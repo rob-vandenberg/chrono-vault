@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twelve decisions have been taken, all on 20 and 21 November 2026: the platforms, the
+Fifteen decisions have been taken, all on 20 and 21 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, and the source layout.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, and what a vault holds.
 
 | Decision | What it settles |
 |---|---|
@@ -21,3 +21,6 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-010](decisions/D-010.md) | Releases and the Windows twin: four private scripts, releases in `dist/`, the Windows setup attached to the release of the same version |
 | [D-011](decisions/D-011.md) | One settings window: a sidebar of topics on the left, the topic's settings on the right, as in the owner's other programs |
 | [D-012](decisions/D-012.md) | The source layout: the vault core in plain C++ apart from the QML windows; Qt 6.8 or newer; strict warnings and a sanitizer build |
+| [D-013](decisions/D-013.md) | The encryption: OpenSSL 3, Argon2id for the key, AES-256-GCM for the vault |
+| [D-014](decisions/D-014.md) | The vault file: a sealed header and contents, refused whole when damaged, every save safe (autonomous mode) |
+| [D-015](decisions/D-015.md) | What a vault holds: items, Login and Secure note templates, built-in and custom fields, JSON inside the seal (autonomous mode) |

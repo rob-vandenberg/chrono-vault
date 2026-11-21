@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.1
+# qml/CMakeLists.txt 0.0.2
 
 # --- Version history ----------------------------------------------------
+# v0.0.2: The module's output folder is named after its URI, as Qt's tools expect
 # v0.0.1: Initial release
 
 # The windows, in Qt Quick (D-003), as one QML module that the program and
@@ -27,6 +28,7 @@ qt_add_library(chrono_vault_ui STATIC)
 qt_add_qml_module(chrono_vault_ui
     URI ChronoVault
     VERSION 1.0
+    OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
         Main.qml
 )

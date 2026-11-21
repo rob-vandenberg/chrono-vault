@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# src/app/CMakeLists.txt 0.0.1
+# src/app/CMakeLists.txt 0.0.2
 
 # --- Version history ----------------------------------------------------
+# v0.0.2: The translations are carried inside the program (D-008)
 # v0.0.1: Initial release
 
 qt_add_executable(chrono-vault
@@ -32,3 +33,4 @@ target_link_libraries(chrono-vault PRIVATE
     Qt6::Quick
 )
 chrono_vault_strict_warnings(chrono-vault)
+chrono_vault_add_translations(chrono-vault)

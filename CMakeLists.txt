@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.0.1 LANGUAGES CXX)
+project(chrono-vault VERSION 0.0.2 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.0.1
+# CMakeLists.txt 0.0.2
 
 # --- Version history ----------------------------------------------------
+# v0.0.2: Translations with Poedit (D-008); OpenSSL 3.2 or newer, for Argon2id and AES-256-GCM (D-013)
 # v0.0.1: Initial release
 
 set(CMAKE_CXX_STANDARD 20)
@@ -31,10 +32,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CHRONO_VAULT_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Test)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Test LinguistTools)
 qt_standard_project_setup(REQUIRES 6.8)
+find_package(OpenSSL 3.2 REQUIRED COMPONENTS Crypto)
 
 include(cmake/ChronoVaultBuild.cmake)
+include(cmake/ChronoVaultTranslations.cmake)
 
 add_subdirectory(src/core)
 add_subdirectory(qml)

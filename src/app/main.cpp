@@ -19,13 +19,16 @@
 
 #include <QCoreApplication>
 #include <QGuiApplication>
+#include <QLocale>
 #include <QQmlApplicationEngine>
+#include <QTranslator>
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.1
+// main.cpp 0.0.2
 
 // --- Version history ----------------------------------------------------
+// v0.0.2: The translation of the system's language is loaded at start (D-008)
 // v0.0.1: Initial release
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -35,6 +38,14 @@ int main(int argc, char* argv[])
     QGuiApplication application(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("Chrono Vault"));
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
+
+    // US English is written in the code; another language is used when a
+    // translation of the system's language is carried inside the program.
+    QTranslator translator;
+    if (translator.load(QLocale(), QStringLiteral("chrono-vault"), QStringLiteral("_"),
+                        QStringLiteral(":/i18n"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
 
     QQmlApplicationEngine engine;
     QObject::connect(

@@ -37,3 +37,9 @@ device keeps an encrypted working copy. `REQUIREMENTS.md` 5.4 and chapter 11, `R
 (`CHRONO_VAULT_SANITIZE`, ASan and UBSan). The vault core `src/core/` (for now only the version), the windows as the
 QML module `qml/` (an empty window titled "Chrono Vault" through the translation call), and `src/app/main.cpp`
 (D-012). Two tests, both passing in the normal and the sanitizer build. Started once on the owner's X11 desktop.
+
+## 21 November 2026: version 0.0.2, translations and the vault core (autonomous mode)
+
+Translations with Poedit from the start (D-008); `push-to-development.sh`; the vault core: encryption with OpenSSL,
+Argon2id and AES-256-GCM (D-013), the vault file with safe saves (D-014), the contents (D-015), the password generator
+and one-time codes (RFC 6238). Eight tests, passing in the normal and the sanitizer build.
