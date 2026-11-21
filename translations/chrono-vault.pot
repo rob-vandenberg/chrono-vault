@@ -337,81 +337,103 @@ msgctxt "PasswordField|"
 msgid "Show the password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:40
+#: ../qml/SettingsWindow.qml:89
+msgctxt "SettingsWindow|"
+msgid ""
+"Chrono Vault could not be set to start at startup. The other settings are "
+"kept."
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:120
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:136
+#: ../qml/SettingsWindow.qml:190 ../qml/SettingsWindow.qml:270
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:157
+#: ../qml/SettingsWindow.qml:190 ../qml/SettingsWindow.qml:292
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:84
+#: ../qml/SettingsWindow.qml:190 ../qml/SettingsWindow.qml:225
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:88
+#: ../qml/SettingsWindow.qml:230
 msgctxt "SettingsWindow|"
 msgid "Keep running in the system tray when the window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:98
+#: ../qml/SettingsWindow.qml:237
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:107
+#: ../qml/SettingsWindow.qml:243
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:116
+#: ../qml/SettingsWindow.qml:248
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:118
+#: ../qml/SettingsWindow.qml:252
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:118
+#: ../qml/SettingsWindow.qml:252
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:118
+#: ../qml/SettingsWindow.qml:252
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:118
+#: ../qml/SettingsWindow.qml:252
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:125
+#: ../qml/SettingsWindow.qml:259
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:140
+#: ../qml/SettingsWindow.qml:274
 msgctxt "SettingsWindow|"
 msgid "Lock the vault after this many minutes without use (0 means never):"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:161
+#: ../qml/SettingsWindow.qml:296
 msgctxt "SettingsWindow|"
 msgid "Clear what was copied after this many seconds (0 means never):"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:330
+msgctxt "SettingsWindow|"
+msgid "Restore defaults"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:336
+msgctxt "SettingsWindow|"
+msgid "OK"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:346
+msgctxt "SettingsWindow|"
+msgid "Cancel"
 msgstr ""
 
 #: ../qml/UnlockPage.qml:80
@@ -476,45 +498,45 @@ msgctxt "UpdateWindow|"
 msgid "Close"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:110
+#: ../src/ui/vault_controller.cpp:118
 msgctxt "VaultController|"
 msgid "The vault file is no longer where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:112
+#: ../src/ui/vault_controller.cpp:120
 msgctxt "VaultController|"
 msgid "The vault file could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:114
+#: ../src/ui/vault_controller.cpp:122
 msgctxt "VaultController|"
 msgid "This file is not a Chrono Vault vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:116
+#: ../src/ui/vault_controller.cpp:124
 msgctxt "VaultController|"
 msgid ""
 "This vault was made by a newer Chrono Vault. Update Chrono Vault to open it."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:119
+#: ../src/ui/vault_controller.cpp:127
 msgctxt "VaultController|"
 msgid "That password does not open this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:121
+#: ../src/ui/vault_controller.cpp:129
 msgctxt "VaultController|"
 msgid "This file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:131
+#: ../src/ui/vault_controller.cpp:139
 msgctxt "VaultController|"
 msgid ""
 "Your change could not be saved: the folder cannot be written to, or the disk "
 "is full. The vault on disk is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:137
+#: ../src/ui/vault_controller.cpp:145
 msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
@@ -627,7 +649,7 @@ msgctxt "chrono_vault::SystemTray|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../src/ui/updater.cpp:151
+#: ../src/ui/updater.cpp:153
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid ""
@@ -635,47 +657,47 @@ msgid ""
 "be updated through one. It is version %1."
 msgstr ""
 
-#: ../src/ui/updater.cpp:156
+#: ../src/ui/updater.cpp:158
 msgctxt "chrono_vault::Updater|"
 msgid "Looking for a newer version…"
 msgstr ""
 
-#: ../src/ui/updater.cpp:166
+#: ../src/ui/updater.cpp:168
 msgctxt "chrono_vault::Updater|"
 msgid "GitHub could not be reached. Try again later."
 msgstr ""
 
-#: ../src/ui/updater.cpp:181
+#: ../src/ui/updater.cpp:183
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "Chrono Vault %1 is available. You have version %2."
 msgstr ""
 
-#: ../src/ui/updater.cpp:188
+#: ../src/ui/updater.cpp:190
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "You have the newest version, %1."
 msgstr ""
 
-#: ../src/ui/updater.cpp:218
+#: ../src/ui/updater.cpp:220
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "The update could not be saved in %1. Choose Download to try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:226
+#: ../src/ui/updater.cpp:228
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "Downloading Chrono Vault %1…"
 msgstr ""
 
-#: ../src/ui/updater.cpp:264
+#: ../src/ui/updater.cpp:266
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "The download was stopped. Chrono Vault %1 is available."
 msgstr ""
 
-#: ../src/ui/updater.cpp:265
+#: ../src/ui/updater.cpp:267
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "The download did not complete: the update could not be written, so check the "
@@ -683,39 +705,39 @@ msgid ""
 "to try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:268
+#: ../src/ui/updater.cpp:270
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "The download did not complete. Nothing was installed. Choose Download to try "
 "again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:274
+#: ../src/ui/updater.cpp:276
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "The downloaded file does not match GitHub's fingerprint, so it was not kept "
 "and nothing was installed. Choose Download to try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:281
+#: ../src/ui/updater.cpp:283
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "The update could not be saved. Nothing was installed. Choose Download to try "
 "again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:287
+#: ../src/ui/updater.cpp:289
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "Chrono Vault %1 is downloaded and checked: %2"
 msgstr ""
 
-#: ../src/ui/updater.cpp:298
+#: ../src/ui/updater.cpp:300
 msgctxt "chrono_vault::Updater|"
 msgid "The update has changed since it was checked, so it was not installed."
 msgstr ""
 
-#: ../src/ui/updater.cpp:303
+#: ../src/ui/updater.cpp:305
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid ""
@@ -723,7 +745,7 @@ msgid ""
 "starts the new version when it is done."
 msgstr ""
 
-#: ../src/ui/updater.cpp:315
+#: ../src/ui/updater.cpp:317
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid ""
@@ -731,123 +753,123 @@ msgid ""
 "try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:325
+#: ../src/ui/updater.cpp:327
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "Installing Chrono Vault %1. The system may ask for your password."
 msgstr ""
 
-#: ../src/ui/updater.cpp:338
+#: ../src/ui/updater.cpp:340
 msgctxt "chrono_vault::Updater|"
 msgid "This system cannot install the update."
 msgstr ""
 
-#: ../src/ui/updater.cpp:376
+#: ../src/ui/updater.cpp:378
 msgctxt "chrono_vault::Updater|"
 msgid "The update was not installed. Choose Install to try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:377
+#: ../src/ui/updater.cpp:379
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "The update was not installed: %1. Choose Install to try again."
 msgstr ""
 
-#: ../src/ui/updater.cpp:381
+#: ../src/ui/updater.cpp:383
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid "Chrono Vault %1 is installed. Chrono Vault now restarts."
 msgstr ""
 
-#: ../src/ui/updater.cpp:389
+#: ../src/ui/updater.cpp:391
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "The update was not installed, because Chrono Vault did not close. Choose "
 "Install again when you are ready."
 msgstr ""
 
-#: ../src/ui/updater.cpp:393
+#: ../src/ui/updater.cpp:395
 #, qt-format
 msgctxt "chrono_vault::Updater|"
 msgid ""
 "Chrono Vault %1 is installed and runs the next time you start Chrono Vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:277
+#: ../src/ui/vault_controller.cpp:285
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose where to keep the new vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:281
+#: ../src/ui/vault_controller.cpp:289
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:285
+#: ../src/ui/vault_controller.cpp:293
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:334
+#: ../src/ui/vault_controller.cpp:342
 msgctxt "chrono_vault::VaultController|"
 msgid "A file with that name already exists. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:293
+#: ../src/ui/vault_controller.cpp:301
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:251
+#: ../src/ui/vault_controller.cpp:259
 msgctxt "chrono_vault::VaultController|"
 msgid "The setting to start at startup could not be saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:313
+#: ../src/ui/vault_controller.cpp:321
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The new vault could not be created: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:322
+#: ../src/ui/vault_controller.cpp:330
 msgctxt "chrono_vault::VaultController|"
 msgid "Your new vault is ready."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:359
+#: ../src/ui/vault_controller.cpp:367
 msgctxt "chrono_vault::VaultController|"
 msgid "Unlocking…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:388
+#: ../src/ui/vault_controller.cpp:396
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault opened, but what it holds is damaged. It was not changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:467
+#: ../src/ui/vault_controller.cpp:475
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled note"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:467
+#: ../src/ui/vault_controller.cpp:475
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled login"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:475
+#: ../src/ui/vault_controller.cpp:483
 msgctxt "chrono_vault::VaultController|"
 msgid "Field"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:547
+#: ../src/ui/vault_controller.cpp:555
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied. The clipboard is cleared in %n second(s)."
 msgid_plural "Copied. The clipboard is cleared in %n second(s)."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:550
+#: ../src/ui/vault_controller.cpp:558
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied."
 msgstr ""

@@ -342,50 +342,55 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+40"/>
+        <location filename="../qml/SettingsWindow.qml" line="+89"/>
+        <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
-        <location line="+77"/>
+        <location line="+70"/>
+        <location line="+80"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-77"/>
-        <location line="+98"/>
+        <location line="-80"/>
+        <location line="+102"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-98"/>
-        <location line="+25"/>
+        <location line="-102"/>
+        <location line="+35"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
         <source>Keep running in the system tray when the window is closed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+7"/>
         <source>Start Chrono Vault at startup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+6"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+5"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+4"/>
         <source>Daily</source>
         <translation type="unfinished"></translation>
     </message>
@@ -415,8 +420,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+22"/>
         <source>Clear what was copied after this many seconds (0 means never):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Restore defaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -489,7 +509,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+110"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+118"/>
         <source>The vault file is no longer where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -647,7 +667,7 @@
 <context>
     <name>chrono_vault::Updater</name>
     <message>
-        <location filename="../src/ui/updater.cpp" line="+151"/>
+        <location filename="../src/ui/updater.cpp" line="+153"/>
         <source>This copy of Chrono Vault was not installed with an installer, so it cannot be updated through one. It is version %1.</source>
         <translation type="unfinished"></translation>
     </message>

@@ -2,18 +2,16 @@
 
 ## Now
 
-**Version 0.0.5** (D-021): the update. "Check for updates" in Settings > General (Daily, Weekly, Monthly, Never),
-checked by itself as set; the About box on F1 with "Check for update". A newer release that carries this system's own
-installer (`.deb`, `.rpm` or the Windows setup) is offered with Download or Skip this version; it is downloaded to
-Downloads, checked against GitHub's SHA-256 fingerprint, installed through PackageKit on Linux or the setup run silently
-on Windows, and the new version starts once this one has ended. The Linux packages need `ca-certificates` and carry
-Qt's TLS plugin and OpenSSL's `libssl`; the bare-system checks make one real request to GitHub. Fifteen tests pass on
-Linux, under the sanitizers and on Windows; six review rounds, the last found nothing real.
+**Version 0.0.6** (D-022): the settings window as in Chrono Viewer: a framed sidebar with the chosen topic marked
+across its width, and Restore defaults, OK and Cancel at the bottom right. OK (and Enter) keeps every topic's changes,
+Cancel (Esc, closing) throws them away, Restore defaults puts back the topic shown. A failed "Start at startup" keeps
+the window open and says so. Also the release to try the update from 0.0.5 (D-021). Fifteen tests pass on Linux, under
+the sanitizers and on Windows.
 
 ## Next task
 
-The owner tries the update: an installed 0.0.5 finds and installs the next version (0.0.4 has no updater). Then the rest of `ROADMAP.md` steps 3 and 6 to 9, through a changelist and the
-owner's Proceed.
+The owner tries the update from 0.0.5 to 0.0.6 on Linux and Windows. Then the owner's two new requirements, as in
+Chrono Viewer: a theme (Light, Dark, Follow the system) and UI scaling, through a changelist and the owner's Proceed.
 
 ## Open questions
 

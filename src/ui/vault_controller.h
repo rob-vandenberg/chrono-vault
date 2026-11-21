@@ -29,9 +29,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.4
+// vault_controller.h 0.0.6
 
 // --- Version history ----------------------------------------------------
+// v0.0.6: The settings' defaults, for Restore defaults (D-022)
 // v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
 
@@ -142,6 +143,9 @@ public:
     // The person is logging out or shutting down: the window then ends the
     // program instead of hiding to the tray, so the logout is never held up.
     [[nodiscard]] Q_INVOKABLE bool isSessionEnding() const;
+    // The settings before the person changes them: what Restore defaults in
+    // the settings window puts back (D-022).
+    [[nodiscard]] Q_INVOKABLE QVariantMap settingsDefaults() const;
 
     // Tests only: a cheap key derivation instead of the standard one.
     void setKdfParameters(const crypto::KdfParameters& parameters) { kdfParameters = parameters; }

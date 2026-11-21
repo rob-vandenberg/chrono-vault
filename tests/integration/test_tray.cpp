@@ -18,10 +18,13 @@
 #include "app_setup.h"
 #include "autostart.h"
 #include "system_tray.h"
+#include "updater.h"
 #include "vault_controller.h"
 
 #include <QAction>
 #include <QFile>
+#include <QFileInfo>
+#include <QDir>
 #include <QQmlApplicationEngine>
 #include <QSettings>
 #include <QSignalSpy>
@@ -32,9 +35,11 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.0.4
+// test_tray.cpp 0.0.6
 
 // --- Version history ----------------------------------------------------
+// v0.0.6: The settings window keeps changes only with OK, also with Enter; Restore defaults; a failed
+//         start at startup is told (D-022)
 // v0.0.4: Initial release; Quit is seen asking the program to end
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -59,6 +64,8 @@ private slots:
     void start_at_startup_writes_and_removes_its_entry();
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
+    void the_settings_window_keeps_changes_only_with_ok();
+    void enter_is_ok_and_a_failed_start_at_startup_is_told();
 
 private:
     struct Loaded
@@ -82,6 +89,10 @@ void TestTray::initTestCase()
 
 void TestTray::cleanupTestCase()
 {
+    // The file a failed run of the start-at-startup test may leave in the
+    // test folder's place of the autostart folder.
+    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) +
+                  QStringLiteral("/autostart"));
     autostart::setEnabled(false, QString());
     QSettings settings;
     settings.clear();
@@ -199,6 +210,146 @@ void TestTray::the_general_settings_are_remembered()
     QVERIFY(again.startMinimized());
     again.setKeepInTray(true);
     again.setStartMinimized(false);
+}
+
+void TestTray::the_settings_window_keeps_changes_only_with_ok()
+{
+    Loaded loaded = load();
+    QVERIFY(loaded.window && loaded.controller);
+    loaded.controller->setTrayAvailable(true);
+    auto* updater = loaded.engine->singletonInstance<Updater*>("ChronoVault", "Updater");
+    QObject* settings = loaded.window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(updater && settings);
+    QObject* topics = settings->findChild<QObject*>(QStringLiteral("topics"));
+    QObject* ok = settings->findChild<QObject*>(QStringLiteral("okButton"));
+    QObject* cancel = settings->findChild<QObject*>(QStringLiteral("cancelButton"));
+    QObject* restore = settings->findChild<QObject*>(QStringLiteral("restoreDefaultsButton"));
+    QObject* minimizedBox = settings->findChild<QObject*>(QStringLiteral("startMinimizedBox"));
+    QVERIFY(topics && ok && cancel && restore && minimizedBox);
+    const int lockBefore = loaded.controller->autoLockMinutes();
+
+    // Cancel throws the changes away.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    settings->setProperty("startMinimized", true);
+    settings->setProperty("autoLockMinutes", 17);
+    QVERIFY(minimizedBox->property("checked").toBool());
+    QVERIFY(QMetaObject::invokeMethod(cancel, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QVERIFY(!loaded.controller->startMinimized());
+    QCOMPARE(loaded.controller->autoLockMinutes(), lockBefore);
+
+    // Opened again, it shows the settings as they are; OK keeps every
+    // topic's changes.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    QVERIFY(!settings->property("startMinimized").toBool());
+    settings->setProperty("startMinimized", true);
+    settings->setProperty("autoLockMinutes", 17);
+    settings->setProperty("checkFrequency", 2);
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QVERIFY(loaded.controller->startMinimized());
+    QCOMPARE(loaded.controller->autoLockMinutes(), 17);
+    QCOMPARE(updater->frequency(), 2);
+
+    // Restore defaults puts back the topic shown (Security) and no other,
+    // kept with OK.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    topics->setProperty("currentIndex", 1);
+    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QCOMPARE(settings->property("autoLockMinutes").toInt(), 5);
+    QVERIFY(settings->property("startMinimized").toBool());
+    QCOMPARE(settings->property("checkFrequency").toInt(), 2);
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QCOMPARE(loaded.controller->autoLockMinutes(), 5);
+    QVERIFY(loaded.controller->startMinimized());
+
+    // Restore defaults on General.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    topics->setProperty("currentIndex", 0);
+    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QVERIFY(!loaded.controller->startMinimized());
+    QVERIFY(loaded.controller->keepInTray());
+    QCOMPARE(updater->frequency(), 0);
+
+    // Without a tray its setting cannot be changed here, so Restore defaults
+    // leaves it as it is.
+    loaded.controller->setKeepInTray(false);
+    loaded.controller->setTrayAvailable(false);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QVERIFY(!loaded.controller->keepInTray());
+    loaded.controller->setKeepInTray(true);
+}
+
+void TestTray::enter_is_ok_and_a_failed_start_at_startup_is_told()
+{
+    Loaded loaded = load();
+    QVERIFY(loaded.window && loaded.controller);
+    QObject* settings = loaded.window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    auto* settingsWindow = qobject_cast<QWindow*>(settings);
+    QVERIFY(settingsWindow);
+
+    // Enter keeps the changes, as OK does.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settingsWindow->isVisible());
+    settings->setProperty("clipboardClearSeconds", 45);
+    settingsWindow->requestActivate();
+    QTRY_VERIFY(settingsWindow->isActive());
+    QTest::keyClick(settingsWindow, Qt::Key_Return);
+    QTRY_VERIFY(!settingsWindow->isVisible());
+    QCOMPARE(loaded.controller->clipboardClearSeconds(), 45);
+    loaded.controller->setClipboardClearSeconds(30);
+
+    // Enter on a button that has the keyboard focus presses that button:
+    // on Cancel, nothing is kept.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settingsWindow->isVisible());
+    settings->setProperty("clipboardClearSeconds", 55);
+    settingsWindow->requestActivate();
+    QTRY_VERIFY(settingsWindow->isActive());
+    QObject* cancel = settings->findChild<QObject*>(QStringLiteral("cancelButton"));
+    QVERIFY(cancel && QMetaObject::invokeMethod(cancel, "forceActiveFocus"));
+    QTest::keyClick(settingsWindow, Qt::Key_Return);
+    QTRY_VERIFY(!settingsWindow->isVisible());
+    QCOMPARE(loaded.controller->clipboardClearSeconds(), 30);
+
+#ifndef Q_OS_WIN
+    // The autostart folder cannot be made (a file is in its place): the
+    // window stays open, says so, and shows the setting as it really is.
+    const QString blocker = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) +
+                            QStringLiteral("/autostart");
+    QVERIFY(blocker.contains(QStringLiteral(".qttest"))); // the test folder, never the person's own
+    QDir(blocker).removeRecursively();
+    QFile::remove(blocker);
+    QVERIFY(QDir().mkpath(QFileInfo(blocker).absolutePath()));
+    QFile file(blocker);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.close();
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settingsWindow->isVisible());
+    settings->setProperty("startAtStartup", true);
+    settings->setProperty("autoLockMinutes", 9);
+    settingsWindow->requestActivate();
+    QTRY_VERIFY(settingsWindow->isActive());
+    QTest::keyClick(settingsWindow, Qt::Key_Return);
+    QVERIFY(settingsWindow->isVisible());
+    QVERIFY(!settings->property("problem").toString().isEmpty());
+    QVERIFY(!settings->property("startAtStartup").toBool());
+    QCOMPARE(loaded.controller->autoLockMinutes(), 9);
+    QVERIFY(QFile::remove(blocker));
+    loaded.controller->setAutoLockMinutes(5);
+    settingsWindow->close();
+    QTRY_VERIFY(!settingsWindow->isVisible());
+    QVERIFY(settings->property("problem").toString().isEmpty());
+#endif
 }
 
 QTEST_MAIN(TestTray)

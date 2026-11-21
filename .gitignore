@@ -15,6 +15,8 @@ art/*
 !art/eye-hidden.svg
 !art/item-login.svg
 !art/item-note.svg
+!art/ok.svg
+!art/cancel.svg
 
 # The four scripts: private (OR-9, D-010)
 gitpush.sh

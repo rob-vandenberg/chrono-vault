@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twenty-one decisions have been taken, all on 20 and 21 November 2026: the platforms, the
+Twenty-two decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, and the update.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, and the settings window's buttons.
 
 | Decision | What it settles |
 |---|---|
@@ -30,3 +30,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-019](decisions/D-019.md) | The program's icon everywhere, the system tray, and the General settings for starting |
 | [D-020](decisions/D-020.md) | One Chrono Vault per person; every window and dialog remembers its size and place, the main window its state |
 | [D-021](decisions/D-021.md) | The update check (Daily, Weekly, Monthly, Never), the About box on F1, and the update downloaded, checked and installed as in Chrono Mail |
+| [D-022](decisions/D-022.md) | The settings window: a framed sidebar, and OK, Cancel and Restore defaults working as in Chrono Viewer |

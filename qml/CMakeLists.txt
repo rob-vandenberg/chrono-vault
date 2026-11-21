@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.5
+# qml/CMakeLists.txt 0.0.6
 
 # --- Version history ----------------------------------------------------
+# v0.0.6: The OK and Cancel icons
 # v0.0.5: The About and Update windows
 # v0.0.4: The style, the program's icon and our own icons from art/, the Noto fonts, Qt Svg and Qt Widgets
 # v0.0.3: The pages, the editor, the generator, the settings window and the controller
@@ -74,6 +75,8 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/eye-hidden.svg"
         "${PROJECT_SOURCE_DIR}/art/item-login.svg"
         "${PROJECT_SOURCE_DIR}/art/item-note.svg"
+        "${PROJECT_SOURCE_DIR}/art/ok.svg"
+        "${PROJECT_SOURCE_DIR}/art/cancel.svg"
 )
 # The fonts, Google's Noto under the SIL Open Font License (OR-2, the owner's
 # exception), carried inside the program so every system shows the same.

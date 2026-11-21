@@ -30,9 +30,10 @@
 class QNetworkReply;
 
 // --- Version ------------------------------------------------------------
-// updater.h 0.0.5
+// updater.h 0.0.6
 
 // --- Version history ----------------------------------------------------
+// v0.0.6: The default check frequency, for Restore defaults (D-022)
 // v0.0.5: Initial release
 
 namespace chrono_vault {
@@ -88,6 +89,8 @@ public:
     // The quit an install asked for was held up or cancelled (unsaved work):
     // nothing is set off at a later, ordinary quit.
     Q_INVOKABLE void quitHeldUp();
+    // The check frequency before the person changes it (Restore defaults, D-022).
+    [[nodiscard]] Q_INVOKABLE int defaultCheckFrequency() const;
 
     // How this copy was installed, from where the program runs and what the
     // system's package records say.

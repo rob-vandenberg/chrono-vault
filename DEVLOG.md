@@ -80,3 +80,11 @@ no CA certificates; the packages now need `ca-certificates`. Six review rounds f
 left an update armed, a disk-full download taken for a stop, a refused install or broken-off download that could not
 be tried again, an update lost when the quit waited for the editor, Cancel in the editor's box that left it armed, and
 the installer's error reply not read. Fifteen tests on Linux, under the sanitizers and on Windows.
+
+## 22 November 2026: version 0.0.6: the settings window's sidebar and buttons
+
+The framed sidebar, and Restore defaults, OK and Cancel working as in Chrono Viewer (D-022); the defaults named once;
+the two icons drawn for Chrono Vault. Four review rounds found and fixed: Enter did nothing; a failed start at startup
+closed the window silently; Enter on a focused Cancel did OK; Enter and Esc in the open update list acted on the
+window; Restore defaults changed the greyed tray setting; a reopened window kept the focus on Cancel. The two new
+icons were kept out of git by `.gitignore`; now let in. Also the release to try the update from 0.0.5.

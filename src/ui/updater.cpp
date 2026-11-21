@@ -41,9 +41,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// updater.cpp 0.0.5
+// updater.cpp 0.0.6
 
 // --- Version history ----------------------------------------------------
+// v0.0.6: The default check frequency, for Restore defaults (D-022)
 // v0.0.5: Initial release; a refused install or a broken-off download can be tried again
 
 namespace chrono_vault {
@@ -52,6 +53,7 @@ namespace {
 
 const QString releasesAddress = QStringLiteral("https://api.github.com/repos/rob-vandenberg/chrono-vault/releases?per_page=30");
 const QString frequencyKey = QStringLiteral("updates/frequency");
+constexpr int defaultFrequency = 0; // daily (D-021)
 const QString lastAnsweredKey = QStringLiteral("updates/lastAnswered");
 const QString skippedKey = QStringLiteral("updates/skipped");
 constexpr qint64 largestAnswerBytes = 4 * 1024 * 1024;
@@ -82,7 +84,7 @@ QNetworkRequest githubRequest(const QUrl& address)
 Updater::Updater(QObject* parent) : QObject(parent)
 {
     kind = detectInstallKind();
-    checkFrequency = static_cast<CheckFrequency>(std::clamp(QSettings().value(frequencyKey, 0).toInt(), 0, 3));
+    checkFrequency = static_cast<CheckFrequency>(std::clamp(QSettings().value(frequencyKey, defaultFrequency).toInt(), 0, 3));
     hourly.setInterval(hourMilliseconds);
     connect(&hourly, &QTimer::timeout, this, [this]() { checkSoon(false); });
     if (QCoreApplication::instance()) {
@@ -461,6 +463,11 @@ QString Updater::fingerprintOf(const QString& path)
         return {};
     }
     return QString::fromLatin1(hash.result().toHex());
+}
+
+int Updater::defaultCheckFrequency() const
+{
+    return defaultFrequency;
 }
 
 } // namespace chrono_vault

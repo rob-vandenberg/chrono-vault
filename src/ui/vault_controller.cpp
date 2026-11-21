@@ -36,9 +36,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.4
+// vault_controller.cpp 0.0.6
 
 // --- Version history ----------------------------------------------------
+// v0.0.6: The settings' defaults, for Restore defaults (D-022)
 // v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
 
@@ -48,6 +49,13 @@ namespace {
 
 const QString lastVaultKey = QStringLiteral("vault/lastPath");
 const QString autoLockKey = QStringLiteral("security/autoLockMinutes");
+// The settings as they are before the person changes them, also what
+// Restore defaults puts back (D-022).
+constexpr int defaultAutoLockMinutes = 5;
+constexpr int defaultClipboardSeconds = 30;
+constexpr bool defaultKeepInTray = true;
+constexpr bool defaultStartMinimized = false;
+constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString keepInTrayKey = QStringLiteral("general/keepRunningInTray");
 const QString startMinimizedKey = QStringLiteral("general/startMinimized");
@@ -148,10 +156,10 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     unlockPool.setMaxThreadCount(1);
 
     QSettings settings;
-    lockMinutes = std::clamp(settings.value(autoLockKey, 5).toInt(), 0, 240);
-    clearSeconds = std::clamp(settings.value(clipboardKey, 30).toInt(), 0, 600);
-    keepRunning = settings.value(keepInTrayKey, true).toBool();
-    minimizedAtStart = settings.value(startMinimizedKey, false).toBool();
+    lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
+    clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
+    keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
+    minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
 
     autoLockTimer.setSingleShot(true);
     connect(&autoLockTimer, &QTimer::timeout, this, &VaultController::lock);
@@ -572,6 +580,17 @@ int VaultController::oneTimeCodeSecondsLeft(const QString& secret) const
 QString VaultController::fieldName(const QString& role) const
 {
     return roleName(role);
+}
+
+QVariantMap VaultController::settingsDefaults() const
+{
+    return {
+        {QStringLiteral("autoLockMinutes"), defaultAutoLockMinutes},
+        {QStringLiteral("clipboardClearSeconds"), defaultClipboardSeconds},
+        {QStringLiteral("keepInTray"), defaultKeepInTray},
+        {QStringLiteral("startMinimized"), defaultStartMinimized},
+        {QStringLiteral("startAtStartup"), defaultStartAtStartup},
+    };
 }
 
 bool VaultController::isSessionEnding() const
