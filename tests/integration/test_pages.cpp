@@ -16,6 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_setup.h"
+#include "updater.h"
 #include "vault_controller.h"
 
 #include <QQmlApplicationEngine>
@@ -28,9 +29,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.4
+// test_pages.cpp 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: A quit for an update waits for the editor and goes on, or is abandoned by Cancel
 // v0.0.4: Chrono Vault's own style; the window shown as the program shows it
 // v0.0.3: Initial release, with unsaved changes asked about and kept through a lock
 
@@ -50,6 +52,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void a_login_made_in_the_editor_is_saved_without_qml_errors();
+    void a_quit_for_an_update_waits_for_the_editor_and_goes_on();
     void unsaved_changes_are_asked_about_and_kept_through_a_lock();
 };
 
@@ -190,6 +193,59 @@ void TestPages::unsaved_changes_are_asked_about_and_kept_through_a_lock()
         warningText += warning.toString() + QLatin1Char('\n');
     }
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestPages::a_quit_for_an_update_waits_for_the_editor_and_goes_on()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    auto* updater = engine.singletonInstance<Updater*>("ChronoVault", "Updater");
+    QVERIFY(controller && updater);
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("update.chronovault"))),
+                            QStringLiteral("master"), QStringLiteral("master"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    QObject* vaultPage = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QObject* unsavedDialog = window->findChild<QObject*>(QStringLiteral("unsavedDialog"));
+    QVERIFY(vaultPage && editor && unsavedDialog);
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newLogin"));
+    editor->setProperty("changed", true);
+
+    // The update is installed and asks to quit while a login is being typed:
+    // the quit asks about the login first, and the update stays armed.
+    updater->armRestartForTests();
+    QSignalSpy quit(&engine, &QQmlEngine::quit);
+    emit updater->quitRequested();
+    QTRY_VERIFY(unsavedDialog->property("opened").toBool());
+    QVERIFY(updater->armedForTests());
+
+    // Saved: the quit goes on, with the update still armed.
+    QVERIFY(QMetaObject::invokeMethod(unsavedDialog, "accept"));
+    QTRY_COMPARE(quit.count(), 1);
+    QVERIFY(updater->armedForTests());
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->items()->rowCount(), 1);
+    updater->quitHeldUp();
+
+    // Cancel abandons the quit: nothing quits, and the update is not set off
+    // at a later, ordinary quit.
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newLogin"));
+    editor->setProperty("changed", true);
+    updater->armRestartForTests();
+    emit updater->quitRequested();
+    QTRY_VERIFY(unsavedDialog->property("opened").toBool());
+    QVERIFY(QMetaObject::invokeMethod(unsavedDialog, "reject"));
+    QTRY_VERIFY(!unsavedDialog->property("opened").toBool());
+    QVERIFY(!updater->armedForTests());
+    QCOMPARE(quit.count(), 1);
+    QVERIFY(window->property("visible").toBool());
 }
 
 QTEST_MAIN(TestPages)

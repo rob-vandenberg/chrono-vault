@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.0.4 LANGUAGES CXX)
+project(chrono-vault VERSION 0.0.5 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.0.4
+# CMakeLists.txt 0.0.5
 
 # --- Version history ----------------------------------------------------
+# v0.0.5: Version 0.0.5; Qt DBus on Linux, for installing an update through PackageKit (D-021)
 # v0.0.4: Qt Widgets (the tray) and Qt Svg (the icons); the icon tool; tests can be left out of a release
 # v0.0.3: Qt Concurrent, for the slow steps off the window's thread (OR-5)
 # v0.0.2: Translations with Poedit (D-008); OpenSSL 3.2 or newer, for Argon2id and AES-256-GCM (D-013)
@@ -38,6 +39,10 @@ option(CHRONO_VAULT_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorS
 find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Widgets Svg Network Qml Quick QuickControls2 Concurrent Test LinguistTools)
 qt_standard_project_setup(REQUIRES 6.8)
 find_package(OpenSSL 3.2 REQUIRED COMPONENTS Crypto)
+if(LINUX)
+    # PackageKit, which installs an update on Linux (D-021).
+    find_package(Qt6 REQUIRED COMPONENTS DBus)
+endif()
 
 include(cmake/ChronoVaultBuild.cmake)
 include(cmake/ChronoVaultTranslations.cmake)

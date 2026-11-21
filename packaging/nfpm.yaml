@@ -4,9 +4,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# nfpm.yaml 0.0.4
+# nfpm.yaml 0.0.5
 #
 # --- Version history ----------------------------------------------------
+# v0.0.5: ca-certificates, which HTTPS to GitHub needs (D-021)
 # v0.0.4: Initial release, modelled on Chrono Viewer's
 #
 # The .deb and the .rpm of Chrono Vault, made by build-release.sh from the program folder the builder image made
@@ -54,6 +55,7 @@ contents:
 overrides:
   deb:
     depends:
+      - ca-certificates
       - libgssapi-krb5-2
       - libglib2.0-0 | libglib2.0-0t64
       - libfontconfig1
@@ -86,6 +88,7 @@ overrides:
       - libwayland-egl1
   rpm:
     depends:
+      - ca-certificates
       - libgssapi_krb5.so.2()(64bit)
       - libglib-2.0.so.0()(64bit)
       - libgthread-2.0.so.0()(64bit)

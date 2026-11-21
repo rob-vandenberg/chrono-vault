@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.4
+// VaultPage.qml 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: Each item's icon in the list
 // v0.0.3: Initial release
 
@@ -53,8 +54,8 @@ Item {
         editor.store()
     }
 
-    function whenEditorFree(action) {
-        editor.whenFree(action)
+    function whenEditorFree(action, abandoned) {
+        editor.whenFree(action, abandoned)
     }
 
     onVisibleChanged: if (!visible) editor.close()

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.4
+# qml/CMakeLists.txt 0.0.5
 
 # --- Version history ----------------------------------------------------
+# v0.0.5: The About and Update windows
 # v0.0.4: The style, the program's icon and our own icons from art/, the Noto fonts, Qt Svg and Qt Widgets
 # v0.0.3: The pages, the editor, the generator, the settings window and the controller
 # v0.0.2: The module's output folder is named after its URI, as Qt's tools expect
@@ -32,6 +33,7 @@ qt_add_qml_module(chrono_vault_ui
     VERSION 1.0
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
+        AboutWindow.qml
         GeneratorDialog.qml
         DialogWindow.qml
         ItemEditor.qml
@@ -39,6 +41,7 @@ qt_add_qml_module(chrono_vault_ui
         PasswordField.qml
         SettingsWindow.qml
         UnlockPage.qml
+        UpdateWindow.qml
         VaultPage.qml
         WelcomePage.qml
     SOURCES
@@ -54,6 +57,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/single_instance.h
         ../src/ui/system_tray.cpp
         ../src/ui/system_tray.h
+        ../src/ui/updater.cpp
+        ../src/ui/updater.h
         ../src/ui/vault_controller.cpp
         ../src/ui/vault_controller.h
         ../src/ui/window_memory.cpp
@@ -86,6 +91,9 @@ target_link_libraries(chrono_vault_ui
     PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent
 )
 # Strict for our own sources; Qt's generated QML cache is Qt's code.
+if(LINUX)
+    target_link_libraries(chrono_vault_ui PRIVATE Qt6::DBus)
+endif()
 chrono_vault_strict_warnings_for_sources(
     ../src/ui/app_setup.cpp
     ../src/ui/autostart.cpp
@@ -93,6 +101,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/item_list_model.cpp
     ../src/ui/single_instance.cpp
     ../src/ui/system_tray.cpp
+    ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
     ../src/ui/window_memory.cpp
 )

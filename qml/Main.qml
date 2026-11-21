@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.4
+// Main.qml 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: F1 opens About; the Update window; a Quit for an update waits for the editor or a save and goes on
 // v0.0.4: The version in the title; hiding to the tray, Quit and Ctrl+Q
 // v0.0.3: The start, unlock and vault pages, the tool bar, the message line with Try saving again
 // v0.0.1: Initial release
@@ -104,6 +105,8 @@ ApplicationWindow {
     property bool quitAnyway: false
     property bool closeWhenSaved: false
     property bool closeWhenSavedQuits: false
+    // The quit dialog stands in the way of a Quit (not of a close to the tray).
+    property bool quitDialogFromQuit: false
     onClosing: function(close) {
         // Logging out or shutting down: never hold it up. What is being typed is
         // stored, and a running save finishes before the program ends (OR-15).
@@ -127,13 +130,19 @@ ApplicationWindow {
             // follows remembers whether it was one.
             const wasQuit = quitting
             quitting = false
+            // A Quit that waits for the editor or a running save goes on by
+            // itself afterwards, so an update stays armed; only a Quit the
+            // person abandons (Cancel in the editor's box, Retry or Cancel in
+            // the quit dialog) disarms it.
             if (vaultPage.hasUnsavedEdit()) {
                 close.accepted = false
-                vaultPage.whenEditorFree(function() { wasQuit ? mainWindow.requestQuit() : mainWindow.close() })
+                vaultPage.whenEditorFree(function() { wasQuit ? mainWindow.requestQuit() : mainWindow.close() },
+                                         function() { if (wasQuit) Updater.quitHeldUp() })
                 return
             }
             if (VaultController.saveFailed || VaultController.hasKeptChanges) {
                 close.accepted = false
+                quitDialogFromQuit = wasQuit
                 quitDialog.open()
                 return
             }
@@ -162,6 +171,7 @@ ApplicationWindow {
         function onSaveFailedChanged() {
             if (mainWindow.closeWhenSaved && VaultController.saveFailed) {
                 mainWindow.closeWhenSaved = false
+                mainWindow.quitDialogFromQuit = mainWindow.closeWhenSavedQuits
                 quitDialog.open()
             }
         }
@@ -186,7 +196,18 @@ ApplicationWindow {
                 Layout.preferredWidth: 380
             }
         }
-        onAccepted: VaultController.retrySave()
+        // Retry or Cancel abandon the Quit: an update armed by it is not set
+        // off at a later, ordinary quit. Discard goes on with the Quit.
+        function quitAbandoned() {
+            if (mainWindow.quitDialogFromQuit)
+                Updater.quitHeldUp()
+            mainWindow.quitDialogFromQuit = false
+        }
+        onAccepted: {
+            quitAbandoned()
+            VaultController.retrySave()
+        }
+        onRejected: quitAbandoned()
         onDiscarded: {
             quitDialog.close()
             mainWindow.quitAnyway = true
@@ -196,8 +217,24 @@ ApplicationWindow {
 
     footer: ColumnLayout {
         spacing: 0
-        visible: VaultController.message !== ""
+        visible: Updater.state === Updater.Available
+                 || VaultController.message !== ""
                  || (VaultController.saveFailed && VaultController.state === VaultController.Unlocked)
+        RowLayout {
+            visible: Updater.state === Updater.Available
+            Layout.fillWidth: true
+            Label {
+                text: Updater.message
+                wrapMode: Text.Wrap
+                padding: 8
+                Layout.fillWidth: true
+            }
+            Button {
+                text: qsTr("Update…")
+                onClicked: updateWindow.open()
+                Layout.rightMargin: 8
+            }
+        }
         Label {
             visible: VaultController.message !== ""
             text: VaultController.message
@@ -225,6 +262,25 @@ ApplicationWindow {
     }
 
     SettingsWindow { id: settingsWindow }
+
+    // About, with F1 for now (no menu item yet), and the update (D-021).
+    AboutWindow {
+        id: aboutWindow
+        onCheckRequested: {
+            Updater.checkNow()
+            updateWindow.open()
+        }
+    }
+    UpdateWindow { id: updateWindow }
+    Shortcut {
+        sequences: ["F1"]
+        context: Qt.ApplicationShortcut
+        onActivated: aboutWindow.open()
+    }
+    Connections {
+        target: Updater
+        function onQuitRequested() { mainWindow.requestQuit() }
+    }
 
     WindowMemory {
         window: mainWindow

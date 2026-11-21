@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/unit/CMakeLists.txt 0.0.2
+# tests/unit/CMakeLists.txt 0.0.5
 
 # --- Version history ----------------------------------------------------
+# v0.0.5: The release check test
 # v0.0.2: The tests of translatable texts, the encryption, the vault file, the contents, the generator and one-time codes
 # v0.0.1: Initial release
 
@@ -35,7 +36,7 @@ chrono_vault_strict_warnings(test_every_string_translatable)
 chrono_vault_add_test(test_every_string_translatable)
 
 # The tests of one part of the vault core each.
-foreach(core_test IN ITEMS test_crypto test_vault_file test_vault_contents test_password_generator test_totp)
+foreach(core_test IN ITEMS test_crypto test_vault_file test_vault_contents test_password_generator test_totp test_release_check)
     qt_add_executable(${core_test} ${core_test}.cpp)
     target_link_libraries(${core_test} PRIVATE chrono_vault_core Qt6::Test)
     chrono_vault_strict_warnings(${core_test})

@@ -6,9 +6,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# build_in_container.sh 0.0.4
+# build_in_container.sh 0.0.5
 #
 # --- Version history ----------------------------------------------------
+# v0.0.5: Qt's TLS plugins and OpenSSL's libssl, for HTTPS to GitHub (D-021)
 # v0.0.4: Initial release, modelled on Chrono Viewer's
 #
 # Runs inside the builder image, started by build-release.sh. /src is the project, read only; /out receives the
@@ -63,6 +64,7 @@ copy_plugins platformthemes 'libqxdgdesktopportal.so'
 copy_plugins xcbglintegrations '*.so'
 copy_plugins imageformats 'libqsvg.so' 'libqico.so' 'libqjpeg.so'
 copy_plugins iconengines 'libqsvgicon.so'
+copy_plugins tls '*.so'
 for kind in "$QT"/plugins/wayland-*; do
     copy_plugins "$(basename "$kind")" '*.so'
 done
@@ -93,6 +95,9 @@ gather() {
 }
 gather
 unset LD_LIBRARY_PATH
+# Qt loads OpenSSL's libssl while the program runs (for HTTPS, D-021), so no
+# library names it: it is put beside the others by name.
+cp -L "$SSL/lib/libssl.so.3" "$OUT/lib/libssl.so.3"
 
 # Every library and plugin looks beside itself: lib/ for a library, the right number of folders up for a plugin.
 for library in "$OUT"/lib/*.so*; do

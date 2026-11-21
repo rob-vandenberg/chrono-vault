@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.4
+// SettingsWindow.qml 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: "Check for updates" in General (D-021)
 // v0.0.4: The version in the title; the General topic
 // v0.0.3: Initial release
 
@@ -110,6 +111,14 @@ ApplicationWindow {
                         VaultController.startMinimized = checked
                         // Shows the setting as it really is, also when it could not be saved.
                         checked = Qt.binding(function() { return VaultController.startMinimized })
+                    }
+                }
+                RowLayout {
+                    Label { text: qsTr("Check for updates") }
+                    ComboBox {
+                        model: [qsTr("Daily"), qsTr("Weekly"), qsTr("Monthly"), qsTr("Never")]
+                        currentIndex: Updater.frequency
+                        onActivated: function(index) { Updater.frequency = index }
                     }
                 }
                 Label {

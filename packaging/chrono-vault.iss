@@ -4,9 +4,10 @@
 ; Copyright (C) 2026 Rob Vandenberg
 ;
 ; --- Version ------------------------------------------------------------
-; chrono-vault.iss 0.0.4
+; chrono-vault.iss 0.0.5
 ;
 ; --- Version history ----------------------------------------------------
+; v0.0.5: Chrono Vault starts after a silent install too: an update restarts it (D-021)
 ; v0.0.4: Initial release, modelled on Chrono Viewer's
 ;
 ; What the Windows setup holds (D-010). Everything it needs is handed to it by
@@ -63,4 +64,5 @@ Name: "{autodesktop}\Chrono Vault"; Filename: "{app}\chrono-vault.exe"; Tasks: d
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "Chrono Vault"; Flags: dontcreatekey uninsdeletevalue
 
 [Run]
-Filename: "{app}\chrono-vault.exe"; Description: "Start Chrono Vault"; Flags: nowait postinstall skipifsilent
+; Also after a silent install: an update (D-021) restarts Chrono Vault this way.
+Filename: "{app}\chrono-vault.exe"; Description: "Start Chrono Vault"; Flags: nowait postinstall

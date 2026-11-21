@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# src/core/CMakeLists.txt 0.0.2
+# src/core/CMakeLists.txt 0.0.5
 
 # --- Version history ----------------------------------------------------
+# v0.0.5: The release check (D-021)
 # v0.0.2: Encryption with OpenSSL (D-013), the vault file (D-014), the contents (D-015), the password generator and one-time codes
 # v0.0.1: Initial release
 
@@ -28,6 +29,8 @@ qt_add_library(chrono_vault_core STATIC
     crypto.h
     password_generator.cpp
     password_generator.h
+    release_check.cpp
+    release_check.h
     totp.cpp
     totp.h
     vault_contents.cpp

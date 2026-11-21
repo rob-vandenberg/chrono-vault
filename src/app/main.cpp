@@ -18,10 +18,13 @@
 #include "app_setup.h"
 #include "single_instance.h"
 #include "system_tray.h"
+#include "updater.h"
 #include "vault_controller.h"
 #include "version.h"
 
 #include <QApplication>
+
+#include <cstdio>
 
 #include <QCoreApplication>
 #include <QGuiApplication>
@@ -32,9 +35,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.4
+// main.cpp 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: The automatic update checks; --check-for-update for the release checks (D-021)
 // v0.0.4: QApplication and the tray, Chrono Vault's own style, fonts and icon, start minimized
 // v0.0.3: The organisation name, so the settings have a place of their own
 // v0.0.2: The translation of the system's language is loaded at start (D-008)
@@ -53,6 +57,21 @@ int main(int argc, char* argv[])
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
     QGuiApplication::setWindowIcon(chrono_vault::programIcon());
     chrono_vault::applyStyle();
+
+    // The packages' own check: one look on GitHub, its answer printed, then
+    // the program ends (build-release.sh tries HTTPS with it, D-021).
+    if (QCoreApplication::arguments().contains(QStringLiteral("--check-for-update"))) {
+        chrono_vault::Updater updater;
+        QObject::connect(&updater, &chrono_vault::Updater::stateChanged, &application, [&updater]() {
+            using State = chrono_vault::Updater::State;
+            if (updater.state() != State::Checking) {
+                std::printf("%s\n", qPrintable(updater.message()));
+                QCoreApplication::exit(updater.state() == State::Unreachable ? 1 : 0);
+            }
+        });
+        updater.checkNow();
+        return updater.state() == chrono_vault::Updater::State::Checking ? QApplication::exec() : 0;
+    }
 
     // One Chrono Vault per person: a later start brings the running one to
     // the front and ends (D-020).
@@ -85,6 +104,7 @@ int main(int argc, char* argv[])
     QObject::connect(&instance, &chrono_vault::SingleInstance::showRequested, &tray,
                      &chrono_vault::SystemTray::showWindow);
     chrono_vault::showMainWindow(window, controller->startMinimized(), trayAvailable);
+    engine.singletonInstance<chrono_vault::Updater*>("ChronoVault", "Updater")->startAutomaticChecks();
 
     return QGuiApplication::exec();
 }

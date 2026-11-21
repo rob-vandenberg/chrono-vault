@@ -2,16 +2,17 @@
 
 ## Now
 
-**Version 0.0.4** (D-017 to D-019): Fusion and the Noto fonts carried inside, the eye in every password field, the
-version in every title, item icons, the program's icon everywhere, the system tray with the General settings (keep
-running in the tray, start at startup, start minimized), one Chrono Vault per person, every window and dialog remembering its size and
-place (D-020), and the four scripts with the Linux packages (tried in Ubuntu 22.04, Debian 12, Fedora 43 and openSUSE
-Leap 16) and the Windows setup. Thirteen tests pass on Linux, under the sanitizers and on Windows; the last review
-rounds found nothing real. The first version pushed to GitHub and released.
+**Version 0.0.5** (D-021): the update. "Check for updates" in Settings > General (Daily, Weekly, Monthly, Never),
+checked by itself as set; the About box on F1 with "Check for update". A newer release that carries this system's own
+installer (`.deb`, `.rpm` or the Windows setup) is offered with Download or Skip this version; it is downloaded to
+Downloads, checked against GitHub's SHA-256 fingerprint, installed through PackageKit on Linux or the setup run silently
+on Windows, and the new version starts once this one has ended. The Linux packages need `ca-certificates` and carry
+Qt's TLS plugin and OpenSSL's `libssl`; the bare-system checks make one real request to GitHub. Fifteen tests pass on
+Linux, under the sanitizers and on Windows; six review rounds, the last found nothing real.
 
 ## Next task
 
-The owner tries the first version. Then the rest of `ROADMAP.md` steps 3 and 6 to 9, through a changelist and the
+The owner tries the update: an installed 0.0.5 finds and installs the next version (0.0.4 has no updater). Then the rest of `ROADMAP.md` steps 3 and 6 to 9, through a changelist and the
 owner's Proceed.
 
 ## Open questions

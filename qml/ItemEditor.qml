@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.4
+// ItemEditor.qml 0.0.5
 
 // --- Version history ----------------------------------------------------
+// v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: One font in every field; the eye inside the password fields; the item's icon
 // v0.0.3: Initial release
 
@@ -39,15 +40,18 @@ Item {
     property int tick: 0
 
     property var afterAsking: null
+    property var afterCancelling: null
 
     signal closed()
     signal stored(string itemId)
 
     // Runs the action now, or, when there are changes not saved yet, after
-    // asking whether to save them (OR-15).
-    function whenFree(action) {
+    // asking whether to save them (OR-15). When the person cancels, or the
+    // save does not succeed, the action is not run and "abandoned" is, if given.
+    function whenFree(action, abandoned) {
         if (itemId !== "" && changed) {
             afterAsking = action
+            afterCancelling = abandoned === undefined ? null : abandoned
             unsavedDialog.open()
         } else {
             action()
@@ -360,20 +364,31 @@ Item {
         }
         onAccepted: {
             const action = editor.afterAsking
+            const abandoned = editor.afterCancelling
             editor.afterAsking = null
+            editor.afterCancelling = null
             editor.store()
             if (!editor.changed && action)
                 action()
+            else if (editor.changed && abandoned)
+                abandoned()
         }
         onDiscarded: {
             const action = editor.afterAsking
             editor.afterAsking = null
+            editor.afterCancelling = null
             editor.changed = false
             unsavedDialog.close()
             if (action)
                 action()
         }
-        onRejected: editor.afterAsking = null
+        onRejected: {
+            const abandoned = editor.afterCancelling
+            editor.afterAsking = null
+            editor.afterCancelling = null
+            if (abandoned)
+                abandoned()
+        }
     }
 
     DialogWindow {

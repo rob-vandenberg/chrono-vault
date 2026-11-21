@@ -71,3 +71,12 @@ One Chrono Vault per person (a later start brings the running one forward and en
 Linux and Windows), every window and dialog remembering its size and place, the main window its state too (D-020),
 the dialogs as movable, resizable windows. The owner's launcher kept out of git and made double-clickable. Thirteen
 tests on Linux, under the sanitizers and on Windows. First push to GitHub, and the first release.
+
+## 21 November 2026: version 0.0.5: the update
+
+The update as in Chrono Mail (D-021): the check setting, About on F1, Download or Skip this version, the download with
+its SHA-256 check, PackageKit or the silent Windows setup, and the restart. The bare Ubuntu 22.04 could not reach GitHub:
+no CA certificates; the packages now need `ca-certificates`. Six review rounds found and fixed: a cancelled Quit that
+left an update armed, a disk-full download taken for a stop, a refused install or broken-off download that could not
+be tried again, an update lost when the quit waited for the editor, Cancel in the editor's box that left it armed, and
+the installer's error reply not read. Fifteen tests on Linux, under the sanitizers and on Windows.

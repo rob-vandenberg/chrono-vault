@@ -5,6 +5,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Qt-Contexts: true\n"
 
+#: ../qml/AboutWindow.qml:35
+msgctxt "AboutWindow|"
+msgid "About Chrono Vault"
+msgstr ""
+
+#: ../qml/AboutWindow.qml:53
+#, qt-format
+msgctxt "AboutWindow|"
+msgid "Chrono Vault %1"
+msgstr ""
+
+#: ../qml/AboutWindow.qml:57
+msgctxt "AboutWindow|"
+msgid "Copyright © 2026 Rob Vandenberg"
+msgstr ""
+
+#: ../qml/AboutWindow.qml:59
+msgctxt "AboutWindow|"
+msgid ""
+"GNU Affero General Public License, version 3 only. This program comes with "
+"no warranty of any kind."
+msgstr ""
+
+#: ../qml/AboutWindow.qml:63
+#, qt-format
+msgctxt "AboutWindow|"
+msgid "Built against Qt %1."
+msgstr ""
+
+#: ../qml/AboutWindow.qml:65
+msgctxt "AboutWindow|"
+msgid ""
+"The fonts are Noto Sans and Noto Sans Mono, under the SIL Open Font License "
+"1.1."
+msgstr ""
+
+#: ../qml/AboutWindow.qml:70
+msgctxt "AboutWindow|"
+msgid "Check for update"
+msgstr ""
+
 #: ../src/core/vault_contents.cpp:113
 msgctxt "Field|"
 msgid "User name"
@@ -66,135 +107,135 @@ msgctxt "GeneratorDialog|"
 msgid "Another one"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:96
+#: ../qml/ItemEditor.qml:100
 msgctxt "ItemEditor|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:113
+#: ../qml/ItemEditor.qml:117
 msgctxt "ItemEditor|"
 msgid "Choose an item on the left, or make a new one."
 msgstr ""
 
-#: ../qml/ItemEditor.qml:145
+#: ../qml/ItemEditor.qml:149
 msgctxt "ItemEditor|"
 msgid "Choose icon…"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:149
+#: ../qml/ItemEditor.qml:153
 msgctxt "ItemEditor|"
 msgid "Remove icon"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:162
+#: ../qml/ItemEditor.qml:166
 msgctxt "ItemEditor|"
 msgid "Title of the note"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:162
+#: ../qml/ItemEditor.qml:166
 msgctxt "ItemEditor|"
 msgid "Title, for example the site's name"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:191
+#: ../qml/ItemEditor.qml:195
 msgctxt "ItemEditor|"
 msgid "Name of the field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:202
+#: ../qml/ItemEditor.qml:206
 msgctxt "ItemEditor|"
 msgid "Remove field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:217
+#: ../qml/ItemEditor.qml:221
 msgctxt "ItemEditor|"
 msgid "The secret the site gives, or its otpauth:// address"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:235
+#: ../qml/ItemEditor.qml:239
 msgctxt "ItemEditor|"
 msgid "Generate…"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:241
+#: ../qml/ItemEditor.qml:245
 msgctxt "ItemEditor|"
 msgid "Copy"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:250
+#: ../qml/ItemEditor.qml:254
 msgctxt "ItemEditor|"
 msgid "This is not a valid one-time code secret."
 msgstr ""
 
-#: ../qml/ItemEditor.qml:256
+#: ../qml/ItemEditor.qml:260
 #, qt-format
 msgctxt "ItemEditor|"
 msgid "%n second(s) left"
 msgid_plural "%n second(s) left"
 msgstr[0] ""
 
-#: ../qml/ItemEditor.qml:261
+#: ../qml/ItemEditor.qml:265
 msgctxt "ItemEditor|"
 msgid "Copy code"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:284
+#: ../qml/ItemEditor.qml:288
 msgctxt "ItemEditor|"
 msgid "Add a text field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:289
+#: ../qml/ItemEditor.qml:293
 msgctxt "ItemEditor|"
 msgid "Add a password field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:298
+#: ../qml/ItemEditor.qml:302
 msgctxt "ItemEditor|"
 msgid "Save"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:304
+#: ../qml/ItemEditor.qml:308
 msgctxt "ItemEditor|"
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:304
+#: ../qml/ItemEditor.qml:308
 msgctxt "ItemEditor|"
 msgid "Close"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:310
+#: ../qml/ItemEditor.qml:314
 msgctxt "ItemEditor|"
 msgid "Delete…"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:321
+#: ../qml/ItemEditor.qml:325
 msgctxt "ItemEditor|"
 msgid "Choose an icon"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:323
+#: ../qml/ItemEditor.qml:327
 msgctxt "ItemEditor|"
 msgid "Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:352
+#: ../qml/ItemEditor.qml:356
 msgctxt "ItemEditor|"
 msgid "Save your changes?"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:356
+#: ../qml/ItemEditor.qml:360
 #, qt-format
 msgctxt "ItemEditor|"
 msgid "“%1” has changes that are not saved yet."
 msgstr ""
 
-#: ../qml/ItemEditor.qml:384
+#: ../qml/ItemEditor.qml:399
 msgctxt "ItemEditor|"
 msgid "Delete this item?"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:388
+#: ../qml/ItemEditor.qml:403
 #, qt-format
 msgctxt "ItemEditor|"
 msgid "“%1” is removed from the vault. This cannot be undone."
@@ -220,63 +261,68 @@ msgctxt "ItemIcons|"
 msgid "Choose a JPG, PNG, BMP, ICO or SVG picture."
 msgstr ""
 
-#: ../qml/Main.qml:39
+#: ../qml/Main.qml:40
 #, qt-format
 msgctxt "Main|"
 msgid "%1 – Chrono Vault %2"
 msgstr ""
 
-#: ../qml/Main.qml:40
+#: ../qml/Main.qml:41
 #, qt-format
 msgctxt "Main|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/Main.qml:51
+#: ../qml/Main.qml:52
 msgctxt "Main|"
 msgid "New login"
 msgstr ""
 
-#: ../qml/Main.qml:55
+#: ../qml/Main.qml:56
 msgctxt "Main|"
 msgid "New secure note"
 msgstr ""
 
-#: ../qml/Main.qml:60
+#: ../qml/Main.qml:61
 msgctxt "Main|"
 msgid "Settings"
 msgstr ""
 
-#: ../qml/Main.qml:64
+#: ../qml/Main.qml:65
 msgctxt "Main|"
 msgid "Lock"
 msgstr ""
 
-#: ../qml/Main.qml:176
+#: ../qml/Main.qml:186
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:183
+#: ../qml/Main.qml:193
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:184
+#: ../qml/Main.qml:194
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:213
+#: ../qml/Main.qml:233
+msgctxt "Main|"
+msgid "Update…"
+msgstr ""
+
+#: ../qml/Main.qml:250
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:220
+#: ../qml/Main.qml:257
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
@@ -297,12 +343,12 @@ msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:128
+#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:136
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:149
+#: ../qml/SettingsWindow.qml:59 ../qml/SettingsWindow.qml:157
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
@@ -327,18 +373,43 @@ msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:117
+#: ../qml/SettingsWindow.qml:116
+msgctxt "SettingsWindow|"
+msgid "Check for updates"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:118
+msgctxt "SettingsWindow|"
+msgid "Daily"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:118
+msgctxt "SettingsWindow|"
+msgid "Weekly"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:118
+msgctxt "SettingsWindow|"
+msgid "Monthly"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:118
+msgctxt "SettingsWindow|"
+msgid "Never"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:125
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:132
+#: ../qml/SettingsWindow.qml:140
 msgctxt "SettingsWindow|"
 msgid "Lock the vault after this many minutes without use (0 means never):"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:153
+#: ../qml/SettingsWindow.qml:161
 msgctxt "SettingsWindow|"
 msgid "Clear what was copied after this many seconds (0 means never):"
 msgstr ""
@@ -373,6 +444,36 @@ msgctxt "UnlockPage|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you open another vault now, the change is lost."
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:35
+msgctxt "UpdateWindow|"
+msgid "Update Chrono Vault"
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:56
+msgctxt "UpdateWindow|"
+msgid "Download"
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:62
+msgctxt "UpdateWindow|"
+msgid "Skip this version"
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:70
+msgctxt "UpdateWindow|"
+msgid "Stop"
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:75
+msgctxt "UpdateWindow|"
+msgid "Install"
+msgstr ""
+
+#: ../qml/UpdateWindow.qml:81
+msgctxt "UpdateWindow|"
+msgid "Close"
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:110
@@ -418,22 +519,22 @@ msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/VaultPage.qml:88
+#: ../qml/VaultPage.qml:89
 msgctxt "VaultPage|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/VaultPage.qml:124
+#: ../qml/VaultPage.qml:125
 msgctxt "VaultPage|"
 msgid "Secure note"
 msgstr ""
 
-#: ../qml/VaultPage.qml:144
+#: ../qml/VaultPage.qml:145
 msgctxt "VaultPage|"
 msgid "No items yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:144
+#: ../qml/VaultPage.qml:145
 msgctxt "VaultPage|"
 msgid "Nothing found."
 msgstr ""
@@ -524,6 +625,152 @@ msgstr ""
 #, qt-format
 msgctxt "chrono_vault::SystemTray|"
 msgid "Chrono Vault %1"
+msgstr ""
+
+#: ../src/ui/updater.cpp:151
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"This copy of Chrono Vault was not installed with an installer, so it cannot "
+"be updated through one. It is version %1."
+msgstr ""
+
+#: ../src/ui/updater.cpp:156
+msgctxt "chrono_vault::Updater|"
+msgid "Looking for a newer version…"
+msgstr ""
+
+#: ../src/ui/updater.cpp:166
+msgctxt "chrono_vault::Updater|"
+msgid "GitHub could not be reached. Try again later."
+msgstr ""
+
+#: ../src/ui/updater.cpp:181
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "Chrono Vault %1 is available. You have version %2."
+msgstr ""
+
+#: ../src/ui/updater.cpp:188
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "You have the newest version, %1."
+msgstr ""
+
+#: ../src/ui/updater.cpp:218
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "The update could not be saved in %1. Choose Download to try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:226
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "Downloading Chrono Vault %1…"
+msgstr ""
+
+#: ../src/ui/updater.cpp:264
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "The download was stopped. Chrono Vault %1 is available."
+msgstr ""
+
+#: ../src/ui/updater.cpp:265
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The download did not complete: the update could not be written, so check the "
+"free space in your Downloads folder. Nothing was installed. Choose Download "
+"to try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:268
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The download did not complete. Nothing was installed. Choose Download to try "
+"again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:274
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The downloaded file does not match GitHub's fingerprint, so it was not kept "
+"and nothing was installed. Choose Download to try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:281
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The update could not be saved. Nothing was installed. Choose Download to try "
+"again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:287
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "Chrono Vault %1 is downloaded and checked: %2"
+msgstr ""
+
+#: ../src/ui/updater.cpp:298
+msgctxt "chrono_vault::Updater|"
+msgid "The update has changed since it was checked, so it was not installed."
+msgstr ""
+
+#: ../src/ui/updater.cpp:303
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The setup of Chrono Vault %1 starts as soon as Chrono Vault has closed, and "
+"starts the new version when it is done."
+msgstr ""
+
+#: ../src/ui/updater.cpp:315
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"This system's software installer could not be reached: %1. Choose Install to "
+"try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:325
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "Installing Chrono Vault %1. The system may ask for your password."
+msgstr ""
+
+#: ../src/ui/updater.cpp:338
+msgctxt "chrono_vault::Updater|"
+msgid "This system cannot install the update."
+msgstr ""
+
+#: ../src/ui/updater.cpp:376
+msgctxt "chrono_vault::Updater|"
+msgid "The update was not installed. Choose Install to try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:377
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "The update was not installed: %1. Choose Install to try again."
+msgstr ""
+
+#: ../src/ui/updater.cpp:381
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid "Chrono Vault %1 is installed. Chrono Vault now restarts."
+msgstr ""
+
+#: ../src/ui/updater.cpp:389
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"The update was not installed, because Chrono Vault did not close. Choose "
+"Install again when you are ready."
+msgstr ""
+
+#: ../src/ui/updater.cpp:393
+#, qt-format
+msgctxt "chrono_vault::Updater|"
+msgid ""
+"Chrono Vault %1 is installed and runs the next time you start Chrono Vault."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:277
