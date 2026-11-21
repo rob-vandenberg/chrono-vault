@@ -7,14 +7,14 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | # | Step | What it delivers | Estimate without AI | Status |
 |---|---|---|---|---|
 | 1 | Skeleton on Linux | `CMakeLists.txt` (version 0.0.1), an empty Qt Quick window, Qt Test under CTest, a sanitizer build, the source layout | 1 week | done, version 0.0.1 |
-| 2 | Translations from the start | Every visible text through Qt's translation call, gathered into a Poedit file, US English primary (D-008) | 1 week | not started |
-| 3 | The four scripts | `push-to-development.sh`, `gitpush.sh`, `build-release.sh` (`.deb` and `.rpm` into `dist/`), `build-release.bat` (Windows setup attached to the release of the same version) (D-010) | 2 weeks | not started |
-| 4 | Windows build | The skeleton builds and starts on the Windows twin | 1 week | not started |
-| 5 | Vault core | Encryption and key derivation (method and library chosen by the owner first), the vault file format, atomic writes with verification (OR-15), tests on damaged input and interrupted writes (OR-4, OR-15) | 1.5 to 2 months | not started |
-| 6 | Vault contents | Items, templates, custom fields, categories, nested tags, attachments, several vaults, keyfile | 1 month | not started |
-| 7 | The windows | Unlock, item list, item editor, template editor, the settings window (D-011), auto-lock; nothing slow on the window's thread (OR-5) | 1.5 to 2 months | not started |
-| 8 | Tools | Password generator, one-time codes (TOTP), copy with the clipboard cleared after a time (D-007) | 2 to 3 weeks | not started |
-| 9 | Storage: local vault file | Open and save on a local disk or network share; detect a change made elsewhere (D-005) | 2 weeks | not started |
+| 2 | Translations from the start | Every visible text through Qt's translation call, gathered into a Poedit file, US English primary (D-008) | 1 week | done in 0.0.2 |
+| 3 | The four scripts | `push-to-development.sh`, `gitpush.sh`, `build-release.sh` (`.deb` and `.rpm` into `dist/`), `build-release.bat` (Windows setup attached to the release of the same version) (D-010) | 2 weeks | `push-to-development.sh` done in 0.0.2; the other three not started |
+| 4 | Windows build | The skeleton builds and starts on the Windows twin | 1 week | done in 0.0.3 |
+| 5 | Vault core | Encryption and key derivation (method and library chosen by the owner first), the vault file format, atomic writes with verification (OR-15), tests on damaged input and interrupted writes (OR-4, OR-15) | 1.5 to 2 months | done in 0.0.2 |
+| 6 | Vault contents | Items, templates, custom fields, categories, nested tags, attachments, several vaults, keyfile | 1 month | in part, 0.0.2: items, Login and Secure note, custom fields; not yet categories, tags, attachments, several vaults, keyfile |
+| 7 | The windows | Unlock, item list, item editor, template editor, the settings window (D-011), auto-lock; nothing slow on the window's thread (OR-5) | 1.5 to 2 months | in part, 0.0.3: unlock, list, editor, settings window, auto-lock; not yet the template editor |
+| 8 | Tools | Password generator, one-time codes (TOTP), copy with the clipboard cleared after a time (D-007) | 2 to 3 weeks | done in 0.0.3 |
+| 9 | Storage: local vault file | Open and save on a local disk or network share; detect a change made elsewhere (D-005) | 2 weeks | in part, 0.0.3: open and save; not yet noticing a change made elsewhere |
 | 10 | Merging | Merge changes from two devices; what cannot be merged is shown to the person to settle (D-005, OR-15) | 1 to 1.5 months | not started |
 | 11 | Storage: WebDAV | Technique decided by the owner when this step is reached (D-005) | 2 to 3 weeks | not started |
 | 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | not started |

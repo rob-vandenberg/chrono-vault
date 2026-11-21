@@ -5,7 +5,508 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Qt-Contexts: true\n"
 
-#: ../qml/Main.qml:33
+#: ../src/core/vault_contents.cpp:109
+msgctxt "Field|"
+msgid "User name"
+msgstr ""
+
+#: ../src/core/vault_contents.cpp:112
+msgctxt "Field|"
+msgid "Password"
+msgstr ""
+
+#: ../src/core/vault_contents.cpp:115
+msgctxt "Field|"
+msgid "Web address"
+msgstr ""
+
+#: ../src/core/vault_contents.cpp:118
+msgctxt "Field|"
+msgid "One-time code"
+msgstr ""
+
+#: ../src/core/vault_contents.cpp:121
+msgctxt "Field|"
+msgid "Notes"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:44
+msgctxt "GeneratorDialog|"
+msgid "Generate a password"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:63
+#, qt-format
+msgctxt "GeneratorDialog|"
+msgid "Length: %1"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:76
+msgctxt "GeneratorDialog|"
+msgid "Capital letters (A-Z)"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:83
+msgctxt "GeneratorDialog|"
+msgid "Small letters (a-z)"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:90
+msgctxt "GeneratorDialog|"
+msgid "Digits (0-9)"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:97
+msgctxt "GeneratorDialog|"
+msgid "Symbols (!#$%…)"
+msgstr ""
+
+#: ../qml/GeneratorDialog.qml:103
+msgctxt "GeneratorDialog|"
+msgid "Another one"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:91
+msgctxt "ItemEditor|"
+msgid "New field"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:108
+msgctxt "ItemEditor|"
+msgid "Choose an item on the left, or make a new one."
+msgstr ""
+
+#: ../qml/ItemEditor.qml:127
+msgctxt "ItemEditor|"
+msgid "Title of the note"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:127
+msgctxt "ItemEditor|"
+msgid "Title, for example the site's name"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:156
+msgctxt "ItemEditor|"
+msgid "Name of the field"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:167
+msgctxt "ItemEditor|"
+msgid "Remove field"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:183
+msgctxt "ItemEditor|"
+msgid "The secret the site gives, or its otpauth:// address"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:192
+msgctxt "ItemEditor|"
+msgid "Hide"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:192
+msgctxt "ItemEditor|"
+msgid "Show"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:197
+msgctxt "ItemEditor|"
+msgid "Generate…"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:203
+msgctxt "ItemEditor|"
+msgid "Copy"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:212
+msgctxt "ItemEditor|"
+msgid "This is not a valid one-time code secret."
+msgstr ""
+
+#: ../qml/ItemEditor.qml:218
+#, qt-format
+msgctxt "ItemEditor|"
+msgid "%n second(s) left"
+msgid_plural "%n second(s) left"
+msgstr[0] ""
+
+#: ../qml/ItemEditor.qml:223
+msgctxt "ItemEditor|"
+msgid "Copy code"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:246
+msgctxt "ItemEditor|"
+msgid "Add a text field"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:251
+msgctxt "ItemEditor|"
+msgid "Add a password field"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:260
+msgctxt "ItemEditor|"
+msgid "Save"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:266
+msgctxt "ItemEditor|"
+msgid "Cancel"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:266
+msgctxt "ItemEditor|"
+msgid "Close"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:272
+msgctxt "ItemEditor|"
+msgid "Delete…"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:297
+msgctxt "ItemEditor|"
+msgid "Save your changes?"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:303
+#, qt-format
+msgctxt "ItemEditor|"
+msgid "“%1” has changes that are not saved yet."
+msgstr ""
+
+#: ../qml/ItemEditor.qml:328
+msgctxt "ItemEditor|"
+msgid "Delete this item?"
+msgstr ""
+
+#: ../qml/ItemEditor.qml:334
+#, qt-format
+msgctxt "ItemEditor|"
+msgid "“%1” is removed from the vault. This cannot be undone."
+msgstr ""
+
+#: ../qml/Main.qml:36
+#, qt-format
+msgctxt "Main|"
+msgid "%1 – Chrono Vault"
+msgstr ""
+
+#: ../qml/Main.qml:37
 msgctxt "Main|"
 msgid "Chrono Vault"
+msgstr ""
+
+#: ../qml/Main.qml:48
+msgctxt "Main|"
+msgid "New login"
+msgstr ""
+
+#: ../qml/Main.qml:52
+msgctxt "Main|"
+msgid "New secure note"
+msgstr ""
+
+#: ../qml/Main.qml:57
+msgctxt "Main|"
+msgid "Settings"
+msgstr ""
+
+#: ../qml/Main.qml:61
+msgctxt "Main|"
+msgid "Lock"
+msgstr ""
+
+#: ../qml/Main.qml:128
+msgctxt "Main|"
+msgid "A change is not saved"
+msgstr ""
+
+#: ../qml/Main.qml:137
+msgctxt "Main|"
+msgid ""
+"Your last change could not be saved. If you quit now, it is lost. The vault "
+"on disk is unchanged."
+msgstr ""
+
+#: ../qml/Main.qml:138
+msgctxt "Main|"
+msgid ""
+"This vault holds a change that could not be saved yet; unlocking it saves "
+"it. If you quit now, it is lost."
+msgstr ""
+
+#: ../qml/Main.qml:167
+msgctxt "Main|"
+msgid "A change is not saved yet. The vault on disk is unchanged."
+msgstr ""
+
+#: ../qml/Main.qml:174
+msgctxt "Main|"
+msgid "Try saving again"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:39
+msgctxt "SettingsWindow|"
+msgid "Settings – Chrono Vault"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:53 ../qml/SettingsWindow.qml:78
+msgctxt "SettingsWindow|"
+msgid "Security"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:53 ../qml/SettingsWindow.qml:99
+msgctxt "SettingsWindow|"
+msgid "Clipboard"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:82
+msgctxt "SettingsWindow|"
+msgid "Lock the vault after this many minutes without use (0 means never):"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:103
+msgctxt "SettingsWindow|"
+msgid "Clear what was copied after this many seconds (0 means never):"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:69
+msgctxt "UnlockPage|"
+msgid "Master password"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:75
+msgctxt "UnlockPage|"
+msgid "Unlock"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:81
+msgctxt "UnlockPage|"
+msgid "A change could not be saved before the vault locked. Unlock to save it."
+msgstr ""
+
+#: ../qml/UnlockPage.qml:87
+msgctxt "UnlockPage|"
+msgid "Open another vault…"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:96
+msgctxt "UnlockPage|"
+msgid "A change is not saved"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:102
+msgctxt "UnlockPage|"
+msgid ""
+"This vault holds a change that could not be saved yet; unlocking it saves "
+"it. If you open another vault now, the change is lost."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:103
+msgctxt "VaultController|"
+msgid "The vault file is no longer where it was."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:105
+msgctxt "VaultController|"
+msgid "The vault file could not be read."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:107
+msgctxt "VaultController|"
+msgid "This file is not a Chrono Vault vault."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:109
+msgctxt "VaultController|"
+msgid ""
+"This vault was made by a newer Chrono Vault. Update Chrono Vault to open it."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:112
+msgctxt "VaultController|"
+msgid "That password does not open this vault."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:114
+msgctxt "VaultController|"
+msgid "This file is too large to be a vault."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:124
+msgctxt "VaultController|"
+msgid ""
+"Your change could not be saved: the folder cannot be written to, or the disk "
+"is full. The vault on disk is unchanged."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:130
+msgctxt "VaultController|"
+msgid "Your change could not be saved. The vault on disk is unchanged."
+msgstr ""
+
+#: ../qml/VaultPage.qml:83
+msgctxt "VaultPage|"
+msgid "Search"
+msgstr ""
+
+#: ../qml/VaultPage.qml:110
+msgctxt "VaultPage|"
+msgid "Secure note"
+msgstr ""
+
+#: ../qml/VaultPage.qml:129
+msgctxt "VaultPage|"
+msgid "No items yet."
+msgstr ""
+
+#: ../qml/VaultPage.qml:129
+msgctxt "VaultPage|"
+msgid "Nothing found."
+msgstr ""
+
+#: ../qml/WelcomePage.qml:39
+msgctxt "WelcomePage|"
+msgid "Welcome to Chrono Vault"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:44
+msgctxt "WelcomePage|"
+msgid "Create a new vault, or open one you already have."
+msgstr ""
+
+#: ../qml/WelcomePage.qml:50
+msgctxt "WelcomePage|"
+msgid "Create a new vault…"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:55
+msgctxt "WelcomePage|"
+msgid "Open a vault…"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:63
+msgctxt "WelcomePage|"
+msgid "Where should the new vault be kept?"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:66 ../qml/WelcomePage.qml:79
+msgctxt "WelcomePage|"
+msgid "Chrono Vault vaults (*.chronovault)"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:77
+msgctxt "WelcomePage|"
+msgid "Open a vault"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:79
+msgctxt "WelcomePage|"
+msgid "All files (*)"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:90
+msgctxt "WelcomePage|"
+msgid "Choose the master password"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:117
+msgctxt "WelcomePage|"
+msgid ""
+"This password opens the vault. Nobody can open it without, not even you, so "
+"choose one you will remember."
+msgstr ""
+
+#: ../qml/WelcomePage.qml:123
+msgctxt "WelcomePage|"
+msgid "Master password"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:129
+msgctxt "WelcomePage|"
+msgid "The same password again"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:136
+msgctxt "WelcomePage|"
+msgid "The two passwords are not the same yet."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:221
+msgctxt "chrono_vault::VaultController|"
+msgid "Choose where to keep the new vault."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:225
+msgctxt "chrono_vault::VaultController|"
+msgid "Choose a master password."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:229
+msgctxt "chrono_vault::VaultController|"
+msgid "The two passwords are not the same."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:278
+msgctxt "chrono_vault::VaultController|"
+msgid "A file with that name already exists. Choose another name."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:237
+msgctxt "chrono_vault::VaultController|"
+msgid "Creating the vault…"
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:257
+msgctxt "chrono_vault::VaultController|"
+msgid ""
+"The new vault could not be created: the folder cannot be written to, or the "
+"disk is full."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:266
+msgctxt "chrono_vault::VaultController|"
+msgid "Your new vault is ready."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:303
+msgctxt "chrono_vault::VaultController|"
+msgid "Unlocking…"
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:332
+msgctxt "chrono_vault::VaultController|"
+msgid "The vault opened, but what it holds is damaged. It was not changed."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:411
+msgctxt "chrono_vault::VaultController|"
+msgid "Untitled note"
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:411
+msgctxt "chrono_vault::VaultController|"
+msgid "Untitled login"
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:419
+msgctxt "chrono_vault::VaultController|"
+msgid "Field"
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:480
+#, qt-format
+msgctxt "chrono_vault::VaultController|"
+msgid "Copied. The clipboard is cleared in %n second(s)."
+msgid_plural "Copied. The clipboard is cleared in %n second(s)."
+msgstr[0] ""
+
+#: ../src/ui/vault_controller.cpp:483
+msgctxt "chrono_vault::VaultController|"
+msgid "Copied."
 msgstr ""

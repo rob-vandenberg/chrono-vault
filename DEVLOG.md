@@ -43,3 +43,14 @@ QML module `qml/` (an empty window titled "Chrono Vault" through the translation
 Translations with Poedit from the start (D-008); `push-to-development.sh`; the vault core: encryption with OpenSSL,
 Argon2id and AES-256-GCM (D-013), the vault file with safe saves (D-014), the contents (D-015), the password generator
 and one-time codes (RFC 6238). Eight tests, passing in the normal and the sanitizer build.
+
+## 21 November 2026: version 0.0.3, the first working version (autonomous mode)
+
+The windows in Qt Quick (D-016): start, unlock, the item list with search, the item editor with custom fields, the
+password generator, one-time codes, copying with the clipboard cleared and marked secret, lock and auto-lock, and the
+settings window with a sidebar (D-011). The controller does every slow step off the window's thread (OR-5) and saves
+after every change (OR-15). The Windows build works on the Windows twin (OpenSSL from vcpkg). Ten tests, among them one
+that drives the pages themselves; it found a binding loop in the delete dialog, now fixed. Five review rounds
+followed; rounds 1 to 4 found faults around unsaved work (changes dropped when switching items, closing or locking;
+a failed save hidden by the next message; a false "not saved" warning after Save and Lock), all fixed with tests and
+recorded in D-016 points 9 to 22; round 5 found nothing real.

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# ChronoVaultBuild.cmake 0.0.1
+# ChronoVaultBuild.cmake 0.0.3
 
 # --- Version history ----------------------------------------------------
+# v0.0.3: Strict warnings for given source files only, for targets that also hold Qt's generated code
 # v0.0.1: Initial release
 
 # The build settings every target of our own shares: warnings treated as
@@ -38,5 +39,15 @@ function(chrono_vault_strict_warnings target)
         target_compile_options(${target} PRIVATE /W4 /WX)
     else()
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+endfunction()
+
+# For a target that also compiles code Qt generates (a QML module's cache of
+# compiled QML): the strict warnings apply to our own source files only.
+function(chrono_vault_strict_warnings_for_sources)
+    if(MSVC)
+        set_source_files_properties(${ARGN} PROPERTIES COMPILE_OPTIONS "/W4;/WX")
+    else()
+        set_source_files_properties(${ARGN} PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;-Wpedantic;-Werror")
     endif()
 endfunction()

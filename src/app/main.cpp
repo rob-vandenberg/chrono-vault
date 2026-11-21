@@ -25,9 +25,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.2
+// main.cpp 0.0.3
 
 // --- Version history ----------------------------------------------------
+// v0.0.3: The organisation name, so the settings have a place of their own
 // v0.0.2: The translation of the system's language is loaded at start (D-008)
 // v0.0.1: Initial release
 
@@ -36,6 +37,7 @@ Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
 int main(int argc, char* argv[])
 {
     QGuiApplication application(argc, argv);
+    QGuiApplication::setOrganizationName(QStringLiteral("Chrono Vault"));
     QGuiApplication::setApplicationName(QStringLiteral("Chrono Vault"));
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
 

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.1
+# tests/integration/CMakeLists.txt 0.0.3
 
 # --- Version history ----------------------------------------------------
+# v0.0.3: The tests of the controller and of the pages
 # v0.0.1: Initial release
 
 qt_add_executable(test_main_window test_main_window.cpp)
@@ -31,3 +32,13 @@ target_link_libraries(test_main_window PRIVATE
 )
 chrono_vault_strict_warnings(test_main_window)
 chrono_vault_add_test(test_main_window)
+
+qt_add_executable(test_vault_controller test_vault_controller.cpp)
+target_link_libraries(test_vault_controller PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
+chrono_vault_strict_warnings(test_vault_controller)
+chrono_vault_add_test(test_vault_controller)
+
+qt_add_executable(test_pages test_pages.cpp)
+target_link_libraries(test_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_pages)
+chrono_vault_add_test(test_pages)

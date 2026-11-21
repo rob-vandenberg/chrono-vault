@@ -19,13 +19,15 @@
 #include <QQmlApplicationEngine>
 #include <QQmlError>
 #include <QQuickWindow>
+#include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.1
+// test_main_window.cpp 0.0.3
 
 // --- Version history ----------------------------------------------------
+// v0.0.3: Settings of the test's own, never the person's
 // v0.0.1: Initial release
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -35,8 +37,16 @@ class TestMainWindow : public QObject
     Q_OBJECT
 
 private slots:
+    void initTestCase();
     void the_main_window_loads_without_qml_errors_and_is_titled_chrono_vault();
 };
+
+void TestMainWindow::initTestCase()
+{
+    QStandardPaths::setTestModeEnabled(true);
+    QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
+    QCoreApplication::setApplicationName(QStringLiteral("test_main_window"));
+}
 
 void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chrono_vault()
 {

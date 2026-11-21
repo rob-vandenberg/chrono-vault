@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.2
+# qml/CMakeLists.txt 0.0.3
 
 # --- Version history ----------------------------------------------------
+# v0.0.3: The pages, the editor, the generator, the settings window and the controller
 # v0.0.2: The module's output folder is named after its URI, as Qt's tools expect
 # v0.0.1: Initial release
 
@@ -30,6 +31,26 @@ qt_add_qml_module(chrono_vault_ui
     VERSION 1.0
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
+        GeneratorDialog.qml
+        ItemEditor.qml
         Main.qml
+        SettingsWindow.qml
+        UnlockPage.qml
+        VaultPage.qml
+        WelcomePage.qml
+    SOURCES
+        ../src/ui/item_list_model.cpp
+        ../src/ui/item_list_model.h
+        ../src/ui/vault_controller.cpp
+        ../src/ui/vault_controller.h
 )
-target_link_libraries(chrono_vault_ui PRIVATE Qt6::Quick Qt6::QuickControls2)
+target_include_directories(chrono_vault_ui PUBLIC "${PROJECT_SOURCE_DIR}/src/ui")
+target_link_libraries(chrono_vault_ui
+    PUBLIC chrono_vault_core Qt6::Gui Qt6::Qml
+    PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent
+)
+# Strict for our own sources; Qt's generated QML cache is Qt's code.
+chrono_vault_strict_warnings_for_sources(
+    ../src/ui/item_list_model.cpp
+    ../src/ui/vault_controller.cpp
+)

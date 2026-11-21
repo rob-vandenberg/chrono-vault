@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Fifteen decisions have been taken, all on 20 and 21 November 2026: the platforms, the
+Sixteen decisions have been taken, all on 20 and 21 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, and what a vault holds.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, and the windows of the first version.
 
 | Decision | What it settles |
 |---|---|
@@ -24,3 +24,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-013](decisions/D-013.md) | The encryption: OpenSSL 3, Argon2id for the key, AES-256-GCM for the vault |
 | [D-014](decisions/D-014.md) | The vault file: a sealed header and contents, refused whole when damaged, every save safe (autonomous mode) |
 | [D-015](decisions/D-015.md) | What a vault holds: items, Login and Secure note templates, built-in and custom fields, JSON inside the seal (autonomous mode) |
+| [D-016](decisions/D-016.md) | The windows of the first version: start, unlock, list and editor, saving at once, copying and auto-lock (autonomous mode) |
