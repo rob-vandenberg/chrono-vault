@@ -20,16 +20,20 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.0.4
+// DialogWindow.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: An application window with the program's font, so the UI scaling reaches it (D-023)
 // v0.0.4: Initial release
 
 // A dialog as a window of its own (D-020): movable and resizable, it remembers
 // its size and place under its name and opens centred over the main window the
 // first time. Its buttons and answers are those of Qt's own Dialog.
-Window {
+// An application window, not a plain one: only that carries a font, which
+// the UI scaling needs to reach the dialog's controls (D-023).
+ApplicationWindow {
     id: dialogWindow
+    font: Appearance.font
 
     property string memoryName: ""
     property alias standardButtons: buttonBox.standardButtons

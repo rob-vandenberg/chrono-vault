@@ -16,6 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_setup.h"
+#include "appearance.h"
 #include "single_instance.h"
 #include "system_tray.h"
 #include "updater.h"
@@ -35,9 +36,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.5
+// main.cpp 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: The kept theme and UI scaling put in use at the start (D-023)
 // v0.0.5: The automatic update checks; --check-for-update for the release checks (D-021)
 // v0.0.4: QApplication and the tray, Chrono Vault's own style, fonts and icon, start minimized
 // v0.0.3: The organisation name, so the settings have a place of their own
@@ -57,6 +59,8 @@ int main(int argc, char* argv[])
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
     QGuiApplication::setWindowIcon(chrono_vault::programIcon());
     chrono_vault::applyStyle();
+    // The kept theme and UI scaling, before any window shows (D-023).
+    chrono_vault::Appearance::applyKept();
 
     // The packages' own check: one look on GitHub, its answer printed, then
     // the program ends (build-release.sh tries HTTPS with it, D-021).

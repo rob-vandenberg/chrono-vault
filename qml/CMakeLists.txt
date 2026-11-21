@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.6
+# qml/CMakeLists.txt 0.0.7
 
 # --- Version history ----------------------------------------------------
+# v0.0.7: The theme, the UI scaling and the appearance the windows see (D-023)
 # v0.0.6: The OK and Cancel icons
 # v0.0.5: The About and Update windows
 # v0.0.4: The style, the program's icon and our own icons from art/, the Noto fonts, Qt Svg and Qt Widgets
@@ -48,16 +49,22 @@ qt_add_qml_module(chrono_vault_ui
     SOURCES
         ../src/ui/app_setup.cpp
         ../src/ui/app_setup.h
+        ../src/ui/appearance.cpp
+        ../src/ui/appearance.h
         ../src/ui/autostart.cpp
         ../src/ui/autostart.h
         ../src/ui/item_icons.cpp
         ../src/ui/item_icons.h
         ../src/ui/item_list_model.cpp
         ../src/ui/item_list_model.h
+        ../src/ui/program_scale.cpp
+        ../src/ui/program_scale.h
         ../src/ui/single_instance.cpp
         ../src/ui/single_instance.h
         ../src/ui/system_tray.cpp
         ../src/ui/system_tray.h
+        ../src/ui/theme.cpp
+        ../src/ui/theme.h
         ../src/ui/updater.cpp
         ../src/ui/updater.h
         ../src/ui/vault_controller.cpp

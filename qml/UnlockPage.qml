@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.4
+// UnlockPage.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.4: The program's icon in the upper left; the eye in the password field
 // v0.0.3: Initial release
 
@@ -62,7 +63,7 @@ Item {
 
         Label {
             text: VaultController.vaultName
-            font.pointSize: 18
+            font.pointSize: Appearance.fontPointSize * 1.8
             elide: Text.ElideMiddle
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter

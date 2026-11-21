@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.5
+// Main.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: The program's font, so the UI scaling reaches every control (D-023)
 // v0.0.5: F1 opens About; the Update window; a Quit for an update waits for the editor or a save and goes on
 // v0.0.4: The version in the title; hiding to the tray, Quit and Ctrl+Q
 // v0.0.3: The start, unlock and vault pages, the tool bar, the message line with Try saving again
@@ -30,6 +31,8 @@ import QtQuick.Layouts
 
 ApplicationWindow {
     id: mainWindow
+    // The program's font, so the UI scaling reaches every control (D-023).
+    font: Appearance.font
 
     width: 960
     height: 640

@@ -88,3 +88,10 @@ the two icons drawn for Chrono Vault. Four review rounds found and fixed: Enter 
 closed the window silently; Enter on a focused Cancel did OK; Enter and Esc in the open update list acted on the
 window; Restore defaults changed the greyed tray setting; a reopened window kept the focus on Cancel. The two new
 icons were kept out of git by `.gitignore`; now let in. Also the release to try the update from 0.0.5.
+
+## 22 November 2026: version 0.0.7: theme and UI scaling
+
+Chrono Viewer's light and dark palettes and Follow the system, and the UI scaling from 50% to 400% (D-023), shown at
+once and kept with OK. Found while building: Qt Quick's controls do not take a changed program font by themselves, so
+every window takes it from `Appearance`, and the dialogs became application windows (a plain window has no font); the
+sidebar measures its names in the font in use. One review round, nothing real. Sixteen tests.

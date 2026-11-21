@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.4
+// WelcomePage.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.4: The program's icon in the upper left; a typo; the eye in the password fields
 // v0.0.3: Initial release
 
@@ -47,7 +48,7 @@ Item {
 
         Label {
             text: qsTr("Welcome to Chrono Vault")
-            font.pointSize: 18
+            font.pointSize: Appearance.fontPointSize * 1.8
             Layout.alignment: Qt.AlignHCenter
         }
         Label {

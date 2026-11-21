@@ -2,16 +2,15 @@
 
 ## Now
 
-**Version 0.0.6** (D-022): the settings window as in Chrono Viewer: a framed sidebar with the chosen topic marked
-across its width, and Restore defaults, OK and Cancel at the bottom right. OK (and Enter) keeps every topic's changes,
-Cancel (Esc, closing) throws them away, Restore defaults puts back the topic shown. A failed "Start at startup" keeps
-the window open and says so. Also the release to try the update from 0.0.5 (D-021). Fifteen tests pass on Linux, under
-the sanitizers and on Windows.
+**Version 0.0.7** (D-023): the theme (Light, Dark, Follow the system) and the UI scaling (50% to 400%) at the top of
+Settings > General, as in Chrono Viewer: shown at once, kept with OK, put back with Cancel, applied at every start.
+Every window takes the program's font, so the scaling reaches every control; the settings pages scroll. Sixteen tests
+pass on Linux, under the sanitizers and on Windows; the review round found nothing real.
 
 ## Next task
 
-The owner tries the update from 0.0.5 to 0.0.6 on Linux and Windows. Then the owner's two new requirements, as in
-Chrono Viewer: a theme (Light, Dark, Follow the system) and UI scaling, through a changelist and the owner's Proceed.
+The owner tries the update from 0.0.5 or 0.0.6 to 0.0.7 on Linux and Windows, and the theme and UI scaling. Then the
+rest of `ROADMAP.md` steps 6 to 9, through a changelist and the owner's Proceed.
 
 ## Open questions
 

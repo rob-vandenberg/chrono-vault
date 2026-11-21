@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.5
+# tests/integration/CMakeLists.txt 0.0.7
 
 # --- Version history ----------------------------------------------------
+# v0.0.7: The theme and UI scaling test
 # v0.0.5: The update test
 # v0.0.4: The window test uses the UI library, for the style; the tray and icon tests
 # v0.0.3: The tests of the controller and of the pages
@@ -65,3 +66,8 @@ qt_add_executable(test_updater test_updater.cpp)
 target_link_libraries(test_updater PRIVATE chrono_vault_ui Qt6::Network Qt6::Test)
 chrono_vault_strict_warnings(test_updater)
 chrono_vault_add_test(test_updater)
+
+qt_add_executable(test_appearance test_appearance.cpp)
+target_link_libraries(test_appearance PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_appearance)
+chrono_vault_add_test(test_appearance)

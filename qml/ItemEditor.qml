@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.5
+// ItemEditor.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: One font in every field; the eye inside the password fields; the item's icon
 // v0.0.3: Initial release
@@ -164,7 +165,7 @@ Item {
             TextField {
                 id: titleField
                 placeholderText: editor.isNote ? qsTr("Title of the note") : qsTr("Title, for example the site's name")
-                font.pointSize: 14
+                font.pointSize: Appearance.fontPointSize * 1.4
                 Layout.fillWidth: true
                 onTextEdited: editor.changed = true
             }
@@ -253,7 +254,7 @@ Item {
                         Label {
                             text: parent.code === "" ? qsTr("This is not a valid one-time code secret.") : parent.code
                             font.family: "Noto Sans Mono"
-                            font.pointSize: parent.code === "" ? 10 : 16
+                            font.pointSize: Appearance.fontPointSize * (parent.code === "" ? 1.0 : 1.6)
                         }
                         Label {
                             visible: parent.code !== ""

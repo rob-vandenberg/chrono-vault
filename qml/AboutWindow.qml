@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.5
+// AboutWindow.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Initial release
 
 // About Chrono Vault (D-021), opened with F1 for now.
@@ -52,7 +53,7 @@ DialogWindow {
             Label {
                 text: qsTr("Chrono Vault %1").arg(VaultController.version)
                 font.bold: true
-                font.pointSize: 14
+                font.pointSize: Appearance.fontPointSize * 1.4
             }
             Label { text: qsTr("Copyright © 2026 Rob Vandenberg") }
             Label {

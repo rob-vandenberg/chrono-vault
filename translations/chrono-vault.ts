@@ -4,7 +4,7 @@
 <context>
     <name>AboutWindow</name>
     <message>
-        <location filename="../qml/AboutWindow.qml" line="+35"/>
+        <location filename="../qml/AboutWindow.qml" line="+36"/>
         <source>About Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -108,7 +108,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+100"/>
+        <location filename="../qml/ItemEditor.qml" line="+101"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -266,7 +266,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+40"/>
+        <location filename="../qml/Main.qml" line="+43"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -342,35 +342,66 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+89"/>
+        <location filename="../qml/SettingsWindow.qml" line="+88"/>
+        <location line="+255"/>
+        <source>%1%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-228"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+31"/>
+        <location line="+41"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+70"/>
-        <location line="+80"/>
+        <location line="+77"/>
+        <location line="+157"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-80"/>
-        <location line="+102"/>
+        <location line="-157"/>
+        <location line="+179"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-102"/>
-        <location line="+35"/>
+        <location line="-179"/>
+        <location line="+42"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+3"/>
+        <source>Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Follow the system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>UI scaling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+44"/>
         <source>Keep running in the system tray when the window is closed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -425,7 +456,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+35"/>
         <source>Restore defaults</source>
         <translation type="unfinished"></translation>
     </message>
@@ -443,7 +474,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+80"/>
+        <location filename="../qml/UnlockPage.qml" line="+81"/>
         <source>Master password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -575,7 +606,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+49"/>
+        <location filename="../qml/WelcomePage.qml" line="+50"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>

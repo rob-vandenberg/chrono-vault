@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.6
+// SettingsWindow.qml 0.0.7
 
 // --- Version history ----------------------------------------------------
+// v0.0.7: Theme and UI scaling in General, shown at once, kept with OK; the pages scroll (D-023)
 // v0.0.6: The sidebar as a framed panel; OK, Cancel and Restore defaults (D-022)
 // v0.0.5: "Check for updates" in General (D-021)
 // v0.0.4: The version in the title; the General topic
@@ -34,6 +35,8 @@ import QtQuick.Layouts
 // topic being shown, to be kept with OK (D-022).
 ApplicationWindow {
     id: settingsWindow
+    // The program's font, so the UI scaling reaches every control (D-023).
+    font: Appearance.font
     objectName: "settingsWindow"
 
     function showWindow() {
@@ -55,8 +58,13 @@ ApplicationWindow {
     property int checkFrequency: 0
     property int autoLockMinutes: 0
     property int clipboardClearSeconds: 0
+    // Shown at once while the window is open; kept with OK, put back otherwise.
+    property int theme: 2
+    property int scale: 100
 
     function loadSettings() {
+        theme = Appearance.theme
+        scale = Appearance.scale
         keepInTray = VaultController.keepInTray
         startAtStartup = VaultController.startAtStartup
         startMinimized = VaultController.startMinimized
@@ -65,10 +73,28 @@ ApplicationWindow {
         clipboardClearSeconds = VaultController.clipboardClearSeconds
     }
 
+    function showTheme(chosen) {
+        theme = chosen
+        Appearance.show(theme, scale)
+    }
+    function showScale(percent) {
+        scale = percent
+        Appearance.show(theme, scale)
+    }
+    // Room for the longest percentage, in the font in use.
+    Text {
+        id: widestPercent
+        visible: false
+        text: qsTr("%1%").arg(Appearance.largestScale)
+        font: Appearance.font
+    }
+
     // OK: every topic's changes are kept, whichever topic is shown.
     function accept() {
         // A number still being typed counts.
         okButton.forceActiveFocus()
+        if (Appearance.theme !== theme || Appearance.scale !== scale)
+            Appearance.keep(theme, scale)
         if (VaultController.keepInTray !== keepInTray)
             VaultController.keepInTray = keepInTray
         if (VaultController.startAtStartup !== startAtStartup)
@@ -94,7 +120,14 @@ ApplicationWindow {
 
     // What went wrong at the last OK, shown beside the buttons.
     property string problem: ""
-    onVisibleChanged: if (!visible) problem = ""
+    // Closed without OK (Cancel, Esc, the window's own close): the theme and
+    // the scale it showed are put back to what is kept.
+    onVisibleChanged: {
+        if (!visible) {
+            problem = ""
+            Appearance.showKept()
+        }
+    }
 
     // The topic being shown, and no other.
     function restoreDefaults() {
@@ -107,6 +140,9 @@ ApplicationWindow {
             startAtStartup = defaults.startAtStartup
             startMinimized = defaults.startMinimized
             checkFrequency = Updater.defaultCheckFrequency()
+            theme = Appearance.defaultTheme
+            scale = Appearance.defaultScale
+            Appearance.show(theme, scale)
             break
         case 1:
             autoLockMinutes = defaults.autoLockMinutes
@@ -118,8 +154,8 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: 640
-    height: 400
+    width: 680
+    height: 520
     visible: false
     color: palette.window
 
@@ -150,16 +186,20 @@ ApplicationWindow {
         }
     }
 
-    // The topics' list is as wide as its longest name and no wider.
-    FontMetrics {
-        id: topicMetrics
-        font: settingsWindow.font
-    }
-    function widestTopic() {
-        let widest = 0
-        for (let i = 0; i < topics.model.length; ++i)
-            widest = Math.max(widest, topicMetrics.advanceWidth(topics.model[i]))
-        return Math.ceil(widest)
+    // The topics' list is as wide as its longest name and no wider; measured
+    // by the names themselves, so it follows the UI scaling.
+    Column {
+        id: topicNames
+        objectName: "topicNames"
+        visible: false
+        Repeater {
+            model: topics.model
+            Text {
+                required property string modelData
+                text: modelData
+                font: Appearance.font
+            }
+        }
     }
 
     ColumnLayout {
@@ -177,7 +217,7 @@ ApplicationWindow {
             Rectangle {
                 objectName: "topicsPanel"
                 Layout.fillHeight: true
-                Layout.preferredWidth: settingsWindow.widestTopic() + 2 * topicPadding + 2 * border.width
+                Layout.preferredWidth: Math.ceil(topicNames.implicitWidth) + 2 * topicPadding + 2 * border.width
                 readonly property int topicPadding: 6
                 color: settingsWindow.palette.base
                 border.color: settingsWindow.palette.mid
@@ -217,98 +257,176 @@ ApplicationWindow {
                 }
             }
 
-            StackLayout {
-                currentIndex: topics.currentIndex
+            // A page taller than the window (a large UI scaling) scrolls.
+            ScrollView {
+                id: pageScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                contentWidth: availableWidth
+                clip: true
 
-                ColumnLayout {
-                    spacing: 8
-                    Label {
-                        text: qsTr("General")
-                        font.pointSize: 14
-                    }
-                    CheckBox {
-                        objectName: "keepInTrayBox"
-                        text: qsTr("Keep running in the system tray when the window is closed")
-                        checked: settingsWindow.keepInTray
-                        enabled: VaultController.trayAvailable
-                        onToggled: settingsWindow.keepInTray = checked
-                    }
-                    CheckBox {
-                        objectName: "startAtStartupBox"
-                        text: qsTr("Start Chrono Vault at startup")
-                        checked: settingsWindow.startAtStartup
-                        onToggled: settingsWindow.startAtStartup = checked
-                    }
-                    CheckBox {
-                        objectName: "startMinimizedBox"
-                        text: qsTr("Start Chrono Vault minimized")
-                        checked: settingsWindow.startMinimized
-                        onToggled: settingsWindow.startMinimized = checked
-                    }
-                    RowLayout {
-                        Label { text: qsTr("Check for updates") }
-                        ComboBox {
-                            id: frequencyBox
-                            objectName: "checkFrequencyBox"
-                            model: [qsTr("Daily"), qsTr("Weekly"), qsTr("Monthly"), qsTr("Never")]
-                            currentIndex: settingsWindow.checkFrequency
-                            onActivated: function(index) { settingsWindow.checkFrequency = index }
+                StackLayout {
+                    currentIndex: topics.currentIndex
+                    width: pageScroll.availableWidth
+
+                    ColumnLayout {
+                        spacing: 8
+                        Label {
+                            text: qsTr("General")
+                            font.pointSize: Appearance.fontPointSize * 1.4
                         }
+                        Label { text: qsTr("Theme") }
+                        Frame {
+                            Layout.fillWidth: true
+                            ColumnLayout {
+                                spacing: 0
+                                RadioButton {
+                                    objectName: "lightTheme"
+                                    text: qsTr("Light")
+                                    checked: settingsWindow.theme === 0
+                                    onToggled: settingsWindow.showTheme(0)
+                                }
+                                RadioButton {
+                                    objectName: "darkTheme"
+                                    text: qsTr("Dark")
+                                    checked: settingsWindow.theme === 1
+                                    onToggled: settingsWindow.showTheme(1)
+                                }
+                                RadioButton {
+                                    objectName: "followTheme"
+                                    text: qsTr("Follow the system")
+                                    checked: settingsWindow.theme === 2
+                                    onToggled: settingsWindow.showTheme(2)
+                                }
+                            }
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 12
+                            Label { text: qsTr("UI scaling") }
+                            Item {
+                                Layout.fillWidth: true
+                                implicitHeight: scaleSlider.implicitHeight + 6
+                                Slider {
+                                    id: scaleSlider
+                                    objectName: "scaleSlider"
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    from: Appearance.smallestScale
+                                    to: Appearance.largestScale
+                                    stepSize: 1
+                                    value: settingsWindow.scale
+                                    // Put in use when the slider is let go, or at
+                                    // once when moved with the keys.
+                                    onPressedChanged: if (!pressed) settingsWindow.showScale(Math.round(value))
+                                    onMoved: if (!pressed) settingsWindow.showScale(Math.round(value))
+                                }
+                                // A mark every 50%.
+                                Repeater {
+                                    model: Math.floor((Appearance.largestScale - Appearance.smallestScale)
+                                                      / Appearance.scaleMarkEvery) + 1
+                                    Rectangle {
+                                        required property int index
+                                        readonly property real handleRoom: scaleSlider.handle ? scaleSlider.handle.width : 0
+                                        x: scaleSlider.leftPadding + handleRoom / 2
+                                           + index * (scaleSlider.availableWidth - handleRoom)
+                                             * Appearance.scaleMarkEvery / (Appearance.largestScale - Appearance.smallestScale)
+                                        y: scaleSlider.height
+                                        width: 1
+                                        height: 5
+                                        color: settingsWindow.palette.mid
+                                    }
+                                }
+                            }
+                            Label {
+                                objectName: "scalePercent"
+                                text: qsTr("%1%").arg(Math.round(scaleSlider.value))
+                                Layout.preferredWidth: Math.ceil(widestPercent.implicitWidth)
+                                horizontalAlignment: Text.AlignRight
+                            }
+                        }
+                        CheckBox {
+                            objectName: "keepInTrayBox"
+                            text: qsTr("Keep running in the system tray when the window is closed")
+                            checked: settingsWindow.keepInTray
+                            enabled: VaultController.trayAvailable
+                            onToggled: settingsWindow.keepInTray = checked
+                        }
+                        CheckBox {
+                            objectName: "startAtStartupBox"
+                            text: qsTr("Start Chrono Vault at startup")
+                            checked: settingsWindow.startAtStartup
+                            onToggled: settingsWindow.startAtStartup = checked
+                        }
+                        CheckBox {
+                            objectName: "startMinimizedBox"
+                            text: qsTr("Start Chrono Vault minimized")
+                            checked: settingsWindow.startMinimized
+                            onToggled: settingsWindow.startMinimized = checked
+                        }
+                        RowLayout {
+                            Label { text: qsTr("Check for updates") }
+                            ComboBox {
+                                id: frequencyBox
+                                objectName: "checkFrequencyBox"
+                                model: [qsTr("Daily"), qsTr("Weekly"), qsTr("Monthly"), qsTr("Never")]
+                                currentIndex: settingsWindow.checkFrequency
+                                onActivated: function(index) { settingsWindow.checkFrequency = index }
+                            }
+                        }
+                        Label {
+                            visible: !VaultController.trayAvailable
+                            text: qsTr("This desktop has no system tray, so closing the window ends Chrono Vault.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.7
+                            Layout.fillWidth: true
+                        }
+                        Item { Layout.fillHeight: true }
                     }
-                    Label {
-                        visible: !VaultController.trayAvailable
-                        text: qsTr("This desktop has no system tray, so closing the window ends Chrono Vault.")
-                        wrapMode: Text.Wrap
-                        opacity: 0.7
-                        Layout.fillWidth: true
-                    }
-                    Item { Layout.fillHeight: true }
-                }
 
-                ColumnLayout {
-                    spacing: 8
-                    Label {
-                        text: qsTr("Security")
-                        font.pointSize: 14
+                    ColumnLayout {
+                        spacing: 8
+                        Label {
+                            text: qsTr("Security")
+                            font.pointSize: Appearance.fontPointSize * 1.4
+                        }
+                        Label {
+                            text: qsTr("Lock the vault after this many minutes without use (0 means never):")
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                        SpinBox {
+                            objectName: "autoLockBox"
+                            from: 0
+                            to: 240
+                            value: settingsWindow.autoLockMinutes
+                            editable: true
+                            onValueModified: settingsWindow.autoLockMinutes = value
+                        }
+                        Item { Layout.fillHeight: true }
                     }
-                    Label {
-                        text: qsTr("Lock the vault after this many minutes without use (0 means never):")
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                    SpinBox {
-                        objectName: "autoLockBox"
-                        from: 0
-                        to: 240
-                        value: settingsWindow.autoLockMinutes
-                        editable: true
-                        onValueModified: settingsWindow.autoLockMinutes = value
-                    }
-                    Item { Layout.fillHeight: true }
-                }
 
-                ColumnLayout {
-                    spacing: 8
-                    Label {
-                        text: qsTr("Clipboard")
-                        font.pointSize: 14
+                    ColumnLayout {
+                        spacing: 8
+                        Label {
+                            text: qsTr("Clipboard")
+                            font.pointSize: Appearance.fontPointSize * 1.4
+                        }
+                        Label {
+                            text: qsTr("Clear what was copied after this many seconds (0 means never):")
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                        SpinBox {
+                            objectName: "clipboardBox"
+                            from: 0
+                            to: 600
+                            value: settingsWindow.clipboardClearSeconds
+                            editable: true
+                            onValueModified: settingsWindow.clipboardClearSeconds = value
+                        }
+                        Item { Layout.fillHeight: true }
                     }
-                    Label {
-                        text: qsTr("Clear what was copied after this many seconds (0 means never):")
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                    }
-                    SpinBox {
-                        objectName: "clipboardBox"
-                        from: 0
-                        to: 600
-                        value: settingsWindow.clipboardClearSeconds
-                        editable: true
-                        onValueModified: settingsWindow.clipboardClearSeconds = value
-                    }
-                    Item { Layout.fillHeight: true }
                 }
             }
         }

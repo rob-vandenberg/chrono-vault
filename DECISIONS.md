@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twenty-two decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Twenty-three decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, and the settings window's buttons.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update,, the settings window's buttons, and the theme and UI scaling.
 
 | Decision | What it settles |
 |---|---|
@@ -31,3 +31,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-020](decisions/D-020.md) | One Chrono Vault per person; every window and dialog remembers its size and place, the main window its state |
 | [D-021](decisions/D-021.md) | The update check (Daily, Weekly, Monthly, Never), the About box on F1, and the update downloaded, checked and installed as in Chrono Mail |
 | [D-022](decisions/D-022.md) | The settings window: a framed sidebar, and OK, Cancel and Restore defaults working as in Chrono Viewer |
+| [D-023](decisions/D-023.md) | The theme (Light, Dark, Follow the system) and the UI scaling (50% to 400%), as in Chrono Viewer |

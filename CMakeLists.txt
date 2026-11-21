@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.0.6 LANGUAGES CXX)
+project(chrono-vault VERSION 0.0.7 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.0.6
+# CMakeLists.txt 0.0.7
 
 # --- Version history ----------------------------------------------------
+# v0.0.7: Version 0.0.7
 # v0.0.6: Version 0.0.6
 # v0.0.5: Version 0.0.5; Qt DBus on Linux, for installing an update through PackageKit (D-021)
 # v0.0.4: Qt Widgets (the tray) and Qt Svg (the icons); the icon tool; tests can be left out of a release
