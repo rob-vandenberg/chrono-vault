@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.3
+// Main.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The version in the title; hiding to the tray, Quit and Ctrl+Q
 // v0.0.3: The start, unlock and vault pages, the tool bar, the message line with Try saving again
 // v0.0.1: Initial release
 
@@ -31,10 +32,12 @@ ApplicationWindow {
 
     width: 960
     height: 640
-    visible: true
+    // Shown by the program as it starts: normally, minimized, or not at all
+    // when "Start Chrono Vault minimized" keeps it in the tray (D-019).
+    visible: false
     title: VaultController.state === VaultController.Unlocked
-           ? qsTr("%1 – Chrono Vault").arg(VaultController.vaultName)
-           : qsTr("Chrono Vault")
+           ? qsTr("%1 – Chrono Vault %2").arg(VaultController.vaultName).arg(VaultController.version)
+           : qsTr("Chrono Vault %1").arg(VaultController.version)
 
     readonly property bool busy: VaultController.state === VaultController.Busy
 
@@ -81,14 +84,52 @@ ApplicationWindow {
         visible: running
     }
 
+    // Quit, from the tray or with Ctrl+Q: asks about unsaved work like every
+    // close (D-016), then ends the program.
+    property bool quitting: false
+    function requestQuit() {
+        quitting = true
+        if (!visible)
+            show()
+        close()
+    }
+
+    Shortcut {
+        sequences: [StandardKey.Quit]
+        context: Qt.ApplicationShortcut
+        onActivated: mainWindow.requestQuit()
+    }
+
     // Closing never drops work without asking (OR-15).
     property bool quitAnyway: false
     property bool closeWhenSaved: false
+    property bool closeWhenSavedQuits: false
     onClosing: function(close) {
+        // Logging out or shutting down: never hold it up. What is being typed is
+        // stored, and a running save finishes before the program ends (OR-15).
+        if (VaultController.isSessionEnding()) {
+            if (vaultPage.hasUnsavedEdit())
+                vaultPage.storeEdit()
+            settingsWindow.close()
+            Qt.quit()
+            return
+        }
+        // Closing the window keeps Chrono Vault running in the tray (D-019).
+        if (!quitting && !quitAnyway && VaultController.keepInTray && VaultController.trayAvailable) {
+            close.accepted = false
+            settingsWindow.close()
+            hide()
+            return
+        }
         if (!quitAnyway) {
+            // A close that is held up leaves no "quitting" mark behind: a Quit
+            // that is cancelled must not turn the next close into a Quit. What
+            // follows remembers whether it was one.
+            const wasQuit = quitting
+            quitting = false
             if (vaultPage.hasUnsavedEdit()) {
                 close.accepted = false
-                vaultPage.whenEditorFree(function() { mainWindow.close() })
+                vaultPage.whenEditorFree(function() { wasQuit ? mainWindow.requestQuit() : mainWindow.close() })
                 return
             }
             if (VaultController.saveFailed || VaultController.hasKeptChanges) {
@@ -100,10 +141,14 @@ ApplicationWindow {
                 // A save is still running: close once it has finished.
                 close.accepted = false
                 closeWhenSaved = true
+                closeWhenSavedQuits = wasQuit
                 return
             }
         }
+        // The close is accepted: the program ends (it never ends by itself when
+        // its last window goes, D-019).
         settingsWindow.close()
+        Qt.quit()
     }
 
     Connections {
@@ -111,7 +156,7 @@ ApplicationWindow {
         function onUnsavedChangesChanged() {
             if (mainWindow.closeWhenSaved && !VaultController.unsavedChanges) {
                 mainWindow.closeWhenSaved = false
-                mainWindow.close()
+                mainWindow.closeWhenSavedQuits ? mainWindow.requestQuit() : mainWindow.close()
             }
         }
         function onSaveFailedChanged() {
@@ -122,12 +167,13 @@ ApplicationWindow {
         }
     }
 
-    Dialog {
+    DialogWindow {
+
         id: quitDialog
+
+        memoryName: "quit"
         objectName: "quitDialog"
         title: qsTr("A change is not saved")
-        modal: true
-        anchors.centerIn: parent
         standardButtons: VaultController.state === VaultController.Unlocked
                          ? Dialog.Retry | Dialog.Discard | Dialog.Cancel
                          : Dialog.Discard | Dialog.Cancel
@@ -179,4 +225,9 @@ ApplicationWindow {
     }
 
     SettingsWindow { id: settingsWindow }
+
+    WindowMemory {
+        window: mainWindow
+        name: "main"
+    }
 }

@@ -17,8 +17,11 @@
 
 #include "vault_controller.h"
 
+#include "autostart.h"
+#include "item_icons.h"
 #include "password_generator.h"
 #include "totp.h"
+#include "version.h"
 
 #include <QClipboard>
 #include <QDateTime>
@@ -33,9 +36,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.3
+// vault_controller.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
 
 namespace chrono_vault {
@@ -45,6 +49,8 @@ namespace {
 const QString lastVaultKey = QStringLiteral("vault/lastPath");
 const QString autoLockKey = QStringLiteral("security/autoLockMinutes");
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
+const QString keepInTrayKey = QStringLiteral("general/keepRunningInTray");
+const QString startMinimizedKey = QStringLiteral("general/startMinimized");
 
 QString kindName(FieldKind kind)
 {
@@ -92,6 +98,7 @@ QVariantMap toMap(const Item& item)
         {QStringLiteral("isNote"), item.itemTemplate == ItemTemplate::SecureNote},
         {QStringLiteral("title"), item.title},
         {QStringLiteral("fields"), fields},
+        {QStringLiteral("icon"), QString::fromLatin1(item.icon.toBase64())},
     };
 }
 
@@ -143,6 +150,8 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     QSettings settings;
     lockMinutes = std::clamp(settings.value(autoLockKey, 5).toInt(), 0, 240);
     clearSeconds = std::clamp(settings.value(clipboardKey, 30).toInt(), 0, 600);
+    keepRunning = settings.value(keepInTrayKey, true).toBool();
+    minimizedAtStart = settings.value(startMinimizedKey, false).toBool();
 
     autoLockTimer.setSingleShot(true);
     connect(&autoLockTimer, &QTimer::timeout, this, &VaultController::lock);
@@ -179,6 +188,11 @@ VaultController::~VaultController()
     forgetUnlockedVault();
 }
 
+QString VaultController::version() const
+{
+    return programVersion();
+}
+
 QString VaultController::vaultName() const
 {
     return QFileInfo(path).completeBaseName();
@@ -211,6 +225,48 @@ void VaultController::setClipboardClearSeconds(int seconds)
         clearSeconds = seconds;
         QSettings().setValue(clipboardKey, seconds);
         emit clipboardClearSecondsChanged();
+    }
+}
+
+void VaultController::setKeepInTray(bool keep)
+{
+    if (keepRunning != keep) {
+        keepRunning = keep;
+        QSettings().setValue(keepInTrayKey, keep);
+        emit keepInTrayChanged();
+    }
+}
+
+bool VaultController::startAtStartup() const
+{
+    return autostart::isEnabled();
+}
+
+void VaultController::setStartAtStartup(bool start)
+{
+    if (start == autostart::isEnabled()) {
+        return;
+    }
+    if (!autostart::setEnabled(start, QCoreApplication::applicationFilePath())) {
+        say(tr("The setting to start at startup could not be saved."), true);
+    }
+    emit startAtStartupChanged();
+}
+
+void VaultController::setStartMinimized(bool minimized)
+{
+    if (minimizedAtStart != minimized) {
+        minimizedAtStart = minimized;
+        QSettings().setValue(startMinimizedKey, minimized);
+        emit startMinimizedChanged();
+    }
+}
+
+void VaultController::setTrayAvailable(bool available)
+{
+    if (trayExists != available) {
+        trayExists = available;
+        emit trayAvailableChanged();
     }
 }
 
@@ -422,6 +478,7 @@ bool VaultController::saveItem(const QVariantMap& map)
         field.value = fieldMap.value(QStringLiteral("value")).toString();
         changed.fields.append(field);
     }
+    changed.icon = QByteArray::fromBase64(map.value(QStringLiteral("icon")).toString().toLatin1());
     changed.modified = QDateTime::currentDateTimeUtc();
 
     const auto existing = std::find_if(contents.items.begin(), contents.items.end(),
@@ -452,6 +509,16 @@ void VaultController::deleteItem(const QString& id)
     contents.items.erase(removed, contents.items.end());
     listModel.setItems(contents.items);
     saveInBackground(QString());
+}
+
+QString VaultController::readItemIcon(const QUrl& file)
+{
+    const IconResult result = readIcon(file.isLocalFile() ? file.toLocalFile() : file.toString());
+    if (result.status != IconStatus::Read) {
+        say(iconStatusText(result.status), true);
+        return {};
+    }
+    return QString::fromLatin1(result.png.toBase64());
 }
 
 void VaultController::retrySave()
@@ -505,6 +572,12 @@ int VaultController::oneTimeCodeSecondsLeft(const QString& secret) const
 QString VaultController::fieldName(const QString& role) const
 {
     return roleName(role);
+}
+
+bool VaultController::isSessionEnding() const
+{
+    const auto* application = qobject_cast<QGuiApplication*>(QCoreApplication::instance());
+    return application && application->isSavingSession();
 }
 
 bool VaultController::isIdle() const

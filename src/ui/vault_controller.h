@@ -29,9 +29,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.3
+// vault_controller.h 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
 
 namespace chrono_vault {
@@ -46,6 +47,7 @@ class VaultController : public QObject
     QML_SINGLETON
 
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString vaultPath READ vaultPath NOTIFY vaultPathChanged)
     Q_PROPERTY(QString vaultName READ vaultName NOTIFY vaultPathChanged)
     Q_PROPERTY(QString message READ message NOTIFY messageChanged)
@@ -56,6 +58,10 @@ class VaultController : public QObject
     Q_PROPERTY(ItemListModel* items READ items CONSTANT)
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(bool keepInTray READ keepInTray WRITE setKeepInTray NOTIFY keepInTrayChanged)
+    Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
+    Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY startMinimizedChanged)
+    Q_PROPERTY(bool trayAvailable READ trayAvailable NOTIFY trayAvailableChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
 
@@ -67,6 +73,7 @@ public:
     ~VaultController() override;
 
     [[nodiscard]] State state() const { return currentState; }
+    [[nodiscard]] QString version() const;
     [[nodiscard]] QString vaultPath() const { return path; }
     [[nodiscard]] QString vaultName() const;
     [[nodiscard]] QString message() const { return currentMessage; }
@@ -84,6 +91,15 @@ public:
     void setSearchText(const QString& text);
     [[nodiscard]] int autoLockMinutes() const { return lockMinutes; }
     void setAutoLockMinutes(int minutes);
+    // The General settings (D-019).
+    [[nodiscard]] bool keepInTray() const { return keepRunning; }
+    void setKeepInTray(bool keep);
+    [[nodiscard]] bool startAtStartup() const;
+    void setStartAtStartup(bool start);
+    [[nodiscard]] bool startMinimized() const { return minimizedAtStart; }
+    void setStartMinimized(bool minimized);
+    [[nodiscard]] bool trayAvailable() const { return trayExists; }
+    void setTrayAvailable(bool available);
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
 
@@ -108,6 +124,9 @@ public:
     // Stores the item (new or changed) and saves the vault.
     Q_INVOKABLE bool saveItem(const QVariantMap& item);
     Q_INVOKABLE void deleteItem(const QString& id);
+    // Reads a picked picture as an item icon (D-018): the PNG in base64, or
+    // empty when the file is not used, with a message saying why.
+    [[nodiscard]] Q_INVOKABLE QString readItemIcon(const QUrl& file);
     // Saves again after a save failed.
     Q_INVOKABLE void retrySave();
 
@@ -120,6 +139,9 @@ public:
     [[nodiscard]] Q_INVOKABLE QString oneTimeCode(const QString& secret) const;
     [[nodiscard]] Q_INVOKABLE int oneTimeCodeSecondsLeft(const QString& secret) const;
     [[nodiscard]] Q_INVOKABLE QString fieldName(const QString& role) const;
+    // The person is logging out or shutting down: the window then ends the
+    // program instead of hiding to the tray, so the logout is never held up.
+    [[nodiscard]] Q_INVOKABLE bool isSessionEnding() const;
 
     // Tests only: a cheap key derivation instead of the standard one.
     void setKdfParameters(const crypto::KdfParameters& parameters) { kdfParameters = parameters; }
@@ -133,6 +155,10 @@ signals:
     void searchTextChanged();
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
+    void keepInTrayChanged();
+    void startAtStartupChanged();
+    void startMinimizedChanged();
+    void trayAvailableChanged();
     void unsavedChangesChanged();
     void saveFailedChanged();
     void keptChangesChanged();
@@ -164,6 +190,9 @@ private:
     QString search;
     int lockMinutes = 5;
     int clearSeconds = 30;
+    bool keepRunning = true;
+    bool minimizedAtStart = false;
+    bool trayExists = false;
 
     VaultContents contents;
     VaultKey key;

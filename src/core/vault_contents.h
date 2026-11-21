@@ -26,9 +26,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.0.2
+// vault_contents.h 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: An item's own icon, and the contents format 2
 // v0.0.2: Initial release
 
 // What a vault holds (D-015): items, each made from a template, each a list
@@ -57,6 +58,7 @@ struct Item
     ItemTemplate itemTemplate = ItemTemplate::Login;
     QString title;
     QList<Field> fields;
+    QByteArray icon; // PNG, 64 by 64 at most; empty for the template's own icon (D-018)
     QDateTime created;
     QDateTime modified;
 

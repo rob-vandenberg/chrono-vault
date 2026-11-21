@@ -20,14 +20,24 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.3
+// UnlockPage.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The program's icon in the upper left; the eye in the password field
 // v0.0.3: Initial release
 
 // The locked vault: the master password opens it.
 Item {
     id: unlockPage
+
+    Image {
+        source: "qrc:/icons/chrono-vault.svg"
+        sourceSize: Qt.size(128, 128)
+        width: 128
+        height: 128
+        x: 16
+        y: 16
+    }
 
     function unlockNow() {
         VaultController.unlock(passwordField.text)
@@ -64,10 +74,10 @@ Item {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
         }
-        TextField {
+        PasswordField {
             id: passwordField
+            objectName: "masterPasswordField"
             placeholderText: qsTr("Master password")
-            echoMode: TextInput.Password
             Layout.fillWidth: true
             onAccepted: unlockPage.unlockNow()
         }
@@ -91,11 +101,12 @@ Item {
         }
     }
 
-    Dialog {
+    DialogWindow {
+
         id: leaveDialog
+
+        memoryName: "leaveVault"
         title: qsTr("A change is not saved")
-        modal: true
-        anchors.centerIn: parent
         standardButtons: Dialog.Discard | Dialog.Cancel
         ColumnLayout {
             Label {

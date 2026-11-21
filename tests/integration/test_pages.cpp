@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#include "app_setup.h"
 #include "vault_controller.h"
 
 #include <QQmlApplicationEngine>
@@ -22,13 +23,15 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.3
+// test_pages.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: Chrono Vault's own style; the window shown as the program shows it
 // v0.0.3: Initial release, with unsaved changes asked about and kept through a lock
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -55,6 +58,7 @@ void TestPages::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_pages"));
+    applyStyle();
     QSettings().clear();
 }
 
@@ -78,6 +82,7 @@ void TestPages::a_login_made_in_the_editor_is_saved_without_qml_errors()
     engine.loadFromModule("ChronoVault", "Main");
     QCOMPARE(engine.rootObjects().size(), 1);
     QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
 
     auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
     QVERIFY(controller != nullptr);
@@ -126,6 +131,7 @@ void TestPages::unsaved_changes_are_asked_about_and_kept_through_a_lock()
                      [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
     engine.loadFromModule("ChronoVault", "Main");
     QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
     auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
     controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
     controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("asking.chronovault"))),

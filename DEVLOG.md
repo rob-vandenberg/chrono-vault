@@ -54,3 +54,20 @@ that drives the pages themselves; it found a binding loop in the delete dialog, 
 followed; rounds 1 to 4 found faults around unsaved work (changes dropped when switching items, closing or locking;
 a failed save hidden by the next message; a false "not saved" warning after Save and Lock), all fixed with tests and
 recorded in D-016 points 9 to 22; round 5 found nothing real.
+
+## 21 November 2026: version 0.0.4, the owner's first test answered, scripts and release
+
+Fusion and the Noto fonts (D-017), the eye in password fields, the version in titles, item icons in the vault (D-018,
+contents format 2), the program's icon everywhere and the system tray with three General settings (D-019), and the
+scripts: `gitpush.sh` with its own scanner and guard, `build-release.sh` (container build, `.deb` and `.rpm`, four bare
+systems), `build-release.bat` (Windows setup, attached to the release of the same version). Four review rounds:
+closing that could quit instead of hiding, a cancelled Quit that stayed a Quit, the autostart path, the push argument,
+a tick box that lied after a failure and a logout that could be held up were found and fixed; the last round found
+nothing real. Twelve tests on Linux, under the sanitizers and on Windows.
+
+## 21 November 2026: version 0.0.4 completed: one instance, windows that remember, the first push
+
+One Chrono Vault per person (a later start brings the running one forward and ends; checked with two real starts on
+Linux and Windows), every window and dialog remembering its size and place, the main window its state too (D-020),
+the dialogs as movable, resizable windows. The owner's launcher kept out of git and made double-clickable. Thirteen
+tests on Linux, under the sanitizers and on Windows. First push to GitHub, and the first release.

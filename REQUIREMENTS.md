@@ -63,6 +63,9 @@ several lines.
 
 4.8 The vault locks itself after a time the person chooses.
 
+4.9 Every item can have an icon of its own, picked by the person: JPG, PNG, BMP, ICO or SVG. It is shown in the item
+and in the list (D-018).
+
 ## 5. Storage and keeping devices the same (D-005)
 
 5.1 Four kinds of storage are required, built in this order:
@@ -155,3 +158,14 @@ like the settings windows of the owner's other programs, with Chrono Viewer's as
 reference program on purpose.
 
 11.3 How it looks on a phone screen is decided when the phones are reached.
+
+## 12. The program itself (D-017, D-019)
+
+12.1 The program's icon is `art/chrono-vault.svg`, everywhere the program shows its icon and in the start menu.
+
+12.2 Chrono Vault runs in the system tray. Settings: "Keep running in the system tray when the window is closed",
+"Start Chrono Vault at startup", "Start Chrono Vault minimized".
+
+12.3 All text in Noto Sans, passwords and codes in Noto Sans Mono, carried inside the program with their licence.
+
+12.4 Every window title shows the version.

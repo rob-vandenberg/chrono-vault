@@ -12,10 +12,15 @@ exports of other password managers.
 
 ## State
 
-**Not released.** The requirements are written and nothing is built yet.
+**A first, rudimentary version (0.0.4) for Linux and Windows.** Create a vault, add logins and secure notes, generate
+passwords, show one-time codes, copy with the clipboard cleared, lock and auto-lock, run in the system tray. The vault
+is a local file for now; WebDAV, pCloud and Google Drive follow.
 
 ## Licence
 
 AGPL-3.0-only. See [LICENSE](LICENSE).
+
+The fonts, Noto Sans and Noto Sans Mono, are Google's, under the SIL Open Font License 1.1: see
+[fonts/OFL.txt](fonts/OFL.txt).
 
 Copyright (C) 2026 Rob Vandenberg <RobVandenberg64@gmail.com>

@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+// Chrono Vault, a password manager.
+// Copyright (C) 2026 Rob Vandenberg <RobVandenberg64@gmail.com>
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU Affero General Public License version 3 as
+// published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+// General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#include <QObject>
+#include <QPointer>
+#include <QQmlParserStatus>
+#include <QRect>
+#include <QTimer>
+#include <QWindow>
+#include <QtQml/qqmlregistration.h>
+
+// --- Version ------------------------------------------------------------
+// window_memory.h 0.0.4
+
+// --- Version history ----------------------------------------------------
+// v0.0.4: Initial release
+
+namespace chrono_vault {
+
+// Every window remembers its size, its place and its state (D-020): placed in
+// a window with a name of its own, it puts the window back as it was left,
+// on a screen that still exists, and saves every change.
+class WindowMemory : public QObject, public QQmlParserStatus
+{
+    Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
+    QML_ELEMENT
+
+    Q_PROPERTY(QWindow* window READ window WRITE setWindow NOTIFY windowChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+
+public:
+    explicit WindowMemory(QObject* parent = nullptr);
+
+    [[nodiscard]] QWindow* window() const { return target; }
+    void setWindow(QWindow* window);
+    [[nodiscard]] QString name() const { return key; }
+    void setName(const QString& name);
+
+    // Puts the window's size and place back, kept on a screen.
+    Q_INVOKABLE void restore();
+    // Whether this window has been placed before.
+    [[nodiscard]] Q_INVOKABLE bool hasSaved() const;
+
+    void classBegin() override {}
+    void componentComplete() override;
+
+    // The state the window named so was left in (normal, maximized or
+    // minimized), for the program as it starts.
+    [[nodiscard]] static Qt::WindowState savedState(const QString& name);
+    // A place kept on a screen: moved onto the nearest one when it is on
+    // none, and made smaller when it is larger than that screen.
+    [[nodiscard]] static QRect onAScreen(const QRect& place);
+
+signals:
+    void windowChanged();
+    void nameChanged();
+
+private:
+    void watch();
+    void save();
+
+    QPointer<QWindow> target;
+    QString key;
+    bool restored = false;
+    bool shownOnce = false; // the place means something only once it was shown
+    QTimer saveTimer;
+};
+
+} // namespace chrono_vault

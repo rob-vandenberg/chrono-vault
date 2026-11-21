@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/CMakeLists.txt 0.0.1
+# tests/CMakeLists.txt 0.0.4
 
 # --- Version history ----------------------------------------------------
+# v0.0.4: LeakSanitizer ignores fontconfig's own lasting configuration only
 # v0.0.1: Initial release
 
 # Every test: at most 20 seconds, and never a window on the screen (OR-11).
@@ -26,7 +27,7 @@ function(chrono_vault_add_test name)
     add_test(NAME ${name} COMMAND ${name})
     set_tests_properties(${name} PROPERTIES
         TIMEOUT 20
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LSAN_OPTIONS=suppressions=${PROJECT_SOURCE_DIR}/tests/lsan-suppressions.txt"
     )
 endfunction()
 

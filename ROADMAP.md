@@ -8,7 +8,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 |---|---|---|---|---|
 | 1 | Skeleton on Linux | `CMakeLists.txt` (version 0.0.1), an empty Qt Quick window, Qt Test under CTest, a sanitizer build, the source layout | 1 week | done, version 0.0.1 |
 | 2 | Translations from the start | Every visible text through Qt's translation call, gathered into a Poedit file, US English primary (D-008) | 1 week | done in 0.0.2 |
-| 3 | The four scripts | `push-to-development.sh`, `gitpush.sh`, `build-release.sh` (`.deb` and `.rpm` into `dist/`), `build-release.bat` (Windows setup attached to the release of the same version) (D-010) | 2 weeks | `push-to-development.sh` done in 0.0.2; the other three not started |
+| 3 | The four scripts | `push-to-development.sh`, `gitpush.sh`, `build-release.sh` (`.deb` and `.rpm` into `dist/`), `build-release.bat` (Windows setup attached to the release of the same version) (D-010) | 2 weeks | done in 0.0.4 |
 | 4 | Windows build | The skeleton builds and starts on the Windows twin | 1 week | done in 0.0.3 |
 | 5 | Vault core | Encryption and key derivation (method and library chosen by the owner first), the vault file format, atomic writes with verification (OR-15), tests on damaged input and interrupted writes (OR-4, OR-15) | 1.5 to 2 months | done in 0.0.2 |
 | 6 | Vault contents | Items, templates, custom fields, categories, nested tags, attachments, several vaults, keyfile | 1 month | in part, 0.0.2: items, Login and Secure note, custom fields; not yet categories, tags, attachments, several vaults, keyfile |

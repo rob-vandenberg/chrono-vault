@@ -23,16 +23,20 @@
 #include <QJsonObject>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.0.2
+// vault_contents.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: An item's own icon, and the contents format 2
 // v0.0.2: Initial release
 
 namespace chrono_vault {
 
 namespace {
 
-constexpr int contentsFormat = 1;
+// Format 2 added the item's icon; format 1 is still read (D-018).
+constexpr int contentsFormat = 2;
+constexpr int oldestContentsFormat = 1;
+constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
 constexpr qsizetype largestFieldCount = 1000;
 
@@ -138,14 +142,18 @@ QByteArray contentsToJson(const VaultContents& contents)
             }
             fields.append(object);
         }
-        items.append(QJsonObject{
+        QJsonObject object{
             {QStringLiteral("id"), item.id.toString(QUuid::WithoutBraces)},
             {QStringLiteral("template"), templateName(item.itemTemplate)},
             {QStringLiteral("title"), item.title},
             {QStringLiteral("created"), item.created.toString(Qt::ISODateWithMs)},
             {QStringLiteral("modified"), item.modified.toString(Qt::ISODateWithMs)},
             {QStringLiteral("fields"), fields},
-        });
+        };
+        if (!item.icon.isEmpty()) {
+            object.insert(QStringLiteral("icon"), QString::fromLatin1(item.icon.toBase64()));
+        }
+        items.append(object);
     }
     const QJsonObject root{{QStringLiteral("format"), contentsFormat}, {QStringLiteral("items"), items}};
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
@@ -168,7 +176,7 @@ ContentsResult contentsFromJson(const QByteArray& json)
         result.status = ContentsStatus::NewerFormat;
         return result;
     }
-    if (format.toInt() != contentsFormat || !root.value(QStringLiteral("items")).isArray()) {
+    if (format.toInt() < oldestContentsFormat || !root.value(QStringLiteral("items")).isArray()) {
         return result;
     }
     const QJsonArray items = root.value(QStringLiteral("items")).toArray();
@@ -198,6 +206,18 @@ ContentsResult contentsFromJson(const QByteArray& json)
         item.title = object.value(QStringLiteral("title")).toString();
         item.created = QDateTime::fromString(object.value(QStringLiteral("created")).toString(), Qt::ISODateWithMs);
         item.modified = QDateTime::fromString(object.value(QStringLiteral("modified")).toString(), Qt::ISODateWithMs);
+        if (object.contains(QStringLiteral("icon"))) {
+            const QJsonValue icon = object.value(QStringLiteral("icon"));
+            if (!icon.isString()) {
+                return result;
+            }
+            const auto decoded = QByteArray::fromBase64Encoding(icon.toString().toLatin1(),
+                                                                 QByteArray::AbortOnBase64DecodingErrors);
+            if (!decoded || decoded.decoded.size() > largestIconBytes) {
+                return result;
+            }
+            item.icon = decoded.decoded;
+        }
 
         const QJsonArray fields = object.value(QStringLiteral("fields")).toArray();
         if (fields.size() > largestFieldCount) {

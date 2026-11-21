@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_controller.cpp 0.0.3
+// test_vault_controller.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: An item's icon survives a lock
 // v0.0.3: Initial release, with a change that could not be saved surviving a lock
 
 using namespace chrono_vault;
@@ -156,6 +157,7 @@ void TestVaultController::a_saved_item_is_there_after_locking_and_unlocking()
 
     QVariantMap login = withField(controller->newLogin(), QStringLiteral("password"), QStringLiteral("s3cret!"));
     login.insert(QStringLiteral("title"), QStringLiteral("Bank"));
+    login.insert(QStringLiteral("icon"), QString::fromLatin1(QByteArray("png bytes of an icon").toBase64()));
     QVERIFY(controller->saveItem(login));
     QTRY_VERIFY(controller->isIdle());
 
@@ -170,6 +172,8 @@ void TestVaultController::a_saved_item_is_there_after_locking_and_unlocking()
     const QVariantMap stored = controller->item(id);
     QCOMPARE(stored.value(QStringLiteral("title")).toString(), QStringLiteral("Bank"));
     QCOMPARE(fieldOf(stored, QStringLiteral("password")), QStringLiteral("s3cret!"));
+    QCOMPARE(QByteArray::fromBase64(stored.value(QStringLiteral("icon")).toString().toLatin1()),
+             QByteArray("png bytes of an icon"));
 }
 
 void TestVaultController::a_wrong_password_leaves_the_vault_locked_and_says_so()

@@ -21,14 +21,24 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.3
+// WelcomePage.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The program's icon in the upper left; a typo; the eye in the password fields
 // v0.0.3: Initial release
 
 // The start: create a new vault, or open one that exists.
 Item {
     id: welcomePage
+
+    Image {
+        source: "qrc:/icons/chrono-vault.svg"
+        sourceSize: Qt.size(128, 128)
+        width: 128
+        height: 128
+        x: 16
+        y: 16
+    }
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -80,16 +90,17 @@ Item {
         onAccepted: VaultController.chooseVault(selectedFile)
     }
 
-    Dialog {
+    DialogWindow {
+
         id: newVaultDialog
+
+        memoryName: "newVault"
 
         property url file
 
         readonly property bool passwordsAgree: firstPassword.text !== "" && firstPassword.text === secondPassword.text
 
         title: qsTr("Choose the master password")
-        modal: true
-        anchors.centerIn: parent
         standardButtons: Dialog.Ok | Dialog.Cancel
 
         // OK only when both fields hold the same password, so a typing slip
@@ -100,7 +111,7 @@ Item {
             value: newVaultDialog.passwordsAgree
         }
 
-        onOpened: firstPassword.forceActiveFocus()
+        onShown: firstPassword.forceActiveFocus()
         onAccepted: {
             VaultController.createVault(file, firstPassword.text, secondPassword.text)
             firstPassword.clear()
@@ -114,20 +125,18 @@ Item {
         ColumnLayout {
             spacing: 8
             Label {
-                text: qsTr("This password opens the vault. Nobody can open it without, not even you, so choose one you will remember.")
+                text: qsTr("This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: 360
             }
-            TextField {
+            PasswordField {
                 id: firstPassword
                 placeholderText: qsTr("Master password")
-                echoMode: TextInput.Password
                 Layout.fillWidth: true
             }
-            TextField {
+            PasswordField {
                 id: secondPassword
                 placeholderText: qsTr("The same password again")
-                echoMode: TextInput.Password
                 Layout.fillWidth: true
                 onAccepted: if (newVaultDialog.passwordsAgree) newVaultDialog.accept()
             }

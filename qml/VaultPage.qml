@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.3
+// VaultPage.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: Each item's icon in the list
 // v0.0.3: Initial release
 
 // The unlocked vault: the items on the left, the chosen one on the right.
@@ -46,6 +47,10 @@ Item {
 
     function hasUnsavedEdit() {
         return editor.itemId !== "" && editor.changed
+    }
+
+    function storeEdit() {
+        editor.store()
     }
 
     function whenEditorFree(action) {
@@ -98,19 +103,29 @@ Item {
                 delegate: ItemDelegate {
                     width: ListView.view.width
                     highlighted: ListView.isCurrentItem
-                    contentItem: ColumnLayout {
-                        spacing: 2
-                        Label {
-                            text: model.title
-                            font.bold: true
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
+                    contentItem: RowLayout {
+                        spacing: 8
+                        Image {
+                            source: model.icon
+                            sourceSize: Qt.size(32, 32)
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
                         }
-                        Label {
-                            text: model.isNote ? qsTr("Secure note") : model.subtitle
-                            opacity: 0.7
-                            elide: Text.ElideRight
+                        ColumnLayout {
+                            spacing: 2
                             Layout.fillWidth: true
+                            Label {
+                                text: model.title
+                                font.bold: true
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: model.isNote ? qsTr("Secure note") : model.subtitle
+                                opacity: 0.7
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
                         }
                     }
                     onClicked: {

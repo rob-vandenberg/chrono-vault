@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# Chrono Vault, a password manager.
+# Copyright (C) 2026 Rob Vandenberg
+#
+# --- Version ------------------------------------------------------------
+# Containerfile 0.0.4
+#
+# --- Version history ----------------------------------------------------
+# v0.0.4: Initial release, modelled on Chrono Viewer's
+#
+# The builder image of the Linux release (D-010): a deliberately old system, Ubuntu 22.04, so the packages run on
+# systems of many ages, with everything a build needs that the system does not have. Made once by build-release.sh,
+# and again only when this file or builder_setup.sh changes: the image's name carries a checksum of both.
+FROM docker.io/library/ubuntu:22.04
+COPY builder_setup.sh /setup/builder_setup.sh
+RUN bash /setup/builder_setup.sh

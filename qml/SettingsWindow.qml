@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.3
+// SettingsWindow.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The version in the title; the General topic
 // v0.0.3: Initial release
 
 // Every setting in one window: the topics on the left, the chosen topic's
@@ -36,10 +37,15 @@ ApplicationWindow {
         requestActivate()
     }
 
-    title: qsTr("Settings – Chrono Vault")
+    title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
     width: 640
     height: 400
     visible: false
+
+    WindowMemory {
+        window: settingsWindow
+        name: "settings"
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -50,7 +56,7 @@ ApplicationWindow {
             Layout.preferredWidth: 180
             Layout.fillHeight: true
             currentIndex: 0
-            model: [qsTr("Security"), qsTr("Clipboard")]
+            model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard")]
             delegate: ItemDelegate {
                 required property int index
                 required property string modelData
@@ -71,6 +77,50 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: 16
+
+            ColumnLayout {
+                spacing: 8
+                Label {
+                    text: qsTr("General")
+                    font.pointSize: 14
+                }
+                CheckBox {
+                    text: qsTr("Keep running in the system tray when the window is closed")
+                    checked: VaultController.keepInTray
+                    enabled: VaultController.trayAvailable
+                    onToggled: {
+                        VaultController.keepInTray = checked
+                        // Shows the setting as it really is, also when it could not be saved.
+                        checked = Qt.binding(function() { return VaultController.keepInTray })
+                    }
+                }
+                CheckBox {
+                    text: qsTr("Start Chrono Vault at startup")
+                    checked: VaultController.startAtStartup
+                    onToggled: {
+                        VaultController.startAtStartup = checked
+                        // Shows the setting as it really is, also when it could not be saved.
+                        checked = Qt.binding(function() { return VaultController.startAtStartup })
+                    }
+                }
+                CheckBox {
+                    text: qsTr("Start Chrono Vault minimized")
+                    checked: VaultController.startMinimized
+                    onToggled: {
+                        VaultController.startMinimized = checked
+                        // Shows the setting as it really is, also when it could not be saved.
+                        checked = Qt.binding(function() { return VaultController.startMinimized })
+                    }
+                }
+                Label {
+                    visible: !VaultController.trayAvailable
+                    text: qsTr("This desktop has no system tray, so closing the window ends Chrono Vault.")
+                    wrapMode: Text.Wrap
+                    opacity: 0.7
+                    Layout.fillWidth: true
+                }
+                Item { Layout.fillHeight: true }
+            }
 
             ColumnLayout {
                 spacing: 8

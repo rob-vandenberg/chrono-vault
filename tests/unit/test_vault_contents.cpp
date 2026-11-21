@@ -20,9 +20,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.0.2
+// test_vault_contents.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: Icons, and the contents format 2
 // v0.0.2: Initial release
 
 using namespace chrono_vault;
@@ -37,6 +38,7 @@ private slots:
     void contents_come_back_exactly_as_they_were_written();
     void an_empty_vault_comes_back_empty();
     void a_newer_format_is_refused();
+    void the_old_format_1_is_still_read();
     void contents_of_the_wrong_shape_are_damaged_data();
     void contents_of_the_wrong_shape_are_damaged();
 };
@@ -69,6 +71,7 @@ void TestVaultContents::contents_come_back_exactly_as_they_were_written()
     login.fields[0].value = QStringLiteral("anna@example.org");
     login.fields[1].value = QStringLiteral("p@ss\nword");
     login.fields.append({{}, QStringLiteral("PIN"), FieldKind::Password, QStringLiteral("1234")});
+    login.icon = QByteArray("\x89PNG not really, but bytes all the same", 40);
     contents.items << login << newItem(ItemTemplate::SecureNote);
 
     const ContentsResult result = contentsFromJson(contentsToJson(contents));
@@ -85,7 +88,16 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":2,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":3,"items":[]})").status, ContentsStatus::NewerFormat);
+}
+
+void TestVaultContents::the_old_format_1_is_still_read()
+{
+    const ContentsResult result = contentsFromJson(
+        R"({"format":1,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"Old","created":"","modified":"","fields":[]}]})");
+    QCOMPARE(result.status, ContentsStatus::Read);
+    QCOMPARE(result.contents.items.size(), 1);
+    QVERIFY(result.contents.items.constFirst().icon.isEmpty());
 }
 
 void TestVaultContents::contents_of_the_wrong_shape_are_damaged_data()
@@ -106,6 +118,13 @@ void TestVaultContents::contents_of_the_wrong_shape_are_damaged_data()
         R"({"format":1,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[{"role":"password","label":"x","kind":"password","value":""}]}]})");
     QTest::newRow("field of unknown kind") << QByteArray(
         R"({"format":1,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[{"role":"password","kind":"colour","value":""}]}]})");
+    QTest::newRow("icon not base64") << QByteArray(
+        R"({"format":2,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[],"icon":"***"}]})");
+    QTest::newRow("icon as number") << QByteArray(
+        R"({"format":2,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[],"icon":7}]})");
+    QTest::newRow("icon too large") << (QByteArray(
+        R"({"format":2,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[],"icon":")")
+        + QByteArray(300 * 1024, 'A').toBase64() + QByteArray(R"("}]})"));
     QTest::newRow("value as number") << QByteArray(
         R"({"format":1,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","title":"","created":"","modified":"","fields":[{"role":"password","kind":"password","value":5}]}]})");
 }

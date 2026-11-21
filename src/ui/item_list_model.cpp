@@ -22,9 +22,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.3
+// item_list_model.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The item's icon, as an address QML can show
 // v0.0.3: Initial release
 
 namespace chrono_vault {
@@ -62,13 +63,20 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole: return item.title;
     case SubtitleRole: return fieldValue(item, QStringLiteral("username"));
     case IsNoteRole: return item.itemTemplate == ItemTemplate::SecureNote;
+    case IconRole:
+        if (!item.icon.isEmpty()) {
+            return QString(QStringLiteral("data:image/png;base64,") + QString::fromLatin1(item.icon.toBase64()));
+        }
+        return item.itemTemplate == ItemTemplate::SecureNote ? QStringLiteral("qrc:/icons/item-note.svg")
+                                                             : QStringLiteral("qrc:/icons/item-login.svg");
     default: return {};
     }
 }
 
 QHash<int, QByteArray> ItemListModel::roleNames() const
 {
-    return {{IdRole, "itemId"}, {TitleRole, "title"}, {SubtitleRole, "subtitle"}, {IsNoteRole, "isNote"}};
+    return {{IdRole, "itemId"}, {TitleRole, "title"}, {SubtitleRole, "subtitle"}, {IsNoteRole, "isNote"},
+            {IconRole, "icon"}};
 }
 
 void ItemListModel::setItems(const QList<Item>& items)

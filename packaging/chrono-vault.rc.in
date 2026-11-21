@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+// Chrono Vault, a password manager.
+// Copyright (C) 2026 Rob Vandenberg <RobVandenberg64@gmail.com>
+//
+// --- Version ------------------------------------------------------------
+// chrono-vault.rc.in 0.0.4
+//
+// --- Version history ----------------------------------------------------
+// v0.0.4: Initial release
+//
+// The Windows program file carries the program's own icon (D-019): Explorer,
+// the Start menu and the taskbar take it from the file. The .ico is made by
+// the build from art/chrono-vault.svg.
+IDI_ICON1 ICON "@CHRONO_VAULT_ICO@"

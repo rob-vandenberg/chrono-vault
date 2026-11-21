@@ -20,14 +20,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GeneratorDialog.qml 0.0.3
+// GeneratorDialog.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The password in Noto Sans Mono
 // v0.0.3: Initial release
 
 // Makes a strong password to use in a field.
-Dialog {
+DialogWindow {
     id: generatorDialog
+    memoryName: "generator"
 
     property string password: ""
     // At least one kind stays ticked, so the password is what the boxes say.
@@ -42,11 +44,9 @@ Dialog {
     }
 
     title: qsTr("Generate a password")
-    modal: true
-    anchors.centerIn: parent
     standardButtons: Dialog.Ok | Dialog.Cancel
 
-    onOpened: makeOne()
+    onShown: makeOne()
     onAccepted: usePassword(password)
 
     ColumnLayout {
@@ -55,7 +55,7 @@ Dialog {
         TextField {
             text: generatorDialog.password
             readOnly: true
-            font.family: "monospace"
+            font.family: "Noto Sans Mono"
             selectByMouse: true
             Layout.preferredWidth: 420
         }

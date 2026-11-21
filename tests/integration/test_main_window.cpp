@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#include "app_setup.h"
+#include "version.h"
+
+#include <QFont>
 #include <QList>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
@@ -24,9 +28,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.3
+// test_main_window.cpp 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: Chrono Vault's own style and fonts; the version in the title
 // v0.0.3: Settings of the test's own, never the person's
 // v0.0.1: Initial release
 
@@ -46,6 +51,7 @@ void TestMainWindow::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_main_window"));
+    chrono_vault::applyStyle();
 }
 
 void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chrono_vault()
@@ -66,7 +72,13 @@ void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chro
 
     auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst());
     QVERIFY(window != nullptr);
-    QCOMPARE(window->title(), QStringLiteral("Chrono Vault"));
+    QCOMPARE(window->title(), QStringLiteral("Chrono Vault ") + chrono_vault::programVersion());
+
+    // The Noto fonts, carried inside the program (D-017).
+    QCOMPARE(QGuiApplication::font().family(), QStringLiteral("Noto Sans"));
+    auto* masterPassword = window->findChild<QObject*>(QStringLiteral("masterPasswordField"));
+    QVERIFY(masterPassword != nullptr);
+    QCOMPARE(masterPassword->property("font").value<QFont>().family(), QStringLiteral("Noto Sans Mono"));
 
     // Leave nothing behind (OR-11): the window goes with the engine.
     window->close();

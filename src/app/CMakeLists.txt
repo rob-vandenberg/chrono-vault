@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# src/app/CMakeLists.txt 0.0.2
+# src/app/CMakeLists.txt 0.0.4
 
 # --- Version history ----------------------------------------------------
+# v0.0.4: The UI library itself, for the style and the icon; a window program with its icon; install
 # v0.0.2: The translations are carried inside the program (D-008)
 # v0.0.1: Initial release
 
@@ -27,10 +28,24 @@ qt_add_executable(chrono-vault
 )
 target_link_libraries(chrono-vault PRIVATE
     chrono_vault_core
+    chrono_vault_ui
     chrono_vault_uiplugin
+    Qt6::Widgets
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
 )
 chrono_vault_strict_warnings(chrono-vault)
+
+# A window program, never a console one; on Windows its file carries the
+# program's icon, which Explorer, the Start menu and the taskbar show (D-019).
+set_target_properties(chrono-vault PROPERTIES WIN32_EXECUTABLE ON)
+if(WIN32)
+    file(TO_CMAKE_PATH "${CHRONO_VAULT_ICONS_DIR}/chrono-vault.ico" CHRONO_VAULT_ICO)
+    configure_file("${PROJECT_SOURCE_DIR}/packaging/chrono-vault.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/chrono-vault.rc" @ONLY)
+    target_sources(chrono-vault PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/chrono-vault.rc")
+endif()
+add_dependencies(chrono-vault chrono_vault_icons)
+
+install(TARGETS chrono-vault RUNTIME DESTINATION .)
 chrono_vault_add_translations(chrono-vault)

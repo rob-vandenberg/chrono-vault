@@ -1,0 +1,8 @@
+# LeakSanitizer, for the sanitizer build only (D-012).
+#
+# fontconfig, the system's font library on Linux, reads its own configuration
+# once, when Qt registers the Noto fonts (D-017), and keeps it for the
+# program's whole life without freeing it. That memory is fontconfig's, not
+# Chrono Vault's or Qt's; only that library's own allocations are ignored, so
+# a leak in our code or in Qt is still reported.
+leak:libfontconfig.so

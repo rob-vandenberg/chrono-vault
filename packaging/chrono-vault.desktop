@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Chrono Vault
+GenericName=Password Manager
+Comment=Keep your passwords and other secrets in an encrypted vault
+Exec=chrono-vault
+Icon=chrono-vault
+Terminal=false
+Categories=Utility;Security;Qt;
+Keywords=password;vault;secret;login;totp;

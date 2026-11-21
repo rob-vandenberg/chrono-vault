@@ -4,6 +4,17 @@ OWNER-RULES.md
 TODO.md
 HANDOVER.md
 scratchpad/
+# The owner's own launcher of the build in this folder
+chrono-vault.sh
+
+# The owner's workshop: only the images the software uses are in git, each
+# named on a line of its own (the owner's rule of 21 November 2026).
+art/*
+!art/chrono-vault.svg
+!art/eye.svg
+!art/eye-hidden.svg
+!art/item-login.svg
+!art/item-note.svg
 
 # The four scripts: private (OR-9, D-010)
 gitpush.sh

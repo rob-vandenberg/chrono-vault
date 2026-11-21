@@ -2,11 +2,12 @@
 
 ## Now
 
-**Version 0.0.3, the first working version** (autonomous mode, G-26), on Linux and Windows: create a vault, unlock,
-add, change and delete logins and secure notes with custom fields, a password generator, one-time codes, copy with the
-clipboard cleared and marked secret, lock and auto-lock, and a settings window (D-011). The vault is one encrypted file
-(D-013, D-014), saved safely after every change (OR-15). Ten tests pass on Linux (also under the sanitizers) and on
-Windows. Committed locally; nothing pushed (OR-10).
+**Version 0.0.4** (D-017 to D-019): Fusion and the Noto fonts carried inside, the eye in every password field, the
+version in every title, item icons, the program's icon everywhere, the system tray with the General settings (keep
+running in the tray, start at startup, start minimized), one Chrono Vault per person, every window and dialog remembering its size and
+place (D-020), and the four scripts with the Linux packages (tried in Ubuntu 22.04, Debian 12, Fedora 43 and openSUSE
+Leap 16) and the Windows setup. Thirteen tests pass on Linux, under the sanitizers and on Windows; the last review
+rounds found nothing real. The first version pushed to GitHub and released.
 
 ## Next task
 

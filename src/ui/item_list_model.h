@@ -23,9 +23,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.0.3
+// item_list_model.h 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: The item's icon
 // v0.0.3: Initial release
 
 namespace chrono_vault {
@@ -39,7 +40,7 @@ class ItemListModel : public QAbstractListModel
     QML_UNCREATABLE("The controller owns the list")
 
 public:
-    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole };
+    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole };
 
     explicit ItemListModel(QObject* parent = nullptr);
 

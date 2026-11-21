@@ -17,12 +17,14 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.3
+// ItemEditor.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.0.4: One font in every field; the eye inside the password fields; the item's icon
 // v0.0.3: Initial release
 
 // One item: its title and fields, to read, copy and change.
@@ -33,6 +35,7 @@ Item {
     property bool isNote: false
     property bool isNew: false
     property bool changed: false
+    property string icon: ""   // the item's own icon, PNG in base64; empty for the template's
     property int tick: 0
 
     property var afterAsking: null
@@ -56,6 +59,7 @@ Item {
         isNote = map.isNote
         isNew = isNewItem
         titleField.text = map.title
+        icon = map.icon
         fieldsModel.clear()
         for (let field of map.fields)
             fieldsModel.append({ role: field.role, label: field.label, name: field.name,
@@ -79,7 +83,8 @@ Item {
             const field = fieldsModel.get(index)
             fields.push({ role: field.role, label: field.label, kind: field.kind, value: field.value })
         }
-        if (VaultController.saveItem({ id: itemId, isNote: isNote, title: titleField.text, fields: fields })) {
+        if (VaultController.saveItem({ id: itemId, isNote: isNote, title: titleField.text, fields: fields,
+                                       icon: icon })) {
             isNew = false
             changed = false
             titleField.text = VaultController.item(itemId).title
@@ -121,6 +126,36 @@ Item {
             spacing: 10
 
             Item { Layout.preferredHeight: 4 }
+
+            RowLayout {
+                spacing: 12
+                Layout.fillWidth: true
+
+                Image {
+                    objectName: "itemIconImage"
+                    source: editor.icon !== "" ? "data:image/png;base64," + editor.icon
+                            : (editor.isNote ? "qrc:/icons/item-note.svg" : "qrc:/icons/item-login.svg")
+                    sourceSize: Qt.size(64, 64)
+                    Layout.preferredWidth: 64
+                    Layout.preferredHeight: 64
+                }
+                ColumnLayout {
+                    spacing: 4
+                    Button {
+                        text: qsTr("Choose icon…")
+                        onClicked: iconDialog.open()
+                    }
+                    Button {
+                        text: qsTr("Remove icon")
+                        enabled: editor.icon !== ""
+                        onClicked: {
+                            editor.icon = ""
+                            editor.changed = true
+                        }
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
 
             TextField {
                 id: titleField
@@ -177,9 +212,8 @@ Item {
                         visible: fieldRow.model.kind !== "multiline"
 
                         TextField {
+                            visible: !fieldRow.isPassword
                             text: fieldRow.model.value
-                            echoMode: fieldRow.isPassword && !fieldRow.model.revealed ? TextInput.Password : TextInput.Normal
-                            font.family: fieldRow.isPassword ? "monospace" : ""
                             placeholderText: fieldRow.isCode ? qsTr("The secret the site gives, or its otpauth:// address") : ""
                             Layout.fillWidth: true
                             onTextEdited: {
@@ -187,10 +221,14 @@ Item {
                                 editor.changed = true
                             }
                         }
-                        Button {
+                        PasswordField {
                             visible: fieldRow.isPassword
-                            text: fieldRow.model.revealed ? qsTr("Hide") : qsTr("Show")
-                            onClicked: fieldsModel.setProperty(fieldRow.index, "revealed", !fieldRow.model.revealed)
+                            text: fieldRow.model.value
+                            Layout.fillWidth: true
+                            onTextEdited: {
+                                fieldsModel.setProperty(fieldRow.index, "value", text)
+                                editor.changed = true
+                            }
                         }
                         Button {
                             visible: fieldRow.isPassword
@@ -210,7 +248,7 @@ Item {
                         readonly property string code: { editor.tick; return VaultController.oneTimeCode(fieldRow.model.value) }
                         Label {
                             text: parent.code === "" ? qsTr("This is not a valid one-time code secret.") : parent.code
-                            font.family: "monospace"
+                            font.family: "Noto Sans Mono"
                             font.pointSize: parent.code === "" ? 10 : 16
                         }
                         Label {
@@ -278,6 +316,20 @@ Item {
         }
     }
 
+    FileDialog {
+        id: iconDialog
+        title: qsTr("Choose an icon")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)")]
+        onAccepted: {
+            const picked = VaultController.readItemIcon(selectedFile)
+            if (picked !== "") {
+                editor.icon = picked
+                editor.changed = true
+            }
+        }
+    }
+
     GeneratorDialog {
         id: generator
         property int fieldIndex: -1
@@ -291,12 +343,13 @@ Item {
         }
     }
 
-    Dialog {
+    DialogWindow {
+
         id: unsavedDialog
+
+        memoryName: "unsavedChanges"
         objectName: "unsavedDialog"
         title: qsTr("Save your changes?")
-        modal: true
-        anchors.centerIn: parent
         standardButtons: Dialog.Save | Dialog.Discard | Dialog.Cancel
         ColumnLayout {
             Label {
@@ -323,11 +376,12 @@ Item {
         onRejected: editor.afterAsking = null
     }
 
-    Dialog {
+    DialogWindow {
+
         id: deleteDialog
+
+        memoryName: "deleteItem"
         title: qsTr("Delete this item?")
-        modal: true
-        anchors.centerIn: parent
         standardButtons: Dialog.Yes | Dialog.No
         ColumnLayout {
             Label {

@@ -16,14 +16,16 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.3
+# tests/integration/CMakeLists.txt 0.0.4
 
 # --- Version history ----------------------------------------------------
+# v0.0.4: The window test uses the UI library, for the style; the tray and icon tests
 # v0.0.3: The tests of the controller and of the pages
 # v0.0.1: Initial release
 
 qt_add_executable(test_main_window test_main_window.cpp)
 target_link_libraries(test_main_window PRIVATE
+    chrono_vault_ui
     chrono_vault_uiplugin
     Qt6::Gui
     Qt6::Qml
@@ -42,3 +44,18 @@ qt_add_executable(test_pages test_pages.cpp)
 target_link_libraries(test_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_pages)
 chrono_vault_add_test(test_pages)
+
+qt_add_executable(test_tray test_tray.cpp)
+target_link_libraries(test_tray PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_tray)
+chrono_vault_add_test(test_tray)
+
+qt_add_executable(test_item_icons test_item_icons.cpp)
+target_link_libraries(test_item_icons PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
+chrono_vault_strict_warnings(test_item_icons)
+chrono_vault_add_test(test_item_icons)
+
+qt_add_executable(test_windows test_windows.cpp)
+target_link_libraries(test_windows PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_windows)
+chrono_vault_add_test(test_windows)
