@@ -1,0 +1,24 @@
+# Private, never in git (OR-9). The assistant's own files are kept out by .git/info/exclude, which is never
+# pushed, so that no pushed file names them (OR-7).
+OWNER-RULES.md
+TODO.md
+HANDOVER.md
+scratchpad/
+
+# The four scripts: private (OR-9, D-010)
+gitpush.sh
+build-release.sh
+build-release.bat
+push-to-development.sh
+
+# Built things: made from what is committed, so never committed themselves
+build/
+build-*/
+cmake-build-*/
+dist/
+
+# Machines and editors
+*.user
+*.autosave
+.DS_Store
+Thumbs.db
