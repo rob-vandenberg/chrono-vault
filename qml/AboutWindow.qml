@@ -117,14 +117,61 @@ DialogWindow {
     // Every licence Chrono Vault ships, ours first, filling the window between
     // the top lines and the buttons.
     ScrollView {
+        id: licenceScroll
         Layout.fillWidth: true
         Layout.fillHeight: true
         // More room around it (the owner): 8 pixels above, 2 below.
         Layout.topMargin: Math.round(8 * Appearance.factor)
         Layout.bottomMargin: Math.round(2 * Appearance.factor)
-        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        // A scroll bar that is always there and clearly seen, light or dark
+        // (the owner, D-046).
+        ScrollBar.vertical: ScrollBar {
+            objectName: "licenceScrollBar"
+            parent: licenceScroll
+            x: licenceScroll.mirrored ? 0 : licenceScroll.width - width
+            y: licenceScroll.topPadding
+            height: licenceScroll.availableHeight
+            policy: ScrollBar.AlwaysOn
+            minimumSize: 0.08 // a handle long enough to see and grab
+            contentItem: Rectangle {
+                implicitWidth: Math.round(8 * Appearance.factor)
+                radius: width / 2
+                color: aboutWindow.palette.buttonText
+                opacity: parent.pressed ? 0.7 : 0.45
+            }
+            background: Rectangle {
+                implicitWidth: Math.round(10 * Appearance.factor)
+                color: aboutWindow.palette.mid
+                opacity: 0.4
+            }
+        }
+        // Up/Down a line, Page Up/Down a page, Home/End the start and end,
+        // as a person expects of a text to read (the owner, D-046).
+        function scrollTo(y) {
+            const flick = contentItem
+            flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height))
+        }
+        function scrollBy(step) {
+            scrollTo(contentItem.contentY + step)
+        }
         TextArea {
+            id: licenceText
             objectName: "licenceText"
+            focus: true
+            Keys.onPressed: function(event) {
+                const line = Math.round(font.pixelSize > 0 ? font.pixelSize * 1.5 : 20 * Appearance.factor)
+                const pageStep = licenceScroll.height - line
+                switch (event.key) {
+                case Qt.Key_Up: licenceScroll.scrollBy(-line); break
+                case Qt.Key_Down: licenceScroll.scrollBy(line); break
+                case Qt.Key_PageUp: licenceScroll.scrollBy(-pageStep); break
+                case Qt.Key_PageDown: licenceScroll.scrollBy(pageStep); break
+                case Qt.Key_Home: licenceScroll.scrollTo(0); break
+                case Qt.Key_End: licenceScroll.scrollTo(licenceScroll.contentItem.contentHeight); break
+                default: return
+                }
+                event.accepted = true
+            }
             readOnly: true
             selectByMouse: true
             wrapMode: TextEdit.Wrap
@@ -161,6 +208,9 @@ DialogWindow {
         }
     ]
     // Help > Check for update.
+    // The text takes the keyboard as the box opens, so the keys scroll at once.
+    onVisibleChanged: if (visible) licenceText.forceActiveFocus()
+
     function checkNow() {
         asked = true
         checkRequested()

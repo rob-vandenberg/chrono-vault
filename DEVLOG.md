@@ -332,3 +332,7 @@ The owner measured the resize cursor over only 2 of the 4 pixels; now 8 (the lin
 ## 22 November 2026: version 0.0.35: keyboard shortcuts set by the person
 
 Settings > Keyboard shortcuts after Chrono Viewer's page (D-045); Ctrl+B collapses or expands the sidebar, Clear Clipboard moves to Shift+Ctrl+B. One review round, nothing real.
+
+## 22 November 2026: version 0.0.36: no bounce, and the About box's text read by keys
+
+Every scrolling page and list stops at its ends; the About box's licence text has a clear scroll bar and scrolls with the arrow, page and Home/End keys (D-046).

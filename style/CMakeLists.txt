@@ -30,6 +30,7 @@ qt_add_qml_module(chrono_vault_style
         MenuItem.qml
         Pane.qml
         RadioButton.qml
+        ScrollView.qml
         ScaledCheckIndicator.qml
         Slider.qml
         SpinBox.qml

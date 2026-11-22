@@ -569,6 +569,7 @@ Item {
 
             ListView {
                 id: itemList
+                boundsBehavior: Flickable.StopAtBounds // no bounce (the owner, D-046)
                 objectName: "itemList"
                 model: VaultController.items
                 clip: true

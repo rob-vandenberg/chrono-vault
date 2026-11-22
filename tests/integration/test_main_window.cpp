@@ -55,6 +55,7 @@ private slots:
     void a_smaller_remembered_about_box_opens_at_its_minimum();
     void the_about_box_shows_every_licence_ours_first();
     void the_tray_setting_says_keep_chrono_vault_running();
+    void the_licences_scroll_by_keys_and_nothing_bounces();
 };
 
 void TestMainWindow::initTestCase()
@@ -215,6 +216,48 @@ void TestMainWindow::the_tray_setting_says_keep_chrono_vault_running()
     QObject* box = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("keepInTrayBox"));
     QVERIFY(box);
     QCOMPARE(box->property("text").toString(), QStringLiteral("Keep Chrono Vault running in the system tray"));
+}
+
+void TestMainWindow::the_licences_scroll_by_keys_and_nothing_bounces()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* root = engine.rootObjects().constFirst();
+    auto* about = qobject_cast<QQuickWindow*>(root->findChild<QObject*>(QStringLiteral("aboutWindow")));
+    QVERIFY(about);
+    QVERIFY(QMetaObject::invokeMethod(about, "open"));
+    QTRY_VERIFY(about->isVisible());
+    about->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(about));
+    auto* text = about->findChild<QQuickItem*>(QStringLiteral("licenceText"));
+    QVERIFY(text);
+    QTRY_VERIFY(text->hasActiveFocus()); // the keys work at once
+    QQuickItem* flick = text->parentItem();
+    while (flick && !flick->property("contentY").isValid()) {
+        flick = flick->parentItem();
+    }
+    QVERIFY(flick);
+    const auto y = [flick]() { return flick->property("contentY").toReal(); };
+    QCOMPARE(y(), 0.0);
+    QTest::keyClick(about, Qt::Key_Down);
+    QVERIFY(y() > 0);
+    const qreal afterLine = y();
+    QTest::keyClick(about, Qt::Key_PageDown);
+    QVERIFY(y() > afterLine + flick->height() / 2);
+    QTest::keyClick(about, Qt::Key_End);
+    QCOMPARE(y(), flick->property("contentHeight").toReal() - flick->height());
+    QTest::keyClick(about, Qt::Key_PageUp);
+    QVERIFY(y() < flick->property("contentHeight").toReal() - flick->height());
+    QTest::keyClick(about, Qt::Key_Home);
+    QCOMPARE(y(), 0.0);
+    QTest::keyClick(about, Qt::Key_Up); // at the start: stays
+    QCOMPARE(y(), 0.0);
+    // No bounce: the page stops at its ends.
+    QCOMPARE(flick->property("boundsBehavior").toInt(), 0); // Flickable.StopAtBounds
+    auto* bar = about->findChild<QQuickItem*>(QStringLiteral("licenceScrollBar"));
+    QVERIFY(bar && bar->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(about, "close"));
 }
 
 QTEST_MAIN(TestMainWindow)

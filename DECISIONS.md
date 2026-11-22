@@ -54,3 +54,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-043](decisions/D-043.md) | The fingerprint one check box for all vaults, its touch in a popup; the Autolock switches no longer mirrored; centered triangles |
 | [D-044](decisions/D-044.md) | `--debug` writes the fingerprint log; the settings under the identifier chrono-vault, carried over |
 | [D-045](decisions/D-045.md) | Keyboard shortcuts set by the person, after Chrono Viewer; Ctrl+B the sidebar, Shift+Ctrl+B Clear Clipboard |
+| [D-046](decisions/D-046.md) | No bounce anywhere; the About box's text with a clear scroll bar, scrolled by the arrow, page and Home/End keys |

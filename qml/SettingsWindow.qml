@@ -398,6 +398,7 @@ ApplicationWindow {
 
                 ListView {
                     id: topics
+                    boundsBehavior: Flickable.StopAtBounds // no bounce (the owner, D-046)
                     objectName: "topics"
                     anchors.fill: parent
                     anchors.margins: parent.border.width
