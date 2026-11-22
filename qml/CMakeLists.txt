@@ -122,6 +122,7 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/star.svg"
         "${PROJECT_SOURCE_DIR}/art/star-filled.svg"
         "${PROJECT_SOURCE_DIR}/art/attachment.svg"
+        "${PROJECT_SOURCE_DIR}/art/copy.svg"
 )
 # The licences Chrono Vault ships, shown in the About box (D-021).
 set_source_files_properties("${PROJECT_SOURCE_DIR}/LICENSE" PROPERTIES QT_RESOURCE_ALIAS "AGPL-3.0.txt")

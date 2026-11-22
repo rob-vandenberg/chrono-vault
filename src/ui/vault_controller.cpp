@@ -1386,6 +1386,21 @@ void VaultController::setShowSubtitles(bool show)
     }
 }
 
+bool VaultController::viewOption(const QString& name, bool fallback) const
+{
+    return QSettings().value(QStringLiteral("view/") + name, fallback).toBool();
+}
+
+void VaultController::setViewOption(const QString& name, bool on)
+{
+    QSettings settings;
+    const QString settingName = QStringLiteral("view/") + name;
+    if (!settings.contains(settingName) || settings.value(settingName).toBool() != on) {
+        settings.setValue(settingName, on);
+        emit viewChanged();
+    }
+}
+
 void VaultController::setFilter(const QString& filter)
 {
     if (chosenFilter != filter) {
@@ -2432,6 +2447,16 @@ void VaultController::copyToClipboard(const QString& text)
         clipboardTimer.stop();
         say(tr("Copied."), false);
     }
+}
+
+void VaultController::clearClipboard()
+{
+    clipboardTimer.stop();
+    copiedText.clear();
+    if (QClipboard* clipboard = QGuiApplication::clipboard()) {
+        clipboard->clear();
+    }
+    say(tr("The clipboard is cleared."), false);
 }
 
 QString VaultController::generatePassword(int length, bool uppercase, bool lowercase, bool digits,

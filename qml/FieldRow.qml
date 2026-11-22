@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// FieldRow.qml 0.0.17
+// FieldRow.qml 0.0.24
 
 // --- Version history ----------------------------------------------------
+// v0.0.24: A copy button for the one-time code; Item > Show Passwords (D-039)
 // v0.0.17: Initial release (D-033)
 
 // One field's row in an item's card (D-033): the label at the right in grey,
@@ -34,7 +35,9 @@ Item {
     required property int index
     property bool revealed: false
     readonly property string kind: modelData.kind
-    readonly property bool isSecret: modelData.sensitive === true && VaultController.hideSensitive && !revealed
+    // Shown as text by its own Show, or by Item > Show Passwords (D-039).
+    readonly property bool shownPlain: revealed || details.revealAll
+    readonly property bool isSecret: modelData.sensitive === true && VaultController.hideSensitive && !shownPlain
     readonly property bool isLink: (kind === "url" && /^https?:\/\//i.test(modelData.value)) || kind === "email"
     readonly property string code: { details.tick; return kind === "totp" ? VaultController.oneTimeCode(modelData.value) : "" }
     readonly property int secondsLeft: { details.tick; return kind === "totp" ? VaultController.oneTimeCodeSecondsLeft(modelData.value) : 0 }
@@ -78,7 +81,7 @@ Item {
               : row.modelData.value
         textFormat: row.isLink && !row.isSecret ? Text.RichText : Text.PlainText
         linkColor: details.palette.link
-        font.family: row.modelData.sensitive && row.revealed ? "Noto Sans Mono" : Appearance.font.family
+        font.family: row.modelData.sensitive && row.shownPlain ? "Noto Sans Mono" : Appearance.font.family
         wrapMode: Text.Wrap
         onLinkActivated: function(address) { Qt.openUrlExternally(address) }
         HoverHandler {
@@ -86,8 +89,22 @@ Item {
             cursorShape: Qt.PointingHandCursor
         }
     }
+    // The one-time code copied with one click, left of its ring (D-039).
+    ToolButton {
+        objectName: "copyCodeButton"
+        visible: row.kind === "totp" && row.code !== ""
+        icon.source: "qrc:/icons/copy.svg"
+        icon.color: details.palette.buttonText
+        anchors.right: ring.left
+        anchors.rightMargin: Math.round(6 * Appearance.factor)
+        anchors.verticalCenter: parent.verticalCenter
+        onClicked: VaultController.copyToClipboard(row.code)
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("Copy")
+    }
     // The seconds the one-time code has left, as a ring, red at the end.
     Item {
+        id: ring
         visible: row.kind === "totp" && row.code !== ""
         width: Math.round(26 * Appearance.factor)
         height: width

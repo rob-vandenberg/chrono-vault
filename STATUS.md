@@ -2,13 +2,14 @@
 
 ## Now
 
-**Version 0.0.23**: unlocking with a fingerprint (Windows Hello; fprintd and the keyring on Linux) and the yearly
-master password reminder (D-038). Before: export (0.0.22), website icons (0.0.20), the importer (0.0.19).
+**Version 0.0.24**: the menus after the reference program's, with their shortcuts, item counts, Hide Sidebar, the
+groups of the left column by choice, Clear Clipboard and the one-time code's copy button (D-039). Before: unlocking
+with a fingerprint (0.0.23), export (0.0.22).
 
 ## Next task
 
-The owner tests the fingerprint on his two laptops and the import and export. Then, by his choice: the reference
-program's settings Chrono Vault lacks, or `ROADMAP.md` step 10, merging.
+0.0.25: Settings > Security, "Change the Master Password" and the four autolock choices; 0.0.26: waits after wrong
+master passwords; then the backlog in `ROADMAP.md` (PIN unlock first). The owner tests the fingerprint.
 
 ## Open questions
 

@@ -254,3 +254,22 @@ would have turned the fingerprint off wrongly (now the mark goes with its own at
 the reader was still being claimed left it claimed until the program quit (each check now has its number, a late
 claim is given back); a reader's own error said nothing (now "not available"); Settings said "fingerprint reader" on
 Windows (now "Windows Hello is not set up"). These five need a real reader or a race in time, so no test reaches them.
+
+## 22 November 2026: version 0.0.24: the menus after the reference program's (autonomous mode)
+
+File, View, Item, Tools and Help as the reference program has them, with only what Chrono Vault does, and their
+shortcuts shown at the right (D-039). New: item counts, Hide Sidebar, the left column's groups by choice, the copies of
+the Item menu, Show Passwords, Clear Clipboard, Support website, and a copy button for the one-time code. Found along
+the way: after an unlock the keyboard stayed in the hidden password field of the page left behind (typed letters went
+there); it now goes to the item list. Fusion's menu builds entries of its own, not the style's; the five menus now name
+the style's entry. `tests/integration/test_menus.cpp` drives it all.
+Review round 1: the menus lost their shortcut text while a text field had the keyboard (the text now comes apart from
+the working shortcut); Show Passwords stayed on through Hide Sensitive switched off and on (now it ends there). Both
+with tests.
+Review round 2: Launch URL took a host with a port ("nas.local:5000") for a scheme; now only "scheme://", mailto: and
+tel: count as one, everything else opens as https. With a test.
+Review round 3: hiding a group of the left column while one of its entries was chosen left the list narrowed with
+nothing showing why (now it goes back to Home); an address with spaces around it did not launch (now trimmed). Both
+with tests.
+Review round 4: Copy OTP stayed clickable for a one-time code whose secret makes no code (a damaged import); now
+greyed. With a test.

@@ -64,11 +64,15 @@ public:
 
     // The row of the item with this id, or -1.
     [[nodiscard]] Q_INVOKABLE int rowOf(const QString& id) const;
+    // How many items a view of the left column holds ("" for Home,
+    // "favourites", "category:<id>", "tag:<tag>", "archive", "trash"),
+    // whatever the search (D-039).
+    [[nodiscard]] Q_INVOKABLE int countOf(const QString& filter) const;
 
 private:
     void rebuild();
 
-    [[nodiscard]] bool passesFilter(const Item& item) const;
+    [[nodiscard]] static bool passesFilter(const Item& item, const QString& filter);
 
     VaultContents allContents;
     QList<Item> shownItems;

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.17
+// VaultPage.qml 0.0.24
 
 // --- Version history ----------------------------------------------------
+// v0.0.24: Hide Sidebar, the groups shown by choice, item counts, Archive and Show Passwords from the menu (D-039)
 // v0.0.17: Archive and Trash under Others; the chosen item with a grey fill and a blue bar; subtitles can be hidden
 //          (D-033)
 // v0.0.15: The vault at the top of the left column chooses among the person's vaults, makes or opens one (D-030)
@@ -43,6 +44,39 @@ Item {
 
     // The item shown or edited on the right; empty when none is chosen.
     property string chosenItemId: ""
+    // The editor is open.
+    readonly property bool editing: editor.itemId !== ""
+    // Item > Show Passwords: the shown item's sensitive fields as text, until
+    // another item is chosen or the vault locks (D-039).
+    property bool revealAll: false
+    onChosenItemIdChanged: revealAll = false
+    Connections {
+        target: VaultController
+        // Hide Sensitive switched: what Show Passwords showed is hidden again.
+        function onHideSensitiveChanged() { vaultPage.revealAll = false }
+        // A group hidden while one of its entries is chosen: back to Home, so
+        // the list is never narrowed by something no longer shown (D-039).
+        function onViewChanged() {
+            const filter = VaultController.filter
+            if ((!VaultController.showCategories && filter.startsWith("category:"))
+                    || (!VaultController.showTags && filter.startsWith("tag:"))
+                    || (!VaultController.showOthers && (filter === "archive" || filter === "trash")))
+                vaultPage.choose("")
+        }
+    }
+
+    // A number of items at the right of an entry of the left column, with
+    // View > Show Item Counts (D-039).
+    component CountLabel: Label {
+        property string filter: ""
+        objectName: "count_" + filter
+        visible: VaultController.showItemCounts
+        text: VaultController.revision >= 0 ? VaultController.items.countOf(filter) : ""
+        opacity: 0.6
+        anchors.right: parent.right
+        anchors.rightMargin: Math.round(10 * Appearance.factor)
+        anchors.verticalCenter: parent.verticalCenter
+    }
 
     // A new item from a template (D-027).
     function newItem(templateId) {
@@ -97,6 +131,19 @@ Item {
             editor.edit(VaultController.item(chosenItemId), false)
     }
 
+    // Item > Archive: the chosen item into the Archive (D-033), where
+    // Unarchive brings it back.
+    function archiveChosen() {
+        const id = chosenItemId
+        if (id === "")
+            return
+        editor.whenFree(function() {
+            if (editor.itemId === id)
+                editor.close()
+            VaultController.archiveItem(id, true)
+        })
+    }
+
     // Item > Delete item…: the question of the editor, about the chosen item.
     function deleteChosen() {
         const id = chosenItemId
@@ -139,6 +186,11 @@ Item {
         if (!visible) {
             editor.close()
             chosenItemId = ""
+        } else {
+            // The keyboard leaves the hidden password field for the list, so
+            // typing never goes into a page no longer shown, and the menus'
+            // shortcuts work (D-039).
+            itemList.forceActiveFocus()
         }
     }
 
@@ -172,6 +224,8 @@ Item {
         Pane {
             id: vaultColumn
             objectName: "vaultColumn"
+            // View > Hide Sidebar (D-039).
+            visible: !VaultController.sidebarHidden
             SplitView.preferredWidth: Math.round(220 * Appearance.factor)
             SplitView.minimumWidth: Math.round(160 * Appearance.factor)
             padding: Math.round(12 * Appearance.factor)
@@ -268,6 +322,7 @@ Item {
                         highlighted: VaultController.filter === ""
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("")
+                        CountLabel { filter: "" }
                     }
                     ItemDelegate {
                         objectName: "favouritesEntry"
@@ -277,9 +332,11 @@ Item {
                         highlighted: VaultController.filter === "favourites"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("favourites")
+                        CountLabel { filter: "favourites" }
                     }
 
                     Label {
+                        visible: VaultController.showCategories
                         text: qsTr("Categories")
                         font.bold: true
                         opacity: 0.7
@@ -287,7 +344,8 @@ Item {
                         Layout.leftMargin: Math.round(8 * Appearance.factor)
                     }
                     Repeater {
-                        model: vaultColumn.categoryList.filter(function(category) { return !category.hidden })
+                        model: VaultController.showCategories
+                               ? vaultColumn.categoryList.filter(function(category) { return !category.hidden }) : []
                         delegate: ItemDelegate {
                             required property var modelData
                             objectName: "categoryEntry_" + modelData.id
@@ -297,10 +355,12 @@ Item {
                             highlighted: VaultController.filter === "category:" + modelData.id
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("category:" + modelData.id)
+                            CountLabel { filter: "category:" + parent.modelData.id }
                         }
                     }
 
                     Label {
+                        visible: VaultController.showTags
                         text: qsTr("Tags")
                         font.bold: true
                         opacity: 0.7
@@ -308,13 +368,13 @@ Item {
                         Layout.leftMargin: Math.round(8 * Appearance.factor)
                     }
                     Label {
-                        visible: vaultColumn.tagList.length === 0
+                        visible: VaultController.showTags && vaultColumn.tagList.length === 0
                         text: qsTr("No tags yet.")
                         opacity: 0.6
                         Layout.leftMargin: Math.round(8 * Appearance.factor)
                     }
                     Repeater {
-                        model: vaultColumn.tagList
+                        model: VaultController.showTags ? vaultColumn.tagList : []
                         delegate: ItemDelegate {
                             id: tagEntry
                             required property var modelData
@@ -327,6 +387,7 @@ Item {
                             highlighted: VaultController.filter === "tag:" + modelData.tag
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("tag:" + modelData.tag)
+                            CountLabel { filter: "tag:" + tagEntry.modelData.tag }
                             TapHandler {
                                 acceptedButtons: Qt.RightButton
                                 onTapped: tagMenu.popup()
@@ -347,6 +408,7 @@ Item {
 
                     // The Archive and the Trash (D-033).
                     Label {
+                        visible: VaultController.showOthers
                         text: qsTr("Others")
                         font.bold: true
                         opacity: 0.7
@@ -355,17 +417,21 @@ Item {
                     }
                     ItemDelegate {
                         objectName: "archiveEntry"
+                        visible: VaultController.showOthers
                         text: qsTr("Archive")
                         highlighted: VaultController.filter === "archive"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("archive")
+                        CountLabel { filter: "archive" }
                     }
                     ItemDelegate {
                         objectName: "trashEntry"
+                        visible: VaultController.showOthers
                         text: qsTr("Trash")
                         highlighted: VaultController.filter === "trash"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("trash")
+                        CountLabel { filter: "trash" }
                     }
                 }
             }
@@ -511,6 +577,7 @@ Item {
             }
             ItemDetails {
                 itemId: vaultPage.chosenItemId
+                revealAll: vaultPage.revealAll
                 onEditRequested: vaultPage.editChosen()
             }
             ItemEditor {

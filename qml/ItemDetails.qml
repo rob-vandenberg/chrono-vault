@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.0.17
+// ItemDetails.qml 0.0.24
 
 // --- Version history ----------------------------------------------------
+// v0.0.24: Item > Show Passwords shows every sensitive field (D-039)
 // v0.0.17: As the reference program shows an item (D-033): every section its own card under its heading, every
 //          field type, hidden values as dots, History in a field's menu, the note, Last Modified and Created,
 //          Autosubmit Login, the Trash and the Archive
@@ -40,6 +41,8 @@ Item {
     objectName: "itemDetails"
 
     property string itemId: ""
+    // Item > Show Passwords: every sensitive field as text (D-039).
+    property bool revealAll: false
     // Read again whenever the vault's items change.
     property int refresh: 0
     readonly property var item: itemId !== "" && refresh >= 0 ? VaultController.item(itemId) : ({})

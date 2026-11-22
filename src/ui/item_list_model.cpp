@@ -161,7 +161,13 @@ int ItemListModel::rowOf(const QString& id) const
     return -1;
 }
 
-bool ItemListModel::passesFilter(const Item& item) const
+int ItemListModel::countOf(const QString& filter) const
+{
+    return static_cast<int>(std::count_if(allContents.items.cbegin(), allContents.items.cend(),
+                                          [&filter](const Item& item) { return passesFilter(item, filter); }));
+}
+
+bool ItemListModel::passesFilter(const Item& item, const QString& chosen)
 {
     // The Trash and the Archive show only their own items; every other
     // view leaves them out (D-033).
@@ -201,7 +207,7 @@ void ItemListModel::rebuild()
     shownItems.clear();
     const QString needle = search.trimmed();
     for (const Item& item : std::as_const(allContents.items)) {
-        if (!passesFilter(item)) {
+        if (!passesFilter(item, chosen)) {
             continue;
         }
         const auto found = [&needle](const QString& text) { return text.contains(needle, Qt::CaseInsensitive); };

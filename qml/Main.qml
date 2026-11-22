@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.22
+// Main.qml 0.0.24
 
 // --- Version history ----------------------------------------------------
+// v0.0.24: The menus after the reference program's, with their shortcuts (D-039)
 // v0.0.22: File > Export… (D-037)
 // v0.0.19: File > Import… (D-035)
 // v0.0.17: Item > Move to Trash in place of Delete item (D-033)
@@ -59,6 +60,56 @@ ApplicationWindow {
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
 
+    // A text field has the keyboard: the menus' shortcuts stand aside, so
+    // Backspace deletes a letter, never the item (D-039).
+    readonly property bool typing: activeFocusItem !== null && activeFocusItem.cursorPosition !== undefined
+    function keys(sequence) {
+        return typing ? "" : sequence
+    }
+
+    readonly property string supportWebsite: "https://github.com/rob-vandenberg/chrono-vault"
+
+    // The item the Item menu acts on: the one shown, while the editor is not
+    // open (D-039).
+    readonly property bool itemFree: unlocked && vaultPage.chosenItemId !== "" && !vaultPage.editing
+    readonly property var chosenItem: itemFree && VaultController.revision >= 0
+                                      ? VaultController.item(vaultPage.chosenItemId) : ({})
+    readonly property bool hasSensitive: (chosenItem.fields || []).some(function(field) {
+        return !field.deleted && field.kind !== "hidden" && field.sensitive && field.value !== ""
+    })
+    // The value of the chosen item's first field of a kind: "username",
+    // "email", "password", "url" or "totp"; empty when it has none.
+    function fieldValue(kind) {
+        const fields = (chosenItem.fields || []).filter(function(field) {
+            return !field.deleted && field.kind !== "hidden" && field.kind !== "section" && field.value !== ""
+        })
+        const matches = {
+            username: function(field) { return field.kind === "username" || field.role === "username" },
+            email: function(field) { return field.kind === "email" },
+            password: function(field) { return field.kind === "password" || field.role === "password" },
+            url: function(field) { return field.kind === "url" },
+            totp: function(field) { return field.kind === "totp" }
+        }
+        let found = fields.find(matches[kind])
+        // A password of an imported item is a sensitive text field.
+        if (!found && kind === "password")
+            found = fields.find(function(field) { return field.kind === "text" && field.sensitive })
+        return found ? found.value : ""
+    }
+    // An address without its scheme opens as https; "nas.local:5000" is a
+    // host and a port, not a scheme.
+    function addressToOpen(given) {
+        const address = given.trim()
+        return /^[a-z][a-z0-9+.-]*:\/\//i.test(address) || /^(mailto|tel):/i.test(address)
+               ? address : "https://" + address
+    }
+    function launch(address) {
+        Qt.openUrlExternally(addressToOpen(address))
+    }
+    function changeMasterPassword() {
+        vaultPage.whenEditorFree(function() { masterPasswordWindow.ask() })
+    }
+
     // The categories the left column shows, each with its templates; one
     // without a template is left out (D-027).
     readonly property var newItemGroups: {
@@ -74,6 +125,21 @@ ApplicationWindow {
             .filter(function(group) { return group.templates.length > 0 })
     }
 
+    // A menu of the bar: the style's own entries, with the shortcut at the
+    // right, and as wide as its widest entry (D-039).
+    component MainMenu: Menu {
+        delegate: MenuItem {}
+        width: {
+            let widest = implicitWidth
+            for (let index = 0; index < count; ++index) {
+                const entry = itemAt(index)
+                if (entry)
+                    widest = Math.max(widest, entry.implicitWidth + leftPadding + rightPadding)
+            }
+            return widest
+        }
+    }
+
     // One bar at the top (D-025): the menus on the left, the buttons on the
     // right. What needs an unlocked vault is greyed until then.
     header: ToolBar {
@@ -83,116 +149,256 @@ ApplicationWindow {
             anchors.rightMargin: Math.round(8 * Appearance.factor)
             spacing: Math.round(6 * Appearance.factor)
 
+            // The menus after the reference program's, with only what Chrono
+            // Vault does (D-039). A shortcut never acts while a text field is
+            // being typed in.
             MenuBar {
                 objectName: "menuBar"
                 background: Item {}
-                Menu {
+                MainMenu {
+                    objectName: "fileMenu"
                     title: qsTr("&File")
-                    // Creating or opening a vault is done from the start page,
-                    // with no vault unlocked.
                     Action {
-                        text: qsTr("New vault…")
+                        text: qsTr("New vault")
                         enabled: !mainWindow.busy
                         onTriggered: mainWindow.newVault()
                     }
                     Action {
-                        text: qsTr("Open vault…")
+                        text: qsTr("Open vault")
                         enabled: !mainWindow.busy
                         onTriggered: mainWindow.openVault()
                     }
                     Action {
-                        text: qsTr("Import…")
+                        text: qsTr("Change Master Password")
+                        enabled: mainWindow.unlocked
+                        onTriggered: mainWindow.changeMasterPassword()
+                    }
+                    MenuSeparator {}
+                    // Not built yet.
+                    Action {
+                        text: qsTr("Backup")
+                        enabled: false
+                    }
+                    Action {
+                        text: qsTr("Restore")
+                        enabled: false
+                    }
+                    MenuSeparator {}
+                    Action {
+                        text: qsTr("Import")
                         enabled: mainWindow.unlocked
                         onTriggered: vaultPage.whenEditorFree(function() { importWindow.start() })
                     }
                     Action {
-                        text: qsTr("Export…")
+                        text: qsTr("Export")
                         enabled: mainWindow.unlocked
                         onTriggered: vaultPage.whenEditorFree(function() { exportWindow.ask() })
                     }
-                    Action {
-                        text: qsTr("Change master password or keyfile…")
-                        enabled: mainWindow.unlocked
-                        onTriggered: vaultPage.whenEditorFree(function() { masterPasswordWindow.ask() })
-                    }
                     MenuSeparator {}
                     Action {
-                        text: qsTr("Lock")
-                        enabled: mainWindow.unlocked
-                        onTriggered: VaultController.lock()
-                    }
-                    Action {
-                        text: qsTr("Preferences…")
+                        text: qsTr("Preferences")
                         onTriggered: settingsWindow.showWindow()
                     }
                     MenuSeparator {}
                     Action {
+                        objectName: "quitAction"
                         text: qsTr("Quit")
+                        shortcut: "Ctrl+Q"
                         onTriggered: mainWindow.requestQuit()
                     }
                 }
-                Menu {
+                MainMenu {
+                    objectName: "viewMenu"
                     title: qsTr("&View")
-                    // Each opens the preferences at General, the choice shown at once.
                     Action {
-                        text: qsTr("Light")
-                        onTriggered: mainWindow.showTheme(0)
+                        objectName: "showItemCountsAction"
+                        text: qsTr("Show Item Counts")
+                        checkable: true
+                        checked: VaultController.showItemCounts
+                        onToggled: {
+                            VaultController.showItemCounts = checked
+                            checked = Qt.binding(function() { return VaultController.showItemCounts })
+                        }
                     }
                     Action {
-                        text: qsTr("Dark")
-                        onTriggered: mainWindow.showTheme(1)
+                        objectName: "hideSidebarAction"
+                        text: qsTr("Hide Sidebar")
+                        checkable: true
+                        checked: VaultController.sidebarHidden
+                        onToggled: {
+                            VaultController.sidebarHidden = checked
+                            checked = Qt.binding(function() { return VaultController.sidebarHidden })
+                        }
                     }
                     Action {
-                        text: qsTr("Follow the system")
-                        onTriggered: mainWindow.showTheme(2)
+                        objectName: "hideSensitiveAction"
+                        text: qsTr("Hide Sensitive")
+                        checkable: true
+                        checked: VaultController.hideSensitive
+                        onToggled: {
+                            VaultController.hideSensitive = checked
+                            checked = Qt.binding(function() { return VaultController.hideSensitive })
+                        }
                     }
                     MenuSeparator {}
                     Action {
-                        text: qsTr("UI scaling…")
-                        onTriggered: settingsWindow.showGeneral()
+                        objectName: "showCategoriesAction"
+                        text: qsTr("Categories")
+                        checkable: true
+                        checked: VaultController.showCategories
+                        onToggled: {
+                            VaultController.showCategories = checked
+                            checked = Qt.binding(function() { return VaultController.showCategories })
+                        }
+                    }
+                    Action {
+                        objectName: "showTagsAction"
+                        text: qsTr("Tags")
+                        checkable: true
+                        checked: VaultController.showTags
+                        onToggled: {
+                            VaultController.showTags = checked
+                            checked = Qt.binding(function() { return VaultController.showTags })
+                        }
+                    }
+                    Action {
+                        objectName: "showOthersAction"
+                        text: qsTr("Others")
+                        checkable: true
+                        checked: VaultController.showOthers
+                        onToggled: {
+                            VaultController.showOthers = checked
+                            checked = Qt.binding(function() { return VaultController.showOthers })
+                        }
                     }
                 }
-                Menu {
+                MainMenu {
+                    objectName: "itemMenu"
                     title: qsTr("&Item")
                     Action {
-                        text: qsTr("New login")
-                        enabled: mainWindow.unlocked
-                        onTriggered: vaultPage.newLogin()
+                        objectName: "archiveAction"
+                        text: qsTr("Archive")
+                        property string shownKeys: "Shift+Backspace"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.chosenItem.archived !== true
+                                 && mainWindow.chosenItem.trashed !== true
+                        onTriggered: vaultPage.archiveChosen()
                     }
                     Action {
-                        text: qsTr("New secure note")
-                        enabled: mainWindow.unlocked
-                        onTriggered: vaultPage.newSecureNote()
+                        objectName: "moveToTrashAction"
+                        text: qsTr("Move to Trash")
+                        property string shownKeys: "Backspace"
+                        shortcut: mainWindow.keys(shownKeys)
+                        // Not for an item already in the Trash.
+                        enabled: mainWindow.itemFree && mainWindow.chosenItem.trashed !== true
+                        onTriggered: vaultPage.deleteChosen()
                     }
                     MenuSeparator {}
                     Action {
-                        text: qsTr("Move to Trash")
-                        // Not for an item already in the Trash.
-                        enabled: mainWindow.unlocked && vaultPage.chosenItemId !== "" && VaultController.revision >= 0
-                                 && VaultController.item(vaultPage.chosenItemId).trashed !== true
-                        onTriggered: vaultPage.deleteChosen()
+                        objectName: "copyUsernameAction"
+                        text: qsTr("Copy Username")
+                        property string shownKeys: "Shift+Ctrl+U"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("username") !== ""
+                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("username"))
+                    }
+                    Action {
+                        objectName: "copyEmailAction"
+                        text: qsTr("Copy E-mail")
+                        property string shownKeys: "Shift+Ctrl+E"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("email") !== ""
+                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("email"))
+                    }
+                    Action {
+                        objectName: "copyPasswordAction"
+                        text: qsTr("Copy Password")
+                        property string shownKeys: "Shift+Ctrl+P"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("password") !== ""
+                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("password"))
+                    }
+                    Action {
+                        objectName: "showPasswordsAction"
+                        text: qsTr("Show Passwords")
+                        property string shownKeys: "Shift+Ctrl+H"
+                        shortcut: mainWindow.keys(shownKeys)
+                        // Shows them, and hides them again when chosen once more.
+                        enabled: mainWindow.itemFree && VaultController.hideSensitive && mainWindow.hasSensitive
+                        onTriggered: vaultPage.revealAll = !vaultPage.revealAll
+                    }
+                    Action {
+                        objectName: "copyUrlAction"
+                        text: qsTr("Copy URL")
+                        property string shownKeys: "Shift+Ctrl+R"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
+                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("url"))
+                    }
+                    Action {
+                        objectName: "copyOtpAction"
+                        text: qsTr("Copy OTP")
+                        property string shownKeys: "Shift+Ctrl+T"
+                        shortcut: mainWindow.keys(shownKeys)
+                        // Greyed too when the secret makes no code (a damaged import).
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("totp") !== ""
+                                 && VaultController.oneTimeCode(mainWindow.fieldValue("totp")) !== ""
+                        onTriggered: VaultController.copyToClipboard(VaultController.oneTimeCode(mainWindow.fieldValue("totp")))
+                    }
+                    Action {
+                        objectName: "launchUrlAction"
+                        text: qsTr("Launch URL")
+                        property string shownKeys: "Shift+Ctrl+L"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
+                        onTriggered: mainWindow.launch(mainWindow.fieldValue("url"))
                     }
                 }
-                Menu {
+                MainMenu {
+                    objectName: "toolsMenu"
                     title: qsTr("&Tools")
                     Action {
-                        text: qsTr("Generate password…")
+                        objectName: "lockAction"
+                        text: qsTr("Lock vault")
+                        property string shownKeys: "Ctrl+L"
+                        shortcut: mainWindow.keys(shownKeys)
+                        enabled: mainWindow.unlocked
+                        onTriggered: VaultController.lock()
+                    }
+                    Action {
+                        objectName: "clearClipboardAction"
+                        text: qsTr("Clear Clipboard")
+                        property string shownKeys: "Ctrl+B"
+                        shortcut: mainWindow.keys(shownKeys)
+                        onTriggered: VaultController.clearClipboard()
+                    }
+                    Action {
+                        objectName: "generatePasswordAction"
+                        text: qsTr("Generate Password")
+                        property string shownKeys: "Ctrl+G"
+                        shortcut: mainWindow.keys(shownKeys)
                         onTriggered: toolsGenerator.open()
                     }
                 }
-                Menu {
+                MainMenu {
+                    objectName: "helpMenu"
                     title: qsTr("&Help")
                     Action {
-                        text: qsTr("About Chrono Vault")
-                        shortcut: "F1"
-                        onTriggered: aboutWindow.open()
-                    }
-                    Action {
-                        text: qsTr("Check for update")
+                        text: qsTr("Check for updates")
                         onTriggered: {
                             aboutWindow.open()
                             aboutWindow.checkNow()
                         }
+                    }
+                    Action {
+                        objectName: "supportWebsiteAction"
+                        text: qsTr("Support website")
+                        onTriggered: Qt.openUrlExternally(mainWindow.supportWebsite)
+                    }
+                    Action {
+                        text: qsTr("About")
+                        shortcut: "F1"
+                        onTriggered: aboutWindow.open()
                     }
                 }
             }
@@ -305,11 +511,6 @@ ApplicationWindow {
         objectName: "masterPasswordWindow"
     }
 
-    function showTheme(theme) {
-        settingsWindow.showGeneral()
-        settingsWindow.showTheme(theme)
-    }
-
     // The generator on its own (Tools, the bar): its password is copied.
     GeneratorDialog {
         id: toolsGenerator
@@ -348,9 +549,11 @@ ApplicationWindow {
         close()
     }
 
+    // Ctrl+Q in the program's other windows; in this one File > Quit has it.
     Shortcut {
-        sequences: [StandardKey.Quit]
+        sequences: ["Ctrl+Q"]
         context: Qt.ApplicationShortcut
+        enabled: !mainWindow.active
         onActivated: mainWindow.requestQuit()
     }
 

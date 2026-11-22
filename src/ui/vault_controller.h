@@ -94,6 +94,12 @@ class VaultController : public QObject
     Q_PROPERTY(bool trayAvailable READ trayAvailable NOTIFY trayAvailableChanged)
     Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
+    // The View menu's choices, kept in the settings (D-039).
+    Q_PROPERTY(bool showItemCounts READ showItemCounts WRITE setShowItemCounts NOTIFY viewChanged)
+    Q_PROPERTY(bool sidebarHidden READ sidebarHidden WRITE setSidebarHidden NOTIFY viewChanged)
+    Q_PROPERTY(bool showCategories READ showCategories WRITE setShowCategories NOTIFY viewChanged)
+    Q_PROPERTY(bool showTags READ showTags WRITE setShowTags NOTIFY viewChanged)
+    Q_PROPERTY(bool showOthers READ showOthers WRITE setShowOthers NOTIFY viewChanged)
     Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
     Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
     Q_PROPERTY(bool quickUnlockAvailable READ quickUnlockAvailable NOTIFY quickUnlockChanged)
@@ -188,6 +194,16 @@ public:
     // Tests only: where a website's icon is asked for.
     void setIconAddressForTests(std::function<QUrl(const QString&)> address) { iconAddress = std::move(address); }
     void setShowSubtitles(bool show);
+    [[nodiscard]] bool showItemCounts() const { return viewOption(QStringLiteral("showItemCounts"), false); }
+    void setShowItemCounts(bool on) { setViewOption(QStringLiteral("showItemCounts"), on); }
+    [[nodiscard]] bool sidebarHidden() const { return viewOption(QStringLiteral("sidebarHidden"), false); }
+    void setSidebarHidden(bool on) { setViewOption(QStringLiteral("sidebarHidden"), on); }
+    [[nodiscard]] bool showCategories() const { return viewOption(QStringLiteral("showCategories"), true); }
+    void setShowCategories(bool on) { setViewOption(QStringLiteral("showCategories"), on); }
+    [[nodiscard]] bool showTags() const { return viewOption(QStringLiteral("showTags"), true); }
+    void setShowTags(bool on) { setViewOption(QStringLiteral("showTags"), on); }
+    [[nodiscard]] bool showOthers() const { return viewOption(QStringLiteral("showOthers"), true); }
+    void setShowOthers(bool on) { setViewOption(QStringLiteral("showOthers"), on); }
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
 
@@ -291,6 +307,8 @@ public:
     // Copies text, marked as secret for clipboard history tools, and clears
     // it again after the chosen number of seconds (D-007).
     Q_INVOKABLE void copyToClipboard(const QString& text);
+    // Tools > Clear Clipboard: empties it at once, whatever is on it (D-039).
+    Q_INVOKABLE void clearClipboard();
     [[nodiscard]] Q_INVOKABLE QString generatePassword(int length, bool uppercase, bool lowercase, bool digits,
                                                        bool symbols) const;
     // The current one-time code for a secret, or empty when it is not one.
@@ -329,6 +347,7 @@ signals:
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
     void showSubtitlesChanged();
+    void viewChanged();
     void useWebsiteIconsChanged();
     void quickUnlockChanged();
     void keepInTrayChanged();
@@ -425,6 +444,8 @@ private:
     int clearSeconds = 30;
     bool hideSecrets = true;
     bool subtitlesShown = true;
+    [[nodiscard]] bool viewOption(const QString& name, bool fallback) const;
+    void setViewOption(const QString& name, bool on);
     bool websiteIconsOn = false;
     std::unique_ptr<QuickUnlock> quick;
     bool quickAvailable = false;

@@ -27,6 +27,25 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | 18 | macOS | Needs a Mac with Xcode, and Apple signing (D-009) | | not started |
 | 19 | iOS | Needs a Mac with Xcode, Apple signing and the App Store (D-009) | | not started |
 
+## Backlog: to be built next (the owner, 22 November 2026)
+
+The menus and settings of the reference program that Chrono Vault does not have yet, in no set order:
+
+1. PIN unlock (0.0.27, after the menus, autolock and the retry waits).
+2. Backup and Restore (File; greyed until built).
+3. Print.
+4. Audit in sidebar, with Show Old Passwords (with step 12).
+5. Previous Group and Next Group (Ctrl+Up, Ctrl+Down).
+6. Duplicate (Ctrl+D), Change Category, Add to Vault.
+7. Sync Now (Ctrl+J), with the storages.
+8. Auto Backups: to a folder, keeping the last 60, with a list of earlier backups.
+9. Clear Recent Items.
+10. App language and data location.
+11. A dark tray icon.
+12. The compromised-password check (with step 12).
+13. Proxy settings, logs, Erase Everything.
+14. A keyboard shortcut editor that looks and works as Chrono Viewer's.
+
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.
 
