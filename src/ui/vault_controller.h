@@ -98,6 +98,9 @@ class VaultController : public QObject
     Q_PROPERTY(bool systemIdleLockOn READ systemIdleLockOn WRITE setSystemIdleLockOn NOTIFY autoLockMinutesChanged)
     Q_PROPERTY(int systemIdleMinutes READ systemIdleMinutes WRITE setSystemIdleMinutes NOTIFY autoLockMinutesChanged)
     Q_PROPERTY(bool systemIdleAvailable READ systemIdleAvailable NOTIFY systemIdleAvailableChanged)
+    // Seconds before the master password may be tried again for this vault,
+    // after wrong ones (D-041); 0 when it may be tried now.
+    Q_PROPERTY(int unlockWaitSeconds READ unlockWaitSeconds NOTIFY unlockWaitChanged)
     Q_PROPERTY(bool keepInTray READ keepInTray WRITE setKeepInTray NOTIFY keepInTrayChanged)
     Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
     Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY startMinimizedChanged)
@@ -178,6 +181,9 @@ public:
     [[nodiscard]] int systemIdleMinutes() const { return systemMinutes; }
     void setSystemIdleMinutes(int minutes);
     [[nodiscard]] bool systemIdleAvailable() const { return systemIdleKnown; }
+    [[nodiscard]] int unlockWaitSeconds() const { return waitSeconds; }
+    // The wait before an attempt, after this many wrong ones (D-041).
+    [[nodiscard]] static int waitBeforeAttempt(int attempt);
     // The main window was closed into the tray: locked when so chosen.
     Q_INVOKABLE void mainWindowClosed();
     // Asks the system how long it has been inactive (every 30 seconds while
@@ -220,6 +226,8 @@ public:
     void setSystemActivityForTests(std::unique_ptr<SystemActivity> standIn);
     // The tests' clock: the vault counts as unlocked this many seconds ago.
     void setUnlockedSecondsAgoForTests(qint64 seconds);
+    // The tests' clock for the waits: moved forward this many seconds.
+    void moveClockForTests(qint64 seconds);
     // Tests only: where a website's icon is asked for.
     void setIconAddressForTests(std::function<QUrl(const QString&)> address) { iconAddress = std::move(address); }
     void setShowSubtitles(bool show);
@@ -374,6 +382,7 @@ signals:
     void exportDone(bool ok);
     void autoLockMinutesChanged();
     void systemIdleAvailableChanged();
+    void unlockWaitChanged();
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
     void showSubtitlesChanged();
@@ -490,6 +499,16 @@ private:
     // When the vault was last unlocked: the system's inactive time counts
     // only from then on (an unlock by finger is no input the system sees).
     qint64 unlockedAtMs = 0;
+    // The waits after wrong master passwords (D-041), kept per vault in the
+    // settings so a restart does not end them.
+    int waitSeconds = 0;
+    qint64 clockShiftMs = 0;
+    QTimer waitTimer;
+    [[nodiscard]] qint64 nowMs() const;
+    [[nodiscard]] QString waitKey() const;
+    void wrongPasswordTyped();
+    void rightPasswordGiven();
+    void updateWait();
     void setBool(bool& value, bool on, const QString& settingName);
     bool quickAvailable = false;
     bool reminderOn = true;

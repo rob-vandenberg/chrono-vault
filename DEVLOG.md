@@ -283,3 +283,9 @@ box unticked. `tests/integration/test_autolock.cpp` drives it through a stand-in
 Review round 1: after a fingerprint unlock the system still counted the time before it as inactive (a finger is no
 input the system sees), so "System inactive for" locked again at once; the inactive time now counts from the unlock
 on. With a test.
+
+## 22 November 2026: version 0.0.26: waits after wrong master passwords (autonomous mode)
+
+The owner's rule (D-041): three tries at once, then 10 seconds, a minute and 10 minutes, and an hour once after every
+25; counted per vault in the settings, so a restart does not end a wait; a correct unlock starts again. The unlock page
+greys with "Try again in m:ss". `tests/integration/test_unlock_waits.cpp` drives 26 wrong tries with the tests' clock.

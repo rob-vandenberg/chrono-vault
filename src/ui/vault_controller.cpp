@@ -30,6 +30,7 @@
 #include <QClipboard>
 #include <QDataStream>
 #include <QCollator>
+#include <QCryptographicHash>
 #include <QDateTime>
 #include <QBuffer>
 #include <QFile>
@@ -86,6 +87,7 @@ const QString lockSleepKey = QStringLiteral("security/lockOnSleep");
 const QString systemIdleLockKey = QStringLiteral("security/systemIdleLockOn");
 const QString systemIdleMinutesKey = QStringLiteral("security/systemIdleMinutes");
 constexpr int defaultSystemIdleMinutes = 10;
+const QString wrongAttemptsGroup = QStringLiteral("security/wrongAttempts/");
 // The settings as they are before the person changes them, also what
 // Restore defaults puts back (D-022).
 constexpr int defaultAutoLockMinutes = 5;
@@ -384,6 +386,9 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     activity = makeSystemActivity();
     connectSystemActivity();
     activity->askIdleTime();
+    // The wait after wrong master passwords counts down each second (D-041).
+    waitTimer.setInterval(1000);
+    connect(&waitTimer, &QTimer::timeout, this, &VaultController::updateWait);
     systemIdleTimer.setInterval(30 * 1000);
     connect(&systemIdleTimer, &QTimer::timeout, this, &VaultController::checkSystemIdle);
 
@@ -759,9 +764,93 @@ void VaultController::chooseVault(const QUrl& file)
     setState(State::Locked);
 }
 
+int VaultController::waitBeforeAttempt(int attempt)
+{
+    // The owner's rule (D-041): 1 to 3 at once, 4 and 5 after 10 seconds, 6 to
+    // 10 after a minute, then 10 minutes; before 26, 51, 76… once an hour.
+    if (attempt <= 3) {
+        return 0;
+    }
+    if (attempt > 25 && (attempt - 1) % 25 == 0) {
+        return 3600;
+    }
+    if (attempt <= 5) {
+        return 10;
+    }
+    if (attempt <= 10) {
+        return 60;
+    }
+    return 600;
+}
+
+qint64 VaultController::nowMs() const
+{
+    return QDateTime::currentMSecsSinceEpoch() + clockShiftMs;
+}
+
+void VaultController::moveClockForTests(qint64 seconds)
+{
+    clockShiftMs += seconds * 1000;
+    updateWait();
+}
+
+QString VaultController::waitKey() const
+{
+    return wrongAttemptsGroup +
+           QString::fromLatin1(QCryptographicHash::hash(path.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
+}
+
+void VaultController::wrongPasswordTyped()
+{
+    QSettings settings;
+    const QString keyPrefix = waitKey();
+    const int wrong = settings.value(keyPrefix + QStringLiteral("/count"), 0).toInt() + 1;
+    const int wait = waitBeforeAttempt(wrong + 1);
+    settings.setValue(keyPrefix + QStringLiteral("/count"), wrong);
+    settings.setValue(keyPrefix + QStringLiteral("/until"), nowMs() + qint64(wait) * 1000);
+    settings.setValue(keyPrefix + QStringLiteral("/wait"), wait);
+    updateWait();
+}
+
+void VaultController::rightPasswordGiven()
+{
+    QSettings().remove(waitKey());
+    updateWait();
+}
+
+void VaultController::updateWait()
+{
+    int left = 0;
+    if (!path.isEmpty()) {
+        QSettings settings;
+        const QString keyPrefix = waitKey();
+        const qint64 until = settings.value(keyPrefix + QStringLiteral("/until"), 0).toLongLong();
+        const qint64 wait = settings.value(keyPrefix + QStringLiteral("/wait"), 0).toLongLong();
+        // A clock set back never makes the wait longer than the wait itself.
+        const qint64 remainingMs = std::min(until - nowMs(), wait * 1000);
+        left = remainingMs > 0 ? static_cast<int>((remainingMs + 999) / 1000) : 0;
+    }
+    if (left > 0) {
+        if (!waitTimer.isActive()) {
+            waitTimer.start();
+        }
+    } else {
+        waitTimer.stop();
+    }
+    if (waitSeconds != left) {
+        waitSeconds = left;
+        emit unlockWaitChanged();
+    }
+}
+
 void VaultController::unlock(const QString& password)
 {
     if (currentState != State::Locked || path.isEmpty()) {
+        return;
+    }
+    // Still waiting after wrong master passwords (D-041).
+    updateWait();
+    if (waitSeconds > 0) {
         return;
     }
     QByteArray passwordBytes = password.toUtf8();
@@ -818,6 +907,11 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                     return;
                 }
                 if (result.status != OpenStatus::Opened) {
+                    // A wrong typed master password counts toward the waits
+                    // (D-041); a saved one was handled above.
+                    if (result.status == OpenStatus::WrongPasswordOrDamaged) {
+                        self->wrongPasswordTyped();
+                    }
                     if (result.status == OpenStatus::KeyfileNeeded && !self->needKeyfile) {
                         self->needKeyfile = true;
                         emit self->keyfileChanged();
@@ -904,6 +998,7 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
 
 void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile)
 {
+    rightPasswordGiven(); // the count of wrong master passwords starts again (D-041)
     if (quick) {
         quick->cancel(); // a finger still asked for is no longer needed
     }
@@ -2679,6 +2774,7 @@ void VaultController::setPath(const QString& newPath)
         }
         needKeyfile = false;
         watch();
+        updateWait(); // the wait of this vault, if one is running (D-041)
         emit vaultPathChanged();
         emit quickUnlockChanged();
         emit keyfileChanged();

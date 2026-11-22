@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.23
+// UnlockPage.qml 0.0.26
 
 // --- Version history ----------------------------------------------------
+// v0.0.26: Greyed with "Try again in" while waiting after wrong master passwords (D-041)
 // v0.0.23: Unlocking with a fingerprint, asked at once; the yearly master password reminder (D-038)
 // v0.0.15: The keyfile, when the vault needs one, chosen here and remembered (D-031); after a lock, the primary
 //          vault's master password unlocks every vault (D-030)
@@ -91,7 +92,18 @@ Item {
             objectName: "masterPasswordField"
             placeholderText: qsTr("Master password")
             Layout.fillWidth: true
+            // Greyed while waiting after wrong master passwords (D-041).
+            enabled: VaultController.unlockWaitSeconds === 0
             onAccepted: unlockPage.unlockNow()
+            onEnabledChanged: if (enabled && unlockPage.visible) forceActiveFocus()
+        }
+        Label {
+            objectName: "unlockWaitText"
+            visible: VaultController.unlockWaitSeconds > 0
+            text: qsTr("Try again in %1").arg(Math.floor(VaultController.unlockWaitSeconds / 60) + ":"
+                                              + String(VaultController.unlockWaitSeconds % 60).padStart(2, "0"))
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
         }
         // The keyfile, when this vault needs one (D-031).
         RowLayout {
@@ -110,7 +122,9 @@ Item {
             }
         }
         Button {
+            objectName: "unlockButton"
             text: qsTr("Unlock")
+            enabled: VaultController.unlockWaitSeconds === 0
             Layout.fillWidth: true
             onClicked: unlockPage.unlockNow()
         }

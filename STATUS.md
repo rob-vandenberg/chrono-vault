@@ -2,13 +2,12 @@
 
 ## Now
 
-**Version 0.0.25**: Settings > Security: Change the Master Password, and Autolock when the main window is closed, the
-system sleeps, Chrono Vault is idle, the system is inactive (D-040). Before: the menus (0.0.24), unlocking with a
-fingerprint (0.0.23).
+**Version 0.0.26**: waits after wrong master passwords, kept through a restart (D-041). Before: Settings > Security
+with Autolock when (0.0.25), the menus (0.0.24), unlocking with a fingerprint (0.0.23).
 
 ## Next task
 
-0.0.26: waits after wrong master passwords; then the backlog in `ROADMAP.md` (PIN unlock first). The owner tests the fingerprint.
+The backlog in `ROADMAP.md` (PIN unlock first). The owner tests the fingerprint.
 
 ## Open questions
 
