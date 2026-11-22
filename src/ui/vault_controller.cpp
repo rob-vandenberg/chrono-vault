@@ -951,6 +951,7 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                     self->recordMasterPassword(); // typed: the reminder waits another year
                 }
                 self->unlocked(result.key, read.contents, *fingerprint);
+                self->keepForThisVault(); // its key for the finger, when that is on (D-043)
             },
             Qt::QueuedConnection);
     });
@@ -1489,6 +1490,10 @@ void VaultController::connectQuickUnlock()
     });
     connect(quick.get(), &QuickUnlock::stored, this, [this](QuickUnlock::Result result) {
         const bool ok = result == QuickUnlock::Result::Done;
+        if (std::exchange(keepingQuietly, false)) {
+            emit quickUnlockChanged(); // kept at an unlock: nothing to say
+            return;
+        }
         if (std::exchange(replacingQuickKey, false)) {
             if (!ok) {
                 quick->remove(path);
@@ -1506,7 +1511,8 @@ void VaultController::connectQuickUnlock()
         switch (result) {
         case QuickUnlock::Result::Done:
             recordMasterPasswordIfNone();
-            tellSetup(tr("%1 unlocks this vault from now on.").arg(sentenceStart(quickUnlockName())), false);
+            QSettings().setValue(QStringLiteral("quickUnlock/enabled"), true);
+            tellSetup(QString(), false); // the ticked box says it
             break;
         case QuickUnlock::Result::Cancelled: tellSetup(QString(), false); break;
         case QuickUnlock::Result::Failed: tellSetup(tr("That finger was not recognized."), true); break;
@@ -1570,7 +1576,11 @@ void VaultController::setQuickUnlock(bool on)
         return;
     }
     if (!on) {
-        quick->remove(path);
+        // Off for all vaults: every kept key removed (D-043).
+        QSettings().setValue(QStringLiteral("quickUnlock/enabled"), false);
+        for (const QString& vault : QSettings().value(QStringLiteral("quickUnlock/vaults")).toStringList()) {
+            quick->remove(vault);
+        }
         emit quickUnlockChanged();
         return;
     }
@@ -1579,6 +1589,24 @@ void VaultController::setQuickUnlock(bool on)
         settingUp = true;
         tellSetup(QString(), false);
         quick->store(path, quickSecretOf(key, keyfileSecret));
+    }
+}
+
+bool VaultController::quickUnlockEnabled() const
+{
+    QSettings settings;
+    // Before 0.0.28 it was per vault: on for any vault means on (D-043).
+    return settings.value(QStringLiteral("quickUnlock/enabled"),
+                          !settings.value(QStringLiteral("quickUnlock/vaults")).toStringList().isEmpty())
+        .toBool();
+}
+
+void VaultController::keepForThisVault()
+{
+    if (quick && quickAvailable && quickUnlockEnabled() && !quick->has(path) && !settingUp && !replacingQuickKey &&
+        currentState == State::Unlocked) {
+        keepingQuietly = true;
+        quick->replace(path, quickSecretOf(key, keyfileSecret));
     }
 }
 

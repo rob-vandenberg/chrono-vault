@@ -122,6 +122,7 @@ class VaultController : public QObject
     Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
     Q_PROPERTY(bool quickUnlockAvailable READ quickUnlockAvailable NOTIFY quickUnlockChanged)
     Q_PROPERTY(bool quickUnlockOn READ quickUnlockOn NOTIFY quickUnlockChanged)
+    Q_PROPERTY(bool quickUnlockEnabled READ quickUnlockEnabled NOTIFY quickUnlockChanged)
     // Turning it on: a finger asked once, and what came of it, for the
     // settings window (D-042).
     Q_PROPERTY(bool quickUnlockBusy READ quickUnlockBusy NOTIFY quickUnlockChanged)
@@ -220,7 +221,14 @@ public:
     void setUseWebsiteIcons(bool use);
     // Unlocking with a fingerprint (D-038).
     [[nodiscard]] bool quickUnlockAvailable() const { return quickAvailable; }
-    [[nodiscard]] bool quickUnlockOn() const { return quick && !path.isEmpty() && quick->has(path); }
+    // One setting for all vaults (the owner, D-043); a vault's key is kept at
+    // its next master-password unlock.
+    [[nodiscard]] bool quickUnlockEnabled() const;
+    [[nodiscard]] bool quickUnlockOn() const
+    {
+        return quick && !path.isEmpty() && quickUnlockEnabled() && quick->has(path);
+    }
+    Q_INVOKABLE void clearQuickUnlockMessage() { tellSetup(QString(), false); }
     [[nodiscard]] QString quickUnlockName() const { return quick ? quick->name() : QString(); }
     // Once a year the master password is asked though a finger would do (the
     // owner, Q44), unless the reminder is off.
@@ -539,6 +547,8 @@ private:
     bool reminderOn = true;
     bool replacingQuickKey = false; // storing the new key after a master password change
     bool settingUp = false;   // a finger asked to turn it on
+    bool keepingQuietly = false; // a vault's key kept at its master-password unlock
+    void keepForThisVault();
     bool retrieving = false;  // a finger asked to unlock
     QString setupMessage;
     bool setupTrouble = false;

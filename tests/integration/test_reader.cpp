@@ -62,6 +62,13 @@ public:
         secret = forSecret;
     }
     void retrieve(const QString& forVault) override { ask(false, forVault); }
+    // As on Linux: a key kept without asking for a finger.
+    void replace(const QString& forVault, const QByteArray& forSecret) override
+    {
+        kept.insert(forVault, forSecret);
+        remember(forVault, true);
+        emit stored(Result::Done);
+    }
     void remove(const QString& forVault) override
     {
         kept.remove(forVault);
@@ -125,6 +132,7 @@ private slots:
     void a_cancel_is_no_failure_and_a_key_not_kept_is_told();
     void unlocking_holds_the_reader_until_it_is_settled();
     void the_unlock_page_asks_whenever_it_is_on_screen();
+    void one_setting_for_all_vaults_keeps_each_key_at_its_unlock();
 
 private:
     std::unique_ptr<VaultController> unlocked(Reader*& reader, const QString& name);
@@ -198,7 +206,8 @@ void TestReader::turning_it_on_asks_one_touch_and_tells_what_came_of_it()
     QVERIFY(!controller->quickUnlockBusy());
     QVERIFY(controller->quickUnlockOn());
     QVERIFY(!controller->quickUnlockTrouble());
-    QCOMPARE(controller->quickUnlockMessage(), QStringLiteral("Fingerprint unlocks this vault from now on."));
+    QVERIFY(controller->quickUnlockMessage().isEmpty()); // the ticked box says it
+    QVERIFY(controller->quickUnlockEnabled());
 }
 
 void TestReader::a_cancel_is_no_failure_and_a_key_not_kept_is_told()
@@ -312,6 +321,42 @@ void TestReader::the_unlock_page_asks_whenever_it_is_on_screen()
         warningText += warning.toString() + QLatin1Char('\n');
     }
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
+{
+    Reader* reader = nullptr;
+    auto controller = unlocked(reader, QStringLiteral("first"));
+    QVERIFY(controller);
+    controller->setQuickUnlock(true);
+    reader->finger(true);
+    QVERIFY(controller->quickUnlockEnabled());
+    const QString first = controller->vaultPath();
+    QVERIFY(reader->kept.contains(first));
+
+    // Another vault, unlocked with its master password: its key is kept
+    // too, without a touch (D-043).
+    controller->createVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("second.chronovault"))),
+                            QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    const QString second = controller->vaultPath();
+    controller->lock();
+    controller->chooseVault(QUrl::fromLocalFile(second));
+    controller->unlock(QStringLiteral("two"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QTRY_VERIFY(reader->kept.contains(second));
+    QVERIFY(controller->quickUnlockOn());
+
+    // Unticked: every kept key removed.
+    controller->setQuickUnlock(false);
+    QVERIFY(!controller->quickUnlockEnabled());
+    QVERIFY(reader->kept.isEmpty());
+    QVERIFY(!controller->quickUnlockOn());
+
+    // Before 0.0.28 it was per vault: on for any vault carries over as on.
+    QSettings().remove(QStringLiteral("quickUnlock/enabled"));
+    QSettings().setValue(QStringLiteral("quickUnlock/vaults"), QStringList{first});
+    QVERIFY(controller->quickUnlockEnabled());
 }
 
 QTEST_MAIN(TestReader)

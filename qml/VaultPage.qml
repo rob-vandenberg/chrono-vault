@@ -98,8 +98,11 @@ Item {
         signal foldToggled()
         spacing: 0
         Layout.topMargin: Math.round(14 * Appearance.factor)
+        Layout.fillWidth: true
         ToolButton {
             objectName: "foldButton_" + heading.key
+            // Collapsed: centered in the column, as in the owner's mockup.
+            Layout.alignment: vaultPage.collapsed ? Qt.AlignHCenter : Qt.AlignLeft
             text: heading.folded ? "▸" : "▾"
             opacity: 0.7
             implicitWidth: Math.round(24 * Appearance.factor)
@@ -110,6 +113,7 @@ Item {
         }
         Label {
             visible: !vaultPage.collapsed
+            Layout.fillWidth: true
             text: heading.title
             font.bold: true
             opacity: 0.7

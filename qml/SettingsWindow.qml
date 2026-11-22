@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.27
+// SettingsWindow.qml 0.0.28
 
 // --- Version history ----------------------------------------------------
+// v0.0.28: The fingerprint one check box for all vaults, its touch in a popup; the switches no longer mirrored (D-043)
 // v0.0.27: General: Keep running in the tray last; the fingerprint a switch, its touch and outcome told here (D-042)
 // v0.0.25: Security: Change the Master Password, Autolock when (D-040)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (Security) (D-038)
@@ -188,6 +189,35 @@ ApplicationWindow {
         close()
     }
 
+    // Ticking the fingerprint: "Touch the fingerprint reader…" with Cancel,
+    // then what came of it, in a popup (the owner, D-043).
+    Popup {
+        objectName: "quickUnlockPopup"
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        visible: settingsWindow.visible && (VaultController.quickUnlockBusy || VaultController.quickUnlockMessage !== "")
+        padding: Math.round(16 * Appearance.factor)
+        contentItem: ColumnLayout {
+            spacing: Math.round(12 * Appearance.factor)
+            Label {
+                objectName: "quickUnlockMessage"
+                text: VaultController.quickUnlockMessage
+                font.bold: VaultController.quickUnlockTrouble
+                wrapMode: Text.Wrap
+                Layout.maximumWidth: Math.round(360 * Appearance.factor)
+            }
+            Button {
+                objectName: "quickUnlockCancel"
+                text: VaultController.quickUnlockBusy ? qsTr("Cancel") : qsTr("OK")
+                Layout.alignment: Qt.AlignRight
+                onClicked: VaultController.quickUnlockBusy ? VaultController.cancelQuickUnlockSetup()
+                                                           : VaultController.clearQuickUnlockMessage()
+            }
+        }
+    }
+
     // What went wrong at the last OK, shown beside the buttons.
     property string problem: ""
     // Closed without OK (Cancel, Esc, the window's own close): the theme and
@@ -197,6 +227,7 @@ ApplicationWindow {
             problem = ""
             // A finger still asked for turning it on: the reader is given back.
             VaultController.cancelQuickUnlockSetup()
+            VaultController.clearQuickUnlockMessage() // nothing left over for the next opening
             Appearance.showKept()
         }
     }
@@ -514,10 +545,11 @@ ApplicationWindow {
                                 text: qsTr("Main window is closed")
                                 Layout.fillWidth: true
                             }
+                            // The word apart from the switch, never mirrored: the
+                            // knob shows on when on (D-043).
+                            Label { text: settingsWindow.lockWhenClosed ? qsTr("On") : qsTr("Off") }
                             Switch {
                                 objectName: "lockWhenClosedSwitch"
-                                text: checked ? qsTr("On") : qsTr("Off")
-                                LayoutMirroring.enabled: true
                                 checked: settingsWindow.lockWhenClosed
                                 onToggled: settingsWindow.lockWhenClosed = checked
                             }
@@ -528,10 +560,11 @@ ApplicationWindow {
                                 text: qsTr("System sleeps")
                                 Layout.fillWidth: true
                             }
+                            // The word apart from the switch, never mirrored: the
+                            // knob shows on when on (D-043).
+                            Label { text: settingsWindow.lockOnSleep ? qsTr("On") : qsTr("Off") }
                             Switch {
                                 objectName: "lockOnSleepSwitch"
-                                text: checked ? qsTr("On") : qsTr("Off")
-                                LayoutMirroring.enabled: true
                                 checked: settingsWindow.lockOnSleep
                                 onToggled: settingsWindow.lockOnSleep = checked
                             }
@@ -592,65 +625,22 @@ ApplicationWindow {
                             onToggled: settingsWindow.hideSensitive = checked
                             Layout.topMargin: Math.round(8 * Appearance.factor)
                         }
-                        // Unlocking with a fingerprint (D-038): for the open
-                        // vault, at once, not with OK.
-                        Label {
-                            text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName || qsTr("fingerprint"))
-                            font.bold: true
-                            Layout.topMargin: Math.round(12 * Appearance.factor)
-                        }
-                        Label {
-                            text: !VaultController.quickUnlockAvailable
-                                  ? (Qt.platform.os === "windows"
-                                     ? qsTr("Windows Hello is not set up on this computer.")
-                                     : qsTr("No fingerprint reader is set up on this computer."))
-                                  : VaultController.state !== VaultController.Unlocked
-                                  ? qsTr("Unlock a vault to turn this on for it.")
-                                  : VaultController.quickUnlockOn
-                                  ? qsTr("On for this vault, on this computer.")
-                                  : qsTr("Off for this vault. Turning it on asks for your finger once.")
-                            wrapMode: Text.Wrap
-                            opacity: 0.8
-                            Layout.fillWidth: true
-                        }
-                        // A switch, at once, not with OK (D-042): on asks for
-                        // one touch of the reader to make sure it works.
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Item { Layout.fillWidth: true }
-                            Switch {
-                                id: quickUnlockSwitch
-                                objectName: "quickUnlockToggle"
-                                text: checked ? qsTr("On") : qsTr("Off")
-                                LayoutMirroring.enabled: true
-                                checked: VaultController.quickUnlockOn || VaultController.quickUnlockBusy
-                                enabled: VaultController.quickUnlockAvailable && !VaultController.quickUnlockBusy
-                                         && VaultController.state === VaultController.Unlocked
-                                onToggled: {
-                                    VaultController.setQuickUnlock(checked)
-                                    checked = Qt.binding(function() {
-                                        return VaultController.quickUnlockOn || VaultController.quickUnlockBusy
-                                    })
-                                }
-                            }
-                        }
-                        // "Touch the fingerprint reader…" and what came of it,
-                        // here where it was asked (D-042).
-                        RowLayout {
-                            visible: VaultController.quickUnlockMessage !== "" || VaultController.quickUnlockBusy
-                            Layout.fillWidth: true
-                            Label {
-                                objectName: "quickUnlockMessage"
-                                text: VaultController.quickUnlockMessage
-                                font.bold: VaultController.quickUnlockTrouble
-                                wrapMode: Text.Wrap
-                                Layout.fillWidth: true
-                            }
-                            Button {
-                                objectName: "quickUnlockCancel"
-                                visible: VaultController.quickUnlockBusy
-                                text: qsTr("Cancel")
-                                onClicked: VaultController.cancelQuickUnlockSetup()
+                        // One line, for all vaults (the owner, D-043): ticked, it
+                        // asks for one touch in a popup, at once, not with OK.
+                        CheckBox {
+                            id: quickUnlockBox
+                            objectName: "quickUnlockToggle"
+                            text: Qt.platform.os === "windows" ? qsTr("Use Windows Hello to unlock vault")
+                                                               : qsTr("Use fingerprint to unlock vault")
+                            checked: VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
+                            enabled: VaultController.quickUnlockAvailable && !VaultController.quickUnlockBusy
+                                     && (checked || VaultController.state === VaultController.Unlocked)
+                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                            onToggled: {
+                                VaultController.setQuickUnlock(checked)
+                                checked = Qt.binding(function() {
+                                    return VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
+                                })
                             }
                         }
                         CheckBox {

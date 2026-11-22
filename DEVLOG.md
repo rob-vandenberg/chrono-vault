@@ -300,3 +300,9 @@ the moment that is settled; the settings window says "Touch the fingerprint read
 `tests/integration/test_reader.cpp` drives it with a stand-in fprintd.
 Review round 1: on Windows a key not kept was blamed on a "desktop keyring" Windows does not have; each system now
 says its own reason.
+
+## 22 November 2026: version 0.0.28: the fingerprint one check box for all vaults
+
+The owner: one line, a check box, for all vaults; the touch in a popup (D-043). Each vault's key is kept at its next
+master-password unlock; unticking removes them all. Found: the Autolock switches were mirrored (on while saying Off);
+the collapsed sidebar's triangles were not centered as in the owner's mockup.

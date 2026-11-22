@@ -2,9 +2,8 @@
 
 ## Now
 
-**Version 0.0.27**: the sidebar collapses to its icons and its groups fold; wider splitters; the fingerprint reader
-held only while a finger is asked, a switch with a one-time touch (D-042). Before: waits after wrong master passwords
-(0.0.26), Autolock when (0.0.25), the menus (0.0.24).
+**Version 0.0.28**: the fingerprint one check box for all vaults, its touch in a popup; the Autolock switches drawn
+the right way; the collapsed sidebar's triangles centered (D-043). Before: the collapsible sidebar (0.0.27).
 
 ## Next task
 
