@@ -2,14 +2,13 @@
 
 ## Now
 
-**Version 0.0.24**: the menus after the reference program's, with their shortcuts, item counts, Hide Sidebar, the
-groups of the left column by choice, Clear Clipboard and the one-time code's copy button (D-039). Before: unlocking
-with a fingerprint (0.0.23), export (0.0.22).
+**Version 0.0.25**: Settings > Security: Change the Master Password, and Autolock when the main window is closed, the
+system sleeps, Chrono Vault is idle, the system is inactive (D-040). Before: the menus (0.0.24), unlocking with a
+fingerprint (0.0.23).
 
 ## Next task
 
-0.0.25: Settings > Security, "Change the Master Password" and the four autolock choices; 0.0.26: waits after wrong
-master passwords; then the backlog in `ROADMAP.md` (PIN unlock first). The owner tests the fingerprint.
+0.0.26: waits after wrong master passwords; then the backlog in `ROADMAP.md` (PIN unlock first). The owner tests the fingerprint.
 
 ## Open questions
 

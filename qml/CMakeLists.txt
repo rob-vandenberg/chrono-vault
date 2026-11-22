@@ -80,6 +80,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/program_scale.cpp
         ../src/ui/quick_unlock.cpp
         ../src/ui/quick_unlock.h
+        ../src/ui/system_activity.h
         ../src/ui/program_scale.h
         ../src/ui/single_instance.cpp
         ../src/ui/single_instance.h
@@ -170,6 +171,16 @@ elseif(WIN32)
     set_source_files_properties(../src/ui/quick_unlock_windows.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
 else()
     target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_none.cpp)
+endif()
+# What the system says for the autolock (D-040): logind and the desktop over
+# D-Bus on Linux, the power messages and the last input on Windows.
+if(LINUX)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/system_activity_linux.cpp)
+elseif(WIN32)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/system_activity_windows.cpp)
+    target_link_libraries(chrono_vault_ui PRIVATE user32)
+else()
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/system_activity_none.cpp)
 endif()
 chrono_vault_strict_warnings_for_sources(
     ../src/ui/app_setup.cpp

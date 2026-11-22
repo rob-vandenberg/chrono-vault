@@ -848,7 +848,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+56"/>
+        <location filename="../qml/Main.qml" line="+57"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1050,7 +1050,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+125"/>
+        <location line="+127"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1177,18 +1177,18 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+125"/>
-        <location line="+283"/>
+        <location filename="../qml/SettingsWindow.qml" line="+139"/>
+        <location line="+298"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-248"/>
+        <location line="-253"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+52"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1200,12 +1200,12 @@
     </message>
     <message>
         <location line="-168"/>
-        <location line="+230"/>
+        <location line="+315"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-230"/>
+        <location line="-315"/>
         <location line="+42"/>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -1286,12 +1286,65 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+19"/>
+        <source>Change the Master Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Autolock when</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Main window is closed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <location line="+14"/>
+        <source>On</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-14"/>
+        <location line="+14"/>
+        <source>Off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-5"/>
+        <source>System sleeps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+15"/>
-        <source>Lock the vault after this many minutes without use (0 means never):</source>
+        <source>Chrono Vault is idle for</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+14"/>
+        <location line="+21"/>
+        <source>Minutes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-15"/>
+        <source>System inactive for</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>This desktop does not tell how long the system has been inactive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Hide sensitive fields: show them as dots until asked</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1657,7 +1710,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+214"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+220"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2137,7 +2190,7 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+197"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+307"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2475,7 +2528,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+180"/>
+        <location line="+188"/>
         <source>“%1” was changed elsewhere. Your version was kept as “%2”; the vault now shows the other version.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2485,7 +2538,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+98"/>
+        <location line="+106"/>
         <source>A change kept through the lock could not be written beside the vault, which was changed elsewhere meanwhile: the folder cannot be written to, or the disk is full.</source>
         <translation type="unfinished"></translation>
     </message>

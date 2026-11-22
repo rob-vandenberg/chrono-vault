@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.24
+// Main.qml 0.0.25
 
 // --- Version history ----------------------------------------------------
+// v0.0.25: Autolock when the main window is closed; Settings > Security opens Change the Master Password (D-040)
 // v0.0.24: The menus after the reference program's, with their shortcuts (D-039)
 // v0.0.22: File > Export… (D-037)
 // v0.0.19: File > Import… (D-035)
@@ -578,6 +579,8 @@ ApplicationWindow {
             close.accepted = false
             settingsWindow.close()
             hide()
+            // Autolock when the main window is closed (D-040).
+            VaultController.mainWindowClosed()
             return
         }
         if (!quitAnyway) {
@@ -701,7 +704,10 @@ ApplicationWindow {
         }
     }
 
-    SettingsWindow { id: settingsWindow }
+    SettingsWindow {
+        id: settingsWindow
+        onChangeMasterPasswordRequested: mainWindow.changeMasterPassword()
+    }
 
     // About, with F1 (D-021), and the update's windows as in Chrono Mail (D-024).
     AboutWindow {

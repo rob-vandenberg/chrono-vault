@@ -48,3 +48,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-037](decisions/D-037.md) | Export in the reference program's format: master password first, a plain warning, the whole vault, readable by the person alone (autonomous mode) |
 | [D-038](decisions/D-038.md) | Unlocking with a fingerprint: Windows Hello on Windows, fprintd and the keyring on Linux (weaker), the master password once a year (autonomous mode) |
 | [D-039](decisions/D-039.md) | The menus after the reference program's: File, View, Item, Tools, Help, their shortcuts, the one-time code's copy button |
+| [D-040](decisions/D-040.md) | Settings > Security: Change the Master Password, and Autolock when the window closes, the system sleeps, Chrono Vault or the system is idle |

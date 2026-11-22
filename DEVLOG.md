@@ -273,3 +273,13 @@ nothing showing why (now it goes back to Home); an address with spaces around it
 with tests.
 Review round 4: Copy OTP stayed clickable for a one-time code whose secret makes no code (a damaged import); now
 greyed. With a test.
+
+## 22 November 2026: version 0.0.25: Change the Master Password in Settings, and Autolock when (autonomous mode)
+
+Settings > Security has a Change the Master Password row and the reference program's Autolock when: the main window
+closed, the system sleeping, Chrono Vault idle, the system inactive (D-040). `src/ui/system_activity*` asks logind and
+the desktop over D-Bus on Linux, the power messages and the last input on Windows. An old "0 minutes" becomes the idle
+box unticked. `tests/integration/test_autolock.cpp` drives it through a stand-in system.
+Review round 1: after a fingerprint unlock the system still counted the time before it as inactive (a finger is no
+input the system sees), so "System inactive for" locked again at once; the inactive time now counts from the unlock
+on. With a test.

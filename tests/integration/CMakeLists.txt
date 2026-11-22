@@ -120,6 +120,11 @@ target_link_libraries(test_menus PRIVATE chrono_vault_ui chrono_vault_uiplugin Q
 chrono_vault_strict_warnings(test_menus)
 chrono_vault_add_test(test_menus)
 
+qt_add_executable(test_autolock test_autolock.cpp)
+target_link_libraries(test_autolock PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_autolock)
+chrono_vault_add_test(test_autolock)
+
 qt_add_executable(test_quick_unlock test_quick_unlock.cpp)
 target_link_libraries(test_quick_unlock PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
 chrono_vault_strict_warnings(test_quick_unlock)

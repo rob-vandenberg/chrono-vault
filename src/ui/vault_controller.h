@@ -20,6 +20,7 @@
 #include "item_list_model.h"
 #include "json_import.h"
 #include "quick_unlock.h"
+#include "system_activity.h"
 #include "vault_contents.h"
 #include "vault_file.h"
 
@@ -88,6 +89,15 @@ class VaultController : public QObject
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockMinutesChanged)
+    // Autolock when (D-040): Chrono Vault idle for autoLockMinutes (when
+    // idleLockOn), the main window closed, the system sleeping, the system
+    // inactive for systemIdleMinutes.
+    Q_PROPERTY(bool idleLockOn READ idleLockOn WRITE setIdleLockOn NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(bool lockWhenClosed READ lockWhenClosed WRITE setLockWhenClosed NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(bool lockOnSleep READ lockOnSleep WRITE setLockOnSleep NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(bool systemIdleLockOn READ systemIdleLockOn WRITE setSystemIdleLockOn NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(int systemIdleMinutes READ systemIdleMinutes WRITE setSystemIdleMinutes NOTIFY autoLockMinutesChanged)
+    Q_PROPERTY(bool systemIdleAvailable READ systemIdleAvailable NOTIFY systemIdleAvailableChanged)
     Q_PROPERTY(bool keepInTray READ keepInTray WRITE setKeepInTray NOTIFY keepInTrayChanged)
     Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
     Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY startMinimizedChanged)
@@ -157,6 +167,22 @@ public:
     // read their lists again.
     [[nodiscard]] int revision() const { return contentsRevision; }
     [[nodiscard]] int autoLockMinutes() const { return lockMinutes; }
+    [[nodiscard]] bool idleLockOn() const { return idleLock; }
+    void setIdleLockOn(bool on);
+    [[nodiscard]] bool lockWhenClosed() const { return lockClosed; }
+    void setLockWhenClosed(bool on);
+    [[nodiscard]] bool lockOnSleep() const { return lockSleep; }
+    void setLockOnSleep(bool on);
+    [[nodiscard]] bool systemIdleLockOn() const { return systemIdleLock; }
+    void setSystemIdleLockOn(bool on);
+    [[nodiscard]] int systemIdleMinutes() const { return systemMinutes; }
+    void setSystemIdleMinutes(int minutes);
+    [[nodiscard]] bool systemIdleAvailable() const { return systemIdleKnown; }
+    // The main window was closed into the tray: locked when so chosen.
+    Q_INVOKABLE void mainWindowClosed();
+    // Asks the system how long it has been inactive (every 30 seconds while
+    // a vault is unlocked and that choice is on); public for the tests.
+    Q_INVOKABLE void checkSystemIdle();
     void setAutoLockMinutes(int minutes);
     // The General settings (D-019).
     [[nodiscard]] bool keepInTray() const { return keepRunning; }
@@ -191,6 +217,9 @@ public:
     Q_INVOKABLE void dismissReminder();
     // Tests only: a stand-in for the fingerprint reader.
     void setQuickUnlockForTests(std::unique_ptr<QuickUnlock> standIn);
+    void setSystemActivityForTests(std::unique_ptr<SystemActivity> standIn);
+    // The tests' clock: the vault counts as unlocked this many seconds ago.
+    void setUnlockedSecondsAgoForTests(qint64 seconds);
     // Tests only: where a website's icon is asked for.
     void setIconAddressForTests(std::function<QUrl(const QString&)> address) { iconAddress = std::move(address); }
     void setShowSubtitles(bool show);
@@ -344,6 +373,7 @@ signals:
     void importRead(const QVariantMap& summary);
     void exportDone(bool ok);
     void autoLockMinutesChanged();
+    void systemIdleAvailableChanged();
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
     void showSubtitlesChanged();
@@ -448,6 +478,19 @@ private:
     void setViewOption(const QString& name, bool on);
     bool websiteIconsOn = false;
     std::unique_ptr<QuickUnlock> quick;
+    std::unique_ptr<SystemActivity> activity;
+    void connectSystemActivity();
+    bool idleLock = true;
+    bool lockClosed = false;
+    bool lockSleep = false;
+    bool systemIdleLock = false;
+    int systemMinutes = 10;
+    bool systemIdleKnown = false;
+    QTimer systemIdleTimer;
+    // When the vault was last unlocked: the system's inactive time counts
+    // only from then on (an unlock by finger is no input the system sees).
+    qint64 unlockedAtMs = 0;
+    void setBool(bool& value, bool on, const QString& settingName);
     bool quickAvailable = false;
     bool reminderOn = true;
     bool replacingQuickKey = false; // storing the new key after a master password change

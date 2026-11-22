@@ -80,6 +80,12 @@ const QString lastVaultKey = QStringLiteral("vault/lastPath");
 const QString vaultListKey = QStringLiteral("vaults/list");
 const QString keyfilesKey = QStringLiteral("vaults/keyfiles");
 const QString autoLockKey = QStringLiteral("security/autoLockMinutes");
+const QString idleLockKey = QStringLiteral("security/idleLockOn");
+const QString lockClosedKey = QStringLiteral("security/lockWhenClosed");
+const QString lockSleepKey = QStringLiteral("security/lockOnSleep");
+const QString systemIdleLockKey = QStringLiteral("security/systemIdleLockOn");
+const QString systemIdleMinutesKey = QStringLiteral("security/systemIdleMinutes");
+constexpr int defaultSystemIdleMinutes = 10;
 // The settings as they are before the person changes them, also what
 // Restore defaults puts back (D-022).
 constexpr int defaultAutoLockMinutes = 5;
@@ -340,6 +346,11 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     if (skipReadingSettings()) {
         // --reset: not read from the settings file at this start (D-026).
         lockMinutes = defaultAutoLockMinutes;
+        idleLock = true;
+        lockClosed = false;
+        lockSleep = false;
+        systemIdleLock = false;
+        systemMinutes = defaultSystemIdleMinutes;
         clearSeconds = defaultClipboardSeconds;
         keepRunning = defaultKeepInTray;
         minimizedAtStart = defaultStartMinimized;
@@ -352,10 +363,29 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
         reminderOn = settings.value(reminderKey, true).toBool();
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
+        // Before 0.0.25, 0 minutes meant never: now the tick box says that
+        // (D-040).
+        idleLock = settings.value(idleLockKey, lockMinutes > 0).toBool();
+        if (lockMinutes == 0) {
+            lockMinutes = defaultAutoLockMinutes;
+        }
+        lockClosed = settings.value(lockClosedKey, false).toBool();
+        lockSleep = settings.value(lockSleepKey, false).toBool();
+        systemIdleLock = settings.value(systemIdleLockKey, false).toBool();
+        systemMinutes =
+            std::clamp(settings.value(systemIdleMinutesKey, defaultSystemIdleMinutes).toInt(), 1, 240);
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
         minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
     }
+
+    // What the system says about sleep and inactivity (D-040); whether it
+    // tells the inactive time is asked once at the start.
+    activity = makeSystemActivity();
+    connectSystemActivity();
+    activity->askIdleTime();
+    systemIdleTimer.setInterval(30 * 1000);
+    connect(&systemIdleTimer, &QTimer::timeout, this, &VaultController::checkSystemIdle);
 
     // Whether a reader is there is asked off the window's thread (D-038).
     quick = makeQuickUnlock();
@@ -443,9 +473,95 @@ void VaultController::setSearchText(const QString& text)
     }
 }
 
+void VaultController::setBool(bool& value, bool on, const QString& settingName)
+{
+    if (value != on) {
+        value = on;
+        QSettings().setValue(settingName, on);
+        restartAutoLock();
+        emit autoLockMinutesChanged();
+    }
+}
+
+void VaultController::setIdleLockOn(bool on)
+{
+    setBool(idleLock, on, idleLockKey);
+}
+
+void VaultController::setLockWhenClosed(bool on)
+{
+    setBool(lockClosed, on, lockClosedKey);
+}
+
+void VaultController::setLockOnSleep(bool on)
+{
+    setBool(lockSleep, on, lockSleepKey);
+}
+
+void VaultController::setSystemIdleLockOn(bool on)
+{
+    setBool(systemIdleLock, on, systemIdleLockKey);
+}
+
+void VaultController::setSystemIdleMinutes(int minutes)
+{
+    minutes = std::clamp(minutes, 1, 240);
+    if (systemMinutes != minutes) {
+        systemMinutes = minutes;
+        QSettings().setValue(systemIdleMinutesKey, minutes);
+        emit autoLockMinutesChanged();
+    }
+}
+
+void VaultController::mainWindowClosed()
+{
+    if (lockClosed && currentState == State::Unlocked) {
+        lock();
+    }
+}
+
+void VaultController::checkSystemIdle()
+{
+    if (activity) {
+        activity->askIdleTime();
+    }
+}
+
+void VaultController::connectSystemActivity()
+{
+    connect(activity.get(), &SystemActivity::sleeping, this, [this]() {
+        if (lockSleep && currentState == State::Unlocked) {
+            lock();
+        }
+    });
+    connect(activity.get(), &SystemActivity::idleTime, this, [this](qint64 seconds) {
+        if (systemIdleKnown != (seconds >= 0)) {
+            systemIdleKnown = seconds >= 0;
+            emit systemIdleAvailableChanged();
+        }
+        const qint64 sinceUnlock = (QDateTime::currentMSecsSinceEpoch() - unlockedAtMs) / 1000;
+        if (systemIdleLock && std::min(seconds, sinceUnlock) >= qint64(systemMinutes) * 60 &&
+            currentState == State::Unlocked) {
+            lock();
+        }
+    });
+}
+
+void VaultController::setSystemActivityForTests(std::unique_ptr<SystemActivity> standIn)
+{
+    activity = std::move(standIn);
+    connectSystemActivity();
+    activity->askIdleTime();
+}
+
+void VaultController::setUnlockedSecondsAgoForTests(qint64 seconds)
+{
+    unlockedAtMs = QDateTime::currentMSecsSinceEpoch() - seconds * 1000;
+}
+
 void VaultController::setAutoLockMinutes(int minutes)
 {
-    minutes = std::clamp(minutes, 0, 240);
+    minutes = std::clamp(minutes, 1, 240);
     if (lockMinutes != minutes) {
         lockMinutes = minutes;
         QSettings().setValue(autoLockKey, minutes);
@@ -2486,6 +2602,11 @@ QVariantMap VaultController::settingsDefaults() const
 {
     return {
         {QStringLiteral("autoLockMinutes"), defaultAutoLockMinutes},
+        {QStringLiteral("idleLockOn"), true},
+        {QStringLiteral("lockWhenClosed"), false},
+        {QStringLiteral("lockOnSleep"), false},
+        {QStringLiteral("systemIdleLockOn"), false},
+        {QStringLiteral("systemIdleMinutes"), defaultSystemIdleMinutes},
         {QStringLiteral("clipboardClearSeconds"), defaultClipboardSeconds},
         {QStringLiteral("keepInTray"), defaultKeepInTray},
         {QStringLiteral("startMinimized"), defaultStartMinimized},
@@ -2527,6 +2648,9 @@ void VaultController::setState(State state)
 {
     if (currentState != state) {
         currentState = state;
+        if (state == State::Unlocked) {
+            unlockedAtMs = QDateTime::currentMSecsSinceEpoch();
+        }
         restartAutoLock();
         emit stateChanged();
     }
@@ -2662,10 +2786,18 @@ void VaultController::saveInBackground(const QString& itemId)
 
 void VaultController::restartAutoLock()
 {
-    if (currentState == State::Unlocked && lockMinutes > 0) {
+    if (currentState == State::Unlocked && idleLock && lockMinutes > 0) {
         autoLockTimer.start(lockMinutes * 60 * 1000);
     } else {
         autoLockTimer.stop();
+    }
+    // The system's inactive time is asked only while it can lock something.
+    if (currentState == State::Unlocked && systemIdleLock) {
+        if (!systemIdleTimer.isActive()) {
+            systemIdleTimer.start();
+        }
+    } else {
+        systemIdleTimer.stop();
     }
 }
 

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.23
+// SettingsWindow.qml 0.0.25
 
 // --- Version history ----------------------------------------------------
+// v0.0.25: Security: Change the Master Password, Autolock when (D-040)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (Security) (D-038)
 // v0.0.20: Use website icons (Customize), off by default (D-036)
 // v0.0.17: Hide sensitive fields (Security) and Show subtitles (Customize) (D-033)
@@ -86,6 +87,14 @@ ApplicationWindow {
     property bool startMinimized: false
     property int checkFrequency: 0
     property int autoLockMinutes: 0
+    // Autolock when (D-040).
+    property bool idleLockOn: true
+    property bool lockWhenClosed: false
+    property bool lockOnSleep: false
+    property bool systemIdleLockOn: false
+    property int systemIdleMinutes: 10
+    // Security > Change the Master Password, opened by the main window.
+    signal changeMasterPasswordRequested()
     property int clipboardClearSeconds: 0
     property bool hideSensitive: true
     property bool showSubtitles: true
@@ -103,6 +112,11 @@ ApplicationWindow {
         startMinimized = VaultController.startMinimized
         checkFrequency = Updater.frequency
         autoLockMinutes = VaultController.autoLockMinutes
+        idleLockOn = VaultController.idleLockOn
+        lockWhenClosed = VaultController.lockWhenClosed
+        lockOnSleep = VaultController.lockOnSleep
+        systemIdleLockOn = VaultController.systemIdleLockOn
+        systemIdleMinutes = VaultController.systemIdleMinutes
         clipboardClearSeconds = VaultController.clipboardClearSeconds
         hideSensitive = VaultController.hideSensitive
         showSubtitles = VaultController.showSubtitles
@@ -142,6 +156,16 @@ ApplicationWindow {
             Updater.frequency = checkFrequency
         if (VaultController.autoLockMinutes !== autoLockMinutes)
             VaultController.autoLockMinutes = autoLockMinutes
+        if (VaultController.idleLockOn !== idleLockOn)
+            VaultController.idleLockOn = idleLockOn
+        if (VaultController.lockWhenClosed !== lockWhenClosed)
+            VaultController.lockWhenClosed = lockWhenClosed
+        if (VaultController.lockOnSleep !== lockOnSleep)
+            VaultController.lockOnSleep = lockOnSleep
+        if (VaultController.systemIdleLockOn !== systemIdleLockOn)
+            VaultController.systemIdleLockOn = systemIdleLockOn
+        if (VaultController.systemIdleMinutes !== systemIdleMinutes)
+            VaultController.systemIdleMinutes = systemIdleMinutes
         if (VaultController.clipboardClearSeconds !== clipboardClearSeconds)
             VaultController.clipboardClearSeconds = clipboardClearSeconds
         if (VaultController.hideSensitive !== hideSensitive)
@@ -191,6 +215,11 @@ ApplicationWindow {
             break
         case 1:
             autoLockMinutes = defaults.autoLockMinutes
+            idleLockOn = defaults.idleLockOn
+            lockWhenClosed = defaults.lockWhenClosed
+            lockOnSleep = defaults.lockOnSleep
+            systemIdleLockOn = defaults.systemIdleLockOn
+            systemIdleMinutes = defaults.systemIdleMinutes
             hideSensitive = defaults.hideSensitive
             masterPasswordReminder = defaults.masterPasswordReminder
             break
@@ -455,18 +484,103 @@ ApplicationWindow {
                             text: qsTr("Security")
                             font.pointSize: Appearance.fontPointSize * 1.4
                         }
-                        Label {
-                            text: qsTr("Lock the vault after this many minutes without use (0 means never):")
-                            wrapMode: Text.Wrap
+                        // Change the Master Password, as a row of its own
+                        // (the reference program's settings).
+                        RowLayout {
                             Layout.fillWidth: true
+                            Label {
+                                text: qsTr("Change the Master Password")
+                                Layout.fillWidth: true
+                            }
+                            Button {
+                                objectName: "changeMasterPasswordButton"
+                                text: qsTr("Change")
+                                enabled: VaultController.state === VaultController.Unlocked
+                                onClicked: settingsWindow.changeMasterPasswordRequested()
+                            }
                         }
-                        SpinBox {
-                            objectName: "autoLockBox"
-                            from: 0
-                            to: 240
-                            value: settingsWindow.autoLockMinutes
-                            editable: true
-                            onValueModified: settingsWindow.autoLockMinutes = value
+                        // Autolock when (D-040).
+                        Label {
+                            text: qsTr("Autolock when")
+                            font.bold: true
+                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: qsTr("Main window is closed")
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                objectName: "lockWhenClosedSwitch"
+                                text: checked ? qsTr("On") : qsTr("Off")
+                                LayoutMirroring.enabled: true
+                                checked: settingsWindow.lockWhenClosed
+                                onToggled: settingsWindow.lockWhenClosed = checked
+                            }
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label {
+                                text: qsTr("System sleeps")
+                                Layout.fillWidth: true
+                            }
+                            Switch {
+                                objectName: "lockOnSleepSwitch"
+                                text: checked ? qsTr("On") : qsTr("Off")
+                                LayoutMirroring.enabled: true
+                                checked: settingsWindow.lockOnSleep
+                                onToggled: settingsWindow.lockOnSleep = checked
+                            }
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            CheckBox {
+                                objectName: "idleLockBox"
+                                text: qsTr("Chrono Vault is idle for")
+                                checked: settingsWindow.idleLockOn
+                                onToggled: settingsWindow.idleLockOn = checked
+                                Layout.fillWidth: true
+                            }
+                            SpinBox {
+                                objectName: "autoLockBox"
+                                from: 1
+                                to: 240
+                                value: settingsWindow.autoLockMinutes
+                                editable: true
+                                enabled: settingsWindow.idleLockOn
+                                onValueModified: settingsWindow.autoLockMinutes = value
+                            }
+                            Label { text: qsTr("Minutes") }
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            CheckBox {
+                                objectName: "systemIdleLockBox"
+                                text: qsTr("System inactive for")
+                                checked: settingsWindow.systemIdleLockOn
+                                enabled: VaultController.systemIdleAvailable
+                                onToggled: settingsWindow.systemIdleLockOn = checked
+                                Layout.fillWidth: true
+                            }
+                            SpinBox {
+                                objectName: "systemIdleBox"
+                                from: 1
+                                to: 240
+                                value: settingsWindow.systemIdleMinutes
+                                editable: true
+                                enabled: VaultController.systemIdleAvailable && settingsWindow.systemIdleLockOn
+                                onValueModified: settingsWindow.systemIdleMinutes = value
+                            }
+                            Label { text: qsTr("Minutes") }
+                        }
+                        Label {
+                            objectName: "systemIdleUnknown"
+                            visible: !VaultController.systemIdleAvailable
+                            text: qsTr("This desktop does not tell how long the system has been inactive.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.7
+                            Layout.fillWidth: true
                         }
                         CheckBox {
                             objectName: "hideSensitiveBox"
