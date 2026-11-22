@@ -110,3 +110,12 @@ The update's windows as in Chrono Mail (D-024) and the main window after the ref
 About box's top lines against the icon. Found while building: `ItemView` is a name of Qt Quick's own (renamed
 `ItemDetails`); a plain item has no font. Review round 1 found and fixed: a cancelled quit after Restart or Close left
 no notice, and a deleted item stayed shown. Seventeen tests.
+
+## 22 November 2026: version 0.0.10: settings names, own colours on every desktop, scaling of everything
+
+Autonomous mode after the owner's Proceed. The cause of the wrong blue was found on the real screen: a Qt Quick
+window takes the desktop theme's colours when it is made, so a look applied at the start never reached it; every
+window now takes the program's colours (`Appearance::dress`). The tray and start settings moved out of Qt's reserved
+"general" group, old values carried over. UI scaling now scales everything: Chrono Vault's own style over Fusion
+(`ChronoVault.Style`, version 6.0 so Fusion stays its fallback), 117 sizes in the windows times the factor, steps
+of 5%. Four sources were missing from the strict warnings; added. One review round, nothing real.

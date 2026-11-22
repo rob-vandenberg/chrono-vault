@@ -127,23 +127,23 @@ Item {
         // Left: the vault, then Home (all items).
         Pane {
             objectName: "vaultColumn"
-            SplitView.preferredWidth: 220
-            SplitView.minimumWidth: 160
-            padding: 12
+            SplitView.preferredWidth: Math.round(220 * Appearance.factor)
+            SplitView.minimumWidth: Math.round(160 * Appearance.factor)
+            padding: Math.round(12 * Appearance.factor)
 
             ColumnLayout {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: 16
+                spacing: Math.round(16 * Appearance.factor)
 
                 RowLayout {
-                    spacing: 10
+                    spacing: Math.round(10 * Appearance.factor)
                     Layout.fillWidth: true
                     Image {
                         source: "qrc:/icons/chrono-vault.svg"
-                        sourceSize: Qt.size(36, 36)
-                        Layout.preferredWidth: 36
-                        Layout.preferredHeight: 36
+                        sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
+                        Layout.preferredWidth: Math.round(36 * Appearance.factor)
+                        Layout.preferredHeight: Math.round(36 * Appearance.factor)
                     }
                     ColumnLayout {
                         spacing: 0
@@ -178,9 +178,9 @@ Item {
 
         // Middle: the search, the order, and the items under letter headings.
         ColumnLayout {
-            SplitView.preferredWidth: 300
-            SplitView.minimumWidth: 200
-            spacing: 4
+            SplitView.preferredWidth: Math.round(300 * Appearance.factor)
+            SplitView.minimumWidth: Math.round(200 * Appearance.factor)
+            spacing: Math.round(4 * Appearance.factor)
 
             TextField {
                 objectName: "searchField"
@@ -188,14 +188,14 @@ Item {
                 text: VaultController.searchText
                 onTextEdited: VaultController.searchText = text
                 Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 8
-                Layout.rightMargin: 8
+                Layout.topMargin: Math.round(8 * Appearance.factor)
+                Layout.leftMargin: Math.round(8 * Appearance.factor)
+                Layout.rightMargin: Math.round(8 * Appearance.factor)
             }
 
             RowLayout {
-                spacing: 2
-                Layout.leftMargin: 8
+                spacing: Math.round(2 * Appearance.factor)
+                Layout.leftMargin: Math.round(8 * Appearance.factor)
                 Label {
                     text: qsTr("Sort By:")
                     opacity: 0.7
@@ -232,9 +232,9 @@ Item {
                     text: section
                     font.bold: true
                     opacity: 0.7
-                    leftPadding: 12
-                    topPadding: 6
-                    bottomPadding: 2
+                    leftPadding: Math.round(12 * Appearance.factor)
+                    topPadding: Math.round(6 * Appearance.factor)
+                    bottomPadding: Math.round(2 * Appearance.factor)
                 }
 
                 delegate: ItemDelegate {
@@ -244,15 +244,15 @@ Item {
                     // The text of the chosen item in the highlight's own colour.
                     readonly property color textColour: highlighted ? vaultPage.palette.highlightedText : vaultPage.palette.text
                     contentItem: RowLayout {
-                        spacing: 10
+                        spacing: Math.round(10 * Appearance.factor)
                         Image {
                             source: model.icon
-                            sourceSize: Qt.size(36, 36)
-                            Layout.preferredWidth: 36
-                            Layout.preferredHeight: 36
+                            sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
+                            Layout.preferredWidth: Math.round(36 * Appearance.factor)
+                            Layout.preferredHeight: Math.round(36 * Appearance.factor)
                         }
                         ColumnLayout {
-                            spacing: 2
+                            spacing: Math.round(2 * Appearance.factor)
                             Layout.fillWidth: true
                             Label {
                                 text: model.title

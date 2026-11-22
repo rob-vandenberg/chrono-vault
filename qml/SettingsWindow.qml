@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.9
+// SettingsWindow.qml 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The program's colours from the start; the slider in steps of 5%; every size times the UI scaling (D-023)
 // v0.0.9: Opened at General from the View menu (D-025)
 // v0.0.8: "Keep Chrono Vault running in the system tray"
 // v0.0.7: Theme and UI scaling in General, shown at once, kept with OK; the pages scroll (D-023)
@@ -39,6 +40,8 @@ ApplicationWindow {
     id: settingsWindow
     // The program's font, so the UI scaling reaches every control (D-023).
     font: Appearance.font
+    // The program's colours, never the desktop theme's (D-023).
+    Component.onCompleted: Appearance.dress(this)
     objectName: "settingsWindow"
 
     function showWindow() {
@@ -162,8 +165,8 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: 680
-    height: 520
+    width: Math.round(680 * Appearance.factor)
+    height: Math.round(520 * Appearance.factor)
     visible: false
     color: palette.window
 
@@ -212,13 +215,13 @@ ApplicationWindow {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+        anchors.margins: Math.round(10 * Appearance.factor)
+        spacing: Math.round(10 * Appearance.factor)
 
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 12
+            spacing: Math.round(12 * Appearance.factor)
 
             // The topics: a framed panel, the chosen one marked across its
             // whole width.
@@ -245,7 +248,7 @@ ApplicationWindow {
                         required property string modelData
                         readonly property bool chosen: ListView.isCurrentItem
                         width: ListView.view.width
-                        height: topicText.implicitHeight + 6
+                        height: topicText.implicitHeight + Math.round(6 * Appearance.factor)
                         color: chosen ? settingsWindow.palette.highlight : "transparent"
                         Text {
                             id: topicText
@@ -278,7 +281,7 @@ ApplicationWindow {
                     width: pageScroll.availableWidth
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: Math.round(8 * Appearance.factor)
                         Label {
                             text: qsTr("General")
                             font.pointSize: Appearance.fontPointSize * 1.4
@@ -310,11 +313,11 @@ ApplicationWindow {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 12
+                            spacing: Math.round(12 * Appearance.factor)
                             Label { text: qsTr("UI scaling") }
                             Item {
                                 Layout.fillWidth: true
-                                implicitHeight: scaleSlider.implicitHeight + 6
+                                implicitHeight: scaleSlider.implicitHeight + Math.round(6 * Appearance.factor)
                                 Slider {
                                     id: scaleSlider
                                     objectName: "scaleSlider"
@@ -322,7 +325,9 @@ ApplicationWindow {
                                     anchors.right: parent.right
                                     from: Appearance.smallestScale
                                     to: Appearance.largestScale
-                                    stepSize: 1
+                                    // In steps of 5% (D-023).
+                                    stepSize: Appearance.scaleStep
+                                    snapMode: Slider.SnapAlways
                                     value: settingsWindow.scale
                                     // Put in use when the slider is let go, or at
                                     // once when moved with the keys.
@@ -341,7 +346,7 @@ ApplicationWindow {
                                              * Appearance.scaleMarkEvery / (Appearance.largestScale - Appearance.smallestScale)
                                         y: scaleSlider.height
                                         width: 1
-                                        height: 5
+                                        height: Math.round(5 * Appearance.factor)
                                         color: settingsWindow.palette.mid
                                     }
                                 }
@@ -393,7 +398,7 @@ ApplicationWindow {
                     }
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: Math.round(8 * Appearance.factor)
                         Label {
                             text: qsTr("Security")
                             font.pointSize: Appearance.fontPointSize * 1.4
@@ -415,7 +420,7 @@ ApplicationWindow {
                     }
 
                     ColumnLayout {
-                        spacing: 8
+                        spacing: Math.round(8 * Appearance.factor)
                         Label {
                             text: qsTr("Clipboard")
                             font.pointSize: Appearance.fontPointSize * 1.4
@@ -442,7 +447,7 @@ ApplicationWindow {
         // OK, Cancel and Restore defaults at the bottom right.
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Math.round(6 * Appearance.factor)
             Label {
                 objectName: "problemLabel"
                 text: settingsWindow.problem
@@ -465,8 +470,8 @@ ApplicationWindow {
                 text: qsTr("OK")
                 highlighted: true
                 icon.source: "qrc:/icons/ok.svg"
-                icon.width: 16
-                icon.height: 16
+                icon.width: Math.round(16 * Appearance.factor)
+                icon.height: Math.round(16 * Appearance.factor)
                 icon.color: settingsWindow.palette.buttonText
                 onClicked: settingsWindow.accept()
             }
@@ -474,8 +479,8 @@ ApplicationWindow {
                 objectName: "cancelButton"
                 text: qsTr("Cancel")
                 icon.source: "qrc:/icons/cancel.svg"
-                icon.width: 16
-                icon.height: 16
+                icon.width: Math.round(16 * Appearance.factor)
+                icon.height: Math.round(16 * Appearance.factor)
                 icon.color: settingsWindow.palette.buttonText
                 onClicked: settingsWindow.close()
             }

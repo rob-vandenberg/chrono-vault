@@ -133,26 +133,26 @@ Item {
         contentWidth: availableWidth
 
         ColumnLayout {
-            width: scroller.availableWidth - 24
+            width: scroller.availableWidth - Math.round(24 * Appearance.factor)
             x: 12
-            spacing: 10
+            spacing: Math.round(10 * Appearance.factor)
 
             Item { Layout.preferredHeight: 4 }
 
             RowLayout {
-                spacing: 12
+                spacing: Math.round(12 * Appearance.factor)
                 Layout.fillWidth: true
 
                 Image {
                     objectName: "itemIconImage"
                     source: editor.icon !== "" ? "data:image/png;base64," + editor.icon
                             : (editor.isNote ? "qrc:/icons/item-note.svg" : "qrc:/icons/item-login.svg")
-                    sourceSize: Qt.size(64, 64)
-                    Layout.preferredWidth: 64
-                    Layout.preferredHeight: 64
+                    sourceSize: Qt.size(Math.round(64 * Appearance.factor), Math.round(64 * Appearance.factor))
+                    Layout.preferredWidth: Math.round(64 * Appearance.factor)
+                    Layout.preferredHeight: Math.round(64 * Appearance.factor)
                 }
                 ColumnLayout {
-                    spacing: 4
+                    spacing: Math.round(4 * Appearance.factor)
                     Button {
                         text: qsTr("Choose icon…")
                         onClicked: iconDialog.open()
@@ -187,7 +187,7 @@ Item {
                     readonly property bool isPassword: model.kind === "password"
                     readonly property bool isCode: model.kind === "totp"
                     readonly property bool isCustom: model.role === ""
-                    spacing: 2
+                    spacing: Math.round(2 * Appearance.factor)
                     Layout.fillWidth: true
 
                     RowLayout {
@@ -201,7 +201,7 @@ Item {
                             visible: fieldRow.isCustom
                             text: fieldRow.model.label
                             placeholderText: qsTr("Name of the field")
-                            Layout.preferredWidth: 220
+                            Layout.preferredWidth: Math.round(220 * Appearance.factor)
                             onTextEdited: {
                                 fieldsModel.setProperty(fieldRow.index, "label", text)
                                 editor.changed = true
@@ -280,7 +280,7 @@ Item {
                         text: fieldRow.model.value
                         wrapMode: TextEdit.Wrap
                         Layout.fillWidth: true
-                        Layout.minimumHeight: 80
+                        Layout.minimumHeight: Math.round(80 * Appearance.factor)
                         onTextChanged: {
                             if (text !== fieldRow.model.value) {
                                 fieldsModel.setProperty(fieldRow.index, "value", text)
@@ -305,7 +305,7 @@ Item {
             }
 
             RowLayout {
-                Layout.topMargin: 8
+                Layout.topMargin: Math.round(8 * Appearance.factor)
                 Button {
                     text: qsTr("Save")
                     highlighted: true
@@ -367,7 +367,7 @@ Item {
             Label {
                 text: qsTr("“%1” has changes that are not saved yet.").arg(titleField.text)
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
             }
         }
         onAccepted: {
@@ -411,7 +411,7 @@ Item {
             Label {
                 text: qsTr("“%1” is removed from the vault. This cannot be undone.").arg(titleField.text)
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
             }
         }
         onAccepted: {

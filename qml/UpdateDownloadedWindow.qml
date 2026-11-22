@@ -44,7 +44,7 @@ DialogWindow {
               .arg(Updater.newVersion)
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: 420
+        Layout.preferredWidth: Math.round(420 * Appearance.factor)
         Layout.fillWidth: true
     }
     Label {

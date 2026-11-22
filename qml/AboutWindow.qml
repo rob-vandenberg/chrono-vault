@@ -41,14 +41,14 @@ DialogWindow {
 
     // The icon with the name, the version and the copyright beside it.
     RowLayout {
-        spacing: 16
+        spacing: Math.round(16 * Appearance.factor)
         Layout.fillWidth: true
 
         Image {
             source: "qrc:/icons/chrono-vault.svg"
-            sourceSize: Qt.size(64, 64)
-            Layout.preferredWidth: 64
-            Layout.preferredHeight: 64
+            sourceSize: Qt.size(Math.round(64 * Appearance.factor), Math.round(64 * Appearance.factor))
+            Layout.preferredWidth: Math.round(64 * Appearance.factor)
+            Layout.preferredHeight: Math.round(64 * Appearance.factor)
             Layout.alignment: Qt.AlignTop
         }
         // The name at the top of the icon, the link at its bottom, the
@@ -56,7 +56,7 @@ DialogWindow {
         Item {
             id: heading
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.max(64, nameLine.height + copyrightLine.height + siteLine.height)
+            Layout.preferredHeight: Math.max(Math.round(64 * Appearance.factor), nameLine.height + copyrightLine.height + siteLine.height)
             implicitWidth: Math.max(nameLine.implicitWidth, copyrightLine.implicitWidth, siteLine.implicitWidth)
             Layout.alignment: Qt.AlignTop
 
@@ -98,8 +98,8 @@ DialogWindow {
     ScrollView {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        Layout.preferredWidth: 480
-        Layout.preferredHeight: 260
+        Layout.preferredWidth: Math.round(480 * Appearance.factor)
+        Layout.preferredHeight: Math.round(260 * Appearance.factor)
         ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         TextArea {
             objectName: "licenceText"
@@ -135,7 +135,7 @@ DialogWindow {
                   || Updater.state === Updater.Unreachable || Updater.state === Updater.Failed ? Updater.message : ""
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            Layout.maximumWidth: 260
+            Layout.maximumWidth: Math.round(260 * Appearance.factor)
         }
     ]
     // Help > Check for update.

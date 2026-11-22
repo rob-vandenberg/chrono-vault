@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.9
+# qml/CMakeLists.txt 0.0.10
 
 # --- Version history ----------------------------------------------------
+# v0.0.10: Chrono Vault's own style for the UI scaling; every source of the library under the strict warnings (D-023)
 # v0.0.9: The update windows of Chrono Mail in place of the one update window (D-024); the top bar's icons (D-025)
 # v0.0.8: The licences, carried inside the program for the About box (D-021)
 # v0.0.7: The theme, the UI scaling and the appearance the windows see (D-023)
@@ -127,7 +128,7 @@ qt_add_resources(chrono_vault_ui chrono_vault_fonts
 )
 target_include_directories(chrono_vault_ui PUBLIC "${PROJECT_SOURCE_DIR}/src/ui")
 target_link_libraries(chrono_vault_ui
-    PUBLIC chrono_vault_core Qt6::Gui Qt6::Qml Qt6::Widgets Qt6::Svg Qt6::Network
+    PUBLIC chrono_vault_core chrono_vault_style chrono_vault_styleplugin Qt6::Gui Qt6::Qml Qt6::Widgets Qt6::Svg Qt6::Network
     PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent
 )
 # Strict for our own sources; Qt's generated QML cache is Qt's code.
@@ -136,6 +137,10 @@ if(LINUX)
 endif()
 chrono_vault_strict_warnings_for_sources(
     ../src/ui/app_setup.cpp
+    ../src/ui/appearance.cpp
+    ../src/ui/licences.cpp
+    ../src/ui/program_scale.cpp
+    ../src/ui/theme.cpp
     ../src/ui/autostart.cpp
     ../src/ui/item_icons.cpp
     ../src/ui/item_list_model.cpp

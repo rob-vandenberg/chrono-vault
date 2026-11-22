@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.0.9 LANGUAGES CXX)
+project(chrono-vault VERSION 0.0.10 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.0.9
+# CMakeLists.txt 0.0.10
 
 # --- Version history ----------------------------------------------------
+# v0.0.10: Version 0.0.10; Chrono Vault's own style (D-023)
 # v0.0.9: Version 0.0.9
 # v0.0.8: Version 0.0.8
 # v0.0.7: Version 0.0.7
@@ -53,6 +54,7 @@ include(cmake/ChronoVaultTranslations.cmake)
 
 add_subdirectory(src/tools)
 add_subdirectory(src/core)
+add_subdirectory(style)
 add_subdirectory(qml)
 add_subdirectory(src/app)
 

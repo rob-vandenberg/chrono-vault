@@ -33,9 +33,9 @@ Item {
 
     Image {
         source: "qrc:/icons/chrono-vault.svg"
-        sourceSize: Qt.size(128, 128)
-        width: 128
-        height: 128
+        sourceSize: Qt.size(Math.round(128 * Appearance.factor), Math.round(128 * Appearance.factor))
+        width: Math.round(128 * Appearance.factor)
+        height: Math.round(128 * Appearance.factor)
         x: 16
         y: 16
     }
@@ -58,8 +58,8 @@ Item {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 12
-        width: Math.min(parent.width - 32, 420)
+        spacing: Math.round(12 * Appearance.factor)
+        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(420 * Appearance.factor))
 
         Label {
             text: VaultController.vaultName
@@ -113,7 +113,7 @@ Item {
             Label {
                 text: qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 380
+                Layout.preferredWidth: Math.round(380 * Appearance.factor)
             }
         }
         onDiscarded: {

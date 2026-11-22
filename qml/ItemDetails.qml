@@ -59,18 +59,18 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        anchors.margins: Math.round(16 * Appearance.factor)
+        spacing: Math.round(12 * Appearance.factor)
 
         RowLayout {
-            spacing: 12
+            spacing: Math.round(12 * Appearance.factor)
             Layout.fillWidth: true
             Image {
                 source: itemDetails.item.icon ? "data:image/png;base64," + itemDetails.item.icon
                         : (itemDetails.item.isNote ? "qrc:/icons/item-note.svg" : "qrc:/icons/item-login.svg")
-                sourceSize: Qt.size(48, 48)
-                Layout.preferredWidth: 48
-                Layout.preferredHeight: 48
+                sourceSize: Qt.size(Math.round(48 * Appearance.factor), Math.round(48 * Appearance.factor))
+                Layout.preferredWidth: Math.round(48 * Appearance.factor)
+                Layout.preferredHeight: Math.round(48 * Appearance.factor)
             }
             Label {
                 objectName: "itemTitle"
@@ -104,7 +104,7 @@ Item {
                 visible: itemDetails.shownFields.length > 0
                 color: itemDetails.palette.base
                 border.color: itemDetails.palette.mid
-                radius: 4
+                radius: Math.round(4 * Appearance.factor)
 
                 Column {
                     id: rows
@@ -127,7 +127,7 @@ Item {
                                 return kind === "totp" ? VaultController.oneTimeCodeSecondsLeft(modelData.value) : 0
                             }
                             width: rows.width
-                            implicitHeight: Math.max(44, line.implicitHeight + 20)
+                            implicitHeight: Math.max(Math.round(44 * Appearance.factor), line.implicitHeight + Math.round(20 * Appearance.factor))
 
                             Rectangle {
                                 visible: row.index > 0
@@ -141,9 +141,9 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: 12
-                                anchors.rightMargin: 6
-                                spacing: 16
+                                anchors.leftMargin: Math.round(12 * Appearance.factor)
+                                anchors.rightMargin: Math.round(6 * Appearance.factor)
+                                spacing: Math.round(16 * Appearance.factor)
 
                                 Label {
                                     text: row.modelData.name
@@ -151,7 +151,7 @@ Item {
                                     horizontalAlignment: Text.AlignRight
                                     opacity: 0.7
                                     elide: Text.ElideRight
-                                    Layout.preferredWidth: 140
+                                    Layout.preferredWidth: Math.round(140 * Appearance.factor)
                                     // Beside the value; at the top of a text of several lines.
                                     Layout.alignment: row.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
                                 }
@@ -177,8 +177,8 @@ Item {
                                 // The seconds the one-time code has left, as a ring.
                                 Item {
                                     visible: row.kind === "totp"
-                                    Layout.preferredWidth: 26
-                                    Layout.preferredHeight: 26
+                                    Layout.preferredWidth: Math.round(26 * Appearance.factor)
+                                    Layout.preferredHeight: Math.round(26 * Appearance.factor)
                                     Canvas {
                                         id: ring
                                         anchors.fill: parent

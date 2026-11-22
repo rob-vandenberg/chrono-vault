@@ -43,7 +43,7 @@ DialogWindow {
         text: qsTr("Chrono Vault %1 is available. You have %2.").arg(Updater.newVersion).arg(VaultController.version)
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: 420
+        Layout.preferredWidth: Math.round(420 * Appearance.factor)
         Layout.fillWidth: true
     }
     Label {

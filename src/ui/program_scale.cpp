@@ -16,16 +16,20 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "program_scale.h"
 
+#include "scaling.h"
+
 #include <QFont>
 #include <QGuiApplication>
 
 #include <algorithm>
+#include <cmath>
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// program_scale.cpp 0.0.7
+// program_scale.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: In steps of 5%; every size follows the factor, not only the text (D-023)
 // v0.0.7: Initial release, as in Chrono Viewer (D-023)
 
 namespace chrono_vault {
@@ -48,7 +52,9 @@ int& scaleInUse()
 
 int programScaleHeldToItsLimits(int percent)
 {
-    return std::clamp(percent, smallestProgramScale, largestProgramScale);
+    // In steps of 5% (D-023).
+    const int stepped = static_cast<int>(std::lround(percent / static_cast<double>(programScaleStep))) * programScaleStep;
+    return std::clamp(stepped, smallestProgramScale, largestProgramScale);
 }
 
 void applyProgramScale(int percent)
@@ -67,6 +73,9 @@ void applyProgramScale(int percent)
         ours.setPixelSize(std::max(1, static_cast<int>(desktop.pixelSize() * held / 100.0 + 0.5)));
     }
     scaleInUse() = held;
+    // Everything else follows the same factor: icons, tick boxes, spacing,
+    // fixed sizes (D-023).
+    UiScale::instance()->setFactor(held / 100.0);
     if (ours != QGuiApplication::font()) {
         QGuiApplication::setFont(ours);
     }

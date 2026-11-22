@@ -2,12 +2,12 @@
 
 ## Now
 
-**Version 0.0.9** (D-024, D-025): an update is offered in a popup as in Chrono Mail (Download, Skip this update,
-Cancel; then Update downloaded with Install; on Linux Restart or Close), no longer as a line at the bottom. The main
-window follows the reference program's layout: one bar with the menus File, View, Item, Tools and Help and the
-buttons New Item, Generate Password, lock and preferences; three columns with the vault, the items under letter
-headings and the chosen item read-only, the editor behind the pencil. The About box's name, copyright and GitHub link
-line up with the icon. Seventeen tests pass on Linux; two review rounds, the last found nothing real.
+**Version 0.0.10** (D-019, D-023): three fixes after the owner's test of 0.0.9. The tray and start settings are no
+longer stored in a group named "general" (Qt reserves it; the choice was lost at every start). Chrono Vault's own
+colours are drawn on every desktop from the start (a Qt Quick window took the desktop theme's colours, Breeze's on
+KDE); "New Item" is a flat fill in the program's blue. The UI scaling grows everything together, as Chrono Mail does,
+in steps of 5%: Chrono Vault's own Qt Quick style (`style/`) over Fusion, and every size in the windows times the
+factor. Seventeen tests pass on Linux; the review round found nothing real.
 
 ## Next task
 

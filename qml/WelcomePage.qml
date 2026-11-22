@@ -39,17 +39,17 @@ Item {
 
     Image {
         source: "qrc:/icons/chrono-vault.svg"
-        sourceSize: Qt.size(128, 128)
-        width: 128
-        height: 128
+        sourceSize: Qt.size(Math.round(128 * Appearance.factor), Math.round(128 * Appearance.factor))
+        width: Math.round(128 * Appearance.factor)
+        height: Math.round(128 * Appearance.factor)
         x: 16
         y: 16
     }
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 16
-        width: Math.min(parent.width - 32, 420)
+        spacing: Math.round(16 * Appearance.factor)
+        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(420 * Appearance.factor))
 
         Label {
             text: qsTr("Welcome to Chrono Vault")
@@ -129,11 +129,11 @@ Item {
         }
 
         ColumnLayout {
-            spacing: 8
+            spacing: Math.round(8 * Appearance.factor)
             Label {
                 text: qsTr("This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
             }
             PasswordField {
                 id: firstPassword

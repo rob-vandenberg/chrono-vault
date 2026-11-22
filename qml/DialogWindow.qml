@@ -36,6 +36,8 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: dialogWindow
     font: Appearance.font
+    // The program's colours, never the desktop theme's (D-023).
+    Component.onCompleted: Appearance.dress(this)
 
     property string memoryName: ""
     property alias standardButtons: buttonBox.standardButtons
@@ -112,10 +114,10 @@ ApplicationWindow {
     modality: Qt.ApplicationModal
     visible: false
     // The edge around everything, the same as the settings window's.
-    readonly property int edge: 10
-    width: Math.max(400, layout.implicitWidth + 2 * edge)
-    height: Math.max(160, layout.implicitHeight + 2 * edge)
-    minimumWidth: Math.min(layout.implicitWidth + 2 * edge, 320)
+    readonly property int edge: Math.round(10 * Appearance.factor)
+    width: Math.max(Math.round(400 * Appearance.factor), layout.implicitWidth + 2 * edge)
+    height: Math.max(Math.round(160 * Appearance.factor), layout.implicitHeight + 2 * edge)
+    minimumWidth: Math.min(layout.implicitWidth + 2 * edge, Math.round(320 * Appearance.factor))
     minimumHeight: layout.implicitHeight + 2 * edge
     color: palette.window
 
@@ -146,7 +148,7 @@ ApplicationWindow {
         id: layout
         anchors.fill: parent
         anchors.margins: dialogWindow.edge
-        spacing: 10
+        spacing: Math.round(10 * Appearance.factor)
 
         ColumnLayout {
             id: contentArea
@@ -156,15 +158,15 @@ ApplicationWindow {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Math.round(6 * Appearance.factor)
             RowLayout {
                 id: leftArea
-                spacing: 6
+                spacing: Math.round(6 * Appearance.factor)
             }
             Item { Layout.fillWidth: true }
             RowLayout {
                 id: rightArea
-                spacing: 6
+                spacing: Math.round(6 * Appearance.factor)
             }
             DialogButtonBox {
                 id: buttonBox

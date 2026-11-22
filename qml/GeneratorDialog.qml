@@ -50,14 +50,14 @@ DialogWindow {
     onAccepted: usePassword(password)
 
     ColumnLayout {
-        spacing: 8
+        spacing: Math.round(8 * Appearance.factor)
 
         TextField {
             text: generatorDialog.password
             readOnly: true
             font.family: "Noto Sans Mono"
             selectByMouse: true
-            Layout.preferredWidth: 420
+            Layout.preferredWidth: Math.round(420 * Appearance.factor)
         }
         RowLayout {
             Label { text: qsTr("Length: %1").arg(lengthSlider.value) }

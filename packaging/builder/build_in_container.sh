@@ -6,9 +6,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# build_in_container.sh 0.0.5
+# build_in_container.sh 0.0.10
 #
 # --- Version history ----------------------------------------------------
+# v0.0.10: The style folder, Chrono Vault's own Qt Quick style (D-023)
 # v0.0.5: Qt's TLS plugins and OpenSSL's libssl, for HTTPS to GitHub (D-021)
 # v0.0.4: Initial release, modelled on Chrono Viewer's
 #
@@ -36,7 +37,7 @@ stop() {
 # Only what a build needs is copied in, never the whole folder.
 rm -rf /work
 mkdir -p /work
-tar -C /src -cf - CMakeLists.txt LICENSE cmake src qml art fonts packaging translations | tar -C /work -xf -
+tar -C /src -cf - CMakeLists.txt LICENSE cmake src qml style art fonts packaging translations | tar -C /work -xf -
 
 cmake -S /work -B /work/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCHRONO_VAULT_BUILD_TESTS=OFF \
     -DCMAKE_PREFIX_PATH="$QT" -DOPENSSL_ROOT_DIR="$SSL" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \

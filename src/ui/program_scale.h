@@ -17,9 +17,10 @@
 #pragma once
 
 // --- Version ------------------------------------------------------------
-// program_scale.h 0.0.7
+// program_scale.h 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: In steps of 5%; every size follows the factor (D-023)
 // v0.0.7: Initial release, as in Chrono Viewer (D-023)
 
 namespace chrono_vault {
@@ -32,13 +33,16 @@ inline constexpr int largestProgramScale = 400;
 // The marks under the slider; any value between them is allowed.
 inline constexpr int programScaleMarkEvery = 50;
 inline constexpr int programScaleToBeginWith = 100;
+// The slider moves in steps of 5% (D-023).
+inline constexpr int programScaleStep = 5;
 
-// Nothing beyond the two ends.
+// Nothing beyond the two ends, and always on a step.
 [[nodiscard]] int programScaleHeldToItsLimits(int percent);
 
 // Puts a scale in use at once, on every window: the program's font is the
 // desktop's size times the scale, always worked out from the desktop's own
-// size, never from a size already scaled.
+// size, never from a size already scaled; every other size follows the same
+// factor through UiScale.
 void applyProgramScale(int percent);
 [[nodiscard]] int programScaleInUse();
 

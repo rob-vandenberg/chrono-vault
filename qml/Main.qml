@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.9
+// Main.qml 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The program's colours from the start (D-023); New Item a flat fill in the program's blue
 // v0.0.9: The update's windows as in Chrono Mail in place of the line at the bottom (D-024); one bar with the
 //         menus and the buttons (D-025)
 // v0.0.8: The About window can be found by its name (tests)
@@ -36,9 +37,11 @@ ApplicationWindow {
     id: mainWindow
     // The program's font, so the UI scaling reaches every control (D-023).
     font: Appearance.font
+    // The program's colours, never the desktop theme's (D-023).
+    Component.onCompleted: Appearance.dress(this)
 
-    width: 960
-    height: 640
+    width: Math.round(960 * Appearance.factor)
+    height: Math.round(640 * Appearance.factor)
     // Shown by the program as it starts: normally, minimized, or not at all
     // when "Start Chrono Vault minimized" keeps it in the tray (D-019).
     visible: false
@@ -56,8 +59,8 @@ ApplicationWindow {
         objectName: "topBar"
         RowLayout {
             anchors.fill: parent
-            anchors.rightMargin: 8
-            spacing: 6
+            anchors.rightMargin: Math.round(8 * Appearance.factor)
+            spacing: Math.round(6 * Appearance.factor)
 
             MenuBar {
                 objectName: "menuBar"
@@ -163,9 +166,19 @@ ApplicationWindow {
                 text: qsTr("New Item")
                 icon.source: "qrc:/icons/plus.svg"
                 icon.color: mainWindow.palette.highlightedText
-                // Filled in the highlight colour, as the main action.
-                palette.button: mainWindow.palette.highlight
+                // A flat fill in the program's blue, as the main action: darker
+                // under the mouse and when pressed, greyed without a vault.
                 palette.buttonText: mainWindow.palette.highlightedText
+                background: Rectangle {
+                    objectName: "newItemFill"
+                    implicitWidth: Math.round(80 * Appearance.factor)
+                    implicitHeight: Math.round(28 * Appearance.factor)
+                    radius: Math.round(3 * Appearance.factor)
+                    color: !parent.enabled ? mainWindow.palette.mid
+                           : parent.down ? Qt.darker(mainWindow.palette.highlight, 1.3)
+                           : parent.hovered ? Qt.darker(mainWindow.palette.highlight, 1.15)
+                           : mainWindow.palette.highlight
+                }
                 enabled: mainWindow.unlocked
                 onClicked: newItemMenu.popup(this, 0, height)
                 Menu {
@@ -345,7 +358,7 @@ ApplicationWindow {
                       ? qsTr("Your last change could not be saved. If you quit now, it is lost. The vault on disk is unchanged.")
                       : qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you quit now, it is lost.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 380
+                Layout.preferredWidth: Math.round(380 * Appearance.factor)
             }
         }
         // Retry or Cancel abandon the Quit: an update armed by it is not set
@@ -376,7 +389,7 @@ ApplicationWindow {
             text: VaultController.message
             font.bold: VaultController.messageIsTrouble
             wrapMode: Text.Wrap
-            padding: 8
+            padding: Math.round(8 * Appearance.factor)
             Layout.fillWidth: true
         }
         RowLayout {
@@ -386,13 +399,13 @@ ApplicationWindow {
                 text: qsTr("A change is not saved yet. The vault on disk is unchanged.")
                 font.bold: true
                 wrapMode: Text.Wrap
-                padding: 8
+                padding: Math.round(8 * Appearance.factor)
                 Layout.fillWidth: true
             }
             Button {
                 text: qsTr("Try saving again")
                 onClicked: VaultController.retrySave()
-                Layout.rightMargin: 8
+                Layout.rightMargin: Math.round(8 * Appearance.factor)
             }
         }
     }

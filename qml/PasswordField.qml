@@ -33,19 +33,19 @@ TextField {
 
     echoMode: revealed ? TextInput.Normal : TextInput.Password
     font.family: "Noto Sans Mono"
-    rightPadding: eyeButton.width + 6
+    rightPadding: eyeButton.width + Math.round(6 * Appearance.factor)
 
     ToolButton {
         id: eyeButton
         anchors.right: parent.right
-        anchors.rightMargin: 2
+        anchors.rightMargin: Math.round(2 * Appearance.factor)
         anchors.verticalCenter: parent.verticalCenter
-        height: parent.height - 4
+        height: parent.height - Math.round(4 * Appearance.factor)
         width: height
         focusPolicy: Qt.NoFocus
         icon.source: passwordField.revealed ? "qrc:/icons/eye-hidden.svg" : "qrc:/icons/eye.svg"
-        icon.width: 18
-        icon.height: 18
+        icon.width: Math.round(18 * Appearance.factor)
+        icon.height: Math.round(18 * Appearance.factor)
         icon.color: passwordField.palette.text
         ToolTip.visible: hovered
         ToolTip.text: passwordField.revealed ? qsTr("Hide the password") : qsTr("Show the password")

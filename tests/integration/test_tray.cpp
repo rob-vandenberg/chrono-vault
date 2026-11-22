@@ -35,9 +35,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.0.6
+// test_tray.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The tray and start settings survive a new start; their old names carried over
 // v0.0.6: The settings window keeps changes only with OK, also with Enter; Restore defaults; a failed
 //         start at startup is told (D-022)
 // v0.0.4: Initial release; Quit is seen asking the program to end
@@ -64,6 +65,7 @@ private slots:
     void start_at_startup_writes_and_removes_its_entry();
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
+    void the_tray_and_start_settings_survive_a_new_start();
     void the_settings_window_keeps_changes_only_with_ok();
     void enter_is_ok_and_a_failed_start_at_startup_is_told();
 
@@ -350,6 +352,44 @@ void TestTray::enter_is_ok_and_a_failed_start_at_startup_is_told()
     QTRY_VERIFY(!settingsWindow->isVisible());
     QVERIFY(settings->property("problem").toString().isEmpty());
 #endif
+}
+
+void TestTray::the_tray_and_start_settings_survive_a_new_start()
+{
+    // Written, then read back from the file itself, as the next start does.
+    {
+        VaultController controller;
+        controller.setKeepInTray(false);
+        controller.setStartMinimized(true);
+    }
+    QSettings().sync();
+    {
+        QSettings fromFile(QSettings().fileName(), QSettings().format());
+        QCOMPARE(fromFile.value(QStringLiteral("tray/keepRunning")).toBool(), false);
+        QCOMPARE(fromFile.value(QStringLiteral("start/minimized")).toBool(), true);
+        for (const QString& key : fromFile.allKeys()) {
+            QVERIFY2(!key.startsWith(QStringLiteral("general/"), Qt::CaseInsensitive), qPrintable(key));
+        }
+    }
+
+    // A choice stored under the old names, as 0.0.4 to 0.0.9 wrote it, is
+    // carried over once and the old names removed.
+    QSettings settings;
+    settings.remove(QStringLiteral("tray/keepRunning"));
+    settings.remove(QStringLiteral("start/minimized"));
+    settings.setValue(QStringLiteral("General/keepRunningInTray"), false);
+    settings.setValue(QStringLiteral("General/startMinimized"), true);
+    settings.sync();
+    {
+        VaultController controller;
+        QVERIFY(!controller.keepInTray());
+        QVERIFY(controller.startMinimized());
+    }
+    QVERIFY(!QSettings().contains(QStringLiteral("General/keepRunningInTray")));
+    QVERIFY(!QSettings().contains(QStringLiteral("General/startMinimized")));
+    VaultController again;
+    again.setKeepInTray(true);
+    again.setStartMinimized(false);
 }
 
 QTEST_MAIN(TestTray)

@@ -30,13 +30,17 @@
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
+#include <QQmlProperty>
+#include <QFontInfo>
+#include <QQuickWindow>
 
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.0.7
+// test_appearance.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The kept look drawn from the start, whatever the desktop's theme; text, icons, boxes and margins double at 200%
 // v0.0.7: Initial release
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -55,6 +59,8 @@ private slots:
     void a_theme_is_kept_under_its_name();
     void the_scale_stays_within_its_limits_and_never_scales_twice();
     void the_settings_window_shows_at_once_and_keeps_only_with_ok();
+    void the_kept_look_is_drawn_from_the_start_whatever_the_desktop();
+    void at_twice_the_scale_text_icons_boxes_and_margins_all_double();
 };
 
 void TestAppearance::initTestCase()
@@ -186,6 +192,81 @@ void TestAppearance::the_settings_window_shows_at_once_and_keeps_only_with_ok()
     QTRY_VERIFY(!settings->property("visible").toBool());
     QCOMPARE(appearance->theme(), Appearance::defaultTheme());
     QCOMPARE(appearance->scale(), Appearance::defaultScale());
+}
+
+void TestAppearance::the_kept_look_is_drawn_from_the_start_whatever_the_desktop()
+{
+    // Kept dark, put in use before any window as the program starts: the
+    // windows draw the program's colours, never the desktop theme's.
+    QSettings().setValue(QStringLiteral("view/theme"), QStringLiteral("dark"));
+    Appearance::applyKept();
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* settings = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    for (QObject* window : {engine.rootObjects().constFirst(), settings}) {
+        QObject* palette = window->property("palette").value<QObject*>();
+        QVERIFY(palette);
+        QCOMPARE(palette->property("window").value<QColor>(), darkPalette().color(QPalette::Window));
+        QCOMPARE(palette->property("highlight").value<QColor>(), darkPalette().color(QPalette::Highlight));
+    }
+    // New Item: a flat fill in the program's own blue.
+    QObject* fill = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("newItemFill"));
+    QVERIFY(fill);
+    QObject* newItem = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("newItemButton"));
+    QVERIFY(newItem);
+    if (newItem->property("enabled").toBool()) {
+        QCOMPARE(fill->property("color").value<QColor>(), darkPalette().color(QPalette::Highlight));
+    }
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    auto* window = qobject_cast<QQuickWindow*>(settings);
+    QTRY_VERIFY(window->isExposed());
+    const QImage shot = window->grabWindow();
+    QCOMPARE(shot.pixelColor(shot.width() - 20, shot.height() / 2), darkPalette().color(QPalette::Window));
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
+    QSettings().remove(QStringLiteral("view/theme"));
+    Appearance::applyKept();
+}
+
+void TestAppearance::at_twice_the_scale_text_icons_boxes_and_margins_all_double()
+{
+    // Steps of 5%: a value between two steps goes to the nearest one.
+    QCOMPARE(programScaleHeldToItsLimits(112), 110);
+    QCOMPARE(programScaleHeldToItsLimits(113), 115);
+    QCOMPARE(programScaleHeldToItsLimits(49), 50);
+    QCOMPARE(programScaleHeldToItsLimits(401), 400);
+
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* settings = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings && QMetaObject::invokeMethod(settings, "showWindow"));
+    QObject* box = settings->findChild<QObject*>(QStringLiteral("startAtStartupBox"));
+    QObject* ok = settings->findChild<QObject*>(QStringLiteral("okButton"));
+    QObject* about = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("aboutWindow"));
+    QVERIFY(box && ok && about);
+
+    const auto measure = [&]() {
+        QObject* indicator = box->property("indicator").value<QObject*>();
+        return QList<double>{QFontInfo(QGuiApplication::font()).pointSizeF(),
+                             indicator ? indicator->property("width").toDouble() : -1.0,
+                             about->property("edge").toDouble(), box->property("padding").toDouble()};
+    };
+    QVERIFY(QMetaObject::invokeMethod(settings, "showScale", Q_ARG(QVariant, 100)));
+    QTRY_VERIFY(measure().at(1) > 0);
+    const QList<double> single = measure();
+    QVERIFY(QMetaObject::invokeMethod(settings, "showScale", Q_ARG(QVariant, 200)));
+    QTRY_VERIFY(measure().at(1) > single.at(1));
+    const QList<double> twice = measure();
+    QCOMPARE(twice.at(0), single.at(0) * 2); // the text
+    QCOMPARE(twice.at(1), single.at(1) * 2); // a tick box
+    QCOMPARE(twice.at(2), single.at(2) * 2); // a dialog's margin
+    QCOMPARE(twice.at(3), single.at(3) * 2); // a control's padding
+    // An icon: the OK button's.
+    QCOMPARE(QQmlProperty::read(ok, QStringLiteral("icon.width")).toDouble(), 32.0);
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
+    QTRY_COMPARE(programScaleInUse(), 100);
 }
 
 QTEST_MAIN(TestAppearance)

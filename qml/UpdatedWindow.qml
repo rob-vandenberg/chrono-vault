@@ -39,7 +39,7 @@ DialogWindow {
         text: Updater.message
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: 420
+        Layout.preferredWidth: Math.round(420 * Appearance.factor)
         Layout.fillWidth: true
     }
 

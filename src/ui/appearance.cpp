@@ -18,6 +18,7 @@
 
 #include "program_scale.h"
 #include "theme.h"
+#include "scaling.h"
 
 #include <QEvent>
 #include <QFontInfo>
@@ -27,9 +28,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.0.7
+// appearance.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The program's colours for every window (D-023)
 // v0.0.7: Initial release (D-023)
 
 namespace chrono_vault {
@@ -63,6 +65,7 @@ Appearance::Appearance(QObject* parent) : QObject(parent)
     if (QCoreApplication* application = QCoreApplication::instance()) {
         application->installEventFilter(this);
     }
+    connect(UiScale::instance(), &UiScale::factorChanged, this, &Appearance::factorChanged);
 }
 
 int Appearance::theme() const
@@ -90,6 +93,11 @@ int Appearance::scaleMarkEvery()
     return programScaleMarkEvery;
 }
 
+int Appearance::scaleStep()
+{
+    return programScaleStep;
+}
+
 int Appearance::defaultTheme()
 {
     return static_cast<int>(Theme::FollowTheSystem);
@@ -105,9 +113,61 @@ double Appearance::fontPointSize() const
     return QFontInfo(QGuiApplication::font()).pointSizeF();
 }
 
+double Appearance::factor()
+{
+    return UiScale::instance()->factor();
+}
+
 QFont Appearance::font()
 {
     return QGuiApplication::font();
+}
+
+namespace {
+
+// The names Qt Quick gives the colour roles of a window's palette.
+const QList<std::pair<const char*, QPalette::ColorRole>> paletteRoles{
+    {"alternateBase", QPalette::AlternateBase}, {"base", QPalette::Base},
+    {"brightText", QPalette::BrightText},       {"button", QPalette::Button},
+    {"buttonText", QPalette::ButtonText},       {"dark", QPalette::Dark},
+    {"highlight", QPalette::Highlight},         {"highlightedText", QPalette::HighlightedText},
+    {"light", QPalette::Light},                 {"link", QPalette::Link},
+    {"linkVisited", QPalette::LinkVisited},     {"mid", QPalette::Mid},
+    {"midlight", QPalette::Midlight},           {"shadow", QPalette::Shadow},
+    {"text", QPalette::Text},                   {"toolTipBase", QPalette::ToolTipBase},
+    {"toolTipText", QPalette::ToolTipText},     {"window", QPalette::Window},
+    {"windowText", QPalette::WindowText},       {"placeholderText", QPalette::PlaceholderText},
+    {"accent", QPalette::Accent},
+};
+
+void copyPalette(QObject* window)
+{
+    QObject* palette = window->property("palette").value<QObject*>();
+    if (!palette) {
+        return;
+    }
+    const QPalette ours = QGuiApplication::palette();
+    for (const auto& [groupName, group] : {std::pair{"active", QPalette::Active}, std::pair{"inactive", QPalette::Inactive},
+                                           std::pair{"disabled", QPalette::Disabled}}) {
+        QObject* colours = palette->property(groupName).value<QObject*>();
+        if (!colours) {
+            continue;
+        }
+        for (const auto& [roleName, role] : paletteRoles) {
+            colours->setProperty(roleName, ours.color(group, role));
+        }
+    }
+}
+
+} // namespace
+
+void Appearance::dress(QObject* window)
+{
+    if (!window) {
+        return;
+    }
+    copyPalette(window);
+    connect(this, &Appearance::paletteChanged, window, [window]() { copyPalette(window); });
 }
 
 void Appearance::show(int theme, int scale)
@@ -140,6 +200,9 @@ bool Appearance::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == QCoreApplication::instance() && event->type() == QEvent::ApplicationFontChange) {
         emit fontChanged();
+    }
+    if (watched == QCoreApplication::instance() && event->type() == QEvent::ApplicationPaletteChange) {
+        emit paletteChanged();
     }
     return QObject::eventFilter(watched, event);
 }

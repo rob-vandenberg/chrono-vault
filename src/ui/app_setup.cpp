@@ -23,19 +23,25 @@
 #include "window_memory.h"
 
 #include <QQuickStyle>
+#include <QtQml/QQmlExtensionPlugin>
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// app_setup.cpp 0.0.4
+// app_setup.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: Chrono Vault's own style over Fusion, for the UI scaling (D-023)
 // v0.0.4: Initial release
+
+// Chrono Vault's style is part of the program itself (D-023).
+Q_IMPORT_QML_PLUGIN(ChronoVault_StylePlugin)
 
 namespace chrono_vault {
 
 void applyStyle()
 {
-    QQuickStyle::setStyle(QStringLiteral("Fusion"));
+    // Fusion with its sizes following the UI scaling (D-017, D-023).
+    QQuickStyle::setStyle(QStringLiteral("ChronoVault.Style"));
     for (const char* file : {":/fonts/NotoSans-Regular.ttf", ":/fonts/NotoSans-Bold.ttf",
                              ":/fonts/NotoSansMono-Regular.ttf"}) {
         QFontDatabase::addApplicationFont(QString::fromLatin1(file));

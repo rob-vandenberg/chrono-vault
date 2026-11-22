@@ -36,9 +36,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.6
+// vault_controller.cpp 0.0.10
 
 // --- Version history ----------------------------------------------------
+// v0.0.10: The tray and start settings no longer in a group named general, their old values carried over (D-019)
 // v0.0.6: The settings' defaults, for Restore defaults (D-022)
 // v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
@@ -57,8 +58,33 @@ constexpr bool defaultKeepInTray = true;
 constexpr bool defaultStartMinimized = false;
 constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
-const QString keepInTrayKey = QStringLiteral("general/keepRunningInTray");
-const QString startMinimizedKey = QStringLiteral("general/startMinimized");
+// Never in a group named "general": in a settings file Qt keeps that name
+// for its own [General] section and reads the value back under "General", so
+// a choice was lost at the next start (D-019).
+const QString keepInTrayKey = QStringLiteral("tray/keepRunning");
+const QString startMinimizedKey = QStringLiteral("start/minimized");
+
+// Once: a choice stored under the old names is carried over and the old names
+// are removed. Linux reads them back as "General/...", Windows as written.
+void carryOverOldNames(QSettings& settings)
+{
+    const QList<std::pair<QString, QString>> moves{
+        {QStringLiteral("keepRunningInTray"), keepInTrayKey},
+        {QStringLiteral("startMinimized"), startMinimizedKey},
+    };
+    for (const auto& [oldName, newKey] : moves) {
+        for (const QString& group : {QStringLiteral("General"), QStringLiteral("general")}) {
+            const QString oldKey = group + QLatin1Char('/') + oldName;
+            if (!settings.contains(oldKey)) {
+                continue;
+            }
+            if (!settings.contains(newKey)) {
+                settings.setValue(newKey, settings.value(oldKey));
+            }
+            settings.remove(oldKey);
+        }
+    }
+}
 
 QString kindName(FieldKind kind)
 {
@@ -158,6 +184,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     QSettings settings;
     lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
     clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
+    carryOverOldNames(settings);
     keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
     minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
 
