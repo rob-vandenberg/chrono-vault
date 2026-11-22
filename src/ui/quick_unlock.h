@@ -66,6 +66,8 @@ public:
     virtual void cancel() {}
     // Whether a secret is kept for this vault (no secret is read for this).
     [[nodiscard]] bool has(const QString& vault) const;
+    // The step that failed last, in plain words; empty when none (D-044).
+    [[nodiscard]] QString problem() const { return lastProblem; }
 
 signals:
     void stored(chrono_vault::QuickUnlock::Result result);
@@ -79,9 +81,17 @@ signals:
 
 protected:
     void remember(const QString& vault, bool kept);
+    void setProblem(const QString& text) { lastProblem = text; }
+
+private:
+    QString lastProblem;
 };
 
 // The one for this system.
 [[nodiscard]] std::unique_ptr<QuickUnlock> makeQuickUnlock();
+
+// One step of the fingerprint, with its time, added to
+// <data folder>/Chrono Vault/fingerprint.log; never a secret (D-044).
+void fingerLog(const QString& step);
 
 } // namespace chrono_vault

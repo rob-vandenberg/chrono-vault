@@ -1179,6 +1179,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+47"/>
+        <source>The keyring did not give the key back.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+199"/>
+        <source>No fingerprint reader was found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>The fingerprint reader is in use by another program.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+20"/>
+        <source>The fingerprint reader refused to start.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>The fingerprint reader reported an error.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ui/quick_unlock_windows.cpp" line="+164"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
@@ -1189,7 +1215,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock.cpp" line="+39"/>
+        <location filename="../src/ui/quick_unlock.cpp" line="+57"/>
         <source>The key could not be kept for this vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2198,24 +2224,24 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1938"/>
+        <location line="+1949"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1934"/>
-        <location line="+1939"/>
+        <location line="-1945"/>
+        <location line="+1950"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1849"/>
-        <location line="+1749"/>
+        <location line="-1860"/>
+        <location line="+1760"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1831"/>
+        <location line="-1842"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2227,13 +2253,13 @@
     <message>
         <location line="+28"/>
         <location line="+117"/>
-        <location line="+1628"/>
+        <location line="+1639"/>
         <location line="+213"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1903"/>
+        <location line="-1914"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2248,7 +2274,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1517"/>
+        <location line="+1528"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2263,7 +2289,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1503"/>
+        <location line="-1514"/>
         <location line="+82"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -2310,12 +2336,12 @@
     </message>
     <message>
         <location line="+74"/>
-        <location line="+865"/>
+        <location line="+876"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-782"/>
+        <location line="-793"/>
         <source>Reading the export…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2378,7 +2404,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+8"/>
         <source>%1 could not be turned on for this vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2388,22 +2414,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+17"/>
         <source>That finger was not recognized. Try again, or use the master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+4"/>
         <source>%1 is not available now. Use the master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+1"/>
+        <source>%1 Use the master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>%1 can no longer open this vault. Use the master password, then turn it on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+90"/>
+        <location line="+94"/>
         <source>Waiting for your %1…</source>
         <translation type="unfinished"></translation>
     </message>

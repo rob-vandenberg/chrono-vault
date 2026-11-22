@@ -1517,7 +1517,9 @@ void VaultController::connectQuickUnlock()
         case QuickUnlock::Result::Cancelled: tellSetup(QString(), false); break;
         case QuickUnlock::Result::Failed: tellSetup(tr("That finger was not recognized."), true); break;
         case QuickUnlock::Result::Unavailable:
-            tellSetup(tr("The %1 is not available now.").arg(quickUnlockName()), true);
+            tellSetup(quick->problem().isEmpty() ? tr("The %1 is not available now.").arg(quickUnlockName())
+                                                 : quick->problem(),
+                      true);
             break;
         case QuickUnlock::Result::NotKept:
             tellSetup(quick->notKeptText(), true);
@@ -1532,6 +1534,7 @@ void VaultController::connectQuickUnlock()
         say(tr("The key could not be removed from the desktop keyring. Remove “%1” there by hand.").arg(where), true);
     });
     connect(quick.get(), &QuickUnlock::retrieved, this, [this](QuickUnlock::Result result, const QByteArray& secret) {
+        fingerLog(QStringLiteral("unlock: answer %1").arg(int(result)));
         retrieving = false;
         if (currentState != State::Locked) {
             return;
@@ -1547,7 +1550,11 @@ void VaultController::connectQuickUnlock()
         case QuickUnlock::Result::Cancelled: say(QString(), false); break;
         case QuickUnlock::Result::Failed: say(tr("That finger was not recognized. Try again, or use the master password."), true); break;
         case QuickUnlock::Result::Unavailable:
-            say(tr("%1 is not available now. Use the master password.").arg(sentenceStart(quickUnlockName())), true);
+            // The step that failed, in plain words (D-044).
+            say(quick->problem().isEmpty()
+                    ? tr("%1 is not available now. Use the master password.").arg(sentenceStart(quickUnlockName()))
+                    : tr("%1 Use the master password.").arg(quick->problem()),
+                true);
             break;
         default:
             // Its key is gone (fingerprints changed, or the keyring emptied).
@@ -1640,6 +1647,10 @@ void VaultController::unlockWithQuickUnlock()
     // Asked once while the question is open: the reader stays held until it
     // is settled (the owner, D-042).
     if (currentState != State::Locked || !quickUnlockOn() || retrieving) {
+        fingerLog(QStringLiteral("unlock: not asked (locked: %1, on: %2, already asking: %3)")
+                      .arg(currentState == State::Locked ? QStringLiteral("yes") : QStringLiteral("no"),
+                           quickUnlockOn() ? QStringLiteral("yes") : QStringLiteral("no"),
+                           retrieving ? QStringLiteral("yes") : QStringLiteral("no")));
         return;
     }
     retrieving = true;

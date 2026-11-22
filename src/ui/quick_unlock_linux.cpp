@@ -147,18 +147,26 @@ public:
 
     void retrieve(const QString& vault) override
     {
+        fingerLog(QStringLiteral("unlock: finger asked"));
         verify([this, vault](Result result) {
             if (result != Result::Done) {
+                fingerLog(QStringLiteral("unlock: no finger (%1)").arg(int(result)));
                 emit retrieved(result, {});
                 return;
             }
+            fingerLog(QStringLiteral("unlock: finger recognized; asking the keyring for the key"));
             QPointer<LinuxQuickUnlock> self(this);
             (void)QtConcurrent::run([self, vault]() {
                 const auto [result, secret] = find(vault);
+                fingerLog(QStringLiteral("keyring: answered %1, %2 bytes").arg(int(result)).arg(secret.size()));
                 QMetaObject::invokeMethod(
                     qApp,
                     [self, result, secret]() {
                         if (self) {
+                            if (result == Result::Unavailable) {
+                                self->setProblem(
+                                    QCoreApplication::translate("QuickUnlock", "The keyring did not give the key back."));
+                            }
                             emit self->retrieved(result, secret);
                         }
                     },
@@ -345,6 +353,8 @@ private:
         cancel(); // a check still waiting gives the reader back first
         waiting = std::move(done);
         const quint64 mine = ++check;
+        setProblem(QString());
+        fingerLog(QStringLiteral("reader: check %1 starts, asking fprintd for the reader").arg(mine));
         const QDBusMessage getDevice = QDBusMessage::createMethodCall(
             fprint, QStringLiteral("/net/reactivated/Fprint/Manager"), QStringLiteral("net.reactivated.Fprint.Manager"),
             QStringLiteral("GetDefaultDevice"));
@@ -353,10 +363,13 @@ private:
                 return;
             }
             if (reply.type() != QDBusMessage::ReplyMessage || reply.arguments().isEmpty()) {
+                fingerLog(QStringLiteral("reader: no reader: %1 %2").arg(reply.errorName(), reply.errorMessage()));
+                setProblem(QCoreApplication::translate("QuickUnlock", "No fingerprint reader was found."));
                 finish(Result::Unavailable);
                 return;
             }
             devicePath = qvariant_cast<QDBusObjectPath>(reply.arguments().constFirst()).path();
+            fingerLog(QStringLiteral("reader: %1, claiming it").arg(devicePath));
             then(QDBusConnection::systemBus().asyncCall(deviceCall(QStringLiteral("Claim"), userName())),
                  [this, mine, path = devicePath](const QDBusMessage& claimed) {
                      if (mine != check) {
@@ -369,14 +382,22 @@ private:
                          return;
                      }
                      if (claimed.type() != QDBusMessage::ReplyMessage) {
+                         fingerLog(QStringLiteral("reader: claim refused: %1 %2")
+                                       .arg(claimed.errorName(), claimed.errorMessage()));
+                         setProblem(claimed.errorName().endsWith(QLatin1String("AlreadyInUse"))
+                                        ? QCoreApplication::translate("QuickUnlock",
+                                                                      "The fingerprint reader is in use by another program.")
+                                        : QCoreApplication::translate("QuickUnlock",
+                                                                      "The fingerprint reader refused to start."));
                          finish(Result::Unavailable);
                          return;
                      }
                      holding = true;
-                     QDBusConnection::systemBus().connect(fprint, devicePath,
-                                                          QStringLiteral("net.reactivated.Fprint.Device"),
-                                                          QStringLiteral("VerifyStatus"), this,
-                                                          SLOT(onVerifyStatus(QString, bool)));
+                     const bool listening = QDBusConnection::systemBus().connect(
+                         fprint, devicePath, QStringLiteral("net.reactivated.Fprint.Device"),
+                         QStringLiteral("VerifyStatus"), this, SLOT(onVerifyStatus(QString, bool)));
+                     fingerLog(QStringLiteral("reader: claimed; listening for its answer: %1, starting the check")
+                                   .arg(listening ? QStringLiteral("yes") : QStringLiteral("NO")));
                      then(QDBusConnection::systemBus().asyncCall(deviceCall(QStringLiteral("VerifyStart"),
                                                                             QStringLiteral("any"))),
                           [this, mine](const QDBusMessage& started) {
@@ -384,9 +405,14 @@ private:
                                   return;
                               }
                               if (started.type() != QDBusMessage::ReplyMessage) {
+                                  fingerLog(QStringLiteral("reader: check refused: %1 %2")
+                                                .arg(started.errorName(), started.errorMessage()));
+                                  setProblem(QCoreApplication::translate("QuickUnlock",
+                                                                         "The fingerprint reader refused to start."));
                                   finish(Result::Unavailable);
                                   return;
                               }
+                              fingerLog(QStringLiteral("reader: check running, waiting for a finger"));
                               emit fingerReady(); // the person can touch it now
                           });
                  });
@@ -415,6 +441,10 @@ private:
     // Gives the reader back, without waiting, and answers the caller.
     void finish(Result result)
     {
+        fingerLog(QStringLiteral("reader: check %1 ends with %2; reader %3")
+                      .arg(check)
+                      .arg(int(result))
+                      .arg(holding ? QStringLiteral("given back") : QStringLiteral("was not held")));
         ++check; // later answers of this check are not acted on
         if (std::exchange(holding, false)) {
             QDBusConnection::systemBus().disconnect(fprint, devicePath, QStringLiteral("net.reactivated.Fprint.Device"),
@@ -432,6 +462,7 @@ private:
     // asks again, since the question is still open (the owner, D-042).
     Q_SLOT void onVerifyStatus(const QString& status, bool done)
     {
+        fingerLog(QStringLiteral("reader: answered %1 (done: %2)").arg(status, done ? QStringLiteral("yes") : QStringLiteral("no")));
         if (status == QLatin1String("verify-match")) {
             finish(Result::Done);
         } else if (status == QLatin1String("verify-no-match")) {
@@ -445,6 +476,7 @@ private:
                      }
                  });
         } else if (done) {
+            setProblem(QCoreApplication::translate("QuickUnlock", "The fingerprint reader reported an error."));
             finish(Result::Unavailable); // disconnected, or the reader's own error
         }
     }

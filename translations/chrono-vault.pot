@@ -1153,6 +1153,31 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept in the desktop keyring."
 msgstr ""
 
+#: ../src/ui/quick_unlock_linux.cpp:168
+msgctxt "QuickUnlock|"
+msgid "The keyring did not give the key back."
+msgstr ""
+
+#: ../src/ui/quick_unlock_linux.cpp:367
+msgctxt "QuickUnlock|"
+msgid "No fingerprint reader was found."
+msgstr ""
+
+#: ../src/ui/quick_unlock_linux.cpp:388
+msgctxt "QuickUnlock|"
+msgid "The fingerprint reader is in use by another program."
+msgstr ""
+
+#: ../src/ui/quick_unlock_linux.cpp:390 ../src/ui/quick_unlock_linux.cpp:410
+msgctxt "QuickUnlock|"
+msgid "The fingerprint reader refused to start."
+msgstr ""
+
+#: ../src/ui/quick_unlock_linux.cpp:479
+msgctxt "QuickUnlock|"
+msgid "The fingerprint reader reported an error."
+msgstr ""
+
 #: ../src/ui/quick_unlock_windows.cpp:164
 msgctxt "QuickUnlock|"
 msgid "Windows Hello"
@@ -1163,7 +1188,7 @@ msgctxt "QuickUnlock|"
 msgid "Confirm it is you in the Windows Hello window…"
 msgstr ""
 
-#: ../src/ui/quick_unlock.cpp:39
+#: ../src/ui/quick_unlock.cpp:57
 msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
@@ -2191,17 +2216,17 @@ msgctxt "chrono_vault::VaultController|"
 msgid "Choose where to keep the new vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:663 ../src/ui/vault_controller.cpp:2601
+#: ../src/ui/vault_controller.cpp:663 ../src/ui/vault_controller.cpp:2612
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:667 ../src/ui/vault_controller.cpp:2606
+#: ../src/ui/vault_controller.cpp:667 ../src/ui/vault_controller.cpp:2617
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:757 ../src/ui/vault_controller.cpp:2506
+#: ../src/ui/vault_controller.cpp:757 ../src/ui/vault_controller.cpp:2517
 msgctxt "chrono_vault::VaultController|"
 msgid "A file with that name already exists. Choose another name."
 msgstr ""
@@ -2217,7 +2242,7 @@ msgid "The setting to start at startup could not be saved."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:653 ../src/ui/vault_controller.cpp:770
-#: ../src/ui/vault_controller.cpp:2398 ../src/ui/vault_controller.cpp:2611
+#: ../src/ui/vault_controller.cpp:2409 ../src/ui/vault_controller.cpp:2622
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until your last change is saved, then try again."
 msgstr ""
@@ -2240,21 +2265,21 @@ msgctxt "chrono_vault::VaultController|"
 msgid "%1 vault"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2248
+#: ../src/ui/vault_controller.cpp:2259
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere and now has another master password. Unlock "
 "it with that one."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2258
+#: ../src/ui/vault_controller.cpp:2269
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere, but that version cannot be read yet. Your "
 "vault stays open."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2384
+#: ../src/ui/vault_controller.cpp:2395
 msgctxt "chrono_vault::VaultController|"
 msgid "Your new vault is ready."
 msgstr ""
@@ -2312,7 +2337,7 @@ msgctxt "chrono_vault::VaultController|"
 msgid "Untitled item"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1217 ../src/ui/vault_controller.cpp:2082
+#: ../src/ui/vault_controller.cpp:1217 ../src/ui/vault_controller.cpp:2093
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2390,13 +2415,13 @@ msgctxt "chrono_vault::VaultController|"
 msgid "The %1 is not available now."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1526
+#: ../src/ui/vault_controller.cpp:1528
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 could not be turned on for this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1532
+#: ../src/ui/vault_controller.cpp:1534
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2404,12 +2429,12 @@ msgid ""
 "hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1548
+#: ../src/ui/vault_controller.cpp:1551
 msgctxt "chrono_vault::VaultController|"
 msgid "That finger was not recognized. Try again, or use the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1550
+#: ../src/ui/vault_controller.cpp:1555
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 is not available now. Use the master password."
@@ -2418,68 +2443,74 @@ msgstr ""
 #: ../src/ui/vault_controller.cpp:1556
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
+msgid "%1 Use the master password."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:1563
+#, qt-format
+msgctxt "chrono_vault::VaultController|"
 msgid ""
 "%1 can no longer open this vault. Use the master password, then turn it on "
 "again in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1646
+#: ../src/ui/vault_controller.cpp:1657
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Waiting for your %1…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1772
+#: ../src/ui/vault_controller.cpp:1783
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the category a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1777 ../src/ui/vault_controller.cpp:1783
+#: ../src/ui/vault_controller.cpp:1788 ../src/ui/vault_controller.cpp:1794
 msgctxt "chrono_vault::VaultController|"
 msgid "There is already a category with that name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1811
+#: ../src/ui/vault_controller.cpp:1822
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This category still holds items or templates. Move or delete them first."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1860
+#: ../src/ui/vault_controller.cpp:1871
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the template a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1913
+#: ../src/ui/vault_controller.cpp:1924
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copy of %1"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1971
+#: ../src/ui/vault_controller.cpp:1982
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the tag a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2066
+#: ../src/ui/vault_controller.cpp:2077
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is larger than %2, the most an attachment may hold."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2073
+#: ../src/ui/vault_controller.cpp:2084
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2127
+#: ../src/ui/vault_controller.cpp:2138
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2129
+#: ../src/ui/vault_controller.cpp:2140
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2487,12 +2518,12 @@ msgid ""
 "full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2197
+#: ../src/ui/vault_controller.cpp:2208
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was changed elsewhere and was read again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2489
+#: ../src/ui/vault_controller.cpp:2500
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2500,19 +2531,19 @@ msgid ""
 "changed. Change it there by hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2520
+#: ../src/ui/vault_controller.cpp:2531
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The keyfile could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2542
+#: ../src/ui/vault_controller.cpp:2553
 msgctxt "chrono_vault::VaultController|"
 msgid "Exporting…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2573
+#: ../src/ui/vault_controller.cpp:2584
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2520,70 +2551,70 @@ msgid ""
 "delete it when done."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2580
+#: ../src/ui/vault_controller.cpp:2591
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the master password. Nothing was exported."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2583
+#: ../src/ui/vault_controller.cpp:2594
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The export could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2626
+#: ../src/ui/vault_controller.cpp:2637
 msgctxt "chrono_vault::VaultController|"
 msgid "Changing the master password…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2690
+#: ../src/ui/vault_controller.cpp:2701
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password was changed. %1 keeps the new one; it may ask you once."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2696
+#: ../src/ui/vault_controller.cpp:2707
 msgctxt "chrono_vault::VaultController|"
 msgid "The master password was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2701
+#: ../src/ui/vault_controller.cpp:2712
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the current master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2704
+#: ../src/ui/vault_controller.cpp:2715
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. Nothing was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2708
+#: ../src/ui/vault_controller.cpp:2719
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password could not be changed: the folder cannot be written to, "
 "or the disk is full. The vault is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2763
+#: ../src/ui/vault_controller.cpp:2774
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied. The clipboard is cleared in %n second(s)."
 msgid_plural "Copied. The clipboard is cleared in %n second(s)."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:2766
+#: ../src/ui/vault_controller.cpp:2777
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2777
+#: ../src/ui/vault_controller.cpp:2788
 msgctxt "chrono_vault::VaultController|"
 msgid "The clipboard is cleared."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2967
+#: ../src/ui/vault_controller.cpp:2978
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2591,7 +2622,7 @@ msgid ""
 "shows the other version."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2979
+#: ../src/ui/vault_controller.cpp:2990
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2599,7 +2630,7 @@ msgid ""
 "Open it from the list of vaults with its own password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3085
+#: ../src/ui/vault_controller.cpp:3096
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "A change kept through the lock could not be written beside the vault, which "
@@ -2607,7 +2638,7 @@ msgid ""
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3091
+#: ../src/ui/vault_controller.cpp:3102
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""

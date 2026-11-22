@@ -17,12 +17,17 @@
 #include "quick_unlock.h"
 
 #include <QCoreApplication>
+#include <QDateTime>
+#include <QDir>
+#include <QFile>
 #include <QSettings>
+#include <QStandardPaths>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock.cpp 0.0.27
+// quick_unlock.cpp 0.0.29
 
 // --- Version history ----------------------------------------------------
+// v0.0.29: The fingerprint log (D-044)
 // v0.0.27: The words for a key not kept (D-042)
 // v0.0.23: Initial release (D-038)
 
@@ -33,6 +38,19 @@ namespace {
 const QString keptKey = QStringLiteral("quickUnlock/vaults");
 
 } // namespace
+
+void fingerLog(const QString& step)
+{
+    const QString folder =
+        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/Chrono Vault");
+    QDir().mkpath(folder);
+    QFile file(folder + QStringLiteral("/fingerprint.log"));
+    if (file.open(QIODevice::Append | QIODevice::Text)) {
+        file.write((QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz ")) + step +
+                    QLatin1Char('\n'))
+                       .toUtf8());
+    }
+}
 
 QString QuickUnlock::notKeptText() const
 {
