@@ -24,9 +24,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.0.19
+// test_items.cpp 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: The vault exported, only with the master password (D-037)
 // v0.0.19: An export imported into a vault, through the controller (D-035)
 // v0.0.17: Initial release: field history, sections and hidden fields kept, Trash and Archive, two settings (D-033)
 
@@ -86,6 +87,7 @@ private slots:
     void the_trash_and_the_archive_keep_their_items_apart();
     void hide_sensitive_fields_and_show_subtitles_are_kept();
     void an_export_is_imported_whole_and_never_over_an_item();
+    void the_vault_is_exported_only_with_its_master_password();
 
 private:
     std::unique_ptr<VaultController> unlocked();
@@ -303,6 +305,45 @@ void TestItems::an_export_is_imported_whole_and_never_over_an_item()
     QVERIFY(controller->messageIsTrouble());
     QVERIFY(!controller->confirmImport());
     QCOMPARE(controller->items()->rowCount(), 4);
+}
+
+void TestItems::the_vault_is_exported_only_with_its_master_password()
+{
+    auto controller = unlocked();
+    QVERIFY(controller);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Mail"));
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    const QString target = folder->filePath(QStringLiteral("export.json"));
+    QSignalSpy done(controller.get(), &VaultController::exportDone);
+
+    controller->exportVault(QUrl::fromLocalFile(target), QStringLiteral("wrong"));
+    QTRY_COMPARE(done.size(), 1);
+    QVERIFY(!done.last().first().toBool());
+    QVERIFY(!QFile::exists(target));
+    QVERIFY(controller->messageIsTrouble());
+
+    controller->exportVault(QUrl::fromLocalFile(target), QStringLiteral("pass"));
+    QTRY_COMPARE(done.size(), 2);
+    QVERIFY(done.last().first().toBool());
+#ifndef Q_OS_WIN
+    // Readable by the person alone: it holds every password unencrypted.
+    QCOMPARE(QFile::permissions(target) & (QFileDevice::ReadGroup | QFileDevice::ReadOther), QFileDevice::Permissions());
+#endif
+    QFile written(target);
+    QVERIFY(written.open(QIODevice::ReadOnly));
+    const ImportResult back = readReferenceExport(written.readAll(), {});
+    QCOMPARE(back.status, ImportStatus::Read);
+    QCOMPARE(back.items.size(), 1);
+    QCOMPARE(back.items.constFirst().title, QStringLiteral("Mail"));
+
+    // A folder that cannot be written to is said, and nothing is left.
+    controller->exportVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("no/such/folder/e.json"))),
+                            QStringLiteral("pass"));
+    QTRY_COMPARE(done.size(), 3);
+    QVERIFY(!done.last().first().toBool());
+    QVERIFY(controller->messageIsTrouble());
 }
 
 QTEST_MAIN(TestItems)

@@ -21,6 +21,7 @@
 
 #include "autostart.h"
 #include "item_icons.h"
+#include "json_export.h"
 #include "password_generator.h"
 #include "templates.h"
 #include "totp.h"
@@ -48,9 +49,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.20
+// vault_controller.cpp 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: Export in the reference program's format, after the master password, off the window's thread (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export, read off the window's thread, added in one save (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
@@ -1985,6 +1987,70 @@ void VaultController::makeKeyfile(const QUrl& file)
                               true);
                 }
                 emit self->keyfileMade(target, made);
+            },
+            Qt::QueuedConnection);
+    });
+}
+
+void VaultController::exportVault(const QUrl& file, const QString& password)
+{
+    const QString target = file.isLocalFile() ? file.toLocalFile() : file.toString();
+    if (currentState != State::Unlocked || target.isEmpty()) {
+        emit exportDone(false);
+        return;
+    }
+    QByteArray typed = password.toUtf8();
+    const QByteArray secret = keyfileSecret;
+    const VaultKey current = key;
+    const VaultContents snapshot = contents;
+    const quint64 session = vaultSession;
+    say(tr("Exporting…"), false);
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&filePool, [self, target, typed, secret, current, snapshot, session]() mutable {
+        enum class Outcome { Written, WrongPassword, CannotWrite };
+        Outcome outcome = Outcome::CannotWrite;
+        // The master password checked as the vault itself would (D-037).
+        QByteArray checked = current.usesKeyfile ? typed + secret : typed;
+        const auto derived = crypto::deriveKey(checked, current.salt, current.parameters);
+        crypto::wipe(checked);
+        crypto::wipe(typed);
+        if (!derived || *derived != current.key) {
+            outcome = Outcome::WrongPassword;
+        } else {
+            QByteArray json = writeReferenceExport(snapshot);
+            QSaveFile output(target);
+            // Readable by the person alone: it holds every password unencrypted.
+            outcome = output.open(QIODevice::WriteOnly) &&
+                              output.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) &&
+                              output.write(json) == json.size() && output.commit()
+                          ? Outcome::Written
+                          : Outcome::CannotWrite;
+            crypto::wipe(json);
+        }
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, outcome, target, session]() {
+                if (!self || session != self->vaultSession) {
+                    return;
+                }
+                switch (outcome) {
+                case Outcome::Written:
+                    self->say(tr("Exported to “%1”. It holds every password unencrypted: keep it safe and delete it "
+                                 "when done.")
+                                  .arg(QFileInfo(target).fileName()),
+                              false);
+                    emit self->exportDone(true);
+                    return;
+                case Outcome::WrongPassword:
+                    self->say(tr("That is not the master password. Nothing was exported."), true);
+                    break;
+                case Outcome::CannotWrite:
+                    self->say(tr("The export could not be written: the folder cannot be written to, or the disk is "
+                                 "full."),
+                              true);
+                    break;
+                }
+                emit self->exportDone(false);
             },
             Qt::QueuedConnection);
     });

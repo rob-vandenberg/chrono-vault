@@ -39,9 +39,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// vault_file.cpp 0.0.18
+// vault_file.cpp 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: A new keyfile readable by the person alone
 // v0.0.18: On Windows, putting the new file in place is tried again briefly while another program holds the vault
 //          (the owner, Q37)
 // v0.0.16: Vault files read so that another program, or a save, can replace them meanwhile (Windows);
@@ -254,7 +255,9 @@ bool makeKeyfile(const QString& path)
         return false;
     }
     QSaveFile file(path);
-    return file.open(QIODevice::WriteOnly) && file.write(bytes) == bytes.size() && file.commit();
+    // A keyfile is a secret: readable by the person alone.
+    return file.open(QIODevice::WriteOnly) && file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) &&
+           file.write(bytes) == bytes.size() && file.commit();
 }
 
 QString savingPathFor(const QString& path)

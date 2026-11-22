@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.0.21
+// ImportWindow.qml 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.21: The file chooser belongs to the main window, so it shows: this window is still hidden when it opens
 // v0.0.19: Initial release (D-035)
 
@@ -47,11 +48,10 @@ DialogWindow {
     }
 
     // Import, greyed while there is nothing to import.
-    Component.onCompleted: standardButton(Dialog.Ok).text = qsTr("Import")
-    Binding {
-        target: importWindow.standardButton(Dialog.Ok)
-        property: "enabled"
-        value: importWindow.summary.ok === true
+    // Set once the button exists; a binding to it made earlier never took hold.
+    Component.onCompleted: {
+        importWindow.standardButton(Dialog.Ok).text = qsTr("Import")
+        importWindow.standardButton(Dialog.Ok).enabled = Qt.binding(function() { return importWindow.summary.ok === true })
     }
 
     Connections {

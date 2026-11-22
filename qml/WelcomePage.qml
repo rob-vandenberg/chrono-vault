@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.15
+// WelcomePage.qml 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.15: A new vault may also be locked with a keyfile, chosen or made; its password may be saved in the primary
 //          vault (D-030, D-031)
 // v0.0.9: New vault and Open vault reachable from the File menu (D-025)
@@ -117,11 +118,8 @@ Item {
 
         // OK only when both fields hold the same password, so a typing slip
         // never sends the person back to the start.
-        Binding {
-            target: newVaultDialog.standardButton(Dialog.Ok)
-            property: "enabled"
-            value: newVaultDialog.ready
-        }
+        // Set once the button exists; a binding to it made earlier never took hold.
+        Component.onCompleted: newVaultDialog.standardButton(Dialog.Ok).enabled = Qt.binding(function() { return newVaultDialog.ready })
 
         onShown: {
             offerSave = VaultController.canSaveInPrimary()

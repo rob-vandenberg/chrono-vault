@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.0.21
+// MasterPasswordWindow.qml 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.21: The keyfile choosers belong to this window, so they show
 // v0.0.15: Initial release (D-031)
 
@@ -51,11 +52,8 @@ DialogWindow {
         currentPassword.forceActiveFocus()
     }
 
-    Binding {
-        target: passwordWindow.standardButton(Dialog.Ok)
-        property: "enabled"
-        value: passwordWindow.ready
-    }
+    // Set once the button exists; a binding to it made earlier never took hold.
+    Component.onCompleted: passwordWindow.standardButton(Dialog.Ok).enabled = Qt.binding(function() { return passwordWindow.ready })
 
     onAccepted: {
         VaultController.changeMasterPassword(currentPassword.text, newPassword.text, repeatedPassword.text,

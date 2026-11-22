@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.19
+# qml/CMakeLists.txt 0.0.22
 
 # --- Version history ----------------------------------------------------
+# v0.0.22: The export window (D-037)
 # v0.0.19: The import window (D-035)
 # v0.0.17: A field's row in the item's view, a file of its own (D-033)
 # v0.0.15: The window that changes the master password or keyfile (D-031)
@@ -43,6 +44,7 @@ qt_add_qml_module(chrono_vault_ui
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
         AboutWindow.qml
+        ExportWindow.qml
         FieldRow.qml
         GeneratorDialog.qml
         ImportWindow.qml

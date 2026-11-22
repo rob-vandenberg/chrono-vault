@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# src/core/CMakeLists.txt 0.0.19
+# src/core/CMakeLists.txt 0.0.22
 
 # --- Version history ----------------------------------------------------
+# v0.0.22: The exporter to the reference program's format (D-037)
 # v0.0.19: The importer of the reference program's export (D-035)
 # v0.0.14: The built-in categories and templates (D-027)
 # v0.0.5: The release check (D-021)
@@ -29,6 +30,8 @@
 qt_add_library(chrono_vault_core STATIC
     crypto.cpp
     crypto.h
+    json_export.cpp
+    json_export.h
     json_import.cpp
     json_import.h
     password_generator.cpp

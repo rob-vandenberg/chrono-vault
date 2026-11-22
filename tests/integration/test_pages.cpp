@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.21
+// test_pages.cpp 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: The item, editor, import and export tests moved to test_item_pages.cpp (OR-11: under 20 seconds)
 // v0.0.21: File > Import… opens its file chooser, which belongs to a window
 // v0.0.19: The import window: Import, and closed by a lock (D-035)
 // v0.0.18: The editor: Field Options, Add > Section, a new field closed without Save, moving, Cancel (D-034)
@@ -110,9 +111,6 @@ private slots:
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
     void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
     void new_item_shows_when_it_has_the_keyboard_focus();
-    void an_item_shows_a_card_per_section_and_hidden_values_as_dots();
-    void the_editor_changes_fields_through_field_options();
-    void the_import_window_offers_import_and_closes_at_a_lock();
 };
 
 void TestPages::initTestCase()
@@ -606,227 +604,6 @@ void TestPages::new_item_shows_when_it_has_the_keyboard_focus()
     button->forceActiveFocus(Qt::TabFocusReason);
     QTRY_VERIFY(button->property("visualFocus").toBool());
     QVERIFY(fill->property("border").value<QObject*>()->property("width").toInt() >= 2);
-    controller->lock();
-}
-
-void TestPages::an_item_shows_a_card_per_section_and_hidden_values_as_dots()
-{
-    QTemporaryDir folder;
-    QVERIFY(folder.isValid());
-    QList<QQmlError> qmlWarnings;
-    QQmlApplicationEngine engine;
-    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
-                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
-    engine.loadFromModule("ChronoVault", "Main");
-    QObject* window = engine.rootObjects().constFirst();
-    showMainWindow(qobject_cast<QWindow*>(window), false, false);
-    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
-    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
-    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("cards.chronovault"))),
-                            QStringLiteral("a"), QStringLiteral("a"));
-    QTRY_COMPARE(controller->state(), State::Unlocked);
-
-    QVariantMap item = controller->newLogin();
-    QVariantList fields{
-        QVariantMap{{"role", ""}, {"label", "Website"}, {"kind", "url"}, {"value", "https://example.org"}},
-        QVariantMap{{"role", ""}, {"label", "Password"}, {"kind", "text"}, {"value", "secret"}, {"sensitive", true}},
-        QVariantMap{{"role", ""}, {"label", "2FA Authentication"}, {"kind", "section"}, {"value", ""}},
-        QVariantMap{{"role", ""}, {"label", "Repository"}, {"kind", "url"}, {"value", "https://example.org/r"}},
-        QVariantMap{{"role", ""}, {"label", "Empty part"}, {"kind", "section"}, {"value", ""}},
-        QVariantMap{{"role", ""}, {"label", "Phone"}, {"kind", "phone"}, {"value", ""}},
-        QVariantMap{{"role", ""}, {"label", "2FA"}, {"kind", "hidden"}, {"value", "x"}, {"hiddenType", ".twoFA"}},
-    };
-    item.insert(QStringLiteral("fields"), fields);
-    item.insert(QStringLiteral("title"), QStringLiteral("Example"));
-    const QString id = item.value(QStringLiteral("id")).toString();
-    QVERIFY(controller->saveItem(item));
-    QTRY_VERIFY(controller->isIdle());
-    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
-    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
-
-    auto* root = qobject_cast<QQuickWindow*>(window)->contentItem();
-    // Two cards: the first without a heading, then the one section with a
-    // field to show; the empty section, the empty phone and the hidden
-    // field are not shown.
-    QTRY_COMPARE(visualItems(root, QStringLiteral("fieldCard")).size(), 2);
-    QStringList headings;
-    for (QQuickItem* heading : visualItems(root, QStringLiteral("sectionHeading"))) {
-        if (heading->isVisible()) {
-            headings << heading->property("text").toString();
-        }
-    }
-    QCOMPARE(headings, QStringList{QStringLiteral("2FA Authentication")});
-    QStringList values;
-    for (QQuickItem* value : visualItems(root, QStringLiteral("fieldValue"))) {
-        if (value->isVisible()) {
-            values << value->property("text").toString();
-        }
-    }
-    QVERIFY(values.contains(QStringLiteral("••••••••")));
-    QVERIFY(!values.contains(QStringLiteral("secret")));
-    QCOMPARE(values.size(), 3);
-
-    // Moved to the Trash and shown there: Restore brings it back.
-    controller->moveToTrash(id, true);
-    controller->setFilter(QStringLiteral("trash"));
-    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
-    QObject* details = window->findChild<QObject*>(QStringLiteral("itemDetails"));
-    QObject* restore = details->findChild<QObject*>(QStringLiteral("restoreButton"));
-    QVERIFY(restore);
-    QTRY_VERIFY(restore->property("visible").toBool());
-    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
-    QVERIFY(!controller->item(id).value(QStringLiteral("trashed")).toBool());
-    controller->setFilter(QString());
-    controller->lock();
-
-    QString warningText;
-    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
-        warningText += warning.toString() + QLatin1Char('\n');
-    }
-    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
-}
-
-void TestPages::the_editor_changes_fields_through_field_options()
-{
-    QTemporaryDir folder;
-    QVERIFY(folder.isValid());
-    QList<QQmlError> qmlWarnings;
-    QQmlApplicationEngine engine;
-    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
-                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
-    engine.loadFromModule("ChronoVault", "Main");
-    QObject* window = engine.rootObjects().constFirst();
-    showMainWindow(qobject_cast<QWindow*>(window), false, false);
-    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
-    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
-    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("editor.chronovault"))),
-                            QStringLiteral("a"), QStringLiteral("a"));
-    QTRY_COMPARE(controller->state(), State::Unlocked);
-
-    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
-    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
-    QObject* options = window->findChild<QObject*>(QStringLiteral("fieldOptions"));
-    QVERIFY(page && editor && options);
-    QVERIFY(QMetaObject::invokeMethod(page, "newItem", Q_ARG(QVariant, QStringLiteral("note"))));
-    const QString id = editor->property("itemId").toString();
-
-    // A field added and given a name, a type and the hide mark.
-    QVariant index;
-    QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("text"))));
-    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
-    QTRY_VERIFY(options->property("opened").toBool());
-    options->findChild<QObject*>(QStringLiteral("fieldNameField"))->setProperty("text", QStringLiteral("PIN code"));
-    options->findChild<QObject*>(QStringLiteral("fieldTypeBox"))->setProperty("currentIndex", 7); // Number
-    options->findChild<QObject*>(QStringLiteral("sensitiveSwitch"))->setProperty("checked", true);
-    QVERIFY(QMetaObject::invokeMethod(options, "accept"));
-
-    // A section, and a field closed without Save, which is not added.
-    QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("section"))));
-    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
-    options->findChild<QObject*>(QStringLiteral("fieldNameField"))->setProperty("text", QStringLiteral("Bank"));
-    QVERIFY(QMetaObject::invokeMethod(options, "accept"));
-    QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("text"))));
-    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
-    QVERIFY(QMetaObject::invokeMethod(options, "reject"));
-
-    // The section moved to the top, then saved.
-    QVERIFY(QMetaObject::invokeMethod(editor, "moveField", Q_ARG(QVariant, 2), Q_ARG(QVariant, -2)));
-    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
-    QTRY_VERIFY(controller->isIdle());
-    QStringList shape;
-    for (const QVariant& field : controller->item(id).value(QStringLiteral("fields")).toList()) {
-        const QVariantMap map = field.toMap();
-        shape << map.value(QStringLiteral("kind")).toString() + QLatin1Char(':') + map.value(QStringLiteral("name")).toString() +
-                     (map.value(QStringLiteral("sensitive")).toBool() ? QStringLiteral("*") : QString());
-    }
-    QCOMPARE(shape, QStringList({"section:Bank", "multiline:Notes", "numeric:PIN code*"}));
-
-    // A field added and closed without Save leaves the saved item unchanged.
-    QVERIFY(!editor->property("changed").toBool());
-    QVERIFY(QMetaObject::invokeMethod(options, "showForNew", Q_ARG(QVariant, QStringLiteral("text"))));
-    QVERIFY(QMetaObject::invokeMethod(options, "reject"));
-    QVERIFY(!editor->property("changed").toBool());
-
-    // Delete Field on the middle field takes only that one away, its
-    // neighbour unchanged; Cancel then leaves without keeping it.
-    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, 1), Q_ARG(QVariant, false)));
-    QObject* deleteField = options->findChild<QObject*>(QStringLiteral("deleteFieldButton"));
-    QVERIFY(deleteField && QMetaObject::invokeMethod(deleteField, "clicked"));
-    QVERIFY(editor->property("changed").toBool());
-    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
-    QTRY_VERIFY(controller->isIdle());
-    shape.clear();
-    for (const QVariant& field : controller->item(id).value(QStringLiteral("fields")).toList()) {
-        const QVariantMap map = field.toMap();
-        shape << map.value(QStringLiteral("kind")).toString() + QLatin1Char(':') + map.value(QStringLiteral("name")).toString() +
-                     (map.value(QStringLiteral("sensitive")).toBool() ? QStringLiteral("*") : QString());
-    }
-    QCOMPARE(shape, QStringList({"section:Bank", "numeric:PIN code*"}));
-    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, 1), Q_ARG(QVariant, false)));
-    QVERIFY(QMetaObject::invokeMethod(deleteField, "clicked"));
-    // Cancel with a change not saved asks first; Discard then leaves.
-    QObject* cancel = editor->findChild<QObject*>(QStringLiteral("cancelButton"));
-    QObject* unsaved = window->findChild<QObject*>(QStringLiteral("unsavedDialog"));
-    QVERIFY(cancel && unsaved && QMetaObject::invokeMethod(cancel, "clicked"));
-    QTRY_VERIFY(unsaved->property("opened").toBool());
-    QCOMPARE(editor->property("itemId").toString(), id);
-    QVERIFY(QMetaObject::invokeMethod(unsaved, "discard"));
-    QCOMPARE(editor->property("itemId").toString(), QString());
-    QCOMPARE(controller->item(id).value(QStringLiteral("fields")).toList().size(), 2);
-    controller->lock();
-
-    QString warningText;
-    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
-        warningText += warning.toString() + QLatin1Char('\n');
-    }
-    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
-}
-
-void TestPages::the_import_window_offers_import_and_closes_at_a_lock()
-{
-    QTemporaryDir folder;
-    QVERIFY(folder.isValid());
-    QQmlApplicationEngine engine;
-    engine.loadFromModule("ChronoVault", "Main");
-    QObject* window = engine.rootObjects().constFirst();
-    showMainWindow(qobject_cast<QWindow*>(window), false, false);
-    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
-    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
-    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("import.chronovault"))),
-                            QStringLiteral("a"), QStringLiteral("a"));
-    QTRY_COMPARE(controller->state(), State::Unlocked);
-    const QString exportFile = folder.filePath(QStringLiteral("export.json"));
-    {
-        QFile file(exportFile);
-        QVERIFY(file.open(QIODevice::WriteOnly));
-        file.write(R"({"items":[{"title":"Mail","category":"login","template_type":"login.default","fields":[]}]})");
-    }
-    QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
-    QVERIFY(importWindow);
-    QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
-    QObject* exportDialog = importWindow->findChild<QObject*>(QStringLiteral("exportDialog"));
-    // The chooser opens, and belongs to a window, or a desktop may not show
-    // it: the import window itself is still hidden then.
-    QVERIFY(exportDialog);
-    QTRY_VERIFY(exportDialog->property("visible").toBool());
-    QVERIFY(exportDialog->property("parentWindow").value<QWindow*>() != nullptr);
-    QVERIFY(QMetaObject::invokeMethod(exportDialog, "close"));
-    importWindow->setProperty("reading", true);
-    controller->readImport(QUrl::fromLocalFile(exportFile));
-    QTRY_VERIFY(importWindow->property("opened").toBool());
-    QVariant buttonValue;
-    QVERIFY(QMetaObject::invokeMethod(importWindow, "standardButton", Q_RETURN_ARG(QVariant, buttonValue),
-                                      Q_ARG(QVariant, 0x00000400))); // Dialog.Ok
-    auto* importButton = buttonValue.value<QObject*>();
-    QVERIFY(importButton);
-    QCOMPARE(importButton->property("text").toString(), QStringLiteral("Import"));
-    QVERIFY(importButton->property("enabled").toBool());
-
-    controller->lock();
-    QTRY_VERIFY(!importWindow->property("opened").toBool());
-    controller->unlock(QStringLiteral("a"));
-    QTRY_COMPARE(controller->state(), State::Unlocked);
-    QCOMPARE(controller->items()->rowCount(), 0); // nothing imported
     controller->lock();
 }
 

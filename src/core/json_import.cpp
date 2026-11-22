@@ -27,9 +27,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// json_import.cpp 0.0.19
+// json_import.cpp 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: Chrono Vault's own built-in templates, as its export names them, come back as themselves (D-037)
 // v0.0.19: Initial release (D-035)
 
 namespace chrono_vault {
@@ -80,8 +81,19 @@ QString builtInTemplateFor(const QString& name)
         {QStringLiteral("login.default"), QStringLiteral("login")},
         {QStringLiteral("note.default"), QStringLiteral("note")},
         {QStringLiteral("password.default"), QStringLiteral("password")},
+        {QStringLiteral("creditcard.default"), QStringLiteral("card")},
+        {QStringLiteral("identity.default"), QStringLiteral("identity")},
     };
-    return names.value(name);
+    if (names.contains(name)) {
+        return names.value(name);
+    }
+    // Chrono Vault's other built-in templates, as its own export names them.
+    for (const Template& one : builtInTemplates()) {
+        if (one.id == name) {
+            return name;
+        }
+    }
+    return {};
 }
 
 bool isInt(const QJsonValue& value)

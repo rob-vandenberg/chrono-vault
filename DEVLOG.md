@@ -223,3 +223,10 @@ keyfile choosers of the master password window got their window too. The page te
 window. The import of the owner's real export was checked by counts only, written for the owner first: every one of
 45 items, 600 fields, 87 deleted, 70 sections, 75 earlier values, 25 custom icons and 2 attachments read as the export
 holds them.
+
+## 22 November 2026: version 0.0.22: export in the reference program's format (autonomous mode)
+
+File > Export…, after the master password and a plain warning (D-037); export and import again give back what a person
+sees, item for item. Found along the way: the rule greying a dialog's OK button never took hold in four windows (set
+too early, before the button existed); `test_pages` grew past 20 seconds under ASan and was split (OR-11). Review round
+1: the export and a new keyfile are now readable by the person alone; problems are said in the export window too.

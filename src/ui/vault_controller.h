@@ -38,9 +38,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.20
+// vault_controller.h 0.0.22
 
 // --- Version history ----------------------------------------------------
+// v0.0.22: Export in the reference program's format, after the master password (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
@@ -181,6 +182,10 @@ public:
     Q_INVOKABLE void switchToVault(const QString& vaultFile);
     // Writes a new keyfile where the person chose; answered by keyfileMade.
     Q_INVOKABLE void makeKeyfile(const QUrl& file);
+    // Writes the open vault, unencrypted, in the reference program's format
+    // where the person chose, once the master password is right (D-037);
+    // answered by exportDone. The file is readable by the person alone.
+    Q_INVOKABLE void exportVault(const QUrl& file, const QString& password);
     // A new master password, and a keyfile or none, for the unlocked vault;
     // answered by masterPasswordChanged (D-031).
     Q_INVOKABLE void changeMasterPassword(const QString& current, const QString& password, const QString& repeated,
@@ -296,6 +301,7 @@ signals:
     void masterPasswordChanged(bool ok);
     // {ok, items, categories, templates, attachments, message}
     void importRead(const QVariantMap& summary);
+    void exportDone(bool ok);
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();

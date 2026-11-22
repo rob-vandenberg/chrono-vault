@@ -2,15 +2,13 @@
 
 ## Now
 
-**Version 0.0.20**: website icons, off by default, asked of each website itself, kept in memory only (D-036). With
-0.0.17 to 0.0.19 the import of the reference program's export is complete: the item, the editor and File > Import…
-(D-033 to D-035).
+**Version 0.0.22**: File > Export… in the reference program's format, after the master password, readable by the
+person alone (D-037). Before: website icons (0.0.20), the importer (0.0.19), the editor (0.0.18), the item (0.0.17).
 
 ## Next task
 
-The owner tries the import with his own export. Then, by his choice: the settings the reference program has that
-Chrono Vault lacks (PIN unlock, more autolock choices, automatic backups, language, data location, item counts), or
-`ROADMAP.md` step 10, merging.
+In autonomous mode: 0.0.23, unlocking with a fingerprint (Windows Hello on Windows; fprintd and the desktop keyring
+on Linux), and the yearly master password reminder.
 
 ## Open questions
 

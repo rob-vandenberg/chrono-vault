@@ -159,6 +159,44 @@
     </message>
 </context>
 <context>
+    <name>ExportWindow</name>
+    <message>
+        <location filename="../qml/ExportWindow.qml" line="+37"/>
+        <source>Export the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Export…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+36"/>
+        <source>The export holds every password of “%1” unencrypted: anyone who gets the file can read them all. Keep it safe, and delete it when you no longer need it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The master password of this vault:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Master password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Where should the export be saved?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>JSON exports (*.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Field</name>
     <message>
         <location filename="../src/core/vault_contents.cpp" line="+402"/>
@@ -390,22 +428,22 @@
 <context>
     <name>ImportWindow</name>
     <message>
-        <location filename="../qml/ImportWindow.qml" line="+39"/>
+        <location filename="../qml/ImportWindow.qml" line="+41"/>
         <source>Import from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+12"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+29"/>
         <source>The export holds %1 item(s), %2 attachment(s), %3 category(ies) and %4 template(s) of your own. They are added to “%5”, as they are.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+23"/>
         <source>Choose the export of %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -809,7 +847,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+54"/>
+        <location filename="../qml/Main.qml" line="+55"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -834,7 +872,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+26"/>
         <source>Preferences…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -894,8 +932,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-11"/>
+        <location line="-16"/>
         <source>Import…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Export…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -949,7 +992,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+37"/>
+        <location line="+41"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -982,12 +1025,12 @@
 <context>
     <name>MasterPasswordWindow</name>
     <message>
-        <location filename="../qml/MasterPasswordWindow.qml" line="+35"/>
+        <location filename="../qml/MasterPasswordWindow.qml" line="+37"/>
         <source>Change master password or keyfile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+42"/>
+        <location line="+39"/>
         <source>Current master password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1037,12 +1080,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>Choose a keyfile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>Where should the new keyfile be kept?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1483,7 +1526,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+181"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+183"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1665,7 +1708,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+57"/>
+        <location filename="../qml/WelcomePage.qml" line="+58"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1711,7 +1754,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+29"/>
         <source>This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1969,18 +2012,18 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1530"/>
+        <location line="+1594"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1526"/>
-        <location line="+1531"/>
+        <location line="-1590"/>
+        <location line="+1595"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1441"/>
+        <location line="-1505"/>
         <location line="+1405"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
@@ -1999,12 +2042,12 @@
         <location line="+28"/>
         <location line="+117"/>
         <location line="+1284"/>
-        <location line="+149"/>
+        <location line="+213"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1495"/>
+        <location line="-1559"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2189,7 +2232,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+42"/>
+        <location line="+22"/>
+        <source>Exporting…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Exported to “%1”. It holds every password unencrypted: keep it safe and delete it when done.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>That is not the master password. Nothing was exported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>The export could not be written: the folder cannot be written to, or the disk is full.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+43"/>
         <source>Changing the master password…</source>
         <translation type="unfinished"></translation>
     </message>
