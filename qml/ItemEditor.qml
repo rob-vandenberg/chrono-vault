@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.18
+// ItemEditor.qml 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: Add at the left, Save and Cancel at the right; a click on the icon opens the icon picker (D-050)
 // v0.0.18: As the reference program's editor (D-034): Cancel, "Add ▾" and a blue Save at the top; the icon with a
 //          pencil badge; the title across the width; one row per field with its label at the right, the drag
 //          handle and a blue "…" under the mouse; Field Options; sections as headings
@@ -245,20 +246,12 @@ Item {
         visible: editor.itemId !== ""
         spacing: 0
 
-        // Cancel at the left; "Add ▾" and the blue Save at the right (D-034).
+        // "Add ▾" at the left; the blue Save and Cancel at the right, 12
+        // pixels between the buttons and the icon below (the owner, D-050).
         RowLayout {
             Layout.fillWidth: true
             Layout.margins: Math.round(16 * Appearance.factor)
-            Layout.bottomMargin: Math.round(8 * Appearance.factor)
-            Button {
-                objectName: "cancelButton"
-                text: qsTr("Cancel")
-                // Cancel means: leave without keeping the changes.
-                // With changes not saved yet, asked first, never lost by one click
-                // (OR-15); without, the editor just closes.
-                onClicked: editor.whenFree(editor.close)
-            }
-            Item { Layout.fillWidth: true }
+            Layout.bottomMargin: Math.round(14 * Appearance.factor)
             Button {
                 objectName: "addButton"
                 text: qsTr("Add") + "  ▾"
@@ -279,6 +272,7 @@ Item {
                     }
                 }
             }
+            Item { Layout.fillWidth: true }
             Button {
                 objectName: "saveButton"
                 text: qsTr("Save")
@@ -286,6 +280,14 @@ Item {
                 // Not while a file is still being read: it would be left out.
                 enabled: (editor.changed || editor.isNew) && editor.waitingFor.length === 0
                 onClicked: editor.store()
+            }
+            Button {
+                objectName: "cancelButton"
+                text: qsTr("Cancel")
+                // Cancel means: leave without keeping the changes.
+                // With changes not saved yet, asked first, never lost by one click
+                // (OR-15); without, the editor just closes.
+                onClicked: editor.whenFree(editor.close)
             }
         }
 
@@ -296,7 +298,9 @@ Item {
             Layout.leftMargin: Math.round(16 * Appearance.factor)
             Layout.rightMargin: Math.round(16 * Appearance.factor)
             Layout.bottomMargin: Math.round(16 * Appearance.factor)
+            // A click anywhere on the icon opens the icon picker (D-050).
             Item {
+                objectName: "itemIcon"
                 Layout.preferredWidth: Math.round(52 * Appearance.factor)
                 Layout.preferredHeight: Math.round(52 * Appearance.factor)
                 Image {
@@ -321,24 +325,17 @@ Item {
                         color: editor.palette.window
                         border.color: editor.lineColour
                     }
-                    onClicked: iconMenu.popup(this, 0, height)
-                    ToolTip.visible: hovered
+                    onClicked: editor.chooseIcon()
+                }
+                MouseArea {
+                    objectName: "itemIconArea"
+                    anchors.fill: parent
+                    z: -1 // the badge, on top, answers for itself
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: editor.chooseIcon()
+                    ToolTip.visible: containsMouse
                     ToolTip.text: qsTr("Change the icon")
-                    Menu {
-                        id: iconMenu
-                        Action {
-                            text: qsTr("Choose icon…")
-                            onTriggered: iconDialog.open()
-                        }
-                        Action {
-                            text: qsTr("Remove icon")
-                            enabled: editor.icon !== ""
-                            onTriggered: {
-                                editor.icon = ""
-                                editor.changed = true
-                            }
-                        }
-                    }
                 }
             }
             TextField {
@@ -703,15 +700,21 @@ Item {
         }
     }
 
-    FileDialog {
-        id: iconDialog
-        title: qsTr("Choose an icon")
-        fileMode: FileDialog.OpenFile
-        nameFilters: [qsTr("Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)")]
-        onAccepted: {
-            const picked = VaultController.readItemIcon(selectedFile)
-            if (picked !== "") {
-                editor.icon = picked
+    // The icon picker (D-050): the chosen icon, or the category's.
+    function chooseIcon() {
+        iconPicker.start(editor.defaultIcon)
+    }
+    IconPicker {
+        id: iconPicker
+        onIconChosen: function(chosen) {
+            if (chosen !== editor.icon) {
+                editor.icon = chosen
+                editor.changed = true
+            }
+        }
+        onIconDeleted: function(deleted) {
+            if (deleted === editor.icon) {
+                editor.icon = ""
                 editor.changed = true
             }
         }

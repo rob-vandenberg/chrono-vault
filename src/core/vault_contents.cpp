@@ -27,9 +27,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.0.17
+// vault_contents.cpp 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The contents format 5: the vault's own icons (D-050)
 // v0.0.17: The contents format 4: sections, the reference program's field types, hide marks, hidden and deleted
 //          fields, field history and ids, an item's subtitle and note, trash, archive, autosubmit (D-033)
 // v0.0.15: The name of the field that holds a vault's file, for its password saved in the primary (D-030)
@@ -44,8 +45,9 @@ namespace {
 
 // Format 2 added the item's icon (D-018); format 3 the categories and
 // templates, tags, favourites and attachments (D-027 to D-029); format 4
-// what the reference program's items hold (D-033). Older formats are read.
-constexpr int contentsFormat = 4;
+// what the reference program's items hold (D-033); format 5 the vault's own
+// icons (D-050). Older formats are read.
+constexpr int contentsFormat = 5;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -524,6 +526,13 @@ QByteArray contentsToJson(const VaultContents& contents)
     if (!contents.hiddenCategories.isEmpty()) {
         root.insert(QStringLiteral("hiddenCategories"), QJsonArray::fromStringList(contents.hiddenCategories));
     }
+    if (!contents.customIcons.isEmpty()) {
+        QJsonArray icons;
+        for (const QByteArray& icon : contents.customIcons) {
+            icons.append(QString::fromLatin1(icon.toBase64()));
+        }
+        root.insert(QStringLiteral("customIcons"), icons);
+    }
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
 }
 
@@ -607,6 +616,30 @@ ContentsResult contentsFromJson(const QByteArray& json)
                 return result;
             }
             contents.hiddenCategories.append(value.toString());
+        }
+    }
+    // Format 5 (D-050): the vault's own icons, each a PNG no larger than an
+    // item's icon.
+    if (root.contains(QStringLiteral("customIcons"))) {
+        const QJsonValue icons = root.value(QStringLiteral("customIcons"));
+        if (format < 5 || !icons.isArray() || icons.toArray().size() > largestListCount) {
+            return result;
+        }
+        for (const QJsonValue& value : icons.toArray()) {
+            const auto icon = bytesFromBase64(value, largestIconBytes);
+            if (!icon || icon->isEmpty()) {
+                return result;
+            }
+            contents.customIcons.append(*icon);
+        }
+    }
+    if (format < 5) {
+        // A vault from before its own icons were kept: the icons its items
+        // carry become them, each once (D-050).
+        for (const Item& item : std::as_const(contents.items)) {
+            if (!item.icon.isEmpty() && !contents.customIcons.contains(item.icon)) {
+                contents.customIcons.append(item.icon);
+            }
         }
     }
     result.status = ContentsStatus::Read;

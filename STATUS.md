@@ -2,7 +2,9 @@
 
 ## Now
 
-**Version 0.0.39**: Settings tidied: Autolock's four tick boxes in a frame, the master password reminder every Day,
+**Version 0.0.40**: the icon picker: the vault's own icons kept in the vault, the shipped icons from `icons/` as
+`icons.md` lists them, copied into the person's own folder; the editor's Add, Save and Cancel; the reminder below
+Change the Master Password (D-050). Before, 0.0.39: Settings tidied: Autolock's four tick boxes in a frame, the master password reminder every Day,
 Month, Quarter (default), Year or Never, "Clear the clipboard after [30] seconds"; normal scroll bars with arrows in
 the settings window and the About box; collapsed sidebar entries as tall as expanded; Esc closes the About box; the
 Windows setup builds again (D-049). Before, 0.0.38: two files, the vaults in `chrono-vault.conf` and everything else in `chrono-vault.ini`, both in

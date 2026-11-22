@@ -20,6 +20,7 @@
 #include "app_setup.h"
 
 #include "autostart.h"
+#include "icon_library.h"
 #include "item_icons.h"
 #include "json_export.h"
 #include "password_generator.h"
@@ -53,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.39
+// vault_controller.cpp 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter no longer hides a member
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never; no local key hiding the member (D-049)
 // v0.0.38: Settings in chrono-vault.ini, vaults in chrono-vault.conf, no carry-over; the Esc setting (D-026, D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
@@ -2736,6 +2738,82 @@ QString VaultController::readItemIcon(const QUrl& file)
     return QString::fromLatin1(result.png.toBase64());
 }
 
+QStringList VaultController::customIcons() const
+{
+    QStringList icons;
+    const auto add = [&icons](const QByteArray& png) {
+        const QString text = QString::fromLatin1(png.toBase64());
+        if (!png.isEmpty() && !icons.contains(text)) {
+            icons.append(text);
+        }
+    };
+    for (const QByteArray& png : contents.customIcons) {
+        add(png);
+    }
+    return icons;
+}
+
+QString VaultController::addCustomIcon(const QUrl& file)
+{
+    if (currentState != State::Unlocked) {
+        return {};
+    }
+    const QString icon = readItemIcon(file);
+    if (icon.isEmpty()) {
+        return {};
+    }
+    const QByteArray png = QByteArray::fromBase64(icon.toLatin1());
+    if (!contents.customIcons.contains(png)) {
+        contents.customIcons.append(png);
+        contentsChanged();
+        saveInBackground(QString());
+    }
+    return icon;
+}
+
+int VaultController::customIconUses(const QString& icon) const
+{
+    const QByteArray png = QByteArray::fromBase64(icon.toLatin1());
+    return static_cast<int>(std::count_if(contents.items.cbegin(), contents.items.cend(),
+                                          [&png](const Item& one) { return !png.isEmpty() && one.icon == png; }));
+}
+
+void VaultController::deleteCustomIcon(const QString& icon)
+{
+    const QByteArray png = QByteArray::fromBase64(icon.toLatin1());
+    if (currentState != State::Unlocked || png.isEmpty()) {
+        return;
+    }
+    bool changed = contents.customIcons.removeAll(png) > 0;
+    for (Item& one : contents.items) {
+        if (one.icon == png) {
+            one.icon.clear(); // its category's icon again
+            changed = true;
+        }
+    }
+    if (changed) {
+        contentsChanged();
+        saveInBackground(QString());
+    }
+}
+
+QVariantList VaultController::iconSections() const
+{
+    QVariantList sections;
+    for (const IconSection& section : readIconSections(personalIconsFolder())) {
+        QVariantList icons;
+        for (const QString& path : section.files) {
+            icons.append(QVariantMap{{QStringLiteral("name"), QFileInfo(path).completeBaseName()},
+                                     {QStringLiteral("url"), QUrl::fromLocalFile(path)}});
+        }
+        // A heading without a translation is shown as written (the owner).
+        sections.append(QVariantMap{
+            {QStringLiteral("heading"), QCoreApplication::translate("IconSections", section.heading.toUtf8().constData())},
+            {QStringLiteral("icons"), icons}});
+    }
+    return sections;
+}
+
 void VaultController::retrySave()
 {
     if (currentState == State::Unlocked && dirty) {
@@ -2811,10 +2889,10 @@ void VaultController::setKeys(const QString& action, const QStringList& keys)
     emit shortcutsChanged();
 }
 
-QString VaultController::keyName(int key, int modifiers) const
+QString VaultController::keyName(int keyCode, int modifiers) const
 {
-    if (key == Qt::Key_Shift || key == Qt::Key_Control || key == Qt::Key_Alt || key == Qt::Key_Meta ||
-        key == Qt::Key_unknown || key == 0) {
+    if (keyCode == Qt::Key_Shift || keyCode == Qt::Key_Control || keyCode == Qt::Key_Alt || keyCode == Qt::Key_Meta ||
+        keyCode == Qt::Key_unknown || keyCode == 0) {
         return {};
     }
     QString name;
@@ -2830,7 +2908,7 @@ QString VaultController::keyName(int key, int modifiers) const
     if (modifiers & Qt::MetaModifier) {
         name += QStringLiteral("Meta+");
     }
-    return name + QKeySequence(key).toString(QKeySequence::PortableText);
+    return name + QKeySequence(keyCode).toString(QKeySequence::PortableText);
 }
 
 void VaultController::clearClipboard()

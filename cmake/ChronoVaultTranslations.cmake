@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# ChronoVaultTranslations.cmake 0.0.2
+# ChronoVaultTranslations.cmake 0.0.40
 
 # --- Version history ----------------------------------------------------
+# v0.0.40: The icon picker's headings from icons/icons.md (D-050)
 # v0.0.2: Initial release
 
 # Translations with Poedit (D-008). US English is written in the code; every
@@ -36,8 +37,12 @@
 set(CHRONO_VAULT_TRANSLATIONS_DIR "${PROJECT_SOURCE_DIR}/translations")
 
 add_custom_target(update_translations
+    # The icon picker's headings from icons/icons.md, as texts to translate (D-050).
+    COMMAND ${CMAKE_COMMAND} -DICONS_MD=${PROJECT_SOURCE_DIR}/icons/icons.md
+            -DOUT=${PROJECT_BINARY_DIR}/icon_headings/icon_headings.cpp
+            -P ${PROJECT_SOURCE_DIR}/cmake/IconHeadings.cmake
     COMMAND Qt6::lupdate -silent -locations relative -extensions cpp,h,qml
-            "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/qml"
+            "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/qml" "${PROJECT_BINARY_DIR}/icon_headings"
             -ts "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.ts"
     COMMAND Qt6::lconvert -i "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.ts"
             -o "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.pot" -of pot

@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.39
+// vault_controller.h 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter renamed
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never (D-049)
 // v0.0.38: The Esc setting (D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
@@ -381,6 +382,19 @@ public:
     // Reads a picked picture as an item icon (D-018): the PNG in base64, or
     // empty when the file is not used, with a message saying why.
     [[nodiscard]] Q_INVOKABLE QString readItemIcon(const QUrl& file);
+    // The icon picker (D-050). The vault's own icons, PNG in base64, each
+    // once.
+    [[nodiscard]] Q_INVOKABLE QStringList customIcons() const;
+    // Reads a picture file into the vault's own icons; returns it, PNG in
+    // base64, or nothing when it cannot be read (and says why).
+    Q_INVOKABLE QString addCustomIcon(const QUrl& file);
+    // How many items carry this icon, and its removal: those items get their
+    // category's icon again.
+    [[nodiscard]] Q_INVOKABLE int customIconUses(const QString& icon) const;
+    Q_INVOKABLE void deleteCustomIcon(const QString& icon);
+    // The sections of the icons that ship with Chrono Vault, as icons.md in
+    // the person's icon folder lists them: {heading, icons: [{name, url}]}.
+    [[nodiscard]] Q_INVOKABLE QVariantList iconSections() const;
     // Saves again after a save failed.
     Q_INVOKABLE void retrySave();
 
@@ -396,7 +410,7 @@ public:
     Q_INVOKABLE void setKeys(const QString& action, const QStringList& keys);
     // A pressed key in words, modifiers first as the menus write them:
     // "Shift+Ctrl+B"; empty for a modifier alone.
-    [[nodiscard]] Q_INVOKABLE QString keyName(int key, int modifiers) const;
+    [[nodiscard]] Q_INVOKABLE QString keyName(int keyCode, int modifiers) const;
     [[nodiscard]] Q_INVOKABLE QString generatePassword(int length, bool uppercase, bool lowercase, bool digits,
                                                        bool symbols) const;
     // The current one-time code for a secret, or empty when it is not one.

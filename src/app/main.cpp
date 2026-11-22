@@ -18,6 +18,7 @@
 #include "app_setup.h"
 #include "quick_unlock.h"
 #include "appearance.h"
+#include "icon_library.h"
 #include "settings_files.h"
 #include "single_instance.h"
 #include "system_tray.h"
@@ -38,9 +39,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.38
+// main.cpp 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The shipped icons copied into the person's folder at start (D-050)
 // v0.0.38: --reset deletes chrono-vault.ini; no carry-over (D-026)
 // v0.0.30: The identifier chrono-vault for the settings, carried over; --debug writes the fingerprint log (D-044)
 // v0.0.12: --reset: the settings not read at the start (D-026)
@@ -96,6 +98,11 @@ int main(int argc, char* argv[])
     if (!instance.becomeTheOnlyOne()) {
         return 0;
     }
+
+    // The icons that ship with Chrono Vault: what the person's own icon
+    // folder lacks is copied in, before any window shows; nothing there is
+    // written over (D-050).
+    chrono_vault::copyMissingIcons();
 
     // US English is written in the code; another language is used when a
     // translation of the system's language is carried inside the program.

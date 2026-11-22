@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.39
+// SettingsWindow.qml 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The reminder just below Change the Master Password (D-050)
 // v0.0.39: Autolock tick boxes in a frame; the reminder a choice; the clipboard on one line; a normal scroll bar (D-049)
 // v0.0.38: "Use the Esc key to exit the program" in General (D-048)
 // v0.0.37: The shortcuts page as Chrono Viewer's, square × and +; a topic as tall as itself (D-047)
@@ -640,6 +641,18 @@ ApplicationWindow {
                                 onClicked: settingsWindow.changeMasterPasswordRequested()
                             }
                         }
+                        // How often the master password is asked though a finger
+                        // would do; Quarter by default (D-049).
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label { text: qsTr("Ask for the master password, so it is not forgotten, every") }
+                            ComboBox {
+                                objectName: "reminderBox"
+                                model: [qsTr("Day"), qsTr("Month"), qsTr("Quarter"), qsTr("Year"), qsTr("Never")]
+                                currentIndex: settingsWindow.masterPasswordReminder
+                                onActivated: function(index) { settingsWindow.masterPasswordReminder = index }
+                            }
+                        }
                         // Autolock when (D-040): four tick boxes in a frame of
                         // their own, the title on its border (D-049).
                         GroupBox {
@@ -736,18 +749,6 @@ ApplicationWindow {
                                 checked = Qt.binding(function() {
                                     return VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
                                 })
-                            }
-                        }
-                        // How often the master password is asked though a finger
-                        // would do; Quarter by default (D-049).
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Label { text: qsTr("Ask for the master password, so it is not forgotten, every") }
-                            ComboBox {
-                                objectName: "reminderBox"
-                                model: [qsTr("Day"), qsTr("Month"), qsTr("Quarter"), qsTr("Year"), qsTr("Never")]
-                                currentIndex: settingsWindow.masterPasswordReminder
-                                onActivated: function(index) { settingsWindow.masterPasswordReminder = index }
                             }
                         }
                         Item { Layout.fillHeight: true }

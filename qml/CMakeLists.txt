@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.38
+# qml/CMakeLists.txt 0.0.40
 
 # --- Version history ----------------------------------------------------
+# v0.0.40: IconPicker.qml, icon_library (D-050)
 # v0.0.38: settings_files (D-026)
 # v0.0.23: Unlocking with a fingerprint, a part per system (D-038)
 # v0.0.22: The export window (D-037)
@@ -49,6 +50,7 @@ qt_add_qml_module(chrono_vault_ui
         ExportWindow.qml
         FieldRow.qml
         GeneratorDialog.qml
+        IconPicker.qml
         ImportWindow.qml
         DialogWindow.qml
         ItemEditor.qml
@@ -72,6 +74,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/appearance.h
         ../src/ui/autostart.cpp
         ../src/ui/autostart.h
+        ../src/ui/icon_library.cpp
+        ../src/ui/icon_library.h
         ../src/ui/item_icons.cpp
         ../src/ui/item_icons.h
         ../src/ui/item_list_model.cpp
@@ -197,6 +201,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/settings_files.cpp
     ../src/ui/theme.cpp
     ../src/ui/autostart.cpp
+    ../src/ui/icon_library.cpp
     ../src/ui/item_icons.cpp
     ../src/ui/item_list_model.cpp
     ../src/ui/single_instance.cpp

@@ -27,12 +27,14 @@
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QJSValue>
+#include <QQuickItem>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_autolock.cpp 0.0.39
+// test_autolock.cpp 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: Tests of the icon picker and the reminder's place (D-050)
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.25: Initial release (D-040)
@@ -233,6 +235,21 @@ void TestAutolock::the_security_settings_show_keep_and_restore_autolock()
                  name);
     }
     QVERIFY(settings->findChild<QObject*>(QStringLiteral("autolockGroup")));
+    // The reminder stands just below Change the Master Password, above
+    // Autolock (D-050).
+    {
+        QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+        QTRY_VERIFY(settings->property("visible").toBool());
+        topics->setProperty("currentIndex", 1);
+        const auto top = [settings](const char* name) {
+            auto* item = settings->findChild<QQuickItem*>(QString::fromLatin1(name));
+            return item ? item->mapToScene(QPointF(0, 0)).y() : -1.0;
+        };
+        QTRY_VERIFY(top("changeMasterPasswordButton") > 0);
+        QTRY_VERIFY(top("changeMasterPasswordButton") < top("reminderBox"));
+        QTRY_VERIFY(top("reminderBox") < top("autolockGroup"));
+        QVERIFY(QMetaObject::invokeMethod(settings, "close"));
+    }
     // The reminder: five choices, Quarter by default; the clipboard: one
     // line, 0 shown as Never (D-049).
     QObject* reminder = settings->findChild<QObject*>(QStringLiteral("reminderBox"));

@@ -22,9 +22,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.0.17
+// test_vault_contents.cpp 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: Tests of the icon picker and the reminder's place (D-050)
 // v0.0.17: Contents format 4: sections, field types, hide marks, hidden and deleted fields, history, ids; an item's
 //          subtitle, note, trash, archive, autosubmit, website; format 3 still read (D-033)
 // v0.0.14: The built-in templates; the contents format 3 with categories, templates, tags, favourites and
@@ -61,6 +62,7 @@ private slots:
     void contents_come_back_exactly_as_they_were_written();
     void an_empty_vault_comes_back_empty();
     void a_newer_format_is_refused();
+    void the_vaults_own_icons_are_kept();
     void the_old_formats_1_and_2_are_still_read();
     void a_tag_is_kept_trimmed_and_nested_by_slashes();
     void contents_of_the_wrong_shape_are_damaged_data();
@@ -165,7 +167,34 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":5,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":6,"items":[]})").status, ContentsStatus::NewerFormat);
+}
+
+// The vault's own icons are kept and read back; a damaged list fails the
+// contents alone, never the program (D-050, OR-4).
+void TestVaultContents::the_vaults_own_icons_are_kept()
+{
+    VaultContents contents;
+    contents.customIcons = {QByteArray("\x89PNG one"), QByteArray("\x89PNG two")};
+    const ContentsResult result = contentsFromJson(contentsToJson(contents));
+    QCOMPARE(result.status, ContentsStatus::Read);
+    QCOMPARE(result.contents.customIcons, contents.customIcons);
+    QCOMPARE(contentsFromJson(R"({"format":5,"items":[],"customIcons":[3]})").status, ContentsStatus::Damaged);
+    QCOMPARE(contentsFromJson(R"({"format":5,"items":[],"customIcons":"x"})").status, ContentsStatus::Damaged);
+    // A format 4 vault has no list: its items' icons become it, each once.
+    VaultContents older;
+    Item first;
+    first.id = QUuid::createUuid();
+    first.title = QStringLiteral("Bank");
+    first.icon = QByteArray("\x89PNG one");
+    Item second = first;
+    second.id = QUuid::createUuid();
+    older.items = {first, second};
+    QByteArray json = contentsToJson(older);
+    json.replace("\"format\":5", "\"format\":4");
+    const ContentsResult read = contentsFromJson(json);
+    QCOMPARE(read.status, ContentsStatus::Read);
+    QCOMPARE(read.contents.customIcons, QList<QByteArray>{first.icon});
 }
 
 void TestVaultContents::the_old_formats_1_and_2_are_still_read()

@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.0.17
+// vault_contents.h 0.0.40
 
 // --- Version history ----------------------------------------------------
+// v0.0.40: The vault's own icons (D-050)
 // v0.0.17: Sections, the reference program's field types, a hide mark on any field, hidden and deleted fields, field
 //          history and ids; an item's own subtitle and note, trash, archive and autosubmit; contents format 4 (D-033)
 // v0.0.14: Categories and templates of the person's own, tags, favourites and attachments; the contents format 3
@@ -150,6 +151,9 @@ struct VaultContents
     QList<Category> categories;     // the person's own
     QList<Template> templates;      // the person's own
     QStringList hiddenCategories;   // not shown in the left column
+    // The vault's own icons, PNG each, offered in the icon picker; kept in
+    // the vault so they come along to every device (D-050).
+    QList<QByteArray> customIcons;
 
     friend bool operator==(const VaultContents&, const VaultContents&) = default;
 };

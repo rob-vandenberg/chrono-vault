@@ -355,3 +355,12 @@ the clipboard setting on one line; a normal scroll bar of the style's own (Scrol
 the About box, beside the page; collapsed sidebar entries as tall as expanded with 24-pixel icons; Esc closes the
 About box (the main window's Esc from 0.0.38 had taken it); no local `key` hiding the member, so Microsoft's compiler
 builds the Windows setup again (D-049).
+
+## 22 November 2026: version 0.0.40: the icon picker
+
+"Choose Icon" after the reference program's picker (IconPicker.qml); the vault's own icons in the contents (format
+5); the shipped icons in `icons/` by `icons.md`, installed beside the program and copied into
+`~/.local/share/chrono-vault/icons` or `%LOCALAPPDATA%\chrono-vault\icons` at each start, never written over
+(icon_library); their headings through the translation; the editor's Add at the left, Save and Cancel at the right,
+the icon clickable; the reminder below Change the Master Password; keyName's parameter renamed for Microsoft's
+compiler (D-050).

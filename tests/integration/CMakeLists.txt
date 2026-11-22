@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.23
+# tests/integration/CMakeLists.txt 0.0.40
 
 # --- Version history ----------------------------------------------------
+# v0.0.40: test_icon_picker (D-050)
 # v0.0.23: The fingerprint unlock test, with a stand-in
 # v0.0.22: The item pages test, apart from the pages test (OR-11)
 # v0.0.20: The website icons test
@@ -144,3 +145,8 @@ qt_add_executable(test_quick_unlock test_quick_unlock.cpp)
 target_link_libraries(test_quick_unlock PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
 chrono_vault_strict_warnings(test_quick_unlock)
 chrono_vault_add_test(test_quick_unlock)
+
+qt_add_executable(test_icon_picker test_icon_picker.cpp)
+target_link_libraries(test_icon_picker PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_icon_picker)
+chrono_vault_add_test(test_icon_picker)

@@ -199,7 +199,7 @@
 <context>
     <name>Field</name>
     <message>
-        <location filename="../src/core/vault_contents.cpp" line="+402"/>
+        <location filename="../src/core/vault_contents.cpp" line="+404"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -427,6 +427,66 @@
     </message>
 </context>
 <context>
+    <name>IconPicker</name>
+    <message>
+        <location filename="../qml/IconPicker.qml" line="+37"/>
+        <source>Choose Icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+139"/>
+        <source>Custom Icons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Default icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <location line="+30"/>
+        <source>Add Custom Icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-22"/>
+        <location line="+39"/>
+        <source>Delete icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-15"/>
+        <source>Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+19"/>
+        <source>This icon is used by %n item(s). They will get their category&apos;s icon instead. Delete it?</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>IconSections</name>
+    <message>
+        <location filename="../build/icon_headings/icon_headings.cpp" line="+4"/>
+        <source>Web</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Credit Card</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Miscellaneous</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ImportWindow</name>
     <message>
         <location filename="../qml/ImportWindow.qml" line="+41"/>
@@ -577,23 +637,13 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+174"/>
+        <location filename="../qml/ItemEditor.qml" line="+175"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+155"/>
-        <source>Choose icon…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>Remove icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+13"/>
+        <location line="+168"/>
         <source>Title of the note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -633,12 +683,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-303"/>
+        <location line="-306"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-220"/>
+        <location line="-213"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -715,28 +765,18 @@
     </message>
     <message>
         <location line="+48"/>
-        <location line="+50"/>
-        <location line="+376"/>
+        <location line="+42"/>
+        <location line="+380"/>
         <source>Section</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-394"/>
+        <location line="-360"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+453"/>
-        <source>Choose an icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+12"/>
+        <location line="+433"/>
         <source>Add an attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -756,7 +796,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-480"/>
+        <location line="-484"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -767,17 +807,17 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+372"/>
+        <location line="+376"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-323"/>
+        <location line="-308"/>
         <source>Change the icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+141"/>
+        <location line="+126"/>
         <source>Enter secret key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1233,7 +1273,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+208"/>
+        <location filename="../qml/SettingsWindow.qml" line="+209"/>
         <location line="+364"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -1343,8 +1383,8 @@
     </message>
     <message>
         <location line="+0"/>
-        <location line="+141"/>
-        <location line="+23"/>
+        <location line="+43"/>
+        <location line="+121"/>
         <location line="+3"/>
         <location line="+6"/>
         <source>Never</source>
@@ -1366,7 +1406,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+21"/>
         <source>Autolock when</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1376,7 +1416,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+90"/>
+        <location line="-20"/>
         <source>Ask for the master password, so it is not forgotten, every</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1401,7 +1441,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+114"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1411,7 +1451,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-123"/>
+        <location line="-111"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1452,7 +1492,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+66"/>
+        <location line="+54"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1808,7 +1848,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+215"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+217"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2636,7 +2676,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+55"/>
+        <location line="+134"/>
         <source>Copied. The clipboard is cleared in %n second(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>

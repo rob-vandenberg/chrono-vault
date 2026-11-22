@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# src/app/CMakeLists.txt 0.0.4
+# src/app/CMakeLists.txt 0.0.40
 
 # --- Version history ----------------------------------------------------
+# v0.0.40: The icons folder installed and copied beside the program (D-050)
 # v0.0.4: The UI library itself, for the style and the icon; a window program with its icon; install
 # v0.0.2: The translations are carried inside the program (D-008)
 # v0.0.1: Initial release
@@ -48,4 +49,12 @@ endif()
 add_dependencies(chrono-vault chrono_vault_icons)
 
 install(TARGETS chrono-vault RUNTIME DESTINATION .)
+# The icons that ship for the icon picker (D-050): the project's icons/ folder
+# beside the program, installed and in the build folder alike, so the program
+# finds them wherever it runs.
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/icons/" DESTINATION icons)
+add_custom_command(TARGET chrono-vault POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/icons" "$<TARGET_FILE_DIR:chrono-vault>/icons"
+    VERBATIM
+)
 chrono_vault_add_translations(chrono-vault)
