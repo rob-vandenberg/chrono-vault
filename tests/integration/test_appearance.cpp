@@ -30,6 +30,7 @@
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
+#include <QScreen>
 #include <QQmlContext>
 #include <QQuickItem>
 #include <QQmlProperty>
@@ -291,6 +292,14 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QCOMPARE(window->minimumWidth(), 730);
     QCOMPARE(window->minimumHeight(), 650);
 
+    // At 400% the size is larger than the screen: it gives way to the
+    // screen's free room (the owner).
+    applyProgramScale(400);
+    const QSize room = QGuiApplication::primaryScreen()->availableGeometry().size();
+    QVERIFY(window->minimumHeight() <= room.height());
+    QVERIFY(window->minimumWidth() <= room.width());
+    applyProgramScale(100);
+    QCOMPARE(window->minimumHeight(), 650);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());
     auto* slider = qobject_cast<QQuickItem*>(settings->findChild<QObject*>(QStringLiteral("scaleSlider")));

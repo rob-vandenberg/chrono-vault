@@ -43,6 +43,11 @@ inline constexpr char monospacedFontFamily[] = "Noto Sans Mono";
 // there is none, and normally otherwise (D-019).
 void showMainWindow(QWindow* window, bool startMinimized, bool trayAvailable);
 
+// --reset on the command line: the settings are not read from the settings
+// file at the start, so they start at their defaults (D-026).
+void setSkipReadingSettings(bool skip);
+[[nodiscard]] bool skipReadingSettings();
+
 // The program's own icon, art/chrono-vault.svg (D-019).
 [[nodiscard]] QIcon programIcon();
 

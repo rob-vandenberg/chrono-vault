@@ -73,6 +73,24 @@ void showMainWindow(QWindow* window, bool startMinimized, bool trayAvailable)
     }
 }
 
+namespace {
+bool& skippingSettings()
+{
+    static bool skip = false;
+    return skip;
+}
+} // namespace
+
+void setSkipReadingSettings(bool skip)
+{
+    skippingSettings() = skip;
+}
+
+bool skipReadingSettings()
+{
+    return skippingSettings();
+}
+
 QIcon programIcon()
 {
     return QIcon(QStringLiteral(":/icons/chrono-vault.svg"));

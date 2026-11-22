@@ -18,15 +18,17 @@
 
 #include <QFont>
 #include <QPalette>
+#include <QSize>
 #include <QObject>
 #include <QtQml/qqmlregistration.h>
 
 class QEvent;
 
 // --- Version ------------------------------------------------------------
-// appearance.h 0.0.10
+// appearance.h 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: The free room of a window's screen, which a minimum gives way to
 // v0.0.10: The program's colours for every window (D-023)
 // v0.0.7: Initial release (D-023)
 
@@ -81,6 +83,9 @@ public:
     // Qt Quick window takes the desktop theme's colours when it is made, not
     // the program's (D-023). Called once by each window as it is made.
     Q_INVOKABLE void dress(QObject* window);
+    // The free room of the screen a window is on (its size without panels):
+    // a window's minimum gives way to it when it does not fit (the owner).
+    [[nodiscard]] Q_INVOKABLE QSize screenRoom(QObject* window) const;
 
     // Keeps them, and shows them.
     Q_INVOKABLE void keep(int theme, int scale);
@@ -89,6 +94,8 @@ public:
 
     // At the start, before the first window: what is kept, put in use.
     static void applyKept();
+    // At the start of the program: what is kept, or with --reset the defaults (D-026).
+    static void applyAtStart();
 
 signals:
     void keptChanged();

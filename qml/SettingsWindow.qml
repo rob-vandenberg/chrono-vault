@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.11
+// SettingsWindow.qml 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 730 by 650 and is never smaller; the scaling slider's marks every 25% above it, room around it (the owner)
 // v0.0.10: The program's colours from the start; the slider in steps of 5%; every size times the UI scaling (D-023)
 // v0.0.9: Opened at General from the View menu (D-025)
@@ -166,11 +167,11 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: Math.round(730 * Appearance.factor)
-    height: Math.round(650 * Appearance.factor)
+    width: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width)
+    height: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height)
     // Never smaller than it opens (the owner).
-    minimumWidth: Math.round(730 * Appearance.factor)
-    minimumHeight: Math.round(650 * Appearance.factor)
+    minimumWidth: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width)
+    minimumHeight: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height)
     visible: false
     color: palette.window
 

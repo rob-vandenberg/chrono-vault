@@ -17,6 +17,8 @@
 
 #include "vault_controller.h"
 
+#include "app_setup.h"
+
 #include "autostart.h"
 #include "item_icons.h"
 #include "password_generator.h"
@@ -36,9 +38,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.10
+// vault_controller.cpp 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: --reset: the settings not read at the start (D-026)
 // v0.0.10: The tray and start settings no longer in a group named general, their old values carried over (D-019)
 // v0.0.6: The settings' defaults, for Restore defaults (D-022)
 // v0.0.4: The program's version, for the window titles; the General settings; item icons
@@ -182,11 +185,19 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     unlockPool.setMaxThreadCount(1);
 
     QSettings settings;
-    lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
-    clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
     carryOverOldNames(settings);
-    keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
-    minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
+    if (skipReadingSettings()) {
+        // --reset: not read from the settings file at this start (D-026).
+        lockMinutes = defaultAutoLockMinutes;
+        clearSeconds = defaultClipboardSeconds;
+        keepRunning = defaultKeepInTray;
+        minimizedAtStart = defaultStartMinimized;
+    } else {
+        lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
+        clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
+        keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
+        minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
+    }
 
     autoLockTimer.setSingleShot(true);
     connect(&autoLockTimer, &QTimer::timeout, this, &VaultController::lock);

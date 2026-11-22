@@ -2,10 +2,9 @@
 
 ## Now
 
-**Version 0.0.11**: the About box opens at 555 by 440 and the settings window at 730 by 650, both times the UI scaling
-and never smaller; a remembered size is raised to a window's minimum and kept inside its screen. The UI scaling slider
-has a mark every 25% above it and half a line height of room above and below. Seventeen tests pass on Linux; two
-review rounds, the last found nothing real. Open: Q17, whether a minimum gives way to a screen too small for it.
+**Version 0.0.12** (D-023, D-026): `chrono-vault --reset` starts without reading the settings window's settings from
+the settings file; the settings window's and the About box's sizes give way to a screen too small for them. Open:
+Q18, whether 730 by 650 is the whole window including the title bar.
 
 ## Next task
 

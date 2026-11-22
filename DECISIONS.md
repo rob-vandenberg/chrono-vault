@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twenty-five decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Twenty-six decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update,, the settings window's buttons, the theme and UI scaling, the update's windows, and the main window's layout.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update,, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, and --reset.
 
 | Decision | What it settles |
 |---|---|
@@ -34,3 +34,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-023](decisions/D-023.md) | The theme (Light, Dark, Follow the system), the program's own colours on every desktop, and the UI scaling of everything together (50% to 400% in steps of 5%) |
 | [D-024](decisions/D-024.md) | The update's windows as in Chrono Mail: the popup with Skip this update, Update downloaded, Restart or Close |
 | [D-025](decisions/D-025.md) | The main window after the reference program: menus and buttons on one bar, three columns, the item read-only |
+| [D-026](decisions/D-026.md) | `--reset`: the settings window's settings not read from the settings file at that start |

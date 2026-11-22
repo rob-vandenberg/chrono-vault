@@ -16,6 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "appearance.h"
 
+#include "app_setup.h"
 #include "program_scale.h"
 #include "theme.h"
 #include "scaling.h"
@@ -23,14 +24,18 @@
 #include <QEvent>
 #include <QFontInfo>
 #include <QGuiApplication>
+#include <QScreen>
+#include <QWindow>
+#include <QWidget>
 #include <QSettings>
 
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.0.10
+// appearance.cpp 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: The free room of a window's screen, which a minimum gives way to; --reset at the start (D-026)
 // v0.0.10: The program's colours for every window (D-023)
 // v0.0.7: Initial release (D-023)
 
@@ -170,6 +175,13 @@ void Appearance::dress(QObject* window)
     connect(this, &Appearance::paletteChanged, window, [window]() { copyPalette(window); });
 }
 
+QSize Appearance::screenRoom(QObject* window) const
+{
+    const auto* shown = qobject_cast<QWindow*>(window);
+    const QScreen* screen = shown && shown->screen() ? shown->screen() : QGuiApplication::primaryScreen();
+    return screen ? screen->availableGeometry().size() : QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+}
+
 void Appearance::show(int theme, int scale)
 {
     applyTheme(themeFromNumber(theme));
@@ -194,6 +206,17 @@ void Appearance::applyKept()
 {
     applyTheme(keptTheme());
     applyProgramScale(keptScale());
+}
+
+void Appearance::applyAtStart()
+{
+    // --reset: not read from the settings file at this start (D-026).
+    if (skipReadingSettings()) {
+        applyTheme(themeFromNumber(defaultTheme()));
+        applyProgramScale(defaultScale());
+        return;
+    }
+    applyKept();
 }
 
 bool Appearance::eventFilter(QObject* watched, QEvent* event)

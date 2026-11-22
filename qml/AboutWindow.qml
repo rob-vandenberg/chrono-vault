@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.11
+// AboutWindow.qml 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 555 by 440, never smaller; the licences fill it (the owner)
 // v0.0.9: The answer of Check for update beside it; a newer version opens the offer (D-024); the name, the
 //         copyright and the link to GitHub lined up with the icon (D-021)
@@ -39,10 +40,10 @@ DialogWindow {
     memoryName: "about"
     // Opens at 555 by 440 and is never smaller, also when a smaller size was
     // remembered from before (the owner).
-    width: Math.round(555 * Appearance.factor)
-    height: Math.round(440 * Appearance.factor)
-    minimumWidth: Math.round(555 * Appearance.factor)
-    minimumHeight: Math.round(440 * Appearance.factor)
+    width: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width)
+    height: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height)
+    minimumWidth: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width)
+    minimumHeight: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height)
     title: qsTr("About Chrono Vault")
     standardButtons: Dialog.Close
 

@@ -17,6 +17,8 @@
 
 #include "updater.h"
 
+#include "app_setup.h"
+
 #include "version.h"
 
 #include <QCoreApplication>
@@ -41,9 +43,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// updater.cpp 0.0.9
+// updater.cpp 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.12: --reset: the check frequency not read at the start (D-026)
 // v0.0.9: The windows of Chrono Mail: a found update offered, its problem, page and folder; Restart or Close
 // v0.0.6: The default check frequency, for Restore defaults (D-022)
 // v0.0.5: Initial release; a refused install or a broken-off download can be tried again
@@ -85,7 +88,10 @@ QNetworkRequest githubRequest(const QUrl& address)
 Updater::Updater(QObject* parent) : QObject(parent)
 {
     kind = detectInstallKind();
-    checkFrequency = static_cast<CheckFrequency>(std::clamp(QSettings().value(frequencyKey, defaultFrequency).toInt(), 0, 3));
+    // --reset: not read from the settings file at this start (D-026).
+    checkFrequency = static_cast<CheckFrequency>(
+        skipReadingSettings() ? defaultFrequency
+                              : std::clamp(QSettings().value(frequencyKey, defaultFrequency).toInt(), 0, 3));
     hourly.setInterval(hourMilliseconds);
     connect(&hourly, &QTimer::timeout, this, [this]() { checkSoon(false); });
     if (QCoreApplication::instance()) {

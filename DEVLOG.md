@@ -126,3 +126,8 @@ The About box 555 by 440 and the settings window 730 by 650 (times the scaling),
 marks every 25% above it, with room around it (the owner's changelist). Found while building: Qt does not raise a
 remembered size to a window's minimum, so `WindowMemory` now does, and moves a window raised past its screen's edge
 back inside. Two review rounds; the first found the edge case, the second nothing real.
+
+## 22 November 2026: version 0.0.12: --reset, sizes give way to a small screen
+
+`--reset` skips reading the settings window's settings at the start (D-026); the two windows' sizes give way to a
+screen too small for them (D-023). Related tests only.

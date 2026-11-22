@@ -66,6 +66,7 @@ private slots:
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
     void the_tray_and_start_settings_survive_a_new_start();
+    void with_reset_the_settings_start_at_their_defaults();
     void the_settings_window_keeps_changes_only_with_ok();
     void enter_is_ok_and_a_failed_start_at_startup_is_told();
 
@@ -390,6 +391,31 @@ void TestTray::the_tray_and_start_settings_survive_a_new_start()
     VaultController again;
     again.setKeepInTray(true);
     again.setStartMinimized(false);
+}
+
+void TestTray::with_reset_the_settings_start_at_their_defaults()
+{
+    QSettings settings;
+    settings.setValue(QStringLiteral("security/autoLockMinutes"), 17);
+    settings.setValue(QStringLiteral("clipboard/clearSeconds"), 45);
+    settings.setValue(QStringLiteral("tray/keepRunning"), false);
+    settings.setValue(QStringLiteral("start/minimized"), true);
+    settings.setValue(QStringLiteral("updates/frequency"), 2);
+    setSkipReadingSettings(true); // --reset (D-026)
+    {
+        VaultController controller;
+        QCOMPARE(controller.autoLockMinutes(), 5);
+        QCOMPARE(controller.clipboardClearSeconds(), 30);
+        QVERIFY(controller.keepInTray());
+        QVERIFY(!controller.startMinimized());
+        Updater updater;
+        QCOMPARE(updater.frequency(), 0);
+    }
+    setSkipReadingSettings(false);
+    for (const char* key : {"security/autoLockMinutes", "clipboard/clearSeconds", "tray/keepRunning", "start/minimized",
+                            "updates/frequency"}) {
+        settings.remove(QString::fromLatin1(key));
+    }
 }
 
 QTEST_MAIN(TestTray)
