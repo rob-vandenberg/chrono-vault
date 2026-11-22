@@ -43,9 +43,11 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.16
+// vault_controller.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: The reference program's fields and items for the windows: sections, field types, hide marks, hidden and
+//          deleted fields, field history; Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
 // v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
 // v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
 //          master password or keyfile (D-030, D-031)
@@ -73,6 +75,10 @@ constexpr bool defaultKeepInTray = true;
 constexpr bool defaultStartMinimized = false;
 constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
+const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
+const QString showSubtitlesKey = QStringLiteral("view/showSubtitles");
+constexpr bool defaultHideSensitive = true;
+constexpr bool defaultShowSubtitles = true;
 // Never in a group named "general": in a settings file Qt keeps that name
 // for its own [General] section and reads the value back under "General", so
 // a choice was lost at the next start (D-019).
@@ -103,31 +109,21 @@ void carryOverOldNames(QSettings& settings)
 
 QString kindName(FieldKind kind)
 {
-    switch (kind) {
-    case FieldKind::Text: return QStringLiteral("text");
-    case FieldKind::Password: return QStringLiteral("password");
-    case FieldKind::WebAddress: return QStringLiteral("url");
-    case FieldKind::OneTimeCode: return QStringLiteral("totp");
-    case FieldKind::MultiLine: return QStringLiteral("multiline");
-    }
-    return QStringLiteral("text");
+    return fieldKindName(kind);
 }
 
 FieldKind kindFromName(const QString& name)
 {
-    if (name == QLatin1String("password")) {
-        return FieldKind::Password;
-    }
-    if (name == QLatin1String("url")) {
-        return FieldKind::WebAddress;
-    }
-    if (name == QLatin1String("totp")) {
-        return FieldKind::OneTimeCode;
-    }
-    if (name == QLatin1String("multiline")) {
-        return FieldKind::MultiLine;
-    }
-    return FieldKind::Text;
+    return fieldKindFromName(name).value_or(FieldKind::Text);
+}
+
+// A moment as the reference program shows it: the long date with the
+// weekday, then the time with seconds, without a time zone (D-033).
+QString momentText(const QDateTime& moment)
+{
+    const QDateTime local = moment.toLocalTime();
+    return QLocale().toString(local.date(), QLocale::LongFormat) + QLatin1Char(' ') +
+           local.time().toString(QStringLiteral("HH:mm:ss"));
 }
 
 QVariantList fieldsToList(const QList<Field>& fields, bool withValues)
@@ -139,9 +135,21 @@ QVariantList fieldsToList(const QList<Field>& fields, bool withValues)
             {QStringLiteral("label"), field.label},
             {QStringLiteral("name"), field.isCustom() ? field.label : roleName(field.role)},
             {QStringLiteral("kind"), kindName(field.kind)},
+            {QStringLiteral("sensitive"), field.isHidden()},
+            {QStringLiteral("deleted"), field.deleted},
+            {QStringLiteral("hiddenType"), field.hiddenType},
+            {QStringLiteral("uid"), field.uid},
         };
         if (withValues) {
             map.insert(QStringLiteral("value"), field.value);
+            QVariantList history;
+            for (auto change = field.history.crbegin(); change != field.history.crend(); ++change) {
+                history.append(QVariantMap{
+                    {QStringLiteral("value"), change->value},
+                    {QStringLiteral("changed"), momentText(change->changed)},
+                });
+            }
+            map.insert(QStringLiteral("history"), history); // newest first
         }
         list.append(map);
     }
@@ -162,6 +170,13 @@ QList<Field> fieldsFromList(const QVariantList& list, bool withValues)
             field.label = QCoreApplication::translate("VaultController", "Field");
         }
         field.kind = kindFromName(fieldMap.value(QStringLiteral("kind")).toString());
+        field.sensitive = fieldMap.value(QStringLiteral("sensitive")).toBool() || field.kind == FieldKind::Password;
+        field.deleted = fieldMap.value(QStringLiteral("deleted")).toBool();
+        field.hiddenType = fieldMap.value(QStringLiteral("hiddenType")).toString();
+        field.uid = fieldMap.value(QStringLiteral("uid")).toLongLong();
+        if (field.kind == FieldKind::Section && field.label.isEmpty()) {
+            field.label = QCoreApplication::translate("VaultController", "Section");
+        }
         if (withValues) {
             field.value = fieldMap.value(QStringLiteral("value")).toString();
         }
@@ -189,6 +204,14 @@ QVariantMap toMap(const Item& item, const VaultContents& contents)
         {QStringLiteral("categoryId"), item.categoryId},
         {QStringLiteral("isNote"), item.categoryId == QLatin1String("note")},
         {QStringLiteral("title"), item.title},
+        {QStringLiteral("subtitle"), item.subtitle},
+        {QStringLiteral("note"), item.note},
+        {QStringLiteral("trashed"), item.trashed},
+        {QStringLiteral("archived"), item.archived},
+        {QStringLiteral("autoSubmit"), item.autoSubmit},
+        {QStringLiteral("website"), item.website},
+        {QStringLiteral("created"), momentText(item.created)},
+        {QStringLiteral("modified"), momentText(item.modified)},
         {QStringLiteral("fields"), fieldsToList(item.fields, true)},
         {QStringLiteral("icon"), QString::fromLatin1(item.icon.toBase64())},
         {QStringLiteral("defaultIcon"), categoryIconSource(item.categoryId)},
@@ -276,7 +299,11 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         clearSeconds = defaultClipboardSeconds;
         keepRunning = defaultKeepInTray;
         minimizedAtStart = defaultStartMinimized;
+        hideSecrets = defaultHideSensitive;
+        subtitlesShown = defaultShowSubtitles;
     } else {
+        hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
+        subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
@@ -496,8 +523,9 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
                     const auto passwordTemplate = findTemplate(QStringLiteral("password"), self->contents);
                     Item saved = newItem(*passwordTemplate);
                     saved.title = tr("%1 vault").arg(QFileInfo(newPath).completeBaseName());
-                    saved.fields.insert(1, Field{QStringLiteral("vaultfile"), {}, FieldKind::Text, newPath});
+                    saved.fields.insert(1, makeField(QStringLiteral("vaultfile"), {}, FieldKind::Text, newPath));
                     saved.fields[0].value = savedPassword;
+                    giveFieldsIds(saved);
                     self->contents.items.append(saved);
                     self->contentsChanged();
                     self->createdVault = CreatedVault{newPath, newKey, *fingerprint};
@@ -798,6 +826,40 @@ bool VaultController::saveItem(const QVariantMap& map)
         }
     }
     changed.favourite = map.value(QStringLiteral("favourite")).toBool();
+    changed.subtitle = map.value(QStringLiteral("subtitle")).toString();
+    changed.note = map.value(QStringLiteral("note")).toString();
+    changed.autoSubmit = map.value(QStringLiteral("autoSubmit")).toBool();
+    changed.website = map.value(QStringLiteral("website")).toString();
+    if (existing != contents.items.end()) {
+        changed.trashed = existing->trashed;
+        changed.archived = existing->archived;
+    }
+    // Each field keeps its earlier values: a changed value goes into its
+    // history with the time it was set (D-033).
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    for (Field& field : changed.fields) {
+        const Field* before = nullptr;
+        if (existing != contents.items.end() && field.uid != 0) {
+            for (const Field& old : std::as_const(existing->fields)) {
+                if (old.uid == field.uid) {
+                    before = &old;
+                }
+            }
+        }
+        if (before == nullptr) {
+            field.changed = now;
+            continue;
+        }
+        field.history = before->history;
+        field.changed = before->changed;
+        if (before->value != field.value) {
+            if (!before->value.isEmpty()) {
+                field.history.append(FieldChange{before->value, before->changed.isValid() ? before->changed : now});
+            }
+            field.changed = now;
+        }
+    }
+    giveFieldsIds(changed);
 
     // The attachments: those the item had, and files added in the editor.
     QStringList usedPending;
@@ -863,6 +925,50 @@ void VaultController::deleteItem(const QString& id)
     contents.items.erase(removed, contents.items.end());
     contentsChanged();
     saveInBackground(QString());
+}
+
+void VaultController::moveToTrash(const QString& id, bool trashed)
+{
+    setItemPlace(id, &Item::trashed, trashed);
+}
+
+void VaultController::archiveItem(const QString& id, bool archived)
+{
+    setItemPlace(id, &Item::archived, archived);
+}
+
+void VaultController::setItemPlace(const QString& id, bool Item::*place, bool on)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    for (Item& one : contents.items) {
+        if (one.id.toString(QUuid::WithoutBraces) == id && one.*place != on) {
+            one.*place = on;
+            one.modified = QDateTime::currentDateTimeUtc();
+            contentsChanged();
+            saveInBackground(QString());
+            return;
+        }
+    }
+}
+
+void VaultController::setHideSensitive(bool hide)
+{
+    if (hideSecrets != hide) {
+        hideSecrets = hide;
+        QSettings().setValue(hideSensitiveKey, hide);
+        emit hideSensitiveChanged();
+    }
+}
+
+void VaultController::setShowSubtitles(bool show)
+{
+    if (subtitlesShown != show) {
+        subtitlesShown = show;
+        QSettings().setValue(showSubtitlesKey, show);
+        emit showSubtitlesChanged();
+    }
 }
 
 void VaultController::setFilter(const QString& filter)
@@ -1866,6 +1972,8 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("keepInTray"), defaultKeepInTray},
         {QStringLiteral("startMinimized"), defaultStartMinimized},
         {QStringLiteral("startAtStartup"), defaultStartAtStartup},
+        {QStringLiteral("hideSensitive"), defaultHideSensitive},
+        {QStringLiteral("showSubtitles"), defaultShowSubtitles},
     };
 }
 

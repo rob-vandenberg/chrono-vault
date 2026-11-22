@@ -21,9 +21,11 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.14
+// ItemEditor.qml 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Every part of an item and its fields kept through an edit: hide marks, ids, hidden and deleted fields,
+//          subtitle, note, autosubmit (D-033)
 // v0.0.14: Every template; fields moved up and down and removed; a field of several lines; tags; attachments
 //          (D-027, D-028, D-029)
 // v0.0.9: The delete question reachable from the Item menu (D-025)
@@ -42,6 +44,8 @@ Item {
     property string categoryId: ""
     property string defaultIcon: ""
     property bool favourite: false
+    // What this editor does not show yet, kept as it was (D-033).
+    property var kept: ({})
     // Files being read for this item; their answers come from the controller.
     property var waitingFor: []
     property bool isNew: false
@@ -102,7 +106,11 @@ Item {
         fieldsModel.clear()
         for (let field of map.fields)
             fieldsModel.append({ role: field.role, label: field.label, name: field.name,
-                                 kind: field.kind, value: field.value, revealed: false })
+                                 kind: field.kind, value: field.value, revealed: false,
+                                 sensitive: field.sensitive === true, deleted: field.deleted === true,
+                                 hiddenType: field.hiddenType || "", uid: field.uid || 0 })
+        kept = { subtitle: map.subtitle || "", note: map.note || "", autoSubmit: map.autoSubmit === true,
+                 website: map.website || "" }
         changed = false
         if (isNewItem)
             titleField.forceActiveFocus()
@@ -124,7 +132,9 @@ Item {
         let fields = []
         for (let index = 0; index < fieldsModel.count; ++index) {
             const field = fieldsModel.get(index)
-            fields.push({ role: field.role, label: field.label, kind: field.kind, value: field.value })
+            fields.push({ role: field.role, label: field.label, kind: field.kind, value: field.value,
+                          sensitive: field.sensitive, deleted: field.deleted, hiddenType: field.hiddenType,
+                          uid: field.uid })
         }
         // A tag typed but not yet added with Enter counts too.
         addTag()
@@ -136,7 +146,8 @@ Item {
             attachments.push({ id: attachmentsModel.get(index).attachmentId })
         if (VaultController.saveItem({ id: itemId, templateId: templateId, categoryId: categoryId,
                                        title: titleField.text, fields: fields, icon: icon, tags: tags,
-                                       favourite: favourite, attachments: attachments })) {
+                                       favourite: favourite, attachments: attachments, subtitle: kept.subtitle,
+                                       note: kept.note, autoSubmit: kept.autoSubmit, website: kept.website })) {
             isNew = false
             changed = false
             titleField.text = VaultController.item(itemId).title
@@ -146,7 +157,8 @@ Item {
 
     function addField(kind) {
         fieldsModel.append({ role: "", label: qsTr("New field"), name: qsTr("New field"),
-                             kind: kind, value: "", revealed: false })
+                             kind: kind, value: "", revealed: false, sensitive: kind === "password",
+                             deleted: false, hiddenType: "", uid: 0 })
         changed = true
     }
 
@@ -276,9 +288,11 @@ Item {
                     id: fieldRow
                     required property int index
                     required property var model
-                    readonly property bool isPassword: model.kind === "password"
+                    readonly property bool isPassword: model.kind === "password" || model.sensitive === true
                     readonly property bool isCode: model.kind === "totp"
                     readonly property bool isCustom: model.role === ""
+                    // Kept but never shown, as in the reference program (D-033).
+                    visible: !(model.deleted === true || model.kind === "hidden")
                     spacing: Math.round(2 * Appearance.factor)
                     Layout.fillWidth: true
 
@@ -624,17 +638,17 @@ Item {
         objectName: "deleteDialog"
 
         memoryName: "deleteItem"
-        title: qsTr("Delete this item?")
+        title: qsTr("Move this item to the Trash?")
         standardButtons: Dialog.Yes | Dialog.No
         ColumnLayout {
             Label {
-                text: qsTr("“%1” is removed from the vault. This cannot be undone.").arg(titleField.text)
+                text: qsTr("“%1” is moved to the Trash, where it can be restored.").arg(titleField.text)
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
             }
         }
         onAccepted: {
-            VaultController.deleteItem(editor.itemId)
+            VaultController.moveToTrash(editor.itemId, true)
             editor.close()
         }
     }

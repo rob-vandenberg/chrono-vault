@@ -18,12 +18,15 @@
 #include "templates.h"
 #include "vault_contents.h"
 
+#include <QTimeZone>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.0.14
+// test_vault_contents.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Contents format 4: sections, field types, hide marks, hidden and deleted fields, history, ids; an item's
+//          subtitle, note, trash, archive, autosubmit, website; format 3 still read (D-033)
 // v0.0.14: The built-in templates; the contents format 3 with categories, templates, tags, favourites and
 //          attachments; formats 1 and 2 still read (D-027, D-028, D-029)
 // v0.0.4: Icons, and the contents format 2
@@ -116,18 +119,36 @@ void TestVaultContents::contents_come_back_exactly_as_they_were_written()
     login.title = QStringLiteral("Bank – €uro \"quoted\"");
     login.fields[0].value = QStringLiteral("anna@example.org");
     login.fields[1].value = QStringLiteral("p@ss\nword");
-    login.fields.append({{}, QStringLiteral("PIN"), FieldKind::Password, QStringLiteral("1234")});
+    login.fields.append(makeField({}, QStringLiteral("PIN"), FieldKind::Password, QStringLiteral("1234")));
+    Field heading = makeField({}, QStringLiteral("Github 2FA Authentication"), FieldKind::Section);
+    Field token = makeField({}, QStringLiteral("Token"), FieldKind::Text, QStringLiteral("secret"));
+    token.sensitive = true;
+    token.uid = 7396;
+    token.changed = QDateTime::fromSecsSinceEpoch(1785260034, QTimeZone::UTC);
+    token.history << FieldChange{QStringLiteral("older"), QDateTime::fromSecsSinceEpoch(1700000000, QTimeZone::UTC)};
+    Field marker = makeField({}, QStringLiteral("2FA"), FieldKind::Hidden, QStringLiteral("x"));
+    marker.hiddenType = QStringLiteral(".twoFA");
+    Field gone = makeField({}, QStringLiteral("Old"), FieldKind::Date, QStringLiteral("08/2029"));
+    gone.deleted = true;
+    login.fields << heading << token << marker << gone;
+    login.subtitle = QStringLiteral("own subtitle");
+    login.note = QStringLiteral("a note\nof two lines");
+    login.archived = true;
+    login.autoSubmit = true;
+    login.website = QStringLiteral("https://example.org");
     login.icon = QByteArray("\x89PNG not really, but bytes all the same", 40);
     login.tags = {QStringLiteral("Work/Servers"), QStringLiteral("Home")};
     login.favourite = true;
     login.attachments << Attachment{QUuid::createUuid(), QStringLiteral("scan.pdf"), QByteArray("%PDF\0bytes", 10)};
+    Item trashed = itemFrom("note");
+    trashed.trashed = true;
     Item card = itemFrom("card");
     card.templateId = QStringLiteral("8a2e");
     card.categoryId = QStringLiteral("own");
-    contents.items << login << itemFrom("note") << card;
+    contents.items << login << trashed << card;
     contents.categories << Category{QStringLiteral("own"), QStringLiteral("Cars")};
     contents.templates << Template{QStringLiteral("8a2e"), QStringLiteral("own"), QStringLiteral("Car"),
-                                   {{{}, QStringLiteral("Plate"), FieldKind::Text, {}}}, false};
+                                   {makeField({}, QStringLiteral("Plate"), FieldKind::Text)}, false};
     contents.hiddenCategories << QStringLiteral("finance");
 
     const ContentsResult result = contentsFromJson(contentsToJson(contents));
@@ -144,7 +165,7 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":4,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":5,"items":[]})").status, ContentsStatus::NewerFormat);
 }
 
 void TestVaultContents::the_old_formats_1_and_2_are_still_read()
@@ -163,6 +184,13 @@ void TestVaultContents::the_old_formats_1_and_2_are_still_read()
     QCOMPARE(result.contents.items.constFirst().categoryId, QStringLiteral("note"));
     QVERIFY(result.contents.items.constFirst().tags.isEmpty());
     QVERIFY(!result.contents.items.constFirst().favourite);
+
+    // Format 3: its fields get ids, for the history from now on (D-033).
+    result = contentsFromJson(format3Item("").replace(R"("fields":[])",
+        R"("fields":[{"role":"username","kind":"text","value":"a"},{"label":"x","kind":"text","value":"b"}])"));
+    QCOMPARE(result.status, ContentsStatus::Read);
+    QCOMPARE(result.contents.items.constFirst().fields.at(0).uid, 1);
+    QCOMPARE(result.contents.items.constFirst().fields.at(1).uid, 2);
 }
 
 void TestVaultContents::a_tag_is_kept_trimmed_and_nested_by_slashes()
@@ -220,6 +248,18 @@ void TestVaultContents::contents_of_the_wrong_shape_are_damaged_data()
     QTest::newRow("template without fields") << QByteArray(
         R"({"format":3,"items":[],"templates":[{"id":"x","category":"misc","name":"Car"}]})");
     QTest::newRow("hidden category a number") << QByteArray(R"({"format":3,"items":[],"hiddenCategories":[1]})");
+    const auto format4Field = [](const QByteArray& field) {
+        return QByteArray(R"({"format":4,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","category":"login","title":"","created":"","modified":"","fields":[)")
+               + field + "]}]}";
+    };
+    QTest::newRow("sensitive as text") << format4Field(R"({"label":"a","kind":"text","value":"","sensitive":"yes"})");
+    QTest::newRow("uid negative") << format4Field(R"({"label":"a","kind":"text","value":"","uid":-1})");
+    QTest::newRow("history not a list") << format4Field(R"({"label":"a","kind":"text","value":"","history":{}})");
+    QTest::newRow("history entry without time") << format4Field(R"({"label":"a","kind":"text","value":"","history":[{"value":"x"}]})");
+    QTest::newRow("unknown kind") << format4Field(R"({"label":"a","kind":"colour","value":""})");
+    QTest::newRow("trashed in format 3") << format3Item(R"(,"trashed":true)");
+    QTest::newRow("note as number") << QByteArray(
+        R"({"format":4,"items":[{"id":"6f9619ff-8b86-d011-b42d-00c04fc964ff","template":"login","category":"login","title":"","created":"","modified":"","fields":[],"note":5}]})");
 }
 
 void TestVaultContents::contents_of_the_wrong_shape_are_damaged()

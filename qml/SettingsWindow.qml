@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.14
+// SettingsWindow.qml 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Hide sensitive fields (Security) and Show subtitles (Customize) (D-033)
 // v0.0.14: The Customize topic: the categories and templates of the open vault (D-027)
 // v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
@@ -84,6 +85,8 @@ ApplicationWindow {
     property int checkFrequency: 0
     property int autoLockMinutes: 0
     property int clipboardClearSeconds: 0
+    property bool hideSensitive: true
+    property bool showSubtitles: true
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -97,6 +100,8 @@ ApplicationWindow {
         checkFrequency = Updater.frequency
         autoLockMinutes = VaultController.autoLockMinutes
         clipboardClearSeconds = VaultController.clipboardClearSeconds
+        hideSensitive = VaultController.hideSensitive
+        showSubtitles = VaultController.showSubtitles
     }
 
     function showTheme(chosen) {
@@ -133,6 +138,10 @@ ApplicationWindow {
             VaultController.autoLockMinutes = autoLockMinutes
         if (VaultController.clipboardClearSeconds !== clipboardClearSeconds)
             VaultController.clipboardClearSeconds = clipboardClearSeconds
+        if (VaultController.hideSensitive !== hideSensitive)
+            VaultController.hideSensitive = hideSensitive
+        if (VaultController.showSubtitles !== showSubtitles)
+            VaultController.showSubtitles = showSubtitles
         // Starting at startup is written outside Chrono Vault and can fail:
         // the window stays open and says so, showing the setting as it is.
         if (VaultController.startAtStartup !== startAtStartup) {
@@ -172,9 +181,13 @@ ApplicationWindow {
             break
         case 1:
             autoLockMinutes = defaults.autoLockMinutes
+            hideSensitive = defaults.hideSensitive
             break
         case 2:
             clipboardClearSeconds = defaults.clipboardClearSeconds
+            break
+        case 3:
+            showSubtitles = defaults.showSubtitles
             break
         }
     }
@@ -443,6 +456,13 @@ ApplicationWindow {
                             editable: true
                             onValueModified: settingsWindow.autoLockMinutes = value
                         }
+                        CheckBox {
+                            objectName: "hideSensitiveBox"
+                            text: qsTr("Hide sensitive fields: show them as dots until asked")
+                            checked: settingsWindow.hideSensitive
+                            onToggled: settingsWindow.hideSensitive = checked
+                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                        }
                         Item { Layout.fillHeight: true }
                     }
 
@@ -470,7 +490,16 @@ ApplicationWindow {
 
                     // Kept in the vault at once; Restore defaults leaves it as
                     // it is (D-027).
-                    CustomizePage {}
+                    ColumnLayout {
+                        spacing: Math.round(8 * Appearance.factor)
+                        CheckBox {
+                            objectName: "showSubtitlesBox"
+                            text: qsTr("Show subtitles in the item list")
+                            checked: settingsWindow.showSubtitles
+                            onToggled: settingsWindow.showSubtitles = checked
+                        }
+                        CustomizePage { Layout.fillWidth: true }
+                    }
                 }
             }
         }

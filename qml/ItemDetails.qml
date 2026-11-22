@@ -14,23 +14,26 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.0.14
+// ItemDetails.qml 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: As the reference program shows an item (D-033): every section its own card under its heading, every
+//          field type, hidden values as dots, History in a field's menu, the note, Last Modified and Created,
+//          Autosubmit Login, the Trash and the Archive
 // v0.0.14: The icon of the item's category; the star that marks a favourite; the template under the title; the
 //          tags; the attachments, each saved with Save as… (D-027, D-028, D-029)
 // v0.0.9: Initial release (D-025)
 
-// The chosen item, read-only (D-025): its icon and title with the pencil
-// that opens the editor, then its fields in a framed card: the label at the
-// right in grey, the value beside it, a "…" menu at the end of each row.
+// The chosen item, read-only (D-025, D-033): its header with the pencil, the
+// star and "…", then its fields in framed cards, one per section, the
+// label at the right in grey, the value beside it, a "…" menu at the end of
+// each row. Empty, deleted and hidden fields are not shown.
 Item {
     id: itemDetails
     objectName: "itemDetails"
@@ -39,10 +42,30 @@ Item {
     // Read again whenever the vault's items change.
     property int refresh: 0
     readonly property var item: itemId !== "" && refresh >= 0 ? VaultController.item(itemId) : ({})
-    readonly property var shownFields: {
+
+    // The fields as cards: [{heading, rows: [field…]}]; a section without a
+    // field to show is left out, as the reference program does (D-033).
+    readonly property var cards: {
         const all = item.fields || []
-        return all.filter(function(field) { return field.value !== "" })
+        let result = [{ heading: "", rows: [] }]
+        for (const field of all) {
+            if (field.deleted || field.kind === "hidden")
+                continue
+            if (field.kind === "section") {
+                result.push({ heading: field.name, rows: [] })
+                continue
+            }
+            if (field.value === "")
+                continue
+            result[result.length - 1].rows.push(field)
+        }
+        return result.filter(function(card) { return card.rows.length > 0 })
     }
+    readonly property int labelWidth: Math.round(220 * Appearance.factor)
+    readonly property int rowHeight: Math.round(54 * Appearance.factor)
+    // Card borders and the lines between rows: a faint shade of the text,
+    // seen on a light and a dark page alike.
+    readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
 
     signal editRequested()
 
@@ -62,38 +85,41 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Math.round(16 * Appearance.factor)
-        spacing: Math.round(12 * Appearance.factor)
+        spacing: 0
 
+        // The header: icon, title, and the pencil, the star and "…".
         RowLayout {
-            spacing: Math.round(12 * Appearance.factor)
+            spacing: Math.round(16 * Appearance.factor)
             Layout.fillWidth: true
+            Layout.margins: Math.round(24 * Appearance.factor)
+            Layout.bottomMargin: Math.round(16 * Appearance.factor)
             Image {
                 source: itemDetails.item.icon ? "data:image/png;base64," + itemDetails.item.icon
                         : (itemDetails.item.defaultIcon || "")
-                sourceSize: Qt.size(Math.round(48 * Appearance.factor), Math.round(48 * Appearance.factor))
-                Layout.preferredWidth: Math.round(48 * Appearance.factor)
-                Layout.preferredHeight: Math.round(48 * Appearance.factor)
+                sourceSize: Qt.size(Math.round(40 * Appearance.factor), Math.round(40 * Appearance.factor))
+                Layout.preferredWidth: Math.round(40 * Appearance.factor)
+                Layout.preferredHeight: Math.round(40 * Appearance.factor)
+                Layout.alignment: Qt.AlignTop
             }
-            ColumnLayout {
-                spacing: 0
+            Label {
+                objectName: "itemTitle"
+                text: itemDetails.item.title || ""
+                textFormat: Text.PlainText
+                font.bold: true
+                font.pointSize: Appearance.fontPointSize * 1.3
+                elide: Text.ElideRight
                 Layout.fillWidth: true
-                Label {
-                    objectName: "itemTitle"
-                    text: itemDetails.item.title || ""
-                    textFormat: Text.PlainText
-                    font.bold: true
-                    font.pointSize: Appearance.fontPointSize * 1.4
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-                Label {
-                    text: itemDetails.item.templateName || ""
-                    textFormat: Text.PlainText
-                    opacity: 0.7
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
+                Layout.alignment: Qt.AlignTop
+            }
+            ToolButton {
+                objectName: "editButton"
+                visible: !itemDetails.item.trashed
+                icon.source: "qrc:/icons/edit.svg"
+                icon.color: itemDetails.palette.buttonText
+                onClicked: itemDetails.editRequested()
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Edit")
+                Layout.alignment: Qt.AlignTop
             }
             ToolButton {
                 objectName: "favouriteButton"
@@ -102,34 +128,31 @@ Item {
                 onClicked: VaultController.setFavourite(itemDetails.itemId, !itemDetails.item.favourite)
                 ToolTip.visible: hovered
                 ToolTip.text: itemDetails.item.favourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
+                Layout.alignment: Qt.AlignTop
             }
             ToolButton {
-                objectName: "editButton"
-                icon.source: "qrc:/icons/edit.svg"
-                icon.color: itemDetails.palette.buttonText
-                onClicked: itemDetails.editRequested()
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Edit")
-            }
-        }
-
-        // The tags, each a way to the items that carry it (D-028).
-        Flow {
-            Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
-            visible: (itemDetails.item.tags || []).length > 0
-            Repeater {
-                model: itemDetails.item.tags || []
-                delegate: Button {
-                    required property string modelData
-                    objectName: "detailsTag"
-                    text: modelData
-                    icon.source: "qrc:/icons/tag.svg"
-                    icon.color: itemDetails.palette.buttonText
-                    flat: true
-                    onClicked: VaultController.filter = "tag:" + modelData
+                objectName: "itemMenuButton"
+                text: "…"
+                onClicked: itemMenu.popup(this, 0, height)
+                Layout.alignment: Qt.AlignTop
+                Menu {
+                    id: itemMenu
+                    Action {
+                        text: itemDetails.item.archived ? qsTr("Unarchive") : qsTr("Archive")
+                        enabled: !itemDetails.item.trashed
+                        onTriggered: VaultController.archiveItem(itemDetails.itemId, !itemDetails.item.archived)
+                    }
+                    Action {
+                        text: itemDetails.item.trashed ? qsTr("Restore") : qsTr("Move to Trash")
+                        onTriggered: VaultController.moveToTrash(itemDetails.itemId, !itemDetails.item.trashed)
+                    }
                 }
             }
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: itemDetails.palette.mid
         }
 
         ScrollView {
@@ -139,210 +162,289 @@ Item {
             contentWidth: availableWidth
             clip: true
 
-            Column {
-                width: fieldsScroll.availableWidth
+            ColumnLayout {
+                width: fieldsScroll.availableWidth - 2 * Math.round(24 * Appearance.factor)
+                x: Math.round(24 * Appearance.factor)
                 spacing: Math.round(12 * Appearance.factor)
 
-            Rectangle {
-                width: parent.width
-                implicitHeight: rows.implicitHeight
-                visible: itemDetails.shownFields.length > 0
-                color: itemDetails.palette.base
-                border.color: itemDetails.palette.mid
-                radius: Math.round(4 * Appearance.factor)
+                Item { Layout.preferredHeight: Math.round(12 * Appearance.factor) }
 
-                Column {
-                    id: rows
-                    width: parent.width
+                // In the Trash or the Archive: said, with the way out.
+                RowLayout {
+                    visible: itemDetails.item.trashed === true || itemDetails.item.archived === true
+                    Layout.fillWidth: true
+                    Label {
+                        text: itemDetails.item.trashed ? qsTr("This item is in the Trash.") : qsTr("This item is archived.")
+                        font.bold: true
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        objectName: "restoreButton"
+                        text: itemDetails.item.trashed ? qsTr("Restore") : qsTr("Unarchive")
+                        onClicked: itemDetails.item.trashed ? VaultController.moveToTrash(itemDetails.itemId, false)
+                                                            : VaultController.archiveItem(itemDetails.itemId, false)
+                    }
+                    Button {
+                        objectName: "deleteForeverButton"
+                        visible: itemDetails.item.trashed === true
+                        text: qsTr("Delete Permanently…")
+                        onClicked: deleteForeverDialog.open()
+                    }
+                }
 
+                // The tags, each a way to the items that carry it (D-028).
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: Math.round(6 * Appearance.factor)
+                    visible: (itemDetails.item.tags || []).length > 0
                     Repeater {
-                        model: itemDetails.shownFields
-                        delegate: Item {
-                            id: row
-                            required property var modelData
-                            required property int index
-                            property bool revealed: false
-                            readonly property string kind: modelData.kind
-                            readonly property string code: {
-                                itemDetails.tick
-                                return kind === "totp" ? VaultController.oneTimeCode(modelData.value) : ""
-                            }
-                            readonly property int secondsLeft: {
-                                itemDetails.tick
-                                return kind === "totp" ? VaultController.oneTimeCodeSecondsLeft(modelData.value) : 0
-                            }
-                            width: rows.width
-                            implicitHeight: Math.max(Math.round(44 * Appearance.factor), line.implicitHeight + Math.round(20 * Appearance.factor))
+                        model: itemDetails.item.tags || []
+                        delegate: Button {
+                            required property string modelData
+                            objectName: "detailsTag"
+                            text: modelData
+                            icon.source: "qrc:/icons/tag.svg"
+                            icon.color: itemDetails.palette.buttonText
+                            flat: true
+                            onClicked: VaultController.filter = "tag:" + modelData
+                        }
+                    }
+                }
 
-                            Rectangle {
-                                visible: row.index > 0
+                // One card per section, its heading above it at the value column.
+                Repeater {
+                    model: itemDetails.cards
+                    delegate: ColumnLayout {
+                        id: cardBlock
+                        required property var modelData
+                        spacing: Math.round(8 * Appearance.factor)
+                        Layout.fillWidth: true
+                        Label {
+                            objectName: "sectionHeading"
+                            visible: cardBlock.modelData.heading !== ""
+                            text: cardBlock.modelData.heading
+                            textFormat: Text.PlainText
+                            font.bold: true
+                            opacity: 0.7
+                            leftPadding: itemDetails.labelWidth + Math.round(24 * Appearance.factor)
+                            Layout.topMargin: Math.round(6 * Appearance.factor)
+                        }
+                        Rectangle {
+                            objectName: "fieldCard"
+                            Layout.fillWidth: true
+                            implicitHeight: rows.implicitHeight
+                            color: Qt.lighter(itemDetails.palette.window, 1.12)
+                            border.color: itemDetails.lineColour
+                            radius: Math.round(6 * Appearance.factor)
+                            Column {
+                                id: rows
                                 width: parent.width
-                                height: 1
-                                color: itemDetails.palette.mid
+                                Repeater {
+                                    model: cardBlock.modelData.rows
+                                    delegate: FieldRow { details: itemDetails }
+                                }
                             }
+                        }
+                    }
+                }
 
-                            RowLayout {
-                                id: line
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: Math.round(12 * Appearance.factor)
-                                anchors.rightMargin: Math.round(6 * Appearance.factor)
-                                spacing: Math.round(16 * Appearance.factor)
+                // The item's own note (D-033).
+                Rectangle {
+                    visible: (itemDetails.item.note || "") !== ""
+                    Layout.fillWidth: true
+                    implicitHeight: noteRow.implicitHeight
+                    color: Qt.lighter(itemDetails.palette.window, 1.12)
+                    border.color: itemDetails.lineColour
+                    radius: Math.round(6 * Appearance.factor)
+                    FieldRow {
+                        id: noteRow
+                        details: itemDetails
+                        modelData: ({ name: qsTr("Note"), kind: "multiline", value: itemDetails.item.note || "",
+                                      sensitive: false, history: [] })
+                        index: 0
+                    }
+                }
 
-                                Label {
-                                    text: row.modelData.name
-                                    textFormat: Text.PlainText
-                                    horizontalAlignment: Text.AlignRight
-                                    opacity: 0.7
-                                    elide: Text.ElideRight
-                                    Layout.preferredWidth: Math.round(140 * Appearance.factor)
-                                    // Beside the value; at the top of a text of several lines.
-                                    Layout.alignment: row.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
+                // The attachments (D-029): saved only where the person chooses.
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: attachmentRows.implicitHeight
+                    visible: (itemDetails.item.attachments || []).length > 0
+                    color: Qt.lighter(itemDetails.palette.window, 1.12)
+                    border.color: itemDetails.lineColour
+                    radius: Math.round(6 * Appearance.factor)
+                    Column {
+                        id: attachmentRows
+                        width: parent.width
+                        Repeater {
+                            model: itemDetails.item.attachments || []
+                            delegate: Item {
+                                id: attachmentRow
+                                required property var modelData
+                                required property int index
+                                width: attachmentRows.width
+                                implicitHeight: itemDetails.rowHeight
+                                Rectangle {
+                                    visible: attachmentRow.index > 0
+                                    width: parent.width
+                                    height: 1
+                                    color: itemDetails.lineColour
                                 }
-                                Label {
-                                    objectName: "fieldValue"
-                                    readonly property bool isLink: row.kind === "url"
-                                        && /^https?:\/\//i.test(row.modelData.value)
-                                    text: row.kind === "password" && !row.revealed ? "••••••••"
-                                          : row.kind === "totp" ? (row.code.length === 6 ? row.code.slice(0, 3) + " " + row.code.slice(3) : row.code)
-                                          : isLink ? itemDetails.link(row.modelData.value)
-                                          : row.modelData.value
-                                    textFormat: isLink ? Text.StyledText : Text.PlainText
-                                    linkColor: itemDetails.palette.link
-                                    font.family: row.kind === "password" && row.revealed ? "Noto Sans Mono" : Appearance.font.family
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                    onLinkActivated: Qt.openUrlExternally(row.modelData.value)
-                                    HoverHandler {
-                                        enabled: parent.isLink
-                                        cursorShape: Qt.PointingHandCursor
-                                    }
-                                }
-                                // The seconds the one-time code has left, as a ring.
-                                Item {
-                                    visible: row.kind === "totp"
-                                    Layout.preferredWidth: Math.round(26 * Appearance.factor)
-                                    Layout.preferredHeight: Math.round(26 * Appearance.factor)
-                                    Canvas {
-                                        id: ring
-                                        anchors.fill: parent
-                                        readonly property int seconds: row.secondsLeft
-                                        onSecondsChanged: requestPaint()
-                                        onPaint: {
-                                            const context = getContext("2d")
-                                            context.reset()
-                                            context.lineWidth = 2
-                                            context.strokeStyle = itemDetails.palette.mid
-                                            context.beginPath()
-                                            context.arc(width / 2, height / 2, width / 2 - 2, 0, 2 * Math.PI)
-                                            context.stroke()
-                                            context.strokeStyle = itemDetails.palette.highlight
-                                            context.beginPath()
-                                            context.arc(width / 2, height / 2, width / 2 - 2, -Math.PI / 2,
-                                                        -Math.PI / 2 + 2 * Math.PI * seconds / 30)
-                                            context.stroke()
-                                        }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Math.round(16 * Appearance.factor)
+                                    anchors.rightMargin: Math.round(8 * Appearance.factor)
+                                    spacing: Math.round(10 * Appearance.factor)
+                                    Image {
+                                        source: "qrc:/icons/attachment.svg"
+                                        sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
                                     }
                                     Label {
-                                        anchors.centerIn: parent
-                                        text: row.secondsLeft
-                                        font.pointSize: Appearance.fontPointSize * 0.7
+                                        text: attachmentRow.modelData.name
+                                        textFormat: Text.PlainText
+                                        elide: Text.ElideMiddle
+                                        Layout.fillWidth: true
                                     }
-                                }
-                                ToolButton {
-                                    objectName: "rowMenuButton"
-                                    text: "…"
-                                    Layout.alignment: row.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
-                                    onClicked: rowMenu.popup(this, 0, height)
-                                    Menu {
-                                        id: rowMenu
-                                        Action {
-                                            text: qsTr("Copy")
-                                            onTriggered: VaultController.copyToClipboard(
-                                                             row.kind === "totp" ? row.code : row.modelData.value)
-                                        }
-                                        // Only a password has something to show.
-                                        MenuItem {
-                                            text: row.revealed ? qsTr("Hide") : qsTr("Show")
-                                            visible: row.kind === "password"
-                                            height: visible ? implicitHeight : 0
-                                            onTriggered: row.revealed = !row.revealed
-                                        }
+                                    Label {
+                                        text: VaultController.sizeText(attachmentRow.modelData.size)
+                                        opacity: 0.7
+                                    }
+                                    Button {
+                                        objectName: "saveAttachmentButton"
+                                        text: qsTr("Save as…")
+                                        onClicked: itemDetails.askWhereToSave(attachmentRow.modelData)
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            // The attachments (D-029): saved only where the person chooses,
-            // never opened from a copy left on the disk.
-            Rectangle {
-                width: parent.width
-                implicitHeight: attachmentRows.implicitHeight
-                visible: (itemDetails.item.attachments || []).length > 0
-                color: itemDetails.palette.base
-                border.color: itemDetails.palette.mid
-                radius: Math.round(4 * Appearance.factor)
-
-                Column {
-                    id: attachmentRows
-                    width: parent.width
-                    Repeater {
-                        model: itemDetails.item.attachments || []
-                        delegate: Item {
-                            id: attachmentRow
-                            required property var modelData
-                            required property int index
-                            width: attachmentRows.width
-                            implicitHeight: Math.round(44 * Appearance.factor)
-                            Rectangle {
-                                visible: attachmentRow.index > 0
-                                width: parent.width
-                                height: 1
-                                color: itemDetails.palette.mid
-                            }
-                            RowLayout {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: Math.round(12 * Appearance.factor)
-                                anchors.rightMargin: Math.round(6 * Appearance.factor)
-                                spacing: Math.round(10 * Appearance.factor)
-                                Image {
-                                    source: "qrc:/icons/attachment.svg"
-                                    sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
-                                }
-                                Label {
-                                    text: attachmentRow.modelData.name
-                                    textFormat: Text.PlainText
-                                    elide: Text.ElideMiddle
-                                    Layout.fillWidth: true
-                                }
-                                Label {
-                                    text: VaultController.sizeText(attachmentRow.modelData.size)
-                                    opacity: 0.7
-                                }
-                                Button {
-                                    objectName: "saveAttachmentButton"
-                                    text: qsTr("Save as…")
-                                    onClicked: itemDetails.askWhereToSave(attachmentRow.modelData)
-                                }
-                            }
+                // When it was changed and made, and Autosubmit Login (D-033).
+                GridLayout {
+                    columns: 2
+                    Layout.fillWidth: true
+                    columnSpacing: Math.round(24 * Appearance.factor)
+                    rowSpacing: Math.round(8 * Appearance.factor)
+                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                    Label {
+                        text: qsTr("Last Modified:")
+                        opacity: 0.7
+                        horizontalAlignment: Text.AlignRight
+                        Layout.preferredWidth: itemDetails.labelWidth
+                    }
+                    Label {
+                        objectName: "lastModified"
+                        text: itemDetails.item.modified || ""
+                        opacity: 0.85
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: qsTr("Created:")
+                        opacity: 0.7
+                        horizontalAlignment: Text.AlignRight
+                        Layout.preferredWidth: itemDetails.labelWidth
+                    }
+                    Label {
+                        text: itemDetails.item.created || ""
+                        opacity: 0.85
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Item { Layout.preferredWidth: itemDetails.labelWidth; visible: autoSubmitBox.visible }
+                    CheckBox {
+                        id: autoSubmitBox
+                        objectName: "autoSubmitBox"
+                        visible: itemDetails.item.categoryId === "login" && !itemDetails.item.trashed
+                        text: qsTr("Autosubmit Login")
+                        checked: itemDetails.item.autoSubmit === true
+                        onToggled: {
+                            let changed = VaultController.item(itemDetails.itemId)
+                            changed.autoSubmit = checked
+                            VaultController.saveItem(changed)
                         }
                     }
                 }
-            }
+
+                Item { Layout.preferredHeight: Math.round(24 * Appearance.factor) }
             }
         }
     }
 
-    // A web address as a link, its text escaped, never read as markup.
-    function link(address) {
-        const escaped = String(address).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        return "<a href=\"" + escaped + "\">" + escaped + "</a>"
+    function showHistory(field) {
+        historyWindow.showFor(field)
+    }
+
+    // A field's earlier values, newest first (D-033).
+    DialogWindow {
+        id: historyWindow
+        objectName: "historyWindow"
+        memoryName: "fieldHistory"
+        property var field: ({})
+        property bool revealed: false
+        title: qsTr("History of “%1”").arg(field.name || "")
+        standardButtons: Dialog.Close
+        function showFor(chosen) {
+            field = chosen
+            revealed = false
+            open()
+        }
+        leftButtons: Button {
+            visible: historyWindow.field.sensitive === true
+            text: historyWindow.revealed ? qsTr("Hide") : qsTr("Show")
+            onClicked: historyWindow.revealed = !historyWindow.revealed
+        }
+        ColumnLayout {
+            spacing: Math.round(6 * Appearance.factor)
+            Layout.preferredWidth: Math.round(460 * Appearance.factor)
+            Repeater {
+                model: historyWindow.field.history || []
+                delegate: RowLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Label {
+                        text: historyWindow.field.sensitive && !historyWindow.revealed ? "••••••••" : modelData.value
+                        textFormat: Text.PlainText
+                        font.family: "Noto Sans Mono"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: modelData.changed
+                        opacity: 0.7
+                    }
+                    Button {
+                        text: qsTr("Copy")
+                        onClicked: VaultController.copyToClipboard(modelData.value)
+                    }
+                }
+            }
+        }
+    }
+
+    DialogWindow {
+        id: deleteForeverDialog
+        objectName: "deleteForeverDialog"
+        memoryName: "deleteForever"
+        title: qsTr("Delete this item permanently?")
+        standardButtons: Dialog.Yes | Dialog.No
+        ColumnLayout {
+            Label {
+                text: qsTr("“%1” is removed from the vault for good. This cannot be undone.").arg(itemDetails.item.title || "")
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            }
+        }
+        onAccepted: VaultController.deleteItem(itemDetails.itemId)
+    }
+
+    // A web or email address as a link, its text escaped, never read as markup.
+    function link(address, words) {
+        const escape = function(text) {
+            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        }
+        return "<a style=\"text-decoration:none\" href=\"" + escape(address) + "\">" + escape(words) + "</a>"
     }
 
     property var savingAttachment: ({})

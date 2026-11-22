@@ -27,9 +27,11 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.0.14
+// vault_contents.h 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Sections, the reference program's field types, a hide mark on any field, hidden and deleted fields, field
+//          history and ids; an item's own subtitle and note, trash, archive and autosubmit; contents format 4 (D-033)
 // v0.0.14: Categories and templates of the person's own, tags, favourites and attachments; the contents format 3
 //          (D-027, D-028, D-029)
 // v0.0.4: An item's own icon
@@ -37,16 +39,52 @@
 
 namespace chrono_vault {
 
-enum class FieldKind { Text, Password, WebAddress, OneTimeCode, MultiLine };
+// Every kind of field the reference program has (D-033). Section is a
+// heading between fields; Hidden is a field the program keeps but never
+// shows, such as the reference program's types starting with a dot.
+enum class FieldKind {
+    Text,
+    Password,
+    WebAddress,
+    OneTimeCode,
+    MultiLine,
+    Email,
+    Username,
+    Phone,
+    Date,
+    Numeric,
+    CardExpiry,
+    CardCvc,
+    CardPin,
+    CardType,
+    Section,
+    Hidden,
+};
+
+// An earlier value of a field, kept when the value changed (D-033).
+struct FieldChange
+{
+    QString value;
+    QDateTime changed;
+
+    friend bool operator==(const FieldChange&, const FieldChange&) = default;
+};
 
 struct Field
 {
     QString role;  // a built-in field's role, such as "username"; empty for a custom field
-    QString label; // the name of a custom field
+    QString label; // the name of a custom field, or a section's heading
     FieldKind kind = FieldKind::Text;
     QString value;
+    bool sensitive = false; // shown as dots (D-033); always so for a password
+    bool deleted = false;   // kept as the reference program keeps it, never shown
+    QString hiddenType;     // a hidden field's own type, such as ".twoFA"
+    qint64 uid = 0;         // the field's id within its item; 0 until it is saved
+    QDateTime changed;      // when its value last changed
+    QList<FieldChange> history; // earlier values, oldest first
 
     [[nodiscard]] bool isCustom() const { return role.isEmpty(); }
+    [[nodiscard]] bool isHidden() const { return sensitive || kind == FieldKind::Password; }
     friend bool operator==(const Field&, const Field&) = default;
 };
 
@@ -67,9 +105,15 @@ struct Item
     QString templateId = QStringLiteral("login"); // the template it was made from (D-027)
     QString categoryId = QStringLiteral("login");
     QString title;
+    QString subtitle; // its own second line; empty for the one Chrono Vault finds (D-033)
+    QString note;     // the item's own note, apart from its fields (D-033)
     QList<Field> fields;
     QStringList tags; // each tag nested with "/", such as "Work/Servers" (D-028)
     bool favourite = false;
+    bool trashed = false;     // in the Trash (D-033)
+    bool archived = false;    // in the Archive (D-033)
+    bool autoSubmit = false;  // the reference program's "Autosubmit Login", kept (D-033)
+    QString website;          // the site whose icon is shown when website icons are on (D-033)
     QList<Attachment> attachments;
     QByteArray icon; // PNG, 64 by 64 at most; empty for the category's own icon (D-018)
     QDateTime created;
@@ -124,6 +168,26 @@ inline constexpr qsizetype largestAttachmentBytes = 5 * 1024 * 1024;
 inline constexpr qsizetype largestAttachmentsTotal = 150 * 1024 * 1024;
 
 [[nodiscard]] QString roleName(const QString& role);
+
+// A kind's name as the vault file and the windows use it ("text", "url",
+// "ccExpiry" …), and back; nothing for a name that is no kind.
+[[nodiscard]] QString fieldKindName(FieldKind kind);
+[[nodiscard]] std::optional<FieldKind> fieldKindFromName(const QString& name);
+
+// A field with only these set; the rest as a new field has them.
+[[nodiscard]] inline Field makeField(const QString& role, const QString& label, FieldKind kind, const QString& value = {})
+{
+    Field field;
+    field.role = role;
+    field.label = label;
+    field.kind = kind;
+    field.value = value;
+    field.sensitive = kind == FieldKind::Password || kind == FieldKind::CardPin;
+    return field;
+}
+
+// Gives every field of the item that has none an id of its own (D-033).
+void giveFieldsIds(Item& item);
 
 // A tag as it is kept: every part trimmed, empty parts left out, joined by
 // "/". Empty when nothing is left.

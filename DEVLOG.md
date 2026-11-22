@@ -173,3 +173,17 @@ read. On Windows the tests showed a real fault: a file held open for reading can
 reading the vault could make another program's save, or a password change on another thread, fail; vault files are
 now read so they can be replaced meanwhile, and every write of an open vault happens on the save thread. Each with a
 test.
+
+## 22 November 2026: version 0.0.17: an item as the reference program has it (autonomous mode)
+
+The owner's rule for the importer: identical to the reference program, what is missing built first. The export's
+format was learnt from the owner's own export only through scripts that wrote shapes, never values, to files the
+owner checked first. Built: contents format 4 with sections, field types, hide marks, hidden and deleted fields,
+field history and ids, an item's subtitle and note, Trash and Archive, autosubmit; the item's view as the reference
+program draws it, checked in pictures; Hide sensitive fields and Show subtitles (D-033). The editor carries every new
+part through an edit; it is redrawn in 0.0.18.
+Two review rounds: a new item's fields had no ids until their first save (now given at once); Move to Trash on an
+item already in the Trash opened the editor (now it moves straight to the Trash and is disabled there). On Windows,
+`test_vaults` now and then saw a save fail with "access denied" at the last step, putting the new file in place; the
+same with the file watcher off, so the cause is outside Chrono Vault ([Speculation] the virus scanner holding the
+fresh file). Not new in 0.0.17; nothing is lost when it happens. Left to the owner (P16).

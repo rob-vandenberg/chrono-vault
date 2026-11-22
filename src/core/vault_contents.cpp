@@ -23,10 +23,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <algorithm>
+#include <utility>
+
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.0.15
+// vault_contents.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: The contents format 4: sections, the reference program's field types, hide marks, hidden and deleted
+//          fields, field history and ids, an item's subtitle and note, trash, archive, autosubmit (D-033)
 // v0.0.15: The name of the field that holds a vault's file, for its password saved in the primary (D-030)
 // v0.0.14: The contents format 3: categories and templates of the person's own, tags, favourites, attachments;
 //          the names of the new templates' fields (D-027, D-028, D-029)
@@ -38,9 +43,9 @@ namespace chrono_vault {
 namespace {
 
 // Format 2 added the item's icon (D-018); format 3 the categories and
-// templates, tags, favourites and attachments (D-027 to D-029). Formats 1 and
-// 2 are still read.
-constexpr int contentsFormat = 3;
+// templates, tags, favourites and attachments (D-027 to D-029); format 4
+// what the reference program's items hold (D-033). Older formats are read.
+constexpr int contentsFormat = 4;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -50,27 +55,21 @@ constexpr qsizetype largestTextLength = 1000;
 const QString keyFormat = QStringLiteral("format");
 const QString keyItems = QStringLiteral("items");
 
+constexpr FieldKind allKinds[] = {
+    FieldKind::Text,     FieldKind::Password,   FieldKind::WebAddress, FieldKind::OneTimeCode, FieldKind::MultiLine,
+    FieldKind::Email,    FieldKind::Username,   FieldKind::Phone,      FieldKind::Date,        FieldKind::Numeric,
+    FieldKind::CardExpiry, FieldKind::CardCvc,  FieldKind::CardPin,    FieldKind::CardType,    FieldKind::Section,
+    FieldKind::Hidden,
+};
+
 QString kindName(FieldKind kind)
 {
-    switch (kind) {
-    case FieldKind::Text: return QStringLiteral("text");
-    case FieldKind::Password: return QStringLiteral("password");
-    case FieldKind::WebAddress: return QStringLiteral("url");
-    case FieldKind::OneTimeCode: return QStringLiteral("totp");
-    case FieldKind::MultiLine: return QStringLiteral("multiline");
-    }
-    return QStringLiteral("text");
+    return fieldKindName(kind);
 }
 
 std::optional<FieldKind> kindFromName(const QString& name)
 {
-    for (const FieldKind kind : {FieldKind::Text, FieldKind::Password, FieldKind::WebAddress,
-                                 FieldKind::OneTimeCode, FieldKind::MultiLine}) {
-        if (kindName(kind) == name) {
-            return kind;
-        }
-    }
-    return std::nullopt;
+    return fieldKindFromName(name);
 }
 
 bool isString(const QJsonObject& object, const char* key)
@@ -92,6 +91,29 @@ QJsonArray fieldsToJson(const QList<Field>& fields)
             object.insert(QStringLiteral("label"), field.label);
         } else {
             object.insert(QStringLiteral("role"), field.role);
+        }
+        if (field.sensitive) {
+            object.insert(QStringLiteral("sensitive"), true);
+        }
+        if (field.deleted) {
+            object.insert(QStringLiteral("deleted"), true);
+        }
+        if (!field.hiddenType.isEmpty()) {
+            object.insert(QStringLiteral("hiddenType"), field.hiddenType);
+        }
+        if (field.uid != 0) {
+            object.insert(QStringLiteral("uid"), static_cast<double>(field.uid));
+        }
+        if (field.changed.isValid()) {
+            object.insert(QStringLiteral("changed"), field.changed.toString(Qt::ISODateWithMs));
+        }
+        if (!field.history.isEmpty()) {
+            QJsonArray history;
+            for (const FieldChange& change : field.history) {
+                history.append(QJsonObject{{QStringLiteral("value"), change.value},
+                                           {QStringLiteral("changed"), change.changed.toString(Qt::ISODateWithMs)}});
+            }
+            object.insert(QStringLiteral("history"), history);
         }
         array.append(object);
     }
@@ -132,6 +154,52 @@ std::optional<QList<Field>> fieldsFromJson(const QJsonValue& value)
         } else {
             field.label = text(object, "label");
         }
+        // Format 4 (D-033); each optional, each of its own type or refused.
+        if (object.contains(QStringLiteral("sensitive"))) {
+            if (!object.value(QStringLiteral("sensitive")).isBool()) {
+                return std::nullopt;
+            }
+            field.sensitive = object.value(QStringLiteral("sensitive")).toBool();
+        }
+        if (object.contains(QStringLiteral("deleted"))) {
+            if (!object.value(QStringLiteral("deleted")).isBool()) {
+                return std::nullopt;
+            }
+            field.deleted = object.value(QStringLiteral("deleted")).toBool();
+        }
+        if (object.contains(QStringLiteral("hiddenType"))) {
+            if (!isString(object, "hiddenType") || text(object, "hiddenType").size() > largestTextLength) {
+                return std::nullopt;
+            }
+            field.hiddenType = text(object, "hiddenType");
+        }
+        if (object.contains(QStringLiteral("uid"))) {
+            const QJsonValue uid = object.value(QStringLiteral("uid"));
+            if (!uid.isDouble() || uid.toDouble() < 0 || uid.toDouble() > 9.0e15) {
+                return std::nullopt;
+            }
+            field.uid = static_cast<qint64>(uid.toDouble());
+        }
+        if (object.contains(QStringLiteral("changed"))) {
+            if (!isString(object, "changed")) {
+                return std::nullopt;
+            }
+            field.changed = QDateTime::fromString(text(object, "changed"), Qt::ISODateWithMs);
+        }
+        if (object.contains(QStringLiteral("history"))) {
+            const QJsonValue history = object.value(QStringLiteral("history"));
+            if (!history.isArray() || history.toArray().size() > largestListCount) {
+                return std::nullopt;
+            }
+            for (const QJsonValue& entry : history.toArray()) {
+                const QJsonObject change = entry.toObject();
+                if (!entry.isObject() || !isString(change, "value") || !isString(change, "changed")) {
+                    return std::nullopt;
+                }
+                field.history.append(FieldChange{text(change, "value"),
+                                                 QDateTime::fromString(text(change, "changed"), Qt::ISODateWithMs)});
+            }
+        }
         fields.append(field);
     }
     return fields;
@@ -169,6 +237,20 @@ QJsonObject itemToJson(const Item& item)
     }
     if (item.favourite) {
         object.insert(QStringLiteral("favourite"), true);
+    }
+    const auto insertText = [&object](const char* key, const QString& value) {
+        if (!value.isEmpty()) {
+            object.insert(QLatin1String(key), value);
+        }
+    };
+    insertText("subtitle", item.subtitle);
+    insertText("note", item.note);
+    insertText("website", item.website);
+    for (const auto& [key, on] : {std::pair{"trashed", item.trashed}, std::pair{"archived", item.archived},
+                                  std::pair{"autoSubmit", item.autoSubmit}}) {
+        if (on) {
+            object.insert(QLatin1String(key), true);
+        }
     }
     if (!item.attachments.isEmpty()) {
         QJsonArray attachments;
@@ -252,6 +334,41 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
         }
         item.favourite = object.value(QStringLiteral("favourite")).toBool();
     }
+    for (const char* key : {"subtitle", "note", "website"}) {
+        if (!object.contains(QLatin1String(key))) {
+            continue;
+        }
+        if (format < 4 || !isString(object, key)) {
+            return std::nullopt;
+        }
+        const QString given = text(object, key);
+        if (qstrcmp(key, "subtitle") == 0) {
+            item.subtitle = given;
+        } else if (qstrcmp(key, "note") == 0) {
+            item.note = given;
+        } else {
+            item.website = given;
+        }
+    }
+    for (const char* key : {"trashed", "archived", "autoSubmit"}) {
+        if (!object.contains(QLatin1String(key))) {
+            continue;
+        }
+        if (format < 4 || !object.value(QLatin1String(key)).isBool()) {
+            return std::nullopt;
+        }
+        const bool on = object.value(QLatin1String(key)).toBool();
+        if (qstrcmp(key, "trashed") == 0) {
+            item.trashed = on;
+        } else if (qstrcmp(key, "archived") == 0) {
+            item.archived = on;
+        } else {
+            item.autoSubmit = on;
+        }
+    }
+    if (format < 4) {
+        giveFieldsIds(item); // ids for the field history from now on
+    }
     if (object.contains(QStringLiteral("attachments"))) {
         const QJsonValue attachments = object.value(QStringLiteral("attachments"));
         if (!attachments.isArray() || attachments.toArray().size() > largestListCount) {
@@ -318,6 +435,52 @@ QString roleName(const QString& role)
     };
     const auto found = names.constFind(role);
     return found == names.constEnd() ? role : QCoreApplication::translate("Field", found.value());
+}
+
+void giveFieldsIds(Item& item)
+{
+    qint64 highest = 0;
+    for (const Field& field : std::as_const(item.fields)) {
+        highest = std::max(highest, field.uid);
+    }
+    for (Field& field : item.fields) {
+        if (field.uid == 0) {
+            field.uid = ++highest;
+        }
+    }
+}
+
+QString fieldKindName(FieldKind kind)
+{
+    switch (kind) {
+    case FieldKind::Text: return QStringLiteral("text");
+    case FieldKind::Password: return QStringLiteral("password");
+    case FieldKind::WebAddress: return QStringLiteral("url");
+    case FieldKind::OneTimeCode: return QStringLiteral("totp");
+    case FieldKind::MultiLine: return QStringLiteral("multiline");
+    case FieldKind::Email: return QStringLiteral("email");
+    case FieldKind::Username: return QStringLiteral("username");
+    case FieldKind::Phone: return QStringLiteral("phone");
+    case FieldKind::Date: return QStringLiteral("date");
+    case FieldKind::Numeric: return QStringLiteral("numeric");
+    case FieldKind::CardExpiry: return QStringLiteral("ccExpiry");
+    case FieldKind::CardCvc: return QStringLiteral("ccCvc");
+    case FieldKind::CardPin: return QStringLiteral("ccPin");
+    case FieldKind::CardType: return QStringLiteral("ccType");
+    case FieldKind::Section: return QStringLiteral("section");
+    case FieldKind::Hidden: return QStringLiteral("hidden");
+    }
+    return QStringLiteral("text");
+}
+
+std::optional<FieldKind> fieldKindFromName(const QString& name)
+{
+    for (const FieldKind kind : allKinds) {
+        if (fieldKindName(kind) == name) {
+            return kind;
+        }
+    }
+    return std::nullopt;
 }
 
 QString normalizedTag(const QString& tag)

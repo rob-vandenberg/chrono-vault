@@ -33,9 +33,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.16
+// test_pages.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: The item view: a card per section, hidden values as dots, the Trash (D-033)
 // v0.0.16: New Item shows its keyboard focus (P12)
 // v0.0.15: The vault chooser, the keyfile on the unlock page, the master password window (D-030, D-031)
 // v0.0.14: New Item's categories, a tag typed in the editor, the left column, the star, Settings > Customize and the
@@ -69,6 +70,22 @@ QQuickItem* visualItem(QQuickItem* root, const QString& name)
     return nullptr;
 }
 
+// Every item a Repeater made with this name, in the tree of items.
+QList<QQuickItem*> visualItems(QQuickItem* root, const QString& name)
+{
+    QList<QQuickItem*> found;
+    if (!root) {
+        return found;
+    }
+    if (root->objectName() == name) {
+        found << root;
+    }
+    for (QQuickItem* child : root->childItems()) {
+        found << visualItems(child, name);
+    }
+    return found;
+}
+
 } // namespace
 
 // The pages themselves, driven as a person would: a new login is made in
@@ -89,6 +106,7 @@ private slots:
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
     void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
     void new_item_shows_when_it_has_the_keyboard_focus();
+    void an_item_shows_a_card_per_section_and_hidden_values_as_dots();
 };
 
 void TestPages::initTestCase()
@@ -343,16 +361,17 @@ void TestPages::the_main_window_has_one_bar_and_three_columns()
     QVERIFY(QMetaObject::invokeMethod(editor, "close"));
     QTRY_VERIFY(details->property("visible").toBool());
 
-    // Item > Delete item…: once deleted, the item is no longer shown.
+    // Item > Move to Trash: once in the Trash, the item is no longer shown
+    // here, and the Trash holds it (D-033).
     QVERIFY(QMetaObject::invokeMethod(page, "deleteChosen"));
-    QObject* deleteDialog = editor->findChild<QObject*>(QStringLiteral("deleteDialog"));
-    QVERIFY(deleteDialog);
-    QTRY_VERIFY(deleteDialog->property("visible").toBool());
-    QVERIFY(QMetaObject::invokeMethod(deleteDialog, "accept"));
+    QVERIFY(!editor->property("visible").toBool()); // no editor, straight into the Trash
     QTRY_VERIFY(controller->isIdle());
     QTRY_COMPARE(page->property("chosenItemId").toString(), QString());
     QVERIFY(!details->property("visible").toBool());
     QCOMPARE(controller->items()->rowCount(), 0);
+    controller->setFilter(QStringLiteral("trash"));
+    QCOMPARE(controller->items()->rowCount(), 1);
+    controller->setFilter(QString());
 }
 
 void TestPages::categories_tags_favourites_and_templates_work_from_the_windows()
@@ -582,6 +601,83 @@ void TestPages::new_item_shows_when_it_has_the_keyboard_focus()
     QTRY_VERIFY(button->property("visualFocus").toBool());
     QVERIFY(fill->property("border").value<QObject*>()->property("width").toInt() >= 2);
     controller->lock();
+}
+
+void TestPages::an_item_shows_a_card_per_section_and_hidden_values_as_dots()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("cards.chronovault"))),
+                            QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    QVariantMap item = controller->newLogin();
+    QVariantList fields{
+        QVariantMap{{"role", ""}, {"label", "Website"}, {"kind", "url"}, {"value", "https://example.org"}},
+        QVariantMap{{"role", ""}, {"label", "Password"}, {"kind", "text"}, {"value", "secret"}, {"sensitive", true}},
+        QVariantMap{{"role", ""}, {"label", "2FA Authentication"}, {"kind", "section"}, {"value", ""}},
+        QVariantMap{{"role", ""}, {"label", "Repository"}, {"kind", "url"}, {"value", "https://example.org/r"}},
+        QVariantMap{{"role", ""}, {"label", "Empty part"}, {"kind", "section"}, {"value", ""}},
+        QVariantMap{{"role", ""}, {"label", "Phone"}, {"kind", "phone"}, {"value", ""}},
+        QVariantMap{{"role", ""}, {"label", "2FA"}, {"kind", "hidden"}, {"value", "x"}, {"hiddenType", ".twoFA"}},
+    };
+    item.insert(QStringLiteral("fields"), fields);
+    item.insert(QStringLiteral("title"), QStringLiteral("Example"));
+    const QString id = item.value(QStringLiteral("id")).toString();
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
+
+    auto* root = qobject_cast<QQuickWindow*>(window)->contentItem();
+    // Two cards: the first without a heading, then the one section with a
+    // field to show; the empty section, the empty phone and the hidden
+    // field are not shown.
+    QTRY_COMPARE(visualItems(root, QStringLiteral("fieldCard")).size(), 2);
+    QStringList headings;
+    for (QQuickItem* heading : visualItems(root, QStringLiteral("sectionHeading"))) {
+        if (heading->isVisible()) {
+            headings << heading->property("text").toString();
+        }
+    }
+    QCOMPARE(headings, QStringList{QStringLiteral("2FA Authentication")});
+    QStringList values;
+    for (QQuickItem* value : visualItems(root, QStringLiteral("fieldValue"))) {
+        if (value->isVisible()) {
+            values << value->property("text").toString();
+        }
+    }
+    QVERIFY(values.contains(QStringLiteral("••••••••")));
+    QVERIFY(!values.contains(QStringLiteral("secret")));
+    QCOMPARE(values.size(), 3);
+
+    // Moved to the Trash and shown there: Restore brings it back.
+    controller->moveToTrash(id, true);
+    controller->setFilter(QStringLiteral("trash"));
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
+    QObject* details = window->findChild<QObject*>(QStringLiteral("itemDetails"));
+    QObject* restore = details->findChild<QObject*>(QStringLiteral("restoreButton"));
+    QVERIFY(restore);
+    QTRY_VERIFY(restore->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QVERIFY(!controller->item(id).value(QStringLiteral("trashed")).toBool());
+    controller->setFilter(QString());
+    controller->lock();
+
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
 }
 
 QTEST_MAIN(TestPages)

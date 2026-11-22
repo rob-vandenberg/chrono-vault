@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.16
+// Main.qml 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Item > Move to Trash in place of Delete item (D-033)
 // v0.0.16: New Item shows a ring when it has the keyboard focus (P12)
 // v0.0.15: New vault and Open vault also with a vault unlocked; Change master password or keyfile (D-030, D-031)
 // v0.0.14: New Item lists every category with its templates (D-027)
@@ -153,8 +154,10 @@ ApplicationWindow {
                     }
                     MenuSeparator {}
                     Action {
-                        text: qsTr("Delete item…")
-                        enabled: mainWindow.unlocked && vaultPage.chosenItemId !== ""
+                        text: qsTr("Move to Trash")
+                        // Not for an item already in the Trash.
+                        enabled: mainWindow.unlocked && vaultPage.chosenItemId !== "" && VaultController.revision >= 0
+                                 && VaultController.item(vaultPage.chosenItemId).trashed !== true
                         onTriggered: vaultPage.deleteChosen()
                     }
                 }

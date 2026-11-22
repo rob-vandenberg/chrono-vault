@@ -34,9 +34,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.16
+// vault_controller.h 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
 // v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
 // v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
 //          master password or keyfile (D-030, D-031)
@@ -81,6 +82,8 @@ class VaultController : public QObject
     Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
     Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY startMinimizedChanged)
     Q_PROPERTY(bool trayAvailable READ trayAvailable NOTIFY trayAvailableChanged)
+    Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
+    Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
 
@@ -140,6 +143,11 @@ public:
     void setStartMinimized(bool minimized);
     [[nodiscard]] bool trayAvailable() const { return trayExists; }
     void setTrayAvailable(bool available);
+    // Settings > Security and Customize (D-033).
+    [[nodiscard]] bool hideSensitive() const { return hideSecrets; }
+    void setHideSensitive(bool hide);
+    [[nodiscard]] bool showSubtitles() const { return subtitlesShown; }
+    void setShowSubtitles(bool show);
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
 
@@ -216,7 +224,12 @@ public:
     [[nodiscard]] Q_INVOKABLE QString sizeText(qint64 bytes) const;
     // Stores the item (new or changed) and saves the vault.
     Q_INVOKABLE bool saveItem(const QVariantMap& item);
+    // Deletes an item for good (from the Trash, after asking).
     Q_INVOKABLE void deleteItem(const QString& id);
+    // Moves an item into the Trash or out of it, into the Archive or out of
+    // it (D-033).
+    Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);
+    Q_INVOKABLE void archiveItem(const QString& id, bool archived);
     // Reads a picked picture as an item icon (D-018): the PNG in base64, or
     // empty when the file is not used, with a message saying why.
     [[nodiscard]] Q_INVOKABLE QString readItemIcon(const QUrl& file);
@@ -259,6 +272,8 @@ signals:
     void masterPasswordChanged(bool ok);
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
+    void hideSensitiveChanged();
+    void showSubtitlesChanged();
     void keepInTrayChanged();
     void startAtStartupChanged();
     void startMinimizedChanged();
@@ -296,6 +311,7 @@ private:
     void takeBackUnsaved();
     // The list and every window that shows the contents are told of a change.
     void contentsChanged();
+    void setItemPlace(const QString& id, bool Item::*place, bool on);
     [[nodiscard]] qsizetype attachmentBytes() const;
     void addVault(const QString& vaultFile);
     void rememberKeyfile(const QString& vaultFile, const QString& keyfile);
@@ -345,6 +361,8 @@ private:
     int contentsRevision = 0;
     int lockMinutes = 5;
     int clearSeconds = 30;
+    bool hideSecrets = true;
+    bool subtitlesShown = true;
     bool keepRunning = true;
     bool minimizedAtStart = false;
     bool trayExists = false;

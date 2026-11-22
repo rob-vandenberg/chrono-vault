@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.14
+// item_list_model.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: The item's own subtitle first; Trash and Archive apart from the rest (D-033)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template; the search also
 //          finds an email address and a tag (D-027, D-028)
 // v0.0.9: The letter an item is grouped under; the web address when there is no user name (D-025)
@@ -67,7 +68,11 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     case TitleRole:
     case Qt::DisplayRole: return item.title;
     case SubtitleRole: {
-        // The first of these the item has (D-025), else its template's name.
+        // The item's own subtitle (D-033), else the first of these it has
+        // (D-025), else its template's name.
+        if (!item.subtitle.isEmpty()) {
+            return item.subtitle;
+        }
         for (const char* fieldRole : {"username", "email", "url", "cardholder", "fullname", "network", "bankname",
                                       "product", "organisation"}) {
             const QString value = fieldValue(item, QString::fromLatin1(fieldRole));
@@ -146,6 +151,20 @@ int ItemListModel::rowOf(const QString& id) const
 
 bool ItemListModel::passesFilter(const Item& item) const
 {
+    // The Trash and the Archive show only their own items; every other
+    // view leaves them out (D-033).
+    if (chosen == QLatin1String("trash")) {
+        return item.trashed;
+    }
+    if (item.trashed) {
+        return false;
+    }
+    if (chosen == QLatin1String("archive")) {
+        return item.archived;
+    }
+    if (item.archived) {
+        return false;
+    }
     if (chosen.isEmpty()) {
         return true;
     }

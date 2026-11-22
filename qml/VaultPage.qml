@@ -20,9 +20,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.15
+// VaultPage.qml 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: Archive and Trash under Others; the chosen item with a grey fill and a blue bar; subtitles can be hidden
+//          (D-033)
 // v0.0.15: The vault at the top of the left column chooses among the person's vaults, makes or opens one (D-030)
 // v0.0.14: The left column narrows the list: Home, Favorites, the categories and the tags as a tree; a new item from
 //          any template (D-027, D-028)
@@ -100,11 +102,25 @@ Item {
         const id = chosenItemId
         if (id === "")
             return
+        // Straight into the Trash, where Restore brings it back (D-033).
         editor.whenFree(function() {
-            if (editor.itemId !== id)
-                editor.edit(VaultController.item(id), false)
-            editor.askDelete()
+            if (editor.itemId === id)
+                editor.close()
+            VaultController.moveToTrash(id, true)
         })
+    }
+
+    // Whether the item is still shown in the list's view: there, and not in
+    // the Trash or the Archive unless that is what is shown (D-033).
+    function stillShown(id) {
+        const shown = VaultController.item(id)
+        if (shown.id === undefined)
+            return false
+        if (shown.trashed)
+            return VaultController.filter === "trash"
+        if (shown.archived)
+            return VaultController.filter === "archive"
+        return VaultController.filter !== "trash" && VaultController.filter !== "archive"
     }
 
     function hasUnsavedEdit() {
@@ -134,7 +150,7 @@ Item {
             const id = editor.itemId !== "" ? editor.itemId : vaultPage.chosenItemId
             const row = id === "" ? -1 : VaultController.items.rowOf(id)
             itemList.currentIndex = row
-            if (editor.itemId === "" && vaultPage.chosenItemId !== "" && VaultController.item(vaultPage.chosenItemId).id === undefined)
+            if (editor.itemId === "" && vaultPage.chosenItemId !== "" && !vaultPage.stillShown(vaultPage.chosenItemId))
                 vaultPage.chosenItemId = ""
         }
     }
@@ -328,6 +344,29 @@ Item {
                             }
                         }
                     }
+
+                    // The Archive and the Trash (D-033).
+                    Label {
+                        text: qsTr("Others")
+                        font.bold: true
+                        opacity: 0.7
+                        Layout.topMargin: Math.round(14 * Appearance.factor)
+                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                    }
+                    ItemDelegate {
+                        objectName: "archiveEntry"
+                        text: qsTr("Archive")
+                        highlighted: VaultController.filter === "archive"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("archive")
+                    }
+                    ItemDelegate {
+                        objectName: "trashEntry"
+                        text: qsTr("Trash")
+                        highlighted: VaultController.filter === "trash"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("trash")
+                    }
                 }
             }
         }
@@ -396,9 +435,26 @@ Item {
                 delegate: ItemDelegate {
                     id: listEntry
                     width: ListView.view.width
-                    highlighted: ListView.isCurrentItem
-                    // The text of the chosen item in the highlight's own colour.
-                    readonly property color textColour: highlighted ? vaultPage.palette.highlightedText : vaultPage.palette.text
+                    // The chosen item: a grey fill with a blue bar at its left
+                    // edge, as in the reference program (D-033).
+                    readonly property bool chosen: ListView.isCurrentItem
+                    readonly property color textColour: vaultPage.palette.text
+                    background: Rectangle {
+                        color: listEntry.chosen ? Qt.rgba(vaultPage.palette.text.r, vaultPage.palette.text.g,
+                                                          vaultPage.palette.text.b, 0.10)
+                               : listEntry.hovered ? Qt.rgba(vaultPage.palette.text.r, vaultPage.palette.text.g,
+                                                             vaultPage.palette.text.b, 0.05) : "transparent"
+                        radius: Math.round(4 * Appearance.factor)
+                        Rectangle {
+                            objectName: "chosenBar"
+                            visible: listEntry.chosen
+                            width: Math.round(3 * Appearance.factor)
+                            height: parent.height - Math.round(12 * Appearance.factor)
+                            anchors.verticalCenter: parent.verticalCenter
+                            radius: width / 2
+                            color: vaultPage.palette.highlight
+                        }
+                    }
                     contentItem: RowLayout {
                         spacing: Math.round(10 * Appearance.factor)
                         Image {
@@ -419,6 +475,7 @@ Item {
                                 Layout.fillWidth: true
                             }
                             Label {
+                                visible: VaultController.showSubtitles && text !== ""
                                 text: model.subtitle
                                 textFormat: Text.PlainText
                                 color: listEntry.textColour
@@ -462,7 +519,7 @@ Item {
                 // Closed: back to the item it showed, when it is still there; a
                 // deleted item is no longer shown.
                 onClosed: {
-                    if (vaultPage.chosenItemId !== "" && VaultController.item(vaultPage.chosenItemId).id === undefined)
+                    if (vaultPage.chosenItemId !== "" && !vaultPage.stillShown(vaultPage.chosenItemId))
                         vaultPage.chosenItemId = ""
                     itemList.currentIndex = vaultPage.chosenItemId === "" ? -1
                                             : VaultController.items.rowOf(vaultPage.chosenItemId)

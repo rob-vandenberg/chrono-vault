@@ -20,9 +20,10 @@
 #include <QDateTime>
 
 // --- Version ------------------------------------------------------------
-// templates.cpp 0.0.14
+// templates.cpp 0.0.17
 
 // --- Version history ----------------------------------------------------
+// v0.0.17: A new item's fields get their ids at once; fields made with makeField, a PIN hidden (D-033)
 // v0.0.14: Initial release (D-027)
 
 namespace chrono_vault {
@@ -31,7 +32,7 @@ namespace {
 
 Field field(const char* role, FieldKind kind)
 {
-    return Field{QString::fromLatin1(role), {}, kind, {}};
+    return makeField(QString::fromLatin1(role), {}, kind);
 }
 
 Template builtIn(const char* id, const char* categoryId, QList<Field> fields)
@@ -59,12 +60,12 @@ const QList<Template>& builtInTemplates()
     using enum FieldKind;
     static const QList<Template> templates{
         builtIn("login", "login",
-                {field("username", Text), field("password", Password), field("url", WebAddress),
+                {field("username", Username), field("password", Password), field("url", WebAddress),
                  field("totp", OneTimeCode)}),
-        builtIn("email", "login", {field("email", Text), field("password", Password), field("server", Text)}),
+        builtIn("email", "login", {field("email", Email), field("password", Password), field("server", Text)}),
         builtIn("card", "card",
-                {field("cardholder", Text), field("cardnumber", Password), field("expiry", Text),
-                 field("cvc", Password), field("pin", Password)}),
+                {field("cardholder", Text), field("cardnumber", Password), field("expiry", CardExpiry),
+                 field("cvc", CardCvc), field("pin", CardPin)}),
         builtIn("identity", "identity",
                 {field("fullname", Text), field("birthday", Text), field("address", MultiLine), field("phone", Text),
                  field("email", Text)}),
@@ -77,7 +78,7 @@ const QList<Template>& builtInTemplates()
         builtIn("password", "password", {field("password", Password)}),
         builtIn("bank", "finance",
                 {field("bankname", Text), field("accountholder", Text), field("accountnumber", Text),
-                 field("iban", Text), field("bic", Text), field("pin", Password)}),
+                 field("iban", Text), field("bic", Text), field("pin", CardPin)}),
         builtIn("wifi", "computer", {field("network", Text), field("password", Password), field("security", Text)}),
         builtIn("server", "computer",
                 {field("url", WebAddress), field("username", Text), field("password", Password)}),
@@ -163,7 +164,9 @@ Item newItem(const Template& itemTemplate)
     item.fields = itemTemplate.fields;
     for (Field& one : item.fields) {
         one.value.clear();
+        one.uid = 0;
     }
+    giveFieldsIds(item); // so its first change is kept in the history (D-033)
     return item;
 }
 

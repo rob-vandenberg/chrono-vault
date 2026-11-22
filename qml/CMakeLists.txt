@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.15
+# qml/CMakeLists.txt 0.0.17
 
 # --- Version history ----------------------------------------------------
+# v0.0.17: A field's row in the item's view, a file of its own (D-033)
 # v0.0.15: The window that changes the master password or keyfile (D-031)
 # v0.0.14: The Customize page and the template editor; the categories', tags', favourites' and attachments' icons (D-027 to D-029)
 # v0.0.10: Chrono Vault's own style for the UI scaling; every source of the library under the strict warnings (D-023)
@@ -41,6 +42,7 @@ qt_add_qml_module(chrono_vault_ui
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
         AboutWindow.qml
+        FieldRow.qml
         GeneratorDialog.qml
         DialogWindow.qml
         ItemEditor.qml
