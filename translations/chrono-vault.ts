@@ -4,12 +4,12 @@
 <context>
     <name>AboutWindow</name>
     <message>
-        <location filename="../qml/AboutWindow.qml" line="+36"/>
+        <location filename="../qml/AboutWindow.qml" line="+37"/>
         <source>About Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+19"/>
         <source>Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -19,22 +19,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
-        <source>GNU Affero General Public License, version 3 only. This program comes with no warranty of any kind.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>Built against Qt %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>The fonts are Noto Sans and Noto Sans Mono, under the SIL Open Font License 1.1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
+        <location line="+27"/>
         <source>Check for update</source>
         <translation type="unfinished"></translation>
     </message>
@@ -266,7 +251,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+43"/>
+        <location filename="../qml/Main.qml" line="+44"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -342,7 +327,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+88"/>
+        <location filename="../qml/SettingsWindow.qml" line="+89"/>
         <location line="+255"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -402,7 +387,7 @@
     </message>
     <message>
         <location line="+44"/>
-        <source>Keep running in the system tray when the window is closed</source>
+        <source>Keep Chrono Vault running in the system tray</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -669,6 +654,44 @@
     <message>
         <location line="+6"/>
         <source>The two passwords are not the same yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>chrono_vault::Licences</name>
+    <message>
+        <location filename="../src/ui/licences.cpp" line="+51"/>
+        <source>Chrono Vault %1: GNU Affero General Public License, version 3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Qt %1: GNU Lesser General Public License, version 3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Qt %1: GNU General Public License, version 3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Qt %1: GNU General Public License, version 2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>OpenSSL %1: Apache License, version 2.0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Noto Sans and Noto Sans Mono: SIL Open Font License, version 1.1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Microsoft Visual C++ runtime, redistributed under Microsoft&apos;s terms</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

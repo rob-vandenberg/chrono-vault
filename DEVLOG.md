@@ -95,3 +95,11 @@ Chrono Viewer's light and dark palettes and Follow the system, and the UI scalin
 once and kept with OK. Found while building: Qt Quick's controls do not take a changed program font by themselves, so
 every window takes it from `Appearance`, and the dialogs became application windows (a plain window has no font); the
 sidebar measures its names in the font in use. One review round, nothing real. Sixteen tests.
+
+## 22 November 2026: version 0.0.8: the About box with the licences
+
+The About box as in the owner's mockup (D-021): the licences carried inside the program and shown in a read-only,
+scrollable text area, each after a line naming what it covers; Check for update at the bottom left. Every dialog got
+the settings window's narrow edge and a place for its own buttons at the bottom left. The tray text changed. Found
+while building: Qt's rich text made every line of a licence a paragraph of its own, so lines are broken explicitly.
+One review round, nothing real.

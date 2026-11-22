@@ -163,7 +163,7 @@ reference program on purpose.
 
 12.1 The program's icon is `art/chrono-vault.svg`, everywhere the program shows its icon and in the start menu.
 
-12.2 Chrono Vault runs in the system tray. Settings: "Keep running in the system tray when the window is closed",
+12.2 Chrono Vault runs in the system tray. Settings: "Keep Chrono Vault running in the system tray",
 "Start Chrono Vault at startup", "Start Chrono Vault minimized".
 
 12.3 All text in Noto Sans, passwords and codes in Noto Sans Mono, carried inside the program with their licence.

@@ -5,43 +5,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Qt-Contexts: true\n"
 
-#: ../qml/AboutWindow.qml:36
+#: ../qml/AboutWindow.qml:37
 msgctxt "AboutWindow|"
 msgid "About Chrono Vault"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:54
+#: ../qml/AboutWindow.qml:56
 #, qt-format
 msgctxt "AboutWindow|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:58
+#: ../qml/AboutWindow.qml:60
 msgctxt "AboutWindow|"
 msgid "Copyright © 2026 Rob Vandenberg"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:60
-msgctxt "AboutWindow|"
-msgid ""
-"GNU Affero General Public License, version 3 only. This program comes with "
-"no warranty of any kind."
-msgstr ""
-
-#: ../qml/AboutWindow.qml:64
-#, qt-format
-msgctxt "AboutWindow|"
-msgid "Built against Qt %1."
-msgstr ""
-
-#: ../qml/AboutWindow.qml:66
-msgctxt "AboutWindow|"
-msgid ""
-"The fonts are Noto Sans and Noto Sans Mono, under the SIL Open Font License "
-"1.1."
-msgstr ""
-
-#: ../qml/AboutWindow.qml:71
+#: ../qml/AboutWindow.qml:87
 msgctxt "AboutWindow|"
 msgid "Check for update"
 msgstr ""
@@ -261,68 +241,68 @@ msgctxt "ItemIcons|"
 msgid "Choose a JPG, PNG, BMP, ICO or SVG picture."
 msgstr ""
 
-#: ../qml/Main.qml:43
+#: ../qml/Main.qml:44
 #, qt-format
 msgctxt "Main|"
 msgid "%1 – Chrono Vault %2"
 msgstr ""
 
-#: ../qml/Main.qml:44
+#: ../qml/Main.qml:45
 #, qt-format
 msgctxt "Main|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/Main.qml:55
+#: ../qml/Main.qml:56
 msgctxt "Main|"
 msgid "New login"
 msgstr ""
 
-#: ../qml/Main.qml:59
+#: ../qml/Main.qml:60
 msgctxt "Main|"
 msgid "New secure note"
 msgstr ""
 
-#: ../qml/Main.qml:64
+#: ../qml/Main.qml:65
 msgctxt "Main|"
 msgid "Settings"
 msgstr ""
 
-#: ../qml/Main.qml:68
+#: ../qml/Main.qml:69
 msgctxt "Main|"
 msgid "Lock"
 msgstr ""
 
-#: ../qml/Main.qml:189
+#: ../qml/Main.qml:190
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:196
+#: ../qml/Main.qml:197
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:197
+#: ../qml/Main.qml:198
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:236
+#: ../qml/Main.qml:237
 msgctxt "Main|"
 msgid "Update…"
 msgstr ""
 
-#: ../qml/Main.qml:253
+#: ../qml/Main.qml:254
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:260
+#: ../qml/Main.qml:261
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
@@ -337,132 +317,132 @@ msgctxt "PasswordField|"
 msgid "Show the password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:88 ../qml/SettingsWindow.qml:343
+#: ../qml/SettingsWindow.qml:89 ../qml/SettingsWindow.qml:344
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:115
+#: ../qml/SettingsWindow.qml:116
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:156
+#: ../qml/SettingsWindow.qml:157
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:233 ../qml/SettingsWindow.qml:390
+#: ../qml/SettingsWindow.qml:234 ../qml/SettingsWindow.qml:391
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:233 ../qml/SettingsWindow.qml:412
+#: ../qml/SettingsWindow.qml:234 ../qml/SettingsWindow.qml:413
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:233 ../qml/SettingsWindow.qml:275
+#: ../qml/SettingsWindow.qml:234 ../qml/SettingsWindow.qml:276
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:278
+#: ../qml/SettingsWindow.qml:279
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:285
+#: ../qml/SettingsWindow.qml:286
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:291
+#: ../qml/SettingsWindow.qml:292
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:297
+#: ../qml/SettingsWindow.qml:298
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:306
+#: ../qml/SettingsWindow.qml:307
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:350
+#: ../qml/SettingsWindow.qml:351
 msgctxt "SettingsWindow|"
-msgid "Keep running in the system tray when the window is closed"
+msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:357
+#: ../qml/SettingsWindow.qml:358
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:363
+#: ../qml/SettingsWindow.qml:364
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:368
+#: ../qml/SettingsWindow.qml:369
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:372
+#: ../qml/SettingsWindow.qml:373
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:372
+#: ../qml/SettingsWindow.qml:373
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:372
+#: ../qml/SettingsWindow.qml:373
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:372
+#: ../qml/SettingsWindow.qml:373
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:379
+#: ../qml/SettingsWindow.qml:380
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:394
+#: ../qml/SettingsWindow.qml:395
 msgctxt "SettingsWindow|"
 msgid "Lock the vault after this many minutes without use (0 means never):"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:416
+#: ../qml/SettingsWindow.qml:417
 msgctxt "SettingsWindow|"
 msgid "Clear what was copied after this many seconds (0 means never):"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:451
+#: ../qml/SettingsWindow.qml:452
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:457
+#: ../qml/SettingsWindow.qml:458
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:467
+#: ../qml/SettingsWindow.qml:468
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -657,6 +637,46 @@ msgstr ""
 #: ../qml/WelcomePage.qml:146
 msgctxt "WelcomePage|"
 msgid "The two passwords are not the same yet."
+msgstr ""
+
+#: ../src/ui/licences.cpp:51
+#, qt-format
+msgctxt "chrono_vault::Licences|"
+msgid "Chrono Vault %1: GNU Affero General Public License, version 3"
+msgstr ""
+
+#: ../src/ui/licences.cpp:53
+#, qt-format
+msgctxt "chrono_vault::Licences|"
+msgid "Qt %1: GNU Lesser General Public License, version 3"
+msgstr ""
+
+#: ../src/ui/licences.cpp:55
+#, qt-format
+msgctxt "chrono_vault::Licences|"
+msgid "Qt %1: GNU General Public License, version 3"
+msgstr ""
+
+#: ../src/ui/licences.cpp:57
+#, qt-format
+msgctxt "chrono_vault::Licences|"
+msgid "Qt %1: GNU General Public License, version 2"
+msgstr ""
+
+#: ../src/ui/licences.cpp:59
+#, qt-format
+msgctxt "chrono_vault::Licences|"
+msgid "OpenSSL %1: Apache License, version 2.0"
+msgstr ""
+
+#: ../src/ui/licences.cpp:61
+msgctxt "chrono_vault::Licences|"
+msgid "Noto Sans and Noto Sans Mono: SIL Open Font License, version 1.1"
+msgstr ""
+
+#: ../src/ui/licences.cpp:66
+msgctxt "chrono_vault::Licences|"
+msgid "Microsoft Visual C++ runtime, redistributed under Microsoft's terms"
 msgstr ""
 
 #: ../src/ui/system_tray.cpp:40

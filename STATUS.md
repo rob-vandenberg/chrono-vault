@@ -2,10 +2,11 @@
 
 ## Now
 
-**Version 0.0.7** (D-023): the theme (Light, Dark, Follow the system) and the UI scaling (50% to 400%) at the top of
-Settings > General, as in Chrono Viewer: shown at once, kept with OK, put back with Cancel, applied at every start.
-Every window takes the program's font, so the scaling reaches every control; the settings pages scroll. Sixteen tests
-pass on Linux, under the sanitizers and on Windows; the review round found nothing real.
+**Version 0.0.8** (D-021): the About box as in the owner's mockup: the icon with the name, version and copyright,
+below them a scrollable text area with every licence Chrono Vault ships (our AGPL-3.0 first, then Qt's LGPL-3.0,
+GPL-3.0 and GPL-2.0, OpenSSL's Apache 2.0 and the Noto fonts' OFL 1.1), Check for update at the bottom left and
+Close at the bottom right. Every dialog has the narrow edge of the settings window. The tray setting reads "Keep
+Chrono Vault running in the system tray". Sixteen tests pass on Linux; the review round found nothing real.
 
 ## Next task
 

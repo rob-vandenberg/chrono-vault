@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.7
+// SettingsWindow.qml 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: "Keep Chrono Vault running in the system tray"
 // v0.0.7: Theme and UI scaling in General, shown at once, kept with OK; the pages scroll (D-023)
 // v0.0.6: The sidebar as a framed panel; OK, Cancel and Restore defaults (D-022)
 // v0.0.5: "Check for updates" in General (D-021)
@@ -347,7 +348,7 @@ ApplicationWindow {
                         }
                         CheckBox {
                             objectName: "keepInTrayBox"
-                            text: qsTr("Keep running in the system tray when the window is closed")
+                            text: qsTr("Keep Chrono Vault running in the system tray")
                             checked: settingsWindow.keepInTray
                             enabled: VaultController.trayAvailable
                             onToggled: settingsWindow.keepInTray = checked

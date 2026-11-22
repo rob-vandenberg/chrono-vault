@@ -29,6 +29,6 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-018](decisions/D-018.md) | Item icons: picked by the person, stored in the vault as 64-pixel PNG, contents format 2 |
 | [D-019](decisions/D-019.md) | The program's icon everywhere, the system tray, and the General settings for starting |
 | [D-020](decisions/D-020.md) | One Chrono Vault per person; every window and dialog remembers its size and place, the main window its state |
-| [D-021](decisions/D-021.md) | The update check (Daily, Weekly, Monthly, Never), the About box on F1, and the update downloaded, checked and installed as in Chrono Mail |
+| [D-021](decisions/D-021.md) | The update check (Daily, Weekly, Monthly, Never), the About box on F1 with every licence that ships, and the update downloaded, checked and installed as in Chrono Mail |
 | [D-022](decisions/D-022.md) | The settings window: a framed sidebar, and OK, Cancel and Restore defaults working as in Chrono Viewer |
 | [D-023](decisions/D-023.md) | The theme (Light, Dark, Follow the system) and the UI scaling (50% to 400%), as in Chrono Viewer |

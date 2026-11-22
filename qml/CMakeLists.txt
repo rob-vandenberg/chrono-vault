@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.7
+# qml/CMakeLists.txt 0.0.8
 
 # --- Version history ----------------------------------------------------
+# v0.0.8: The licences, carried inside the program for the About box (D-021)
 # v0.0.7: The theme, the UI scaling and the appearance the windows see (D-023)
 # v0.0.6: The OK and Cancel icons
 # v0.0.5: The About and Update windows
@@ -57,6 +58,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/item_icons.h
         ../src/ui/item_list_model.cpp
         ../src/ui/item_list_model.h
+        ../src/ui/licences.cpp
+        ../src/ui/licences.h
         ../src/ui/program_scale.cpp
         ../src/ui/program_scale.h
         ../src/ui/single_instance.cpp
@@ -84,6 +87,23 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/item-note.svg"
         "${PROJECT_SOURCE_DIR}/art/ok.svg"
         "${PROJECT_SOURCE_DIR}/art/cancel.svg"
+)
+# The licences Chrono Vault ships, shown in the About box (D-021).
+set_source_files_properties("${PROJECT_SOURCE_DIR}/LICENSE" PROPERTIES QT_RESOURCE_ALIAS "AGPL-3.0.txt")
+set_source_files_properties("${PROJECT_SOURCE_DIR}/packaging/licences/LGPL-3.0.txt" PROPERTIES QT_RESOURCE_ALIAS "LGPL-3.0.txt")
+set_source_files_properties("${PROJECT_SOURCE_DIR}/packaging/licences/GPL-3.0.txt" PROPERTIES QT_RESOURCE_ALIAS "GPL-3.0.txt")
+set_source_files_properties("${PROJECT_SOURCE_DIR}/packaging/licences/GPL-2.0.txt" PROPERTIES QT_RESOURCE_ALIAS "GPL-2.0.txt")
+set_source_files_properties("${PROJECT_SOURCE_DIR}/packaging/licences/Apache-2.0.txt" PROPERTIES QT_RESOURCE_ALIAS "Apache-2.0.txt")
+set_source_files_properties("${PROJECT_SOURCE_DIR}/fonts/OFL.txt" PROPERTIES QT_RESOURCE_ALIAS "OFL-1.1.txt")
+qt_add_resources(chrono_vault_ui chrono_vault_licences
+    PREFIX "/licences"
+    FILES
+        "${PROJECT_SOURCE_DIR}/LICENSE"
+        "${PROJECT_SOURCE_DIR}/packaging/licences/LGPL-3.0.txt"
+        "${PROJECT_SOURCE_DIR}/packaging/licences/GPL-3.0.txt"
+        "${PROJECT_SOURCE_DIR}/packaging/licences/GPL-2.0.txt"
+        "${PROJECT_SOURCE_DIR}/packaging/licences/Apache-2.0.txt"
+        "${PROJECT_SOURCE_DIR}/fonts/OFL.txt"
 )
 # The fonts, Google's Noto under the SIL Open Font License (OR-2, the owner's
 # exception), carried inside the program so every system shows the same.

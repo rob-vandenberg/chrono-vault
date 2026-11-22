@@ -16,21 +16,24 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_setup.h"
+#include "licences.h"
 #include "version.h"
 
 #include <QFont>
 #include <QList>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
+#include <QQuickItem>
 #include <QQuickWindow>
 #include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.4
+// test_main_window.cpp 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: The About box shows every licence, ours first, Check for update at the bottom left; the tray text
 // v0.0.4: Chrono Vault's own style and fonts; the version in the title
 // v0.0.3: Settings of the test's own, never the person's
 // v0.0.1: Initial release
@@ -44,6 +47,8 @@ class TestMainWindow : public QObject
 private slots:
     void initTestCase();
     void the_main_window_loads_without_qml_errors_and_is_titled_chrono_vault();
+    void the_about_box_shows_every_licence_ours_first();
+    void the_tray_setting_says_keep_chrono_vault_running();
 };
 
 void TestMainWindow::initTestCase()
@@ -82,6 +87,79 @@ void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chro
 
     // Leave nothing behind (OR-11): the window goes with the engine.
     window->close();
+}
+
+void TestMainWindow::the_about_box_shows_every_licence_ours_first()
+{
+    // Every licence that ships has its text inside the program, ours first.
+    const QList<chrono_vault::Licence> licences = chrono_vault::shippedLicences();
+    QVERIFY(licences.size() >= 6);
+    QVERIFY(licences.constFirst().covers.contains(QStringLiteral("GNU Affero General Public License")));
+    QVERIFY(licences.constFirst().text.contains(QStringLiteral("GNU AFFERO GENERAL PUBLIC LICENSE")));
+    for (const QString& expected : {QStringLiteral("GNU LESSER GENERAL PUBLIC LICENSE"),
+                                    QStringLiteral("Version 3, 29 June 2007"), QStringLiteral("Version 2, June 1991"),
+                                    QStringLiteral("Apache License"), QStringLiteral("SIL OPEN FONT LICENSE")}) {
+        bool found = false;
+        for (const chrono_vault::Licence& licence : licences) {
+            found = found || licence.text.contains(expected);
+        }
+        QVERIFY2(found, qPrintable(expected));
+    }
+    for (int i = 0; i < 6; ++i) {
+        QVERIFY2(!licences.at(i).text.isEmpty(), qPrintable(licences.at(i).covers));
+    }
+
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* about = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("aboutWindow"));
+    QVERIFY(about);
+    QVERIFY(QMetaObject::invokeMethod(about, "open"));
+    QTRY_VERIFY(about->property("visible").toBool());
+
+    // The text area: our licence first, then a bar, then the others.
+    QObject* text = about->findChild<QObject*>(QStringLiteral("licenceText"));
+    QVERIFY(text);
+    QVERIFY(text->property("readOnly").toBool());
+    const QString shown = text->property("text").toString();
+    const qsizetype ours = shown.indexOf(QStringLiteral("GNU AFFERO GENERAL PUBLIC LICENSE"));
+    const qsizetype qt = shown.indexOf(QStringLiteral("GNU LESSER GENERAL PUBLIC LICENSE"));
+    QVERIFY(ours >= 0 && qt > ours);
+    QVERIFY(text->property("length").toInt() > 10000);
+
+    // Check for update at the bottom left, Close at the bottom right, on one row.
+    auto* check = qobject_cast<QQuickItem*>(about->findChild<QObject*>(QStringLiteral("checkForUpdateButton")));
+    QVariant closeVariant;
+    QVERIFY(QMetaObject::invokeMethod(about, "standardButton", Q_RETURN_ARG(QVariant, closeVariant),
+                                      Q_ARG(QVariant, 0x00200000))); // Dialog.Close
+    auto* close = qobject_cast<QQuickItem*>(closeVariant.value<QObject*>());
+    QVERIFY(check && close);
+    auto* window = qobject_cast<QQuickWindow*>(about);
+    QTRY_VERIFY(close->width() > 0);
+    const QPointF checkAt = check->mapToScene(QPointF(0, 0));
+    const QPointF closeAt = close->mapToScene(QPointF(0, 0));
+    QVERIFY(qAbs((checkAt.y() + check->height() / 2) - (closeAt.y() + close->height() / 2)) <= 1.0);
+    QVERIFY(checkAt.x() < window->width() / 4.0);
+    QVERIFY(closeAt.x() + close->width() > window->width() * 3 / 4.0);
+
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestMainWindow::the_tray_setting_says_keep_chrono_vault_running()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* box = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("keepInTrayBox"));
+    QVERIFY(box);
+    QCOMPARE(box->property("text").toString(), QStringLiteral("Keep Chrono Vault running in the system tray"));
 }
 
 QTEST_MAIN(TestMainWindow)

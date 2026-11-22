@@ -27,9 +27,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// crypto.cpp 0.0.2
+// crypto.cpp 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: The version of OpenSSL in use, for the About box
 // v0.0.2: Initial release
 
 namespace chrono_vault::crypto {
@@ -213,6 +214,11 @@ void wipe(QByteArray& secret)
         OPENSSL_cleanse(secret.data(), static_cast<size_t>(secret.size()));
     }
     secret.clear();
+}
+
+QByteArray openSslVersion()
+{
+    return QByteArray(OpenSSL_version(OPENSSL_VERSION_STRING));
 }
 
 } // namespace chrono_vault::crypto

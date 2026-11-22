@@ -23,9 +23,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// crypto.h 0.0.2
+// crypto.h 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: The version of OpenSSL in use, for the About box
 // v0.0.2: Initial release
 
 // The encryption of Chrono Vault (D-013): the key is derived from the master
@@ -72,5 +73,8 @@ struct KdfParameters
 
 // Overwrites the bytes with zeros in a way the compiler cannot leave out.
 void wipe(QByteArray& secret);
+
+// The version of OpenSSL in use, as "3.5.9", for the About box.
+[[nodiscard]] QByteArray openSslVersion();
 
 } // namespace chrono_vault::crypto

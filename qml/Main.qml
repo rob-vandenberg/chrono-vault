@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.7
+// Main.qml 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: The About window can be found by its name (tests)
 // v0.0.7: The program's font, so the UI scaling reaches every control (D-023)
 // v0.0.5: F1 opens About; the Update window; a Quit for an update waits for the editor or a save and goes on
 // v0.0.4: The version in the title; hiding to the tray, Quit and Ctrl+Q
@@ -269,6 +270,7 @@ ApplicationWindow {
     // About, with F1 for now (no menu item yet), and the update (D-021).
     AboutWindow {
         id: aboutWindow
+        objectName: "aboutWindow"
         onCheckRequested: {
             Updater.checkNow()
             updateWindow.open()

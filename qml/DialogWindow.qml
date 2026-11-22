@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.0.7
+// DialogWindow.qml 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: A narrow edge, as the settings window's; a place for the dialog's own buttons at the bottom left
 // v0.0.7: An application window with the program's font, so the UI scaling reaches it (D-023)
 // v0.0.4: Initial release
 
@@ -39,6 +40,9 @@ ApplicationWindow {
     property alias standardButtons: buttonBox.standardButtons
     readonly property bool opened: visible
     default property alias content: contentArea.data
+    // Buttons of the dialog's own, at the bottom left (as Check for update in
+    // About); the standard buttons stay at the bottom right.
+    property alias leftButtons: leftArea.data
     property bool answered: false
 
     signal shown()
@@ -78,10 +82,12 @@ ApplicationWindow {
     flags: Qt.Dialog
     modality: Qt.ApplicationModal
     visible: false
-    width: Math.max(400, layout.implicitWidth + 32)
-    height: Math.max(160, layout.implicitHeight + 32)
-    minimumWidth: Math.min(layout.implicitWidth + 32, 320)
-    minimumHeight: layout.implicitHeight + 32
+    // The edge around everything, the same as the settings window's.
+    readonly property int edge: 10
+    width: Math.max(400, layout.implicitWidth + 2 * edge)
+    height: Math.max(160, layout.implicitHeight + 2 * edge)
+    minimumWidth: Math.min(layout.implicitWidth + 2 * edge, 320)
+    minimumHeight: layout.implicitHeight + 2 * edge
     color: palette.window
 
     // Closed with its own title bar button: the same as Cancel.
@@ -101,8 +107,8 @@ ApplicationWindow {
     ColumnLayout {
         id: layout
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        anchors.margins: dialogWindow.edge
+        spacing: 10
 
         ColumnLayout {
             id: contentArea
@@ -110,12 +116,22 @@ ApplicationWindow {
             Layout.fillHeight: true
         }
 
-        DialogButtonBox {
-            id: buttonBox
+        RowLayout {
             Layout.fillWidth: true
-            onAccepted: dialogWindow.accept()
-            onRejected: dialogWindow.reject()
-            onDiscarded: dialogWindow.discard()
+            spacing: 6
+            RowLayout {
+                id: leftArea
+                spacing: 6
+            }
+            Item { Layout.fillWidth: true }
+            DialogButtonBox {
+                id: buttonBox
+                // No edge of its own: the window's edge is the only one.
+                padding: 0
+                onAccepted: dialogWindow.accept()
+                onRejected: dialogWindow.reject()
+                onDiscarded: dialogWindow.discard()
+            }
         }
     }
 }

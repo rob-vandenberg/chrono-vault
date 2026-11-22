@@ -20,13 +20,14 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.7
+// AboutWindow.qml 0.0.8
 
 // --- Version history ----------------------------------------------------
+// v0.0.8: The licences in a scrollable text area; Check for update at the bottom left (D-021)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Initial release
 
-// About Chrono Vault (D-021), opened with F1 for now.
+// About Chrono Vault (D-021), opened with F1 for now, as in Chrono Viewer.
 DialogWindow {
     id: aboutWindow
 
@@ -36,6 +37,7 @@ DialogWindow {
     title: qsTr("About Chrono Vault")
     standardButtons: Dialog.Close
 
+    // The icon with the name, the version and the copyright beside it.
     RowLayout {
         spacing: 16
         Layout.fillWidth: true
@@ -56,21 +58,33 @@ DialogWindow {
                 font.pointSize: Appearance.fontPointSize * 1.4
             }
             Label { text: qsTr("Copyright © 2026 Rob Vandenberg") }
-            Label {
-                text: qsTr("GNU Affero General Public License, version 3 only. This program comes with no warranty of any kind.")
-                wrapMode: Text.Wrap
-                Layout.preferredWidth: 380
-            }
-            Label { text: qsTr("Built against Qt %1.").arg(Updater.qtVersion) }
-            Label {
-                text: qsTr("The fonts are Noto Sans and Noto Sans Mono, under the SIL Open Font License 1.1.")
-                wrapMode: Text.Wrap
-                Layout.preferredWidth: 380
-            }
-            Button {
-                text: qsTr("Check for update")
-                onClicked: aboutWindow.checkRequested()
+        }
+    }
+
+    // Every licence Chrono Vault ships, ours first, across the whole width.
+    ScrollView {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.preferredWidth: 480
+        Layout.preferredHeight: 260
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        TextArea {
+            objectName: "licenceText"
+            readOnly: true
+            selectByMouse: true
+            wrapMode: TextEdit.Wrap
+            textFormat: TextEdit.RichText
+            text: Licences.text
+            background: Rectangle {
+                color: aboutWindow.palette.base
+                border.color: aboutWindow.palette.mid
             }
         }
+    }
+
+    leftButtons: Button {
+        objectName: "checkForUpdateButton"
+        text: qsTr("Check for update")
+        onClicked: aboutWindow.checkRequested()
     }
 }
