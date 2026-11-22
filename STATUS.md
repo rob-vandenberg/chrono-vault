@@ -2,12 +2,10 @@
 
 ## Now
 
-**Version 0.0.10** (D-019, D-023): three fixes after the owner's test of 0.0.9. The tray and start settings are no
-longer stored in a group named "general" (Qt reserves it; the choice was lost at every start). Chrono Vault's own
-colours are drawn on every desktop from the start (a Qt Quick window took the desktop theme's colours, Breeze's on
-KDE); "New Item" is a flat fill in the program's blue. The UI scaling grows everything together, as Chrono Mail does,
-in steps of 5%: Chrono Vault's own Qt Quick style (`style/`) over Fusion, and every size in the windows times the
-factor. Seventeen tests pass on Linux; the review round found nothing real.
+**Version 0.0.11**: the About box opens at 555 by 440 and the settings window at 730 by 650, both times the UI scaling
+and never smaller; a remembered size is raised to a window's minimum and kept inside its screen. The UI scaling slider
+has a mark every 25% above it and half a line height of room above and below. Seventeen tests pass on Linux; two
+review rounds, the last found nothing real. Open: Q17, whether a minimum gives way to a screen too small for it.
 
 ## Next task
 

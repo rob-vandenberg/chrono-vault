@@ -17,9 +17,10 @@
 #pragma once
 
 // --- Version ------------------------------------------------------------
-// program_scale.h 0.0.10
+// program_scale.h 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: A mark every 25% (the owner)
 // v0.0.10: In steps of 5%; every size follows the factor (D-023)
 // v0.0.7: Initial release, as in Chrono Viewer (D-023)
 
@@ -30,8 +31,8 @@ namespace chrono_vault {
 // already scales by 150% is not scaled twice.
 inline constexpr int smallestProgramScale = 50;
 inline constexpr int largestProgramScale = 400;
-// The marks under the slider; any value between them is allowed.
-inline constexpr int programScaleMarkEvery = 50;
+// The marks above the slider, every 25% (the owner); the slider moves in steps of 5% between them.
+inline constexpr int programScaleMarkEvery = 25;
 inline constexpr int programScaleToBeginWith = 100;
 // The slider moves in steps of 5% (D-023).
 inline constexpr int programScaleStep = 5;

@@ -30,6 +30,8 @@
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
+#include <QQmlContext>
+#include <QQuickItem>
 #include <QQmlProperty>
 #include <QFontInfo>
 #include <QQuickWindow>
@@ -37,9 +39,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.0.10
+// test_appearance.cpp 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: The settings window at 730 by 650; the slider's steps, marks above it and room around it
 // v0.0.10: The kept look drawn from the start, whatever the desktop's theme; text, icons, boxes and margins double at 200%
 // v0.0.7: Initial release
 
@@ -61,6 +64,7 @@ private slots:
     void the_settings_window_shows_at_once_and_keeps_only_with_ok();
     void the_kept_look_is_drawn_from_the_start_whatever_the_desktop();
     void at_twice_the_scale_text_icons_boxes_and_margins_all_double();
+    void the_settings_window_and_its_slider_have_their_sizes();
 };
 
 void TestAppearance::initTestCase()
@@ -267,6 +271,45 @@ void TestAppearance::at_twice_the_scale_text_icons_boxes_and_margins_all_double(
     QCOMPARE(QQmlProperty::read(ok, QStringLiteral("icon.width")).toDouble(), 32.0);
     QVERIFY(QMetaObject::invokeMethod(settings, "close"));
     QTRY_COMPARE(programScaleInUse(), 100);
+    QSettings().remove(QStringLiteral("windows/settings")); // leaves no remembered size behind
+}
+
+void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
+{
+    // The size it opens at, not one an earlier test left remembered.
+    QSettings().remove(QStringLiteral("windows/settings"));
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* settings = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    auto* window = qobject_cast<QWindow*>(settings);
+    QVERIFY(window);
+    // Opens at 730 by 650 and is never smaller (the owner).
+    QCOMPARE(window->width(), 730);
+    QCOMPARE(window->height(), 650);
+    QCOMPARE(window->minimumWidth(), 730);
+    QCOMPARE(window->minimumHeight(), 650);
+
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(window->isExposed());
+    auto* slider = qobject_cast<QQuickItem*>(settings->findChild<QObject*>(QStringLiteral("scaleSlider")));
+    QObject* marks = settings->findChild<QObject*>(QStringLiteral("scaleMarks"));
+    QObject* row = settings->findChild<QObject*>(QStringLiteral("scaleRow"));
+    QObject* percent = settings->findChild<QObject*>(QStringLiteral("scalePercent"));
+    QVERIFY(slider && marks && row && percent);
+    // Steps of 5%.
+    QCOMPARE(slider->property("stepSize").toDouble(), 5.0);
+    // 15 marks, every 25% from 50% to 400%, above the slider.
+    QCOMPARE(marks->property("count").toInt(), 15);
+    QQuickItem* mark = nullptr;
+    QVERIFY(QMetaObject::invokeMethod(marks, "itemAt", Q_RETURN_ARG(QQuickItem*, mark), Q_ARG(int, 0)));
+    QVERIFY(mark);
+    QVERIFY(mark->mapToScene(QPointF(0, mark->height())).y() <= slider->mapToScene(QPointF(0, 0)).y());
+    // Half a line height of room above and below.
+    const double halfLine = qRound(percent->property("implicitHeight").toDouble() / 2);
+    QCOMPARE(QQmlProperty::read(row, QStringLiteral("Layout.topMargin"), qmlContext(row)).toDouble(), halfLine);
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
 }
 
 QTEST_MAIN(TestAppearance)

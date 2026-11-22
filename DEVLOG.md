@@ -119,3 +119,10 @@ window now takes the program's colours (`Appearance::dress`). The tray and start
 "general" group, old values carried over. UI scaling now scales everything: Chrono Vault's own style over Fusion
 (`ChronoVault.Style`, version 6.0 so Fusion stays its fallback), 117 sizes in the windows times the factor, steps
 of 5%. Four sources were missing from the strict warnings; added. One review round, nothing real.
+
+## 22 November 2026: version 0.0.11: window sizes, scale slider marks
+
+The About box 555 by 440 and the settings window 730 by 650 (times the scaling), never smaller; the scaling slider's
+marks every 25% above it, with room around it (the owner's changelist). Found while building: Qt does not raise a
+remembered size to a window's minimum, so `WindowMemory` now does, and moves a window raised past its screen's edge
+back inside. Two review rounds; the first found the edge case, the second nothing real.

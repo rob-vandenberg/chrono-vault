@@ -25,14 +25,17 @@
 #include <QQmlError>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QRect>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.9
+// test_main_window.cpp 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: The About box at 555 by 440, never smaller
 // v0.0.9: The About box's name, copyright and link lined up with the icon
 // v0.0.8: The About box shows every licence, ours first, Check for update at the bottom left; the tray text
 // v0.0.4: Chrono Vault's own style and fonts; the version in the title
@@ -48,6 +51,8 @@ class TestMainWindow : public QObject
 private slots:
     void initTestCase();
     void the_main_window_loads_without_qml_errors_and_is_titled_chrono_vault();
+    void the_about_box_opens_at_555_by_440();
+    void a_smaller_remembered_about_box_opens_at_its_minimum();
     void the_about_box_shows_every_licence_ours_first();
     void the_tray_setting_says_keep_chrono_vault_running();
 };
@@ -90,6 +95,34 @@ void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chro
     window->close();
 }
 
+void TestMainWindow::the_about_box_opens_at_555_by_440()
+{
+    // Nothing remembered: it opens at 555 by 440 (the owner).
+    QSettings().remove(QStringLiteral("windows/about"));
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* about = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("aboutWindow"));
+    QVERIFY(about);
+    QCOMPARE(about->property("width").toInt(), 555);
+    QCOMPARE(about->property("height").toInt(), 440);
+    QSettings().remove(QStringLiteral("windows/about"));
+}
+
+void TestMainWindow::a_smaller_remembered_about_box_opens_at_its_minimum()
+{
+    // Remembered at 500 by 300 from an older version: raised to 555 by 440.
+    QSettings().setValue(QStringLiteral("windows/about/geometry"), QRect(100, 100, 500, 300));
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    auto* about = qobject_cast<QWindow*>(engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("aboutWindow")));
+    QVERIFY(about);
+    QCOMPARE(about->width(), 555);
+    QCOMPARE(about->height(), 440);
+    QSettings().remove(QStringLiteral("windows/about"));
+}
+
 void TestMainWindow::the_about_box_shows_every_licence_ours_first()
 {
     // Every licence that ships has its text inside the program, ours first.
@@ -118,6 +151,10 @@ void TestMainWindow::the_about_box_shows_every_licence_ours_first()
     QVERIFY(!engine.rootObjects().isEmpty());
     QObject* about = engine.rootObjects().constFirst()->findChild<QObject*>(QStringLiteral("aboutWindow"));
     QVERIFY(about);
+    // Never smaller than 555 by 440 (the owner), also when a smaller size is
+    // remembered from before.
+    QCOMPARE(about->property("minimumWidth").toInt(), 555);
+    QCOMPARE(about->property("minimumHeight").toInt(), 440);
     QVERIFY(QMetaObject::invokeMethod(about, "open"));
     QTRY_VERIFY(about->property("visible").toBool());
 

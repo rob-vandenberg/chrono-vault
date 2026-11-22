@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.9
+// AboutWindow.qml 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: Opens at 555 by 440, never smaller; the licences fill it (the owner)
 // v0.0.9: The answer of Check for update beside it; a newer version opens the offer (D-024); the name, the
 //         copyright and the link to GitHub lined up with the icon (D-021)
 // v0.0.8: The licences in a scrollable text area; Check for update at the bottom left (D-021)
@@ -36,6 +37,12 @@ DialogWindow {
     signal checkRequested()
 
     memoryName: "about"
+    // Opens at 555 by 440 and is never smaller, also when a smaller size was
+    // remembered from before (the owner).
+    width: Math.round(555 * Appearance.factor)
+    height: Math.round(440 * Appearance.factor)
+    minimumWidth: Math.round(555 * Appearance.factor)
+    minimumHeight: Math.round(440 * Appearance.factor)
     title: qsTr("About Chrono Vault")
     standardButtons: Dialog.Close
 
@@ -94,12 +101,11 @@ DialogWindow {
         }
     }
 
-    // Every licence Chrono Vault ships, ours first, across the whole width.
+    // Every licence Chrono Vault ships, ours first, filling the window between
+    // the top lines and the buttons.
     ScrollView {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        Layout.preferredWidth: Math.round(480 * Appearance.factor)
-        Layout.preferredHeight: Math.round(260 * Appearance.factor)
         ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         TextArea {
             objectName: "licenceText"

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.10
+// SettingsWindow.qml 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: Opens at 730 by 650 and is never smaller; the scaling slider's marks every 25% above it, room around it (the owner)
 // v0.0.10: The program's colours from the start; the slider in steps of 5%; every size times the UI scaling (D-023)
 // v0.0.9: Opened at General from the View menu (D-025)
 // v0.0.8: "Keep Chrono Vault running in the system tray"
@@ -165,8 +166,11 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: Math.round(680 * Appearance.factor)
-    height: Math.round(520 * Appearance.factor)
+    width: Math.round(730 * Appearance.factor)
+    height: Math.round(650 * Appearance.factor)
+    // Never smaller than it opens (the owner).
+    minimumWidth: Math.round(730 * Appearance.factor)
+    minimumHeight: Math.round(650 * Appearance.factor)
     visible: false
     color: palette.window
 
@@ -312,17 +316,25 @@ ApplicationWindow {
                             }
                         }
                         RowLayout {
+                            objectName: "scaleRow"
                             Layout.fillWidth: true
+                            // Half a line height of room above and below (the owner).
+                            Layout.topMargin: Math.round(widestPercent.implicitHeight / 2)
+                            Layout.bottomMargin: Math.round(widestPercent.implicitHeight / 2)
                             spacing: Math.round(12 * Appearance.factor)
                             Label { text: qsTr("UI scaling") }
                             Item {
+                                id: scaleTrack
+                                readonly property int markHeight: Math.round(5 * Appearance.factor)
                                 Layout.fillWidth: true
-                                implicitHeight: scaleSlider.implicitHeight + Math.round(6 * Appearance.factor)
+                                // The marks on top, the slider below them.
+                                implicitHeight: markHeight + Math.round(2 * Appearance.factor) + scaleSlider.implicitHeight
                                 Slider {
                                     id: scaleSlider
                                     objectName: "scaleSlider"
                                     anchors.left: parent.left
                                     anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
                                     from: Appearance.smallestScale
                                     to: Appearance.largestScale
                                     // In steps of 5% (D-023).
@@ -334,8 +346,9 @@ ApplicationWindow {
                                     onPressedChanged: if (!pressed) settingsWindow.showScale(Math.round(value))
                                     onMoved: if (!pressed) settingsWindow.showScale(Math.round(value))
                                 }
-                                // A mark every 50%.
+                                // A mark every 25%, above the slider.
                                 Repeater {
+                                    objectName: "scaleMarks"
                                     model: Math.floor((Appearance.largestScale - Appearance.smallestScale)
                                                       / Appearance.scaleMarkEvery) + 1
                                     Rectangle {
@@ -344,9 +357,9 @@ ApplicationWindow {
                                         x: scaleSlider.leftPadding + handleRoom / 2
                                            + index * (scaleSlider.availableWidth - handleRoom)
                                              * Appearance.scaleMarkEvery / (Appearance.largestScale - Appearance.smallestScale)
-                                        y: scaleSlider.height
+                                        y: 0
                                         width: 1
-                                        height: Math.round(5 * Appearance.factor)
+                                        height: scaleTrack.markHeight
                                         color: settingsWindow.palette.mid
                                     }
                                 }

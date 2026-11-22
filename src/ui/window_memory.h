@@ -26,9 +26,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// window_memory.h 0.0.4
+// window_memory.h 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: A place moved back inside its screen
 // v0.0.4: Initial release
 
 namespace chrono_vault {
@@ -67,6 +68,8 @@ public:
     // A place kept on a screen: moved onto the nearest one when it is on
     // none, and made smaller when it is larger than that screen.
     [[nodiscard]] static QRect onAScreen(const QRect& place);
+    // The place moved back inside the screen it is on, its size kept.
+    [[nodiscard]] static QRect insideItsScreen(const QRect& place);
 
 signals:
     void windowChanged();

@@ -25,9 +25,10 @@
 #include <limits>
 
 // --- Version ------------------------------------------------------------
-// window_memory.cpp 0.0.4
+// window_memory.cpp 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: A remembered size never smaller than the window's minimum, and moved back inside its screen
 // v0.0.4: Initial release
 
 namespace chrono_vault {
@@ -81,7 +82,11 @@ void WindowMemory::restore()
     }
     const QRect saved = QSettings().value(settingsKey(key, "geometry")).toRect();
     if (saved.isValid()) {
-        target->setGeometry(onAScreen(saved));
+        // Never smaller than the window's minimum now: a size remembered from
+        // before a window got a larger minimum does not bring it back.
+        QRect atLeast = saved;
+        atLeast.setSize(saved.size().expandedTo(target->minimumSize()));
+        target->setGeometry(insideItsScreen(onAScreen(atLeast)));
     }
     restored = true;
 }
@@ -137,6 +142,41 @@ Qt::WindowState WindowMemory::savedState(const QString& name)
         return static_cast<Qt::WindowState>(state);
     }
     return Qt::WindowNoState;
+}
+
+QRect WindowMemory::insideItsScreen(const QRect& place)
+{
+    // A window made larger than it was remembered (its minimum grew) can reach
+    // past the edge of its screen: it is moved back inside, its size kept.
+    // The screen it lies on most.
+    const QScreen* mostOn = nullptr;
+    long long largest = 0;
+    for (const QScreen* screen : QGuiApplication::screens()) {
+        const QRect overlap = screen->availableGeometry().intersected(place);
+        const long long size = static_cast<long long>(overlap.width()) * overlap.height();
+        if (overlap.isValid() && size > largest) {
+            largest = size;
+            mostOn = screen;
+        }
+    }
+    if (mostOn) {
+        const QRect area = mostOn->availableGeometry();
+        QRect moved = place;
+        if (moved.right() > area.right()) {
+            moved.moveRight(area.right());
+        }
+        if (moved.bottom() > area.bottom()) {
+            moved.moveBottom(area.bottom());
+        }
+        if (moved.left() < area.left()) {
+            moved.moveLeft(area.left());
+        }
+        if (moved.top() < area.top()) {
+            moved.moveTop(area.top());
+        }
+        return moved;
+    }
+    return place;
 }
 
 QRect WindowMemory::onAScreen(const QRect& place)

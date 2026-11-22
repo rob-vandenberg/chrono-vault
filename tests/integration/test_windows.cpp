@@ -29,9 +29,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_windows.cpp 0.0.4
+// test_windows.cpp 0.0.11
 
 // --- Version history ----------------------------------------------------
+// v0.0.11: A window past its screen's edge is moved back inside
 // v0.0.4: Initial release
 
 using namespace chrono_vault;
@@ -49,6 +50,7 @@ private slots:
     void a_window_comes_back_at_its_size_and_place();
     void a_maximized_window_is_remembered_as_maximized();
     void a_place_on_no_screen_is_moved_onto_one();
+    void a_window_past_its_screens_edge_is_moved_back_inside();
 
 private:
     const QString name = QStringLiteral("chrono-vault-test-windows");
@@ -152,6 +154,20 @@ void TestWindows::a_place_on_no_screen_is_moved_onto_one()
 
     const QRect fine(screen.topLeft() + QPoint(10, 10), QSize(200, 150));
     QCOMPARE(WindowMemory::onAScreen(fine), fine);
+}
+
+void TestWindows::a_window_past_its_screens_edge_is_moved_back_inside()
+{
+    // Remembered near the bottom right, then made larger: moved back inside,
+    // its size kept.
+    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
+    const QRect past(screen.right() - 300, screen.bottom() - 200, 555, 440);
+    const QRect inside = WindowMemory::insideItsScreen(past);
+    QCOMPARE(inside.size(), past.size());
+    QVERIFY(screen.contains(inside));
+    // A place already inside stays where it is.
+    const QRect fine(screen.topLeft() + QPoint(10, 10), QSize(200, 150));
+    QCOMPARE(WindowMemory::insideItsScreen(fine), fine);
 }
 
 QTEST_MAIN(TestWindows)
