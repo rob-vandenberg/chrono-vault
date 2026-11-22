@@ -519,6 +519,32 @@ void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
     QMetaObject::invokeMethod(action(QStringLiteral("shortcutsAction")), "trigger");
     QTRY_VERIFY(settings->property("visible").toBool());
 
+    // The page is as tall as the topic shown, not the tallest one (D-047).
+    auto* shortcutsPage = settings->findChild<QQuickItem*>(QStringLiteral("shortcutsPage"));
+    QQuickItem* flick = shortcutsPage->parentItem();
+    while (flick && !flick->property("contentHeight").isValid()) {
+        flick = flick->parentItem();
+    }
+    QVERIFY(flick);
+    QTRY_VERIFY(qAbs(flick->property("contentHeight").toReal() - shortcutsPage->implicitHeight()) <= 12);
+    QObject* topicList = settings->findChild<QObject*>(QStringLiteral("topics"));
+    topicList->setProperty("currentIndex", 0);
+    QTRY_VERIFY(flick->property("contentHeight").toReal() < shortcutsPage->implicitHeight() - 100);
+    topicList->setProperty("currentIndex", 4);
+    // "no key" stands in the keys' own column, at their left edge.
+    {
+        QQuickItem* noKey = nullptr;
+        QQuickItem* aKey = nullptr;
+        std::function<void(QQuickItem*)> walk = [&](QQuickItem* item) {
+            if (item->objectName() == QLatin1String("noKey") && item->isVisible() && !noKey) noKey = item;
+            if (item->objectName() == QLatin1String("shortcutKey") && item->isVisible() && !aKey) aKey = item;
+            for (QQuickItem* child : item->childItems()) walk(child);
+        };
+        walk(shortcutsPage);
+        QVERIFY(noKey && aKey);
+        QCOMPARE(noKey->mapToScene(QPointF(0, 0)).x(), aKey->mapToScene(QPointF(0, 0)).x());
+    }
+
     // A new key added to Lock vault, kept with OK and shown in the menu.
     QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Lock vault")));
     QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));

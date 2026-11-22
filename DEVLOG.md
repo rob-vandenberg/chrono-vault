@@ -336,3 +336,7 @@ Settings > Keyboard shortcuts after Chrono Viewer's page (D-045); Ctrl+B collaps
 ## 22 November 2026: version 0.0.36: no bounce, and the About box's text read by keys
 
 Every scrolling page and list stops at its ends; the About box's licence text has a clear scroll bar and scrolls with the arrow, page and Home/End keys (D-046).
+
+## 22 November 2026: version 0.0.37: the shortcuts page as Chrono Viewer's
+
+Square × and + buttons in columns, "no key" in the keys' column; a settings topic as tall as itself (D-047).

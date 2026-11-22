@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.35
+// SettingsWindow.qml 0.0.37
 
 // --- Version history ----------------------------------------------------
+// v0.0.37: The shortcuts page as Chrono Viewer's, square × and +; a topic as tall as itself (D-047)
 // v0.0.35: Keyboard shortcuts, after Chrono Viewer's page (D-045)
 // v0.0.28: The fingerprint one check box for all vaults, its touch in a popup; the switches no longer mirrored (D-043)
 // v0.0.27: General: Keep running in the tray last; the fingerprint a switch, its touch and outcome told here (D-042)
@@ -82,6 +83,20 @@ ApplicationWindow {
     function showShortcuts() {
         showWindow()
         topics.currentIndex = 4
+    }
+
+    // The small square buttons of the Keyboard shortcuts page: × and +, a grey
+    // fill, as on Chrono Viewer's page (D-047).
+    component KeyButton: Button {
+        implicitWidth: Math.round(24 * Appearance.factor)
+        implicitHeight: Math.round(24 * Appearance.factor)
+        padding: 0
+        font.pixelSize: Math.round(14 * Appearance.factor)
+        background: Rectangle {
+            radius: Math.round(3 * Appearance.factor)
+            color: parent.down ? settingsWindow.palette.mid : settingsWindow.palette.button
+            border.color: settingsWindow.palette.mid
+        }
     }
 
     // The actions whose keys the person sets, from the main window, so the
@@ -438,9 +453,15 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentWidth: availableWidth
+                // As tall as the topic shown, not the tallest one, so a topic
+                // ends at its last row (D-047).
+                contentHeight: pageStack.children[pageStack.currentIndex]
+                               ? pageStack.children[pageStack.currentIndex].implicitHeight + Math.round(10 * Appearance.factor)
+                               : 0
                 clip: true
 
                 StackLayout {
+                    id: pageStack
                     currentIndex: topics.currentIndex
                     width: pageScroll.availableWidth
 
@@ -767,6 +788,7 @@ ApplicationWindow {
                         // Escape cannot be set: it cancels and closes.
                         RowLayout {
                             Layout.fillWidth: true
+                            spacing: Math.round(6 * Appearance.factor)
                             opacity: 0.5
                             Label {
                                 text: qsTr("Cancel, close a window")
@@ -776,55 +798,59 @@ ApplicationWindow {
                                 text: "Esc"
                                 Layout.preferredWidth: Math.round(150 * Appearance.factor)
                             }
-                            Item { Layout.preferredWidth: Math.round(64 * Appearance.factor) }
+                            // The room of the × and the +, which Escape does not have.
+                            KeyButton { opacity: 0; enabled: false }
+                            KeyButton { opacity: 0; enabled: false }
                         }
+                        // Each action: its lines in fixed columns, as Chrono
+                        // Viewer's page: the name, the key (or "no key", greyed,
+                        // in the same column), the ×, and the + on the first line.
                         Repeater {
                             model: settingsWindow.keyedActions
-                            delegate: RowLayout {
+                            delegate: ColumnLayout {
                                 id: shortcutRow
                                 required property var modelData
                                 readonly property string actionId: modelData.actionId
                                 readonly property var keys: settingsWindow.keyMap[actionId] || []
                                 objectName: "shortcutRow_" + actionId
+                                spacing: Math.round(4 * Appearance.factor)
                                 Layout.fillWidth: true
-                                Label {
-                                    text: shortcutRow.modelData.text.replace("&", "")
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignTop
-                                    topPadding: Math.round(6 * Appearance.factor)
-                                }
-                                ColumnLayout {
-                                    spacing: 0
-                                    Layout.alignment: Qt.AlignTop
-                                    Label {
-                                        visible: shortcutRow.keys.length === 0
-                                        text: qsTr("no key")
-                                        opacity: 0.5
-                                        Layout.preferredWidth: Math.round(150 * Appearance.factor)
-                                        topPadding: Math.round(6 * Appearance.factor)
-                                    }
-                                    Repeater {
-                                        model: shortcutRow.keys
-                                        delegate: RowLayout {
-                                            required property string modelData
-                                            Label {
-                                                objectName: "shortcutKey"
-                                                text: modelData
-                                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
-                                            }
-                                            ToolButton {
-                                                objectName: "removeKey_" + shortcutRow.actionId
-                                                text: "×"
-                                                onClicked: settingsWindow.takeKey(shortcutRow.actionId, modelData)
-                                            }
+                                Repeater {
+                                    // At least one line: "no key" when it has none.
+                                    model: shortcutRow.keys.length > 0 ? shortcutRow.keys : [""]
+                                    delegate: RowLayout {
+                                        required property string modelData
+                                        required property int index
+                                        Layout.fillWidth: true
+                                        spacing: Math.round(6 * Appearance.factor)
+                                        Label {
+                                            text: index === 0 ? shortcutRow.modelData.text.replace("&", "") : ""
+                                            Layout.fillWidth: true
+                                        }
+                                        Label {
+                                            objectName: modelData === "" ? "noKey" : "shortcutKey"
+                                            text: modelData === "" ? qsTr("no key") : modelData
+                                            opacity: modelData === "" ? 0.5 : 1
+                                            horizontalAlignment: Text.AlignLeft
+                                            Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                        }
+                                        KeyButton {
+                                            objectName: "removeKey_" + shortcutRow.actionId
+                                            text: "×"
+                                            // A line without a key has no cross; its room stays.
+                                            opacity: modelData === "" ? 0 : 1
+                                            enabled: modelData !== ""
+                                            onClicked: settingsWindow.takeKey(shortcutRow.actionId, modelData)
+                                        }
+                                        KeyButton {
+                                            objectName: "addKey_" + shortcutRow.actionId
+                                            text: "+"
+                                            opacity: index === 0 ? 1 : 0
+                                            enabled: index === 0
+                                            onClicked: keyCatcher.askFor(shortcutRow.actionId,
+                                                                         shortcutRow.modelData.text.replace("&", ""))
                                         }
                                     }
-                                }
-                                ToolButton {
-                                    objectName: "addKey_" + shortcutRow.actionId
-                                    text: "+"
-                                    Layout.alignment: Qt.AlignTop
-                                    onClicked: keyCatcher.askFor(shortcutRow.actionId, shortcutRow.modelData.text.replace("&", ""))
                                 }
                             }
                         }
