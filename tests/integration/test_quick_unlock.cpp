@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.0.38
+// test_quick_unlock.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
 
@@ -251,10 +252,24 @@ void TestQuickUnlock::the_master_password_is_asked_once_a_year()
         settings.setValue(QStringLiteral("security/lastMasterPassword"), times);
     }
     QVERIFY(controller->reminderDue());
-    controller->setMasterPasswordReminder(false);
+    // Quarter by default; Never stops it; Year waits a year (D-049).
+    QCOMPARE(controller->masterPasswordReminder(), 2);
+    controller->setMasterPasswordReminder(4);
     QVERIFY(!controller->reminderDue());
-    controller->setMasterPasswordReminder(true);
+    controller->setMasterPasswordReminder(3);
     QVERIFY(controller->reminderDue());
+    {
+        VaultsFile settings;
+        QVariantMap times = settings.value(QStringLiteral("security/lastMasterPassword")).toMap();
+        times.insert(controller->vaultPath(), QDateTime::currentDateTimeUtc().addDays(-100));
+        settings.setValue(QStringLiteral("security/lastMasterPassword"), times);
+    }
+    QVERIFY(!controller->reminderDue()); // a year has not passed
+    controller->setMasterPasswordReminder(2);
+    QVERIFY(controller->reminderDue()); // a quarter has
+    controller->setMasterPasswordReminder(1);
+    QVERIFY(controller->reminderDue());
+    controller->setMasterPasswordReminder(2);
     // "Not now": the reminder waits another year, and the finger opens it.
     controller->dismissReminder();
     QVERIFY(!controller->reminderDue());

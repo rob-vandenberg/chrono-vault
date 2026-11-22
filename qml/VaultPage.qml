@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.27
+// VaultPage.qml 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Collapsed entries as tall as expanded, with larger icons (D-049)
 // v0.0.27: The sidebar collapses to its icons; its groups fold; Archive and Trash with icons; wider splitters (D-042)
 // v0.0.24: Hide Sidebar, the groups shown by choice, item counts, Archive and Show Passwords from the menu (D-039)
 // v0.0.17: Archive and Trash under Others; the chosen item with a grey fill and a blue bar; subtitles can be hidden
@@ -87,6 +88,22 @@ Item {
         ToolTip.visible: vaultPage.collapsed && hovered
         ToolTip.text: text
         Layout.fillWidth: true
+        // Collapsed, an entry is exactly as tall as expanded, and its icon
+        // larger, centred in that height (the owner, D-049).
+        implicitHeight: entryMeasure.implicitHeight
+        icon.width: vaultPage.collapsed ? vaultPage.collapsedIconSize : Math.round(16 * Appearance.factor)
+        icon.height: vaultPage.collapsed ? vaultPage.collapsedIconSize : Math.round(16 * Appearance.factor)
+        topPadding: vaultPage.collapsed ? Math.floor((implicitHeight - icon.height) / 2) : padding
+        bottomPadding: vaultPage.collapsed ? Math.ceil((implicitHeight - icon.height) / 2) : padding
+    }
+    readonly property int collapsedIconSize: Math.round(24 * Appearance.factor)
+    // An expanded entry, never shown: its height is every entry's height.
+    ItemDelegate {
+        id: entryMeasure
+        visible: false
+        text: qsTr("Home") // any one line of text: only its height counts
+        display: AbstractButton.TextBesideIcon
+        icon.source: "qrc:/icons/home.svg"
     }
     // A group's heading: its triangle folds or unfolds the group, in both
     // states of the sidebar; the name only while expanded (D-042).

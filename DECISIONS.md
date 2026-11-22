@@ -57,3 +57,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-046](decisions/D-046.md) | No bounce anywhere; the About box's text with a clear scroll bar, scrolled by the arrow, page and Home/End keys |
 | [D-047](decisions/D-047.md) | The shortcuts page as Chrono Viewer's; a settings topic as tall as itself |
 | [D-048](decisions/D-048.md) | "Use the Esc key to exit the program": Esc in the main window, not in edit mode, closes it |
+| [D-049](decisions/D-049.md) | Settings tidied (Autolock tick boxes in a frame, the reminder a choice, the clipboard on one line), normal scroll bars, collapsed entries as tall as expanded, Esc in the About box |

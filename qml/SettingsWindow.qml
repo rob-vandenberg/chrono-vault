@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.38
+// SettingsWindow.qml 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Autolock tick boxes in a frame; the reminder a choice; the clipboard on one line; a normal scroll bar (D-049)
 // v0.0.38: "Use the Esc key to exit the program" in General (D-048)
 // v0.0.37: The shortcuts page as Chrono Viewer's, square × and +; a topic as tall as itself (D-047)
 // v0.0.35: Keyboard shortcuts, after Chrono Viewer's page (D-045)
@@ -165,7 +166,7 @@ ApplicationWindow {
     property bool hideSensitive: true
     property bool showSubtitles: true
     property bool useWebsiteIcons: false
-    property bool masterPasswordReminder: true
+    property int masterPasswordReminder: 2
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -456,6 +457,21 @@ ApplicationWindow {
             // A page taller than the window (a large UI scaling) scrolls.
             ScrollView {
                 id: pageScroll
+                objectName: "pageScroll"
+                // A normal scroll bar with arrows (D-049), in room of its own
+                // beside the page, so it never covers the + buttons; the room
+                // is kept also when the page fits, so the page never depends
+                // on whether the bar shows.
+                rightPadding: pageScrollBar.width + Math.round(6 * Appearance.factor)
+                ScrollBar.vertical: ScrollBar {
+                    id: pageScrollBar
+                    objectName: "pageScrollBar"
+                    parent: pageScroll
+                    x: pageScroll.mirrored ? 0 : pageScroll.width - width
+                    y: pageScroll.topPadding
+                    height: pageScroll.height - pageScroll.topPadding
+                    orientation: Qt.Vertical
+                }
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentWidth: availableWidth
@@ -624,90 +640,78 @@ ApplicationWindow {
                                 onClicked: settingsWindow.changeMasterPasswordRequested()
                             }
                         }
-                        // Autolock when (D-040).
-                        Label {
-                            text: qsTr("Autolock when")
-                            font.bold: true
+                        // Autolock when (D-040): four tick boxes in a frame of
+                        // their own, the title on its border (D-049).
+                        GroupBox {
+                            objectName: "autolockGroup"
+                            title: qsTr("Autolock when")
+                            Layout.fillWidth: true
                             Layout.topMargin: Math.round(8 * Appearance.factor)
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Label {
-                                text: qsTr("Main window is closed")
-                                Layout.fillWidth: true
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: Math.round(8 * Appearance.factor)
+                                CheckBox {
+                                    objectName: "lockWhenClosedBox"
+                                    text: qsTr("Main window is closed")
+                                    checked: settingsWindow.lockWhenClosed
+                                    onToggled: settingsWindow.lockWhenClosed = checked
+                                }
+                                CheckBox {
+                                    objectName: "lockOnSleepBox"
+                                    text: qsTr("System sleeps")
+                                    checked: settingsWindow.lockOnSleep
+                                    onToggled: settingsWindow.lockOnSleep = checked
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    CheckBox {
+                                        objectName: "idleLockBox"
+                                        text: qsTr("Chrono Vault is idle for")
+                                        checked: settingsWindow.idleLockOn
+                                        onToggled: settingsWindow.idleLockOn = checked
+                                        Layout.fillWidth: true
+                                    }
+                                    SpinBox {
+                                        objectName: "autoLockBox"
+                                        from: 1
+                                        to: 240
+                                        value: settingsWindow.autoLockMinutes
+                                        editable: true
+                                        enabled: settingsWindow.idleLockOn
+                                        onValueModified: settingsWindow.autoLockMinutes = value
+                                    }
+                                    Label { text: qsTr("Minutes") }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    CheckBox {
+                                        objectName: "systemIdleLockBox"
+                                        text: qsTr("System inactive for")
+                                        checked: settingsWindow.systemIdleLockOn
+                                        enabled: VaultController.systemIdleAvailable
+                                        onToggled: settingsWindow.systemIdleLockOn = checked
+                                        Layout.fillWidth: true
+                                    }
+                                    SpinBox {
+                                        objectName: "systemIdleBox"
+                                        from: 1
+                                        to: 240
+                                        value: settingsWindow.systemIdleMinutes
+                                        editable: true
+                                        enabled: VaultController.systemIdleAvailable && settingsWindow.systemIdleLockOn
+                                        onValueModified: settingsWindow.systemIdleMinutes = value
+                                    }
+                                    Label { text: qsTr("Minutes") }
+                                }
+                                Label {
+                                    objectName: "systemIdleUnknown"
+                                    visible: !VaultController.systemIdleAvailable
+                                    text: qsTr("This desktop does not tell how long the system has been inactive.")
+                                    wrapMode: Text.Wrap
+                                    opacity: 0.7
+                                    Layout.fillWidth: true
+                                }
                             }
-                            // The word apart from the switch, never mirrored: the
-                            // knob shows on when on (D-043).
-                            Label { text: settingsWindow.lockWhenClosed ? qsTr("On") : qsTr("Off") }
-                            Switch {
-                                objectName: "lockWhenClosedSwitch"
-                                checked: settingsWindow.lockWhenClosed
-                                onToggled: settingsWindow.lockWhenClosed = checked
-                            }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Label {
-                                text: qsTr("System sleeps")
-                                Layout.fillWidth: true
-                            }
-                            // The word apart from the switch, never mirrored: the
-                            // knob shows on when on (D-043).
-                            Label { text: settingsWindow.lockOnSleep ? qsTr("On") : qsTr("Off") }
-                            Switch {
-                                objectName: "lockOnSleepSwitch"
-                                checked: settingsWindow.lockOnSleep
-                                onToggled: settingsWindow.lockOnSleep = checked
-                            }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            CheckBox {
-                                objectName: "idleLockBox"
-                                text: qsTr("Chrono Vault is idle for")
-                                checked: settingsWindow.idleLockOn
-                                onToggled: settingsWindow.idleLockOn = checked
-                                Layout.fillWidth: true
-                            }
-                            SpinBox {
-                                objectName: "autoLockBox"
-                                from: 1
-                                to: 240
-                                value: settingsWindow.autoLockMinutes
-                                editable: true
-                                enabled: settingsWindow.idleLockOn
-                                onValueModified: settingsWindow.autoLockMinutes = value
-                            }
-                            Label { text: qsTr("Minutes") }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            CheckBox {
-                                objectName: "systemIdleLockBox"
-                                text: qsTr("System inactive for")
-                                checked: settingsWindow.systemIdleLockOn
-                                enabled: VaultController.systemIdleAvailable
-                                onToggled: settingsWindow.systemIdleLockOn = checked
-                                Layout.fillWidth: true
-                            }
-                            SpinBox {
-                                objectName: "systemIdleBox"
-                                from: 1
-                                to: 240
-                                value: settingsWindow.systemIdleMinutes
-                                editable: true
-                                enabled: VaultController.systemIdleAvailable && settingsWindow.systemIdleLockOn
-                                onValueModified: settingsWindow.systemIdleMinutes = value
-                            }
-                            Label { text: qsTr("Minutes") }
-                        }
-                        Label {
-                            objectName: "systemIdleUnknown"
-                            visible: !VaultController.systemIdleAvailable
-                            text: qsTr("This desktop does not tell how long the system has been inactive.")
-                            wrapMode: Text.Wrap
-                            opacity: 0.7
-                            Layout.fillWidth: true
                         }
                         CheckBox {
                             objectName: "hideSensitiveBox"
@@ -734,11 +738,17 @@ ApplicationWindow {
                                 })
                             }
                         }
-                        CheckBox {
-                            objectName: "reminderBox"
-                            text: qsTr("Ask for the master password once a year, so it is not forgotten")
-                            checked: settingsWindow.masterPasswordReminder
-                            onToggled: settingsWindow.masterPasswordReminder = checked
+                        // How often the master password is asked though a finger
+                        // would do; Quarter by default (D-049).
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Label { text: qsTr("Ask for the master password, so it is not forgotten, every") }
+                            ComboBox {
+                                objectName: "reminderBox"
+                                model: [qsTr("Day"), qsTr("Month"), qsTr("Quarter"), qsTr("Year"), qsTr("Never")]
+                                currentIndex: settingsWindow.masterPasswordReminder
+                                onActivated: function(index) { settingsWindow.masterPasswordReminder = index }
+                            }
                         }
                         Item { Layout.fillHeight: true }
                     }
@@ -749,18 +759,29 @@ ApplicationWindow {
                             text: qsTr("Clipboard")
                             font.pointSize: Appearance.fontPointSize * 1.4
                         }
-                        Label {
-                            text: qsTr("Clear what was copied after this many seconds (0 means never):")
-                            wrapMode: Text.Wrap
-                            Layout.fillWidth: true
-                        }
-                        SpinBox {
-                            objectName: "clipboardBox"
-                            from: 0
-                            to: 600
-                            value: settingsWindow.clipboardClearSeconds
-                            editable: true
-                            onValueModified: settingsWindow.clipboardClearSeconds = value
+                        // One line; 0 shows as "Never" (D-049).
+                        RowLayout {
+                            Label { text: qsTr("Clear the clipboard after") }
+                            SpinBox {
+                                objectName: "clipboardBox"
+                                from: 0
+                                to: 600
+                                value: settingsWindow.clipboardClearSeconds
+                                editable: true
+                                textFromValue: function(value) { return value === 0 ? qsTr("Never") : String(value) }
+                                // An emptied field keeps the value it had.
+                                valueFromText: function(text) {
+                                    if (text === qsTr("Never"))
+                                        return 0
+                                    const seconds = parseInt(text, 10)
+                                    return isNaN(seconds) ? value : seconds
+                                }
+                                validator: RegularExpressionValidator {
+                                    regularExpression: new RegExp("^(\\d{1,3}|" + qsTr("Never") + ")$")
+                                }
+                                onValueModified: settingsWindow.clipboardClearSeconds = value
+                            }
+                            Label { text: qsTr("seconds") }
                         }
                         Item { Layout.fillHeight: true }
                     }
@@ -807,7 +828,7 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                             }
                             Label {
-                                text: "Esc"
+                                text: qsTr("Esc")
                                 Layout.preferredWidth: Math.round(150 * Appearance.factor)
                             }
                             // The room of the × and the +, which Escape does not have.

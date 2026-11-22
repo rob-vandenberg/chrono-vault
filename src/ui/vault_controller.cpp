@@ -53,9 +53,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.38
+// vault_controller.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: The reminder every Day, Month, Quarter, Year or Never; no local key hiding the member (D-049)
 // v0.0.38: Settings in chrono-vault.ini, vaults in chrono-vault.conf, no carry-over; the Esc setting (D-026, D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password, off the window's thread (D-037)
@@ -102,9 +103,10 @@ const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
 const QString showSubtitlesKey = QStringLiteral("view/showSubtitles");
 const QString websiteIconsKey = QStringLiteral("view/websiteIcons");
-const QString reminderKey = QStringLiteral("security/masterPasswordReminder");
+const QString reminderKey = QStringLiteral("security/masterPasswordReminderEvery");
 const QString lastPasswordKey = QStringLiteral("security/lastMasterPassword");
-constexpr int reminderDays = 365;
+constexpr int reminderNever = 4;
+constexpr int defaultReminder = 2; // Quarter (the owner, D-049)
 
 // The vault's key whole, and its keyfile's fingerprint, as kept for the
 // finger (D-038).
@@ -339,7 +341,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
         subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
         websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
-        reminderOn = settings.value(reminderKey, true).toBool();
+        reminderEvery = std::clamp(settings.value(reminderKey, defaultReminder).toInt(), 0, reminderNever);
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
         // Before 0.0.25, 0 minutes meant never: now the tick box says that
         // (D-040).
@@ -1651,18 +1653,29 @@ void VaultController::recordMasterPasswordIfNone()
 
 bool VaultController::reminderDue() const
 {
-    if (!reminderOn || !quickUnlockOn()) {
+    if (reminderEvery >= reminderNever || !quickUnlockOn()) {
         return false;
     }
     const QDateTime last = VaultsFile().value(lastPasswordKey).toMap().value(path).toDateTime();
-    return last.isValid() && last.daysTo(QDateTime::currentDateTimeUtc()) >= reminderDays;
+    if (!last.isValid()) {
+        return false;
+    }
+    QDateTime due = last;
+    switch (reminderEvery) {
+    case 0: due = last.addDays(1); break;
+    case 1: due = last.addMonths(1); break;
+    case 2: due = last.addMonths(3); break;
+    default: due = last.addYears(1); break;
+    }
+    return QDateTime::currentDateTimeUtc() >= due;
 }
 
-void VaultController::setMasterPasswordReminder(bool on)
+void VaultController::setMasterPasswordReminder(int every)
 {
-    if (reminderOn != on) {
-        reminderOn = on;
-        SettingsFile().setValue(reminderKey, on);
+    every = std::clamp(every, 0, reminderNever);
+    if (reminderEvery != every) {
+        reminderEvery = every;
+        SettingsFile().setValue(reminderKey, every);
         emit quickUnlockChanged();
     }
 }
@@ -2780,19 +2793,19 @@ QStringList VaultController::defaultKeysOf(const QString& action) const
 QStringList VaultController::keysOf(const QString& action) const
 {
     SettingsFile settings;
-    const QString key = QStringLiteral("shortcuts/") + action;
-    return settings.contains(key) ? settings.value(key).toStringList() : defaultKeysOf(action);
+    const QString settingName = QStringLiteral("shortcuts/") + action;
+    return settings.contains(settingName) ? settings.value(settingName).toStringList() : defaultKeysOf(action);
 }
 
 void VaultController::setKeys(const QString& action, const QStringList& keys)
 {
     SettingsFile settings;
-    const QString key = QStringLiteral("shortcuts/") + action;
+    const QString settingName = QStringLiteral("shortcuts/") + action;
     if (keys == defaultKeysOf(action)) {
-        settings.remove(key);
+        settings.remove(settingName);
     } else {
         // An empty list is kept as a list, so "no key" is remembered.
-        settings.setValue(key, keys.isEmpty() ? QVariant(QStringList{}) : QVariant(keys));
+        settings.setValue(settingName, keys.isEmpty() ? QVariant(QStringList{}) : QVariant(keys));
     }
     ++keysRevision;
     emit shortcutsChanged();
@@ -2870,7 +2883,7 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("hideSensitive"), defaultHideSensitive},
         {QStringLiteral("showSubtitles"), defaultShowSubtitles},
         {QStringLiteral("useWebsiteIcons"), defaultWebsiteIcons},
-        {QStringLiteral("masterPasswordReminder"), true},
+        {QStringLiteral("masterPasswordReminder"), defaultReminder},
     };
 }
 

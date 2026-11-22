@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.38
+// vault_controller.h 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: The reminder every Day, Month, Quarter, Year or Never (D-049)
 // v0.0.38: The Esc setting (D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password (D-037)
@@ -135,7 +136,9 @@ class VaultController : public QObject
     Q_PROPERTY(bool quickUnlockTrouble READ quickUnlockTrouble NOTIFY quickUnlockChanged)
     Q_PROPERTY(QString quickUnlockName READ quickUnlockName CONSTANT)
     Q_PROPERTY(bool reminderDue READ reminderDue NOTIFY quickUnlockChanged)
-    Q_PROPERTY(bool masterPasswordReminder READ masterPasswordReminder WRITE setMasterPasswordReminder NOTIFY
+    // How often the master password is asked though a finger would do:
+    // 0 Day, 1 Month, 2 Quarter (the default), 3 Year, 4 Never (D-049).
+    Q_PROPERTY(int masterPasswordReminder READ masterPasswordReminder WRITE setMasterPasswordReminder NOTIFY
                    quickUnlockChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
@@ -240,8 +243,8 @@ public:
     // Once a year the master password is asked though a finger would do (the
     // owner, Q44), unless the reminder is off.
     [[nodiscard]] bool reminderDue() const;
-    [[nodiscard]] bool masterPasswordReminder() const { return reminderOn; }
-    void setMasterPasswordReminder(bool on);
+    [[nodiscard]] int masterPasswordReminder() const { return reminderEvery; }
+    void setMasterPasswordReminder(int every);
     Q_INVOKABLE void setQuickUnlock(bool on);
     Q_INVOKABLE void unlockWithQuickUnlock();
     [[nodiscard]] bool quickUnlockBusy() const { return settingUp; }
@@ -563,7 +566,7 @@ private:
     void updateWait();
     void setBool(bool& value, bool on, const QString& settingName);
     bool quickAvailable = false;
-    bool reminderOn = true;
+    int reminderEvery = 2;
     bool replacingQuickKey = false; // storing the new key after a master password change
     bool settingUp = false;   // a finger asked to turn it on
     bool keepingQuietly = false; // a vault's key kept at its master-password unlock

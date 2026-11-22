@@ -17,6 +17,7 @@
 
 #include "app_setup.h"
 #include "licences.h"
+#include "vault_controller.h"
 #include "version.h"
 
 #include <QFont>
@@ -32,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.38
+// test_main_window.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: The About box at 555 by 440, never smaller
 // v0.0.9: The About box's name, copyright and link lined up with the icon
@@ -57,6 +59,8 @@ private slots:
     void the_about_box_shows_every_licence_ours_first();
     void the_tray_setting_says_keep_chrono_vault_running();
     void the_licences_scroll_by_keys_and_nothing_bounces();
+    void the_settings_scroll_bar_stands_beside_the_page();
+    void esc_closes_the_about_box_and_only_the_about_box();
 };
 
 void TestMainWindow::initTestCase()
@@ -258,7 +262,68 @@ void TestMainWindow::the_licences_scroll_by_keys_and_nothing_bounces()
     QCOMPARE(flick->property("boundsBehavior").toInt(), 0); // Flickable.StopAtBounds
     auto* bar = about->findChild<QQuickItem*>(QStringLiteral("licenceScrollBar"));
     QVERIFY(bar && bar->isVisible());
-    QVERIFY(QMetaObject::invokeMethod(about, "close"));
+    // A normal scroll bar: an arrow at each end, beside the text, never over
+    // it (D-049).
+    QVERIFY(bar->findChild<QQuickItem*>(QStringLiteral("scrollBarArrowBack")));
+    QVERIFY(bar->findChild<QQuickItem*>(QStringLiteral("scrollBarArrowForward")));
+    QVERIFY(bar->mapToScene(QPointF(0, 0)).x() >= text->mapToScene(QPointF(text->width(), 0)).x());
+    // Esc closes the About box while its text has the keys (D-049).
+    QVERIFY(text->hasActiveFocus());
+    QTest::keyClick(about, Qt::Key_Escape);
+    QTRY_VERIFY(!about->isVisible());
+}
+
+// Esc closes the About box also with "Use the Esc key to exit the program"
+// ticked for the main window, which then stays (D-048, D-049).
+void TestMainWindow::esc_closes_the_about_box_and_only_the_about_box()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    auto* mainWindow = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst());
+    QVERIFY(mainWindow);
+    auto* controller = engine.singletonInstance<chrono_vault::VaultController*>("ChronoVault", "VaultController");
+    QVERIFY(controller);
+    controller->setTrayAvailable(true);
+    controller->setEscapeExits(true);
+    mainWindow->show();
+    QVERIFY(QTest::qWaitForWindowExposed(mainWindow));
+    auto* about = qobject_cast<QQuickWindow*>(mainWindow->findChild<QObject*>(QStringLiteral("aboutWindow")));
+    QVERIFY(about);
+    QVERIFY(QMetaObject::invokeMethod(about, "open"));
+    QTRY_VERIFY(about->isVisible());
+    about->requestActivate();
+    QTRY_COMPARE(QGuiApplication::focusWindow(), static_cast<QWindow*>(about));
+    QTest::keyClick(about, Qt::Key_Escape);
+    QTRY_VERIFY(!about->isVisible());
+    QVERIFY(mainWindow->isVisible());
+    controller->setEscapeExits(false);
+}
+
+// The settings window's scroll bar, on the long shortcuts page: a normal one
+// with arrows, beside the page, never over its + buttons (D-049).
+void TestMainWindow::the_settings_scroll_bar_stands_beside_the_page()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* root = engine.rootObjects().constFirst();
+    QObject* settings = root->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showShortcuts"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    auto* scroll = settings->findChild<QQuickItem*>(QStringLiteral("pageScroll"));
+    QVERIFY(scroll);
+    QQuickItem* bar = nullptr;
+    for (QQuickItem* child : scroll->childItems()) {
+        if (child->objectName() == QStringLiteral("pageScrollBar")) {
+            bar = child;
+        }
+    }
+    QVERIFY(bar);
+    QTRY_VERIFY(bar->isVisible());
+    QVERIFY(scroll->property("availableWidth").toReal() + bar->width() <= scroll->width());
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
 }
 
 QTEST_MAIN(TestMainWindow)

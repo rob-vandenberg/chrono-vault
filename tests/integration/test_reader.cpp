@@ -320,6 +320,22 @@ void TestReader::the_unlock_page_asks_whenever_it_is_on_screen()
     QTRY_COMPARE(reader->asked, 2);
     controller->stopQuickUnlock();
 
+    // The reminder says how often it asks, as Settings > Security says (D-049).
+    {
+        VaultsFile settings;
+        QVariantMap times = settings.value(QStringLiteral("security/lastMasterPassword")).toMap();
+        times.insert(controller->vaultPath(), QDateTime::currentDateTimeUtc().addDays(-400));
+        settings.setValue(QStringLiteral("security/lastMasterPassword"), times);
+    }
+    controller->setMasterPasswordReminder(0);
+    QTRY_VERIFY(controller->reminderDue());
+    QObject* reminderText = window->findChild<QObject*>(QStringLiteral("reminderText"));
+    QVERIFY(reminderText);
+    QVERIFY(reminderText->property("text").toString().contains(QStringLiteral("once a day")));
+    controller->setMasterPasswordReminder(2);
+    QVERIFY(reminderText->property("text").toString().contains(QStringLiteral("once a quarter")));
+    controller->stopQuickUnlock();
+
     QString warningText;
     for (const QQmlError& warning : std::as_const(qmlWarnings)) {
         warningText += warning.toString() + QLatin1Char('\n');

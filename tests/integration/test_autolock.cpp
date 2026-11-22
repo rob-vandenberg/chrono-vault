@@ -26,12 +26,14 @@
 #include <QTemporaryDir>
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
+#include <QJSValue>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_autolock.cpp 0.0.38
+// test_autolock.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.25: Initial release (D-040)
 
@@ -220,10 +222,33 @@ void TestAutolock::the_security_settings_show_keep_and_restore_autolock()
     QObject* restore = settings->findChild<QObject*>(QStringLiteral("restoreDefaultsButton"));
     QObject* change = settings->findChild<QObject*>(QStringLiteral("changeMasterPasswordButton"));
     QVERIFY(topics && ok && restore && change);
-    for (const char* name : {"lockWhenClosedSwitch", "lockOnSleepSwitch", "idleLockBox", "autoLockBox",
+    for (const char* name : {"lockWhenClosedBox", "lockOnSleepBox", "idleLockBox", "autoLockBox",
                              "systemIdleLockBox", "systemIdleBox"}) {
         QVERIFY2(settings->findChild<QObject*>(QString::fromLatin1(name)), name);
     }
+    // Autolock's four are tick boxes in one frame (D-049).
+    for (const char* name : {"lockWhenClosedBox", "lockOnSleepBox"}) {
+        QVERIFY2(QString::fromLatin1(settings->findChild<QObject*>(QString::fromLatin1(name))->metaObject()->className())
+                     .contains(QStringLiteral("CheckBox")),
+                 name);
+    }
+    QVERIFY(settings->findChild<QObject*>(QStringLiteral("autolockGroup")));
+    // The reminder: five choices, Quarter by default; the clipboard: one
+    // line, 0 shown as Never (D-049).
+    QObject* reminder = settings->findChild<QObject*>(QStringLiteral("reminderBox"));
+    QObject* clipboard = settings->findChild<QObject*>(QStringLiteral("clipboardBox"));
+    QVERIFY(reminder && clipboard);
+    QCOMPARE(reminder->property("count").toInt(), 5);
+    QCOMPARE(reminder->property("currentIndex").toInt(), 2);
+    settings->setProperty("clipboardClearSeconds", 0);
+    QCOMPARE(clipboard->property("displayText").toString(), QStringLiteral("Never"));
+    settings->setProperty("clipboardClearSeconds", 30);
+    QCOMPARE(clipboard->property("displayText").toString(), QStringLiteral("30"));
+    // A field emptied by the person keeps the value it had.
+    QJSValue fromText = clipboard->property("valueFromText").value<QJSValue>();
+    QCOMPARE(fromText.call({QJSValue(QString())}).toInt(), 30);
+    QCOMPARE(fromText.call({QJSValue(QStringLiteral("45"))}).toInt(), 45);
+    QCOMPARE(fromText.call({QJSValue(QStringLiteral("Never"))}).toInt(), 0);
     // No vault unlocked: nothing to change the master password of.
     QVERIFY(!change->property("enabled").toBool());
 

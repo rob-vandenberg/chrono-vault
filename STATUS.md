@@ -2,7 +2,10 @@
 
 ## Now
 
-**Version 0.0.38**: two files, the vaults in `chrono-vault.conf` and everything else in `chrono-vault.ini`, both in
+**Version 0.0.39**: Settings tidied: Autolock's four tick boxes in a frame, the master password reminder every Day,
+Month, Quarter (default), Year or Never, "Clear the clipboard after [30] seconds"; normal scroll bars with arrows in
+the settings window and the About box; collapsed sidebar entries as tall as expanded; Esc closes the About box; the
+Windows setup builds again (D-049). Before, 0.0.38: two files, the vaults in `chrono-vault.conf` and everything else in `chrono-vault.ini`, both in
 the program's folder (Windows too, no registry); `--reset` deletes the `.ini` (D-026); no carry-over from earlier
 versions. "Use the Esc key to exit the program" in Settings > General (D-048).
 

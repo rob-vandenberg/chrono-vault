@@ -347,3 +347,11 @@ The vaults' configuration and login tries in `chrono-vault.conf`, every other se
 `chrono-vault.ini`, side by side in the program's folder on Linux and Windows; `--reset` deletes the `.ini` (D-026).
 The carry-over from earlier versions and the pre-0.0.28 fingerprint fallback removed (no backwards compatibility).
 "Use the Esc key to exit the program", off by default: Esc in the main window, not in edit mode, closes it (D-048).
+
+## 22 November 2026: version 0.0.39: settings tidied, and the Windows setup again
+
+Autolock's switches are tick boxes, the four in a frame; the reminder a choice of Day, Month, Quarter, Year, Never;
+the clipboard setting on one line; a normal scroll bar of the style's own (ScrollBar.qml) in the settings window and
+the About box, beside the page; collapsed sidebar entries as tall as expanded with 24-pixel icons; Esc closes the
+About box (the main window's Esc from 0.0.38 had taken it); no local `key` hiding the member, so Microsoft's compiler
+builds the Windows setup again (D-049).

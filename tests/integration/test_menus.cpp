@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.0.38
+// test_menus.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: the sidebar collapses to its icons, its groups fold, the splitters (D-042)
 // v0.0.24: Initial release (D-039)
@@ -450,6 +451,10 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
         QVERIFY2(source.endsWith(QString::fromLatin1(name).chopped(5) + QStringLiteral(".svg")), qPrintable(source));
     }
     const qreal expandedWidth = column->width();
+    QQuickItem* homeEntry = visualItem(root, QStringLiteral("homeEntry"));
+    QVERIFY(homeEntry);
+    const qreal expandedHeight = homeEntry->height();
+    const qreal expandedIcon = QQmlProperty::read(homeEntry, QStringLiteral("icon.height")).toReal();
 
     // Collapsed: a narrow column, icons only, remembered.
     QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
@@ -457,6 +462,9 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     QVERIFY(controller->sidebarCollapsed());
     QQuickItem* home = visualItem(root, QStringLiteral("homeEntry"));
     QCOMPARE(home->property("display").toInt(), 0); // AbstractButton.IconOnly
+    // Exactly as tall as expanded, with a larger icon (D-049).
+    QCOMPARE(home->height(), expandedHeight);
+    QVERIFY(QQmlProperty::read(home, QStringLiteral("icon.height")).toReal() > expandedIcon);
     QVERIFY(SettingsFile().value(QStringLiteral("view/sidebarCollapsed")).toBool());
     // Hide Sidebar still hides it whole, apart from collapsing.
     controller->setSidebarHidden(true);

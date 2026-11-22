@@ -31,7 +31,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 
 The menus and settings of the reference program that Chrono Vault does not have yet, in no set order:
 
-1. PIN unlock (0.0.39).
+1. PIN unlock (0.0.40).
 2. Backup and Restore (File; greyed until built).
 3. Print.
 4. Audit in sidebar, with Show Old Passwords (with step 12).

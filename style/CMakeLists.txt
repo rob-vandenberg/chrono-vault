@@ -4,9 +4,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# style/CMakeLists.txt 0.0.10
+# style/CMakeLists.txt 0.0.39
 #
 # --- Version history ----------------------------------------------------
+# v0.0.39: ScrollBar.qml (D-049)
 # v0.0.10: Initial release (D-023)
 
 # Chrono Vault's own Qt Quick Controls style: Fusion's controls with their fixed
@@ -30,6 +31,7 @@ qt_add_qml_module(chrono_vault_style
         MenuItem.qml
         Pane.qml
         RadioButton.qml
+        ScrollBar.qml
         ScrollView.qml
         ScaledCheckIndicator.qml
         Slider.qml

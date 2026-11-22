@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.38
+// Main.qml 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: Esc in the main window only while it has the keys, so Esc closes the About box (D-049)
 // v0.0.38: Esc closes the main window when "Use the Esc key to exit the program" is ticked (D-048)
 // v0.0.35: The keys of every action set by the person; Ctrl+B the sidebar (D-045)
 // v0.0.25: Autolock when the main window is closed; Settings > Security opens Change the Master Password (D-040)
@@ -114,7 +115,12 @@ ApplicationWindow {
         sequences: ["Esc"]
         context: Qt.WindowShortcut
         autoRepeat: false
-        enabled: VaultController.escapeExits && !vaultPage.editing
+        // Only while this window itself has the keys: Qt counts a window
+        // shortcut also in the windows this one opens (and calls this window
+        // active then), and two shortcuts on Esc there, the dialog's own
+        // Cancel, cancel each other out, so Esc would not close the About
+        // box (D-049).
+        enabled: VaultController.escapeExits && !vaultPage.editing && mainWindow.activeFocusItem !== null
         onActivated: mainWindow.close()
     }
 

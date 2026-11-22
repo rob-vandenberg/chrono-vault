@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.13
+// AboutWindow.qml 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: A normal scroll bar with arrows, beside the text (D-049)
 // v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 555 by 440, never smaller; the licences fill it (the owner)
@@ -123,28 +124,19 @@ DialogWindow {
         // More room around it (the owner): 8 pixels above, 2 below.
         Layout.topMargin: Math.round(8 * Appearance.factor)
         Layout.bottomMargin: Math.round(2 * Appearance.factor)
-        // A scroll bar that is always there and clearly seen, light or dark
-        // (the owner, D-046).
+        // A normal scroll bar, arrows at both ends, always there (the owner,
+        // D-046, D-049): the style's own, beside the text.
         ScrollBar.vertical: ScrollBar {
+            id: licenceScrollBar
             objectName: "licenceScrollBar"
             parent: licenceScroll
             x: licenceScroll.mirrored ? 0 : licenceScroll.width - width
             y: licenceScroll.topPadding
-            height: licenceScroll.availableHeight
+            height: licenceScroll.height - licenceScroll.topPadding
+            orientation: Qt.Vertical
             policy: ScrollBar.AlwaysOn
-            minimumSize: 0.08 // a handle long enough to see and grab
-            contentItem: Rectangle {
-                implicitWidth: Math.round(8 * Appearance.factor)
-                radius: width / 2
-                color: aboutWindow.palette.buttonText
-                opacity: parent.pressed ? 0.7 : 0.45
-            }
-            background: Rectangle {
-                implicitWidth: Math.round(10 * Appearance.factor)
-                color: aboutWindow.palette.mid
-                opacity: 0.4
-            }
         }
+        rightPadding: licenceScrollBar.width + Math.round(6 * Appearance.factor)
         // Up/Down a line, Page Up/Down a page, Home/End the start and end,
         // as a person expects of a text to read (the owner, D-046).
         function scrollTo(y) {

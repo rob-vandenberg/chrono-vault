@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.27
+// UnlockPage.qml 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.0.39: The reminder says how often it asks (D-049)
 // v0.0.27: The finger asked whenever the page is on screen: at a start, for another vault, back from the tray (D-042)
 // v0.0.26: Greyed with "Try again in" while waiting after wrong master passwords (D-041)
 // v0.0.23: Unlocking with a fingerprint, asked at once; the yearly master password reminder (D-038)
@@ -153,11 +154,16 @@ Item {
             Layout.fillWidth: true
             onClicked: VaultController.unlockWithQuickUnlock()
         }
-        // Once a year the master password, so it is not forgotten (Q44).
+        // Now and then the master password, so it is not forgotten, as often
+        // as Settings > Security says (D-049).
         Label {
             objectName: "reminderText"
             visible: VaultController.reminderDue
-            text: qsTr("Please type your master password: Chrono Vault asks for it once a year, so that you do not forget it.")
+            text: [qsTr("Please type your master password: Chrono Vault asks for it once a day, so that you do not forget it."),
+                   qsTr("Please type your master password: Chrono Vault asks for it once a month, so that you do not forget it."),
+                   qsTr("Please type your master password: Chrono Vault asks for it once a quarter, so that you do not forget it."),
+                   qsTr("Please type your master password: Chrono Vault asks for it once a year, so that you do not forget it.")
+                  ][Math.min(VaultController.masterPasswordReminder, 3)]
             wrapMode: Text.Wrap
             font.bold: true
             Layout.fillWidth: true
