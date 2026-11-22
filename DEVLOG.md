@@ -206,3 +206,11 @@ category and template of the person's own, read off the window's thread, added i
 whole. Tested on a made-up export in the same format, and once on the owner's real export with only counts written
 for the owner to check. Two review rounds: the import window stayed open after a lock, and its Import button could
 lose its name; both fixed with a test.
+
+## 22 November 2026: version 0.0.20: website icons (autonomous mode)
+
+Settings > Customize > Use website icons, off by default: each website asked for its own icon, kept in memory only
+and forgotten at the lock (D-036). Found along the way: the icons were not asked for again after an unlock, because
+the list is refreshed just before the vault counts as unlocked; caught by the new test against a local server.
+Two review rounds: each arriving icon reset the whole list, the size limit applied only after the download, icons
+were re-encoded on every redraw, and the Trash's websites were asked too; all fixed, the last with a test.

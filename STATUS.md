@@ -2,12 +2,15 @@
 
 ## Now
 
-**Version 0.0.19**: File > Import… of the reference program's export, everything exactly as it holds it (D-035).
-Before: the editor (0.0.18, D-034) and the item (0.0.17, D-033) as the reference program has them.
+**Version 0.0.20**: website icons, off by default, asked of each website itself, kept in memory only (D-036). With
+0.0.17 to 0.0.19 the import of the reference program's export is complete: the item, the editor and File > Import…
+(D-033 to D-035).
 
 ## Next task
 
-In autonomous mode: 0.0.20, website icons (Settings > Customize > Use website icons, off by default).
+The owner tries the import with his own export. Then, by his choice: the settings the reference program has that
+Chrono Vault lacks (PIN unlock, more autolock choices, automatic backups, language, data location, item counts), or
+`ROADMAP.md` step 10, merging.
 
 ## Open questions
 

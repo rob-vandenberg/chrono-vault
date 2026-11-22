@@ -18,11 +18,13 @@
 
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QUrl>
 
 // --- Version ------------------------------------------------------------
-// templates.cpp 0.0.17
+// templates.cpp 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: The website an item belongs to, for its icon (D-036)
 // v0.0.17: A new item's fields get their ids at once; fields made with makeField, a PIN hidden (D-033)
 // v0.0.14: Initial release (D-027)
 
@@ -168,6 +170,27 @@ Item newItem(const Template& itemTemplate)
     }
     giveFieldsIds(item); // so its first change is kept in the history (D-033)
     return item;
+}
+
+QString websiteHostOf(const Item& item)
+{
+    QString address = item.website;
+    if (address.isEmpty()) {
+        for (const Field& field : item.fields) {
+            if (field.kind == FieldKind::WebAddress && !field.deleted && !field.value.trimmed().isEmpty()) {
+                address = field.value.trimmed();
+                break;
+            }
+        }
+    }
+    if (address.isEmpty()) {
+        return {};
+    }
+    const QUrl url = QUrl::fromUserInput(address);
+    if (!url.isValid() || (url.scheme() != QLatin1String("http") && url.scheme() != QLatin1String("https"))) {
+        return {};
+    }
+    return url.host().toLower();
 }
 
 QString categoryIconSource(const QString& categoryId)

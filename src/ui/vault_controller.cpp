@@ -29,7 +29,11 @@
 #include <QClipboard>
 #include <QCollator>
 #include <QDateTime>
+#include <QBuffer>
 #include <QFile>
+#include <QImage>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QFileInfo>
 #include <QLocale>
 #include <QSaveFile>
@@ -44,9 +48,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.19
+// vault_controller.cpp 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export, read off the window's thread, added in one save (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: The reference program's fields and items for the windows: sections, field types, hide marks, hidden and
@@ -80,6 +85,9 @@ constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
 const QString showSubtitlesKey = QStringLiteral("view/showSubtitles");
+const QString websiteIconsKey = QStringLiteral("view/websiteIcons");
+constexpr bool defaultWebsiteIcons = false;
+constexpr qint64 largestWebsiteIconBytes = 512 * 1024;
 constexpr bool defaultHideSensitive = true;
 constexpr bool defaultShowSubtitles = true;
 // Never in a group named "general": in a settings file Qt keeps that name
@@ -304,9 +312,11 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         minimizedAtStart = defaultStartMinimized;
         hideSecrets = defaultHideSensitive;
         subtitlesShown = defaultShowSubtitles;
+        websiteIconsOn = defaultWebsiteIcons;
     } else {
         hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
         subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
+        websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
@@ -716,6 +726,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     takeBackUnsaved();
     contentsChanged();
     setState(State::Unlocked);
+    fetchWebsiteIcons(); // now that it counts as unlocked (D-036)
     if (path == primaryVault()) {
         rememberPrimary();
         // After a lock, back to the vault that was shown (D-030).
@@ -770,7 +781,11 @@ QVariantMap VaultController::item(const QString& id) const
 {
     for (const Item& one : contents.items) {
         if (one.id.toString(QUuid::WithoutBraces) == id) {
-            return toMap(one, contents);
+            QVariantMap map = toMap(one, contents);
+            if (const QString site = websiteIcons.value(websiteHostOf(one)); !site.isEmpty()) {
+                map.insert(QStringLiteral("defaultIcon"), site);
+            }
+            return map;
         }
     }
     return {};
@@ -1077,6 +1092,77 @@ void VaultController::cancelImport()
 QString VaultController::referenceName() const
 {
     return referenceProgramName();
+}
+
+void VaultController::setUseWebsiteIcons(bool use)
+{
+    if (websiteIconsOn == use) {
+        return;
+    }
+    websiteIconsOn = use;
+    QSettings().setValue(websiteIconsKey, use);
+    if (use) {
+        fetchWebsiteIcons();
+    } else {
+        // Off: every item shows its own or its category's icon again.
+        websiteIcons.clear();
+        iconsAsked.clear();
+        listModel.setWebsiteIcons({});
+        ++contentsRevision;
+        emit revisionChanged();
+    }
+    emit useWebsiteIconsChanged();
+}
+
+void VaultController::fetchWebsiteIcons()
+{
+    if (!websiteIconsOn || currentState != State::Unlocked) {
+        return;
+    }
+    if (!iconAddress) {
+        // The website itself, never a service in between (Q36): only it
+        // learns that its icon was asked for.
+        iconAddress = [](const QString& host) { return QUrl(QStringLiteral("https://%1/favicon.ico").arg(host)); };
+    }
+    for (const Item& one : std::as_const(contents.items)) {
+        const QString host = websiteHostOf(one);
+        // Not for an item in the Trash: its website is not asked (D-036).
+        if (one.trashed || !one.icon.isEmpty() || host.isEmpty() || iconsAsked.contains(host)) {
+            continue;
+        }
+        iconsAsked.insert(host);
+        QNetworkRequest request(iconAddress(host));
+        request.setTransferTimeout(10000);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        request.setMaximumRedirectsAllowed(5);
+        QNetworkReply* reply = iconNetwork.get(request);
+        // Broken off as soon as it grows past what an icon may be.
+        connect(reply, &QNetworkReply::downloadProgress, reply, [reply](qint64 received, qint64) {
+            if (received > largestWebsiteIconBytes) {
+                reply->abort();
+            }
+        });
+        const quint64 session = vaultSession;
+        connect(reply, &QNetworkReply::finished, this, [this, reply, host, session]() {
+            reply->deleteLater();
+            if (session != vaultSession || !websiteIconsOn || reply->error() != QNetworkReply::NoError) {
+                return;
+            }
+            const QByteArray bytes = reply->read(largestWebsiteIconBytes + 1);
+            QImage image;
+            if (bytes.size() > largestWebsiteIconBytes || !image.loadFromData(bytes) || image.isNull()) {
+                return; // no icon: the category's stays
+            }
+            QByteArray png;
+            QBuffer buffer(&png);
+            buffer.open(QIODevice::WriteOnly);
+            image.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation).save(&buffer, "PNG");
+            websiteIcons.insert(host, QStringLiteral("data:image/png;base64,") + QString::fromLatin1(png.toBase64()));
+            listModel.setWebsiteIcons(websiteIcons);
+            ++contentsRevision;
+            emit revisionChanged();
+        });
+    }
 }
 
 bool VaultController::touchScreen() const
@@ -1526,6 +1612,7 @@ void VaultController::contentsChanged()
     listModel.setContents(contents);
     ++contentsRevision;
     emit revisionChanged();
+    fetchWebsiteIcons();
 }
 
 void VaultController::watch()
@@ -1759,6 +1846,7 @@ void VaultController::showCreated(CreatedVault created)
     contentsChanged();
     say(tr("Your new vault is ready."), false);
     setState(State::Unlocked);
+    fetchWebsiteIcons();
     if (primaryVault() == created.path) {
         rememberPrimary();
     }
@@ -2099,6 +2187,7 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("startAtStartup"), defaultStartAtStartup},
         {QStringLiteral("hideSensitive"), defaultHideSensitive},
         {QStringLiteral("showSubtitles"), defaultShowSubtitles},
+        {QStringLiteral("useWebsiteIcons"), defaultWebsiteIcons},
     };
 }
 
@@ -2378,6 +2467,10 @@ void VaultController::forgetUnlockedVault()
     contents = {};
     pendingAttachments.clear();
     pendingImport.reset();
+    // Website icons are kept in memory only, and only while unlocked (D-036).
+    websiteIcons.clear();
+    iconsAsked.clear();
+    listModel.setWebsiteIcons({});
     ++vaultSession;
     listModel.clear();
     if (!search.isEmpty()) {

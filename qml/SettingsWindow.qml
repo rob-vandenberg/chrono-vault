@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.17
+// SettingsWindow.qml 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: Use website icons (Customize), off by default (D-036)
 // v0.0.17: Hide sensitive fields (Security) and Show subtitles (Customize) (D-033)
 // v0.0.14: The Customize topic: the categories and templates of the open vault (D-027)
 // v0.0.13: Its size includes the title bar and frame (the owner)
@@ -87,6 +88,7 @@ ApplicationWindow {
     property int clipboardClearSeconds: 0
     property bool hideSensitive: true
     property bool showSubtitles: true
+    property bool useWebsiteIcons: false
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -102,6 +104,7 @@ ApplicationWindow {
         clipboardClearSeconds = VaultController.clipboardClearSeconds
         hideSensitive = VaultController.hideSensitive
         showSubtitles = VaultController.showSubtitles
+        useWebsiteIcons = VaultController.useWebsiteIcons
     }
 
     function showTheme(chosen) {
@@ -142,6 +145,8 @@ ApplicationWindow {
             VaultController.hideSensitive = hideSensitive
         if (VaultController.showSubtitles !== showSubtitles)
             VaultController.showSubtitles = showSubtitles
+        if (VaultController.useWebsiteIcons !== useWebsiteIcons)
+            VaultController.useWebsiteIcons = useWebsiteIcons
         // Starting at startup is written outside Chrono Vault and can fail:
         // the window stays open and says so, showing the setting as it is.
         if (VaultController.startAtStartup !== startAtStartup) {
@@ -188,6 +193,7 @@ ApplicationWindow {
             break
         case 3:
             showSubtitles = defaults.showSubtitles
+            useWebsiteIcons = defaults.useWebsiteIcons
             break
         }
     }
@@ -497,6 +503,19 @@ ApplicationWindow {
                             text: qsTr("Show subtitles in the item list")
                             checked: settingsWindow.showSubtitles
                             onToggled: settingsWindow.showSubtitles = checked
+                        }
+                        CheckBox {
+                            objectName: "websiteIconsBox"
+                            text: qsTr("Use website icons")
+                            checked: settingsWindow.useWebsiteIcons
+                            onToggled: settingsWindow.useWebsiteIcons = checked
+                        }
+                        Label {
+                            text: qsTr("Each website in your vault is asked for its own icon, which that website can then see. The icons are kept only while the vault is unlocked, never on the disk.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.7
+                            leftPadding: Math.round(28 * Appearance.factor)
+                            Layout.fillWidth: true
                         }
                         CustomizePage { Layout.fillWidth: true }
                     }

@@ -22,9 +22,10 @@
 #include <QString>
 
 // --- Version ------------------------------------------------------------
-// templates.h 0.0.14
+// templates.h 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: The website an item belongs to, for its icon (D-036)
 // v0.0.14: Initial release (D-027)
 
 namespace chrono_vault {
@@ -46,6 +47,11 @@ namespace chrono_vault {
 
 // A new item from a template: a new id, the template's fields, empty.
 [[nodiscard]] Item newItem(const Template& itemTemplate);
+
+// The website an item belongs to, as a host such as "github.com", for its
+// website icon (D-036): the site the import named, else its first web
+// address; empty when it has none.
+[[nodiscard]] QString websiteHostOf(const Item& item);
 
 // The picture shown for an item without an icon of its own: its category's.
 [[nodiscard]] QString categoryIconSource(const QString& categoryId);

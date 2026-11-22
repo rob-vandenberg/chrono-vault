@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.17
+// item_list_model.cpp 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.17: The item's own subtitle first; Trash and Archive apart from the rest (D-033)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template; the search also
 //          finds an email address and a tag (D-027, D-028)
@@ -98,6 +99,9 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
         if (!item.icon.isEmpty()) {
             return QString(QStringLiteral("data:image/png;base64,") + QString::fromLatin1(item.icon.toBase64()));
         }
+        if (const QString site = websiteIcons.value(websiteHostOf(item)); !site.isEmpty()) {
+            return site;
+        }
         return categoryIconSource(item.categoryId);
     default: return {};
     }
@@ -113,6 +117,14 @@ void ItemListModel::setContents(const VaultContents& contents)
 {
     allContents = contents;
     rebuild();
+}
+
+void ItemListModel::setWebsiteIcons(const QHash<QString, QString>& icons)
+{
+    websiteIcons = icons;
+    if (!shownItems.isEmpty()) {
+        emit dataChanged(index(0), index(static_cast<int>(shownItems.size()) - 1), {IconRole});
+    }
 }
 
 void ItemListModel::setFilter(const QString& filter)

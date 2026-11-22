@@ -23,9 +23,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.0.14
+// item_list_model.h 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template (D-027, D-028)
 // v0.0.9: The letter an item is grouped under (D-025)
 // v0.0.4: The item's icon
@@ -56,6 +57,9 @@ public:
     // "" for every item, "favourites", "category:<id>" or "tag:<tag>"; a
     // tag also shows the items of the tags nested under it (D-028).
     void setFilter(const QString& filter);
+    // Website icons by host, as "data:" addresses ready to show, for an item
+    // without its own (D-036); only the icons are redrawn, the list stays.
+    void setWebsiteIcons(const QHash<QString, QString>& icons);
     void clear();
 
     // The row of the item with this id, or -1.
@@ -70,6 +74,7 @@ private:
     QList<Item> shownItems;
     QString search;
     QString chosen;
+    QHash<QString, QString> websiteIcons;
 };
 
 } // namespace chrono_vault

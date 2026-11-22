@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.17
+# tests/integration/CMakeLists.txt 0.0.20
 
 # --- Version history ----------------------------------------------------
+# v0.0.20: The website icons test
 # v0.0.17: The items test: history, sections, hidden fields, Trash and Archive
 # v0.0.16: The test of a change made elsewhere
 # v0.0.15: The vaults test: several vaults, the keyfile, changing the master password
@@ -101,3 +102,8 @@ qt_add_executable(test_items test_items.cpp)
 target_link_libraries(test_items PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
 chrono_vault_strict_warnings(test_items)
 chrono_vault_add_test(test_items)
+
+qt_add_executable(test_website_icons test_website_icons.cpp)
+target_link_libraries(test_website_icons PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_website_icons)
+chrono_vault_add_test(test_website_icons)

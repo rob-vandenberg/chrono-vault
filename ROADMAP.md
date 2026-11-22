@@ -15,7 +15,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | 7 | The windows | Unlock, item list, item editor, template editor, the settings window (D-011), auto-lock; nothing slow on the window's thread (OR-5) | 1.5 to 2 months | done in 0.0.14 (template editor in Settings > Customize) |
 | 8 | Tools | Password generator, one-time codes (TOTP), copy with the clipboard cleared after a time (D-007) | 2 to 3 weeks | done in 0.0.3 |
 | 9 | Storage: local vault file | Open and save on a local disk or network share; detect a change made elsewhere (D-005) | 2 weeks | done in 0.0.16: open and save (0.0.3); a change made elsewhere noticed (0.0.16) |
-| 9a | Importing the reference program's export | Everything an item of the reference program holds, the editor, the importer, website icons (the owner, 22 November 2026: before merging) | 3 to 4 weeks | in progress: 0.0.17 the item, 0.0.18 the editor, 0.0.19 the importer; website icons next |
+| 9a | Importing the reference program's export | Everything an item of the reference program holds, the editor, the importer, website icons (the owner, 22 November 2026: before merging) | 3 to 4 weeks | done in 0.0.20: the item (0.0.17), the editor (0.0.18), the importer (0.0.19), website icons (0.0.20) |
 | 10 | Merging | Merge changes from two devices; what cannot be merged is shown to the person to settle (D-005, OR-15) | 1 to 1.5 months | not started |
 | 11 | Storage: WebDAV | Technique decided by the owner when this step is reached (D-005) | 2 to 3 weeks | not started |
 | 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | not started |

@@ -23,6 +23,8 @@
 #include "vault_file.h"
 
 #include <QFileSystemWatcher>
+#include <QNetworkAccessManager>
+#include <QSet>
 #include <QHash>
 #include <QMutex>
 #include <QObject>
@@ -32,12 +34,14 @@
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
+#include <functional>
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.19
+// vault_controller.h 0.0.20
 
 // --- Version history ----------------------------------------------------
+// v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
@@ -88,6 +92,7 @@ class VaultController : public QObject
     Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
     Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
+    Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
 
@@ -153,6 +158,11 @@ public:
     [[nodiscard]] bool showSubtitles() const { return subtitlesShown; }
     // A touch screen is present: what shows under the mouse stays shown (D-034).
     [[nodiscard]] bool touchScreen() const;
+    // Settings > Customize > Use website icons, off by default (D-036).
+    [[nodiscard]] bool useWebsiteIcons() const { return websiteIconsOn; }
+    void setUseWebsiteIcons(bool use);
+    // Tests only: where a website's icon is asked for.
+    void setIconAddressForTests(std::function<QUrl(const QString&)> address) { iconAddress = std::move(address); }
     void setShowSubtitles(bool show);
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
@@ -290,6 +300,7 @@ signals:
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
     void showSubtitlesChanged();
+    void useWebsiteIconsChanged();
     void keepInTrayChanged();
     void startAtStartupChanged();
     void startMinimizedChanged();
@@ -341,6 +352,8 @@ private:
     void rememberPrimary();
     void forgetPrimary();
     void showCreated(CreatedVault created);
+    // Asks each website not asked yet for its icon (D-036).
+    void fetchWebsiteIcons();
     // A change made elsewhere (D-032): the stamp of each vault file as this
     // Chrono Vault last read or wrote it, shared with the save thread.
     struct Stamps
@@ -379,6 +392,11 @@ private:
     int clearSeconds = 30;
     bool hideSecrets = true;
     bool subtitlesShown = true;
+    bool websiteIconsOn = false;
+    QNetworkAccessManager iconNetwork;
+    QHash<QString, QString> websiteIcons; // host: "data:" address of its PNG, in memory only
+    QSet<QString> iconsAsked;
+    std::function<QUrl(const QString&)> iconAddress;
     bool keepRunning = true;
     bool minimizedAtStart = false;
     bool trayExists = false;
