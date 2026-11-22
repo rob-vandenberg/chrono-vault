@@ -48,6 +48,12 @@ void showMainWindow(QWindow* window, bool startMinimized, bool trayAvailable);
 void setSkipReadingSettings(bool skip);
 [[nodiscard]] bool skipReadingSettings();
 
+// The settings from before 0.0.30, kept under the name "Chrono Vault", are
+// carried over to "chrono-vault" (the identifier) once, nothing lost: the old
+// place is removed only after every value reads back the same (D-044).
+// Returns false when something did not read back; the old place then stays.
+bool carryOverOldSettings(const QString& oldOrganization, const QString& oldApplication);
+
 // The program's own icon, art/chrono-vault.svg (D-019).
 [[nodiscard]] QIcon programIcon();
 

@@ -93,5 +93,7 @@ private:
 // One step of the fingerprint, with its time, added to
 // <data folder>/Chrono Vault/fingerprint.log; never a secret (D-044).
 void fingerLog(const QString& step);
+// Only with --debug on the command line is the log written (the owner).
+void setFingerLogOn(bool on);
 
 } // namespace chrono_vault

@@ -39,10 +39,26 @@ const QString keptKey = QStringLiteral("quickUnlock/vaults");
 
 } // namespace
 
+namespace {
+bool& logOn()
+{
+    static bool on = false;
+    return on;
+}
+} // namespace
+
+void setFingerLogOn(bool on)
+{
+    logOn() = on;
+}
+
 void fingerLog(const QString& step)
 {
+    if (!logOn()) {
+        return;
+    }
     const QString folder =
-        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/Chrono Vault");
+        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/chrono-vault");
     QDir().mkpath(folder);
     QFile file(folder + QStringLiteral("/fingerprint.log"));
     if (file.open(QIODevice::Append | QIODevice::Text)) {

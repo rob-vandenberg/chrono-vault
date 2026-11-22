@@ -1215,7 +1215,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock.cpp" line="+57"/>
+        <location filename="../src/ui/quick_unlock.cpp" line="+73"/>
         <source>The key could not be kept for this vault.</source>
         <translation type="unfinished"></translation>
     </message>

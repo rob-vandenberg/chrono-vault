@@ -52,3 +52,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-041](decisions/D-041.md) | Waits after wrong master passwords: 3 at once, then 10 seconds, a minute, 10 minutes, an hour after every 25; kept through a restart |
 | [D-042](decisions/D-042.md) | The sidebar collapses to its icons and its groups fold; wider splitters; the fingerprint reader held only while a finger is asked, a switch with a one-time touch |
 | [D-043](decisions/D-043.md) | The fingerprint one check box for all vaults, its touch in a popup; the Autolock switches no longer mirrored; centered triangles |
+| [D-044](decisions/D-044.md) | `--debug` writes the fingerprint log; the settings under the identifier chrono-vault, carried over |

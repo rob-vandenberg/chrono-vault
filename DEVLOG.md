@@ -306,3 +306,9 @@ says its own reason.
 The owner: one line, a check box, for all vaults; the touch in a popup (D-043). Each vault's key is kept at its next
 master-password unlock; unticking removes them all. Found: the Autolock switches were mirrored (on while saying Off);
 the collapsed sidebar's triangles were not centered as in the owner's mockup.
+
+## 22 November 2026: version 0.0.30: --debug, and the identifier chrono-vault for the settings
+
+The fingerprint log is written only with `--debug` (the owner), to `~/.local/share/chrono-vault/fingerprint.log`. The
+settings live under the identifier `chrono-vault`, no longer under the name "Chrono Vault"; those of before are
+carried over once, the old place removed only after every value reads back the same (D-044).

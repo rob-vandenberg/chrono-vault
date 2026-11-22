@@ -1188,7 +1188,7 @@ msgctxt "QuickUnlock|"
 msgid "Confirm it is you in the Windows Hello window…"
 msgstr ""
 
-#: ../src/ui/quick_unlock.cpp:57
+#: ../src/ui/quick_unlock.cpp:73
 msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""

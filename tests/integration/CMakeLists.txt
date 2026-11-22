@@ -135,6 +135,11 @@ target_link_libraries(test_reader PRIVATE chrono_vault_ui chrono_vault_uiplugin 
 chrono_vault_strict_warnings(test_reader)
 chrono_vault_add_test(test_reader)
 
+qt_add_executable(test_settings_place test_settings_place.cpp)
+target_link_libraries(test_settings_place PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
+chrono_vault_strict_warnings(test_settings_place)
+chrono_vault_add_test(test_settings_place)
+
 qt_add_executable(test_quick_unlock test_quick_unlock.cpp)
 target_link_libraries(test_quick_unlock PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
 chrono_vault_strict_warnings(test_quick_unlock)

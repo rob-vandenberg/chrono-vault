@@ -17,7 +17,12 @@
 
 #include "app_setup.h"
 
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QFont>
+#include <QSettings>
+#include <QStandardPaths>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include "window_memory.h"
@@ -89,6 +94,41 @@ void setSkipReadingSettings(bool skip)
 bool skipReadingSettings()
 {
     return skippingSettings();
+}
+
+bool carryOverOldSettings(const QString& oldOrganization, const QString& oldApplication)
+{
+    QSettings old(oldOrganization, oldApplication);
+    QSettings now;
+    const QStringList keys = old.allKeys();
+    if (keys.isEmpty() || !now.allKeys().isEmpty()) {
+        return true; // nothing to carry, or carried already
+    }
+    for (const QString& key : keys) {
+        now.setValue(key, old.value(key));
+    }
+    now.sync();
+    if (now.status() != QSettings::NoError) {
+        return false;
+    }
+    for (const QString& key : keys) {
+        if (now.value(key) != old.value(key)) {
+            return false; // the old place stays: nothing is lost
+        }
+    }
+    const QString oldFile = old.fileName();
+    old.clear();
+    old.sync();
+    if (old.format() == QSettings::IniFormat || oldFile.endsWith(QLatin1String(".conf"))) {
+        QFile::remove(oldFile);
+        QDir().rmdir(QFileInfo(oldFile).absolutePath());
+    }
+    // The fingerprint log of 0.0.29 had a folder by the old name too.
+    const QString oldLogFolder =
+        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/Chrono Vault");
+    QFile::remove(oldLogFolder + QStringLiteral("/fingerprint.log"));
+    QDir().rmdir(oldLogFolder);
+    return true;
 }
 
 QIcon programIcon()

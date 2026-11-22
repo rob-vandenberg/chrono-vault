@@ -16,6 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_setup.h"
+#include "quick_unlock.h"
 #include "appearance.h"
 #include "single_instance.h"
 #include "system_tray.h"
@@ -39,6 +40,7 @@
 // main.cpp 0.0.12
 
 // --- Version history ----------------------------------------------------
+// v0.0.30: The identifier chrono-vault for the settings, carried over; --debug writes the fingerprint log (D-044)
 // v0.0.12: --reset: the settings not read at the start (D-026)
 // v0.0.7: The kept theme and UI scaling put in use at the start (D-023)
 // v0.0.5: The automatic update checks; --check-for-update for the release checks (D-021)
@@ -55,8 +57,13 @@ int main(int argc, char* argv[])
     // The window decides when the program ends (Main.qml): closing it may keep
     // Chrono Vault running in the tray (D-019).
     QApplication::setQuitOnLastWindowClosed(false);
-    QGuiApplication::setOrganizationName(QStringLiteral("Chrono Vault"));
-    QGuiApplication::setApplicationName(QStringLiteral("Chrono Vault"));
+    // The identifier, not the name people read (D-044); the settings kept
+    // under the name before 0.0.30 are carried over once.
+    QGuiApplication::setOrganizationName(QStringLiteral("chrono-vault"));
+    QGuiApplication::setApplicationName(QStringLiteral("chrono-vault"));
+    chrono_vault::carryOverOldSettings(QStringLiteral("Chrono Vault"), QStringLiteral("Chrono Vault"));
+    // --debug: the fingerprint's steps are written to a log (the owner).
+    chrono_vault::setFingerLogOn(QCoreApplication::arguments().contains(QStringLiteral("--debug")));
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
     QGuiApplication::setWindowIcon(chrono_vault::programIcon());
     chrono_vault::applyStyle();
