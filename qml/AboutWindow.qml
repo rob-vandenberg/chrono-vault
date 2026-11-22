@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.12
+// AboutWindow.qml 0.0.13
 
 // --- Version history ----------------------------------------------------
+// v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 555 by 440, never smaller; the licences fill it (the owner)
 // v0.0.9: The answer of Check for update beside it; a newer version opens the offer (D-024); the name, the
@@ -38,12 +39,23 @@ DialogWindow {
     signal checkRequested()
 
     memoryName: "about"
+    // The whole window, title bar and frame included, is the size set here
+    // (the owner): the frame the desktop draws, known once it is shown, is
+    // taken off the inside.
+    property size frame: Qt.size(0, 0)
+    onFrameSwapped: {
+        if (frame.width === 0 && frame.height === 0) {
+            const drawn = Appearance.frameOf(this)
+            if (drawn.width > 0 || drawn.height > 0)
+                frame = drawn
+        }
+    }
     // Opens at 555 by 440 and is never smaller, also when a smaller size was
     // remembered from before (the owner).
-    width: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width)
-    height: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height)
-    minimumWidth: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width)
-    minimumHeight: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height)
+    width: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
+    height: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
+    minimumWidth: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
+    minimumHeight: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
     title: qsTr("About Chrono Vault")
     standardButtons: Dialog.Close
 

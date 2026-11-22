@@ -300,6 +300,11 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(window->minimumWidth() <= room.width());
     applyProgramScale(100);
     QCOMPARE(window->minimumHeight(), 650);
+    // The title bar and frame are taken off the inside: the whole window is 730 by 650.
+    settings->setProperty("frame", QSizeF(8, 40));
+    QCOMPARE(window->minimumWidth(), 730 - 8);
+    QCOMPARE(window->minimumHeight(), 650 - 40);
+    settings->setProperty("frame", QSizeF(0, 0));
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());
     auto* slider = qobject_cast<QQuickItem*>(settings->findChild<QObject*>(QStringLiteral("scaleSlider")));

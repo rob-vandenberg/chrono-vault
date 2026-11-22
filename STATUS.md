@@ -2,9 +2,8 @@
 
 ## Now
 
-**Version 0.0.12** (D-023, D-026): `chrono-vault --reset` starts without reading the settings window's settings from
-the settings file; the settings window's and the About box's sizes give way to a screen too small for them. Open:
-Q18, whether 730 by 650 is the whole window including the title bar.
+**Version 0.0.13**: the settings window (730 by 650) and the About box (555 by 440) measure that size as a whole,
+title bar and frame included; `--reset` (0.0.12) skips reading the settings at the start.
 
 ## Next task
 

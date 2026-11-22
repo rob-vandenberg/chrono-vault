@@ -131,3 +131,7 @@ back inside. Two review rounds; the first found the edge case, the second nothin
 
 `--reset` skips reading the settings window's settings at the start (D-026); the two windows' sizes give way to a
 screen too small for them (D-023). Related tests only.
+
+## 22 November 2026: version 0.0.13: sizes include the title bar
+
+The owner's 650 is the whole window: the desktop's title bar and frame are taken off the inside. Related tests only.

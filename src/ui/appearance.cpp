@@ -32,9 +32,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.0.12
+// appearance.cpp 0.0.13
 
 // --- Version history ----------------------------------------------------
+// v0.0.13: The size of a window's title bar and frame
 // v0.0.12: The free room of a window's screen, which a minimum gives way to; --reset at the start (D-026)
 // v0.0.10: The program's colours for every window (D-023)
 // v0.0.7: Initial release (D-023)
@@ -180,6 +181,16 @@ QSize Appearance::screenRoom(QObject* window) const
     const auto* shown = qobject_cast<QWindow*>(window);
     const QScreen* screen = shown && shown->screen() ? shown->screen() : QGuiApplication::primaryScreen();
     return screen ? screen->availableGeometry().size() : QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+}
+
+QSize Appearance::frameOf(QObject* window) const
+{
+    const auto* shown = qobject_cast<QWindow*>(window);
+    if (!shown) {
+        return {};
+    }
+    const QMargins frame = shown->frameMargins();
+    return {frame.left() + frame.right(), frame.top() + frame.bottom()};
 }
 
 void Appearance::show(int theme, int scale)

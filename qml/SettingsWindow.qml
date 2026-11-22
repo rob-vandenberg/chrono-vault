@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.12
+// SettingsWindow.qml 0.0.13
 
 // --- Version history ----------------------------------------------------
+// v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 730 by 650 and is never smaller; the scaling slider's marks every 25% above it, room around it (the owner)
 // v0.0.10: The program's colours from the start; the slider in steps of 5%; every size times the UI scaling (D-023)
@@ -43,6 +44,17 @@ ApplicationWindow {
     // The program's font, so the UI scaling reaches every control (D-023).
     font: Appearance.font
     // The program's colours, never the desktop theme's (D-023).
+    // The whole window, title bar and frame included, is the size set here
+    // (the owner): the frame the desktop draws, known once it is shown, is
+    // taken off the inside.
+    property size frame: Qt.size(0, 0)
+    onFrameSwapped: {
+        if (frame.width === 0 && frame.height === 0) {
+            const drawn = Appearance.frameOf(this)
+            if (drawn.width > 0 || drawn.height > 0)
+                frame = drawn
+        }
+    }
     Component.onCompleted: Appearance.dress(this)
     objectName: "settingsWindow"
 
@@ -167,11 +179,11 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width)
-    height: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height)
+    width: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
+    height: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
     // Never smaller than it opens (the owner).
-    minimumWidth: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width)
-    minimumHeight: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height)
+    minimumWidth: Math.min(Math.round(730 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
+    minimumHeight: Math.min(Math.round(650 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
     visible: false
     color: palette.window
 
