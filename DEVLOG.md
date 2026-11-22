@@ -320,3 +320,7 @@ The collapsed sidebar's group triangles stand centered: their button spans the c
 ## 22 November 2026: version 0.0.32: no filler items in the top bar and the dialogs
 
 The menu bar, and a dialog's left button area, take the free room themselves; the empty items that only took up room are gone (the editor's one, between two buttons that must not stretch, stays).
+
+## 22 November 2026: version 0.0.33: room around the About box's text
+
+The licence text with 8 pixels more room above it and 2 below (the owner).

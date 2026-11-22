@@ -119,6 +119,9 @@ DialogWindow {
     ScrollView {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        // More room around it (the owner): 8 pixels above, 2 below.
+        Layout.topMargin: Math.round(8 * Appearance.factor)
+        Layout.bottomMargin: Math.round(2 * Appearance.factor)
         ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         TextArea {
             objectName: "licenceText"
