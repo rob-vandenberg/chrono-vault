@@ -481,11 +481,11 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     QVERIFY(QMetaObject::invokeMethod(foldCategories, "clicked"));
     QTRY_VERIFY(visualItem(root, QStringLiteral("categoryEntry_login")));
 
-    // The splitters catch the mouse over 4 pixels, not Fusion's 2.
+    // The splitters catch the mouse over 8 pixels, not Fusion's 2.
     int handles = 0;
     std::function<void(QQuickItem*)> walk = [&](QQuickItem* item) {
         if (QString(item->metaObject()->className()).startsWith(QLatin1String("QQuickItem")) &&
-            qFuzzyCompare(item->implicitWidth(), 4.0) && item->childItems().size() == 1) {
+            qFuzzyCompare(item->implicitWidth(), 8.0) && item->childItems().size() == 1) {
             ++handles;
         }
         for (QQuickItem* child : item->childItems()) {

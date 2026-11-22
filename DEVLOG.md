@@ -324,3 +324,7 @@ The menu bar, and a dialog's left button area, take the free room themselves; th
 ## 22 November 2026: version 0.0.33: room around the About box's text
 
 The licence text with 8 pixels more room above it and 2 below (the owner).
+
+## 22 November 2026: version 0.0.34: the splitters catch the mouse over 8 pixels
+
+The owner measured the resize cursor over only 2 of the 4 pixels; now 8 (the line shown stays 2).

@@ -274,10 +274,10 @@ Item {
 
     SplitView {
         anchors.fill: parent
-        // Twice Fusion's 2 pixels to catch with the mouse; the line shown
-        // stays as thin as before (D-042).
+        // 8 pixels to catch with the mouse (the owner); the line shown stays
+        // as thin as before (D-042).
         handle: Item {
-            implicitWidth: Math.max(4, Math.round(4 * Appearance.factor))
+            implicitWidth: Math.max(8, Math.round(8 * Appearance.factor))
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 2
