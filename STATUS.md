@@ -2,13 +2,12 @@
 
 ## Now
 
-**Version 0.0.18**: the editor as the reference program's (D-034): Cancel, "Add ▾" and Save at the top, a row per
-field with the drag handle and "…", Field Options, sections as headings; on Windows a save is tried again briefly when
-another program holds the vault (the owner's Q37). 0.0.17 brought the item as the reference program has it (D-033).
+**Version 0.0.19**: File > Import… of the reference program's export, everything exactly as it holds it (D-035).
+Before: the editor (0.0.18, D-034) and the item (0.0.17, D-033) as the reference program has them.
 
 ## Next task
 
-In autonomous mode: 0.0.19 File > Import… of the reference program's export, then 0.0.20 website icons.
+In autonomous mode: 0.0.20, website icons (Settings > Customize > Use website icons, off by default).
 
 ## Open questions
 

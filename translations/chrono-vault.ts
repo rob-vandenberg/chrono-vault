@@ -388,6 +388,39 @@
     </message>
 </context>
 <context>
+    <name>ImportWindow</name>
+    <message>
+        <location filename="../qml/ImportWindow.qml" line="+39"/>
+        <source>Import from %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>The export holds %1 item(s), %2 attachment(s), %3 category(ies) and %4 template(s) of your own. They are added to “%5”, as they are.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Choose the export of %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>JSON exports (*.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>All files (*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ItemDetails</name>
     <message>
         <location filename="../qml/ItemDetails.qml" line="+131"/>
@@ -776,7 +809,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+53"/>
+        <location filename="../qml/Main.qml" line="+54"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -801,7 +834,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+21"/>
         <source>Preferences…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -861,7 +894,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-6"/>
+        <location line="-11"/>
+        <source>Import…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Change master password or keyfile…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -911,7 +949,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+37"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1435,7 +1473,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+172"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+173"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1921,24 +1959,24 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1338"/>
+        <location line="+1452"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1334"/>
-        <location line="+1339"/>
+        <location line="-1448"/>
+        <location line="+1453"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1249"/>
-        <location line="+1213"/>
+        <location line="-1363"/>
+        <location line="+1327"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1295"/>
+        <location line="-1409"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1950,13 +1988,13 @@
     <message>
         <location line="+28"/>
         <location line="+117"/>
-        <location line="+1092"/>
+        <location line="+1206"/>
         <location line="+149"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1303"/>
+        <location line="-1417"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1971,7 +2009,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+982"/>
+        <location line="+1096"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1986,7 +2024,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1052"/>
+        <location line="-1166"/>
         <location line="+73"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -2028,12 +2066,54 @@
     </message>
     <message>
         <location line="+74"/>
-        <location line="+450"/>
+        <location line="+564"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-310"/>
+        <location line="-481"/>
+        <source>Reading the export…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>The file could not be read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The file is too large to be an export.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This file is not an export of %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The export is damaged. Nothing was imported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Nothing was imported: choose the export again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>The attachments of this vault together may hold at most %1. Nothing was imported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+28"/>
+        <source>%n item(s) imported.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+81"/>
         <source>Give the category a name.</source>
         <translation type="unfinished"></translation>
     </message>

@@ -17,15 +17,17 @@
 #include "vault_controller.h"
 
 #include <QFile>
+#include <QSignalSpy>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.0.17
+// test_items.cpp 0.0.19
 
 // --- Version history ----------------------------------------------------
+// v0.0.19: An export imported into a vault, through the controller (D-035)
 // v0.0.17: Initial release: field history, sections and hidden fields kept, Trash and Archive, two settings (D-033)
 
 using namespace chrono_vault;
@@ -83,6 +85,7 @@ private slots:
     void sections_hidden_deleted_fields_and_the_items_own_parts_are_kept();
     void the_trash_and_the_archive_keep_their_items_apart();
     void hide_sensitive_fields_and_show_subtitles_are_kept();
+    void an_export_is_imported_whole_and_never_over_an_item();
 
 private:
     std::unique_ptr<VaultController> unlocked();
@@ -243,6 +246,63 @@ void TestItems::hide_sensitive_fields_and_show_subtitles_are_kept()
     QVERIFY(!again.showSubtitles());
     QVERIFY(again.settingsDefaults().value(QStringLiteral("hideSensitive")).toBool());
     QVERIFY(again.settingsDefaults().value(QStringLiteral("showSubtitles")).toBool());
+}
+
+void TestItems::an_export_is_imported_whole_and_never_over_an_item()
+{
+    auto controller = unlocked();
+    QVERIFY(controller);
+    const QString exportFile = folder->filePath(QStringLiteral("export.json"));
+    {
+        QFile file(exportFile);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(R"({"items":[
+            {"uuid":"6f9619ff-8b86-d011-b42d-00c04fc96401","title":"Mail","category":"login","template_type":"login.default",
+             "createdAt":1726302325,"updated_at":1785260034,"fields":[
+               {"type":"email","label":"E-mail","value":"a@example.org","order":1,"sensitive":0,"deleted":0,"uid":1},
+               {"type":"section","label":"More","value":"","order":2,"sensitive":0,"deleted":0,"uid":2},
+               {"type":"text","label":"Password","value":"x","order":3,"sensitive":1,"deleted":0,"uid":3}]},
+            {"uuid":"6f9619ff-8b86-d011-b42d-00c04fc96402","title":"Card","category":"8b0e6a3e-1c1d-4c0a-9a4b-2f4a51c0d001",
+             "category_name":"Bank cards","template_type":"8b0e6a3e-1c1d-4c0a-9a4b-2f4a51c0d002","fields":[]}]})");
+    }
+    QSignalSpy read(controller.get(), &VaultController::importRead);
+    controller->readImport(QUrl::fromLocalFile(exportFile));
+    QTRY_COMPARE(read.size(), 1);
+    const QVariantMap summary = read.first().first().toMap();
+    QVERIFY(summary.value(QStringLiteral("ok")).toBool());
+    QCOMPARE(summary.value(QStringLiteral("items")).toInt(), 2);
+    QCOMPARE(summary.value(QStringLiteral("categories")).toInt(), 1);
+    QVERIFY(controller->confirmImport());
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(titles(*controller), QStringList({"Card", "Mail"}));
+    QVERIFY(!controller->confirmImport()); // nothing waiting any more
+
+    // Imported again: everything again, the second time under new ids.
+    controller->readImport(QUrl::fromLocalFile(exportFile));
+    QTRY_COMPARE(read.size(), 2);
+    QVERIFY(controller->confirmImport());
+    lockAndUnlock(*controller);
+    QCOMPARE(titles(*controller), QStringList({"Card", "Card", "Mail", "Mail"}));
+    QCOMPARE(controller->item(QStringLiteral("6f9619ff-8b86-d011-b42d-00c04fc96401")).value(QStringLiteral("title")).toString(),
+             QStringLiteral("Mail"));
+    int bankCategories = 0;
+    for (const QVariant& category : controller->categories()) {
+        bankCategories += category.toMap().value(QStringLiteral("name")).toString() == QLatin1String("Bank cards") ? 1 : 0;
+    }
+    QCOMPARE(bankCategories, 1);
+
+    // A damaged export: said, nothing added.
+    {
+        QFile file(exportFile);
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(R"({"items":[{"title":5}]})");
+    }
+    controller->readImport(QUrl::fromLocalFile(exportFile));
+    QTRY_COMPARE(read.size(), 3);
+    QVERIFY(!read.last().first().toMap().value(QStringLiteral("ok")).toBool());
+    QVERIFY(controller->messageIsTrouble());
+    QVERIFY(!controller->confirmImport());
+    QCOMPARE(controller->items()->rowCount(), 4);
 }
 
 QTEST_MAIN(TestItems)

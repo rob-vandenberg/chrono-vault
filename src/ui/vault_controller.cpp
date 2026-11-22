@@ -44,9 +44,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.18
+// vault_controller.cpp 0.0.19
 
 // --- Version history ----------------------------------------------------
+// v0.0.19: Importing the reference program's export, read off the window's thread, added in one save (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: The reference program's fields and items for the windows: sections, field types, hide marks, hidden and
 //          deleted fields, field history; Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
@@ -962,6 +963,120 @@ void VaultController::setHideSensitive(bool hide)
         QSettings().setValue(hideSensitiveKey, hide);
         emit hideSensitiveChanged();
     }
+}
+
+void VaultController::readImport(const QUrl& file)
+{
+    const QString source = file.isLocalFile() ? file.toLocalFile() : file.toString();
+    if (currentState != State::Unlocked || source.isEmpty()) {
+        return;
+    }
+    pendingImport.reset();
+    const VaultContents snapshot = contents;
+    const quint64 session = vaultSession;
+    QPointer<VaultController> self(this);
+    say(tr("Reading the export…"), false);
+    (void)QtConcurrent::run(&filePool, [self, source, snapshot, session]() {
+        ImportResult result;
+        QFile input(source);
+        if (!input.open(QIODevice::ReadOnly)) {
+            result.status = ImportStatus::NotTheFormat;
+        } else if (input.size() > largestImportBytes) {
+            result.status = ImportStatus::TooLarge;
+        } else {
+            QByteArray json = input.read(largestImportBytes + 1);
+            result = readReferenceExport(json, snapshot);
+            crypto::wipe(json);
+        }
+        const bool readable = input.isOpen();
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, result, session, readable]() mutable {
+                if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
+                    return;
+                }
+                QVariantMap summary{{QStringLiteral("ok"), result.status == ImportStatus::Read}};
+                if (result.status != ImportStatus::Read) {
+                    const QString why = !readable ? tr("The file could not be read.")
+                                        : result.status == ImportStatus::TooLarge
+                                            ? tr("The file is too large to be an export.")
+                                        : result.status == ImportStatus::NotTheFormat
+                                            ? tr("This file is not an export of %1.").arg(referenceProgramName())
+                                            : tr("The export is damaged. Nothing was imported.");
+                    summary.insert(QStringLiteral("message"), why);
+                    self->say(why, true);
+                    emit self->importRead(summary);
+                    return;
+                }
+                summary.insert(QStringLiteral("items"), static_cast<int>(result.items.size()));
+                summary.insert(QStringLiteral("categories"), static_cast<int>(result.categories.size()));
+                summary.insert(QStringLiteral("templates"), static_cast<int>(result.templates.size()));
+                summary.insert(QStringLiteral("attachments"), result.attachmentCount);
+                self->pendingImport = std::move(result);
+                self->say(QString(), false);
+                emit self->importRead(summary);
+            },
+            Qt::QueuedConnection);
+    });
+}
+
+bool VaultController::confirmImport()
+{
+    if (currentState != State::Unlocked || !pendingImport) {
+        if (currentState == State::Unlocked) {
+            say(tr("Nothing was imported: choose the export again."), true);
+        }
+        return false;
+    }
+    ImportResult result = std::move(*pendingImport);
+    pendingImport.reset();
+    qsizetype added = 0;
+    for (const Item& one : std::as_const(result.items)) {
+        for (const Attachment& attachment : one.attachments) {
+            added += attachment.data.size();
+        }
+    }
+    if (attachmentBytes() + added > largestAttachmentsTotal) {
+        say(tr("The attachments of this vault together may hold at most %1. Nothing was imported.")
+                .arg(sizeText(largestAttachmentsTotal)),
+            true);
+        return false;
+    }
+    for (const Category& category : std::as_const(result.categories)) {
+        if (std::none_of(contents.categories.cbegin(), contents.categories.cend(),
+                         [&category](const Category& one) { return one.id == category.id; })) {
+            contents.categories.append(category);
+        }
+    }
+    for (const Template& one : std::as_const(result.templates)) {
+        if (std::none_of(contents.templates.cbegin(), contents.templates.cend(),
+                         [&one](const Template& other) { return other.id == one.id; })) {
+            contents.templates.append(one);
+        }
+    }
+    for (Item item : std::as_const(result.items)) {
+        // Everything is imported (the owner): an item whose id the vault
+        // already has gets a new one, never written over another.
+        if (std::any_of(contents.items.cbegin(), contents.items.cend(),
+                        [&item](const Item& one) { return one.id == item.id; })) {
+            item.id = QUuid::createUuid();
+        }
+        contents.items.append(item);
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    say(tr("%n item(s) imported.", nullptr, static_cast<int>(result.items.size())), false);
+    return true;
+}
+
+void VaultController::cancelImport()
+{
+    pendingImport.reset();
+}
+
+QString VaultController::referenceName() const
+{
+    return referenceProgramName();
 }
 
 bool VaultController::touchScreen() const
@@ -2262,6 +2377,7 @@ void VaultController::forgetUnlockedVault()
     }
     contents = {};
     pendingAttachments.clear();
+    pendingImport.reset();
     ++vaultSession;
     listModel.clear();
     if (!search.isEmpty()) {

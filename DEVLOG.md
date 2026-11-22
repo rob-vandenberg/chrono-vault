@@ -198,3 +198,11 @@ Review rounds for 0.0.18: Delete Field gave its window's settings to the next fi
 and "…" could not be seen (now always shown where a touch screen is present); a field added and closed without Save
 left a false unsaved change; Cancel discarded unsaved edits without asking (now it asks, OR-15). Each with a test.
 On Windows the save's brief retry ended the intermittent failure of P16: three runs in a row clean.
+
+## 22 November 2026: version 0.0.19: File > Import… of the reference program's export (autonomous mode)
+
+The importer (D-035): every item, field, section, hidden and deleted field, history, attachment, custom icon,
+category and template of the person's own, read off the window's thread, added in one save; a damaged export refused
+whole. Tested on a made-up export in the same format, and once on the owner's real export with only counts written
+for the owner to check. Two review rounds: the import window stayed open after a lock, and its Import button could
+lose its name; both fixed with a test.

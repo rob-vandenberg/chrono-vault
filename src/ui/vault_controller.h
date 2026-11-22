@@ -18,6 +18,7 @@
 #pragma once
 
 #include "item_list_model.h"
+#include "json_import.h"
 #include "vault_contents.h"
 #include "vault_file.h"
 
@@ -34,9 +35,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.18
+// vault_controller.h 0.0.19
 
 // --- Version history ----------------------------------------------------
+// v0.0.19: Importing the reference program's export (D-035)
 // v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
 // v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
@@ -226,6 +228,14 @@ public:
     // Writes an attachment of a saved item where the person chose.
     Q_INVOKABLE void saveAttachment(const QString& itemId, const QString& attachmentId, const QUrl& file);
     [[nodiscard]] Q_INVOKABLE QString sizeText(qint64 bytes) const;
+
+    // Importing the reference program's export (D-035): the file is read off
+    // the window's thread and answered by importRead with a summary; nothing
+    // joins the vault until confirmImport.
+    Q_INVOKABLE void readImport(const QUrl& file);
+    Q_INVOKABLE bool confirmImport();
+    Q_INVOKABLE void cancelImport();
+    [[nodiscard]] Q_INVOKABLE QString referenceName() const;
     // Stores the item (new or changed) and saves the vault.
     Q_INVOKABLE bool saveItem(const QVariantMap& item);
     // Deletes an item for good (from the Trash, after asking).
@@ -274,6 +284,8 @@ signals:
     void keyfileChanged();
     void keyfileMade(const QString& keyfile, bool ok);
     void masterPasswordChanged(bool ok);
+    // {ok, items, categories, templates, attachments, message}
+    void importRead(const QVariantMap& summary);
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
@@ -391,6 +403,7 @@ private:
     std::optional<CreatedVault> createdVault; // see CreatedVault
     QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
     QString returnTo;                      // the vault shown before the lock
+    std::optional<ImportResult> pendingImport; // read, waiting for the person's OK
     std::shared_ptr<Stamps> stamps = std::make_shared<Stamps>();
     QFileSystemWatcher watcher;
     bool checkPending = false;

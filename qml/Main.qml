@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.17
+// Main.qml 0.0.19
 
 // --- Version history ----------------------------------------------------
+// v0.0.19: File > Import… (D-035)
 // v0.0.17: Item > Move to Trash in place of Delete item (D-033)
 // v0.0.16: New Item shows a ring when it has the keyboard focus (P12)
 // v0.0.15: New vault and Open vault also with a vault unlocked; Change master password or keyfile (D-030, D-031)
@@ -97,6 +98,11 @@ ApplicationWindow {
                         text: qsTr("Open vault…")
                         enabled: !mainWindow.busy
                         onTriggered: mainWindow.openVault()
+                    }
+                    Action {
+                        text: qsTr("Import…")
+                        enabled: mainWindow.unlocked
+                        onTriggered: vaultPage.whenEditorFree(function() { importWindow.start() })
                     }
                     Action {
                         text: qsTr("Change master password or keyfile…")
@@ -278,6 +284,10 @@ ApplicationWindow {
             vaultPage.whenEditorFree(function() { welcomePage.openVault() })
         else
             welcomePage.openVault()
+    }
+
+    ImportWindow {
+        id: importWindow
     }
 
     MasterPasswordWindow {

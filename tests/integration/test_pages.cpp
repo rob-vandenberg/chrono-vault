@@ -29,13 +29,15 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 #include <QQuickItem>
+#include <QFile>
 #include <QQuickWindow>
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.18
+// test_pages.cpp 0.0.19
 
 // --- Version history ----------------------------------------------------
+// v0.0.19: The import window: Import, and closed by a lock (D-035)
 // v0.0.18: The editor: Field Options, Add > Section, a new field closed without Save, moving, Cancel (D-034)
 // v0.0.17: The item view: a card per section, hidden values as dots, the Trash (D-033)
 // v0.0.16: New Item shows its keyboard focus (P12)
@@ -109,6 +111,7 @@ private slots:
     void new_item_shows_when_it_has_the_keyboard_focus();
     void an_item_shows_a_card_per_section_and_hidden_values_as_dots();
     void the_editor_changes_fields_through_field_options();
+    void the_import_window_offers_import_and_closes_at_a_lock();
 };
 
 void TestPages::initTestCase()
@@ -776,6 +779,46 @@ void TestPages::the_editor_changes_fields_through_field_options()
         warningText += warning.toString() + QLatin1Char('\n');
     }
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestPages::the_import_window_offers_import_and_closes_at_a_lock()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("import.chronovault"))),
+                            QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    const QString exportFile = folder.filePath(QStringLiteral("export.json"));
+    {
+        QFile file(exportFile);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(R"({"items":[{"title":"Mail","category":"login","template_type":"login.default","fields":[]}]})");
+    }
+    QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
+    QVERIFY(importWindow);
+    importWindow->setProperty("reading", true);
+    controller->readImport(QUrl::fromLocalFile(exportFile));
+    QTRY_VERIFY(importWindow->property("opened").toBool());
+    QVariant buttonValue;
+    QVERIFY(QMetaObject::invokeMethod(importWindow, "standardButton", Q_RETURN_ARG(QVariant, buttonValue),
+                                      Q_ARG(QVariant, 0x00000400))); // Dialog.Ok
+    auto* importButton = buttonValue.value<QObject*>();
+    QVERIFY(importButton);
+    QCOMPARE(importButton->property("text").toString(), QStringLiteral("Import"));
+    QVERIFY(importButton->property("enabled").toBool());
+
+    controller->lock();
+    QTRY_VERIFY(!importWindow->property("opened").toBool());
+    controller->unlock(QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QCOMPARE(controller->items()->rowCount(), 0); // nothing imported
+    controller->lock();
 }
 
 QTEST_MAIN(TestPages)
