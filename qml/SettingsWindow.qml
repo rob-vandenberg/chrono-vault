@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.13
+// SettingsWindow.qml 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: The Customize topic: the categories and templates of the open vault (D-027)
 // v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
 // v0.0.11: Opens at 730 by 650 and is never smaller; the scaling slider's marks every 25% above it, room around it (the owner)
@@ -258,7 +259,7 @@ ApplicationWindow {
                     anchors.margins: parent.border.width
                     clip: true
                     currentIndex: 0
-                    model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard")]
+                    model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard"), qsTr("Customize")]
                     delegate: Rectangle {
                         id: topic
                         required property int index
@@ -466,6 +467,10 @@ ApplicationWindow {
                         }
                         Item { Layout.fillHeight: true }
                     }
+
+                    // Kept in the vault at once; Restore defaults leaves it as
+                    // it is (D-027).
+                    CustomizePage {}
                 }
             }
         }

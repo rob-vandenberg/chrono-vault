@@ -23,6 +23,16 @@ art/*
 !art/settings.svg
 !art/home.svg
 !art/edit.svg
+!art/item-card.svg
+!art/item-identity.svg
+!art/item-password.svg
+!art/item-finance.svg
+!art/item-computer.svg
+!art/item-misc.svg
+!art/tag.svg
+!art/star.svg
+!art/star-filled.svg
+!art/attachment.svg
 
 # The four scripts: private (OR-9, D-010)
 gitpush.sh

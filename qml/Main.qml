@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.10
+// Main.qml 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: New Item lists every category with its templates (D-027)
 // v0.0.10: The program's colours from the start (D-023); New Item a flat fill in the program's blue
 // v0.0.9: The update's windows as in Chrono Mail in place of the line at the bottom (D-024); one bar with the
 //         menus and the buttons (D-025)
@@ -52,6 +53,21 @@ ApplicationWindow {
     readonly property bool busy: VaultController.state === VaultController.Busy
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
+
+    // The categories the left column shows, each with its templates; one
+    // without a template is left out (D-027).
+    readonly property var newItemGroups: {
+        if (VaultController.revision < 0)
+            return []
+        const templates = VaultController.templates()
+        return VaultController.categories()
+            .filter(function(category) { return !category.hidden })
+            .map(function(category) {
+                return { id: category.id, name: category.name,
+                         templates: templates.filter(function(one) { return one.categoryId === category.id }) }
+            })
+            .filter(function(group) { return group.templates.length > 0 })
+    }
 
     // One bar at the top (D-025): the menus on the left, the buttons on the
     // right. What needs an unlocked vault is greyed until then.
@@ -181,15 +197,30 @@ ApplicationWindow {
                 }
                 enabled: mainWindow.unlocked
                 onClicked: newItemMenu.popup(this, 0, height)
+                // Every category shown in the left column, with its templates
+                // (D-027).
                 Menu {
                     id: newItemMenu
-                    Action {
-                        text: qsTr("Login")
-                        onTriggered: vaultPage.newLogin()
-                    }
-                    Action {
-                        text: qsTr("Secure note")
-                        onTriggered: vaultPage.newSecureNote()
+                    objectName: "newItemMenu"
+                    Instantiator {
+                        model: mainWindow.newItemGroups
+                        delegate: Menu {
+                            id: categoryMenu
+                            required property var modelData
+                            title: modelData.name
+                            Instantiator {
+                                model: categoryMenu.modelData.templates
+                                delegate: MenuItem {
+                                    required property var modelData
+                                    text: modelData.name
+                                    onTriggered: vaultPage.newItem(modelData.id)
+                                }
+                                onObjectAdded: function(index, object) { categoryMenu.insertItem(index, object) }
+                                onObjectRemoved: function(index, object) { categoryMenu.removeItem(object) }
+                            }
+                        }
+                        onObjectAdded: function(index, object) { newItemMenu.insertMenu(index, object) }
+                        onObjectRemoved: function(index, object) { newItemMenu.removeMenu(object) }
                     }
                 }
             }

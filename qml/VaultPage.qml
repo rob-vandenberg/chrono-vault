@@ -20,9 +20,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.9
+// VaultPage.qml 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: The left column narrows the list: Home, Favorites, the categories and the tags as a tree; a new item from
+//          any template (D-027, D-028)
 // v0.0.9: Three columns after the reference program: the vault, the items under letter headings, the chosen item
 //         read-only with the editor behind the pencil (D-025)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
@@ -39,19 +41,29 @@ Item {
     // The item shown or edited on the right; empty when none is chosen.
     property string chosenItemId: ""
 
-    function newLogin() {
+    // A new item from a template (D-027).
+    function newItem(templateId) {
         editor.whenFree(function() {
             itemList.currentIndex = -1
             chosenItemId = ""
-            editor.edit(VaultController.newLogin(), true)
+            editor.edit(VaultController.newItemFrom(templateId), true)
         })
     }
 
+    function newLogin() {
+        newItem("login")
+    }
+
     function newSecureNote() {
+        newItem("note")
+    }
+
+    // What the list is narrowed to (D-027, D-028); asks first about an edit
+    // not saved yet, as choosing another item does.
+    function choose(filter) {
         editor.whenFree(function() {
-            itemList.currentIndex = -1
-            chosenItemId = ""
-            editor.edit(VaultController.newSecureNote(), true)
+            editor.close()
+            VaultController.filter = filter
         })
     }
 
@@ -124,54 +136,142 @@ Item {
     SplitView {
         anchors.fill: parent
 
-        // Left: the vault, then Home (all items).
+        // Left: the vault, then Home (all items), Favorites, the categories
+        // and the tags, each narrowing the list (D-027, D-028).
         Pane {
+            id: vaultColumn
             objectName: "vaultColumn"
             SplitView.preferredWidth: Math.round(220 * Appearance.factor)
             SplitView.minimumWidth: Math.round(160 * Appearance.factor)
             padding: Math.round(12 * Appearance.factor)
 
-            ColumnLayout {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                spacing: Math.round(16 * Appearance.factor)
+            readonly property var categoryList: VaultController.revision >= 0 ? VaultController.categories() : []
+            readonly property var tagList: VaultController.revision >= 0 ? VaultController.tags() : []
 
-                RowLayout {
-                    spacing: Math.round(10 * Appearance.factor)
-                    Layout.fillWidth: true
-                    Image {
-                        source: "qrc:/icons/chrono-vault.svg"
-                        sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
-                        Layout.preferredWidth: Math.round(36 * Appearance.factor)
-                        Layout.preferredHeight: Math.round(36 * Appearance.factor)
-                    }
-                    ColumnLayout {
-                        spacing: 0
+            ScrollView {
+                id: columnScroll
+                anchors.fill: parent
+                contentWidth: availableWidth
+                clip: true
+
+                ColumnLayout {
+                    width: columnScroll.availableWidth
+                    spacing: Math.round(2 * Appearance.factor)
+
+                    RowLayout {
+                        spacing: Math.round(10 * Appearance.factor)
                         Layout.fillWidth: true
-                        Label {
-                            objectName: "vaultName"
-                            text: VaultController.vaultName
-                            textFormat: Text.PlainText
-                            font.bold: true
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
+                        Layout.bottomMargin: Math.round(14 * Appearance.factor)
+                        Image {
+                            source: "qrc:/icons/chrono-vault.svg"
+                            sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
+                            Layout.preferredWidth: Math.round(36 * Appearance.factor)
+                            Layout.preferredHeight: Math.round(36 * Appearance.factor)
                         }
-                        Label {
-                            text: qsTr("Local file")
-                            opacity: 0.7
-                            elide: Text.ElideRight
+                        ColumnLayout {
+                            spacing: 0
                             Layout.fillWidth: true
+                            Label {
+                                objectName: "vaultName"
+                                text: VaultController.vaultName
+                                textFormat: Text.PlainText
+                                font.bold: true
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: qsTr("Local file")
+                                opacity: 0.7
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
                         }
                     }
-                }
 
-                ItemDelegate {
-                    objectName: "homeEntry"
-                    text: qsTr("Home")
-                    icon.source: "qrc:/icons/home.svg"
-                    icon.color: vaultPage.palette.buttonText
-                    highlighted: true
-                    Layout.fillWidth: true
+                    ItemDelegate {
+                        objectName: "homeEntry"
+                        text: qsTr("Home")
+                        icon.source: "qrc:/icons/home.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        highlighted: VaultController.filter === ""
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("")
+                    }
+                    ItemDelegate {
+                        objectName: "favouritesEntry"
+                        text: qsTr("Favorites")
+                        icon.source: "qrc:/icons/star.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        highlighted: VaultController.filter === "favourites"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("favourites")
+                    }
+
+                    Label {
+                        text: qsTr("Categories")
+                        font.bold: true
+                        opacity: 0.7
+                        Layout.topMargin: Math.round(14 * Appearance.factor)
+                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                    }
+                    Repeater {
+                        model: vaultColumn.categoryList.filter(function(category) { return !category.hidden })
+                        delegate: ItemDelegate {
+                            required property var modelData
+                            objectName: "categoryEntry_" + modelData.id
+                            text: modelData.name
+                            icon.source: modelData.icon
+                            icon.color: "transparent"
+                            highlighted: VaultController.filter === "category:" + modelData.id
+                            Layout.fillWidth: true
+                            onClicked: vaultPage.choose("category:" + modelData.id)
+                        }
+                    }
+
+                    Label {
+                        text: qsTr("Tags")
+                        font.bold: true
+                        opacity: 0.7
+                        Layout.topMargin: Math.round(14 * Appearance.factor)
+                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                    }
+                    Label {
+                        visible: vaultColumn.tagList.length === 0
+                        text: qsTr("No tags yet.")
+                        opacity: 0.6
+                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                    }
+                    Repeater {
+                        model: vaultColumn.tagList
+                        delegate: ItemDelegate {
+                            id: tagEntry
+                            required property var modelData
+                            objectName: "tagEntry_" + modelData.tag
+                            text: modelData.name
+                            icon.source: "qrc:/icons/tag.svg"
+                            icon.color: vaultPage.palette.buttonText
+                            // A nested tag stands under the one above it.
+                            leftPadding: Math.round((8 + 16 * modelData.depth) * Appearance.factor)
+                            highlighted: VaultController.filter === "tag:" + modelData.tag
+                            Layout.fillWidth: true
+                            onClicked: vaultPage.choose("tag:" + modelData.tag)
+                            TapHandler {
+                                acceptedButtons: Qt.RightButton
+                                onTapped: tagMenu.popup()
+                            }
+                            Menu {
+                                id: tagMenu
+                                Action {
+                                    text: qsTr("Rename tag…")
+                                    onTriggered: tagDialog.ask(tagEntry.modelData.tag)
+                                }
+                                Action {
+                                    text: qsTr("Remove tag")
+                                    onTriggered: VaultController.removeTag(tagEntry.modelData.tag)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -263,7 +363,7 @@ Item {
                                 Layout.fillWidth: true
                             }
                             Label {
-                                text: model.isNote ? qsTr("Secure note") : model.subtitle
+                                text: model.subtitle
                                 textFormat: Text.PlainText
                                 color: listEntry.textColour
                                 opacity: 0.7
@@ -278,7 +378,8 @@ Item {
                 Label {
                     anchors.centerIn: parent
                     visible: itemList.count === 0
-                    text: VaultController.searchText === "" ? qsTr("No items yet.") : qsTr("Nothing found.")
+                    text: VaultController.searchText !== "" ? qsTr("Nothing found.")
+                          : VaultController.filter !== "" ? qsTr("No items here.") : qsTr("No items yet.")
                     opacity: 0.7
                 }
             }
@@ -316,5 +417,36 @@ Item {
                 }
             }
         }
+    }
+
+    // Renames a tag and the tags nested under it, in every item (D-028).
+    DialogWindow {
+        id: tagDialog
+        objectName: "tagDialog"
+        memoryName: "renameTag"
+        property string tag: ""
+        title: qsTr("Rename tag")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        function ask(chosenTag) {
+            tag = chosenTag
+            tagName.text = chosenTag
+            open()
+            tagName.forceActiveFocus()
+            tagName.selectAll()
+        }
+        ColumnLayout {
+            Label {
+                text: qsTr("A slash nests a tag under another, as in “Work/Servers”.")
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            }
+            TextField {
+                id: tagName
+                objectName: "tagNameField"
+                Layout.fillWidth: true
+                onAccepted: tagDialog.accept()
+            }
+        }
+        onAccepted: VaultController.renameTag(tag, tagName.text)
     }
 }

@@ -21,6 +21,7 @@
 #include "vault_contents.h"
 #include "vault_file.h"
 
+#include <QHash>
 #include <QObject>
 #include <QThreadPool>
 #include <QTimer>
@@ -29,9 +30,11 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.6
+// vault_controller.h 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: Categories and templates, the person's own too; tags; favourites; attachments; what the list is
+//          narrowed to (D-027, D-028, D-029)
 // v0.0.6: The settings' defaults, for Restore defaults (D-022)
 // v0.0.4: The program's version, for the window titles; the General settings; item icons
 // v0.0.3: Initial release
@@ -58,6 +61,8 @@ class VaultController : public QObject
     Q_PROPERTY(bool hasKeptChanges READ hasKeptChanges NOTIFY keptChangesChanged)
     Q_PROPERTY(ItemListModel* items READ items CONSTANT)
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
+    Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockMinutesChanged)
     Q_PROPERTY(bool keepInTray READ keepInTray WRITE setKeepInTray NOTIFY keepInTrayChanged)
     Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
@@ -90,6 +95,13 @@ public:
     [[nodiscard]] ItemListModel* items() { return &listModel; }
     [[nodiscard]] QString searchText() const { return search; }
     void setSearchText(const QString& text);
+    // What the list is narrowed to: "" (Home), "favourites", "category:<id>"
+    // or "tag:<tag>" (D-027, D-028).
+    [[nodiscard]] QString filter() const { return chosenFilter; }
+    void setFilter(const QString& filter);
+    // Goes up whenever the unlocked vault's contents change, so the windows
+    // read their lists again.
+    [[nodiscard]] int revision() const { return contentsRevision; }
     [[nodiscard]] int autoLockMinutes() const { return lockMinutes; }
     void setAutoLockMinutes(int minutes);
     // The General settings (D-019).
@@ -116,12 +128,49 @@ public:
     // Back to the start, to create or choose another vault.
     Q_INVOKABLE void closeVault();
 
-    // An item as the editor uses it: {id, isNote, title, fields: [{role,
-    // label, name, kind, value}]}. An unknown id gives an empty map.
+    // An item as the editor uses it: {id, templateId, templateName,
+    // categoryId, isNote, title, fields: [{role, label, name, kind, value}],
+    // icon, defaultIcon, tags, favourite, attachments: [{id, name, size}]}.
+    // An unknown id gives an empty map.
     [[nodiscard]] Q_INVOKABLE QVariantMap item(const QString& id) const;
     // A new item that is not in the vault until it is saved.
+    [[nodiscard]] Q_INVOKABLE QVariantMap newItemFrom(const QString& templateId) const;
     [[nodiscard]] Q_INVOKABLE QVariantMap newLogin() const;
     [[nodiscard]] Q_INVOKABLE QVariantMap newSecureNote() const;
+
+    // Categories and templates (D-027). Every category: {id, name, icon,
+    // builtIn, hidden, count}; every template: {id, name, categoryId,
+    // categoryName, builtIn, fields: [{role, label, name, kind}]}.
+    [[nodiscard]] Q_INVOKABLE QVariantList categories() const;
+    [[nodiscard]] Q_INVOKABLE QVariantList templates() const;
+    // A category of the person's own, new (empty id) or renamed: its id, or
+    // empty when it is not kept, with a message saying why.
+    Q_INVOKABLE QString saveCategory(const QString& id, const QString& name);
+    // Only a category of the person's own that no item or template uses.
+    Q_INVOKABLE bool deleteCategory(const QString& id);
+    Q_INVOKABLE void setCategoryHidden(const QString& id, bool hidden);
+    // A template of the person's own, new (empty id) or changed: {id, name,
+    // categoryId, fields: [{role, label, kind}]}. Its id, or empty.
+    Q_INVOKABLE QString saveTemplate(const QVariantMap& itemTemplate);
+    Q_INVOKABLE bool deleteTemplate(const QString& id);
+    // A copy of any template, to be changed and saved as the person's own.
+    [[nodiscard]] Q_INVOKABLE QVariantMap copyOfTemplate(const QString& id) const;
+
+    // Tags (D-028): every tag in use and every tag above one, in the order
+    // of the tree: {tag, name, depth, count}.
+    [[nodiscard]] Q_INVOKABLE QVariantList tags() const;
+    // Renames a tag, and the tags nested under it, in every item.
+    Q_INVOKABLE bool renameTag(const QString& tag, const QString& newName);
+    // Takes a tag, and the tags nested under it, off every item.
+    Q_INVOKABLE void removeTag(const QString& tag);
+    Q_INVOKABLE void setFavourite(const QString& id, bool favourite);
+
+    // Attachments (D-029). Reads a file off the window's thread; the answer
+    // comes as attachmentRead with the id returned here.
+    Q_INVOKABLE QString readAttachment(const QUrl& file);
+    // Writes an attachment of a saved item where the person chose.
+    Q_INVOKABLE void saveAttachment(const QString& itemId, const QString& attachmentId, const QUrl& file);
+    [[nodiscard]] Q_INVOKABLE QString sizeText(qint64 bytes) const;
     // Stores the item (new or changed) and saves the vault.
     Q_INVOKABLE bool saveItem(const QVariantMap& item);
     Q_INVOKABLE void deleteItem(const QString& id);
@@ -157,6 +206,10 @@ signals:
     void vaultPathChanged();
     void messageChanged();
     void searchTextChanged();
+    void filterChanged();
+    void revisionChanged();
+    // A file the person added is read (ok) or not; the id is readAttachment's.
+    void attachmentRead(const QString& requestId, const QString& name, qint64 size, bool ok);
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
     void keepInTrayChanged();
@@ -186,12 +239,17 @@ private:
     void setFailed(bool hasFailed);
     void keepUnsavedWhileLocked();
     void takeBackUnsaved();
+    // The list and every window that shows the contents are told of a change.
+    void contentsChanged();
+    [[nodiscard]] qsizetype attachmentBytes() const;
 
     State currentState = State::NoVault;
     QString path;
     QString currentMessage;
     bool trouble = false;
     QString search;
+    QString chosenFilter;
+    int contentsRevision = 0;
     int lockMinutes = 5;
     int clearSeconds = 30;
     bool keepRunning = true;
@@ -205,6 +263,11 @@ private:
 
     QThreadPool savePool;    // one thread, so saves happen in order
     QThreadPool unlockPool;  // deriving keys
+    QThreadPool filePool;    // reading and writing attachments
+    // Files added in the editor, kept until the item is saved; dropped with
+    // the unlocked vault.
+    QHash<QString, Attachment> pendingAttachments;
+    quint64 vaultSession = 0; // goes up each time the unlocked vault is put away
     int savesRunning = 0;
     bool dirty = false;
     bool failed = false;

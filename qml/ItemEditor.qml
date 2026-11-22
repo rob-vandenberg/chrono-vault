@@ -21,9 +21,11 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.9
+// ItemEditor.qml 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: Every template; fields moved up and down and removed; a field of several lines; tags; attachments
+//          (D-027, D-028, D-029)
 // v0.0.9: The delete question reachable from the Item menu (D-025)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
@@ -36,6 +38,12 @@ Item {
 
     property string itemId: ""
     property bool isNote: false
+    property string templateId: ""
+    property string categoryId: ""
+    property string defaultIcon: ""
+    property bool favourite: false
+    // Files being read for this item; their answers come from the controller.
+    property var waitingFor: []
     property bool isNew: false
     property bool changed: false
     property string icon: ""   // the item's own icon, PNG in base64; empty for the template's
@@ -51,6 +59,13 @@ Item {
     // asking whether to save them (OR-15). When the person cancels, or the
     // save does not succeed, the action is not run and "abandoned" is, if given.
     function whenFree(action, abandoned) {
+        // A file still being read would be lost by leaving now (D-029).
+        if (itemId !== "" && waitingFor.length > 0) {
+            readingDialog.open()
+            if (abandoned)
+                abandoned()
+            return
+        }
         if (itemId !== "" && changed) {
             afterAsking = action
             afterCancelling = abandoned === undefined ? null : abandoned
@@ -69,6 +84,18 @@ Item {
     function edit(map, isNewItem) {
         itemId = map.id
         isNote = map.isNote
+        templateId = map.templateId
+        categoryId = map.categoryId
+        defaultIcon = map.defaultIcon
+        favourite = map.favourite
+        waitingFor = []
+        tagsModel.clear()
+        for (let tag of map.tags)
+            tagsModel.append({ tag: tag })
+        tagField.clear()
+        attachmentsModel.clear()
+        for (let attachment of map.attachments)
+            attachmentsModel.append({ attachmentId: attachment.id, name: attachment.name, size: attachment.size })
         isNew = isNewItem
         titleField.text = map.title
         icon = map.icon
@@ -84,6 +111,10 @@ Item {
     function close() {
         itemId = ""
         fieldsModel.clear()
+        tagsModel.clear()
+        attachmentsModel.clear()
+        waitingFor = []
+        tagField.clear()
         titleField.clear()
         changed = false
         closed()
@@ -95,8 +126,17 @@ Item {
             const field = fieldsModel.get(index)
             fields.push({ role: field.role, label: field.label, kind: field.kind, value: field.value })
         }
-        if (VaultController.saveItem({ id: itemId, isNote: isNote, title: titleField.text, fields: fields,
-                                       icon: icon })) {
+        // A tag typed but not yet added with Enter counts too.
+        addTag()
+        let tags = []
+        for (let index = 0; index < tagsModel.count; ++index)
+            tags.push(tagsModel.get(index).tag)
+        let attachments = []
+        for (let index = 0; index < attachmentsModel.count; ++index)
+            attachments.push({ id: attachmentsModel.get(index).attachmentId })
+        if (VaultController.saveItem({ id: itemId, templateId: templateId, categoryId: categoryId,
+                                       title: titleField.text, fields: fields, icon: icon, tags: tags,
+                                       favourite: favourite, attachments: attachments })) {
             isNew = false
             changed = false
             titleField.text = VaultController.item(itemId).title
@@ -109,6 +149,59 @@ Item {
                              kind: kind, value: "", revealed: false })
         changed = true
     }
+
+    // Moves a field one place up (-1) or down (1).
+    function moveField(index, step) {
+        const target = index + step
+        if (target < 0 || target >= fieldsModel.count)
+            return
+        fieldsModel.move(index, target, 1)
+        changed = true
+    }
+
+    // The tag typed in the tag field, kept once (D-028).
+    function addTag() {
+        const tag = tagField.text.split("/").map(function(part) { return part.trim() })
+                            .filter(function(part) { return part !== "" }).join("/")
+        tagField.clear()
+        if (tag === "")
+            return
+        for (let index = 0; index < tagsModel.count; ++index) {
+            if (tagsModel.get(index).tag === tag)
+                return
+        }
+        tagsModel.append({ tag: tag })
+        changed = true
+    }
+
+    function removeTag(index) {
+        tagsModel.remove(index)
+        changed = true
+    }
+
+    // A file the person picked: read off the window's thread (D-029).
+    function addAttachment(file) {
+        const requestId = VaultController.readAttachment(file)
+        if (requestId !== "")
+            waitingFor = waitingFor.concat([requestId])
+    }
+
+    Connections {
+        target: VaultController
+        function onAttachmentRead(requestId, name, size, ok) {
+            const at = editor.waitingFor.indexOf(requestId)
+            if (at < 0)
+                return
+            editor.waitingFor = editor.waitingFor.filter(function(one) { return one !== requestId })
+            if (ok) {
+                attachmentsModel.append({ attachmentId: requestId, name: name, size: size })
+                editor.changed = true
+            }
+        }
+    }
+
+    ListModel { id: tagsModel }
+    ListModel { id: attachmentsModel }
 
     Timer {
         interval: 1000
@@ -145,8 +238,7 @@ Item {
 
                 Image {
                     objectName: "itemIconImage"
-                    source: editor.icon !== "" ? "data:image/png;base64," + editor.icon
-                            : (editor.isNote ? "qrc:/icons/item-note.svg" : "qrc:/icons/item-login.svg")
+                    source: editor.icon !== "" ? "data:image/png;base64," + editor.icon : editor.defaultIcon
                     sourceSize: Qt.size(Math.round(64 * Appearance.factor), Math.round(64 * Appearance.factor))
                     Layout.preferredWidth: Math.round(64 * Appearance.factor)
                     Layout.preferredHeight: Math.round(64 * Appearance.factor)
@@ -208,8 +300,23 @@ Item {
                             }
                         }
                         Item { Layout.fillWidth: true }
+                        ToolButton {
+                            objectName: "fieldUpButton"
+                            text: "↑"
+                            enabled: fieldRow.index > 0
+                            onClicked: editor.moveField(fieldRow.index, -1)
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Move the field up")
+                        }
+                        ToolButton {
+                            objectName: "fieldDownButton"
+                            text: "↓"
+                            enabled: fieldRow.index < fieldsModel.count - 1
+                            onClicked: editor.moveField(fieldRow.index, 1)
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Move the field down")
+                        }
                         Button {
-                            visible: fieldRow.isCustom
                             flat: true
                             text: qsTr("Remove field")
                             onClicked: {
@@ -302,6 +409,95 @@ Item {
                     flat: true
                     onClicked: editor.addField("password")
                 }
+                Button {
+                    text: qsTr("Add a field of several lines")
+                    flat: true
+                    onClicked: editor.addField("multiline")
+                }
+            }
+
+            // Tags (D-028): each shown with a cross to take it off; a new one
+            // typed below, a slash nesting it under another.
+            Label {
+                text: qsTr("Tags")
+                opacity: 0.8
+                Layout.topMargin: Math.round(6 * Appearance.factor)
+            }
+            Flow {
+                Layout.fillWidth: true
+                spacing: Math.round(6 * Appearance.factor)
+                visible: tagsModel.count > 0
+                Repeater {
+                    model: tagsModel
+                    delegate: Button {
+                        required property int index
+                        required property string tag
+                        objectName: "tagChip"
+                        text: tag + "  ×"
+                        flat: true
+                        onClicked: editor.removeTag(index)
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Remove this tag")
+                    }
+                }
+            }
+            TextField {
+                id: tagField
+                objectName: "tagField"
+                placeholderText: qsTr("Add a tag, for example Work/Servers, and press Enter")
+                Layout.fillWidth: true
+                onAccepted: editor.addTag()
+            }
+
+            // Attachments (D-029): kept inside the vault, sealed.
+            Label {
+                text: qsTr("Attachments")
+                opacity: 0.8
+                Layout.topMargin: Math.round(6 * Appearance.factor)
+            }
+            Repeater {
+                model: attachmentsModel
+                delegate: RowLayout {
+                    required property int index
+                    required property string name
+                    required property double size
+                    Layout.fillWidth: true
+                    Image {
+                        source: "qrc:/icons/attachment.svg"
+                        sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
+                    }
+                    Label {
+                        text: name
+                        textFormat: Text.PlainText
+                        elide: Text.ElideMiddle
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: VaultController.sizeText(size)
+                        opacity: 0.7
+                    }
+                    Button {
+                        flat: true
+                        text: qsTr("Remove")
+                        onClicked: {
+                            attachmentsModel.remove(index)
+                            editor.changed = true
+                        }
+                    }
+                }
+            }
+            RowLayout {
+                Button {
+                    objectName: "addAttachmentButton"
+                    text: qsTr("Add attachment…")
+                    flat: true
+                    onClicked: attachmentDialog.open()
+                }
+                Label {
+                    visible: editor.waitingFor.length > 0
+                    text: qsTr("Reading the file…")
+                    opacity: 0.7
+                }
             }
 
             RowLayout {
@@ -309,7 +505,8 @@ Item {
                 Button {
                     text: qsTr("Save")
                     highlighted: true
-                    enabled: editor.changed || editor.isNew
+                    // Not while a file is still being read: it would be left out.
+                    enabled: (editor.changed || editor.isNew) && editor.waitingFor.length === 0
                     onClicked: editor.store()
                 }
                 Button {
@@ -340,6 +537,13 @@ Item {
                 editor.changed = true
             }
         }
+    }
+
+    FileDialog {
+        id: attachmentDialog
+        title: qsTr("Add an attachment")
+        fileMode: FileDialog.OpenFile
+        onAccepted: editor.addAttachment(selectedFile)
     }
 
     GeneratorDialog {
@@ -396,6 +600,21 @@ Item {
             editor.afterCancelling = null
             if (abandoned)
                 abandoned()
+        }
+    }
+
+    DialogWindow {
+        id: readingDialog
+        objectName: "readingDialog"
+        memoryName: "readingAttachment"
+        title: qsTr("A file is being read")
+        standardButtons: Dialog.Ok
+        ColumnLayout {
+            Label {
+                text: qsTr("The file you added is still being read. Try again in a moment.")
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            }
         }
     }
 

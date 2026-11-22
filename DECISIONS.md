@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twenty-six decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Twenty-nine decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update,, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, and --reset.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, and attachments.
 
 | Decision | What it settles |
 |---|---|
@@ -23,7 +23,7 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-012](decisions/D-012.md) | The source layout: the vault core in plain C++ apart from the QML windows; Qt 6.8 or newer; strict warnings and a sanitizer build |
 | [D-013](decisions/D-013.md) | The encryption: OpenSSL 3, Argon2id for the key, AES-256-GCM for the vault |
 | [D-014](decisions/D-014.md) | The vault file: a sealed header and contents, refused whole when damaged, every save safe (autonomous mode) |
-| [D-015](decisions/D-015.md) | What a vault holds: items, Login and Secure note templates, built-in and custom fields, JSON inside the seal (autonomous mode) |
+| [D-015](decisions/D-015.md) | What a vault holds: items, templates, built-in and custom fields, JSON inside the seal; contents format 3 since 0.0.14 (autonomous mode) |
 | [D-016](decisions/D-016.md) | The windows of the first version: start, unlock, list and editor, saving at once, copying and auto-lock (autonomous mode) |
 | [D-017](decisions/D-017.md) | Chrono Vault's own look: Qt's Fusion style, the Noto fonts carried inside, the version in every title |
 | [D-018](decisions/D-018.md) | Item icons: picked by the person, stored in the vault as 64-pixel PNG, contents format 2 |
@@ -35,3 +35,6 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-024](decisions/D-024.md) | The update's windows as in Chrono Mail: the popup with Skip this update, Update downloaded, Restart or Close |
 | [D-025](decisions/D-025.md) | The main window after the reference program: menus and buttons on one bar, three columns, the item read-only |
 | [D-026](decisions/D-026.md) | `--reset`: the settings window's settings not read from the settings file at that start |
+| [D-027](decisions/D-027.md) | Categories and templates: eight built-in categories with thirteen templates, the person's own kept in the vault, Settings > Customize (autonomous mode) |
+| [D-028](decisions/D-028.md) | Tags nested with a slash, shown as a tree; favourites marked with a star (autonomous mode) |
+| [D-029](decisions/D-029.md) | Attachments inside the vault, 5 MB each and 150 MB together, only saved where the person chooses (autonomous mode) |

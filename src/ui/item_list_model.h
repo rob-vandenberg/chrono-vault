@@ -23,17 +23,19 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.0.9
+// item_list_model.h 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template (D-027, D-028)
 // v0.0.9: The letter an item is grouped under (D-025)
 // v0.0.4: The item's icon
 // v0.0.3: Initial release
 
 namespace chrono_vault {
 
-// The items of the unlocked vault as the list on the left shows them: sorted
-// by title, narrowed by the search text.
+// The items of the unlocked vault as the list in the middle shows them:
+// sorted by title, narrowed by what is chosen on the left (everything, the
+// favourites, a category or a tag) and by the search text.
 class ItemListModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -41,7 +43,7 @@ class ItemListModel : public QAbstractListModel
     QML_UNCREATABLE("The controller owns the list")
 
 public:
-    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole, InitialRole };
+    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole, InitialRole, FavouriteRole };
 
     explicit ItemListModel(QObject* parent = nullptr);
 
@@ -49,8 +51,11 @@ public:
     [[nodiscard]] QVariant data(const QModelIndex& index, int role) const override;
     [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
-    void setItems(const QList<Item>& items);
+    void setContents(const VaultContents& contents);
     void setSearchText(const QString& text);
+    // "" for every item, "favourites", "category:<id>" or "tag:<tag>"; a
+    // tag also shows the items of the tags nested under it (D-028).
+    void setFilter(const QString& filter);
     void clear();
 
     // The row of the item with this id, or -1.
@@ -59,9 +64,12 @@ public:
 private:
     void rebuild();
 
-    QList<Item> allItems;
+    [[nodiscard]] bool passesFilter(const Item& item) const;
+
+    VaultContents allContents;
     QList<Item> shownItems;
     QString search;
+    QString chosen;
 };
 
 } // namespace chrono_vault

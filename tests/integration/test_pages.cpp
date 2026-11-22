@@ -29,11 +29,14 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 #include <QQuickItem>
+#include <QQuickWindow>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.9
+// test_pages.cpp 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: New Item's categories, a tag typed in the editor, the left column, the star, Settings > Customize and the
+//          template editor (D-027, D-028)
 // v0.0.9: One bar with the menus and the buttons; three columns; the item read-only, the pencil opening the editor
 // v0.0.5: A quit for an update waits for the editor and goes on, or is abandoned by Cancel
 // v0.0.4: Chrono Vault's own style; the window shown as the program shows it
@@ -43,6 +46,27 @@ Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
 
 using namespace chrono_vault;
 using State = VaultController::State;
+
+namespace {
+
+// An item a Repeater made, which is in the tree of items but not of objects.
+QQuickItem* visualItem(QQuickItem* root, const QString& name)
+{
+    if (!root) {
+        return nullptr;
+    }
+    if (root->objectName() == name) {
+        return root;
+    }
+    for (QQuickItem* child : root->childItems()) {
+        if (QQuickItem* found = visualItem(child, name)) {
+            return found;
+        }
+    }
+    return nullptr;
+}
+
+} // namespace
 
 // The pages themselves, driven as a person would: a new login is made in
 // the editor, given a field of its own, saved and closed, and the vault is
@@ -58,6 +82,8 @@ private slots:
     void the_main_window_has_one_bar_and_three_columns();
     void a_quit_for_an_update_waits_for_the_editor_and_goes_on();
     void unsaved_changes_are_asked_about_and_kept_through_a_lock();
+    void categories_tags_favourites_and_templates_work_from_the_windows();
+    void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
 };
 
 void TestPages::initTestCase()
@@ -322,6 +348,147 @@ void TestPages::the_main_window_has_one_bar_and_three_columns()
     QTRY_COMPARE(page->property("chosenItemId").toString(), QString());
     QVERIFY(!details->property("visible").toBool());
     QCOMPARE(controller->items()->rowCount(), 0);
+}
+
+void TestPages::categories_tags_favourites_and_templates_work_from_the_windows()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("customize.chronovault"))),
+                            QStringLiteral("master"), QStringLiteral("master"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    // New Item offers every category with templates: eight.
+    QObject* newItemMenu = window->findChild<QObject*>(QStringLiteral("newItemMenu"));
+    QVERIFY(newItemMenu);
+    QTRY_COMPARE(newItemMenu->property("count").toInt(), 8);
+
+    // A credit card with a tag typed in the editor, not yet added with Enter.
+    QObject* vaultPage = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QObject* tagField = window->findChild<QObject*>(QStringLiteral("tagField"));
+    QVERIFY(vaultPage && editor && tagField);
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newItem", Q_ARG(QVariant, QStringLiteral("card"))));
+    QCOMPARE(editor->property("categoryId").toString(), QStringLiteral("card"));
+    tagField->setProperty("text", QStringLiteral(" Money / Cards "));
+    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->tags().size(), 2);
+    const QString itemId = editor->property("itemId").toString();
+    QCOMPARE(controller->item(itemId).value(QStringLiteral("tags")).toStringList(),
+             QStringList{QStringLiteral("Money/Cards")});
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+
+    // The left column narrows the list; the tag tree shows the nested tag.
+    auto* quickWindow = qobject_cast<QQuickWindow*>(window);
+    QVERIFY(quickWindow);
+    QTRY_VERIFY(visualItem(quickWindow->contentItem(), QStringLiteral("tagEntry_Money/Cards")) != nullptr);
+    QVERIFY(visualItem(quickWindow->contentItem(), QStringLiteral("categoryEntry_card")) != nullptr);
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "choose", Q_ARG(QVariant, QStringLiteral("category:login"))));
+    QCOMPARE(controller->filter(), QStringLiteral("category:login"));
+    QCOMPARE(controller->items()->rowCount(), 0);
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "choose", Q_ARG(QVariant, QStringLiteral("tag:Money"))));
+    QCOMPARE(controller->items()->rowCount(), 1);
+
+    // The star marks it a favourite.
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "showItem", Q_ARG(QVariant, itemId)));
+    QObject* star = window->findChild<QObject*>(QStringLiteral("favouriteButton"));
+    QVERIFY(star);
+    QVERIFY(QMetaObject::invokeMethod(star, "clicked"));
+    QVERIFY(controller->item(itemId).value(QStringLiteral("favourite")).toBool());
+
+    // Settings > Customize: a new template, named, kept in the vault.
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QObject* topics = settings->findChild<QObject*>(QStringLiteral("topics"));
+    QVERIFY(topics);
+    topics->setProperty("currentIndex", 3);
+    QObject* newTemplate = settings->findChild<QObject*>(QStringLiteral("newTemplateButton"));
+    QObject* templateEditor = settings->findChild<QObject*>(QStringLiteral("templateEditor"));
+    QVERIFY(newTemplate && templateEditor);
+    QVERIFY(QMetaObject::invokeMethod(newTemplate, "clicked"));
+    QTRY_VERIFY(templateEditor->property("opened").toBool());
+    QObject* nameField = templateEditor->findChild<QObject*>(QStringLiteral("templateNameField"));
+    QVERIFY(nameField);
+    // Without a name it stays open, nothing typed lost.
+    QVERIFY(QMetaObject::invokeMethod(templateEditor, "accept"));
+    QTRY_VERIFY(templateEditor->property("opened").toBool());
+    nameField->setProperty("text", QStringLiteral("Car"));
+    QVERIFY(QMetaObject::invokeMethod(templateEditor, "accept"));
+    QTRY_VERIFY(!templateEditor->property("opened").toBool());
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->templates().size(), 14);
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
+
+    controller->lock();
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestPages::a_file_still_being_read_is_never_lost_by_leaving_the_editor()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    const QString source = folder.filePath(QStringLiteral("scan.txt"));
+    {
+        QFile file(source);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("the scan");
+    }
+
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("reading.chronovault"))),
+                            QStringLiteral("master"), QStringLiteral("master"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    QObject* vaultPage = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QObject* readingDialog = window->findChild<QObject*>(QStringLiteral("readingDialog"));
+    QVERIFY(vaultPage && editor && readingDialog);
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newItem", Q_ARG(QVariant, QStringLiteral("passport"))));
+    const QString itemId = editor->property("itemId").toString();
+
+    // Leaving while the file is read is held up and said; the item stays open.
+    QVERIFY(QMetaObject::invokeMethod(editor, "addAttachment", Q_ARG(QVariant, QUrl::fromLocalFile(source))));
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newLogin"));
+    QTRY_VERIFY(readingDialog->property("opened").toBool());
+    QCOMPARE(editor->property("itemId").toString(), itemId);
+    QVERIFY(QMetaObject::invokeMethod(readingDialog, "accept"));
+
+    // Once read, it is there, and saved with the item.
+    QTRY_COMPARE(editor->property("waitingFor").toList().size(), 0);
+    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->item(itemId).value(QStringLiteral("attachments")).toList().size(), 1);
+
+    controller->lock();
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
 }
 
 QTEST_MAIN(TestPages)

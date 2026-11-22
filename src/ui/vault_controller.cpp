@@ -22,12 +22,17 @@
 #include "autostart.h"
 #include "item_icons.h"
 #include "password_generator.h"
+#include "templates.h"
 #include "totp.h"
 #include "version.h"
 
 #include <QClipboard>
+#include <QCollator>
 #include <QDateTime>
+#include <QFile>
 #include <QFileInfo>
+#include <QLocale>
+#include <QSaveFile>
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QPointer>
@@ -38,9 +43,11 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.12
+// vault_controller.cpp 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: Categories and templates, the person's own too; tags; favourites; attachments, read and written off the
+//          window's thread; the contents put into words off the window's thread when saved (D-027 to D-029, OR-5)
 // v0.0.12: --reset: the settings not read at the start (D-026)
 // v0.0.10: The tray and start settings no longer in a group named general, their old values carried over (D-019)
 // v0.0.6: The settings' defaults, for Restore defaults (D-022)
@@ -118,25 +125,90 @@ FieldKind kindFromName(const QString& name)
     return FieldKind::Text;
 }
 
-QVariantMap toMap(const Item& item)
+QVariantList fieldsToList(const QList<Field>& fields, bool withValues)
 {
-    QVariantList fields;
-    for (const Field& field : item.fields) {
-        fields.append(QVariantMap{
+    QVariantList list;
+    for (const Field& field : fields) {
+        QVariantMap map{
             {QStringLiteral("role"), field.role},
             {QStringLiteral("label"), field.label},
             {QStringLiteral("name"), field.isCustom() ? field.label : roleName(field.role)},
             {QStringLiteral("kind"), kindName(field.kind)},
-            {QStringLiteral("value"), field.value},
+        };
+        if (withValues) {
+            map.insert(QStringLiteral("value"), field.value);
+        }
+        list.append(map);
+    }
+    return list;
+}
+
+// The fields as the editors give them back; a custom field without a name
+// gets one.
+QList<Field> fieldsFromList(const QVariantList& list, bool withValues)
+{
+    QList<Field> fields;
+    for (const QVariant& value : list) {
+        const QVariantMap fieldMap = value.toMap();
+        Field field;
+        field.role = fieldMap.value(QStringLiteral("role")).toString();
+        field.label = field.role.isEmpty() ? fieldMap.value(QStringLiteral("label")).toString().trimmed() : QString();
+        if (field.role.isEmpty() && field.label.isEmpty()) {
+            field.label = QCoreApplication::translate("VaultController", "Field");
+        }
+        field.kind = kindFromName(fieldMap.value(QStringLiteral("kind")).toString());
+        if (withValues) {
+            field.value = fieldMap.value(QStringLiteral("value")).toString();
+        }
+        fields.append(field);
+    }
+    return fields;
+}
+
+QVariantMap toMap(const Item& item, const VaultContents& contents)
+{
+    QVariantList attachments;
+    for (const Attachment& attachment : item.attachments) {
+        attachments.append(QVariantMap{
+            {QStringLiteral("id"), attachment.id.toString(QUuid::WithoutBraces)},
+            {QStringLiteral("name"), attachment.name},
+            {QStringLiteral("size"), static_cast<qint64>(attachment.data.size())},
         });
     }
+    const auto itemTemplate = findTemplate(item.templateId, contents);
     return {
         {QStringLiteral("id"), item.id.toString(QUuid::WithoutBraces)},
-        {QStringLiteral("isNote"), item.itemTemplate == ItemTemplate::SecureNote},
+        {QStringLiteral("templateId"), item.templateId},
+        {QStringLiteral("templateName"),
+         itemTemplate ? templateName(*itemTemplate) : categoryName(item.categoryId, contents)},
+        {QStringLiteral("categoryId"), item.categoryId},
+        {QStringLiteral("isNote"), item.categoryId == QLatin1String("note")},
         {QStringLiteral("title"), item.title},
-        {QStringLiteral("fields"), fields},
+        {QStringLiteral("fields"), fieldsToList(item.fields, true)},
         {QStringLiteral("icon"), QString::fromLatin1(item.icon.toBase64())},
+        {QStringLiteral("defaultIcon"), categoryIconSource(item.categoryId)},
+        {QStringLiteral("tags"), item.tags},
+        {QStringLiteral("favourite"), item.favourite},
+        {QStringLiteral("attachments"), attachments},
     };
+}
+
+QVariantMap templateToMap(const Template& itemTemplate, const VaultContents& contents)
+{
+    return {
+        {QStringLiteral("id"), itemTemplate.id},
+        {QStringLiteral("name"), templateName(itemTemplate)},
+        {QStringLiteral("categoryId"), itemTemplate.categoryId},
+        {QStringLiteral("categoryName"), categoryName(itemTemplate.categoryId, contents)},
+        {QStringLiteral("builtIn"), itemTemplate.builtIn},
+        {QStringLiteral("fields"), fieldsToList(itemTemplate.fields, false)},
+    };
+}
+
+// Whether a tag is this one, or nested under it.
+bool isUnder(const QString& tag, const QString& top)
+{
+    return tag == top || tag.startsWith(top + QLatin1Char('/'));
 }
 
 QString openStatusText(OpenStatus status)
@@ -183,6 +255,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
 {
     savePool.setMaxThreadCount(1);
     unlockPool.setMaxThreadCount(1);
+    filePool.setMaxThreadCount(1);
 
     QSettings settings;
     carryOverOldNames(settings);
@@ -231,6 +304,7 @@ VaultController::~VaultController()
 {
     savePool.waitForDone();
     unlockPool.waitForDone();
+    filePool.waitForDone();
     forgetUnlockedVault();
 }
 
@@ -364,7 +438,7 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
                 self->setPath(newPath);
                 self->key = newKey;
                 self->contents = {};
-                self->listModel.setItems({});
+                self->contentsChanged();
                 self->say(tr("Your new vault is ready."), false);
                 self->setState(State::Unlocked);
             },
@@ -440,7 +514,7 @@ void VaultController::unlock(const QString& password)
                 self->contents = read.contents;
                 self->say(QString(), false);
                 self->takeBackUnsaved();
-                self->listModel.setItems(self->contents.items);
+                self->contentsChanged();
                 self->setState(State::Unlocked);
             },
             Qt::QueuedConnection);
@@ -479,20 +553,26 @@ QVariantMap VaultController::item(const QString& id) const
 {
     for (const Item& one : contents.items) {
         if (one.id.toString(QUuid::WithoutBraces) == id) {
-            return toMap(one);
+            return toMap(one, contents);
         }
     }
     return {};
 }
 
+QVariantMap VaultController::newItemFrom(const QString& templateId) const
+{
+    const auto itemTemplate = findTemplate(templateId, contents);
+    return itemTemplate ? toMap(newItem(*itemTemplate), contents) : QVariantMap();
+}
+
 QVariantMap VaultController::newLogin() const
 {
-    return toMap(newItem(ItemTemplate::Login));
+    return newItemFrom(QStringLiteral("login"));
 }
 
 QVariantMap VaultController::newSecureNote() const
 {
-    return toMap(newItem(ItemTemplate::SecureNote));
+    return newItemFrom(QStringLiteral("note"));
 }
 
 bool VaultController::saveItem(const QVariantMap& map)
@@ -504,31 +584,73 @@ bool VaultController::saveItem(const QVariantMap& map)
     if (id.isNull()) {
         return false;
     }
-    Item changed;
-    changed.id = id;
-    changed.itemTemplate =
-        map.value(QStringLiteral("isNote")).toBool() ? ItemTemplate::SecureNote : ItemTemplate::Login;
-    changed.title = map.value(QStringLiteral("title")).toString().trimmed();
-    if (changed.title.isEmpty()) {
-        changed.title = changed.itemTemplate == ItemTemplate::SecureNote ? tr("Untitled note") : tr("Untitled login");
-    }
-    for (const QVariant& value : map.value(QStringLiteral("fields")).toList()) {
-        const QVariantMap fieldMap = value.toMap();
-        Field field;
-        field.role = fieldMap.value(QStringLiteral("role")).toString();
-        field.label = field.role.isEmpty() ? fieldMap.value(QStringLiteral("label")).toString().trimmed() : QString();
-        if (field.role.isEmpty() && field.label.isEmpty()) {
-            field.label = tr("Field");
-        }
-        field.kind = kindFromName(fieldMap.value(QStringLiteral("kind")).toString());
-        field.value = fieldMap.value(QStringLiteral("value")).toString();
-        changed.fields.append(field);
-    }
-    changed.icon = QByteArray::fromBase64(map.value(QStringLiteral("icon")).toString().toLatin1());
-    changed.modified = QDateTime::currentDateTimeUtc();
-
     const auto existing = std::find_if(contents.items.begin(), contents.items.end(),
                                        [&id](const Item& one) { return one.id == id; });
+    Item changed;
+    changed.id = id;
+    changed.templateId = map.value(QStringLiteral("templateId")).toString();
+    changed.categoryId = map.value(QStringLiteral("categoryId")).toString();
+    if (changed.templateId.isEmpty()) {
+        changed.templateId = QStringLiteral("login");
+    }
+    if (changed.categoryId.isEmpty()) {
+        const auto itemTemplate = findTemplate(changed.templateId, contents);
+        changed.categoryId = itemTemplate ? itemTemplate->categoryId : QStringLiteral("misc");
+    }
+    changed.title = map.value(QStringLiteral("title")).toString().trimmed();
+    if (changed.title.isEmpty()) {
+        changed.title = changed.categoryId == QLatin1String("note")    ? tr("Untitled note")
+                        : changed.categoryId == QLatin1String("login") ? tr("Untitled login")
+                                                                        : tr("Untitled item");
+    }
+    changed.fields = fieldsFromList(map.value(QStringLiteral("fields")).toList(), true);
+    changed.icon = QByteArray::fromBase64(map.value(QStringLiteral("icon")).toString().toLatin1());
+    for (const QString& tag : map.value(QStringLiteral("tags")).toStringList()) {
+        const QString kept = normalizedTag(tag);
+        if (!kept.isEmpty() && !changed.tags.contains(kept)) {
+            changed.tags.append(kept);
+        }
+    }
+    changed.favourite = map.value(QStringLiteral("favourite")).toBool();
+
+    // The attachments: those the item had, and files added in the editor.
+    QStringList usedPending;
+    for (const QVariant& value : map.value(QStringLiteral("attachments")).toList()) {
+        const QString attachmentId = value.toMap().value(QStringLiteral("id")).toString();
+        if (const auto pending = pendingAttachments.constFind(attachmentId); pending != pendingAttachments.constEnd()) {
+            changed.attachments.append(pending.value());
+            usedPending.append(attachmentId);
+            continue;
+        }
+        if (existing == contents.items.end()) {
+            continue;
+        }
+        for (const Attachment& attachment : std::as_const(existing->attachments)) {
+            if (attachment.id.toString(QUuid::WithoutBraces) == attachmentId) {
+                changed.attachments.append(attachment);
+            }
+        }
+    }
+    qsizetype total = attachmentBytes();
+    if (existing != contents.items.end()) {
+        for (const Attachment& attachment : std::as_const(existing->attachments)) {
+            total -= attachment.data.size();
+        }
+    }
+    for (const Attachment& attachment : std::as_const(changed.attachments)) {
+        total += attachment.data.size();
+    }
+    if (total > largestAttachmentsTotal) {
+        say(tr("The attachments of this vault together may hold at most %1. Remove an attachment first.")
+                .arg(sizeText(largestAttachmentsTotal)),
+            true);
+        return false;
+    }
+    for (const QString& used : std::as_const(usedPending)) {
+        pendingAttachments.remove(used);
+    }
+    changed.modified = QDateTime::currentDateTimeUtc();
+
     if (existing != contents.items.end()) {
         changed.created = existing->created;
         *existing = changed;
@@ -536,7 +658,7 @@ bool VaultController::saveItem(const QVariantMap& map)
         changed.created = changed.modified;
         contents.items.append(changed);
     }
-    listModel.setItems(contents.items);
+    contentsChanged();
     saveInBackground(id.toString(QUuid::WithoutBraces));
     return true;
 }
@@ -553,8 +675,451 @@ void VaultController::deleteItem(const QString& id)
         return;
     }
     contents.items.erase(removed, contents.items.end());
-    listModel.setItems(contents.items);
+    contentsChanged();
     saveInBackground(QString());
+}
+
+void VaultController::setFilter(const QString& filter)
+{
+    if (chosenFilter != filter) {
+        chosenFilter = filter;
+        listModel.setFilter(filter);
+        emit filterChanged();
+    }
+}
+
+QVariantList VaultController::categories() const
+{
+    QStringList ids = builtInCategoryIds();
+    for (const Category& category : contents.categories) {
+        ids.append(category.id);
+    }
+    QVariantList list;
+    for (const QString& id : std::as_const(ids)) {
+        const auto count = std::count_if(contents.items.cbegin(), contents.items.cend(),
+                                         [&id](const Item& one) { return one.categoryId == id; });
+        list.append(QVariantMap{
+            {QStringLiteral("id"), id},
+            {QStringLiteral("name"), categoryName(id, contents)},
+            {QStringLiteral("icon"), categoryIconSource(id)},
+            {QStringLiteral("builtIn"), isBuiltInCategory(id)},
+            {QStringLiteral("hidden"), contents.hiddenCategories.contains(id)},
+            {QStringLiteral("count"), static_cast<int>(count)},
+        });
+    }
+    return list;
+}
+
+QVariantList VaultController::templates() const
+{
+    QVariantList list;
+    for (const Template& one : builtInTemplates()) {
+        list.append(templateToMap(one, contents));
+    }
+    for (const Template& one : contents.templates) {
+        list.append(templateToMap(one, contents));
+    }
+    return list;
+}
+
+QString VaultController::saveCategory(const QString& id, const QString& name)
+{
+    if (currentState != State::Unlocked || isBuiltInCategory(id)) {
+        return {};
+    }
+    const QString kept = name.simplified();
+    if (kept.isEmpty()) {
+        say(tr("Give the category a name."), true);
+        return {};
+    }
+    for (const QString& other : builtInCategoryIds()) {
+        if (categoryName(other, contents).compare(kept, Qt::CaseInsensitive) == 0) {
+            say(tr("There is already a category with that name."), true);
+            return {};
+        }
+    }
+    for (const Category& other : std::as_const(contents.categories)) {
+        if (other.id != id && other.name.compare(kept, Qt::CaseInsensitive) == 0) {
+            say(tr("There is already a category with that name."), true);
+            return {};
+        }
+    }
+    QString keptId = id;
+    const auto found = std::find_if(contents.categories.begin(), contents.categories.end(),
+                                    [&id](const Category& one) { return one.id == id; });
+    if (id.isEmpty() || found == contents.categories.end()) {
+        keptId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        contents.categories.append(Category{keptId, kept});
+    } else {
+        found->name = kept;
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    return keptId;
+}
+
+bool VaultController::deleteCategory(const QString& id)
+{
+    if (currentState != State::Unlocked || isBuiltInCategory(id)) {
+        return false;
+    }
+    const bool usedByItem = std::any_of(contents.items.cbegin(), contents.items.cend(),
+                                        [&id](const Item& one) { return one.categoryId == id; });
+    const bool usedByTemplate = std::any_of(contents.templates.cbegin(), contents.templates.cend(),
+                                            [&id](const Template& one) { return one.categoryId == id; });
+    if (usedByItem || usedByTemplate) {
+        say(tr("This category still holds items or templates. Move or delete them first."), true);
+        return false;
+    }
+    const auto removed = std::remove_if(contents.categories.begin(), contents.categories.end(),
+                                        [&id](const Category& one) { return one.id == id; });
+    if (removed == contents.categories.end()) {
+        return false;
+    }
+    contents.categories.erase(removed, contents.categories.end());
+    contents.hiddenCategories.removeAll(id);
+    if (chosenFilter == QLatin1String("category:") + id) {
+        setFilter(QString());
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    return true;
+}
+
+void VaultController::setCategoryHidden(const QString& id, bool hidden)
+{
+    if (currentState != State::Unlocked || contents.hiddenCategories.contains(id) == hidden) {
+        return;
+    }
+    if (hidden) {
+        contents.hiddenCategories.append(id);
+        if (chosenFilter == QLatin1String("category:") + id) {
+            setFilter(QString());
+        }
+    } else {
+        contents.hiddenCategories.removeAll(id);
+    }
+    contentsChanged();
+    saveInBackground(QString());
+}
+
+QString VaultController::saveTemplate(const QVariantMap& map)
+{
+    QString id = map.value(QStringLiteral("id")).toString();
+    if (currentState != State::Unlocked) {
+        return {};
+    }
+    for (const Template& builtIn : builtInTemplates()) {
+        if (builtIn.id == id) {
+            return {}; // a built-in template is never changed (D-027)
+        }
+    }
+    Template changed;
+    changed.name = map.value(QStringLiteral("name")).toString().simplified();
+    if (changed.name.isEmpty()) {
+        say(tr("Give the template a name."), true);
+        return {};
+    }
+    changed.categoryId = map.value(QStringLiteral("categoryId")).toString();
+    const bool categoryExists =
+        isBuiltInCategory(changed.categoryId) ||
+        std::any_of(contents.categories.cbegin(), contents.categories.cend(),
+                    [&changed](const Category& one) { return one.id == changed.categoryId; });
+    if (!categoryExists) {
+        changed.categoryId = QStringLiteral("misc");
+    }
+    changed.fields = fieldsFromList(map.value(QStringLiteral("fields")).toList(), false);
+    const auto found = std::find_if(contents.templates.begin(), contents.templates.end(),
+                                    [&id](const Template& one) { return one.id == id; });
+    if (id.isEmpty() || found == contents.templates.end()) {
+        id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        changed.id = id;
+        contents.templates.append(changed);
+    } else {
+        changed.id = id;
+        *found = changed;
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    return id;
+}
+
+bool VaultController::deleteTemplate(const QString& id)
+{
+    if (currentState != State::Unlocked) {
+        return false;
+    }
+    // Items made from it keep their fields; only the template goes (D-027).
+    const auto removed = std::remove_if(contents.templates.begin(), contents.templates.end(),
+                                        [&id](const Template& one) { return one.id == id; });
+    if (removed == contents.templates.end()) {
+        return false;
+    }
+    contents.templates.erase(removed, contents.templates.end());
+    contentsChanged();
+    saveInBackground(QString());
+    return true;
+}
+
+QVariantMap VaultController::copyOfTemplate(const QString& id) const
+{
+    const auto original = findTemplate(id, contents);
+    if (!original) {
+        return {};
+    }
+    Template copy = *original;
+    copy.id.clear();
+    copy.builtIn = false;
+    copy.name = tr("Copy of %1").arg(templateName(*original));
+    return templateToMap(copy, contents);
+}
+
+QVariantList VaultController::tags() const
+{
+    QHash<QString, int> counts;
+    for (const Item& one : contents.items) {
+        QStringList itsTags;
+        for (const QString& tag : one.tags) {
+            // The tag and every tag above it, each counted once per item.
+            QStringList parts = tag.split(QLatin1Char('/'));
+            while (!parts.isEmpty()) {
+                const QString tagPath = parts.join(QLatin1Char('/'));
+                if (!itsTags.contains(tagPath)) {
+                    itsTags.append(tagPath);
+                }
+                parts.removeLast();
+            }
+        }
+        for (const QString& tagPath : std::as_const(itsTags)) {
+            ++counts[tagPath];
+        }
+    }
+    QStringList paths = counts.keys();
+    QCollator collator;
+    collator.setCaseSensitivity(Qt::CaseInsensitive);
+    collator.setNumericMode(true);
+    std::sort(paths.begin(), paths.end(), [&collator](const QString& left, const QString& right) {
+        const QStringList leftParts = left.split(QLatin1Char('/'));
+        const QStringList rightParts = right.split(QLatin1Char('/'));
+        for (qsizetype index = 0; index < std::min(leftParts.size(), rightParts.size()); ++index) {
+            const int order = collator.compare(leftParts.at(index), rightParts.at(index));
+            if (order != 0) {
+                return order < 0;
+            }
+        }
+        return leftParts.size() < rightParts.size();
+    });
+    QVariantList list;
+    for (const QString& tagPath : std::as_const(paths)) {
+        list.append(QVariantMap{
+            {QStringLiteral("tag"), tagPath},
+            {QStringLiteral("name"), tagPath.section(QLatin1Char('/'), -1)},
+            {QStringLiteral("depth"), static_cast<int>(tagPath.count(QLatin1Char('/')))},
+            {QStringLiteral("count"), counts.value(tagPath)},
+        });
+    }
+    return list;
+}
+
+bool VaultController::renameTag(const QString& tag, const QString& newName)
+{
+    if (currentState != State::Unlocked || tag.isEmpty()) {
+        return false;
+    }
+    const QString renamed = normalizedTag(newName);
+    if (renamed.isEmpty()) {
+        say(tr("Give the tag a name."), true);
+        return false;
+    }
+    if (renamed == tag) {
+        return true;
+    }
+    bool anyChanged = false;
+    for (Item& one : contents.items) {
+        QStringList kept;
+        for (const QString& old : std::as_const(one.tags)) {
+            const QString now = isUnder(old, tag) ? renamed + old.mid(tag.size()) : old;
+            anyChanged = anyChanged || now != old;
+            if (!kept.contains(now)) {
+                kept.append(now);
+            }
+        }
+        one.tags = kept;
+    }
+    if (!anyChanged) {
+        return false;
+    }
+    if (chosenFilter.startsWith(QLatin1String("tag:")) && isUnder(chosenFilter.mid(4), tag)) {
+        setFilter(QLatin1String("tag:") + renamed + chosenFilter.mid(4 + tag.size()));
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    return true;
+}
+
+void VaultController::removeTag(const QString& tag)
+{
+    if (currentState != State::Unlocked || tag.isEmpty()) {
+        return;
+    }
+    bool anyChanged = false;
+    for (Item& one : contents.items) {
+        anyChanged = one.tags.removeIf([&tag](const QString& old) { return isUnder(old, tag); }) > 0 || anyChanged;
+    }
+    if (!anyChanged) {
+        return;
+    }
+    if (chosenFilter.startsWith(QLatin1String("tag:")) && isUnder(chosenFilter.mid(4), tag)) {
+        setFilter(QString());
+    }
+    contentsChanged();
+    saveInBackground(QString());
+}
+
+void VaultController::setFavourite(const QString& id, bool favourite)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    for (Item& one : contents.items) {
+        if (one.id.toString(QUuid::WithoutBraces) == id && one.favourite != favourite) {
+            one.favourite = favourite;
+            contentsChanged();
+            saveInBackground(id);
+            return;
+        }
+    }
+}
+
+QString VaultController::readAttachment(const QUrl& file)
+{
+    const QString source = file.isLocalFile() ? file.toLocalFile() : file.toString();
+    const QString requestId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    if (currentState != State::Unlocked || source.isEmpty()) {
+        return {};
+    }
+    const quint64 session = vaultSession;
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&filePool, [self, source, requestId, session]() {
+        enum class Outcome { Read, TooLarge, CannotRead };
+        Outcome outcome = Outcome::CannotRead;
+        QByteArray data;
+        QFile input(source);
+        if (input.open(QIODevice::ReadOnly)) {
+            if (input.size() > largestAttachmentBytes) {
+                outcome = Outcome::TooLarge;
+            } else {
+                data = input.read(largestAttachmentBytes + 1);
+                outcome = input.error() != QFileDevice::NoError ? Outcome::CannotRead
+                          : data.size() > largestAttachmentBytes ? Outcome::TooLarge
+                                                                 : Outcome::Read;
+            }
+        }
+        const QString name = QFileInfo(source).fileName();
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, requestId, session, outcome, data, name]() {
+                if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
+                    return;
+                }
+                if (outcome == Outcome::TooLarge) {
+                    self->say(tr("“%1” is larger than %2, the most an attachment may hold.")
+                                  .arg(name, self->sizeText(largestAttachmentBytes)),
+                              true);
+                    emit self->attachmentRead(requestId, name, 0, false);
+                    return;
+                }
+                if (outcome == Outcome::CannotRead) {
+                    self->say(tr("“%1” could not be read.").arg(name), true);
+                    emit self->attachmentRead(requestId, name, 0, false);
+                    return;
+                }
+                qsizetype total = self->attachmentBytes() + data.size();
+                for (const Attachment& pending : std::as_const(self->pendingAttachments)) {
+                    total += pending.data.size();
+                }
+                if (total > largestAttachmentsTotal) {
+                    self->say(tr("The attachments of this vault together may hold at most %1. Remove an attachment "
+                                 "first.")
+                                  .arg(self->sizeText(largestAttachmentsTotal)),
+                              true);
+                    emit self->attachmentRead(requestId, name, 0, false);
+                    return;
+                }
+                self->pendingAttachments.insert(requestId, Attachment{QUuid::fromString(requestId), name, data});
+                emit self->attachmentRead(requestId, name, data.size(), true);
+            },
+            Qt::QueuedConnection);
+    });
+    return requestId;
+}
+
+void VaultController::saveAttachment(const QString& itemId, const QString& attachmentId, const QUrl& file)
+{
+    const QString target = file.isLocalFile() ? file.toLocalFile() : file.toString();
+    if (currentState != State::Unlocked || target.isEmpty()) {
+        return;
+    }
+    for (const Item& one : std::as_const(contents.items)) {
+        if (one.id.toString(QUuid::WithoutBraces) != itemId) {
+            continue;
+        }
+        for (const Attachment& attachment : one.attachments) {
+            if (attachment.id.toString(QUuid::WithoutBraces) != attachmentId) {
+                continue;
+            }
+            // Written only where the person chose, never anywhere else
+            // (REQUIREMENTS.md 4.1, D-029).
+            QPointer<VaultController> self(this);
+            const QByteArray data = attachment.data;
+            const QString name = attachment.name;
+            (void)QtConcurrent::run(&filePool, [self, target, data, name]() {
+                QSaveFile output(target);
+                const bool written = output.open(QIODevice::WriteOnly) && output.write(data) == data.size() &&
+                                     output.commit();
+                QMetaObject::invokeMethod(
+                    qApp,
+                    [self, written, name]() {
+                        if (!self) {
+                            return;
+                        }
+                        if (written) {
+                            self->say(tr("“%1” was saved.").arg(name), false);
+                        } else {
+                            self->say(tr("“%1” could not be saved: the folder cannot be written to, or the disk is "
+                                         "full.")
+                                          .arg(name),
+                                      true);
+                        }
+                    },
+                    Qt::QueuedConnection);
+            });
+            return;
+        }
+    }
+}
+
+QString VaultController::sizeText(qint64 bytes) const
+{
+    return QLocale().formattedDataSize(bytes, 1, QLocale::DataSizeTraditionalFormat);
+}
+
+void VaultController::contentsChanged()
+{
+    listModel.setContents(contents);
+    ++contentsRevision;
+    emit revisionChanged();
+}
+
+qsizetype VaultController::attachmentBytes() const
+{
+    qsizetype total = 0;
+    for (const Item& one : contents.items) {
+        for (const Attachment& attachment : one.attachments) {
+            total += attachment.data.size();
+        }
+    }
+    return total;
 }
 
 QString VaultController::readItemIcon(const QUrl& file)
@@ -693,14 +1258,18 @@ void VaultController::setPath(const QString& newPath)
 
 void VaultController::saveInBackground(const QString& itemId)
 {
-    const QByteArray json = contentsToJson(contents);
+    // A copy that shares its data: put into words on the save's thread, since
+    // attachments make that slow (OR-5).
+    const VaultContents snapshot = contents;
     const QString vaultFile = path;
     VaultKey saveKey = key;
     ++savesRunning;
     setDirty(true);
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, json, saveKey, itemId]() mutable {
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, snapshot, saveKey, itemId]() mutable {
+        QByteArray json = contentsToJson(snapshot);
         const SaveStatus status = saveVaultFile(vaultFile, json, saveKey);
+        crypto::wipe(json);
         saveKey.wipe();
         QMetaObject::invokeMethod(
             qApp,
@@ -795,6 +1364,7 @@ void VaultController::takeBackUnsaved()
     crypto::wipe(*json);
     if (read.status == ContentsStatus::Read) {
         contents = read.contents;
+        contentsChanged();
         saveInBackground(QString());
     }
 }
@@ -805,11 +1375,19 @@ void VaultController::forgetUnlockedVault()
     setFailed(false);
     key.wipe();
     contents = {};
+    pendingAttachments.clear();
+    ++vaultSession;
     listModel.clear();
     if (!search.isEmpty()) {
         search.clear();
         emit searchTextChanged();
     }
+    if (!chosenFilter.isEmpty()) {
+        chosenFilter.clear();
+        emit filterChanged();
+    }
+    ++contentsRevision;
+    emit revisionChanged();
 }
 
 } // namespace chrono_vault

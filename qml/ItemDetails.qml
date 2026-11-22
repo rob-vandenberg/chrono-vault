@@ -17,12 +17,15 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.0.9
+// ItemDetails.qml 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: The icon of the item's category; the star that marks a favourite; the template under the title; the
+//          tags; the attachments, each saved with Save as… (D-027, D-028, D-029)
 // v0.0.9: Initial release (D-025)
 
 // The chosen item, read-only (D-025): its icon and title with the pencil
@@ -67,19 +70,38 @@ Item {
             Layout.fillWidth: true
             Image {
                 source: itemDetails.item.icon ? "data:image/png;base64," + itemDetails.item.icon
-                        : (itemDetails.item.isNote ? "qrc:/icons/item-note.svg" : "qrc:/icons/item-login.svg")
+                        : (itemDetails.item.defaultIcon || "")
                 sourceSize: Qt.size(Math.round(48 * Appearance.factor), Math.round(48 * Appearance.factor))
                 Layout.preferredWidth: Math.round(48 * Appearance.factor)
                 Layout.preferredHeight: Math.round(48 * Appearance.factor)
             }
-            Label {
-                objectName: "itemTitle"
-                text: itemDetails.item.title || ""
-                textFormat: Text.PlainText
-                font.bold: true
-                font.pointSize: Appearance.fontPointSize * 1.4
-                elide: Text.ElideRight
+            ColumnLayout {
+                spacing: 0
                 Layout.fillWidth: true
+                Label {
+                    objectName: "itemTitle"
+                    text: itemDetails.item.title || ""
+                    textFormat: Text.PlainText
+                    font.bold: true
+                    font.pointSize: Appearance.fontPointSize * 1.4
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+                Label {
+                    text: itemDetails.item.templateName || ""
+                    textFormat: Text.PlainText
+                    opacity: 0.7
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+            }
+            ToolButton {
+                objectName: "favouriteButton"
+                icon.source: itemDetails.item.favourite ? "qrc:/icons/star-filled.svg" : "qrc:/icons/star.svg"
+                icon.color: itemDetails.palette.buttonText
+                onClicked: VaultController.setFavourite(itemDetails.itemId, !itemDetails.item.favourite)
+                ToolTip.visible: hovered
+                ToolTip.text: itemDetails.item.favourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
             }
             ToolButton {
                 objectName: "editButton"
@@ -91,6 +113,25 @@ Item {
             }
         }
 
+        // The tags, each a way to the items that carry it (D-028).
+        Flow {
+            Layout.fillWidth: true
+            spacing: Math.round(6 * Appearance.factor)
+            visible: (itemDetails.item.tags || []).length > 0
+            Repeater {
+                model: itemDetails.item.tags || []
+                delegate: Button {
+                    required property string modelData
+                    objectName: "detailsTag"
+                    text: modelData
+                    icon.source: "qrc:/icons/tag.svg"
+                    icon.color: itemDetails.palette.buttonText
+                    flat: true
+                    onClicked: VaultController.filter = "tag:" + modelData
+                }
+            }
+        }
+
         ScrollView {
             id: fieldsScroll
             Layout.fillWidth: true
@@ -98,8 +139,12 @@ Item {
             contentWidth: availableWidth
             clip: true
 
-            Rectangle {
+            Column {
                 width: fieldsScroll.availableWidth
+                spacing: Math.round(12 * Appearance.factor)
+
+            Rectangle {
+                width: parent.width
                 implicitHeight: rows.implicitHeight
                 visible: itemDetails.shownFields.length > 0
                 color: itemDetails.palette.base
@@ -231,6 +276,66 @@ Item {
                     }
                 }
             }
+
+            // The attachments (D-029): saved only where the person chooses,
+            // never opened from a copy left on the disk.
+            Rectangle {
+                width: parent.width
+                implicitHeight: attachmentRows.implicitHeight
+                visible: (itemDetails.item.attachments || []).length > 0
+                color: itemDetails.palette.base
+                border.color: itemDetails.palette.mid
+                radius: Math.round(4 * Appearance.factor)
+
+                Column {
+                    id: attachmentRows
+                    width: parent.width
+                    Repeater {
+                        model: itemDetails.item.attachments || []
+                        delegate: Item {
+                            id: attachmentRow
+                            required property var modelData
+                            required property int index
+                            width: attachmentRows.width
+                            implicitHeight: Math.round(44 * Appearance.factor)
+                            Rectangle {
+                                visible: attachmentRow.index > 0
+                                width: parent.width
+                                height: 1
+                                color: itemDetails.palette.mid
+                            }
+                            RowLayout {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Math.round(12 * Appearance.factor)
+                                anchors.rightMargin: Math.round(6 * Appearance.factor)
+                                spacing: Math.round(10 * Appearance.factor)
+                                Image {
+                                    source: "qrc:/icons/attachment.svg"
+                                    sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
+                                }
+                                Label {
+                                    text: attachmentRow.modelData.name
+                                    textFormat: Text.PlainText
+                                    elide: Text.ElideMiddle
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    text: VaultController.sizeText(attachmentRow.modelData.size)
+                                    opacity: 0.7
+                                }
+                                Button {
+                                    objectName: "saveAttachmentButton"
+                                    text: qsTr("Save as…")
+                                    onClicked: itemDetails.askWhereToSave(attachmentRow.modelData)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            }
         }
     }
 
@@ -238,5 +343,19 @@ Item {
     function link(address) {
         const escaped = String(address).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
         return "<a href=\"" + escaped + "\">" + escaped + "</a>"
+    }
+
+    property var savingAttachment: ({})
+    function askWhereToSave(attachment) {
+        savingAttachment = attachment
+        saveDialog.selectedFile = saveDialog.currentFolder + "/" + encodeURIComponent(attachment.name)
+        saveDialog.open()
+    }
+
+    FileDialog {
+        id: saveDialog
+        title: qsTr("Save the attachment")
+        fileMode: FileDialog.SaveFile
+        onAccepted: VaultController.saveAttachment(itemDetails.itemId, itemDetails.savingAttachment.id, selectedFile)
     }
 }

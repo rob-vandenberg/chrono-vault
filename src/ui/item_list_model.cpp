@@ -17,14 +17,18 @@
 
 #include "item_list_model.h"
 
+#include "templates.h"
+
 #include <QCollator>
 
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.9
+// item_list_model.cpp 0.0.14
 
 // --- Version history ----------------------------------------------------
+// v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template; the search also
+//          finds an email address and a tag (D-027, D-028)
 // v0.0.9: The letter an item is grouped under; the web address when there is no user name (D-025)
 // v0.0.4: The item's icon, as an address QML can show
 // v0.0.3: Initial release
@@ -63,9 +67,16 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     case TitleRole:
     case Qt::DisplayRole: return item.title;
     case SubtitleRole: {
-        // The user name, or else the web address (D-025).
-        const QString user = fieldValue(item, QStringLiteral("username"));
-        return user.isEmpty() ? fieldValue(item, QStringLiteral("url")) : user;
+        // The first of these the item has (D-025), else its template's name.
+        for (const char* fieldRole : {"username", "email", "url", "cardholder", "fullname", "network", "bankname",
+                                      "product", "organisation"}) {
+            const QString value = fieldValue(item, QString::fromLatin1(fieldRole));
+            if (!value.isEmpty()) {
+                return value;
+            }
+        }
+        const auto itemTemplate = findTemplate(item.templateId, allContents);
+        return itemTemplate ? templateName(*itemTemplate) : categoryName(item.categoryId, allContents);
     }
     case InitialRole: {
         // The heading the item stands under: its first letter, or # for a
@@ -76,13 +87,13 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
         }
         return QString(title.at(0)).toUpper();
     }
-    case IsNoteRole: return item.itemTemplate == ItemTemplate::SecureNote;
+    case IsNoteRole: return item.categoryId == QLatin1String("note");
+    case FavouriteRole: return item.favourite;
     case IconRole:
         if (!item.icon.isEmpty()) {
             return QString(QStringLiteral("data:image/png;base64,") + QString::fromLatin1(item.icon.toBase64()));
         }
-        return item.itemTemplate == ItemTemplate::SecureNote ? QStringLiteral("qrc:/icons/item-note.svg")
-                                                             : QStringLiteral("qrc:/icons/item-login.svg");
+        return categoryIconSource(item.categoryId);
     default: return {};
     }
 }
@@ -90,13 +101,21 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
 QHash<int, QByteArray> ItemListModel::roleNames() const
 {
     return {{IdRole, "itemId"}, {TitleRole, "title"}, {SubtitleRole, "subtitle"}, {IsNoteRole, "isNote"},
-            {IconRole, "icon"}, {InitialRole, "initial"}};
+            {IconRole, "icon"}, {InitialRole, "initial"}, {FavouriteRole, "favourite"}};
 }
 
-void ItemListModel::setItems(const QList<Item>& items)
+void ItemListModel::setContents(const VaultContents& contents)
 {
-    allItems = items;
+    allContents = contents;
     rebuild();
+}
+
+void ItemListModel::setFilter(const QString& filter)
+{
+    if (chosen != filter) {
+        chosen = filter;
+        rebuild();
+    }
 }
 
 void ItemListModel::setSearchText(const QString& text)
@@ -109,8 +128,9 @@ void ItemListModel::setSearchText(const QString& text)
 
 void ItemListModel::clear()
 {
-    allItems.clear();
+    allContents = {};
     search.clear();
+    chosen.clear();
     rebuild();
 }
 
@@ -124,15 +144,39 @@ int ItemListModel::rowOf(const QString& id) const
     return -1;
 }
 
+bool ItemListModel::passesFilter(const Item& item) const
+{
+    if (chosen.isEmpty()) {
+        return true;
+    }
+    if (chosen == QLatin1String("favourites")) {
+        return item.favourite;
+    }
+    if (chosen.startsWith(QLatin1String("category:"))) {
+        return item.categoryId == chosen.mid(9);
+    }
+    if (chosen.startsWith(QLatin1String("tag:"))) {
+        const QString tag = chosen.mid(4);
+        return std::any_of(item.tags.cbegin(), item.tags.cend(), [&tag](const QString& one) {
+            return one == tag || one.startsWith(tag + QLatin1Char('/'));
+        });
+    }
+    return true;
+}
+
 void ItemListModel::rebuild()
 {
     beginResetModel();
     shownItems.clear();
     const QString needle = search.trimmed();
-    for (const Item& item : std::as_const(allItems)) {
-        if (needle.isEmpty() || item.title.contains(needle, Qt::CaseInsensitive) ||
-            fieldValue(item, QStringLiteral("username")).contains(needle, Qt::CaseInsensitive) ||
-            fieldValue(item, QStringLiteral("url")).contains(needle, Qt::CaseInsensitive)) {
+    for (const Item& item : std::as_const(allContents.items)) {
+        if (!passesFilter(item)) {
+            continue;
+        }
+        const auto found = [&needle](const QString& text) { return text.contains(needle, Qt::CaseInsensitive); };
+        if (needle.isEmpty() || found(item.title) || found(fieldValue(item, QStringLiteral("username"))) ||
+            found(fieldValue(item, QStringLiteral("url"))) || found(fieldValue(item, QStringLiteral("email"))) ||
+            std::any_of(item.tags.cbegin(), item.tags.cend(), found)) {
             shownItems.append(item);
         }
     }

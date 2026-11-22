@@ -135,3 +135,13 @@ screen too small for them (D-023). Related tests only.
 ## 22 November 2026: version 0.0.13: sizes include the title bar
 
 The owner's 650 is the whole window: the desktop's title bar and frame are taken off the inside. Related tests only.
+
+## 22 November 2026: version 0.0.14: categories, templates, tags, favourites, attachments (autonomous mode)
+
+`ROADMAP.md` step 6 in part and step 7: eight built-in categories with thirteen templates, the person's own
+categories and templates in Settings > Customize with a template editor, nested tags shown as a tree, favourites,
+attachments inside the vault (5 MB each, 150 MB together, only saved where the person chooses); fields moved up and
+down and removed in the editor; contents format 3 (D-027 to D-029). The save now puts the contents into JSON off the
+window's thread. Found along the way: items a Repeater makes are not in the QObject tree, so the page test looks in
+the tree of items; Microsoft's compiler refused two names that hid others. Round 1: an attachment still being read
+was lost when the person saved or left the editor; now Save waits and leaving says so, with a test.

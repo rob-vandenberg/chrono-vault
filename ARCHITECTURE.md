@@ -29,3 +29,13 @@ The version lives only in the `project(...)` line of `CMakeLists.txt` (CPP-2); t
 
 1. The encryption method and the key derivation (`REQUIREMENTS.md` 9.1).
 2. The format of the vault file (9.2).
+
+## 4. What a vault holds (D-015, D-027 to D-029)
+
+1. `src/core/vault_contents.*`: items, the person's own categories and templates, the hidden categories; read and
+   written as JSON inside the sealed vault (contents format 3; formats 1 and 2 still read).
+2. `src/core/templates.*`: the eight built-in categories and thirteen built-in templates, and the names a person sees.
+3. `src/ui/vault_controller.*`: what the windows call; it reads files for attachments, writes them where the person
+   chooses, and puts the contents into JSON for a save, all off the window's thread (OR-5).
+4. `src/ui/item_list_model.*`: the item list, narrowed to Home, Favorites, a category or a tag.
+5. `qml/CustomizePage.qml` and `qml/TemplateEditor.qml`: Settings > Customize.
