@@ -312,3 +312,7 @@ the collapsed sidebar's triangles were not centered as in the owner's mockup.
 The fingerprint log is written only with `--debug` (the owner), to `~/.local/share/chrono-vault/fingerprint.log`. The
 settings live under the identifier `chrono-vault`, no longer under the name "Chrono Vault"; those of before are
 carried over once, the old place removed only after every value reads back the same (D-044).
+
+## 22 November 2026: version 0.0.31: the triangles centered
+
+The collapsed sidebar's group triangles stand centered: their button spans the column (0.0.28 tried a centering that a row of one item ignores, and it was not checked in a picture).

@@ -101,8 +101,9 @@ Item {
         Layout.fillWidth: true
         ToolButton {
             objectName: "foldButton_" + heading.key
-            // Collapsed: centered in the column, as in the owner's mockup.
-            Layout.alignment: vaultPage.collapsed ? Qt.AlignHCenter : Qt.AlignLeft
+            // Collapsed: the button spans the column, so its triangle stands
+            // centered, as in the owner's mockup.
+            Layout.fillWidth: vaultPage.collapsed
             text: heading.folded ? "▸" : "▾"
             opacity: 0.7
             implicitWidth: Math.round(24 * Appearance.factor)
