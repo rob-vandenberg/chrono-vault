@@ -159,11 +159,13 @@ ApplicationWindow {
         RowLayout {
             Layout.fillWidth: true
             spacing: Math.round(6 * Appearance.factor)
+            // The left buttons' area takes the free room, so the right ones
+            // stand at the right.
             RowLayout {
                 id: leftArea
                 spacing: Math.round(6 * Appearance.factor)
+                Layout.fillWidth: true
             }
-            Item { Layout.fillWidth: true }
             RowLayout {
                 id: rightArea
                 spacing: Math.round(6 * Appearance.factor)

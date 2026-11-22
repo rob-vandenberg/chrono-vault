@@ -156,6 +156,8 @@ ApplicationWindow {
             MenuBar {
                 objectName: "menuBar"
                 background: Item {}
+                // The menus take the free room, so the buttons stand at the right.
+                Layout.fillWidth: true
                 MainMenu {
                     objectName: "fileMenu"
                     title: qsTr("&File")
@@ -403,8 +405,6 @@ ApplicationWindow {
                     }
                 }
             }
-
-            Item { Layout.fillWidth: true }
 
             Button {
                 objectName: "newItemButton"

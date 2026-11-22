@@ -316,3 +316,7 @@ carried over once, the old place removed only after every value reads back the s
 ## 22 November 2026: version 0.0.31: the triangles centered
 
 The collapsed sidebar's group triangles stand centered: their button spans the column (0.0.28 tried a centering that a row of one item ignores, and it was not checked in a picture).
+
+## 22 November 2026: version 0.0.32: no filler items in the top bar and the dialogs
+
+The menu bar, and a dialog's left button area, take the free room themselves; the empty items that only took up room are gone (the editor's one, between two buttons that must not stretch, stays).
