@@ -21,15 +21,16 @@
 #include <QDir>
 #include <QFile>
 #include <QGuiApplication>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_controller.cpp 0.0.4
+// test_vault_controller.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.4: An item's icon survives a lock
 // v0.0.3: Initial release, with a change that could not be saved surviving a lock
 
@@ -106,15 +107,17 @@ void TestVaultController::initTestCase()
 
 void TestVaultController::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestVaultController::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
     vaultPath = folder->filePath(QStringLiteral("My vault.chronovault"));
@@ -122,7 +125,8 @@ void TestVaultController::init()
 
 void TestVaultController::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }

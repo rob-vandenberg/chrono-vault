@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.37
+// SettingsWindow.qml 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: "Use the Esc key to exit the program" in General (D-048)
 // v0.0.37: The shortcuts page as Chrono Viewer's, square × and +; a topic as tall as itself (D-047)
 // v0.0.35: Keyboard shortcuts, after Chrono Viewer's page (D-045)
 // v0.0.28: The fingerprint one check box for all vaults, its touch in a popup; the switches no longer mirrored (D-043)
@@ -149,6 +150,7 @@ ApplicationWindow {
     property bool keepInTray: false
     property bool startAtStartup: false
     property bool startMinimized: false
+    property bool escapeExits: false
     property int checkFrequency: 0
     property int autoLockMinutes: 0
     // Autolock when (D-040).
@@ -174,6 +176,7 @@ ApplicationWindow {
         keepInTray = VaultController.keepInTray
         startAtStartup = VaultController.startAtStartup
         startMinimized = VaultController.startMinimized
+        escapeExits = VaultController.escapeExits
         checkFrequency = Updater.frequency
         autoLockMinutes = VaultController.autoLockMinutes
         idleLockOn = VaultController.idleLockOn
@@ -217,6 +220,8 @@ ApplicationWindow {
             VaultController.startAtStartup = startAtStartup
         if (VaultController.startMinimized !== startMinimized)
             VaultController.startMinimized = startMinimized
+        if (VaultController.escapeExits !== escapeExits)
+            VaultController.escapeExits = escapeExits
         if (Updater.frequency !== checkFrequency)
             Updater.frequency = checkFrequency
         if (VaultController.autoLockMinutes !== autoLockMinutes)
@@ -306,6 +311,7 @@ ApplicationWindow {
                 keepInTray = defaults.keepInTray
             startAtStartup = defaults.startAtStartup
             startMinimized = defaults.startMinimized
+            escapeExits = defaults.escapeExits
             checkFrequency = Updater.defaultCheckFrequency()
             theme = Appearance.defaultTheme
             scale = Appearance.defaultScale
@@ -570,6 +576,12 @@ ApplicationWindow {
                             checked: settingsWindow.keepInTray
                             enabled: VaultController.trayAvailable
                             onToggled: settingsWindow.keepInTray = checked
+                        }
+                        CheckBox {
+                            objectName: "escapeExitsBox"
+                            text: qsTr("Use the Esc key to exit the program")
+                            checked: settingsWindow.escapeExits
+                            onToggled: settingsWindow.escapeExits = checked
                         }
                         RowLayout {
                             Label { text: qsTr("Check for updates") }

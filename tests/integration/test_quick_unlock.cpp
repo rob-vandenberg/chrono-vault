@@ -20,16 +20,17 @@
 
 #include <QFile>
 #include <QHash>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.0.23
+// test_quick_unlock.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
 
 using namespace chrono_vault;
@@ -108,22 +109,25 @@ void TestQuickUnlock::initTestCase()
 
 void TestQuickUnlock::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestQuickUnlock::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
 }
 
 void TestQuickUnlock::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }
@@ -241,7 +245,7 @@ void TestQuickUnlock::the_master_password_is_asked_once_a_year()
     QVERIFY(!controller->reminderDue());
     // A year and more since the master password was last typed.
     {
-        QSettings settings;
+        VaultsFile settings;
         QVariantMap times = settings.value(QStringLiteral("security/lastMasterPassword")).toMap();
         times.insert(controller->vaultPath(), QDateTime::currentDateTimeUtc().addDays(-400));
         settings.setValue(QStringLiteral("security/lastMasterPassword"), times);

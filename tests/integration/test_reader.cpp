@@ -21,7 +21,7 @@
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QWindow>
@@ -29,9 +29,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_reader.cpp 0.0.27
+// test_reader.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Initial release (D-042)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -149,21 +150,24 @@ void TestReader::initTestCase()
 
 void TestReader::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestReader::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
 }
 
 void TestReader::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }
@@ -352,11 +356,6 @@ void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
     QVERIFY(!controller->quickUnlockEnabled());
     QVERIFY(reader->kept.isEmpty());
     QVERIFY(!controller->quickUnlockOn());
-
-    // Before 0.0.28 it was per vault: on for any vault carries over as on.
-    QSettings().remove(QStringLiteral("quickUnlock/enabled"));
-    QSettings().setValue(QStringLiteral("quickUnlock/vaults"), QStringList{first});
-    QVERIFY(controller->quickUnlockEnabled());
 }
 
 QTEST_MAIN(TestReader)

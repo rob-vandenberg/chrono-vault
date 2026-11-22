@@ -20,13 +20,14 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock.cpp 0.0.29
+// quick_unlock.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.29: The fingerprint log (D-044)
 // v0.0.27: The words for a key not kept (D-042)
 // v0.0.23: Initial release (D-038)
@@ -75,12 +76,12 @@ QString QuickUnlock::notKeptText() const
 
 bool QuickUnlock::has(const QString& vault) const
 {
-    return QSettings().value(keptKey).toStringList().contains(vault);
+    return VaultsFile().value(keptKey).toStringList().contains(vault);
 }
 
 void QuickUnlock::remember(const QString& vault, bool kept)
 {
-    QSettings settings;
+    VaultsFile settings;
     QStringList vaults = settings.value(keptKey).toStringList();
     vaults.removeAll(vault);
     if (kept) {

@@ -18,16 +18,17 @@
 #include "vault_file.h"
 
 #include <QFile>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_customizing.cpp 0.0.14
+// test_customizing.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.14: Initial release: categories and templates, tags, favourites and attachments (D-027, D-028, D-029)
 
 using namespace chrono_vault;
@@ -109,15 +110,17 @@ void TestCustomizing::initTestCase()
 
 void TestCustomizing::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestCustomizing::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
     vaultPath = folder->filePath(QStringLiteral("Mine.chronovault"));
@@ -125,7 +128,8 @@ void TestCustomizing::init()
 
 void TestCustomizing::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }

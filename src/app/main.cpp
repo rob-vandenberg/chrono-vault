@@ -18,6 +18,7 @@
 #include "app_setup.h"
 #include "quick_unlock.h"
 #include "appearance.h"
+#include "settings_files.h"
 #include "single_instance.h"
 #include "system_tray.h"
 #include "updater.h"
@@ -37,9 +38,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.12
+// main.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: --reset deletes chrono-vault.ini; no carry-over (D-026)
 // v0.0.30: The identifier chrono-vault for the settings, carried over; --debug writes the fingerprint log (D-044)
 // v0.0.12: --reset: the settings not read at the start (D-026)
 // v0.0.7: The kept theme and UI scaling put in use at the start (D-023)
@@ -57,18 +59,19 @@ int main(int argc, char* argv[])
     // The window decides when the program ends (Main.qml): closing it may keep
     // Chrono Vault running in the tray (D-019).
     QApplication::setQuitOnLastWindowClosed(false);
-    // The identifier, not the name people read (D-044); the settings kept
-    // under the name before 0.0.30 are carried over once.
+    // The identifier, not the name people read (D-044).
     QGuiApplication::setOrganizationName(QStringLiteral("chrono-vault"));
     QGuiApplication::setApplicationName(QStringLiteral("chrono-vault"));
-    chrono_vault::carryOverOldSettings(QStringLiteral("Chrono Vault"), QStringLiteral("Chrono Vault"));
+    // --reset: chrono-vault.ini is deleted before anything reads it; the
+    // vaults in chrono-vault.conf stay (D-026).
+    if (QCoreApplication::arguments().contains(QStringLiteral("--reset"))) {
+        chrono_vault::deleteSettingsFile();
+    }
     // --debug: the fingerprint's steps are written to a log (the owner).
     chrono_vault::setFingerLogOn(QCoreApplication::arguments().contains(QStringLiteral("--debug")));
     QGuiApplication::setApplicationVersion(chrono_vault::programVersion());
     QGuiApplication::setWindowIcon(chrono_vault::programIcon());
     chrono_vault::applyStyle();
-    // --reset: the settings are not read from the settings file at this start (D-026).
-    chrono_vault::setSkipReadingSettings(QCoreApplication::arguments().contains(QStringLiteral("--reset")));
     // The kept theme and UI scaling, before any window shows (D-023).
     chrono_vault::Appearance::applyAtStart();
 

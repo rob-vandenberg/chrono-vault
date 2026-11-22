@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.23
+# qml/CMakeLists.txt 0.0.38
 
 # --- Version history ----------------------------------------------------
+# v0.0.38: settings_files (D-026)
 # v0.0.23: Unlocking with a fingerprint, a part per system (D-038)
 # v0.0.22: The export window (D-037)
 # v0.0.19: The import window (D-035)
@@ -82,6 +83,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/quick_unlock.h
         ../src/ui/system_activity.h
         ../src/ui/program_scale.h
+        ../src/ui/settings_files.cpp
+        ../src/ui/settings_files.h
         ../src/ui/single_instance.cpp
         ../src/ui/single_instance.h
         ../src/ui/system_tray.cpp
@@ -191,6 +194,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/licences.cpp
     ../src/ui/program_scale.cpp
     ../src/ui/quick_unlock.cpp
+    ../src/ui/settings_files.cpp
     ../src/ui/theme.cpp
     ../src/ui/autostart.cpp
     ../src/ui/item_icons.cpp

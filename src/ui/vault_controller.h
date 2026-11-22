@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.23
+// vault_controller.h 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The Esc setting (D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
@@ -104,6 +105,8 @@ class VaultController : public QObject
     Q_PROPERTY(bool keepInTray READ keepInTray WRITE setKeepInTray NOTIFY keepInTrayChanged)
     Q_PROPERTY(bool startAtStartup READ startAtStartup WRITE setStartAtStartup NOTIFY startAtStartupChanged)
     Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY startMinimizedChanged)
+    // "Use the Esc key to exit the program" (D-048).
+    Q_PROPERTY(bool escapeExits READ escapeExits WRITE setEscapeExits NOTIFY escapeExitsChanged)
     Q_PROPERTY(bool trayAvailable READ trayAvailable NOTIFY trayAvailableChanged)
     Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
@@ -210,6 +213,8 @@ public:
     void setStartAtStartup(bool start);
     [[nodiscard]] bool startMinimized() const { return minimizedAtStart; }
     void setStartMinimized(bool minimized);
+    [[nodiscard]] bool escapeExits() const { return escExits; }
+    void setEscapeExits(bool exits);
     [[nodiscard]] bool trayAvailable() const { return trayExists; }
     void setTrayAvailable(bool available);
     // Settings > Security and Customize (D-033).
@@ -436,6 +441,7 @@ signals:
     void keepInTrayChanged();
     void startAtStartupChanged();
     void startMinimizedChanged();
+    void escapeExitsChanged();
     void trayAvailableChanged();
     void unsavedChangesChanged();
     void saveFailedChanged();
@@ -573,6 +579,7 @@ private:
     std::function<QUrl(const QString&)> iconAddress;
     bool keepRunning = true;
     bool minimizedAtStart = false;
+    bool escExits = false;
     bool trayExists = false;
 
     VaultContents contents;

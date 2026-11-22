@@ -21,7 +21,7 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QScreen>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QThread>
@@ -29,9 +29,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_windows.cpp 0.0.11
+// test_windows.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: A window past its screen's edge is moved back inside
 // v0.0.4: Initial release
 
@@ -61,15 +62,17 @@ void TestWindows::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_windows"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 }
 
 void TestWindows::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestWindows::a_second_start_is_turned_away_and_asks_the_first_to_come_forward()

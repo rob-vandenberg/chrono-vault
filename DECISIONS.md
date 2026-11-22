@@ -34,7 +34,7 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-023](decisions/D-023.md) | The theme (Light, Dark, Follow the system), the program's own colours on every desktop, and the UI scaling of everything together (50% to 400% in steps of 5%) |
 | [D-024](decisions/D-024.md) | The update's windows as in Chrono Mail: the popup with Skip this update, Update downloaded, Restart or Close |
 | [D-025](decisions/D-025.md) | The main window after the reference program: menus and buttons on one bar, three columns, the item read-only |
-| [D-026](decisions/D-026.md) | `--reset`: the settings window's settings not read from the settings file at that start |
+| [D-026](decisions/D-026.md) | Two files: the vaults in `chrono-vault.conf`, everything else in `chrono-vault.ini`; `--reset` deletes the `.ini` |
 | [D-027](decisions/D-027.md) | Categories and templates: eight built-in categories with thirteen templates, the person's own kept in the vault, Settings > Customize (autonomous mode) |
 | [D-028](decisions/D-028.md) | Tags nested with a slash, shown as a tree; favourites marked with a star (autonomous mode) |
 | [D-029](decisions/D-029.md) | Attachments inside the vault, 5 MB each and 150 MB together, only saved where the person chooses (autonomous mode) |
@@ -52,7 +52,8 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-041](decisions/D-041.md) | Waits after wrong master passwords: 3 at once, then 10 seconds, a minute, 10 minutes, an hour after every 25; kept through a restart |
 | [D-042](decisions/D-042.md) | The sidebar collapses to its icons and its groups fold; wider splitters; the fingerprint reader held only while a finger is asked, a switch with a one-time touch |
 | [D-043](decisions/D-043.md) | The fingerprint one check box for all vaults, its touch in a popup; the Autolock switches no longer mirrored; centered triangles |
-| [D-044](decisions/D-044.md) | `--debug` writes the fingerprint log; the settings under the identifier chrono-vault, carried over |
+| [D-044](decisions/D-044.md) | `--debug` writes the fingerprint log; the settings under the identifier chrono-vault |
 | [D-045](decisions/D-045.md) | Keyboard shortcuts set by the person, after Chrono Viewer; Ctrl+B the sidebar, Shift+Ctrl+B Clear Clipboard |
 | [D-046](decisions/D-046.md) | No bounce anywhere; the About box's text with a clear scroll bar, scrolled by the arrow, page and Home/End keys |
 | [D-047](decisions/D-047.md) | The shortcuts page as Chrono Viewer's; a settings topic as tall as itself |
+| [D-048](decisions/D-048.md) | "Use the Esc key to exit the program": Esc in the main window, not in edit mode, closes it |

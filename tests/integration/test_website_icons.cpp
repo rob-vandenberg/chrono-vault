@@ -19,7 +19,7 @@
 #include <QBuffer>
 #include <QFile>
 #include <QImage>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_website_icons.cpp 0.0.20
+// test_website_icons.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.20: Initial release (D-036)
 
 using namespace chrono_vault;
@@ -86,20 +87,23 @@ void TestWebsiteIcons::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_website_icons"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 }
 
 void TestWebsiteIcons::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestWebsiteIcons::a_website_icon_is_shown_while_the_setting_is_on_and_forgotten_at_the_lock()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     IconServer server;
     QVERIFY(server.listen(QHostAddress::LocalHost));
     QTemporaryDir folder;
@@ -154,7 +158,8 @@ void TestWebsiteIcons::a_website_icon_is_shown_while_the_setting_is_on_and_forgo
 
 void TestWebsiteIcons::off_by_default_and_nothing_asked()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     IconServer server;
     QVERIFY(server.listen(QHostAddress::LocalHost));
     QTemporaryDir folder;

@@ -22,7 +22,7 @@
 
 #include <QQmlApplicationEngine>
 #include <QQmlError>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QWindow>
@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.0.22
+// test_item_pages.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: Initial release: the item's view, the editor, the import and the export windows, moved here from
 //          test_pages.cpp so that neither runs past 20 seconds (OR-11)
 
@@ -106,15 +107,17 @@ void TestItemPages::initTestCase()
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_item_pages"));
     applyStyle();
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 }
 
 void TestItemPages::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestItemPages::an_item_shows_a_card_per_section_and_hidden_values_as_dots()

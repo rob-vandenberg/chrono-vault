@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QStyleHints>
 #include <QWindow>
@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.0.11
+// test_appearance.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: The settings window at 730 by 650; the slider's steps, marks above it and room around it
 // v0.0.10: The kept look drawn from the start, whatever the desktop's theme; text, icons, boxes and margins double at 200%
 // v0.0.7: Initial release
@@ -73,16 +74,18 @@ void TestAppearance::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_appearance"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     applyStyle();
 }
 
 void TestAppearance::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestAppearance::light_and_dark_are_two_looks_and_follow_asks_the_system()
@@ -203,7 +206,7 @@ void TestAppearance::the_kept_look_is_drawn_from_the_start_whatever_the_desktop(
 {
     // Kept dark, put in use before any window as the program starts: the
     // windows draw the program's colours, never the desktop theme's.
-    QSettings().setValue(QStringLiteral("view/theme"), QStringLiteral("dark"));
+    SettingsFile().setValue(QStringLiteral("view/theme"), QStringLiteral("dark"));
     Appearance::applyKept();
     QQmlApplicationEngine engine;
     engine.loadFromModule("ChronoVault", "Main");
@@ -230,7 +233,7 @@ void TestAppearance::the_kept_look_is_drawn_from_the_start_whatever_the_desktop(
     const QImage shot = window->grabWindow();
     QCOMPARE(shot.pixelColor(shot.width() - 20, shot.height() / 2), darkPalette().color(QPalette::Window));
     QVERIFY(QMetaObject::invokeMethod(settings, "close"));
-    QSettings().remove(QStringLiteral("view/theme"));
+    SettingsFile().remove(QStringLiteral("view/theme"));
     Appearance::applyKept();
 }
 
@@ -272,13 +275,13 @@ void TestAppearance::at_twice_the_scale_text_icons_boxes_and_margins_all_double(
     QCOMPARE(QQmlProperty::read(ok, QStringLiteral("icon.width")).toDouble(), 32.0);
     QVERIFY(QMetaObject::invokeMethod(settings, "close"));
     QTRY_COMPARE(programScaleInUse(), 100);
-    QSettings().remove(QStringLiteral("windows/settings")); // leaves no remembered size behind
+    SettingsFile().remove(QStringLiteral("windows/settings")); // leaves no remembered size behind
 }
 
 void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
 {
     // The size it opens at, not one an earlier test left remembered.
-    QSettings().remove(QStringLiteral("windows/settings"));
+    SettingsFile().remove(QStringLiteral("windows/settings"));
     QQmlApplicationEngine engine;
     engine.loadFromModule("ChronoVault", "Main");
     QVERIFY(!engine.rootObjects().isEmpty());

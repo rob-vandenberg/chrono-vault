@@ -26,16 +26,17 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.0.27
+// test_menus.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: the sidebar collapses to its icons, its groups fold, the splitters (D-042)
 // v0.0.24: Initial release (D-039)
 
@@ -112,15 +113,17 @@ void TestMenus::initTestCase()
 
 void TestMenus::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestMenus::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     qmlWarnings.clear();
     folder = new QTemporaryDir;
 }
@@ -381,7 +384,7 @@ void TestMenus::the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts(
     QCOMPARE(visualItem(root, QStringLiteral("count_trash"))->property("text").toString(), QStringLiteral("0"));
     QCOMPARE(visualItem(root, QStringLiteral("count_category:login"))->property("text").toString(),
              QStringLiteral("1"));
-    QVERIFY(QSettings().value(QStringLiteral("view/showItemCounts")).toBool());
+    QVERIFY(SettingsFile().value(QStringLiteral("view/showItemCounts")).toBool());
 
     // Others, Categories, Tags hidden and shown again; a group hidden while
     // one of its entries is chosen leaves the list at Home.
@@ -401,7 +404,7 @@ void TestMenus::the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts(
     // Hide Sidebar, kept for the next start.
     QMetaObject::invokeMethod(action(QStringLiteral("hideSidebarAction")), "toggle");
     QTRY_VERIFY(!window->findChild<QQuickItem*>(QStringLiteral("vaultColumn"))->isVisible());
-    QVERIFY(QSettings().value(QStringLiteral("view/sidebarHidden")).toBool());
+    QVERIFY(SettingsFile().value(QStringLiteral("view/sidebarHidden")).toBool());
 
     // Hide Sensitive in the menu is the Security setting; a change made
     // elsewhere shows in the menu.
@@ -454,7 +457,7 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     QVERIFY(controller->sidebarCollapsed());
     QQuickItem* home = visualItem(root, QStringLiteral("homeEntry"));
     QCOMPARE(home->property("display").toInt(), 0); // AbstractButton.IconOnly
-    QVERIFY(QSettings().value(QStringLiteral("view/sidebarCollapsed")).toBool());
+    QVERIFY(SettingsFile().value(QStringLiteral("view/sidebarCollapsed")).toBool());
     // Hide Sidebar still hides it whole, apart from collapsing.
     controller->setSidebarHidden(true);
     QTRY_VERIFY(!column->isVisible());
@@ -468,7 +471,7 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     QVERIFY(visualItem(root, QStringLiteral("categoryEntry_login")));
     QVERIFY(QMetaObject::invokeMethod(foldCategories, "clicked"));
     QTRY_VERIFY(!visualItem(root, QStringLiteral("categoryEntry_login")));
-    QVERIFY(QSettings().value(QStringLiteral("view/categoriesFolded")).toBool());
+    QVERIFY(SettingsFile().value(QStringLiteral("view/categoriesFolded")).toBool());
     QQuickItem* foldOthers = visualItem(root, QStringLiteral("foldButton_others"));
     QVERIFY(QMetaObject::invokeMethod(foldOthers, "clicked"));
     QTRY_VERIFY(!visualItem(root, QStringLiteral("trashEntry")));

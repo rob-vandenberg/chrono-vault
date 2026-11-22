@@ -2,8 +2,9 @@
 
 ## Now
 
-**Version 0.0.28**: the fingerprint one check box for all vaults, its touch in a popup; the Autolock switches drawn
-the right way; the collapsed sidebar's triangles centered (D-043). Before: the collapsible sidebar (0.0.27).
+**Version 0.0.38**: two files, the vaults in `chrono-vault.conf` and everything else in `chrono-vault.ini`, both in
+the program's folder (Windows too, no registry); `--reset` deletes the `.ini` (D-026); no carry-over from earlier
+versions. "Use the Esc key to exit the program" in Settings > General (D-048).
 
 ## Next task
 

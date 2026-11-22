@@ -45,7 +45,7 @@
 #include <QInputDevice>
 #include <QMimeData>
 #include <QPointer>
-#include <QSettings>
+#include "settings_files.h"
 #include <QVariantList>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -53,9 +53,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.23
+// vault_controller.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: Settings in chrono-vault.ini, vaults in chrono-vault.conf, no carry-over; the Esc setting (D-026, D-048)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password, off the window's thread (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
@@ -95,6 +96,7 @@ constexpr int defaultAutoLockMinutes = 5;
 constexpr int defaultClipboardSeconds = 30;
 constexpr bool defaultKeepInTray = true;
 constexpr bool defaultStartMinimized = false;
+constexpr bool defaultEscapeExits = false; // off (the owner, D-048)
 constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
@@ -137,28 +139,7 @@ constexpr bool defaultShowSubtitles = true;
 // a choice was lost at the next start (D-019).
 const QString keepInTrayKey = QStringLiteral("tray/keepRunning");
 const QString startMinimizedKey = QStringLiteral("start/minimized");
-
-// Once: a choice stored under the old names is carried over and the old names
-// are removed. Linux reads them back as "General/...", Windows as written.
-void carryOverOldNames(QSettings& settings)
-{
-    const QList<std::pair<QString, QString>> moves{
-        {QStringLiteral("keepRunningInTray"), keepInTrayKey},
-        {QStringLiteral("startMinimized"), startMinimizedKey},
-    };
-    for (const auto& [oldName, newKey] : moves) {
-        for (const QString& group : {QStringLiteral("General"), QStringLiteral("general")}) {
-            const QString oldKey = group + QLatin1Char('/') + oldName;
-            if (!settings.contains(oldKey)) {
-                continue;
-            }
-            if (!settings.contains(newKey)) {
-                settings.setValue(newKey, settings.value(oldKey));
-            }
-            settings.remove(oldKey);
-        }
-    }
-}
+const QString escapeExitsKey = QStringLiteral("start/escapeExits");
 
 QString kindName(FieldKind kind)
 {
@@ -353,23 +334,8 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     unlockPool.setMaxThreadCount(1);
     filePool.setMaxThreadCount(1);
 
-    QSettings settings;
-    carryOverOldNames(settings);
-    if (skipReadingSettings()) {
-        // --reset: not read from the settings file at this start (D-026).
-        lockMinutes = defaultAutoLockMinutes;
-        idleLock = true;
-        lockClosed = false;
-        lockSleep = false;
-        systemIdleLock = false;
-        systemMinutes = defaultSystemIdleMinutes;
-        clearSeconds = defaultClipboardSeconds;
-        keepRunning = defaultKeepInTray;
-        minimizedAtStart = defaultStartMinimized;
-        hideSecrets = defaultHideSensitive;
-        subtitlesShown = defaultShowSubtitles;
-        websiteIconsOn = defaultWebsiteIcons;
-    } else {
+    SettingsFile settings;
+    {
         hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
         subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
         websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
@@ -389,6 +355,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
         minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
+        escExits = settings.value(escapeExitsKey, defaultEscapeExits).toBool();
     }
 
     // Quitting gives the fingerprint reader back (D-042).
@@ -455,12 +422,13 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, &VaultController::checkForChangeElsewhere);
     connect(&watcher, &QFileSystemWatcher::directoryChanged, this, &VaultController::checkForChangeElsewhere);
 
-    const QString last = settings.value(lastVaultKey).toString();
-    vaultList = settings.value(vaultListKey).toStringList();
+    VaultsFile vaults;
+    const QString last = vaults.value(lastVaultKey).toString();
+    vaultList = vaults.value(vaultListKey).toStringList();
     if (vaultList.isEmpty() && !last.isEmpty()) {
         // Before 0.0.15 there was one vault: it is the primary (D-030).
         vaultList = {last};
-        settings.setValue(vaultListKey, vaultList);
+        vaults.setValue(vaultListKey, vaultList);
     }
     if (!last.isEmpty() && QFileInfo::exists(last)) {
         setPath(last);
@@ -500,7 +468,7 @@ void VaultController::setBool(bool& value, bool on, const QString& settingName)
 {
     if (value != on) {
         value = on;
-        QSettings().setValue(settingName, on);
+        SettingsFile().setValue(settingName, on);
         restartAutoLock();
         emit autoLockMinutesChanged();
     }
@@ -531,7 +499,7 @@ void VaultController::setSystemIdleMinutes(int minutes)
     minutes = std::clamp(minutes, 1, 240);
     if (systemMinutes != minutes) {
         systemMinutes = minutes;
-        QSettings().setValue(systemIdleMinutesKey, minutes);
+        SettingsFile().setValue(systemIdleMinutesKey, minutes);
         emit autoLockMinutesChanged();
     }
 }
@@ -587,7 +555,7 @@ void VaultController::setAutoLockMinutes(int minutes)
     minutes = std::clamp(minutes, 1, 240);
     if (lockMinutes != minutes) {
         lockMinutes = minutes;
-        QSettings().setValue(autoLockKey, minutes);
+        SettingsFile().setValue(autoLockKey, minutes);
         restartAutoLock();
         emit autoLockMinutesChanged();
     }
@@ -598,7 +566,7 @@ void VaultController::setClipboardClearSeconds(int seconds)
     seconds = std::clamp(seconds, 0, 600);
     if (clearSeconds != seconds) {
         clearSeconds = seconds;
-        QSettings().setValue(clipboardKey, seconds);
+        SettingsFile().setValue(clipboardKey, seconds);
         emit clipboardClearSecondsChanged();
     }
 }
@@ -607,7 +575,7 @@ void VaultController::setKeepInTray(bool keep)
 {
     if (keepRunning != keep) {
         keepRunning = keep;
-        QSettings().setValue(keepInTrayKey, keep);
+        SettingsFile().setValue(keepInTrayKey, keep);
         emit keepInTrayChanged();
     }
 }
@@ -632,8 +600,17 @@ void VaultController::setStartMinimized(bool minimized)
 {
     if (minimizedAtStart != minimized) {
         minimizedAtStart = minimized;
-        QSettings().setValue(startMinimizedKey, minimized);
+        SettingsFile().setValue(startMinimizedKey, minimized);
         emit startMinimizedChanged();
+    }
+}
+
+void VaultController::setEscapeExits(bool exits)
+{
+    if (escExits != exits) {
+        escExits = exits;
+        SettingsFile().setValue(escapeExitsKey, exits);
+        emit escapeExitsChanged();
     }
 }
 
@@ -820,7 +797,7 @@ QString VaultController::waitKey() const
 
 void VaultController::wrongPasswordTyped()
 {
-    QSettings settings;
+    VaultsFile settings;
     const QString keyPrefix = waitKey();
     const int wrong = settings.value(keyPrefix + QStringLiteral("/count"), 0).toInt() + 1;
     const int wait = waitBeforeAttempt(wrong + 1);
@@ -832,7 +809,7 @@ void VaultController::wrongPasswordTyped()
 
 void VaultController::rightPasswordGiven()
 {
-    QSettings().remove(waitKey());
+    VaultsFile().remove(waitKey());
     updateWait();
 }
 
@@ -840,7 +817,7 @@ void VaultController::updateWait()
 {
     int left = 0;
     if (!path.isEmpty()) {
-        QSettings settings;
+        VaultsFile settings;
         const QString keyPrefix = waitKey();
         const qint64 until = settings.value(keyPrefix + QStringLiteral("/until"), 0).toLongLong();
         const qint64 wait = settings.value(keyPrefix + QStringLiteral("/wait"), 0).toLongLong();
@@ -1080,7 +1057,7 @@ void VaultController::closeVault()
         emit keptChangesChanged();
     }
     setPath(QString());
-    QSettings().remove(lastVaultKey);
+    VaultsFile().remove(lastVaultKey);
     say(QString(), false);
     setState(State::NoVault);
 }
@@ -1283,7 +1260,7 @@ void VaultController::setHideSensitive(bool hide)
 {
     if (hideSecrets != hide) {
         hideSecrets = hide;
-        QSettings().setValue(hideSensitiveKey, hide);
+        SettingsFile().setValue(hideSensitiveKey, hide);
         emit hideSensitiveChanged();
     }
 }
@@ -1408,7 +1385,7 @@ void VaultController::setUseWebsiteIcons(bool use)
         return;
     }
     websiteIconsOn = use;
-    QSettings().setValue(websiteIconsKey, use);
+    SettingsFile().setValue(websiteIconsKey, use);
     if (use) {
         fetchWebsiteIcons();
     } else {
@@ -1512,7 +1489,7 @@ void VaultController::connectQuickUnlock()
         switch (result) {
         case QuickUnlock::Result::Done:
             recordMasterPasswordIfNone();
-            QSettings().setValue(QStringLiteral("quickUnlock/enabled"), true);
+            SettingsFile().setValue(QStringLiteral("quickUnlock/enabled"), true);
             tellSetup(QString(), false); // the ticked box says it
             break;
         case QuickUnlock::Result::Cancelled: tellSetup(QString(), false); break;
@@ -1585,8 +1562,8 @@ void VaultController::setQuickUnlock(bool on)
     }
     if (!on) {
         // Off for all vaults: every kept key removed (D-043).
-        QSettings().setValue(QStringLiteral("quickUnlock/enabled"), false);
-        for (const QString& vault : QSettings().value(QStringLiteral("quickUnlock/vaults")).toStringList()) {
+        SettingsFile().setValue(QStringLiteral("quickUnlock/enabled"), false);
+        for (const QString& vault : VaultsFile().value(QStringLiteral("quickUnlock/vaults")).toStringList()) {
             quick->remove(vault);
         }
         emit quickUnlockChanged();
@@ -1602,11 +1579,8 @@ void VaultController::setQuickUnlock(bool on)
 
 bool VaultController::quickUnlockEnabled() const
 {
-    QSettings settings;
-    // Before 0.0.28 it was per vault: on for any vault means on (D-043).
-    return settings.value(QStringLiteral("quickUnlock/enabled"),
-                          !settings.value(QStringLiteral("quickUnlock/vaults")).toStringList().isEmpty())
-        .toBool();
+    // A setting of the settings window: off unless ticked (D-026, D-043).
+    return SettingsFile().value(QStringLiteral("quickUnlock/enabled"), false).toBool();
 }
 
 void VaultController::keepForThisVault()
@@ -1661,7 +1635,7 @@ void VaultController::unlockWithQuickUnlock()
 
 void VaultController::recordMasterPassword()
 {
-    QSettings settings;
+    VaultsFile settings;
     QVariantMap times = settings.value(lastPasswordKey).toMap();
     times.insert(path, QDateTime::currentDateTimeUtc());
     settings.setValue(lastPasswordKey, times);
@@ -1670,7 +1644,7 @@ void VaultController::recordMasterPassword()
 
 void VaultController::recordMasterPasswordIfNone()
 {
-    if (!QSettings().value(lastPasswordKey).toMap().contains(path)) {
+    if (!VaultsFile().value(lastPasswordKey).toMap().contains(path)) {
         recordMasterPassword();
     }
 }
@@ -1680,7 +1654,7 @@ bool VaultController::reminderDue() const
     if (!reminderOn || !quickUnlockOn()) {
         return false;
     }
-    const QDateTime last = QSettings().value(lastPasswordKey).toMap().value(path).toDateTime();
+    const QDateTime last = VaultsFile().value(lastPasswordKey).toMap().value(path).toDateTime();
     return last.isValid() && last.daysTo(QDateTime::currentDateTimeUtc()) >= reminderDays;
 }
 
@@ -1688,7 +1662,7 @@ void VaultController::setMasterPasswordReminder(bool on)
 {
     if (reminderOn != on) {
         reminderOn = on;
-        QSettings().setValue(reminderKey, on);
+        SettingsFile().setValue(reminderKey, on);
         emit quickUnlockChanged();
     }
 }
@@ -1711,19 +1685,19 @@ void VaultController::setShowSubtitles(bool show)
 {
     if (subtitlesShown != show) {
         subtitlesShown = show;
-        QSettings().setValue(showSubtitlesKey, show);
+        SettingsFile().setValue(showSubtitlesKey, show);
         emit showSubtitlesChanged();
     }
 }
 
 bool VaultController::viewOption(const QString& name, bool fallback) const
 {
-    return QSettings().value(QStringLiteral("view/") + name, fallback).toBool();
+    return SettingsFile().value(QStringLiteral("view/") + name, fallback).toBool();
 }
 
 void VaultController::setViewOption(const QString& name, bool on)
 {
-    QSettings settings;
+    SettingsFile settings;
     const QString settingName = QStringLiteral("view/") + name;
     if (!settings.contains(settingName) || settings.value(settingName).toBool() != on) {
         settings.setValue(settingName, on);
@@ -2308,7 +2282,7 @@ void VaultController::setKeyfilePath(const QString& keyfile)
 
 QString VaultController::keyfileOf(const QString& vaultFile) const
 {
-    return QSettings().value(keyfilesKey).toMap().value(vaultFile).toString();
+    return VaultsFile().value(keyfilesKey).toMap().value(vaultFile).toString();
 }
 
 void VaultController::rememberKeyfile(const QString& vaultFile, const QString& keyfile)
@@ -2316,7 +2290,7 @@ void VaultController::rememberKeyfile(const QString& vaultFile, const QString& k
     if (vaultFile.isEmpty() || keyfileOf(vaultFile) == keyfile) {
         return;
     }
-    QSettings settings;
+    VaultsFile settings;
     QVariantMap keyfiles = settings.value(keyfilesKey).toMap();
     if (keyfile.isEmpty()) {
         keyfiles.remove(vaultFile);
@@ -2335,7 +2309,7 @@ void VaultController::addVault(const QString& vaultFile)
         return;
     }
     vaultList.append(vaultFile);
-    QSettings().setValue(vaultListKey, vaultList);
+    VaultsFile().setValue(vaultListKey, vaultList);
     emit vaultsChanged();
 }
 
@@ -2805,14 +2779,14 @@ QStringList VaultController::defaultKeysOf(const QString& action) const
 
 QStringList VaultController::keysOf(const QString& action) const
 {
-    QSettings settings;
+    SettingsFile settings;
     const QString key = QStringLiteral("shortcuts/") + action;
     return settings.contains(key) ? settings.value(key).toStringList() : defaultKeysOf(action);
 }
 
 void VaultController::setKeys(const QString& action, const QStringList& keys)
 {
-    QSettings settings;
+    SettingsFile settings;
     const QString key = QStringLiteral("shortcuts/") + action;
     if (keys == defaultKeysOf(action)) {
         settings.remove(key);
@@ -2891,6 +2865,7 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("clipboardClearSeconds"), defaultClipboardSeconds},
         {QStringLiteral("keepInTray"), defaultKeepInTray},
         {QStringLiteral("startMinimized"), defaultStartMinimized},
+        {QStringLiteral("escapeExits"), defaultEscapeExits},
         {QStringLiteral("startAtStartup"), defaultStartAtStartup},
         {QStringLiteral("hideSensitive"), defaultHideSensitive},
         {QStringLiteral("showSubtitles"), defaultShowSubtitles},
@@ -2957,7 +2932,7 @@ void VaultController::setPath(const QString& newPath)
         stopQuickUnlock(); // a finger asked for another vault is no longer the question
         path = newPath;
         if (!path.isEmpty()) {
-            QSettings().setValue(lastVaultKey, path);
+            VaultsFile().setValue(lastVaultKey, path);
         }
         needKeyfile = false;
         watch();

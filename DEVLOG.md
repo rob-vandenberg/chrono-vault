@@ -340,3 +340,10 @@ Every scrolling page and list stops at its ends; the About box's licence text ha
 ## 22 November 2026: version 0.0.37: the shortcuts page as Chrono Viewer's
 
 Square × and + buttons in columns, "no key" in the keys' column; a settings topic as tall as itself (D-047).
+
+## 22 November 2026: version 0.0.38: Esc exits the program, settings in their own file
+
+The vaults' configuration and login tries in `chrono-vault.conf`, every other setting and stored value in
+`chrono-vault.ini`, side by side in the program's folder on Linux and Windows; `--reset` deletes the `.ini` (D-026).
+The carry-over from earlier versions and the pre-0.0.28 fingerprint fallback removed (no backwards compatibility).
+"Use the Esc key to exit the program", off by default: Esc in the main window, not in edit mode, closes it (D-048).

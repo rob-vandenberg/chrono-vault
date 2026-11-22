@@ -21,7 +21,7 @@
 
 #include <QFile>
 #include <QQmlApplicationEngine>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -30,9 +30,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_update_windows.cpp 0.0.9
+// test_update_windows.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.9: Initial release
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -77,16 +78,18 @@ void TestUpdateWindows::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_update_windows"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     applyStyle();
 }
 
 void TestUpdateWindows::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 TestUpdateWindows::Loaded TestUpdateWindows::load()
@@ -129,7 +132,7 @@ void TestUpdateWindows::a_found_update_opens_the_popup_and_skip_this_update_skip
     QVERIFY(skip && skip->property("enabled").toBool());
     QVERIFY(QMetaObject::invokeMethod(skip, "clicked"));
     QTRY_VERIFY(!popup->property("visible").toBool());
-    QCOMPARE(QSettings().value(QStringLiteral("updates/skipped")).toString(), QStringLiteral("99.0.0"));
+    QCOMPARE(SettingsFile().value(QStringLiteral("updates/skipped")).toString(), QStringLiteral("99.0.0"));
     loaded.updater->answerForTests(releaseWith(QStringLiteral("99.0.0")), false);
     QVERIFY(loaded.updater->state() != State::Available);
     QVERIFY(!popup->property("visible").toBool());
@@ -142,7 +145,7 @@ void TestUpdateWindows::a_found_update_opens_the_popup_and_skip_this_update_skip
     QVERIFY(!about->property("visible").toBool());
     QVERIFY(QMetaObject::invokeMethod(popup, "reject"));
     QTRY_VERIFY(!popup->property("visible").toBool());
-    QSettings().remove(QStringLiteral("updates/skipped"));
+    SettingsFile().remove(QStringLiteral("updates/skipped"));
 }
 
 void TestUpdateWindows::downloaded_then_installed_asks_restart_or_close()

@@ -22,7 +22,7 @@
 
 #include <QQmlApplicationEngine>
 #include <QQmlError>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QWindow>
@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.22
+// test_pages.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The item, editor, import and export tests moved to test_item_pages.cpp (OR-11: under 20 seconds)
 // v0.0.21: File > Import… opens its file chooser, which belongs to a window
 // v0.0.19: The import window: Import, and closed by a lock (D-035)
@@ -119,15 +120,17 @@ void TestPages::initTestCase()
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_pages"));
     applyStyle();
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 }
 
 void TestPages::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestPages::a_login_made_in_the_editor_is_saved_without_qml_errors()
@@ -523,7 +526,8 @@ void TestPages::vaults_are_chosen_and_the_master_password_changed_from_the_windo
 {
     QTemporaryDir folder;
     QVERIFY(folder.isValid());
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 
     QList<QQmlError> qmlWarnings;
     QQmlApplicationEngine engine;

@@ -19,16 +19,17 @@
 
 #include <QDir>
 #include <QFile>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vaults.cpp 0.0.15
+// test_vaults.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.15: Initial release: several vaults, the keyfile, changing the master password (D-030, D-031)
 
 using namespace chrono_vault;
@@ -92,22 +93,25 @@ void TestVaults::initTestCase()
 
 void TestVaults::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestVaults::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
 }
 
 void TestVaults::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }
@@ -195,7 +199,7 @@ void TestVaults::the_one_vault_of_an_older_version_becomes_the_primary()
         auto vaults = controller();
         create(*vaults, QStringLiteral("Old"), QStringLiteral("pass"));
     }
-    QSettings().remove(QStringLiteral("vaults/list")); // as 0.0.14 left it
+    VaultsFile().remove(QStringLiteral("vaults/list")); // as 0.0.14 left it
     auto vaults = controller();
     QCOMPARE(vaults->vaults(), QStringList{file("Old")});
     QCOMPARE(vaults->primaryVault(), file("Old"));

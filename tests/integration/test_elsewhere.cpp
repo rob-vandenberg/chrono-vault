@@ -19,15 +19,16 @@
 
 #include <QDir>
 #include <QFile>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_elsewhere.cpp 0.0.16
+// test_elsewhere.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.16: Initial release: a change made elsewhere to the vault file (D-032)
 
 using namespace chrono_vault;
@@ -119,15 +120,17 @@ void TestElsewhere::initTestCase()
 
 void TestElsewhere::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestElsewhere::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
     vaultPath = folder->filePath(QStringLiteral("Shared.chronovault"));
@@ -135,7 +138,8 @@ void TestElsewhere::init()
 
 void TestElsewhere::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }

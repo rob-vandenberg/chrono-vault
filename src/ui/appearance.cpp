@@ -16,7 +16,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "appearance.h"
 
-#include "app_setup.h"
 #include "program_scale.h"
 #include "theme.h"
 #include "scaling.h"
@@ -27,14 +26,15 @@
 #include <QScreen>
 #include <QWindow>
 #include <QWidget>
-#include <QSettings>
+#include "settings_files.h"
 
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.0.13
+// appearance.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.13: The size of a window's title bar and frame
 // v0.0.12: The free room of a window's screen, which a minimum gives way to; --reset at the start (D-026)
 // v0.0.10: The program's colours for every window (D-023)
@@ -54,13 +54,13 @@ Theme themeFromNumber(int number)
 
 Theme keptTheme()
 {
-    return themeFromName(QSettings().value(themeKey).toString());
+    return themeFromName(SettingsFile().value(themeKey).toString());
 }
 
 int keptScale()
 {
     bool isNumber = false;
-    const int percent = QSettings().value(scaleKey, programScaleToBeginWith).toInt(&isNumber);
+    const int percent = SettingsFile().value(scaleKey, programScaleToBeginWith).toInt(&isNumber);
     return isNumber ? programScaleHeldToItsLimits(percent) : programScaleToBeginWith;
 }
 
@@ -201,7 +201,7 @@ void Appearance::show(int theme, int scale)
 
 void Appearance::keep(int theme, int scale)
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.setValue(themeKey, nameOfTheme(themeFromNumber(theme)));
     settings.setValue(scaleKey, programScaleHeldToItsLimits(scale));
     show(theme, scale);
@@ -221,12 +221,6 @@ void Appearance::applyKept()
 
 void Appearance::applyAtStart()
 {
-    // --reset: not read from the settings file at this start (D-026).
-    if (skipReadingSettings()) {
-        applyTheme(themeFromNumber(defaultTheme()));
-        applyProgramScale(defaultScale());
-        return;
-    }
     applyKept();
 }
 

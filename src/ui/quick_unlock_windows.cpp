@@ -21,7 +21,7 @@
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QPointer>
-#include <QSettings>
+#include "settings_files.h"
 
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Security.Credentials.h>
@@ -34,9 +34,10 @@
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.0.23
+// quick_unlock_windows.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
 
 // Windows Hello (D-038): a key credential per vault, made and used only after
@@ -198,7 +199,7 @@ public:
                         return;
                     }
                     if (!sealed.isEmpty()) {
-                        QSettings().setValue(settingsKey(vault),
+                        VaultsFile().setValue(settingsKey(vault),
                                              QStringList{QString::fromLatin1(challenge.toBase64()),
                                                          QString::fromLatin1(sealed.toBase64())});
                     }
@@ -211,7 +212,7 @@ public:
 
     void retrieve(const QString& vault) override
     {
-        const QStringList kept = QSettings().value(settingsKey(vault)).toStringList();
+        const QStringList kept = VaultsFile().value(settingsKey(vault)).toStringList();
         if (kept.size() != 2) {
             emit retrieved(Result::NoKey, {});
             return;
@@ -263,7 +264,7 @@ public:
 
     void remove(const QString& vault) override
     {
-        QSettings().remove(settingsKey(vault));
+        VaultsFile().remove(settingsKey(vault));
         remember(vault, false);
         std::thread([vault]() {
             winrt::init_apartment(winrt::apartment_type::multi_threaded);

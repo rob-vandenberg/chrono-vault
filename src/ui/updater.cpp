@@ -17,7 +17,6 @@
 
 #include "updater.h"
 
-#include "app_setup.h"
 
 #include "version.h"
 
@@ -28,7 +27,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 
 #include <algorithm>
@@ -43,9 +42,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// updater.cpp 0.0.12
+// updater.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.12: --reset: the check frequency not read at the start (D-026)
 // v0.0.9: The windows of Chrono Mail: a found update offered, its problem, page and folder; Restart or Close
 // v0.0.6: The default check frequency, for Restore defaults (D-022)
@@ -88,10 +88,8 @@ QNetworkRequest githubRequest(const QUrl& address)
 Updater::Updater(QObject* parent) : QObject(parent)
 {
     kind = detectInstallKind();
-    // --reset: not read from the settings file at this start (D-026).
-    checkFrequency = static_cast<CheckFrequency>(
-        skipReadingSettings() ? defaultFrequency
-                              : std::clamp(QSettings().value(frequencyKey, defaultFrequency).toInt(), 0, 3));
+    checkFrequency =
+        static_cast<CheckFrequency>(std::clamp(SettingsFile().value(frequencyKey, defaultFrequency).toInt(), 0, 3));
     hourly.setInterval(hourMilliseconds);
     connect(&hourly, &QTimer::timeout, this, [this]() { checkSoon(false); });
     if (QCoreApplication::instance()) {
@@ -116,7 +114,7 @@ void Updater::setFrequency(int frequency)
     frequency = std::clamp(frequency, 0, 3);
     if (frequency != static_cast<int>(checkFrequency)) {
         checkFrequency = static_cast<CheckFrequency>(frequency);
-        QSettings().setValue(frequencyKey, frequency);
+        SettingsFile().setValue(frequencyKey, frequency);
         emit frequencyChanged();
     }
 }
@@ -152,7 +150,7 @@ void Updater::checkSoon(bool byHand)
         return;
     }
     if (!byHand) {
-        const QDateTime last = QSettings().value(lastAnsweredKey).toDateTime();
+        const QDateTime last = SettingsFile().value(lastAnsweredKey).toDateTime();
         if (kind == InstallKind::None || currentState == State::Available ||
             !isCheckDue(checkFrequency, last, QDateTime::currentDateTimeUtc())) {
             return;
@@ -182,7 +180,7 @@ void Updater::checkSoon(bool byHand)
 
 void Updater::answered(const QByteArray& body, bool byHand)
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.setValue(lastAnsweredKey, QDateTime::currentDateTimeUtc());
     const auto running = parseVersion(programVersion()).value_or(Version{0, 0, 0});
     const auto skipped = parseVersion(settings.value(skippedKey).toString()).value_or(Version{});
@@ -205,7 +203,7 @@ void Updater::answerForTests(const QByteArray& releasesJson, bool byHand)
 void Updater::skipThisVersion()
 {
     if (offer) {
-        QSettings().setValue(skippedKey, versionText(offer->release.version));
+        SettingsFile().setValue(skippedKey, versionText(offer->release.version));
     }
     offer.reset();
     setState(State::Idle, QString());

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.35
+// Main.qml 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: Esc closes the main window when "Use the Esc key to exit the program" is ticked (D-048)
 // v0.0.35: The keys of every action set by the person; Ctrl+B the sidebar (D-045)
 // v0.0.25: Autolock when the main window is closed; Settings > Security opens Change the Master Password (D-040)
 // v0.0.24: The menus after the reference program's, with their shortcuts (D-039)
@@ -102,6 +103,19 @@ ApplicationWindow {
             context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
             onActivated: if (modelData.enabled) modelData.trigger()
         }
+    }
+
+    // "Use the Esc key to exit the program" (D-048): Esc in this window, not
+    // in edit mode, works as the window's close button: to the tray when
+    // Chrono Vault keeps running there, otherwise the program ends. An open
+    // menu or dialog takes its Esc first.
+    Shortcut {
+        objectName: "escapeExitsShortcut"
+        sequences: ["Esc"]
+        context: Qt.WindowShortcut
+        autoRepeat: false
+        enabled: VaultController.escapeExits && !vaultPage.editing
+        onActivated: mainWindow.close()
     }
 
     readonly property string supportWebsite: "https://github.com/rob-vandenberg/chrono-vault"

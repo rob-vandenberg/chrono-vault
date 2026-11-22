@@ -19,7 +19,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+80"/>
         <source>Check for update</source>
         <translation type="unfinished"></translation>
     </message>
@@ -848,7 +848,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+58"/>
+        <location filename="../qml/Main.qml" line="+59"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -858,7 +858,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+140"/>
+        <location line="+153"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -915,12 +915,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-511"/>
+        <location line="-524"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+125"/>
+        <location line="+138"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1215,7 +1215,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+164"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+165"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1225,7 +1225,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock.cpp" line="+73"/>
+        <location filename="../src/ui/quick_unlock.cpp" line="+74"/>
         <source>The key could not be kept for this vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1233,46 +1233,46 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+189"/>
-        <location line="+339"/>
+        <location filename="../qml/SettingsWindow.qml" line="+207"/>
+        <location line="+349"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-293"/>
+        <location line="-301"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+91"/>
+        <location line="+92"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+80"/>
-        <location line="+169"/>
+        <location line="+81"/>
+        <location line="+181"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-169"/>
-        <location line="+309"/>
+        <location line="-181"/>
+        <location line="+321"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-309"/>
-        <location line="+43"/>
+        <location line="-321"/>
+        <location line="+49"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-43"/>
+        <location line="-49"/>
         <source>Customize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+52"/>
         <source>Theme</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1307,17 +1307,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-128"/>
+        <location line="-134"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="+140"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
+        <source>Use the Esc key to exit the program</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1445,17 +1450,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+21"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+38"/>
         <source>no key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+71"/>
+        <location line="+66"/>
         <source>Press the new key for “%1”.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1470,15 +1475,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-671"/>
-        <location line="+633"/>
+        <location line="-690"/>
+        <location line="+652"/>
         <location line="+44"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-677"/>
-        <location line="+641"/>
+        <location line="-696"/>
+        <location line="+660"/>
         <location line="+6"/>
         <location line="+40"/>
         <source>Cancel</source>
@@ -1766,7 +1771,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+232"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+213"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1915,7 +1920,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+136"/>
+        <location line="+137"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1930,7 +1935,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-328"/>
+        <location line="-329"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1940,7 +1945,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+327"/>
+        <location line="+328"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2138,7 +2143,7 @@
 <context>
     <name>chrono_vault::Updater</name>
     <message>
-        <location filename="../src/ui/updater.cpp" line="+161"/>
+        <location filename="../src/ui/updater.cpp" line="+159"/>
         <source>This copy of Chrono Vault was not installed with an installer, so it cannot be updated through one. It is version %1.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2256,48 +2261,48 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+318"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+314"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1949"/>
+        <location line="+1946"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1945"/>
-        <location line="+1950"/>
+        <location line="-1942"/>
+        <location line="+1947"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1860"/>
-        <location line="+1760"/>
+        <location line="-1857"/>
+        <location line="+1757"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1842"/>
+        <location line="-1839"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-50"/>
+        <location line="-59"/>
         <source>The setting to start at startup could not be saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+37"/>
         <location line="+117"/>
-        <location line="+1639"/>
+        <location line="+1636"/>
         <location line="+213"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1914"/>
+        <location line="-1911"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2312,7 +2317,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1528"/>
+        <location line="+1525"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2327,7 +2332,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1514"/>
+        <location line="-1511"/>
         <location line="+82"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -2374,12 +2379,12 @@
     </message>
     <message>
         <location line="+74"/>
-        <location line="+876"/>
+        <location line="+873"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-793"/>
+        <location line="-790"/>
         <source>Reading the export…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2472,7 +2477,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+91"/>
         <source>Waiting for your %1…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2610,7 +2615,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+190"/>
+        <location line="+191"/>
         <source>“%1” was changed elsewhere. Your version was kept as “%2”; the vault now shows the other version.</source>
         <translation type="unfinished"></translation>
     </message>

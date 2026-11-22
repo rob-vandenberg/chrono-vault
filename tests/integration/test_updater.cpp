@@ -19,15 +19,16 @@
 #include "version.h"
 
 #include <QFile>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_updater.cpp 0.0.5
+// test_updater.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.5: Initial release
 
 using namespace chrono_vault;
@@ -66,15 +67,17 @@ void TestUpdater::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_updater"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
 }
 
 void TestUpdater::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestUpdater::only_an_installed_copy_counts_as_installed()
@@ -114,7 +117,7 @@ void TestUpdater::a_newer_version_for_this_system_is_offered_and_can_be_skipped(
 
     updater.skipThisVersion();
     QCOMPARE(updater.state(), State::Idle);
-    QCOMPARE(QSettings().value(QStringLiteral("updates/skipped")).toString(), QStringLiteral("99.0.0"));
+    QCOMPARE(SettingsFile().value(QStringLiteral("updates/skipped")).toString(), QStringLiteral("99.0.0"));
 }
 
 void TestUpdater::nothing_newer_says_this_is_the_newest()

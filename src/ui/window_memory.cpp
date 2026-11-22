@@ -19,15 +19,16 @@
 
 #include <QGuiApplication>
 #include <QScreen>
-#include <QSettings>
+#include "settings_files.h"
 
 #include <algorithm>
 #include <limits>
 
 // --- Version ------------------------------------------------------------
-// window_memory.cpp 0.0.11
+// window_memory.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: A remembered size never smaller than the window's minimum, and moved back inside its screen
 // v0.0.4: Initial release
 
@@ -80,7 +81,7 @@ void WindowMemory::restore()
     if (!target || key.isEmpty()) {
         return;
     }
-    const QRect saved = QSettings().value(settingsKey(key, "geometry")).toRect();
+    const QRect saved = SettingsFile().value(settingsKey(key, "geometry")).toRect();
     if (saved.isValid()) {
         // Never smaller than the window's minimum now: a size remembered from
         // before a window got a larger minimum does not bring it back.
@@ -93,7 +94,7 @@ void WindowMemory::restore()
 
 bool WindowMemory::hasSaved() const
 {
-    return !key.isEmpty() && QSettings().value(settingsKey(key, "geometry")).toRect().isValid();
+    return !key.isEmpty() && SettingsFile().value(settingsKey(key, "geometry")).toRect().isValid();
 }
 
 void WindowMemory::watch()
@@ -125,7 +126,7 @@ void WindowMemory::save()
     if (!target || key.isEmpty()) {
         return;
     }
-    QSettings settings;
+    SettingsFile settings;
     const Qt::WindowState state = target->windowState();
     settings.setValue(settingsKey(key, "state"), static_cast<int>(state));
     // The size and place of the normal window: a maximized or minimized one
@@ -137,7 +138,7 @@ void WindowMemory::save()
 
 Qt::WindowState WindowMemory::savedState(const QString& name)
 {
-    const int state = QSettings().value(settingsKey(name, "state"), static_cast<int>(Qt::WindowNoState)).toInt();
+    const int state = SettingsFile().value(settingsKey(name, "state"), static_cast<int>(Qt::WindowNoState)).toInt();
     if (state == Qt::WindowMaximized || state == Qt::WindowMinimized || state == Qt::WindowFullScreen) {
         return static_cast<Qt::WindowState>(state);
     }

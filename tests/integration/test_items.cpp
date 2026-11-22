@@ -18,15 +18,16 @@
 
 #include <QFile>
 #include <QSignalSpy>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.0.22
+// test_items.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The vault exported, only with the master password (D-037)
 // v0.0.19: An export imported into a vault, through the controller (D-035)
 // v0.0.17: Initial release: field history, sections and hidden fields kept, Trash and Archive, two settings (D-033)
@@ -104,22 +105,25 @@ void TestItems::initTestCase()
 
 void TestItems::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestItems::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
     QVERIFY(folder->isValid());
 }
 
 void TestItems::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }

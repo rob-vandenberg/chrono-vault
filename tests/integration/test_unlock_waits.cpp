@@ -20,7 +20,7 @@
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QWindow>
@@ -28,9 +28,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_unlock_waits.cpp 0.0.26
+// test_unlock_waits.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.26: Initial release (D-041)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -72,21 +73,24 @@ void TestUnlockWaits::initTestCase()
 
 void TestUnlockWaits::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestUnlockWaits::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
 }
 
 void TestUnlockWaits::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }

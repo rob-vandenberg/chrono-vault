@@ -21,7 +21,7 @@
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
-#include <QSettings>
+#include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QWindow>
@@ -29,9 +29,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_autolock.cpp 0.0.25
+// test_autolock.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.25: Initial release (D-040)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -85,21 +86,24 @@ void TestAutolock::initTestCase()
 
 void TestAutolock::cleanupTestCase()
 {
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 }
 
 void TestAutolock::init()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     folder = new QTemporaryDir;
 }
 
 void TestAutolock::cleanup()
 {
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     delete folder;
     folder = nullptr;
 }
@@ -122,15 +126,16 @@ std::unique_ptr<VaultController> TestAutolock::unlocked(StandIn*& standIn)
 void TestAutolock::zero_minutes_from_before_becomes_the_idle_box_unticked()
 {
     // Before 0.0.25, 0 minutes meant "never".
-    QSettings().setValue(QStringLiteral("security/autoLockMinutes"), 0);
+    SettingsFile().setValue(QStringLiteral("security/autoLockMinutes"), 0);
     {
         VaultController controller;
         QVERIFY(!controller.idleLockOn());
         QCOMPARE(controller.autoLockMinutes(), 5);
     }
     // A number of minutes stays, ticked.
-    QSettings().clear();
-    QSettings().setValue(QStringLiteral("security/autoLockMinutes"), 12);
+    SettingsFile().clear();
+    VaultsFile().clear();
+    SettingsFile().setValue(QStringLiteral("security/autoLockMinutes"), 12);
     VaultController controller;
     QVERIFY(controller.idleLockOn());
     QCOMPARE(controller.autoLockMinutes(), 12);
@@ -148,7 +153,7 @@ void TestAutolock::the_system_sleeping_locks_only_when_chosen()
     standIn->sleep();
     QCOMPARE(controller->state(), State::Unlocked);
     controller->setLockOnSleep(true);
-    QVERIFY(QSettings().value(QStringLiteral("security/lockOnSleep")).toBool());
+    QVERIFY(SettingsFile().value(QStringLiteral("security/lockOnSleep")).toBool());
     standIn->sleep();
     QCOMPARE(controller->state(), State::Locked);
 }

@@ -27,7 +27,7 @@
 #include <QDir>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>
-#include <QSettings>
+#include "settings_files.h"
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -36,9 +36,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.0.27
+// test_tray.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Keep running in the tray is the last of the three (D-042)
 // v0.0.10: The tray and start settings survive a new start; their old names carried over
 // v0.0.6: The settings window keeps changes only with OK, also with Enter; Restore defaults; a failed
@@ -68,7 +69,7 @@ private slots:
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
     void the_tray_and_start_settings_survive_a_new_start();
-    void with_reset_the_settings_start_at_their_defaults();
+    void esc_closes_the_main_window_only_when_ticked_and_not_editing();
     void the_settings_window_keeps_changes_only_with_ok();
     void enter_is_ok_and_a_failed_start_at_startup_is_told();
     void keep_running_in_the_tray_is_the_last_of_the_three();
@@ -88,7 +89,8 @@ void TestTray::initTestCase()
     QStandardPaths::setTestModeEnabled(true);
     QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
     QCoreApplication::setApplicationName(QStringLiteral("test_tray"));
-    QSettings().clear();
+    SettingsFile().clear();
+    VaultsFile().clear();
     applyStyle();
     autostart::setWindowsKeyForTests(testRunKey);
 }
@@ -100,10 +102,11 @@ void TestTray::cleanupTestCase()
     QFile::remove(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) +
                   QStringLiteral("/autostart"));
     autostart::setEnabled(false, QString());
-    QSettings settings;
+    SettingsFile settings;
     settings.clear();
     settings.sync();
     QFile::remove(settings.fileName());
+    QFile::remove(VaultsFile().fileName());
 #ifdef Q_OS_WIN
     QSettings(QStringLiteral("HKEY_CURRENT_USER\\Software"), QSettings::NativeFormat)
         .remove(QStringLiteral("Chrono Vault Tests"));
@@ -253,11 +256,13 @@ void TestTray::the_settings_window_keeps_changes_only_with_ok()
     settings->setProperty("startMinimized", true);
     settings->setProperty("autoLockMinutes", 17);
     settings->setProperty("checkFrequency", 2);
+    settings->setProperty("escapeExits", true);
     QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
     QTRY_VERIFY(!settings->property("visible").toBool());
     QVERIFY(loaded.controller->startMinimized());
     QCOMPARE(loaded.controller->autoLockMinutes(), 17);
     QCOMPARE(updater->frequency(), 2);
+    QVERIFY(loaded.controller->escapeExits());
 
     // Restore defaults puts back the topic shown (Security) and no other,
     // kept with OK.
@@ -282,6 +287,7 @@ void TestTray::the_settings_window_keeps_changes_only_with_ok()
     QVERIFY(!loaded.controller->startMinimized());
     QVERIFY(loaded.controller->keepInTray());
     QCOMPARE(updater->frequency(), 0);
+    QVERIFY(!loaded.controller->escapeExits());
 
     // Without a tray its setting cannot be changed here, so Restore defaults
     // leaves it as it is.
@@ -366,9 +372,9 @@ void TestTray::the_tray_and_start_settings_survive_a_new_start()
         controller.setKeepInTray(false);
         controller.setStartMinimized(true);
     }
-    QSettings().sync();
+    SettingsFile().sync();
     {
-        QSettings fromFile(QSettings().fileName(), QSettings().format());
+        QSettings fromFile(SettingsFile().fileName(), SettingsFile().format());
         QCOMPARE(fromFile.value(QStringLiteral("tray/keepRunning")).toBool(), false);
         QCOMPARE(fromFile.value(QStringLiteral("start/minimized")).toBool(), true);
         for (const QString& key : fromFile.allKeys()) {
@@ -376,49 +382,67 @@ void TestTray::the_tray_and_start_settings_survive_a_new_start()
         }
     }
 
-    // A choice stored under the old names, as 0.0.4 to 0.0.9 wrote it, is
-    // carried over once and the old names removed.
-    QSettings settings;
-    settings.remove(QStringLiteral("tray/keepRunning"));
-    settings.remove(QStringLiteral("start/minimized"));
-    settings.setValue(QStringLiteral("General/keepRunningInTray"), false);
-    settings.setValue(QStringLiteral("General/startMinimized"), true);
-    settings.sync();
-    {
-        VaultController controller;
-        QVERIFY(!controller.keepInTray());
-        QVERIFY(controller.startMinimized());
-    }
-    QVERIFY(!QSettings().contains(QStringLiteral("General/keepRunningInTray")));
-    QVERIFY(!QSettings().contains(QStringLiteral("General/startMinimized")));
     VaultController again;
     again.setKeepInTray(true);
     again.setStartMinimized(false);
 }
 
-void TestTray::with_reset_the_settings_start_at_their_defaults()
+void TestTray::esc_closes_the_main_window_only_when_ticked_and_not_editing()
 {
-    QSettings settings;
-    settings.setValue(QStringLiteral("security/autoLockMinutes"), 17);
-    settings.setValue(QStringLiteral("clipboard/clearSeconds"), 45);
-    settings.setValue(QStringLiteral("tray/keepRunning"), false);
-    settings.setValue(QStringLiteral("start/minimized"), true);
-    settings.setValue(QStringLiteral("updates/frequency"), 2);
-    setSkipReadingSettings(true); // --reset (D-026)
-    {
-        VaultController controller;
-        QCOMPARE(controller.autoLockMinutes(), 5);
-        QCOMPARE(controller.clipboardClearSeconds(), 30);
-        QVERIFY(controller.keepInTray());
-        QVERIFY(!controller.startMinimized());
-        Updater updater;
-        QCOMPARE(updater.frequency(), 0);
-    }
-    setSkipReadingSettings(false);
-    for (const char* key : {"security/autoLockMinutes", "clipboard/clearSeconds", "tray/keepRunning", "start/minimized",
-                            "updates/frequency"}) {
-        settings.remove(QString::fromLatin1(key));
-    }
+    QTemporaryDir folder;
+    Loaded loaded = load();
+    QVERIFY(loaded.window && loaded.controller);
+    loaded.controller->setTrayAvailable(true);
+    loaded.controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    QVERIFY(!loaded.controller->escapeExits()); // off by default (D-048)
+    QSignalSpy quit(loaded.engine.get(), &QQmlEngine::quit);
+    showMainWindow(loaded.window, false, true);
+    QVERIFY(QTest::qWaitForWindowExposed(loaded.window));
+
+    // Not ticked: Esc does nothing.
+    QTest::keyClick(loaded.window, Qt::Key_Escape);
+    QVERIFY(loaded.window->isVisible());
+
+    // Ticked: an open menu takes its Esc first, and closes.
+    loaded.controller->setEscapeExits(true);
+    QObject* fileMenu = loaded.window->findChild<QObject*>(QStringLiteral("fileMenu"));
+    QVERIFY(fileMenu);
+    QVERIFY(QMetaObject::invokeMethod(fileMenu, "open"));
+    QTRY_VERIFY(fileMenu->property("opened").toBool());
+    QTest::keyClick(loaded.window, Qt::Key_Escape);
+    QTRY_VERIFY(!fileMenu->property("visible").toBool());
+    QVERIFY(loaded.window->isVisible());
+
+    // Ticked, with the tray: to the tray, still running.
+    QTest::keyClick(loaded.window, Qt::Key_Escape);
+    QTRY_VERIFY(!loaded.window->isVisible());
+    QCOMPARE(quit.count(), 0);
+
+    // In edit mode Esc does nothing.
+    showMainWindow(loaded.window, false, true);
+    QVERIFY(QTest::qWaitForWindowExposed(loaded.window));
+    loaded.controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("esc.chronovault"))),
+                                   QStringLiteral("master"), QStringLiteral("master"));
+    QTRY_COMPARE(loaded.controller->state(), State::Unlocked);
+    QObject* page = loaded.window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QVERIFY(page);
+    QTRY_VERIFY(page->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(page, "newLogin"));
+    QTRY_VERIFY(page->property("editing").toBool());
+    QTest::keyClick(loaded.window, Qt::Key_Escape);
+    QVERIFY(loaded.window->isVisible());
+    QVERIFY(page->property("editing").toBool());
+
+    // Out of edit mode, without the tray: the program ends.
+    QObject* editor = loaded.window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QVERIFY(editor);
+    editor->setProperty("itemId", QString());
+    QTRY_VERIFY(!page->property("editing").toBool());
+    loaded.controller->setKeepInTray(false);
+    QTest::keyClick(loaded.window, Qt::Key_Escape);
+    QTRY_COMPARE(quit.count(), 1);
+    loaded.controller->setKeepInTray(true);
+    loaded.controller->setEscapeExits(false);
 }
 
 void TestTray::keep_running_in_the_tray_is_the_last_of_the_three()
@@ -436,6 +460,7 @@ void TestTray::keep_running_in_the_tray_is_the_last_of_the_three()
     QTRY_VERIFY(top("startAtStartupBox") > 0);
     QVERIFY(top("startAtStartupBox") < top("startMinimizedBox"));
     QVERIFY(top("startMinimizedBox") < top("keepInTrayBox"));
+    QVERIFY(top("keepInTrayBox") < top("escapeExitsBox")); // D-048
     QVERIFY(QMetaObject::invokeMethod(settings, "close"));
 }
 

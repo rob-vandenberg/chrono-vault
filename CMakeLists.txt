@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.0.37 LANGUAGES CXX)
+project(chrono-vault VERSION 0.0.38 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.0.37
+# CMakeLists.txt 0.0.38
 
 # --- Version history ----------------------------------------------------
+# v0.0.38: Version 0.0.38
 # v0.0.37: Version 0.0.37
 # v0.0.36: Version 0.0.36
 # v0.0.35: Version 0.0.35
