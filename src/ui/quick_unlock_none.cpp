@@ -33,7 +33,7 @@ class NoQuickUnlock : public QuickUnlock
 public:
     [[nodiscard]] bool available() const override { return false; }
     [[nodiscard]] QString name() const override { return {}; }
-    void store(const QString&, const QByteArray&) override { emit stored(false); }
+    void store(const QString&, const QByteArray&) override { emit stored(Result::Unavailable); }
     void retrieve(const QString&) override { emit retrieved(Result::Unavailable, {}); }
     void remove(const QString& vault) override { remember(vault, false); }
 };

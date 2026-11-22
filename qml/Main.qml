@@ -579,7 +579,9 @@ ApplicationWindow {
             close.accepted = false
             settingsWindow.close()
             hide()
-            // Autolock when the main window is closed (D-040).
+            // Autolock when the main window is closed (D-040); a finger still
+            // asked for is no longer asked: the reader is given back (D-042).
+            VaultController.stopQuickUnlock()
             VaultController.mainWindowClosed()
             return
         }

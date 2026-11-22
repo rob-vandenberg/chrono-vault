@@ -289,3 +289,14 @@ on. With a test.
 The owner's rule (D-041): three tries at once, then 10 seconds, a minute and 10 minutes, and an hour once after every
 25; counted per vault in the settings, so a restart does not end a wait; a correct unlock starts again. The unlock page
 greys with "Try again in m:ss". `tests/integration/test_unlock_waits.cpp` drives 26 wrong tries with the tests' clock.
+
+## 22 November 2026: version 0.0.27: the collapsible sidebar, and the fingerprint reader held only while asked
+
+The sidebar collapses to its icons and its groups fold with their ▾; Archive and Trash have icons; the splitters are
+easier to catch; Keep running in the tray is the last of the three in General (D-042). Found on the owner's laptop:
+turning the fingerprint on asked for a finger without saying so and kept the reader; a second press was reported as a
+failure; the unlock page never asked at a start. Now the reader is held only while a finger is asked and given back
+the moment that is settled; the settings window says "Touch the fingerprint reader…" and the outcome, with a Cancel.
+`tests/integration/test_reader.cpp` drives it with a stand-in fprintd.
+Review round 1: on Windows a key not kept was blamed on a "desktop keyring" Windows does not have; each system now
+says its own reason.

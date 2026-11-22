@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.24
+// VaultPage.qml 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: The sidebar collapses to its icons; its groups fold; Archive and Trash with icons; wider splitters (D-042)
 // v0.0.24: Hide Sidebar, the groups shown by choice, item counts, Archive and Show Passwords from the menu (D-039)
 // v0.0.17: Archive and Trash under Others; the chosen item with a grey fill and a blue bar; subtitles can be hidden
 //          (D-033)
@@ -65,12 +66,62 @@ Item {
         }
     }
 
+    // The sidebar collapsed to its icons (D-042).
+    readonly property bool collapsed: VaultController.sidebarCollapsed
+    readonly property int collapsedWidth: Math.round(64 * Appearance.factor)
+    property int expandedWidth: Math.round(220 * Appearance.factor)
+    function setCollapsed(on) {
+        if (on === collapsed)
+            return
+        if (on)
+            expandedWidth = vaultColumn.width
+        VaultController.sidebarCollapsed = on
+        vaultColumn.SplitView.preferredWidth = on ? collapsedWidth : expandedWidth
+    }
+    Component.onCompleted: if (collapsed) vaultColumn.SplitView.preferredWidth = collapsedWidth
+
+    // An entry of the left column: its icon alone while collapsed, its name
+    // then shown on hover (D-042).
+    component SideEntry: ItemDelegate {
+        display: vaultPage.collapsed ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+        ToolTip.visible: vaultPage.collapsed && hovered
+        ToolTip.text: text
+        Layout.fillWidth: true
+    }
+    // A group's heading: its triangle folds or unfolds the group, in both
+    // states of the sidebar; the name only while expanded (D-042).
+    component GroupHeading: RowLayout {
+        id: heading
+        property string title: ""
+        property string key: ""
+        property bool folded: false
+        signal foldToggled()
+        spacing: 0
+        Layout.topMargin: Math.round(14 * Appearance.factor)
+        ToolButton {
+            objectName: "foldButton_" + heading.key
+            text: heading.folded ? "▸" : "▾"
+            opacity: 0.7
+            implicitWidth: Math.round(24 * Appearance.factor)
+            implicitHeight: Math.round(22 * Appearance.factor)
+            onClicked: heading.foldToggled()
+            ToolTip.visible: vaultPage.collapsed && hovered
+            ToolTip.text: heading.title
+        }
+        Label {
+            visible: !vaultPage.collapsed
+            text: heading.title
+            font.bold: true
+            opacity: 0.7
+        }
+    }
+
     // A number of items at the right of an entry of the left column, with
     // View > Show Item Counts (D-039).
     component CountLabel: Label {
         property string filter: ""
         objectName: "count_" + filter
-        visible: VaultController.showItemCounts
+        visible: VaultController.showItemCounts && !vaultPage.collapsed
         text: VaultController.revision >= 0 ? VaultController.items.countOf(filter) : ""
         opacity: 0.6
         anchors.right: parent.right
@@ -218,6 +269,18 @@ Item {
 
     SplitView {
         anchors.fill: parent
+        // Twice Fusion's 2 pixels to catch with the mouse; the line shown
+        // stays as thin as before (D-042).
+        handle: Item {
+            implicitWidth: Math.max(4, Math.round(4 * Appearance.factor))
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 2
+                height: parent.height
+                color: parent.SplitHandle.pressed ? vaultPage.palette.dark
+                       : parent.SplitHandle.hovered ? vaultPage.palette.midlight : vaultPage.palette.mid
+            }
+        }
 
         // Left: the vault, then Home (all items), Favorites, the categories
         // and the tags, each narrowing the list (D-027, D-028).
@@ -227,8 +290,10 @@ Item {
             // View > Hide Sidebar (D-039).
             visible: !VaultController.sidebarHidden
             SplitView.preferredWidth: Math.round(220 * Appearance.factor)
-            SplitView.minimumWidth: Math.round(160 * Appearance.factor)
-            padding: Math.round(12 * Appearance.factor)
+            // Collapsed: a narrow column of fixed width (D-042).
+            SplitView.minimumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Math.round(160 * Appearance.factor)
+            SplitView.maximumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Number.POSITIVE_INFINITY
+            padding: vaultPage.collapsed ? Math.round(6 * Appearance.factor) : Math.round(12 * Appearance.factor)
 
             readonly property var categoryList: VaultController.revision >= 0 ? VaultController.categories() : []
             readonly property var tagList: VaultController.revision >= 0 ? VaultController.tags() : []
@@ -243,6 +308,16 @@ Item {
                     width: columnScroll.availableWidth
                     spacing: Math.round(2 * Appearance.factor)
 
+                    // Collapses the sidebar to its icons, or expands it (D-042).
+                    ToolButton {
+                        objectName: "sidebarToggle"
+                        icon.source: "qrc:/icons/sidebar.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        onClicked: vaultPage.setCollapsed(!vaultPage.collapsed)
+                        ToolTip.visible: hovered
+                        ToolTip.text: vaultPage.collapsed ? qsTr("Expand the sidebar") : qsTr("Collapse the sidebar")
+                    }
+
                     // The vault shown; it opens the list of the person's
                     // vaults, and New vault and Open vault (D-030).
                     ItemDelegate {
@@ -251,15 +326,22 @@ Item {
                         Layout.fillWidth: true
                         Layout.bottomMargin: Math.round(14 * Appearance.factor)
                         onClicked: vaultMenu.popup(this, 0, height)
-                        contentItem: RowLayout {
-                            spacing: Math.round(10 * Appearance.factor)
+                        ToolTip.visible: vaultPage.collapsed && hovered
+                        ToolTip.text: VaultController.vaultName
+                        // Collapsed: the icon with its ▾ below it (D-042).
+                        contentItem: GridLayout {
+                            columns: vaultPage.collapsed ? 1 : 3
+                            columnSpacing: Math.round(10 * Appearance.factor)
+                            rowSpacing: 0
                             Image {
+                                Layout.alignment: Qt.AlignHCenter
                                 source: "qrc:/icons/chrono-vault.svg"
                                 sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
                                 Layout.preferredWidth: Math.round(36 * Appearance.factor)
                                 Layout.preferredHeight: Math.round(36 * Appearance.factor)
                             }
                             ColumnLayout {
+                                visible: !vaultPage.collapsed
                                 spacing: 0
                                 Layout.fillWidth: true
                                 Label {
@@ -280,6 +362,7 @@ Item {
                             Label {
                                 text: "▾"
                                 opacity: 0.7
+                                Layout.alignment: Qt.AlignHCenter
                             }
                         }
                         Menu {
@@ -314,7 +397,7 @@ Item {
                         }
                     }
 
-                    ItemDelegate {
+                    SideEntry {
                         objectName: "homeEntry"
                         text: qsTr("Home")
                         icon.source: "qrc:/icons/home.svg"
@@ -324,7 +407,7 @@ Item {
                         onClicked: vaultPage.choose("")
                         CountLabel { filter: "" }
                     }
-                    ItemDelegate {
+                    SideEntry {
                         objectName: "favouritesEntry"
                         text: qsTr("Favorites")
                         icon.source: "qrc:/icons/star.svg"
@@ -335,18 +418,17 @@ Item {
                         CountLabel { filter: "favourites" }
                     }
 
-                    Label {
+                    GroupHeading {
                         visible: VaultController.showCategories
-                        text: qsTr("Categories")
-                        font.bold: true
-                        opacity: 0.7
-                        Layout.topMargin: Math.round(14 * Appearance.factor)
-                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                        title: qsTr("Categories")
+                        key: "categories"
+                        folded: VaultController.categoriesFolded
+                        onFoldToggled: VaultController.categoriesFolded = !VaultController.categoriesFolded
                     }
                     Repeater {
-                        model: VaultController.showCategories
+                        model: VaultController.showCategories && !VaultController.categoriesFolded
                                ? vaultColumn.categoryList.filter(function(category) { return !category.hidden }) : []
-                        delegate: ItemDelegate {
+                        delegate: SideEntry {
                             required property var modelData
                             objectName: "categoryEntry_" + modelData.id
                             text: modelData.name
@@ -359,23 +441,23 @@ Item {
                         }
                     }
 
-                    Label {
+                    GroupHeading {
                         visible: VaultController.showTags
-                        text: qsTr("Tags")
-                        font.bold: true
-                        opacity: 0.7
-                        Layout.topMargin: Math.round(14 * Appearance.factor)
-                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                        title: qsTr("Tags")
+                        key: "tags"
+                        folded: VaultController.tagsFolded
+                        onFoldToggled: VaultController.tagsFolded = !VaultController.tagsFolded
                     }
                     Label {
-                        visible: VaultController.showTags && vaultColumn.tagList.length === 0
+                        visible: VaultController.showTags && !VaultController.tagsFolded && !vaultPage.collapsed
+                                 && vaultColumn.tagList.length === 0
                         text: qsTr("No tags yet.")
                         opacity: 0.6
                         Layout.leftMargin: Math.round(8 * Appearance.factor)
                     }
                     Repeater {
-                        model: VaultController.showTags ? vaultColumn.tagList : []
-                        delegate: ItemDelegate {
+                        model: VaultController.showTags && !VaultController.tagsFolded ? vaultColumn.tagList : []
+                        delegate: SideEntry {
                             id: tagEntry
                             required property var modelData
                             objectName: "tagEntry_" + modelData.tag
@@ -383,7 +465,7 @@ Item {
                             icon.source: "qrc:/icons/tag.svg"
                             icon.color: vaultPage.palette.buttonText
                             // A nested tag stands under the one above it.
-                            leftPadding: Math.round((8 + 16 * modelData.depth) * Appearance.factor)
+                            leftPadding: Math.round((8 + (vaultPage.collapsed ? 0 : 16 * modelData.depth)) * Appearance.factor)
                             highlighted: VaultController.filter === "tag:" + modelData.tag
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("tag:" + modelData.tag)
@@ -407,27 +489,30 @@ Item {
                     }
 
                     // The Archive and the Trash (D-033).
-                    Label {
+                    GroupHeading {
                         visible: VaultController.showOthers
-                        text: qsTr("Others")
-                        font.bold: true
-                        opacity: 0.7
-                        Layout.topMargin: Math.round(14 * Appearance.factor)
-                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                        title: qsTr("Others")
+                        key: "others"
+                        folded: VaultController.othersFolded
+                        onFoldToggled: VaultController.othersFolded = !VaultController.othersFolded
                     }
-                    ItemDelegate {
+                    SideEntry {
                         objectName: "archiveEntry"
-                        visible: VaultController.showOthers
+                        visible: VaultController.showOthers && !VaultController.othersFolded
                         text: qsTr("Archive")
+                        icon.source: "qrc:/icons/archive.svg"
+                        icon.color: vaultPage.palette.buttonText
                         highlighted: VaultController.filter === "archive"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("archive")
                         CountLabel { filter: "archive" }
                     }
-                    ItemDelegate {
+                    SideEntry {
                         objectName: "trashEntry"
-                        visible: VaultController.showOthers
+                        visible: VaultController.showOthers && !VaultController.othersFolded
                         text: qsTr("Trash")
+                        icon.source: "qrc:/icons/trash.svg"
+                        icon.color: vaultPage.palette.buttonText
                         highlighted: VaultController.filter === "trash"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("trash")

@@ -23,6 +23,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
+#include <QQmlProperty>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QSettings>
@@ -32,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.0.24
+// test_menus.cpp 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: the sidebar collapses to its icons, its groups fold, the splitters (D-042)
 // v0.0.24: Initial release (D-039)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -82,6 +84,7 @@ private slots:
     void shortcuts_stand_aside_while_a_text_field_is_typed_in();
     void the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts();
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
+    void the_sidebar_collapses_to_icons_and_its_groups_fold();
 
 private:
     // The main window with a vault unlocked, and one item shown.
@@ -425,6 +428,72 @@ void TestMenus::clear_clipboard_empties_it_and_the_code_has_a_copy_button()
     QMetaObject::invokeMethod(action(QStringLiteral("clearClipboardAction")), "trigger");
     QVERIFY(clipboard->text().isEmpty());
     QCOMPARE(controller->message(), QStringLiteral("The clipboard is cleared."));
+}
+
+void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
+{
+    QVERIFY(open(QStringLiteral("sidebar")));
+    auto* root = qobject_cast<QQuickWindow*>(window)->contentItem();
+    auto* column = window->findChild<QQuickItem*>(QStringLiteral("vaultColumn"));
+    QQuickItem* toggle = visualItem(root, QStringLiteral("sidebarToggle"));
+    QVERIFY(column && toggle);
+    // Archive and Trash have icons of their own.
+    for (const char* name : {"archiveEntry", "trashEntry"}) {
+        QQuickItem* entry = visualItem(root, QString::fromLatin1(name));
+        QVERIFY2(entry, name);
+        const QString source = QQmlProperty::read(entry, QStringLiteral("icon.source")).toUrl().toString();
+        QVERIFY2(source.endsWith(QString::fromLatin1(name).chopped(5) + QStringLiteral(".svg")), qPrintable(source));
+    }
+    const qreal expandedWidth = column->width();
+
+    // Collapsed: a narrow column, icons only, remembered.
+    QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
+    QTRY_VERIFY(column->width() < expandedWidth / 2);
+    QVERIFY(controller->sidebarCollapsed());
+    QQuickItem* home = visualItem(root, QStringLiteral("homeEntry"));
+    QCOMPARE(home->property("display").toInt(), 0); // AbstractButton.IconOnly
+    QVERIFY(QSettings().value(QStringLiteral("view/sidebarCollapsed")).toBool());
+    // Hide Sidebar still hides it whole, apart from collapsing.
+    controller->setSidebarHidden(true);
+    QTRY_VERIFY(!column->isVisible());
+    controller->setSidebarHidden(false);
+    QTRY_VERIFY(column->isVisible());
+    QVERIFY(controller->sidebarCollapsed());
+
+    // The triangle folds a group, and unfolds it; remembered.
+    QQuickItem* foldCategories = visualItem(root, QStringLiteral("foldButton_categories"));
+    QVERIFY(foldCategories);
+    QVERIFY(visualItem(root, QStringLiteral("categoryEntry_login")));
+    QVERIFY(QMetaObject::invokeMethod(foldCategories, "clicked"));
+    QTRY_VERIFY(!visualItem(root, QStringLiteral("categoryEntry_login")));
+    QVERIFY(QSettings().value(QStringLiteral("view/categoriesFolded")).toBool());
+    QQuickItem* foldOthers = visualItem(root, QStringLiteral("foldButton_others"));
+    QVERIFY(QMetaObject::invokeMethod(foldOthers, "clicked"));
+    QTRY_VERIFY(!visualItem(root, QStringLiteral("trashEntry")));
+    QVERIFY(QMetaObject::invokeMethod(foldOthers, "clicked"));
+    QTRY_VERIFY(visualItem(root, QStringLiteral("trashEntry")));
+
+    // Expanded again: its earlier width; the folding stays.
+    QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
+    QTRY_COMPARE(column->width(), expandedWidth);
+    QCOMPARE(home->property("display").toInt(), 2); // AbstractButton.TextBesideIcon
+    QVERIFY(!visualItem(root, QStringLiteral("categoryEntry_login")));
+    QVERIFY(QMetaObject::invokeMethod(foldCategories, "clicked"));
+    QTRY_VERIFY(visualItem(root, QStringLiteral("categoryEntry_login")));
+
+    // The splitters catch the mouse over 4 pixels, not Fusion's 2.
+    int handles = 0;
+    std::function<void(QQuickItem*)> walk = [&](QQuickItem* item) {
+        if (QString(item->metaObject()->className()).startsWith(QLatin1String("QQuickItem")) &&
+            qFuzzyCompare(item->implicitWidth(), 4.0) && item->childItems().size() == 1) {
+            ++handles;
+        }
+        for (QQuickItem* child : item->childItems()) {
+            walk(child);
+        }
+    };
+    walk(root);
+    QCOMPARE(handles, 2);
 }
 
 QTEST_MAIN(TestMenus)

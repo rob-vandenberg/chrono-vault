@@ -162,21 +162,38 @@ public:
     }
 
     [[nodiscard]] QString name() const override { return QCoreApplication::translate("QuickUnlock", "Windows Hello"); }
+    [[nodiscard]] QString touchPrompt() const override
+    {
+        return QCoreApplication::translate("QuickUnlock", "Confirm it is you in the Windows Hello window…");
+    }
 
     void store(const QString& vault, const QByteArray& secret) override
     {
         const QByteArray challenge = crypto::randomBytes(32);
         QPointer<WindowsQuickUnlock> self(this);
-        std::thread([self, vault, secret, challenge]() {
-            Pending own; // turning it on is never stopped by an unlock
-            const Signed answer = sign(vault, challenge, true, own);
+        // Its Cancel stops it too (D-042); a stopped one answers Cancelled.
+        cancel();
+        auto pending = std::make_shared<Pending>();
+        asking = pending;
+        emit fingerReady(); // Windows Hello shows its own window now
+        std::thread([self, vault, secret, challenge, pending]() {
+            const Signed answer = sign(vault, challenge, true, *pending);
+            bool stopped = false;
+            {
+                const std::lock_guard<std::mutex> guard(pending->lock);
+                stopped = pending->stopped;
+            }
             QByteArray sealed;
-            if (answer.result == Result::Done) {
+            if (answer.result == Result::Done && !stopped) {
                 sealed = crypto::seal(answer.key, secret, sealLabel);
             }
+            const Result result = stopped                         ? Result::Cancelled
+                                  : answer.result != Result::Done ? answer.result
+                                  : sealed.isEmpty()              ? Result::NotKept
+                                                                  : Result::Done;
             QMetaObject::invokeMethod(
                 qApp,
-                [self, vault, challenge, sealed]() {
+                [self, vault, challenge, sealed, result]() {
                     if (!self) {
                         return;
                     }
@@ -186,7 +203,7 @@ public:
                                                          QString::fromLatin1(sealed.toBase64())});
                     }
                     self->remember(vault, !sealed.isEmpty());
-                    emit self->stored(!sealed.isEmpty());
+                    emit self->stored(result);
                 },
                 Qt::QueuedConnection);
         }).detach();
@@ -205,6 +222,7 @@ public:
         cancel();
         auto pending = std::make_shared<Pending>();
         asking = pending;
+        emit fingerReady(); // Windows Hello shows its own window now
         std::thread([self, vault, challenge, sealed, pending]() {
             const Signed answer = sign(vault, challenge, false, *pending);
             {

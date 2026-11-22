@@ -113,10 +113,20 @@ class VaultController : public QObject
     Q_PROPERTY(bool showCategories READ showCategories WRITE setShowCategories NOTIFY viewChanged)
     Q_PROPERTY(bool showTags READ showTags WRITE setShowTags NOTIFY viewChanged)
     Q_PROPERTY(bool showOthers READ showOthers WRITE setShowOthers NOTIFY viewChanged)
+    // The sidebar collapsed to its icons, and its groups folded (D-042).
+    Q_PROPERTY(bool sidebarCollapsed READ sidebarCollapsed WRITE setSidebarCollapsed NOTIFY viewChanged)
+    Q_PROPERTY(bool categoriesFolded READ categoriesFolded WRITE setCategoriesFolded NOTIFY viewChanged)
+    Q_PROPERTY(bool tagsFolded READ tagsFolded WRITE setTagsFolded NOTIFY viewChanged)
+    Q_PROPERTY(bool othersFolded READ othersFolded WRITE setOthersFolded NOTIFY viewChanged)
     Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
     Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
     Q_PROPERTY(bool quickUnlockAvailable READ quickUnlockAvailable NOTIFY quickUnlockChanged)
     Q_PROPERTY(bool quickUnlockOn READ quickUnlockOn NOTIFY quickUnlockChanged)
+    // Turning it on: a finger asked once, and what came of it, for the
+    // settings window (D-042).
+    Q_PROPERTY(bool quickUnlockBusy READ quickUnlockBusy NOTIFY quickUnlockChanged)
+    Q_PROPERTY(QString quickUnlockMessage READ quickUnlockMessage NOTIFY quickUnlockChanged)
+    Q_PROPERTY(bool quickUnlockTrouble READ quickUnlockTrouble NOTIFY quickUnlockChanged)
     Q_PROPERTY(QString quickUnlockName READ quickUnlockName CONSTANT)
     Q_PROPERTY(bool reminderDue READ reminderDue NOTIFY quickUnlockChanged)
     Q_PROPERTY(bool masterPasswordReminder READ masterPasswordReminder WRITE setMasterPasswordReminder NOTIFY
@@ -219,6 +229,13 @@ public:
     void setMasterPasswordReminder(bool on);
     Q_INVOKABLE void setQuickUnlock(bool on);
     Q_INVOKABLE void unlockWithQuickUnlock();
+    [[nodiscard]] bool quickUnlockBusy() const { return settingUp; }
+    [[nodiscard]] QString quickUnlockMessage() const { return setupMessage; }
+    [[nodiscard]] bool quickUnlockTrouble() const { return setupTrouble; }
+    // The Cancel beside "Touch the fingerprint reader…" (D-042).
+    Q_INVOKABLE void cancelQuickUnlockSetup();
+    // The unlock page is no longer on screen: the reader is given back.
+    Q_INVOKABLE void stopQuickUnlock();
     // "Not now": the reminder waits another year.
     Q_INVOKABLE void dismissReminder();
     // Tests only: a stand-in for the fingerprint reader.
@@ -241,6 +258,14 @@ public:
     void setShowTags(bool on) { setViewOption(QStringLiteral("showTags"), on); }
     [[nodiscard]] bool showOthers() const { return viewOption(QStringLiteral("showOthers"), true); }
     void setShowOthers(bool on) { setViewOption(QStringLiteral("showOthers"), on); }
+    [[nodiscard]] bool sidebarCollapsed() const { return viewOption(QStringLiteral("sidebarCollapsed"), false); }
+    void setSidebarCollapsed(bool on) { setViewOption(QStringLiteral("sidebarCollapsed"), on); }
+    [[nodiscard]] bool categoriesFolded() const { return viewOption(QStringLiteral("categoriesFolded"), false); }
+    void setCategoriesFolded(bool on) { setViewOption(QStringLiteral("categoriesFolded"), on); }
+    [[nodiscard]] bool tagsFolded() const { return viewOption(QStringLiteral("tagsFolded"), false); }
+    void setTagsFolded(bool on) { setViewOption(QStringLiteral("tagsFolded"), on); }
+    [[nodiscard]] bool othersFolded() const { return viewOption(QStringLiteral("othersFolded"), false); }
+    void setOthersFolded(bool on) { setViewOption(QStringLiteral("othersFolded"), on); }
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
 
@@ -513,6 +538,11 @@ private:
     bool quickAvailable = false;
     bool reminderOn = true;
     bool replacingQuickKey = false; // storing the new key after a master password change
+    bool settingUp = false;   // a finger asked to turn it on
+    bool retrieving = false;  // a finger asked to unlock
+    QString setupMessage;
+    bool setupTrouble = false;
+    void tellSetup(const QString& text, bool isTrouble);
     bool openingByFinger = false;   // the vault is being opened with the key kept for the finger
     QNetworkAccessManager iconNetwork;
     QHash<QString, QString> websiteIcons; // host: "data:" address of its PNG, in memory only

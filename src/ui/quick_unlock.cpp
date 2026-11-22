@@ -16,12 +16,14 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "quick_unlock.h"
 
+#include <QCoreApplication>
 #include <QSettings>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock.cpp 0.0.23
+// quick_unlock.cpp 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: The words for a key not kept (D-042)
 // v0.0.23: Initial release (D-038)
 
 namespace chrono_vault {
@@ -31,6 +33,11 @@ namespace {
 const QString keptKey = QStringLiteral("quickUnlock/vaults");
 
 } // namespace
+
+QString QuickUnlock::notKeptText() const
+{
+    return QCoreApplication::translate("QuickUnlock", "The key could not be kept for this vault.");
+}
 
 bool QuickUnlock::has(const QString& vault) const
 {

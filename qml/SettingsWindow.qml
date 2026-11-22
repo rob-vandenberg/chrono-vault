@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.25
+// SettingsWindow.qml 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: General: Keep running in the tray last; the fingerprint a switch, its touch and outcome told here (D-042)
 // v0.0.25: Security: Change the Master Password, Autolock when (D-040)
 // v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (Security) (D-038)
 // v0.0.20: Use website icons (Customize), off by default (D-036)
@@ -194,6 +195,8 @@ ApplicationWindow {
     onVisibleChanged: {
         if (!visible) {
             problem = ""
+            // A finger still asked for turning it on: the reader is given back.
+            VaultController.cancelQuickUnlockSetup()
             Appearance.showKept()
         }
     }
@@ -440,13 +443,6 @@ ApplicationWindow {
                             }
                         }
                         CheckBox {
-                            objectName: "keepInTrayBox"
-                            text: qsTr("Keep Chrono Vault running in the system tray")
-                            checked: settingsWindow.keepInTray
-                            enabled: VaultController.trayAvailable
-                            onToggled: settingsWindow.keepInTray = checked
-                        }
-                        CheckBox {
                             objectName: "startAtStartupBox"
                             text: qsTr("Start Chrono Vault at startup")
                             checked: settingsWindow.startAtStartup
@@ -457,6 +453,13 @@ ApplicationWindow {
                             text: qsTr("Start Chrono Vault minimized")
                             checked: settingsWindow.startMinimized
                             onToggled: settingsWindow.startMinimized = checked
+                        }
+                        CheckBox {
+                            objectName: "keepInTrayBox"
+                            text: qsTr("Keep Chrono Vault running in the system tray")
+                            checked: settingsWindow.keepInTray
+                            enabled: VaultController.trayAvailable
+                            onToggled: settingsWindow.keepInTray = checked
                         }
                         RowLayout {
                             Label { text: qsTr("Check for updates") }
@@ -610,11 +613,45 @@ ApplicationWindow {
                             opacity: 0.8
                             Layout.fillWidth: true
                         }
-                        Button {
-                            objectName: "quickUnlockToggle"
-                            enabled: VaultController.quickUnlockAvailable && VaultController.state === VaultController.Unlocked
-                            text: VaultController.quickUnlockOn ? qsTr("Turn off") : qsTr("Turn on")
-                            onClicked: VaultController.setQuickUnlock(!VaultController.quickUnlockOn)
+                        // A switch, at once, not with OK (D-042): on asks for
+                        // one touch of the reader to make sure it works.
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Item { Layout.fillWidth: true }
+                            Switch {
+                                id: quickUnlockSwitch
+                                objectName: "quickUnlockToggle"
+                                text: checked ? qsTr("On") : qsTr("Off")
+                                LayoutMirroring.enabled: true
+                                checked: VaultController.quickUnlockOn || VaultController.quickUnlockBusy
+                                enabled: VaultController.quickUnlockAvailable && !VaultController.quickUnlockBusy
+                                         && VaultController.state === VaultController.Unlocked
+                                onToggled: {
+                                    VaultController.setQuickUnlock(checked)
+                                    checked = Qt.binding(function() {
+                                        return VaultController.quickUnlockOn || VaultController.quickUnlockBusy
+                                    })
+                                }
+                            }
+                        }
+                        // "Touch the fingerprint reader…" and what came of it,
+                        // here where it was asked (D-042).
+                        RowLayout {
+                            visible: VaultController.quickUnlockMessage !== "" || VaultController.quickUnlockBusy
+                            Layout.fillWidth: true
+                            Label {
+                                objectName: "quickUnlockMessage"
+                                text: VaultController.quickUnlockMessage
+                                font.bold: VaultController.quickUnlockTrouble
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                            Button {
+                                objectName: "quickUnlockCancel"
+                                visible: VaultController.quickUnlockBusy
+                                text: qsTr("Cancel")
+                                onClicked: VaultController.cancelQuickUnlockSetup()
+                            }
                         }
                         CheckBox {
                             objectName: "reminderBox"

@@ -178,6 +178,15 @@ QString momentText(const QDateTime& moment)
            local.time().toString(QStringLiteral("HH:mm:ss"));
 }
 
+// A name at the start of a sentence: "fingerprint" becomes "Fingerprint".
+QString sentenceStart(QString name)
+{
+    if (!name.isEmpty()) {
+        name[0] = name.at(0).toUpper();
+    }
+    return name;
+}
+
 QVariantList fieldsToList(const QList<Field>& fields, bool withValues)
 {
     QVariantList list;
@@ -379,6 +388,14 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
         minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
+    }
+
+    // Quitting gives the fingerprint reader back (D-042).
+    if (QCoreApplication::instance()) {
+        connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this]() {
+            stopQuickUnlock();
+            cancelQuickUnlockSetup();
+        });
     }
 
     // What the system says about sleep and inactivity (D-040); whether it
@@ -1001,6 +1018,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     rightPasswordGiven(); // the count of wrong master passwords starts again (D-041)
     if (quick) {
         quick->cancel(); // a finger still asked for is no longer needed
+        retrieving = false;
     }
     stamps->set(path, unlockedStamp);
     key = newKey;
@@ -1455,7 +1473,22 @@ void VaultController::fetchWebsiteIcons()
 
 void VaultController::connectQuickUnlock()
 {
-    connect(quick.get(), &QuickUnlock::stored, this, [this](bool ok) {
+    connect(quick.get(), &QuickUnlock::fingerReady, this, [this]() {
+        if (settingUp) {
+            tellSetup(quick->touchPrompt(), false);
+        } else if (retrieving && currentState == State::Locked) {
+            say(quick->touchPrompt(), false);
+        }
+    });
+    connect(quick.get(), &QuickUnlock::notRecognized, this, [this]() {
+        if (settingUp) {
+            tellSetup(tr("Not recognized. Try again."), true);
+        } else if (retrieving && currentState == State::Locked) {
+            say(tr("Not recognized. Try again."), true);
+        }
+    });
+    connect(quick.get(), &QuickUnlock::stored, this, [this](QuickUnlock::Result result) {
+        const bool ok = result == QuickUnlock::Result::Done;
         if (std::exchange(replacingQuickKey, false)) {
             if (!ok) {
                 quick->remove(path);
@@ -1467,11 +1500,25 @@ void VaultController::connectQuickUnlock()
             emit quickUnlockChanged();
             return;
         }
-        if (ok) {
+        // The outcome is told in the settings window, where it was asked
+        // (D-042); a Cancel is no failure.
+        settingUp = false;
+        switch (result) {
+        case QuickUnlock::Result::Done:
             recordMasterPasswordIfNone();
-            say(tr("%1 unlocks this vault from now on.").arg(quickUnlockName()), false);
-        } else {
-            say(tr("%1 could not be turned on for this vault.").arg(quickUnlockName()), true);
+            tellSetup(tr("%1 unlocks this vault from now on.").arg(sentenceStart(quickUnlockName())), false);
+            break;
+        case QuickUnlock::Result::Cancelled: tellSetup(QString(), false); break;
+        case QuickUnlock::Result::Failed: tellSetup(tr("That finger was not recognized."), true); break;
+        case QuickUnlock::Result::Unavailable:
+            tellSetup(tr("The %1 is not available now.").arg(quickUnlockName()), true);
+            break;
+        case QuickUnlock::Result::NotKept:
+            tellSetup(quick->notKeptText(), true);
+            break;
+        default:
+            tellSetup(tr("%1 could not be turned on for this vault.").arg(sentenceStart(quickUnlockName())), true);
+            break;
         }
         emit quickUnlockChanged();
     });
@@ -1479,6 +1526,7 @@ void VaultController::connectQuickUnlock()
         say(tr("The key could not be removed from the desktop keyring. Remove “%1” there by hand.").arg(where), true);
     });
     connect(quick.get(), &QuickUnlock::retrieved, this, [this](QuickUnlock::Result result, const QByteArray& secret) {
+        retrieving = false;
         if (currentState != State::Locked) {
             return;
         }
@@ -1493,7 +1541,7 @@ void VaultController::connectQuickUnlock()
         case QuickUnlock::Result::Cancelled: say(QString(), false); break;
         case QuickUnlock::Result::Failed: say(tr("That finger was not recognized. Try again, or use the master password."), true); break;
         case QuickUnlock::Result::Unavailable:
-            say(tr("%1 is not available now. Use the master password.").arg(quickUnlockName()), true);
+            say(tr("%1 is not available now. Use the master password.").arg(sentenceStart(quickUnlockName())), true);
             break;
         default:
             // Its key is gone (fingerprints changed, or the keyring emptied).
@@ -1501,7 +1549,7 @@ void VaultController::connectQuickUnlock()
             emit quickUnlockChanged();
             say(tr("%1 can no longer open this vault. Use the master password, then turn it on again in Settings > "
                    "Security.")
-                    .arg(quickUnlockName()),
+                    .arg(sentenceStart(quickUnlockName())),
                 true);
             break;
         }
@@ -1526,16 +1574,47 @@ void VaultController::setQuickUnlock(bool on)
         emit quickUnlockChanged();
         return;
     }
-    if (currentState == State::Unlocked && quickAvailable) {
+    // One finger asked at a time: the switch waits for it (D-042).
+    if (currentState == State::Unlocked && quickAvailable && !settingUp) {
+        settingUp = true;
+        tellSetup(QString(), false);
         quick->store(path, quickSecretOf(key, keyfileSecret));
+    }
+}
+
+void VaultController::tellSetup(const QString& text, bool isTrouble)
+{
+    setupMessage = text;
+    setupTrouble = isTrouble;
+    emit quickUnlockChanged();
+}
+
+void VaultController::cancelQuickUnlockSetup()
+{
+    if (settingUp && quick) {
+        quick->cancel(); // answered as Cancelled, which ends the waiting
+    }
+}
+
+void VaultController::stopQuickUnlock()
+{
+    if (retrieving && quick) {
+        quick->cancel();
+        retrieving = false;
+        if (currentState == State::Locked) {
+            say(QString(), false);
+        }
     }
 }
 
 void VaultController::unlockWithQuickUnlock()
 {
-    if (currentState != State::Locked || !quickUnlockOn()) {
+    // Asked once while the question is open: the reader stays held until it
+    // is settled (the owner, D-042).
+    if (currentState != State::Locked || !quickUnlockOn() || retrieving) {
         return;
     }
+    retrieving = true;
     say(tr("Waiting for your %1…").arg(quickUnlockName()), false);
     quick->retrieve(path);
 }
@@ -2768,6 +2847,7 @@ void VaultController::say(const QString& text, bool isTrouble)
 void VaultController::setPath(const QString& newPath)
 {
     if (path != newPath) {
+        stopQuickUnlock(); // a finger asked for another vault is no longer the question
         path = newPath;
         if (!path.isEmpty()) {
             QSettings().setValue(lastVaultKey, path);

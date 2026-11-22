@@ -38,7 +38,8 @@ class QuickUnlock : public QObject
     Q_OBJECT
 
 public:
-    enum class Result { Done, Cancelled, Failed, NoKey, Unavailable };
+    // NotKept: the finger was recognized, but the key could not be kept (D-042).
+    enum class Result { Done, Cancelled, Failed, NoKey, Unavailable, NotKept };
     Q_ENUM(Result)
 
     using QObject::QObject;
@@ -48,6 +49,10 @@ public:
     [[nodiscard]] virtual bool available() const = 0;
     // "fingerprint" or "Windows Hello", for the windows' texts.
     [[nodiscard]] virtual QString name() const = 0;
+    // What the person is asked to do once the reader is ready (D-042).
+    [[nodiscard]] virtual QString touchPrompt() const { return {}; }
+    // Why a recognized finger still did not turn it on: the key not kept.
+    [[nodiscard]] virtual QString notKeptText() const;
     // Keeps the secret for this vault after the person's check; answered by
     // stored.
     virtual void store(const QString& vault, const QByteArray& secret) = 0;
@@ -63,7 +68,11 @@ public:
     [[nodiscard]] bool has(const QString& vault) const;
 
 signals:
-    void stored(bool ok);
+    void stored(chrono_vault::QuickUnlock::Result result);
+    // The reader is ready: the person can touch it now (D-042).
+    void fingerReady();
+    // A finger was not recognized; the reader stays held and asks again.
+    void notRecognized();
     void retrieved(chrono_vault::QuickUnlock::Result result, const QByteArray& secret);
     // A kept key could not be removed; where it is, for the person to remove.
     void removeFailed(const QString& where);

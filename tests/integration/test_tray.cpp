@@ -26,6 +26,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QQmlApplicationEngine>
+#include <QQuickItem>
 #include <QSettings>
 #include <QSignalSpy>
 #include <QStandardPaths>
@@ -35,9 +36,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.0.10
+// test_tray.cpp 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: Keep running in the tray is the last of the three (D-042)
 // v0.0.10: The tray and start settings survive a new start; their old names carried over
 // v0.0.6: The settings window keeps changes only with OK, also with Enter; Restore defaults; a failed
 //         start at startup is told (D-022)
@@ -69,6 +71,7 @@ private slots:
     void with_reset_the_settings_start_at_their_defaults();
     void the_settings_window_keeps_changes_only_with_ok();
     void enter_is_ok_and_a_failed_start_at_startup_is_told();
+    void keep_running_in_the_tray_is_the_last_of_the_three();
 
 private:
     struct Loaded
@@ -416,6 +419,24 @@ void TestTray::with_reset_the_settings_start_at_their_defaults()
                             "updates/frequency"}) {
         settings.remove(QString::fromLatin1(key));
     }
+}
+
+void TestTray::keep_running_in_the_tray_is_the_last_of_the_three()
+{
+    Loaded loaded = load();
+    QVERIFY(loaded.window);
+    QObject* settings = loaded.window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    const auto top = [settings](const char* name) {
+        auto* box = settings->findChild<QQuickItem*>(QString::fromLatin1(name));
+        return box ? box->mapToScene(QPointF(0, 0)).y() : -1.0;
+    };
+    QTRY_VERIFY(top("startAtStartupBox") > 0);
+    QVERIFY(top("startAtStartupBox") < top("startMinimizedBox"));
+    QVERIFY(top("startMinimizedBox") < top("keepInTrayBox"));
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
 }
 
 QTEST_MAIN(TestTray)

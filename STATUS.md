@@ -2,8 +2,9 @@
 
 ## Now
 
-**Version 0.0.26**: waits after wrong master passwords, kept through a restart (D-041). Before: Settings > Security
-with Autolock when (0.0.25), the menus (0.0.24), unlocking with a fingerprint (0.0.23).
+**Version 0.0.27**: the sidebar collapses to its icons and its groups fold; wider splitters; the fingerprint reader
+held only while a finger is asked, a switch with a one-time touch (D-042). Before: waits after wrong master passwords
+(0.0.26), Autolock when (0.0.25), the menus (0.0.24).
 
 ## Next task
 

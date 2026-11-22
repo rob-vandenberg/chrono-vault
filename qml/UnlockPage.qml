@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.26
+// UnlockPage.qml 0.0.27
 
 // --- Version history ----------------------------------------------------
+// v0.0.27: The finger asked whenever the page is on screen: at a start, for another vault, back from the tray (D-042)
 // v0.0.26: Greyed with "Try again in" while waiting after wrong master passwords (D-041)
 // v0.0.23: Unlocking with a fingerprint, asked at once; the yearly master password reminder (D-038)
 // v0.0.15: The keyfile, when the vault needs one, chosen here and remembered (D-031); after a lock, the primary
@@ -50,13 +51,29 @@ Item {
         passwordField.clear()
     }
 
-    // The finger asked at once, unless the yearly reminder is due (D-038).
+    // The finger asked whenever this page is on screen for a vault with the
+    // fingerprint on, unless the yearly reminder is due (D-038, D-042): at a
+    // start once the window shows, after a lock, for another vault, back from
+    // the tray. Never while the window is hidden.
+    function askFinger() {
+        if (visible && Window.window && Window.window.visible && VaultController.state === VaultController.Locked
+                && VaultController.quickUnlockOn && !VaultController.reminderDue)
+            VaultController.unlockWithQuickUnlock()
+    }
     onVisibleChanged: {
         if (!visible)
             return
         passwordField.forceActiveFocus()
-        if (VaultController.quickUnlockOn && !VaultController.reminderDue)
-            VaultController.unlockWithQuickUnlock()
+        askFinger()
+    }
+    Component.onCompleted: askFinger()
+    Connections {
+        target: VaultController
+        function onVaultPathChanged() { unlockPage.askFinger() }
+    }
+    Connections {
+        target: unlockPage.Window.window
+        function onVisibleChanged() { unlockPage.askFinger() }
     }
 
     // After a try that did not open the vault, typing goes on in the field.

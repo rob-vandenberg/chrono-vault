@@ -33,6 +33,9 @@ art/*
 !art/star.svg
 !art/star-filled.svg
 !art/copy.svg
+!art/sidebar.svg
+!art/archive.svg
+!art/trash.svg
 !art/attachment.svg
 
 # The four scripts: private (OR-9, D-010)

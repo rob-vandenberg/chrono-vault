@@ -53,12 +53,12 @@ public:
         ++stores;
         if (failStore) {
             remember(vault, false);
-            emit stored(false);
+            emit stored(QuickUnlock::Result::Failed);
             return;
         }
         kept.insert(vault, secret);
         remember(vault, true);
-        emit stored(true);
+        emit stored(QuickUnlock::Result::Done);
     }
     void retrieve(const QString& vault) override
     {

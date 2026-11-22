@@ -112,12 +112,20 @@ public:
     }
 
     [[nodiscard]] QString name() const override { return QCoreApplication::translate("QuickUnlock", "fingerprint"); }
+    [[nodiscard]] QString touchPrompt() const override
+    {
+        return QCoreApplication::translate("QuickUnlock", "Touch the fingerprint reader…");
+    }
+    [[nodiscard]] QString notKeptText() const override
+    {
+        return QCoreApplication::translate("QuickUnlock", "The key could not be kept in the desktop keyring.");
+    }
 
     void store(const QString& vault, const QByteArray& secret) override
     {
         verify([this, vault, secret](Result result) {
             if (result != Result::Done) {
-                emit stored(false);
+                emit stored(result);
                 return;
             }
             // The keyring may ask for its password: off the window's thread.
@@ -129,7 +137,7 @@ public:
                     [self, vault, kept]() {
                         if (self) {
                             self->remember(vault, kept);
-                            emit self->stored(kept);
+                            emit self->stored(kept ? Result::Done : Result::NotKept);
                         }
                     },
                     Qt::QueuedConnection);
@@ -170,7 +178,7 @@ public:
                 [self, vault, kept]() {
                     if (self) {
                         self->remember(vault, kept);
-                        emit self->stored(kept);
+                        emit self->stored(kept ? Result::Done : Result::NotKept);
                     }
                 },
                 Qt::QueuedConnection);
@@ -372,9 +380,14 @@ private:
                      then(QDBusConnection::systemBus().asyncCall(deviceCall(QStringLiteral("VerifyStart"),
                                                                             QStringLiteral("any"))),
                           [this, mine](const QDBusMessage& started) {
-                              if (mine == check && started.type() != QDBusMessage::ReplyMessage) {
-                                  finish(Result::Failed);
+                              if (mine != check) {
+                                  return;
                               }
+                              if (started.type() != QDBusMessage::ReplyMessage) {
+                                  finish(Result::Unavailable);
+                                  return;
+                              }
+                              emit fingerReady(); // the person can touch it now
                           });
                  });
         });
@@ -415,13 +428,24 @@ private:
         }
     }
 
+    // A match settles it; a finger not recognized keeps the reader held and
+    // asks again, since the question is still open (the owner, D-042).
     Q_SLOT void onVerifyStatus(const QString& status, bool done)
     {
         if (status == QLatin1String("verify-match")) {
             finish(Result::Done);
+        } else if (status == QLatin1String("verify-no-match")) {
+            emit notRecognized();
+            const quint64 mine = check;
+            QDBusConnection::systemBus().asyncCall(deviceCall(QStringLiteral("VerifyStop")));
+            then(QDBusConnection::systemBus().asyncCall(deviceCall(QStringLiteral("VerifyStart"), QStringLiteral("any"))),
+                 [this, mine](const QDBusMessage& started) {
+                     if (mine == check && started.type() != QDBusMessage::ReplyMessage) {
+                         finish(Result::Unavailable);
+                     }
+                 });
         } else if (done) {
-            finish(status == QLatin1String("verify-no-match")       ? Result::Failed
-                                                                    : Result::Unavailable); // disconnected, or the reader's own error
+            finish(Result::Unavailable); // disconnected, or the reader's own error
         }
     }
 
