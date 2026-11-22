@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.7
+// ItemEditor.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The delete question reachable from the Item menu (D-025)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: One font in every field; the eye inside the password fields; the item's icon
@@ -57,6 +58,12 @@ Item {
         } else {
             action()
         }
+    }
+
+    // Item > Delete item… (D-025): the same question as the Delete button.
+    function askDelete() {
+        if (itemId !== "" && !isNew)
+            deleteDialog.open()
     }
 
     function edit(map, isNewItem) {
@@ -395,6 +402,7 @@ Item {
     DialogWindow {
 
         id: deleteDialog
+        objectName: "deleteDialog"
 
         memoryName: "deleteItem"
         title: qsTr("Delete this item?")

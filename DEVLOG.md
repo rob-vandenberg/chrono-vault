@@ -103,3 +103,10 @@ scrollable text area, each after a line naming what it covers; Check for update 
 the settings window's narrow edge and a place for its own buttons at the bottom left. The tray text changed. Found
 while building: Qt's rich text made every line of a licence a paragraph of its own, so lines are broken explicitly.
 One review round, nothing real.
+
+## 22 November 2026: version 0.0.9: the update popup, the three-column main window
+
+The update's windows as in Chrono Mail (D-024) and the main window after the reference program's layout (D-025); the
+About box's top lines against the icon. Found while building: `ItemView` is a name of Qt Quick's own (renamed
+`ItemDetails`); a plain item has no font. Review round 1 found and fixed: a cancelled quit after Restart or Close left
+no notice, and a deleted item stayed shown. Seventeen tests.

@@ -41,9 +41,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// updater.cpp 0.0.6
+// updater.cpp 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The windows of Chrono Mail: a found update offered, its problem, page and folder; Restart or Close
 // v0.0.6: The default check frequency, for Restore defaults (D-022)
 // v0.0.5: Initial release; a refused install or a broken-off download can be tried again
 
@@ -130,10 +131,11 @@ void Updater::checkNow()
     checkSoon(true);
 }
 
-void Updater::setState(State state, const QString& message)
+void Updater::setState(State state, const QString& message, const QString& problem)
 {
     currentState = state;
     currentMessage = message;
+    currentProblem = problem;
     emit stateChanged();
 }
 
@@ -182,18 +184,16 @@ void Updater::answered(const QByteArray& body, bool byHand)
     if (offer) {
         setState(State::Available, tr("Chrono Vault %1 is available. You have version %2.")
                                        .arg(versionText(offer->release.version), programVersion()));
-        if (!byHand) {
-            emit updateAvailable();
-        }
+        emit offered(byHand);
     } else {
         setState(byHand ? State::Current : State::Idle,
                  byHand ? tr("You have the newest version, %1.").arg(programVersion()) : QString());
     }
 }
 
-void Updater::answerForTests(const QByteArray& releasesJson)
+void Updater::answerForTests(const QByteArray& releasesJson, bool byHand)
 {
-    answered(releasesJson, true);
+    answered(releasesJson, byHand);
 }
 
 void Updater::skipThisVersion()
@@ -217,8 +217,9 @@ void Updater::download()
     downloadedPath = QDir(folder).filePath(offer->file.name);
     partFile.setFileName(downloadedPath + QStringLiteral(".part"));
     if (!partFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        setState(State::Available, tr("The update could not be saved in %1. Choose Download to try again.")
-                                       .arg(QDir::toNativeSeparators(folder)));
+        const QString problem = tr("The update could not be saved in %1. Choose Download to try again.")
+                                    .arg(QDir::toNativeSeparators(folder));
+        setState(State::Available, problem, problem);
         return;
     }
     hasher.reset();
@@ -262,32 +263,34 @@ void Updater::finishDownload()
     if (!complete) {
         QFile::remove(partFile.fileName());
         // The offer stays: Download can be tried again.
+        const QString problem =
+            stopped ? QString()
+                    : brokenOff ? tr("The download did not complete: the update could not be written, so check the free "
+                                     "space in your Downloads folder. Nothing was installed. Choose Download to try again.")
+                                : tr("The download did not complete. Nothing was installed. Choose Download to try again.");
         setState(State::Available,
-                 stopped ? tr("The download was stopped. Chrono Vault %1 is available.").arg(newVersion())
-                         : brokenOff ? tr("The download did not complete: the update could not be written, so check the free "
-                                          "space in your Downloads folder. Nothing was installed. Choose Download to try "
-                                          "again.")
-                                     : tr("The download did not complete. Nothing was installed. Choose Download to try "
-                                          "again."));
+                 stopped ? tr("The download was stopped. Chrono Vault %1 is available.").arg(newVersion()) : problem,
+                 problem);
         return;
     }
     if (QString::fromLatin1(hasher.result().toHex()) != offer->file.sha256) {
         QFile::remove(partFile.fileName());
-        setState(State::Available, tr("The downloaded file does not match GitHub's fingerprint, so it was not kept and "
-                                      "nothing was installed. Choose Download to try again."));
+        const QString problem = tr("The downloaded file does not match GitHub's fingerprint, so it was not kept and "
+                                   "nothing was installed. Choose Download to try again.");
+        setState(State::Available, problem, problem);
         return;
     }
     QFile::remove(downloadedPath);
     if (!QFile::rename(partFile.fileName(), downloadedPath)) {
         QFile::remove(partFile.fileName());
-        setState(State::Available, tr("The update could not be saved. Nothing was installed. Choose Download to try "
-                                      "again."));
+        const QString problem = tr("The update could not be saved. Nothing was installed. Choose Download to try again.");
+        setState(State::Available, problem, problem);
         return;
     }
     downloadProgress = 1;
     emit progressChanged();
-    setState(State::Downloaded, tr("Chrono Vault %1 is downloaded and checked: %2")
-                                    .arg(newVersion(), QDir::toNativeSeparators(downloadedPath)));
+    setState(State::Downloaded,
+             tr("The update to Chrono Vault %1 was downloaded and checked: it is complete and unchanged.").arg(newVersion()));
 }
 
 void Updater::install()
@@ -297,7 +300,8 @@ void Updater::install()
     }
     // Still exactly the file that was checked.
     if (fingerprintOf(downloadedPath) != offer->file.sha256) {
-        setState(State::Failed, tr("The update has changed since it was checked, so it was not installed."));
+        const QString problem = tr("The update has changed since it was checked, so it was not installed.");
+        setState(State::Failed, problem, problem);
         return;
     }
     if (kind == InstallKind::Windows) {
@@ -314,9 +318,10 @@ void Updater::install()
     const QDBusReply<QDBusObjectPath> transaction = service.call(QStringLiteral("CreateTransaction"));
     if (!transaction.isValid()) {
         // The checked file stays: Install can be tried again without a new download.
-        setState(State::Downloaded, tr("This system's software installer could not be reached: %1. Choose Install "
-                                       "to try again.")
-                                        .arg(transaction.error().message()));
+        const QString problem = tr("This system's software installer could not be reached: %1. Choose Install to "
+                                   "try again.")
+                                    .arg(transaction.error().message());
+        setState(State::Downloaded, problem, problem);
         return;
     }
     const QString path = transaction.value().path();
@@ -324,7 +329,7 @@ void Updater::install()
     QDBusInterface work(packageKit, path, packageKit + QStringLiteral(".Transaction"), QDBusConnection::systemBus());
     work.call(QStringLiteral("SetHints"), QStringList{QStringLiteral("interactive=true")});
     packageKitDetails.clear();
-    setState(State::Installing, tr("Installing Chrono Vault %1. The system may ask for your password.").arg(newVersion()));
+    setState(State::Installing, tr("Installing the update… your system may ask for its password."));
     // The installer reports the outcome with its Finished signal; a request it
     // refuses outright is answered with an error instead, which ends it too.
     auto* call = new QDBusPendingCallWatcher(
@@ -374,22 +379,47 @@ void Updater::installedOnLinux(bool succeeded, const QString& details)
     if (!succeeded) {
         // A cancelled password prompt is a normal event: the checked file stays,
         // and Install can be tried again without a new download.
-        setState(State::Downloaded,
-                 details.isEmpty() ? tr("The update was not installed. Choose Install to try again.")
-                                   : tr("The update was not installed: %1. Choose Install to try again.").arg(details));
+        const QString problem =
+            details.isEmpty()
+                ? tr("The update was not installed. It is still in its folder; choose Install to try again.")
+                : tr("The update was not installed: %1. It is still in its folder; choose Install to try again.").arg(details);
+        setState(State::Downloaded, problem, problem);
         return;
     }
-    restartAfterQuit = true;
-    setState(State::Installed, tr("Chrono Vault %1 is installed. Chrono Vault now restarts.").arg(newVersion()));
+    // As in Chrono Mail: the person chooses Restart or Close; Chrono Vault
+    // closes either way, its files being the new version's now.
+    restartChoicePending = true;
+    setState(State::Installed, tr("Chrono Vault was updated to %1. Restart it to use the new version.").arg(newVersion()));
+}
+
+void Updater::finishUpdate(bool restart)
+{
+    if (!restartChoicePending) {
+        return;
+    }
+    restartChoicePending = false;
+    restartAfterQuit = restart;
+    finishing = true;
+    emit stateChanged();
     emit quitRequested();
 }
 
 void Updater::quitHeldUp()
 {
+    // The quit after Restart or Close was held up or cancelled: Restart or
+    // Close is asked again, the new version still waiting for it (D-024).
+    if (finishing) {
+        finishing = false;
+        restartAfterQuit = false;
+        restartChoicePending = true;
+        emit stateChanged();
+        return;
+    }
     if (!setupToStart.isEmpty()) {
         setupToStart.clear();
-        setState(State::Downloaded, tr("The update was not installed, because Chrono Vault did not close. Choose "
-                                       "Install again when you are ready."));
+        const QString problem = tr("The update was not installed, because Chrono Vault did not close. Choose "
+                                   "Install again when you are ready.");
+        setState(State::Downloaded, problem, problem);
     } else if (restartAfterQuit) {
         restartAfterQuit = false;
         setState(State::Installed, tr("Chrono Vault %1 is installed and runs the next time you start Chrono Vault.")
@@ -463,6 +493,23 @@ QString Updater::fingerprintOf(const QString& path)
         return {};
     }
     return QString::fromLatin1(hash.result().toHex());
+}
+
+QString Updater::releasePage() const
+{
+    // Only a page of Chrono Vault's own releases, whatever the answer held.
+    const QString page = offer ? offer->release.page : QString();
+    return page.startsWith(QStringLiteral("https://github.com/rob-vandenberg/chrono-vault/releases/")) ? page : QString();
+}
+
+QUrl Updater::downloadFolder() const
+{
+    return downloadedPath.isEmpty() ? QUrl() : QUrl::fromLocalFile(QFileInfo(downloadedPath).absolutePath());
+}
+
+QString Updater::downloadFolderName() const
+{
+    return downloadedPath.isEmpty() ? QString() : QDir::toNativeSeparators(QFileInfo(downloadedPath).absolutePath());
 }
 
 int Updater::defaultCheckFrequency() const

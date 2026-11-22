@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.8
+# qml/CMakeLists.txt 0.0.9
 
 # --- Version history ----------------------------------------------------
+# v0.0.9: The update windows of Chrono Mail in place of the one update window (D-024); the top bar's icons (D-025)
 # v0.0.8: The licences, carried inside the program for the About box (D-021)
 # v0.0.7: The theme, the UI scaling and the appearance the windows see (D-023)
 # v0.0.6: The OK and Cancel icons
@@ -40,11 +41,14 @@ qt_add_qml_module(chrono_vault_ui
         GeneratorDialog.qml
         DialogWindow.qml
         ItemEditor.qml
+        ItemDetails.qml
         Main.qml
         PasswordField.qml
         SettingsWindow.qml
         UnlockPage.qml
-        UpdateWindow.qml
+        UpdateAvailableWindow.qml
+        UpdateDownloadedWindow.qml
+        UpdatedWindow.qml
         VaultPage.qml
         WelcomePage.qml
     SOURCES
@@ -87,6 +91,12 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/item-note.svg"
         "${PROJECT_SOURCE_DIR}/art/ok.svg"
         "${PROJECT_SOURCE_DIR}/art/cancel.svg"
+        "${PROJECT_SOURCE_DIR}/art/plus.svg"
+        "${PROJECT_SOURCE_DIR}/art/generate.svg"
+        "${PROJECT_SOURCE_DIR}/art/lock.svg"
+        "${PROJECT_SOURCE_DIR}/art/settings.svg"
+        "${PROJECT_SOURCE_DIR}/art/home.svg"
+        "${PROJECT_SOURCE_DIR}/art/edit.svg"
 )
 # The licences Chrono Vault ships, shown in the About box (D-021).
 set_source_files_properties("${PROJECT_SOURCE_DIR}/LICENSE" PROPERTIES QT_RESOURCE_ALIAS "AGPL-3.0.txt")

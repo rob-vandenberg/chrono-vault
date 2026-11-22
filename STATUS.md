@@ -2,11 +2,12 @@
 
 ## Now
 
-**Version 0.0.8** (D-021): the About box as in the owner's mockup: the icon with the name, version and copyright,
-below them a scrollable text area with every licence Chrono Vault ships (our AGPL-3.0 first, then Qt's LGPL-3.0,
-GPL-3.0 and GPL-2.0, OpenSSL's Apache 2.0 and the Noto fonts' OFL 1.1), Check for update at the bottom left and
-Close at the bottom right. Every dialog has the narrow edge of the settings window. The tray setting reads "Keep
-Chrono Vault running in the system tray". Sixteen tests pass on Linux; the review round found nothing real.
+**Version 0.0.9** (D-024, D-025): an update is offered in a popup as in Chrono Mail (Download, Skip this update,
+Cancel; then Update downloaded with Install; on Linux Restart or Close), no longer as a line at the bottom. The main
+window follows the reference program's layout: one bar with the menus File, View, Item, Tools and Help and the
+buttons New Item, Generate Password, lock and preferences; three columns with the vault, the items under letter
+headings and the chosen item read-only, the editor behind the pencil. The About box's name, copyright and GitHub link
+line up with the icon. Seventeen tests pass on Linux; two review rounds, the last found nothing real.
 
 ## Next task
 

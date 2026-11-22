@@ -17,6 +17,12 @@ art/*
 !art/item-note.svg
 !art/ok.svg
 !art/cancel.svg
+!art/plus.svg
+!art/generate.svg
+!art/lock.svg
+!art/settings.svg
+!art/home.svg
+!art/edit.svg
 
 # The four scripts: private (OR-9, D-010)
 gitpush.sh

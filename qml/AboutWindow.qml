@@ -20,9 +20,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.8
+// AboutWindow.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The answer of Check for update beside it; a newer version opens the offer (D-024); the name, the
+//         copyright and the link to GitHub lined up with the icon (D-021)
 // v0.0.8: The licences in a scrollable text area; Check for update at the bottom left (D-021)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Initial release
@@ -49,15 +51,46 @@ DialogWindow {
             Layout.preferredHeight: 64
             Layout.alignment: Qt.AlignTop
         }
-        ColumnLayout {
-            spacing: 8
+        // The name at the top of the icon, the link at its bottom, the
+        // copyright exactly in the middle between them.
+        Item {
+            id: heading
             Layout.fillWidth: true
+            Layout.preferredHeight: Math.max(64, nameLine.height + copyrightLine.height + siteLine.height)
+            implicitWidth: Math.max(nameLine.implicitWidth, copyrightLine.implicitWidth, siteLine.implicitWidth)
+            Layout.alignment: Qt.AlignTop
+
             Label {
+                id: nameLine
+                objectName: "nameLine"
+                anchors.top: parent.top
                 text: qsTr("Chrono Vault %1").arg(VaultController.version)
                 font.bold: true
                 font.pointSize: Appearance.fontPointSize * 1.4
+                topPadding: 0
+                bottomPadding: 0
             }
-            Label { text: qsTr("Copyright © 2026 Rob Vandenberg") }
+            Label {
+                id: siteLine
+                objectName: "siteLine"
+                readonly property string address: "https://github.com/rob-vandenberg/chrono-vault"
+                anchors.bottom: parent.bottom
+                text: aboutWindow.link(address, address)
+                textFormat: Text.StyledText
+                linkColor: aboutWindow.palette.link
+                topPadding: 0
+                bottomPadding: 0
+                onLinkActivated: Qt.openUrlExternally(address)
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
+            }
+            Label {
+                id: copyrightLine
+                objectName: "copyrightLine"
+                y: (nameLine.y + nameLine.height / 2 + siteLine.y + siteLine.height / 2) / 2 - height / 2
+                text: qsTr("Copyright © 2026 Rob Vandenberg")
+                topPadding: 0
+                bottomPadding: 0
+            }
         }
     }
 
@@ -82,9 +115,35 @@ DialogWindow {
         }
     }
 
-    leftButtons: Button {
-        objectName: "checkForUpdateButton"
-        text: qsTr("Check for update")
-        onClicked: aboutWindow.checkRequested()
+    leftButtons: [
+        Button {
+            objectName: "checkForUpdateButton"
+            text: qsTr("Check for update")
+            enabled: Updater.state !== Updater.Checking
+            onClicked: {
+                aboutWindow.asked = true
+                aboutWindow.checkRequested()
+            }
+        },
+        // The answer of a check asked for here: looking, the newest already,
+        // GitHub not reached, or not installed with an installer. A newer
+        // version closes this window and opens the offer.
+        Label {
+            objectName: "updateNote"
+            visible: aboutWindow.asked && text !== ""
+            text: Updater.state === Updater.Checking || Updater.state === Updater.Current
+                  || Updater.state === Updater.Unreachable || Updater.state === Updater.Failed ? Updater.message : ""
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            Layout.maximumWidth: 260
+        }
+    ]
+    // Help > Check for update.
+    function checkNow() {
+        asked = true
+        checkRequested()
     }
+    // Only the answer to a check asked for in this window is shown here.
+    property bool asked: false
+    onShown: asked = false
 }

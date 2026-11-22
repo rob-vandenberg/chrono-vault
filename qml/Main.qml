@@ -20,9 +20,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.8
+// Main.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The update's windows as in Chrono Mail in place of the line at the bottom (D-024); one bar with the
+//         menus and the buttons (D-025)
 // v0.0.8: The About window can be found by its name (tests)
 // v0.0.7: The program's font, so the UI scaling reaches every control (D-023)
 // v0.0.5: F1 opens About; the Update window; a Quit for an update waits for the editor or a save and goes on
@@ -46,30 +48,176 @@ ApplicationWindow {
 
     readonly property bool busy: VaultController.state === VaultController.Busy
 
+    readonly property bool unlocked: VaultController.state === VaultController.Unlocked
+
+    // One bar at the top (D-025): the menus on the left, the buttons on the
+    // right. What needs an unlocked vault is greyed until then.
     header: ToolBar {
-        visible: VaultController.state === VaultController.Unlocked
+        objectName: "topBar"
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 8
             anchors.rightMargin: 8
-            ToolButton {
-                text: qsTr("New login")
-                onClicked: vaultPage.newLogin()
+            spacing: 6
+
+            MenuBar {
+                objectName: "menuBar"
+                background: Item {}
+                Menu {
+                    title: qsTr("&File")
+                    // Creating or opening a vault is done from the start page,
+                    // with no vault unlocked.
+                    Action {
+                        text: qsTr("New vault…")
+                        enabled: !mainWindow.unlocked && !mainWindow.busy
+                        onTriggered: welcomePage.newVault()
+                    }
+                    Action {
+                        text: qsTr("Open vault…")
+                        enabled: !mainWindow.unlocked && !mainWindow.busy
+                        onTriggered: welcomePage.openVault()
+                    }
+                    MenuSeparator {}
+                    Action {
+                        text: qsTr("Lock")
+                        enabled: mainWindow.unlocked
+                        onTriggered: VaultController.lock()
+                    }
+                    Action {
+                        text: qsTr("Preferences…")
+                        onTriggered: settingsWindow.showWindow()
+                    }
+                    MenuSeparator {}
+                    Action {
+                        text: qsTr("Quit")
+                        onTriggered: mainWindow.requestQuit()
+                    }
+                }
+                Menu {
+                    title: qsTr("&View")
+                    // Each opens the preferences at General, the choice shown at once.
+                    Action {
+                        text: qsTr("Light")
+                        onTriggered: mainWindow.showTheme(0)
+                    }
+                    Action {
+                        text: qsTr("Dark")
+                        onTriggered: mainWindow.showTheme(1)
+                    }
+                    Action {
+                        text: qsTr("Follow the system")
+                        onTriggered: mainWindow.showTheme(2)
+                    }
+                    MenuSeparator {}
+                    Action {
+                        text: qsTr("UI scaling…")
+                        onTriggered: settingsWindow.showGeneral()
+                    }
+                }
+                Menu {
+                    title: qsTr("&Item")
+                    Action {
+                        text: qsTr("New login")
+                        enabled: mainWindow.unlocked
+                        onTriggered: vaultPage.newLogin()
+                    }
+                    Action {
+                        text: qsTr("New secure note")
+                        enabled: mainWindow.unlocked
+                        onTriggered: vaultPage.newSecureNote()
+                    }
+                    MenuSeparator {}
+                    Action {
+                        text: qsTr("Delete item…")
+                        enabled: mainWindow.unlocked && vaultPage.chosenItemId !== ""
+                        onTriggered: vaultPage.deleteChosen()
+                    }
+                }
+                Menu {
+                    title: qsTr("&Tools")
+                    Action {
+                        text: qsTr("Generate password…")
+                        onTriggered: toolsGenerator.open()
+                    }
+                }
+                Menu {
+                    title: qsTr("&Help")
+                    Action {
+                        text: qsTr("About Chrono Vault")
+                        shortcut: "F1"
+                        onTriggered: aboutWindow.open()
+                    }
+                    Action {
+                        text: qsTr("Check for update")
+                        onTriggered: {
+                            aboutWindow.open()
+                            aboutWindow.checkNow()
+                        }
+                    }
+                }
             }
-            ToolButton {
-                text: qsTr("New secure note")
-                onClicked: vaultPage.newSecureNote()
-            }
+
             Item { Layout.fillWidth: true }
-            ToolButton {
-                text: qsTr("Settings")
-                onClicked: settingsWindow.showWindow()
+
+            Button {
+                objectName: "newItemButton"
+                text: qsTr("New Item")
+                icon.source: "qrc:/icons/plus.svg"
+                icon.color: mainWindow.palette.highlightedText
+                // Filled in the highlight colour, as the main action.
+                palette.button: mainWindow.palette.highlight
+                palette.buttonText: mainWindow.palette.highlightedText
+                enabled: mainWindow.unlocked
+                onClicked: newItemMenu.popup(this, 0, height)
+                Menu {
+                    id: newItemMenu
+                    Action {
+                        text: qsTr("Login")
+                        onTriggered: vaultPage.newLogin()
+                    }
+                    Action {
+                        text: qsTr("Secure note")
+                        onTriggered: vaultPage.newSecureNote()
+                    }
+                }
+            }
+            ToolSeparator {}
+            Button {
+                objectName: "generateButton"
+                text: qsTr("Generate Password")
+                icon.source: "qrc:/icons/generate.svg"
+                icon.color: mainWindow.palette.buttonText
+                onClicked: toolsGenerator.open()
             }
             ToolButton {
-                text: qsTr("Lock")
+                objectName: "lockButton"
+                icon.source: "qrc:/icons/lock.svg"
+                icon.color: mainWindow.palette.buttonText
+                enabled: mainWindow.unlocked
                 onClicked: VaultController.lock()
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Lock the vault")
+            }
+            ToolButton {
+                objectName: "preferencesButton"
+                icon.source: "qrc:/icons/settings.svg"
+                icon.color: mainWindow.palette.buttonText
+                onClicked: settingsWindow.showWindow()
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Preferences")
             }
         }
+    }
+
+    function showTheme(theme) {
+        settingsWindow.showGeneral()
+        settingsWindow.showTheme(theme)
+    }
+
+    // The generator on its own (Tools, the bar): its password is copied.
+    GeneratorDialog {
+        id: toolsGenerator
+        Component.onCompleted: standardButton(Dialog.Ok).text = qsTr("Copy")
+        onUsePassword: function(password) { VaultController.copyToClipboard(password) }
     }
 
     StackLayout {
@@ -78,7 +226,7 @@ ApplicationWindow {
         currentIndex: VaultController.state === VaultController.Unlocked ? 2
                       : (VaultController.vaultPath === "" ? 0 : 1)
 
-        WelcomePage {}
+        WelcomePage { id: welcomePage }
         UnlockPage {}
         VaultPage { id: vaultPage }
     }
@@ -221,24 +369,8 @@ ApplicationWindow {
 
     footer: ColumnLayout {
         spacing: 0
-        visible: Updater.state === Updater.Available
-                 || VaultController.message !== ""
+        visible: VaultController.message !== ""
                  || (VaultController.saveFailed && VaultController.state === VaultController.Unlocked)
-        RowLayout {
-            visible: Updater.state === Updater.Available
-            Layout.fillWidth: true
-            Label {
-                text: Updater.message
-                wrapMode: Text.Wrap
-                padding: 8
-                Layout.fillWidth: true
-            }
-            Button {
-                text: qsTr("Update…")
-                onClicked: updateWindow.open()
-                Layout.rightMargin: 8
-            }
-        }
         Label {
             visible: VaultController.message !== ""
             text: VaultController.message
@@ -267,24 +399,54 @@ ApplicationWindow {
 
     SettingsWindow { id: settingsWindow }
 
-    // About, with F1 for now (no menu item yet), and the update (D-021).
+    // About, with F1 (D-021), and the update's windows as in Chrono Mail (D-024).
     AboutWindow {
         id: aboutWindow
         objectName: "aboutWindow"
-        onCheckRequested: {
-            Updater.checkNow()
-            updateWindow.open()
+        onCheckRequested: Updater.checkNow()
+    }
+    UpdateAvailableWindow { id: updateAvailableWindow }
+    UpdateDownloadedWindow { id: updateDownloadedWindow }
+    UpdatedWindow { id: updatedWindow }
+
+    // A found update: one asked for in About comes forward at once; one found by
+    // itself is shown without taking the keyboard, and only while the main
+    // window is on screen and the settings are not open (it waits till then).
+    property bool updateWaiting: false
+    function offerWaitingUpdate() {
+        if (updateWaiting && visible && !settingsWindow.visible && Updater.state === Updater.Available) {
+            updateWaiting = false
+            updateAvailableWindow.openQuietly()
         }
     }
-    UpdateWindow { id: updateWindow }
-    Shortcut {
-        sequences: ["F1"]
-        context: Qt.ApplicationShortcut
-        onActivated: aboutWindow.open()
+    onVisibleChanged: offerWaitingUpdate()
+    Connections {
+        target: settingsWindow
+        function onVisibleChanged() { mainWindow.offerWaitingUpdate() }
     }
     Connections {
         target: Updater
         function onQuitRequested() { mainWindow.requestQuit() }
+        function onOffered(byHand) {
+            if (byHand) {
+                aboutWindow.accept()
+                mainWindow.updateWaiting = false
+                updateAvailableWindow.open()
+            } else if (!updateAvailableWindow.visible) {
+                mainWindow.updateWaiting = true
+                mainWindow.offerWaitingUpdate()
+            }
+        }
+        // Downloaded: the first window closes as the next one opens.
+        function onStateChanged() {
+            if (Updater.state === Updater.Downloaded && updateAvailableWindow.visible) {
+                updateAvailableWindow.accept()
+                updateDownloadedWindow.open()
+            } else if (Updater.waitsForRestartChoice && !updatedWindow.visible) {
+                updateDownloadedWindow.accept()
+                updatedWindow.open()
+            }
+        }
     }
 
     WindowMemory {

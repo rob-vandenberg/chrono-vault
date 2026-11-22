@@ -22,9 +22,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.4
+// item_list_model.cpp 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The letter an item is grouped under; the web address when there is no user name (D-025)
 // v0.0.4: The item's icon, as an address QML can show
 // v0.0.3: Initial release
 
@@ -61,7 +62,20 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     case IdRole: return item.id.toString(QUuid::WithoutBraces);
     case TitleRole:
     case Qt::DisplayRole: return item.title;
-    case SubtitleRole: return fieldValue(item, QStringLiteral("username"));
+    case SubtitleRole: {
+        // The user name, or else the web address (D-025).
+        const QString user = fieldValue(item, QStringLiteral("username"));
+        return user.isEmpty() ? fieldValue(item, QStringLiteral("url")) : user;
+    }
+    case InitialRole: {
+        // The heading the item stands under: its first letter, or # for a
+        // title that starts with anything else (D-025).
+        const QString title = item.title.trimmed();
+        if (title.isEmpty() || !title.at(0).isLetter()) {
+            return QStringLiteral("#");
+        }
+        return QString(title.at(0)).toUpper();
+    }
     case IsNoteRole: return item.itemTemplate == ItemTemplate::SecureNote;
     case IconRole:
         if (!item.icon.isEmpty()) {
@@ -76,7 +90,7 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
 QHash<int, QByteArray> ItemListModel::roleNames() const
 {
     return {{IdRole, "itemId"}, {TitleRole, "title"}, {SubtitleRole, "subtitle"}, {IsNoteRole, "isNote"},
-            {IconRole, "icon"}};
+            {IconRole, "icon"}, {InitialRole, "initial"}};
 }
 
 void ItemListModel::setItems(const QList<Item>& items)

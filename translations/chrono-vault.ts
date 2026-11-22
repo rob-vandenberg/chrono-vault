@@ -4,22 +4,22 @@
 <context>
     <name>AboutWindow</name>
     <message>
-        <location filename="../qml/AboutWindow.qml" line="+37"/>
+        <location filename="../qml/AboutWindow.qml" line="+39"/>
         <source>About Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+28"/>
         <source>Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+23"/>
         <source>Copyright © 2026 Rob Vandenberg</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+31"/>
         <source>Check for update</source>
         <translation type="unfinished"></translation>
     </message>
@@ -91,9 +91,32 @@
     </message>
 </context>
 <context>
+    <name>ItemDetails</name>
+    <message>
+        <location filename="../qml/ItemDetails.qml" line="+90"/>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+126"/>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Show</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+101"/>
+        <location filename="../qml/ItemEditor.qml" line="+108"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -251,7 +274,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+44"/>
+        <location filename="../qml/Main.qml" line="+46"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -261,27 +284,142 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
-        <source>New login</source>
+        <location line="+19"/>
+        <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>New secure note</source>
+        <source>New vault…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Settings</source>
+        <source>Open vault…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Preferences…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Quit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Light</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Follow the system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>UI scaling…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>New login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>New secure note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-43"/>
         <source>Lock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+121"/>
+        <location line="+49"/>
+        <source>Delete item…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>&amp;Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Generate password…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>&amp;Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>About Chrono Vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Check for update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>New Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Secure note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Generate Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Lock the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+119"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -296,12 +434,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+39"/>
-        <source>Update…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+17"/>
+        <location line="+40"/>
         <source>A change is not saved yet. The vault on disk is unchanged.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -327,7 +460,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+89"/>
+        <location filename="../qml/SettingsWindow.qml" line="+96"/>
         <location line="+255"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -490,35 +623,66 @@
     </message>
 </context>
 <context>
-    <name>UpdateWindow</name>
+    <name>UpdateAvailableWindow</name>
     <message>
-        <location filename="../qml/UpdateWindow.qml" line="+35"/>
-        <source>Update Chrono Vault</source>
+        <location filename="../qml/UpdateAvailableWindow.qml" line="+37"/>
+        <source>Update available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+6"/>
+        <source>Chrono Vault %1 is available. You have %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>What is new in Chrono Vault %1 (on GitHub)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
-        <source>Skip this version</source>
+        <location line="+7"/>
+        <source>Skip this update</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UpdateDownloadedWindow</name>
     <message>
-        <location line="+8"/>
-        <source>Stop</source>
+        <location filename="../qml/UpdateDownloadedWindow.qml" line="+38"/>
+        <source>Update downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Install</source>
+        <source>The update to Chrono Vault %1 was downloaded and checked: it is complete and unchanged.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
-        <source>Close</source>
+        <location line="+10"/>
+        <source>Saved in %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Install</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UpdatedWindow</name>
+    <message>
+        <location filename="../qml/UpdatedWindow.qml" line="+36"/>
+        <source>Chrono Vault was updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Restart</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -568,17 +732,38 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+89"/>
+        <location filename="../qml/VaultPage.qml" line="+160"/>
+        <source>Local file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+17"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+13"/>
+        <source>Sort By:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <location line="+6"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+55"/>
         <source>Secure note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+15"/>
         <source>No items yet.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -587,11 +772,16 @@
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location line="+12"/>
+        <source>Choose an item, or make a new one.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+50"/>
+        <location filename="../qml/WelcomePage.qml" line="+55"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -721,7 +911,7 @@
 <context>
     <name>chrono_vault::Updater</name>
     <message>
-        <location filename="../src/ui/updater.cpp" line="+153"/>
+        <location filename="../src/ui/updater.cpp" line="+155"/>
         <source>This copy of Chrono Vault was not installed with an installer, so it cannot be updated through one. It is version %1.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -741,7 +931,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+5"/>
         <source>You have the newest version, %1.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -751,47 +941,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Downloading Chrono Vault %1…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+43"/>
         <source>The download was stopped. Chrono Vault %1 is available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+21"/>
+        <source>The update to Chrono Vault %1 was downloaded and checked: it is complete and unchanged.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+39"/>
+        <source>Installing the update… your system may ask for its password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+52"/>
+        <source>The update was not installed. It is still in its folder; choose Install to try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+1"/>
-        <source>The download did not complete: the update could not be written, so check the free space in your Downloads folder. Nothing was installed. Choose Download to try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+3"/>
-        <source>The download did not complete. Nothing was installed. Choose Download to try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+6"/>
-        <source>The downloaded file does not match GitHub&apos;s fingerprint, so it was not kept and nothing was installed. Choose Download to try again.</source>
+        <source>The update was not installed: %1. It is still in its folder; choose Install to try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+7"/>
+        <source>Chrono Vault was updated to %1. Restart it to use the new version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-124"/>
+        <source>The download did not complete: the update could not be written, so check the free space in your Downloads folder. Nothing was installed. Choose Download to try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The download did not complete. Nothing was installed. Choose Download to try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The downloaded file does not match GitHub&apos;s fingerprint, so it was not kept and nothing was installed. Choose Download to try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>The update could not be saved. Nothing was installed. Choose Download to try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
-        <source>Chrono Vault %1 is downloaded and checked: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
+        <location line="+17"/>
         <source>The update has changed since it was checked, so it was not installed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+6"/>
         <source>The setup of Chrono Vault %1 starts as soon as Chrono Vault has closed, and starts the new version when it is done.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -801,37 +1011,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
-        <source>Installing Chrono Vault %1. The system may ask for your password.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+13"/>
+        <location line="+24"/>
         <source>This system cannot install the update.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
-        <source>The update was not installed. Choose Install to try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>The update was not installed: %1. Choose Install to try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>Chrono Vault %1 is installed. Chrono Vault now restarts.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
+        <location line="+65"/>
         <source>The update was not installed, because Chrono Vault did not close. Choose Install again when you are ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
         <source>Chrono Vault %1 is installed and runs the next time you start Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>

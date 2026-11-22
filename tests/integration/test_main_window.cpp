@@ -30,9 +30,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.8
+// test_main_window.cpp 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The About box's name, copyright and link lined up with the icon
 // v0.0.8: The About box shows every licence, ours first, Check for update at the bottom left; the tray text
 // v0.0.4: Chrono Vault's own style and fonts; the version in the title
 // v0.0.3: Settings of the test's own, never the person's
@@ -144,6 +145,23 @@ void TestMainWindow::the_about_box_shows_every_licence_ours_first()
     QVERIFY(qAbs((checkAt.y() + check->height() / 2) - (closeAt.y() + close->height() / 2)) <= 1.0);
     QVERIFY(checkAt.x() < window->width() / 4.0);
     QVERIFY(closeAt.x() + close->width() > window->width() * 3 / 4.0);
+
+    // The name at the top of the icon, the link at its bottom, the copyright
+    // exactly in the middle (D-021).
+    auto* nameLine = qobject_cast<QQuickItem*>(about->findChild<QObject*>(QStringLiteral("nameLine")));
+    auto* copyrightLine = qobject_cast<QQuickItem*>(about->findChild<QObject*>(QStringLiteral("copyrightLine")));
+    auto* siteLine = qobject_cast<QQuickItem*>(about->findChild<QObject*>(QStringLiteral("siteLine")));
+    QVERIFY(nameLine && copyrightLine && siteLine);
+    QVERIFY(siteLine->property("text").toString().contains(QStringLiteral("https://github.com/rob-vandenberg/chrono-vault")));
+    auto* heading = siteLine->parentItem();
+    const double top = heading->mapToScene(QPointF(0, 0)).y();
+    const double bottom = top + heading->height();
+    QVERIFY(qAbs(nameLine->mapToScene(QPointF(0, 0)).y() - top) <= 1.0);
+    QVERIFY(qAbs(siteLine->mapToScene(QPointF(0, siteLine->height())).y() - bottom) <= 1.0);
+    const double nameMiddle = nameLine->mapToScene(QPointF(0, nameLine->height() / 2)).y();
+    const double siteMiddle = siteLine->mapToScene(QPointF(0, siteLine->height() / 2)).y();
+    const double copyrightMiddle = copyrightLine->mapToScene(QPointF(0, copyrightLine->height() / 2)).y();
+    QVERIFY(qAbs(copyrightMiddle - (nameMiddle + siteMiddle) / 2) <= 1.0);
 
     QString warningText;
     for (const QQmlError& warning : std::as_const(qmlWarnings)) {

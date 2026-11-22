@@ -25,14 +25,16 @@
 #include <QObject>
 #include <QPointer>
 #include <QTimer>
+#include <QUrl>
 #include <QtQml/qqmlregistration.h>
 
 class QNetworkReply;
 
 // --- Version ------------------------------------------------------------
-// updater.h 0.0.6
+// updater.h 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: The windows of Chrono Mail: a found update offered, its problem, page and folder; Restart or Close
 // v0.0.6: The default check frequency, for Restore defaults (D-022)
 // v0.0.5: Initial release
 
@@ -56,6 +58,18 @@ class Updater : public QObject
     Q_PROPERTY(double progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(int frequency READ frequency WRITE setFrequency NOTIFY frequencyChanged)
     Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
+    // What went wrong with the last download or install, for the window that
+    // offers it again; empty otherwise.
+    Q_PROPERTY(QString problem READ problem NOTIFY stateChanged)
+    // The new version's page on GitHub ("What is new"); empty when the answer
+    // held no page of Chrono Vault's own releases.
+    Q_PROPERTY(QString releasePage READ releasePage NOTIFY stateChanged)
+    // The folder the update was saved in.
+    Q_PROPERTY(QUrl downloadFolder READ downloadFolder NOTIFY stateChanged)
+    // The same folder as the system writes it, with its own separators.
+    Q_PROPERTY(QString downloadFolderName READ downloadFolderName NOTIFY stateChanged)
+    // Linux: installed, waiting for the person's Restart or Close.
+    Q_PROPERTY(bool waitsForRestartChoice READ waitsForRestartChoice NOTIFY stateChanged)
 
 public:
     enum class State { Idle, Checking, Current, Available, Unreachable, Downloading, Downloaded, Installing, Installed, Failed };
@@ -73,6 +87,11 @@ public:
     [[nodiscard]] int frequency() const { return static_cast<int>(checkFrequency); }
     void setFrequency(int frequency);
     [[nodiscard]] QString qtVersion() const;
+    [[nodiscard]] QString problem() const { return currentProblem; }
+    [[nodiscard]] QString releasePage() const;
+    [[nodiscard]] QUrl downloadFolder() const;
+    [[nodiscard]] QString downloadFolderName() const;
+    [[nodiscard]] bool waitsForRestartChoice() const { return restartChoicePending; }
 
     // The automatic checks: one shortly after the start when one is due, and
     // a look every hour while Chrono Vault runs.
@@ -89,6 +108,9 @@ public:
     // The quit an install asked for was held up or cancelled (unsaved work):
     // nothing is set off at a later, ordinary quit.
     Q_INVOKABLE void quitHeldUp();
+    // Linux, after the install: Chrono Vault closes either way; with restart
+    // the new version starts once it has ended.
+    Q_INVOKABLE void finishUpdate(bool restart);
     // The check frequency before the person changes it (Restore defaults, D-022).
     [[nodiscard]] Q_INVOKABLE int defaultCheckFrequency() const;
 
@@ -103,7 +125,13 @@ public:
 
     // Tests only: GitHub's answer instead of a request, and how this copy
     // counts as installed.
-    void answerForTests(const QByteArray& releasesJson);
+    void answerForTests(const QByteArray& releasesJson, bool byHand = true);
+    // Tests only: the offered update counts as downloaded to this file.
+    void downloadedForTests(const QString& path)
+    {
+        downloadedPath = path;
+        setState(State::Downloaded, QString());
+    }
     void setInstallKindForTests(InstallKind installKind) { kind = installKind; }
     // Tests only: an installed update waits for the quit; and whether one does.
     void armRestartForTests() { restartAfterQuit = true; }
@@ -119,14 +147,15 @@ signals:
     void stateChanged();
     void progressChanged();
     void frequencyChanged();
-    // A newer version was found by an automatic check.
-    void updateAvailable();
+    // A newer version was found: by an automatic check, or by hand (About).
+    void offered(bool byHand);
     // The update is installed or handed to the setup: the program should quit
     // (asking about unsaved work first), and the rest follows.
     void quitRequested();
 
 private:
-    void setState(State state, const QString& message);
+    // A problem, when given, is what went wrong with a download or install.
+    void setState(State state, const QString& message, const QString& problem = {});
     void checkSoon(bool byHand);
     void answered(const QByteArray& body, bool byHand);
     void finishDownload();
@@ -155,6 +184,9 @@ private:
     QString setupToStart;     // Windows: the setup, started once this program has ended
     bool restartAfterQuit = false; // Linux: start the new version once this one has ended
     bool brokenOff = false;        // the download was broken off by the program, not by Stop
+    QString currentProblem;
+    bool restartChoicePending = false;
+    bool finishing = false; // Restart or Close was chosen; the quit is under way
 };
 
 } // namespace chrono_vault

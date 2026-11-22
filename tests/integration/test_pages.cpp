@@ -16,6 +16,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "app_setup.h"
+#include "item_list_model.h"
 #include "updater.h"
 #include "vault_controller.h"
 
@@ -27,11 +28,13 @@
 #include <QWindow>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
+#include <QQuickItem>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.5
+// test_pages.cpp 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: One bar with the menus and the buttons; three columns; the item read-only, the pencil opening the editor
 // v0.0.5: A quit for an update waits for the editor and goes on, or is abandoned by Cancel
 // v0.0.4: Chrono Vault's own style; the window shown as the program shows it
 // v0.0.3: Initial release, with unsaved changes asked about and kept through a lock
@@ -52,6 +55,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void a_login_made_in_the_editor_is_saved_without_qml_errors();
+    void the_main_window_has_one_bar_and_three_columns();
     void a_quit_for_an_update_waits_for_the_editor_and_goes_on();
     void unsaved_changes_are_asked_about_and_kept_through_a_lock();
 };
@@ -246,6 +250,78 @@ void TestPages::a_quit_for_an_update_waits_for_the_editor_and_goes_on()
     QVERIFY(!updater->armedForTests());
     QCOMPARE(quit.count(), 1);
     QVERIFY(window->property("visible").toBool());
+}
+
+void TestPages::the_main_window_has_one_bar_and_three_columns()
+{
+    QTemporaryDir folder;
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+
+    // The bar: the five menus on the left, the buttons on the right, on one line.
+    QObject* menuBar = window->findChild<QObject*>(QStringLiteral("menuBar"));
+    auto* newItem = qobject_cast<QQuickItem*>(window->findChild<QObject*>(QStringLiteral("newItemButton")));
+    auto* preferences = qobject_cast<QQuickItem*>(window->findChild<QObject*>(QStringLiteral("preferencesButton")));
+    QVERIFY(menuBar && newItem && preferences);
+    QCOMPARE(menuBar->property("count").toInt(), 5);
+    auto* bar = qobject_cast<QQuickItem*>(menuBar);
+    QVERIFY(bar);
+    QTRY_VERIFY(newItem->width() > 0);
+    QVERIFY(bar->mapToScene(QPointF(0, 0)).x() < newItem->mapToScene(QPointF(0, 0)).x());
+    QVERIFY(qAbs(bar->mapToScene(QPointF(0, bar->height() / 2)).y()
+                 - newItem->mapToScene(QPointF(0, newItem->height() / 2)).y()) <= 4);
+    // Without an unlocked vault, New Item is greyed (never hidden).
+    QVERIFY(newItem->isVisible() && !newItem->isEnabled());
+
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("columns.chronovault"))),
+                            QStringLiteral("master"), QStringLiteral("master"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QVERIFY(newItem->isEnabled());
+    QVariantMap item = controller->newLogin();
+    item[QStringLiteral("title")] = QStringLiteral("Bakery orders");
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    const QString id = item[QStringLiteral("id")].toString();
+
+    // Three columns: the vault, the items under their letter, the chosen item.
+    QObject* vaultColumn = window->findChild<QObject*>(QStringLiteral("vaultColumn"));
+    QObject* list = window->findChild<QObject*>(QStringLiteral("itemList"));
+    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QObject* details = window->findChild<QObject*>(QStringLiteral("itemDetails"));
+    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QVERIFY(vaultColumn && list && page && details && editor);
+    QCOMPARE(list->property("section").value<QObject*>()->property("property").toString(), QStringLiteral("initial"));
+    QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::InitialRole).toString(),
+             QStringLiteral("B"));
+
+    // Chosen: shown read-only; the pencil opens the editor in the same column.
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
+    QTRY_VERIFY(details->property("visible").toBool());
+    QObject* title = details->findChild<QObject*>(QStringLiteral("itemTitle"));
+    QVERIFY(title);
+    QCOMPARE(title->property("text").toString(), QStringLiteral("Bakery orders"));
+    QVERIFY(!editor->property("visible").toBool());
+    QObject* pencil = details->findChild<QObject*>(QStringLiteral("editButton"));
+    QVERIFY(pencil && QMetaObject::invokeMethod(pencil, "clicked"));
+    QTRY_VERIFY(editor->property("visible").toBool());
+    QCOMPARE(editor->property("itemId").toString(), id);
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+    QTRY_VERIFY(details->property("visible").toBool());
+
+    // Item > Delete item…: once deleted, the item is no longer shown.
+    QVERIFY(QMetaObject::invokeMethod(page, "deleteChosen"));
+    QObject* deleteDialog = editor->findChild<QObject*>(QStringLiteral("deleteDialog"));
+    QVERIFY(deleteDialog);
+    QTRY_VERIFY(deleteDialog->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(deleteDialog, "accept"));
+    QTRY_VERIFY(controller->isIdle());
+    QTRY_COMPARE(page->property("chosenItemId").toString(), QString());
+    QVERIFY(!details->property("visible").toBool());
+    QCOMPARE(controller->items()->rowCount(), 0);
 }
 
 QTEST_MAIN(TestPages)

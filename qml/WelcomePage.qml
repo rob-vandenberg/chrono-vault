@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.7
+// WelcomePage.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: New vault and Open vault reachable from the File menu (D-025)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.4: The program's icon in the upper left; a typo; the eye in the password fields
 // v0.0.3: Initial release
@@ -31,6 +32,10 @@ import QtQuick.Layouts
 // The start: create a new vault, or open one that exists.
 Item {
     id: welcomePage
+
+    // File > New vault… and Open vault… (D-025).
+    function newVault() { createFileDialog.open() }
+    function openVault() { openFileDialog.open() }
 
     Image {
         source: "qrc:/icons/chrono-vault.svg"

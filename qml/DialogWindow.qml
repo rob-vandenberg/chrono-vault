@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.0.8
+// DialogWindow.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: Opened quietly, without taking the keyboard; a window that cannot be closed for a while; buttons of its own at the right (D-024)
 // v0.0.8: A narrow edge, as the settings window's; a place for the dialog's own buttons at the bottom left
 // v0.0.7: An application window with the program's font, so the UI scaling reaches it (D-023)
 // v0.0.4: Initial release
@@ -43,12 +44,38 @@ ApplicationWindow {
     // Buttons of the dialog's own, at the bottom left (as Check for update in
     // About); the standard buttons stay at the bottom right.
     property alias leftButtons: leftArea.data
+    // Buttons of the dialog's own at the bottom right, before the standard ones
+    // (as Download and Skip this update before Cancel).
+    property alias rightButtons: rightArea.data
     property bool answered: false
 
     signal shown()
     signal accepted()
     signal rejected()
     signal discarded()
+
+    // Shown without taking the keyboard from someone who is typing (an update
+    // found by itself, D-024).
+    function openQuietly() {
+        answered = false
+        if (!memory.hasSaved() && transientParent) {
+            x = transientParent.x + (transientParent.width - width) / 2
+            y = transientParent.y + (transientParent.height - height) / 2
+        }
+        show()
+        shown()
+    }
+    // A link for a label: the words (already translated) escaped, never read
+    // as markup.
+    function link(address, words) {
+        const escape = function(text) {
+            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        }
+        return "<a href=\"" + escape(address) + "\">" + escape(words) + "</a>"
+    }
+
+    // While false the window cannot be closed (the system is installing).
+    property bool closable: true
 
     function open() {
         answered = false
@@ -67,6 +94,8 @@ ApplicationWindow {
         accepted()
     }
     function reject() {
+        if (!closable)
+            return
         answered = true
         hide()
         rejected()
@@ -91,7 +120,16 @@ ApplicationWindow {
     color: palette.window
 
     // Closed with its own title bar button: the same as Cancel.
-    onClosing: if (!answered) { answered = true; rejected() }
+    onClosing: function(close) {
+        if (!closable) {
+            close.accepted = false
+            return
+        }
+        if (!answered) {
+            answered = true
+            rejected()
+        }
+    }
 
     WindowMemory {
         id: memory
@@ -124,6 +162,10 @@ ApplicationWindow {
                 spacing: 6
             }
             Item { Layout.fillWidth: true }
+            RowLayout {
+                id: rightArea
+                spacing: 6
+            }
             DialogButtonBox {
                 id: buttonBox
                 // No edge of its own: the window's edge is the only one.

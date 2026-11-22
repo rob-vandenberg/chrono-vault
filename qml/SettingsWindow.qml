@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.8
+// SettingsWindow.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: Opened at General from the View menu (D-025)
 // v0.0.8: "Keep Chrono Vault running in the system tray"
 // v0.0.7: Theme and UI scaling in General, shown at once, kept with OK; the pages scroll (D-023)
 // v0.0.6: The sidebar as a framed panel; OK, Cancel and Restore defaults (D-022)
@@ -50,6 +51,12 @@ ApplicationWindow {
         show()
         raise()
         requestActivate()
+    }
+
+    // Opened at General (the View menu).
+    function showGeneral() {
+        showWindow()
+        topics.currentIndex = 0
     }
 
     // What the window shows, until OK keeps it.

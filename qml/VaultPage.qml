@@ -20,21 +20,29 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.5
+// VaultPage.qml 0.0.9
 
 // --- Version history ----------------------------------------------------
+// v0.0.9: Three columns after the reference program: the vault, the items under letter headings, the chosen item
+//         read-only with the editor behind the pencil (D-025)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: Each item's icon in the list
 // v0.0.3: Initial release
 
-// The unlocked vault: the items on the left, the chosen one on the right.
+// The unlocked vault in three columns (D-025): the vault on the left, its
+// items in the middle, the chosen item on the right, read-only, with the
+// editor behind the pencil.
 Item {
     id: vaultPage
     objectName: "vaultPage"
 
+    // The item shown or edited on the right; empty when none is chosen.
+    property string chosenItemId: ""
+
     function newLogin() {
         editor.whenFree(function() {
             itemList.currentIndex = -1
+            chosenItemId = ""
             editor.edit(VaultController.newLogin(), true)
         })
     }
@@ -42,7 +50,33 @@ Item {
     function newSecureNote() {
         editor.whenFree(function() {
             itemList.currentIndex = -1
+            chosenItemId = ""
             editor.edit(VaultController.newSecureNote(), true)
+        })
+    }
+
+    function showItem(id) {
+        editor.whenFree(function() {
+            editor.close()
+            chosenItemId = id
+            itemList.currentIndex = VaultController.items.rowOf(id)
+        })
+    }
+
+    function editChosen() {
+        if (chosenItemId !== "")
+            editor.edit(VaultController.item(chosenItemId), false)
+    }
+
+    // Item > Delete item…: the question of the editor, about the chosen item.
+    function deleteChosen() {
+        const id = chosenItemId
+        if (id === "")
+            return
+        editor.whenFree(function() {
+            if (editor.itemId !== id)
+                editor.edit(VaultController.item(id), false)
+            editor.askDelete()
         })
     }
 
@@ -58,13 +92,23 @@ Item {
         editor.whenFree(action, abandoned)
     }
 
-    onVisibleChanged: if (!visible) editor.close()
+    onVisibleChanged: {
+        if (!visible) {
+            editor.close()
+            chosenItemId = ""
+        }
+    }
 
-    // The item being edited stays highlighted while the list changes.
+    // The chosen item stays highlighted while the list changes; one that is
+    // gone (deleted) is no longer shown.
     Connections {
         target: VaultController.items
         function onModelReset() {
-            itemList.currentIndex = editor.itemId === "" ? -1 : VaultController.items.rowOf(editor.itemId)
+            const id = editor.itemId !== "" ? editor.itemId : vaultPage.chosenItemId
+            const row = id === "" ? -1 : VaultController.items.rowOf(id)
+            itemList.currentIndex = row
+            if (editor.itemId === "" && vaultPage.chosenItemId !== "" && VaultController.item(vaultPage.chosenItemId).id === undefined)
+                vaultPage.chosenItemId = ""
         }
     }
 
@@ -80,63 +124,155 @@ Item {
     SplitView {
         anchors.fill: parent
 
+        // Left: the vault, then Home (all items).
+        Pane {
+            objectName: "vaultColumn"
+            SplitView.preferredWidth: 220
+            SplitView.minimumWidth: 160
+            padding: 12
+
+            ColumnLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 16
+
+                RowLayout {
+                    spacing: 10
+                    Layout.fillWidth: true
+                    Image {
+                        source: "qrc:/icons/chrono-vault.svg"
+                        sourceSize: Qt.size(36, 36)
+                        Layout.preferredWidth: 36
+                        Layout.preferredHeight: 36
+                    }
+                    ColumnLayout {
+                        spacing: 0
+                        Layout.fillWidth: true
+                        Label {
+                            objectName: "vaultName"
+                            text: VaultController.vaultName
+                            textFormat: Text.PlainText
+                            font.bold: true
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        Label {
+                            text: qsTr("Local file")
+                            opacity: 0.7
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+
+                ItemDelegate {
+                    objectName: "homeEntry"
+                    text: qsTr("Home")
+                    icon.source: "qrc:/icons/home.svg"
+                    icon.color: vaultPage.palette.buttonText
+                    highlighted: true
+                    Layout.fillWidth: true
+                }
+            }
+        }
+
+        // Middle: the search, the order, and the items under letter headings.
         ColumnLayout {
             SplitView.preferredWidth: 300
             SplitView.minimumWidth: 200
             spacing: 4
 
             TextField {
+                objectName: "searchField"
                 placeholderText: qsTr("Search")
                 text: VaultController.searchText
                 onTextEdited: VaultController.searchText = text
                 Layout.fillWidth: true
-                Layout.margins: 6
+                Layout.topMargin: 8
+                Layout.leftMargin: 8
+                Layout.rightMargin: 8
+            }
+
+            RowLayout {
+                spacing: 2
+                Layout.leftMargin: 8
+                Label {
+                    text: qsTr("Sort By:")
+                    opacity: 0.7
+                }
+                ToolButton {
+                    objectName: "sortButton"
+                    text: qsTr("Title") + " ▾"
+                    font.bold: true
+                    onClicked: sortMenu.popup(this, 0, height)
+                    Menu {
+                        id: sortMenu
+                        MenuItem {
+                            text: qsTr("Title")
+                            checkable: true
+                            checked: true
+                        }
+                    }
+                }
             }
 
             ListView {
                 id: itemList
+                objectName: "itemList"
                 model: VaultController.items
                 clip: true
                 currentIndex: -1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                section.property: "initial"
+                section.criteria: ViewSection.FullString
+                section.delegate: Label {
+                    required property string section
+                    text: section
+                    font.bold: true
+                    opacity: 0.7
+                    leftPadding: 12
+                    topPadding: 6
+                    bottomPadding: 2
+                }
+
                 delegate: ItemDelegate {
+                    id: listEntry
                     width: ListView.view.width
                     highlighted: ListView.isCurrentItem
+                    // The text of the chosen item in the highlight's own colour.
+                    readonly property color textColour: highlighted ? vaultPage.palette.highlightedText : vaultPage.palette.text
                     contentItem: RowLayout {
-                        spacing: 8
+                        spacing: 10
                         Image {
                             source: model.icon
-                            sourceSize: Qt.size(32, 32)
-                            Layout.preferredWidth: 32
-                            Layout.preferredHeight: 32
+                            sourceSize: Qt.size(36, 36)
+                            Layout.preferredWidth: 36
+                            Layout.preferredHeight: 36
                         }
                         ColumnLayout {
                             spacing: 2
                             Layout.fillWidth: true
                             Label {
                                 text: model.title
+                                textFormat: Text.PlainText
+                                color: listEntry.textColour
                                 font.bold: true
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                             Label {
                                 text: model.isNote ? qsTr("Secure note") : model.subtitle
+                                textFormat: Text.PlainText
+                                color: listEntry.textColour
                                 opacity: 0.7
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                         }
                     }
-                    onClicked: {
-                        const row = index
-                        const id = model.itemId
-                        editor.whenFree(function() {
-                            itemList.currentIndex = row
-                            editor.edit(VaultController.item(id), false)
-                        })
-                    }
+                    onClicked: vaultPage.showItem(model.itemId)
                 }
 
                 Label {
@@ -148,12 +284,37 @@ Item {
             }
         }
 
-        ItemEditor {
-            id: editor
-            objectName: "itemEditor"
+        // Right: nothing chosen, the chosen item read-only, or the editor.
+        StackLayout {
             SplitView.fillWidth: true
-            onClosed: itemList.currentIndex = -1
-            onStored: function(itemId) { itemList.currentIndex = VaultController.items.rowOf(itemId) }
+            currentIndex: editor.itemId !== "" ? 2 : (vaultPage.chosenItemId !== "" ? 1 : 0)
+
+            Label {
+                text: qsTr("Choose an item, or make a new one.")
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                opacity: 0.7
+            }
+            ItemDetails {
+                itemId: vaultPage.chosenItemId
+                onEditRequested: vaultPage.editChosen()
+            }
+            ItemEditor {
+                id: editor
+                objectName: "itemEditor"
+                // Closed: back to the item it showed, when it is still there; a
+                // deleted item is no longer shown.
+                onClosed: {
+                    if (vaultPage.chosenItemId !== "" && VaultController.item(vaultPage.chosenItemId).id === undefined)
+                        vaultPage.chosenItemId = ""
+                    itemList.currentIndex = vaultPage.chosenItemId === "" ? -1
+                                            : VaultController.items.rowOf(vaultPage.chosenItemId)
+                }
+                onStored: function(itemId) {
+                    vaultPage.chosenItemId = itemId
+                    itemList.currentIndex = VaultController.items.rowOf(itemId)
+                }
+            }
         }
     }
 }
