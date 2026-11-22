@@ -2,13 +2,14 @@
 
 ## Now
 
-**Version 0.0.14**: categories and templates (eight built-in categories with thirteen templates, the person's own in
-Settings > Customize), nested tags, favourites and attachments (D-027 to D-029); contents format 3.
+**Version 0.0.15**: several vaults, the primary's master password unlocking the others (D-030); a keyfile beside the
+master password, and File > Change master password or keyfile (D-031). 0.0.14 brought categories, templates, tags,
+favourites and attachments (D-027 to D-029).
 
 ## Next task
 
-`ROADMAP.md` steps 6 to 9 in autonomous mode (the owner, 22 November 2026): next 0.0.15, several vaults and the
-keyfile; then 0.0.16, noticing a change made elsewhere and the focus mark on New Item.
+0.0.16, in autonomous mode: noticing a change made elsewhere to the vault file (`ROADMAP.md` step 9) and the focus
+mark on New Item (P12).
 
 ## Open questions
 

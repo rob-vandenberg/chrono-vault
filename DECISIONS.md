@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Twenty-nine decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Thirty-one decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, and attachments.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, attachments, several vaults, and the keyfile.
 
 | Decision | What it settles |
 |---|---|
@@ -38,3 +38,5 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-027](decisions/D-027.md) | Categories and templates: eight built-in categories with thirteen templates, the person's own kept in the vault, Settings > Customize (autonomous mode) |
 | [D-028](decisions/D-028.md) | Tags nested with a slash, shown as a tree; favourites marked with a star (autonomous mode) |
 | [D-029](decisions/D-029.md) | Attachments inside the vault, 5 MB each and 150 MB together, only saved where the person chooses (autonomous mode) |
+| [D-030](decisions/D-030.md) | Several vaults: the primary's master password unlocks the others, their passwords saved in it; locking locks all (autonomous mode) |
+| [D-031](decisions/D-031.md) | The keyfile beside the master password (header format 2), and File > Change master password or keyfile (autonomous mode) |

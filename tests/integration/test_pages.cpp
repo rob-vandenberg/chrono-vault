@@ -30,11 +30,13 @@
 #include <QtTest>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.14
+// test_pages.cpp 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: The vault chooser, the keyfile on the unlock page, the master password window (D-030, D-031)
 // v0.0.14: New Item's categories, a tag typed in the editor, the left column, the star, Settings > Customize and the
 //          template editor (D-027, D-028)
 // v0.0.9: One bar with the menus and the buttons; three columns; the item read-only, the pencil opening the editor
@@ -84,6 +86,7 @@ private slots:
     void unsaved_changes_are_asked_about_and_kept_through_a_lock();
     void categories_tags_favourites_and_templates_work_from_the_windows();
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
+    void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
 };
 
 void TestPages::initTestCase()
@@ -484,6 +487,70 @@ void TestPages::a_file_still_being_read_is_never_lost_by_leaving_the_editor()
     QCOMPARE(controller->item(itemId).value(QStringLiteral("attachments")).toList().size(), 1);
 
     controller->lock();
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestPages::vaults_are_chosen_and_the_master_password_changed_from_the_windows()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QSettings().clear();
+
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    const QString home = folder.filePath(QStringLiteral("home.chronovault"));
+    const QString work = folder.filePath(QStringLiteral("work.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(home), QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    controller->createVault(QUrl::fromLocalFile(work), QStringLiteral("b"), QStringLiteral("b"), QUrl(), true);
+    QTRY_COMPARE(controller->vaultPath(), work);
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QTRY_VERIFY(controller->isIdle());
+
+    // The vault chooser lists both vaults, then New vault and Open vault.
+    QObject* vaultMenu = window->findChild<QObject*>(QStringLiteral("vaultMenu"));
+    QVERIFY(vaultMenu);
+    QTRY_COMPARE(vaultMenu->property("count").toInt(), 5);
+    QObject* vaultPage = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "switchVault", Q_ARG(QVariant, home)));
+    QTRY_COMPARE(controller->vaultPath(), home);
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    // The master password window changes it.
+    QObject* passwordWindow = window->findChild<QObject*>(QStringLiteral("masterPasswordWindow"));
+    QVERIFY(passwordWindow);
+    QVERIFY(QMetaObject::invokeMethod(passwordWindow, "ask"));
+    QTRY_VERIFY(passwordWindow->property("opened").toBool());
+    passwordWindow->findChild<QObject*>(QStringLiteral("currentPasswordField"))->setProperty("text", QStringLiteral("a"));
+    passwordWindow->findChild<QObject*>(QStringLiteral("newPasswordField"))->setProperty("text", QStringLiteral("c"));
+    passwordWindow->findChild<QObject*>(QStringLiteral("repeatedPasswordField"))->setProperty("text", QStringLiteral("c"));
+    QVERIFY(passwordWindow->property("ready").toBool());
+    QSignalSpy changed(controller, &VaultController::masterPasswordChanged);
+    QVERIFY(QMetaObject::invokeMethod(passwordWindow, "accept"));
+    QTRY_COMPARE(changed.size(), 1);
+    QVERIFY(changed.first().at(0).toBool());
+
+    // Locked: the unlock page has no keyfile row for a vault without one.
+    controller->lock();
+    auto* quickWindow = qobject_cast<QQuickWindow*>(window);
+    QQuickItem* keyfileLabel = visualItem(quickWindow->contentItem(), QStringLiteral("unlockKeyfileLabel"));
+    QVERIFY(keyfileLabel);
+    QVERIFY(!keyfileLabel->isVisible());
+    controller->unlock(QStringLiteral("c"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    controller->lock();
+
     QString warningText;
     for (const QQmlError& warning : std::as_const(qmlWarnings)) {
         warningText += warning.toString() + QLatin1Char('\n');

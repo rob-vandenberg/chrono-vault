@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.14
+// VaultPage.qml 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: The vault at the top of the left column chooses among the person's vaults, makes or opens one (D-030)
 // v0.0.14: The left column narrows the list: Home, Favorites, the categories and the tags as a tree; a new item from
 //          any template (D-027, D-028)
 // v0.0.9: Three columns after the reference program: the vault, the items under letter headings, the chosen item
@@ -56,6 +57,20 @@ Item {
 
     function newSecureNote() {
         newItem("note")
+    }
+
+    // File > New vault… and Open vault…, handled by the start page's windows.
+    signal newVaultRequested()
+    signal openVaultRequested()
+
+    // Another of the person's vaults (D-030), after an edit not saved yet is
+    // asked about.
+    function switchVault(vaultFile) {
+        editor.whenFree(function() {
+            editor.close()
+            chosenItemId = ""
+            VaultController.switchToVault(vaultFile)
+        })
     }
 
     // What the list is narrowed to (D-027, D-028); asks first about an edit
@@ -158,32 +173,73 @@ Item {
                     width: columnScroll.availableWidth
                     spacing: Math.round(2 * Appearance.factor)
 
-                    RowLayout {
-                        spacing: Math.round(10 * Appearance.factor)
+                    // The vault shown; it opens the list of the person's
+                    // vaults, and New vault and Open vault (D-030).
+                    ItemDelegate {
+                        id: vaultChooser
+                        objectName: "vaultChooser"
                         Layout.fillWidth: true
                         Layout.bottomMargin: Math.round(14 * Appearance.factor)
-                        Image {
-                            source: "qrc:/icons/chrono-vault.svg"
-                            sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
-                            Layout.preferredWidth: Math.round(36 * Appearance.factor)
-                            Layout.preferredHeight: Math.round(36 * Appearance.factor)
-                        }
-                        ColumnLayout {
-                            spacing: 0
-                            Layout.fillWidth: true
-                            Label {
-                                objectName: "vaultName"
-                                text: VaultController.vaultName
-                                textFormat: Text.PlainText
-                                font.bold: true
-                                elide: Text.ElideRight
+                        onClicked: vaultMenu.popup(this, 0, height)
+                        contentItem: RowLayout {
+                            spacing: Math.round(10 * Appearance.factor)
+                            Image {
+                                source: "qrc:/icons/chrono-vault.svg"
+                                sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
+                                Layout.preferredWidth: Math.round(36 * Appearance.factor)
+                                Layout.preferredHeight: Math.round(36 * Appearance.factor)
+                            }
+                            ColumnLayout {
+                                spacing: 0
                                 Layout.fillWidth: true
+                                Label {
+                                    objectName: "vaultName"
+                                    text: VaultController.vaultName
+                                    textFormat: Text.PlainText
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    text: qsTr("Local file")
+                                    opacity: 0.7
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
                             }
                             Label {
-                                text: qsTr("Local file")
+                                text: "▾"
                                 opacity: 0.7
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
+                            }
+                        }
+                        Menu {
+                            id: vaultMenu
+                            objectName: "vaultMenu"
+                            Instantiator {
+                                model: VaultController.vaults
+                                delegate: MenuItem {
+                                    required property string modelData
+                                    text: modelData === VaultController.primaryVault
+                                          ? qsTr("%1 (primary)").arg(VaultController.vaultNameOf(modelData))
+                                          : VaultController.vaultNameOf(modelData)
+                                    checkable: true
+                                    checked: modelData === VaultController.vaultPath
+                                    onTriggered: {
+                                        checked = Qt.binding(function() { return modelData === VaultController.vaultPath })
+                                        vaultPage.switchVault(modelData)
+                                    }
+                                }
+                                onObjectAdded: function(index, object) { vaultMenu.insertItem(index, object) }
+                                onObjectRemoved: function(index, object) { vaultMenu.removeItem(object) }
+                            }
+                            MenuSeparator {}
+                            Action {
+                                text: qsTr("New vault…")
+                                onTriggered: vaultPage.newVaultRequested()
+                            }
+                            Action {
+                                text: qsTr("Open vault…")
+                                onTriggered: vaultPage.openVaultRequested()
                             }
                         }
                     }

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.14
+# qml/CMakeLists.txt 0.0.15
 
 # --- Version history ----------------------------------------------------
+# v0.0.15: The window that changes the master password or keyfile (D-031)
 # v0.0.14: The Customize page and the template editor; the categories', tags', favourites' and attachments' icons (D-027 to D-029)
 # v0.0.10: Chrono Vault's own style for the UI scaling; every source of the library under the strict warnings (D-023)
 # v0.0.9: The update windows of Chrono Mail in place of the one update window (D-024); the top bar's icons (D-025)
@@ -46,6 +47,7 @@ qt_add_qml_module(chrono_vault_ui
         CustomizePage.qml
         ItemDetails.qml
         Main.qml
+        MasterPasswordWindow.qml
         PasswordField.qml
         SettingsWindow.qml
         TemplateEditor.qml

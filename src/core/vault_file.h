@@ -23,11 +23,13 @@
 #include <QString>
 
 #include <functional>
+#include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_file.h 0.0.2
+// vault_file.h 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
 // v0.0.2: Initial release
 
 // The vault file (D-014): a short header, then the contents sealed with
@@ -36,8 +38,10 @@
 //
 //   offset  size  what
 //        0     8  "CHRVAULT"
-//        8     2  format version, 1 (big-endian, as every number here)
-//       10     1  key derivation, 1 = Argon2id
+//        8     2  format version: 1, or 2 when a keyfile is needed too
+//                 (big-endian, as every number here)
+//       10     1  key derivation: 1 = Argon2id of the password; 2 = Argon2id
+//                 of the password followed by the keyfile's SHA-256 (D-031)
 //       11     1  cipher, 1 = AES-256-GCM
 //       12     4  Argon2id memory in KiB
 //       16     4  Argon2id iterations
@@ -53,6 +57,7 @@ struct VaultKey
     QByteArray key;
     QByteArray salt;
     crypto::KdfParameters parameters;
+    bool usesKeyfile = false; // the vault needs its keyfile too (D-031)
 
     [[nodiscard]] bool isValid() const { return key.size() == crypto::keyLength; }
     void wipe() { crypto::wipe(key); }
@@ -66,6 +71,7 @@ enum class OpenStatus {
     NewerFormat,
     WrongPasswordOrDamaged,
     TooLarge,
+    KeyfileNeeded, // the vault needs its keyfile, and none was given (D-031)
 };
 
 struct OpenResult
@@ -101,10 +107,30 @@ inline constexpr qint64 largestVaultFileBytes = 256LL * 1024 * 1024;
 [[nodiscard]] crypto::KdfParameters standardKdfParameters();
 
 // A new key, from the password with a fresh salt; invalid when it fails.
-[[nodiscard]] VaultKey makeVaultKey(const QByteArray& password, const crypto::KdfParameters& parameters);
+// With a keyfile's fingerprint (keyfileFingerprint), the vault needs both.
+[[nodiscard]] VaultKey makeVaultKey(const QByteArray& password, const crypto::KdfParameters& parameters,
+                                    const QByteArray& keyfile = {});
 
 // Reads and decrypts the vault at path. Slow on purpose: it derives the key.
-[[nodiscard]] OpenResult openVaultFile(const QString& path, const QByteArray& password);
+// The keyfile is its fingerprint, empty when none is given.
+[[nodiscard]] OpenResult openVaultFile(const QString& path, const QByteArray& password,
+                                       const QByteArray& keyfile = {});
+
+// Reads and decrypts the vault with a key derived before, without the
+// password: when it fails (the vault was given another password meanwhile),
+// it says WrongPasswordOrDamaged (D-030).
+[[nodiscard]] OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key);
+
+// The largest keyfile that is read (D-031).
+inline constexpr qint64 largestKeyfileBytes = 64LL * 1024 * 1024;
+
+// A keyfile's fingerprint (SHA-256 of its bytes), read in pieces; nothing when
+// it cannot be read or is larger than largestKeyfileBytes. Slow for a large
+// file: never on the window's thread (OR-5).
+[[nodiscard]] std::optional<QByteArray> keyfileFingerprint(const QString& path);
+
+// Writes a new keyfile of random bytes, safely; false when it cannot.
+[[nodiscard]] bool makeKeyfile(const QString& path);
 
 // Writes the contents to path, safely: a new file next to it, flushed to the
 // disk, read back and decrypted, and only then put in the old one's place.

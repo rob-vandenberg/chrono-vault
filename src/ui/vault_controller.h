@@ -30,9 +30,11 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.14
+// vault_controller.h 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
+//          master password or keyfile (D-030, D-031)
 // v0.0.14: Categories and templates, the person's own too; tags; favourites; attachments; what the list is
 //          narrowed to (D-027, D-028, D-029)
 // v0.0.6: The settings' defaults, for Restore defaults (D-022)
@@ -59,6 +61,12 @@ class VaultController : public QObject
     Q_PROPERTY(bool unsavedChanges READ unsavedChanges NOTIFY unsavedChangesChanged)
     Q_PROPERTY(bool saveFailed READ saveFailed NOTIFY saveFailedChanged)
     Q_PROPERTY(bool hasKeptChanges READ hasKeptChanges NOTIFY keptChangesChanged)
+    Q_PROPERTY(QStringList vaults READ vaults NOTIFY vaultsChanged)
+    Q_PROPERTY(QString primaryVault READ primaryVault NOTIFY vaultsChanged)
+    Q_PROPERTY(QString keyfilePath READ keyfilePath WRITE setKeyfilePath NOTIFY keyfileChanged)
+    Q_PROPERTY(bool keyfileNeeded READ keyfileNeeded NOTIFY keyfileChanged)
+    Q_PROPERTY(QUrl keyfileUrl READ keyfileUrl NOTIFY keyfileChanged)
+    Q_PROPERTY(bool usesKeyfile READ usesKeyfile NOTIFY stateChanged)
     Q_PROPERTY(ItemListModel* items READ items CONSTANT)
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
@@ -89,9 +97,23 @@ public:
     [[nodiscard]] bool unsavedChanges() const { return dirty; }
     // The last save failed, and its change is not on disk yet.
     [[nodiscard]] bool saveFailed() const { return failed; }
-    // The locked vault holds changes, kept through the lock, that are saved
-    // at the next unlock.
-    [[nodiscard]] bool hasKeptChanges() const { return !unsavedSealed.isEmpty() && unsavedPath == path; }
+    // Changes kept through a lock, saved when their vault is unlocked again;
+    // that vault may be another than the one shown (D-030).
+    [[nodiscard]] bool hasKeptChanges() const { return !unsavedSealed.isEmpty(); }
+    // Every vault the person keeps; the first is the primary, whose master
+    // password unlocks the others (D-030).
+    [[nodiscard]] QStringList vaults() const { return vaultList; }
+    [[nodiscard]] QString primaryVault() const;
+    // The keyfile used for the vault shown, remembered per vault (D-031).
+    [[nodiscard]] QString keyfilePath() const;
+    void setKeyfilePath(const QString& keyfile);
+    // The same keyfile as an address the file windows take; empty for none.
+    [[nodiscard]] QUrl keyfileUrl() const
+    {
+        return keyfilePath().isEmpty() ? QUrl() : QUrl::fromLocalFile(keyfilePath());
+    }
+    [[nodiscard]] bool keyfileNeeded() const { return needKeyfile || !keyfilePath().isEmpty(); }
+    [[nodiscard]] bool usesKeyfile() const { return currentState == State::Unlocked && key.usesKeyfile; }
     [[nodiscard]] ItemListModel* items() { return &listModel; }
     [[nodiscard]] QString searchText() const { return search; }
     void setSearchText(const QString& text);
@@ -116,8 +138,24 @@ public:
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);
 
-    // Creates a new vault at the chosen place and opens it.
-    Q_INVOKABLE void createVault(const QUrl& file, const QString& password, const QString& repeated);
+    // Creates a new vault at the chosen place and opens it; with a keyfile
+    // when one is given (D-031). With savePassword, and the primary vault
+    // unlocked, its password is saved in the primary first (D-030).
+    Q_INVOKABLE void createVault(const QUrl& file, const QString& password, const QString& repeated,
+                                 const QUrl& keyfile = QUrl(), bool savePassword = false);
+    // Whether a new vault's password can be saved in the primary vault now.
+    [[nodiscard]] Q_INVOKABLE bool canSaveInPrimary() const;
+    [[nodiscard]] Q_INVOKABLE QString vaultNameOf(const QString& vaultFile) const;
+    // Shows another of the person's vaults: the primary opened with the key
+    // kept from this session, one whose password is saved in the primary
+    // opened with it, any other locked (D-030).
+    Q_INVOKABLE void switchToVault(const QString& vaultFile);
+    // Writes a new keyfile where the person chose; answered by keyfileMade.
+    Q_INVOKABLE void makeKeyfile(const QUrl& file);
+    // A new master password, and a keyfile or none, for the unlocked vault;
+    // answered by masterPasswordChanged (D-031).
+    Q_INVOKABLE void changeMasterPassword(const QString& current, const QString& password, const QString& repeated,
+                                          const QUrl& keyfile);
     // Chooses an existing vault file; it is then unlocked with unlock().
     Q_INVOKABLE void chooseVault(const QUrl& file);
     // False, and says why, when a new vault cannot be made at this place:
@@ -210,6 +248,10 @@ signals:
     void revisionChanged();
     // A file the person added is read (ok) or not; the id is readAttachment's.
     void attachmentRead(const QString& requestId, const QString& name, qint64 size, bool ok);
+    void vaultsChanged();
+    void keyfileChanged();
+    void keyfileMade(const QString& keyfile, bool ok);
+    void masterPasswordChanged(bool ok);
     void autoLockMinutesChanged();
     void clipboardClearSecondsChanged();
     void keepInTrayChanged();
@@ -229,6 +271,14 @@ protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+    // A vault just created whose password is being saved in the primary: it
+    // is shown once that save is on disk (D-030).
+    struct CreatedVault
+    {
+        QString path;
+        VaultKey key;
+        QByteArray keyfile;
+    };
     void setState(State state);
     void say(const QString& text, bool isTrouble);
     void setPath(const QString& newPath);
@@ -242,6 +292,20 @@ private:
     // The list and every window that shows the contents are told of a change.
     void contentsChanged();
     [[nodiscard]] qsizetype attachmentBytes() const;
+    void addVault(const QString& vaultFile);
+    void rememberKeyfile(const QString& vaultFile, const QString& keyfile);
+    [[nodiscard]] QString keyfileOf(const QString& vaultFile) const;
+    // Unlocks the vault shown with a password, or with a key kept from
+    // before; both off the window's thread (OR-5).
+    void startUnlock(const QByteArray& password, bool savedPassword = false);
+    void startOpenWithKey(const VaultKey& kept);
+    void unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile);
+    // The primary's key and the passwords saved in it, kept while unlocked.
+    void rememberPrimary();
+    void forgetPrimary();
+    void showCreated(CreatedVault created);
+    // The password saved in the primary for this vault, changed with it.
+    void updateSavedPassword(const QString& vaultFile, const QString& password);
 
     State currentState = State::NoVault;
     QString path;
@@ -268,6 +332,14 @@ private:
     // the unlocked vault.
     QHash<QString, Attachment> pendingAttachments;
     quint64 vaultSession = 0; // goes up each time the unlocked vault is put away
+    QStringList vaultList;
+    bool needKeyfile = false;
+    QByteArray keyfileSecret;              // the unlocked vault's keyfile fingerprint
+    VaultKey primaryKey;                   // kept while unlocked (D-030)
+    QByteArray primaryKeyfile;             // the primary's keyfile fingerprint, with its key
+    std::optional<CreatedVault> createdVault; // see CreatedVault
+    QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
+    QString returnTo;                      // the vault shown before the lock
     int savesRunning = 0;
     bool dirty = false;
     bool failed = false;

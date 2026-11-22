@@ -24,9 +24,10 @@
 #include <QJsonObject>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.0.14
+// vault_contents.cpp 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: The name of the field that holds a vault's file, for its password saved in the primary (D-030)
 // v0.0.14: The contents format 3: categories and templates of the person's own, tags, favourites, attachments;
 //          the names of the new templates' fields (D-027, D-028, D-029)
 // v0.0.4: An item's own icon, and the contents format 2
@@ -313,6 +314,7 @@ QString roleName(const QString& role)
         {QStringLiteral("licensedto"), QT_TRANSLATE_NOOP("Field", "Licensed to")},
         {QStringLiteral("organisation"), QT_TRANSLATE_NOOP("Field", "Organization")},
         {QStringLiteral("membernumber"), QT_TRANSLATE_NOOP("Field", "Member number")},
+        {QStringLiteral("vaultfile"), QT_TRANSLATE_NOOP("Field", "Vault file")},
     };
     const auto found = names.constFind(role);
     return found == names.constEnd() ? role : QCoreApplication::translate("Field", found.value());

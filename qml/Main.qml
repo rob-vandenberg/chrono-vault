@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.14
+// Main.qml 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: New vault and Open vault also with a vault unlocked; Change master password or keyfile (D-030, D-031)
 // v0.0.14: New Item lists every category with its templates (D-027)
 // v0.0.10: The program's colours from the start (D-023); New Item a flat fill in the program's blue
 // v0.0.9: The update's windows as in Chrono Mail in place of the line at the bottom (D-024); one bar with the
@@ -87,13 +88,18 @@ ApplicationWindow {
                     // with no vault unlocked.
                     Action {
                         text: qsTr("New vault…")
-                        enabled: !mainWindow.unlocked && !mainWindow.busy
-                        onTriggered: welcomePage.newVault()
+                        enabled: !mainWindow.busy
+                        onTriggered: mainWindow.newVault()
                     }
                     Action {
                         text: qsTr("Open vault…")
-                        enabled: !mainWindow.unlocked && !mainWindow.busy
-                        onTriggered: welcomePage.openVault()
+                        enabled: !mainWindow.busy
+                        onTriggered: mainWindow.openVault()
+                    }
+                    Action {
+                        text: qsTr("Change master password or keyfile…")
+                        enabled: mainWindow.unlocked
+                        onTriggered: vaultPage.whenEditorFree(function() { masterPasswordWindow.ask() })
                     }
                     MenuSeparator {}
                     Action {
@@ -252,6 +258,26 @@ ApplicationWindow {
         }
     }
 
+    // A new or another vault: with a vault unlocked, an edit not saved yet is
+    // asked about first (D-030).
+    function newVault() {
+        if (unlocked)
+            vaultPage.whenEditorFree(function() { welcomePage.newVault() })
+        else
+            welcomePage.newVault()
+    }
+    function openVault() {
+        if (unlocked)
+            vaultPage.whenEditorFree(function() { welcomePage.openVault() })
+        else
+            welcomePage.openVault()
+    }
+
+    MasterPasswordWindow {
+        id: masterPasswordWindow
+        objectName: "masterPasswordWindow"
+    }
+
     function showTheme(theme) {
         settingsWindow.showGeneral()
         settingsWindow.showTheme(theme)
@@ -272,7 +298,11 @@ ApplicationWindow {
 
         WelcomePage { id: welcomePage }
         UnlockPage {}
-        VaultPage { id: vaultPage }
+        VaultPage {
+            id: vaultPage
+            onNewVaultRequested: mainWindow.newVault()
+            onOpenVaultRequested: mainWindow.openVault()
+        }
     }
 
     BusyIndicator {

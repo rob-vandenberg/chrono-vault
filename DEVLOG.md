@@ -145,3 +145,16 @@ down and removed in the editor; contents format 3 (D-027 to D-029). The save now
 window's thread. Found along the way: items a Repeater makes are not in the QObject tree, so the page test looks in
 the tree of items; Microsoft's compiler refused two names that hid others. Round 1: an attachment still being read
 was lost when the person saved or left the editor; now Save waits and leaving says so, with a test.
+
+## 22 November 2026: version 0.0.15: several vaults, the keyfile (autonomous mode)
+
+`ROADMAP.md` step 6 done: several vaults with the primary's master password unlocking the others and their passwords
+saved in it, locking locking all (D-030); a keyfile beside the master password, header format 2, and changing the
+master password or keyfile (D-031). Found along the way: the state before creating a vault was read after the
+controller had gone busy, so the password was not saved in the primary; caught by the new test.
+Three review rounds: a keyfile path with "#" or "%" misread by the password window; a primary with a keyfile refusing
+its right password after a switch; a failed save of a new vault's password into the primary said on the new vault;
+another vault's password changed but not the copy saved in the primary; "Make a new keyfile" able to write over a
+vault's keyfile. All fixed, each with a test.
+Round 3: the primary is now always the first vault, even while its drive is away; a primary changed elsewhere and a
+stale saved password are said; opening the primary waits for a write to it still running. Each with a test.

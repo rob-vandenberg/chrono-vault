@@ -21,9 +21,11 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.9
+// WelcomePage.qml 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: A new vault may also be locked with a keyfile, chosen or made; its password may be saved in the primary
+//          vault (D-030, D-031)
 // v0.0.9: New vault and Open vault reachable from the File menu (D-025)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.4: The program's icon in the upper left; a typo; the eye in the password fields
@@ -103,8 +105,12 @@ Item {
         memoryName: "newVault"
 
         property url file
+        property url keyfile
+        // Asked when the window opens: whether the primary vault is unlocked.
+        property bool offerSave: false
 
         readonly property bool passwordsAgree: firstPassword.text !== "" && firstPassword.text === secondPassword.text
+        readonly property bool ready: passwordsAgree && (!useKeyfile.checked || keyfile.toString() !== "")
 
         title: qsTr("Choose the master password")
         standardButtons: Dialog.Ok | Dialog.Cancel
@@ -114,12 +120,19 @@ Item {
         Binding {
             target: newVaultDialog.standardButton(Dialog.Ok)
             property: "enabled"
-            value: newVaultDialog.passwordsAgree
+            value: newVaultDialog.ready
         }
 
-        onShown: firstPassword.forceActiveFocus()
+        onShown: {
+            offerSave = VaultController.canSaveInPrimary()
+            saveInPrimary.checked = true
+            useKeyfile.checked = false
+            keyfile = ""
+            firstPassword.forceActiveFocus()
+        }
         onAccepted: {
-            VaultController.createVault(file, firstPassword.text, secondPassword.text)
+            VaultController.createVault(file, firstPassword.text, secondPassword.text,
+                                        useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
             firstPassword.clear()
             secondPassword.clear()
         }
@@ -144,13 +157,77 @@ Item {
                 id: secondPassword
                 placeholderText: qsTr("The same password again")
                 Layout.fillWidth: true
-                onAccepted: if (newVaultDialog.passwordsAgree) newVaultDialog.accept()
+                onAccepted: if (newVaultDialog.ready) newVaultDialog.accept()
             }
             Label {
                 visible: secondPassword.text !== "" && !newVaultDialog.passwordsAgree
                 text: qsTr("The two passwords are not the same yet.")
                 font.bold: true
             }
+            // A keyfile beside the password (D-031).
+            CheckBox {
+                id: useKeyfile
+                objectName: "useKeyfileBox"
+                text: qsTr("Also lock the vault with a keyfile")
+            }
+            ColumnLayout {
+                visible: useKeyfile.checked
+                spacing: Math.round(6 * Appearance.factor)
+                Label {
+                    text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
+                    font.bold: true
+                    wrapMode: Text.Wrap
+                    Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                }
+                Label {
+                    objectName: "chosenKeyfileLabel"
+                    text: newVaultDialog.keyfile.toString() === "" ? qsTr("No keyfile chosen yet.")
+                          : qsTr("Keyfile: %1").arg(decodeURIComponent(newVaultDialog.keyfile.toString().replace(/^.*\//, "")))
+                    elide: Text.ElideMiddle
+                    opacity: 0.8
+                    Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                }
+                RowLayout {
+                    Button {
+                        text: qsTr("Choose a keyfile…")
+                        onClicked: keyfileOpenDialog.open()
+                    }
+                    Button {
+                        text: qsTr("Make a new keyfile…")
+                        onClicked: keyfileSaveDialog.open()
+                    }
+                }
+            }
+            CheckBox {
+                id: saveInPrimary
+                objectName: "saveInPrimaryBox"
+                visible: newVaultDialog.offerSave
+                text: qsTr("Save this vault's password in “%1”").arg(VaultController.vaultNameOf(VaultController.primaryVault))
+            }
+        }
+    }
+
+    FileDialog {
+        id: keyfileOpenDialog
+        title: qsTr("Choose a keyfile")
+        fileMode: FileDialog.OpenFile
+        onAccepted: newVaultDialog.keyfile = selectedFile
+    }
+
+    FileDialog {
+        id: keyfileSaveDialog
+        title: qsTr("Where should the new keyfile be kept?")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "chronovaultkey"
+        nameFilters: [qsTr("Chrono Vault keyfiles (*.chronovaultkey)")]
+        onAccepted: VaultController.makeKeyfile(selectedFile)
+    }
+
+    Connections {
+        target: VaultController
+        function onKeyfileMade(keyfile, ok) {
+            if (ok && newVaultDialog.visible)
+                newVaultDialog.keyfile = keyfileSaveDialog.selectedFile
         }
     }
 }

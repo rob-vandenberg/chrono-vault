@@ -17,12 +17,15 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.7
+// UnlockPage.qml 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: The keyfile, when the vault needs one, chosen here and remembered (D-031); after a lock, the primary
+//          vault's master password unlocks every vault (D-030)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.4: The program's icon in the upper left; the eye in the password field
 // v0.0.3: Initial release
@@ -82,6 +85,22 @@ Item {
             Layout.fillWidth: true
             onAccepted: unlockPage.unlockNow()
         }
+        // The keyfile, when this vault needs one (D-031).
+        RowLayout {
+            visible: VaultController.keyfileNeeded
+            Layout.fillWidth: true
+            Label {
+                objectName: "unlockKeyfileLabel"
+                text: VaultController.keyfilePath === "" ? qsTr("This vault needs its keyfile.")
+                      : qsTr("Keyfile: %1").arg(VaultController.keyfilePath)
+                elide: Text.ElideMiddle
+                Layout.fillWidth: true
+            }
+            Button {
+                text: qsTr("Choose keyfile…")
+                onClicked: unlockKeyfileDialog.open()
+            }
+        }
         Button {
             text: qsTr("Unlock")
             Layout.fillWidth: true
@@ -119,6 +138,16 @@ Item {
         onDiscarded: {
             leaveDialog.close()
             VaultController.closeVault()
+        }
+    }
+
+    FileDialog {
+        id: unlockKeyfileDialog
+        title: qsTr("Choose the vault's keyfile")
+        fileMode: FileDialog.OpenFile
+        onAccepted: {
+            VaultController.keyfilePath = selectedFile
+            passwordField.forceActiveFocus()
         }
     }
 }

@@ -17,6 +17,9 @@
 
 #include "vault_file.h"
 
+#include <QCryptographicHash>
+#include <QSaveFile>
+
 #include <QFile>
 #include <QFileInfo>
 #include <QtEndian>
@@ -32,9 +35,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// vault_file.cpp 0.0.2
+// vault_file.cpp 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
 // v0.0.2: Initial release
 
 namespace chrono_vault {
@@ -43,7 +47,16 @@ namespace {
 
 constexpr char magic[] = {'C', 'H', 'R', 'V', 'A', 'U', 'L', 'T'};
 constexpr quint16 formatVersion = 1;
+constexpr quint16 keyfileFormatVersion = 2;
 constexpr quint8 kdfArgon2id = 1;
+constexpr quint8 kdfArgon2idWithKeyfile = 2;
+constexpr int keyfileLength = 64;
+
+// What Argon2id is given: the password, then the keyfile's fingerprint.
+QByteArray secretOf(const QByteArray& password, const QByteArray& keyfile)
+{
+    return keyfile.isEmpty() ? password : password + keyfile;
+}
 constexpr quint8 cipherAes256Gcm = 1;
 constexpr int headerLength = 40;
 
@@ -52,8 +65,10 @@ QByteArray makeHeader(const VaultKey& key)
     QByteArray header(headerLength, '\0');
     auto* bytes = reinterpret_cast<uchar*>(header.data());
     std::copy(std::begin(magic), std::end(magic), header.data());
-    qToBigEndian<quint16>(formatVersion, bytes + 8);
-    bytes[10] = kdfArgon2id;
+    // A vault without a keyfile stays format 1, so an older Chrono Vault
+    // still opens it; one with a keyfile is format 2 (D-031).
+    qToBigEndian<quint16>(key.usesKeyfile ? keyfileFormatVersion : formatVersion, bytes + 8);
+    bytes[10] = key.usesKeyfile ? kdfArgon2idWithKeyfile : kdfArgon2id;
     bytes[11] = cipherAes256Gcm;
     qToBigEndian<quint32>(key.parameters.memoryKiB, bytes + 12);
     qToBigEndian<quint32>(key.parameters.iterations, bytes + 16);
@@ -126,19 +141,57 @@ crypto::KdfParameters standardKdfParameters()
     return crypto::KdfParameters{};
 }
 
-VaultKey makeVaultKey(const QByteArray& password, const crypto::KdfParameters& parameters)
+VaultKey makeVaultKey(const QByteArray& password, const crypto::KdfParameters& parameters, const QByteArray& keyfile)
 {
     VaultKey vaultKey;
     vaultKey.parameters = parameters;
+    vaultKey.usesKeyfile = !keyfile.isEmpty();
     vaultKey.salt = crypto::randomBytes(crypto::saltLength);
     if (vaultKey.salt.size() != crypto::saltLength) {
         return {};
     }
-    if (auto key = crypto::deriveKey(password, vaultKey.salt, parameters)) {
+    QByteArray secret = secretOf(password, keyfile);
+    if (auto key = crypto::deriveKey(secret, vaultKey.salt, parameters)) {
         vaultKey.key = *key;
         crypto::wipe(*key);
     }
+    crypto::wipe(secret);
     return vaultKey;
+}
+
+std::optional<QByteArray> keyfileFingerprint(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly) || file.size() > largestKeyfileBytes) {
+        return std::nullopt;
+    }
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    qint64 total = 0;
+    while (!file.atEnd()) {
+        const QByteArray piece = file.read(1024 * 1024);
+        if (piece.isEmpty() && file.error() != QFileDevice::NoError) {
+            return std::nullopt;
+        }
+        total += piece.size();
+        if (total > largestKeyfileBytes) {
+            return std::nullopt;
+        }
+        hash.addData(piece);
+    }
+    if (file.error() != QFileDevice::NoError) {
+        return std::nullopt;
+    }
+    return hash.result();
+}
+
+bool makeKeyfile(const QString& path)
+{
+    const QByteArray bytes = crypto::randomBytes(keyfileLength);
+    if (bytes.size() != keyfileLength) {
+        return false;
+    }
+    QSaveFile file(path);
+    return file.open(QIODevice::WriteOnly) && file.write(bytes) == bytes.size() && file.commit();
 }
 
 QString savingPathFor(const QString& path)
@@ -146,58 +199,66 @@ QString savingPathFor(const QString& path)
     return path + QStringLiteral(".saving");
 }
 
-OpenResult openVaultFile(const QString& path, const QByteArray& password)
+namespace {
+
+// The file read and its header checked; status Opened means "go on".
+struct ReadFile
 {
-    OpenResult result;
+    OpenStatus status = OpenStatus::CannotRead;
+    QByteArray data;
+    Header header;
+};
+
+ReadFile readVaultFile(const QString& path)
+{
+    ReadFile read;
     QFile file(path);
     if (!file.exists()) {
-        result.status = OpenStatus::FileMissing;
-        return result;
+        read.status = OpenStatus::FileMissing;
+        return read;
     }
     if (file.size() > largestVaultFileBytes) {
-        result.status = OpenStatus::TooLarge;
-        return result;
+        read.status = OpenStatus::TooLarge;
+        return read;
     }
     if (!file.open(QIODevice::ReadOnly)) {
-        result.status = OpenStatus::CannotRead;
-        return result;
+        read.status = OpenStatus::CannotRead;
+        return read;
     }
-    const QByteArray data = file.read(largestVaultFileBytes + 1);
-    if (data.size() > largestVaultFileBytes) {
-        result.status = OpenStatus::TooLarge;
-        return result;
+    read.data = file.read(largestVaultFileBytes + 1);
+    if (read.data.size() > largestVaultFileBytes) {
+        read.status = OpenStatus::TooLarge;
+        return read;
     }
-    if (!startsWithMagic(data)) {
-        result.status = OpenStatus::NotAVault;
-        return result;
+    if (!startsWithMagic(read.data)) {
+        read.status = OpenStatus::NotAVault;
+        return read;
     }
-    if (data.size() < headerLength + crypto::nonceLength + crypto::tagLength) {
-        result.status = OpenStatus::WrongPasswordOrDamaged;
-        return result;
+    if (read.data.size() < headerLength + crypto::nonceLength + crypto::tagLength) {
+        read.status = OpenStatus::WrongPasswordOrDamaged;
+        return read;
     }
-    const Header header = readHeader(data);
-    if (header.version > formatVersion) {
-        result.status = OpenStatus::NewerFormat;
-        return result;
+    read.header = readHeader(read.data);
+    if (read.header.version > keyfileFormatVersion) {
+        read.status = OpenStatus::NewerFormat;
+        return read;
     }
-    if (header.version != formatVersion || header.kdf != kdfArgon2id || header.cipher != cipherAes256Gcm ||
-        !header.parameters.isWithinLimits()) {
-        result.status = OpenStatus::WrongPasswordOrDamaged;
-        return result;
+    const bool plain = read.header.version == formatVersion && read.header.kdf == kdfArgon2id;
+    const bool withKeyfile =
+        read.header.version == keyfileFormatVersion && read.header.kdf == kdfArgon2idWithKeyfile;
+    if ((!plain && !withKeyfile) || read.header.cipher != cipherAes256Gcm ||
+        !read.header.parameters.isWithinLimits()) {
+        read.status = OpenStatus::WrongPasswordOrDamaged;
+        return read;
     }
+    read.status = OpenStatus::Opened;
+    return read;
+}
 
-    VaultKey key;
-    key.salt = header.salt;
-    key.parameters = header.parameters;
-    auto derived = crypto::deriveKey(password, key.salt, key.parameters);
-    if (!derived) {
-        result.status = OpenStatus::WrongPasswordOrDamaged;
-        return result;
-    }
-    key.key = *derived;
-    crypto::wipe(*derived);
-
-    auto contents = crypto::open(key.key, data.mid(headerLength), data.left(headerLength));
+OpenResult decrypt(const ReadFile& read, VaultKey key)
+{
+    OpenResult result;
+    auto contents = crypto::open(key.key, read.data.mid(headerLength), read.data.left(headerLength));
     if (!contents) {
         key.wipe();
         result.status = OpenStatus::WrongPasswordOrDamaged;
@@ -208,6 +269,55 @@ OpenResult openVaultFile(const QString& path, const QByteArray& password)
     crypto::wipe(*contents);
     result.key = key;
     return result;
+}
+
+} // namespace
+
+OpenResult openVaultFile(const QString& path, const QByteArray& password, const QByteArray& keyfile)
+{
+    OpenResult result;
+    const ReadFile read = readVaultFile(path);
+    if (read.status != OpenStatus::Opened) {
+        result.status = read.status;
+        return result;
+    }
+    VaultKey key;
+    key.salt = read.header.salt;
+    key.parameters = read.header.parameters;
+    key.usesKeyfile = read.header.kdf == kdfArgon2idWithKeyfile;
+    if (key.usesKeyfile && keyfile.isEmpty()) {
+        result.status = OpenStatus::KeyfileNeeded;
+        return result;
+    }
+    // A keyfile given for a vault that has none is not used.
+    QByteArray secret = secretOf(password, key.usesKeyfile ? keyfile : QByteArray());
+    auto derived = crypto::deriveKey(secret, key.salt, key.parameters);
+    crypto::wipe(secret);
+    if (!derived) {
+        result.status = OpenStatus::WrongPasswordOrDamaged;
+        return result;
+    }
+    key.key = *derived;
+    crypto::wipe(*derived);
+    return decrypt(read, key);
+}
+
+OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key)
+{
+    OpenResult result;
+    const ReadFile read = readVaultFile(path);
+    if (read.status != OpenStatus::Opened) {
+        result.status = read.status;
+        return result;
+    }
+    if (read.header.salt != key.salt || read.header.parameters.memoryKiB != key.parameters.memoryKiB ||
+        read.header.parameters.iterations != key.parameters.iterations ||
+        read.header.parameters.lanes != key.parameters.lanes ||
+        (read.header.kdf == kdfArgon2idWithKeyfile) != key.usesKeyfile) {
+        result.status = OpenStatus::WrongPasswordOrDamaged;
+        return result;
+    }
+    return decrypt(read, key);
 }
 
 SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const VaultKey& key,

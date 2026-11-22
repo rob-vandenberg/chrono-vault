@@ -18,14 +18,16 @@
 #include "vault_file.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QTemporaryDir>
 #include <QtEndian>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_file.cpp 0.0.2
+// test_vault_file.cpp 0.0.15
 
 // --- Version history ----------------------------------------------------
+// v0.0.15: The keyfile (header format 2) and opening with a kept key (D-030, D-031); a newer format is now 3
 // v0.0.2: Initial release
 
 using namespace chrono_vault;
@@ -70,6 +72,10 @@ private slots:
     void an_interrupted_save_leaves_the_old_vault_whole();
     void a_left_over_saving_file_does_not_stop_the_next_save();
     void a_save_to_a_folder_that_does_not_exist_fails_and_leaves_nothing();
+    void a_vault_with_a_keyfile_opens_only_with_both();
+    void a_vault_without_a_keyfile_stays_format_1();
+    void a_keyfile_that_cannot_be_read_gives_no_fingerprint();
+    void a_kept_key_opens_the_vault_until_its_password_changes();
 
 private:
     QTemporaryDir* folder = nullptr;
@@ -139,7 +145,7 @@ void TestVaultFile::a_newer_format_is_refused()
 {
     QCOMPARE(saveVaultFile(vaultPath, "contents", key), SaveStatus::Saved);
     QByteArray data = readAll(vaultPath);
-    qToBigEndian<quint16>(2, data.data() + 8);
+    qToBigEndian<quint16>(3, data.data() + 8);
     writeAll(vaultPath, data);
     QCOMPARE(openVaultFile(vaultPath, "master password").status, OpenStatus::NewerFormat);
 }
@@ -215,6 +221,63 @@ void TestVaultFile::a_save_to_a_folder_that_does_not_exist_fails_and_leaves_noth
     const QString path = folder->filePath(QStringLiteral("no such folder/test.chronovault"));
     QCOMPARE(saveVaultFile(path, "contents", key), SaveStatus::CannotWrite);
     QVERIFY(!QFile::exists(path));
+}
+
+void TestVaultFile::a_vault_with_a_keyfile_opens_only_with_both()
+{
+    const QString keyfile = folder->filePath(QStringLiteral("my.chronovaultkey"));
+    QVERIFY(makeKeyfile(keyfile));
+    QCOMPARE(QFileInfo(keyfile).size(), 64);
+    const auto fingerprint = keyfileFingerprint(keyfile);
+    QVERIFY(fingerprint);
+    const VaultKey withKeyfile = makeVaultKey("master password", quick, *fingerprint);
+    QVERIFY(withKeyfile.usesKeyfile);
+    QCOMPARE(saveVaultFile(vaultPath, "secret", withKeyfile), SaveStatus::Saved);
+    QCOMPARE(qFromBigEndian<quint16>(readAll(vaultPath).constData() + 8), quint16(2));
+
+    QCOMPARE(openVaultFile(vaultPath, "master password").status, OpenStatus::KeyfileNeeded);
+    const QString other = folder->filePath(QStringLiteral("other.chronovaultkey"));
+    QVERIFY(makeKeyfile(other));
+    QCOMPARE(openVaultFile(vaultPath, "master password", *keyfileFingerprint(other)).status,
+             OpenStatus::WrongPasswordOrDamaged);
+    QCOMPARE(openVaultFile(vaultPath, "wrong", *fingerprint).status, OpenStatus::WrongPasswordOrDamaged);
+    const OpenResult opened = openVaultFile(vaultPath, "master password", *fingerprint);
+    QCOMPARE(opened.status, OpenStatus::Opened);
+    QCOMPARE(opened.contents, QByteArray("secret"));
+    QVERIFY(opened.key.usesKeyfile);
+    // Saved again with the key it opened with, it still needs the keyfile.
+    QCOMPARE(saveVaultFile(vaultPath, "again", opened.key), SaveStatus::Saved);
+    QCOMPARE(openVaultFile(vaultPath, "master password").status, OpenStatus::KeyfileNeeded);
+}
+
+void TestVaultFile::a_vault_without_a_keyfile_stays_format_1()
+{
+    QCOMPARE(saveVaultFile(vaultPath, "contents", key), SaveStatus::Saved);
+    QCOMPARE(qFromBigEndian<quint16>(readAll(vaultPath).constData() + 8), quint16(1));
+    // A keyfile given for a vault without one is not used.
+    const OpenResult result = openVaultFile(vaultPath, "master password", QByteArray(32, 'k'));
+    QCOMPARE(result.status, OpenStatus::Opened);
+    QVERIFY(!result.key.usesKeyfile);
+}
+
+void TestVaultFile::a_keyfile_that_cannot_be_read_gives_no_fingerprint()
+{
+    QVERIFY(!keyfileFingerprint(folder->filePath(QStringLiteral("gone"))));
+    QVERIFY(!makeKeyfile(folder->filePath(QStringLiteral("no/such/folder/key"))));
+    const QString empty = folder->filePath(QStringLiteral("empty"));
+    writeAll(empty, {});
+    QCOMPARE(keyfileFingerprint(empty).value_or(QByteArray()).size(), 32);
+}
+
+void TestVaultFile::a_kept_key_opens_the_vault_until_its_password_changes()
+{
+    QCOMPARE(saveVaultFile(vaultPath, "contents", key), SaveStatus::Saved);
+    const OpenResult kept = openVaultFileWithKey(vaultPath, key);
+    QCOMPARE(kept.status, OpenStatus::Opened);
+    QCOMPARE(kept.contents, QByteArray("contents"));
+    // Given a new password (a new salt), the kept key no longer opens it.
+    QCOMPARE(saveVaultFile(vaultPath, "contents", makeVaultKey("new password", quick)), SaveStatus::Saved);
+    QCOMPARE(openVaultFileWithKey(vaultPath, key).status, OpenStatus::WrongPasswordOrDamaged);
 }
 
 QTEST_GUILESS_MAIN(TestVaultFile)

@@ -161,7 +161,7 @@
 <context>
     <name>Field</name>
     <message>
-        <location filename="../src/core/vault_contents.cpp" line="+284"/>
+        <location filename="../src/core/vault_contents.cpp" line="+285"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -320,6 +320,11 @@
         <source>Member number</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location line="+1"/>
+        <source>Vault file</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneratorDialog</name>
@@ -405,7 +410,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+141"/>
+        <location filename="../qml/ItemEditor.qml" line="+148"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -542,7 +547,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -582,7 +587,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+38"/>
+        <source>A file is being read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>The file you added is still being read. Try again in a moment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>Delete this item?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -618,7 +633,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+50"/>
+        <location filename="../qml/Main.qml" line="+51"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -643,7 +658,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+16"/>
         <source>Preferences…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -698,7 +713,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="-6"/>
+        <source>Change master password or keyfile…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+55"/>
         <source>Delete item…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -748,12 +768,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+33"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+119"/>
+        <location line="+123"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -775,6 +795,79 @@
     <message>
         <location line="+7"/>
         <source>Try saving again</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MasterPasswordWindow</name>
+    <message>
+        <location filename="../qml/MasterPasswordWindow.qml" line="+34"/>
+        <source>Change master password or keyfile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <source>Current master password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>New master password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The same password again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The two passwords are not the same yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Also lock the vault with a keyfile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>No keyfile chosen yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keyfile: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Choose a keyfile…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Make a new keyfile…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Choose a keyfile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Where should the new keyfile be kept?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Chrono Vault keyfiles (*.chronovaultkey)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1072,8 +1165,23 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+81"/>
+        <location filename="../qml/UnlockPage.qml" line="+84"/>
         <source>Master password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>This vault needs its keyfile.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keyfile: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Choose keyfile…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1099,6 +1207,11 @@
     <message>
         <location line="+4"/>
         <source>This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Choose the vault&apos;s keyfile</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1169,7 +1282,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+157"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+161"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1204,7 +1317,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+2"/>
+        <source>This vault also needs its keyfile. Choose it below, then unlock.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Your change could not be saved: the folder cannot be written to, or the disk is full. The vault on disk is unchanged.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1217,12 +1335,27 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+183"/>
+        <location filename="../qml/VaultPage.qml" line="+204"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+19"/>
+        <source>%1 (primary)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>New vault…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Open vault…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1306,7 +1439,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+55"/>
+        <location filename="../qml/WelcomePage.qml" line="+57"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1347,12 +1480,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+18"/>
         <source>Choose the master password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+32"/>
         <source>This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1369,6 +1502,56 @@
     <message>
         <location line="+6"/>
         <source>The two passwords are not the same yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Also lock the vault with a keyfile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>No keyfile chosen yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Keyfile: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Choose a keyfile…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Make a new keyfile…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Save this vault&apos;s password in “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Choose a keyfile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Where should the new keyfile be kept?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Chrono Vault keyfiles (*.chronovaultkey)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1554,57 +1737,84 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+151"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+166"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
+        <location line="+1102"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="-1098"/>
+        <location line="+1103"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="-1017"/>
+        <location line="+981"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-41"/>
+        <location line="-1059"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-42"/>
+        <location line="-50"/>
         <source>The setting to start at startup could not be saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+62"/>
+        <location line="+28"/>
+        <location line="+113"/>
+        <location line="+865"/>
+        <location line="+144"/>
+        <source>Wait until your last change is saved, then try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-1069"/>
+        <source>The keyfile could not be read. The vault was not created.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>The new vault could not be created: the folder cannot be written to, or the disk is full.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+14"/>
+        <source>%1 vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+890"/>
         <source>Your new vault is ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+37"/>
+        <location line="-825"/>
+        <location line="+60"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="-30"/>
+        <source>The keyfile could not be read. Choose it again below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
         <source>The vault opened, but what it holds is damaged. It was not changed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+159"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1675,8 +1885,43 @@
         <source>“%1” could not be saved: the folder cannot be written to, or the disk is full.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location line="+232"/>
+        <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>The keyfile could not be written: the folder cannot be written to, or the disk is full.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <source>Changing the master password…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+52"/>
+        <source>The master password was changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>That is not the current master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>The keyfile could not be read. Nothing was changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>The master password could not be changed: the folder cannot be written to, or the disk is full. The vault is unchanged.</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
-        <location line="+69"/>
+        <location line="+55"/>
         <source>Copied. The clipboard is cleared in %n second(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1685,6 +1930,11 @@
     <message>
         <location line="+3"/>
         <source>Copied.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+159"/>
+        <source>The vault “%1” was created, but its password could not be saved in “%2”. Open it from the list of vaults with its own password.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
