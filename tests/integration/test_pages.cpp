@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.19
+// test_pages.cpp 0.0.21
 
 // --- Version history ----------------------------------------------------
+// v0.0.21: File > Import… opens its file chooser, which belongs to a window
 // v0.0.19: The import window: Import, and closed by a lock (D-035)
 // v0.0.18: The editor: Field Options, Add > Section, a new field closed without Save, moving, Cancel (D-034)
 // v0.0.17: The item view: a card per section, hidden values as dots, the Trash (D-033)
@@ -802,6 +803,14 @@ void TestPages::the_import_window_offers_import_and_closes_at_a_lock()
     }
     QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
     QVERIFY(importWindow);
+    QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
+    QObject* exportDialog = importWindow->findChild<QObject*>(QStringLiteral("exportDialog"));
+    // The chooser opens, and belongs to a window, or a desktop may not show
+    // it: the import window itself is still hidden then.
+    QVERIFY(exportDialog);
+    QTRY_VERIFY(exportDialog->property("visible").toBool());
+    QVERIFY(exportDialog->property("parentWindow").value<QWindow*>() != nullptr);
+    QVERIFY(QMetaObject::invokeMethod(exportDialog, "close"));
     importWindow->setProperty("reading", true);
     controller->readImport(QUrl::fromLocalFile(exportFile));
     QTRY_VERIFY(importWindow->property("opened").toBool());

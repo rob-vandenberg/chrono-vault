@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.0.19
+// ImportWindow.qml 0.0.21
 
 // --- Version history ----------------------------------------------------
+// v0.0.21: The file chooser belongs to the main window, so it shows: this window is still hidden when it opens
 // v0.0.19: Initial release (D-035)
 
 // File > Import… (D-035): the person picks the reference program's JSON
@@ -97,6 +98,10 @@ DialogWindow {
 
     FileDialog {
         id: exportDialog
+        objectName: "exportDialog"
+        // This window is still hidden when the chooser opens: it belongs to
+        // the main window, or it would not be shown.
+        parentWindow: importWindow.transientParent
         title: qsTr("Choose the export of %1").arg(importWindow.program)
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("JSON exports (*.json)"), qsTr("All files (*)")]

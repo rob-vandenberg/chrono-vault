@@ -214,3 +214,12 @@ and forgotten at the lock (D-036). Found along the way: the icons were not asked
 the list is refreshed just before the vault counts as unlocked; caught by the new test against a local server.
 Two review rounds: each arriving icon reset the whole list, the size limit applied only after the download, icons
 were re-encoded on every redraw, and the Trash's websites were asked too; all fixed, the last with a test.
+
+## 22 November 2026: version 0.0.21: File > Import… opens its file chooser
+
+The owner: File > Import… did nothing. Cause: the import window's file chooser had no parent window, because the
+import window is still hidden when it opens, and the desktop did not show it. It now belongs to the main window; the
+keyfile choosers of the master password window got their window too. The page test checks the chooser opens with a
+window. The import of the owner's real export was checked by counts only, written for the owner first: every one of
+45 items, 600 fields, 87 deleted, 70 sections, 75 earlier values, 25 custom icons and 2 attachments read as the export
+holds them.

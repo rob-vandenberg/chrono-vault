@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.0.15
+// MasterPasswordWindow.qml 0.0.21
 
 // --- Version history ----------------------------------------------------
+// v0.0.21: The keyfile choosers belong to this window, so they show
 // v0.0.15: Initial release (D-031)
 
 // File > Change master password or keyfile… (D-031): the current master
@@ -131,12 +132,14 @@ DialogWindow {
 
     FileDialog {
         id: chooseDialog
+        parentWindow: passwordWindow
         title: qsTr("Choose a keyfile")
         fileMode: FileDialog.OpenFile
         onAccepted: passwordWindow.keyfile = selectedFile
     }
     FileDialog {
         id: makeDialog
+        parentWindow: passwordWindow
         title: qsTr("Where should the new keyfile be kept?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "chronovaultkey"
