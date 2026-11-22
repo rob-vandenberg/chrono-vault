@@ -14,7 +14,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | 6 | Vault contents | Items, templates, custom fields, categories, nested tags, attachments, several vaults, keyfile | 1 month | done in 0.0.15: items, custom fields (0.0.2); categories, templates, nested tags, attachments (0.0.14); several vaults, keyfile (0.0.15) |
 | 7 | The windows | Unlock, item list, item editor, template editor, the settings window (D-011), auto-lock; nothing slow on the window's thread (OR-5) | 1.5 to 2 months | done in 0.0.14 (template editor in Settings > Customize) |
 | 8 | Tools | Password generator, one-time codes (TOTP), copy with the clipboard cleared after a time (D-007) | 2 to 3 weeks | done in 0.0.3 |
-| 9 | Storage: local vault file | Open and save on a local disk or network share; detect a change made elsewhere (D-005) | 2 weeks | in part, 0.0.3: open and save; not yet noticing a change made elsewhere |
+| 9 | Storage: local vault file | Open and save on a local disk or network share; detect a change made elsewhere (D-005) | 2 weeks | done in 0.0.16: open and save (0.0.3); a change made elsewhere noticed (0.0.16) |
 | 10 | Merging | Merge changes from two devices; what cannot be merged is shown to the person to settle (D-005, OR-15) | 1 to 1.5 months | not started |
 | 11 | Storage: WebDAV | Technique decided by the owner when this step is reached (D-005) | 2 to 3 weeks | not started |
 | 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | not started |

@@ -158,3 +158,18 @@ another vault's password changed but not the copy saved in the primary; "Make a 
 vault's keyfile. All fixed, each with a test.
 Round 3: the primary is now always the first vault, even while its drive is away; a primary changed elsewhere and a
 stale saved password are said; opening the primary waits for a write to it still running. Each with a test.
+
+## 22 November 2026: version 0.0.16: a change made elsewhere, the focus mark on New Item (autonomous mode)
+
+`ROADMAP.md` step 9 done: every save gives the vault file a new stamp (its header and nonce); a change made elsewhere
+is noticed by the system's watcher and right before every save; with nothing waiting here the vault is read again,
+with a change waiting both versions are kept, the person's own in a conflict copy that joins the list of vaults; a
+change kept through a lock gets the same treatment at the next unlock (P6 in part) (D-032). New Item shows a ring
+when it has the keyboard focus (P12). Found along the way: the watcher's check could overwrite the conflict message;
+the other version's stamp is now recorded when the copy is written.
+Review rounds for 0.0.16: a conflict copy that could not be written let the next save go over the other version; a
+half-synced vault locked the person out with a wrong message; the other version's stamp was recorded before it was
+read. On Windows the tests showed a real fault: a file held open for reading cannot be replaced there, so a check
+reading the vault could make another program's save, or a password change on another thread, fail; vault files are
+now read so they can be replaced meanwhile, and every write of an open vault happens on the save thread. Each with a
+test.

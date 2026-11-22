@@ -21,7 +21,9 @@
 #include "vault_contents.h"
 #include "vault_file.h"
 
+#include <QFileSystemWatcher>
 #include <QHash>
+#include <QMutex>
 #include <QObject>
 #include <QThreadPool>
 #include <QTimer>
@@ -29,10 +31,13 @@
 #include <QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
+#include <memory>
+
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.15
+// vault_controller.h 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
 // v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
 //          master password or keyfile (D-030, D-031)
 // v0.0.14: Categories and templates, the person's own too; tags; favourites; attachments; what the list is
@@ -304,6 +309,30 @@ private:
     void rememberPrimary();
     void forgetPrimary();
     void showCreated(CreatedVault created);
+    // A change made elsewhere (D-032): the stamp of each vault file as this
+    // Chrono Vault last read or wrote it, shared with the save thread.
+    struct Stamps
+    {
+        QMutex lock;
+        QHash<QString, QByteArray> known;
+        void set(const QString& vaultFile, const QByteArray& stamp)
+        {
+            const QMutexLocker locker(&lock);
+            known.insert(vaultFile, stamp);
+        }
+        [[nodiscard]] QByteArray get(const QString& vaultFile)
+        {
+            const QMutexLocker locker(&lock);
+            return known.value(vaultFile);
+        }
+    };
+    void watch();
+    void checkForChangeElsewhere();
+    // Reads the vault shown again with its key; a vault that its key no
+    // longer opens is locked.
+    void readAgain(const QString& said, bool important);
+    // Where a version of the vault that is not kept in it is written.
+    [[nodiscard]] static QString conflictPathFor(const QString& vaultFile);
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
@@ -340,6 +369,12 @@ private:
     std::optional<CreatedVault> createdVault; // see CreatedVault
     QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
     QString returnTo;                      // the vault shown before the lock
+    std::shared_ptr<Stamps> stamps = std::make_shared<Stamps>();
+    QFileSystemWatcher watcher;
+    bool checkPending = false;
+    bool readingAgain = false; // the vault shown is being read again (D-032)
+    QByteArray unsavedStamp;   // the stamp a change kept through a lock was made against
+    QByteArray unlockedStamp;  // the stamp of the file as the last unlock read it
     int savesRunning = 0;
     bool dirty = false;
     bool failed = false;

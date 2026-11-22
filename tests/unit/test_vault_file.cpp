@@ -277,7 +277,7 @@ void TestVaultFile::a_kept_key_opens_the_vault_until_its_password_changes()
     QCOMPARE(kept.contents, QByteArray("contents"));
     // Given a new password (a new salt), the kept key no longer opens it.
     QCOMPARE(saveVaultFile(vaultPath, "contents", makeVaultKey("new password", quick)), SaveStatus::Saved);
-    QCOMPARE(openVaultFileWithKey(vaultPath, key).status, OpenStatus::WrongPasswordOrDamaged);
+    QCOMPARE(openVaultFileWithKey(vaultPath, key).status, OpenStatus::KeyChanged);
 }
 
 QTEST_GUILESS_MAIN(TestVaultFile)

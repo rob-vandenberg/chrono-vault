@@ -2,14 +2,13 @@
 
 ## Now
 
-**Version 0.0.15**: several vaults, the primary's master password unlocking the others (D-030); a keyfile beside the
-master password, and File > Change master password or keyfile (D-031). 0.0.14 brought categories, templates, tags,
-favourites and attachments (D-027 to D-029).
+**Version 0.0.16**: `ROADMAP.md` steps 6 to 9 done. A change made elsewhere to the vault file is noticed, read again,
+or kept beside the vault as a conflict copy (D-032); New Item shows its keyboard focus. Before: several vaults and
+the keyfile (0.0.15, D-030, D-031); categories, templates, tags, favourites and attachments (0.0.14, D-027 to D-029).
 
 ## Next task
 
-0.0.16, in autonomous mode: noticing a change made elsewhere to the vault file (`ROADMAP.md` step 9) and the focus
-mark on New Item (P12).
+The owner tries 0.0.14 to 0.0.16. Then `ROADMAP.md` step 10, merging, through a changelist and the owner's Proceed.
 
 ## Open questions
 

@@ -26,9 +26,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_file.h 0.0.15
+// vault_file.h 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: A vault file's stamp, different after every save, to notice a change made elsewhere (D-032)
 // v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
 // v0.0.2: Initial release
 
@@ -72,6 +73,7 @@ enum class OpenStatus {
     WrongPasswordOrDamaged,
     TooLarge,
     KeyfileNeeded, // the vault needs its keyfile, and none was given (D-031)
+    KeyChanged,    // a kept key: the vault was given another password since (D-032)
 };
 
 struct OpenResult
@@ -79,6 +81,7 @@ struct OpenResult
     OpenStatus status = OpenStatus::CannotRead;
     QByteArray contents; // the decrypted contents, when opened
     VaultKey key;        // to save again, when opened
+    QByteArray stamp;    // the file's stamp as it was read (D-032)
 };
 
 enum class SaveStatus {
@@ -117,8 +120,8 @@ inline constexpr qint64 largestVaultFileBytes = 256LL * 1024 * 1024;
                                        const QByteArray& keyfile = {});
 
 // Reads and decrypts the vault with a key derived before, without the
-// password: when it fails (the vault was given another password meanwhile),
-// it says WrongPasswordOrDamaged (D-030).
+// password: when the vault was given another password meanwhile, it says
+// KeyChanged (D-030, D-032).
 [[nodiscard]] OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key);
 
 // The largest keyfile that is read (D-031).
@@ -129,6 +132,11 @@ inline constexpr qint64 largestKeyfileBytes = 64LL * 1024 * 1024;
 // file: never on the window's thread (OR-5).
 [[nodiscard]] std::optional<QByteArray> keyfileFingerprint(const QString& path);
 
+// The stamp of a vault file: its header and the random nonce of its last
+// save, so it differs after every save, wherever made; empty when the file
+// cannot be read (D-032). Reads 52 bytes, cheap enough to ask before a save.
+[[nodiscard]] QByteArray vaultFileStamp(const QString& path);
+
 // Writes a new keyfile of random bytes, safely; false when it cannot.
 [[nodiscard]] bool makeKeyfile(const QString& path);
 
@@ -136,8 +144,9 @@ inline constexpr qint64 largestKeyfileBytes = 64LL * 1024 * 1024;
 // disk, read back and decrypted, and only then put in the old one's place.
 // The old vault is never touched before the new one is verified (OR-15).
 // The check, when given, may stop the save at a step (tests only).
+// When writtenStamp is given, it receives the stamp of the file written.
 [[nodiscard]] SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const VaultKey& key,
-                                       const SaveStepCheck& check = {});
+                                       const SaveStepCheck& check = {}, QByteArray* writtenStamp = nullptr);
 
 // The name of the file a save writes before it replaces the vault.
 [[nodiscard]] QString savingPathFor(const QString& path);

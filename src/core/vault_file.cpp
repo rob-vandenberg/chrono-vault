@@ -20,24 +20,29 @@
 #include <QCryptographicHash>
 #include <QSaveFile>
 
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QtEndian>
 
+#include <algorithm>
 #include <filesystem>
 #include <system_error>
 
 #ifdef Q_OS_WIN
 #include <io.h>
+#include <windows.h>
 #else
 #include <fcntl.h>
 #include <unistd.h>
 #endif
 
 // --- Version ------------------------------------------------------------
-// vault_file.cpp 0.0.15
+// vault_file.cpp 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: Vault files read so that another program, or a save, can replace them meanwhile (Windows);
+//          a vault file's stamp, different after every save, to notice a change made elsewhere (D-032)
 // v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
 // v0.0.2: Initial release
 
@@ -104,6 +109,55 @@ Header readHeader(const QByteArray& data)
     header.parameters.lanes = qFromBigEndian<quint32>(bytes + 20);
     header.salt = data.mid(24, crypto::saltLength);
     return header;
+}
+
+// Reads at most the first `most` bytes of a file, leaving it free to be
+// replaced meanwhile: on Windows, a file another program holds open cannot be
+// replaced unless it was opened to allow that, so a sync program's or our own
+// save's replace would fail while a vault is read (D-032).
+std::optional<QByteArray> readStartOf(const QString& path, qint64 most)
+{
+#ifdef Q_OS_WIN
+    const std::wstring name = QDir::toNativeSeparators(path).toStdWString();
+    HANDLE handle = CreateFileW(name.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        return std::nullopt;
+    }
+    QByteArray data;
+    constexpr DWORD piece = 1024 * 1024;
+    bool failed = false;
+    while (data.size() < most) {
+        const qsizetype before = data.size();
+        const DWORD wanted = static_cast<DWORD>(std::min<qint64>(piece, most - before));
+        data.resize(before + wanted);
+        DWORD got = 0;
+        if (!ReadFile(handle, data.data() + before, wanted, &got, nullptr)) {
+            failed = true;
+            data.resize(before);
+            break;
+        }
+        data.resize(before + got);
+        if (got == 0) {
+            break;
+        }
+    }
+    CloseHandle(handle);
+    if (failed) {
+        return std::nullopt;
+    }
+    return data;
+#else
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return std::nullopt;
+    }
+    QByteArray data = file.read(most);
+    if (file.error() != QFileDevice::NoError) {
+        return std::nullopt;
+    }
+    return data;
+#endif
 }
 
 // Flushes the file's data to the disk itself, not only to the system's cache.
@@ -184,6 +238,12 @@ std::optional<QByteArray> keyfileFingerprint(const QString& path)
     return hash.result();
 }
 
+QByteArray vaultFileStamp(const QString& path)
+{
+    const auto stamp = readStartOf(path, headerLength + crypto::nonceLength);
+    return stamp && stamp->size() == headerLength + crypto::nonceLength ? *stamp : QByteArray();
+}
+
 bool makeKeyfile(const QString& path)
 {
     const QByteArray bytes = crypto::randomBytes(keyfileLength);
@@ -212,20 +272,20 @@ struct ReadFile
 ReadFile readVaultFile(const QString& path)
 {
     ReadFile read;
-    QFile file(path);
-    if (!file.exists()) {
+    if (!QFileInfo::exists(path)) {
         read.status = OpenStatus::FileMissing;
         return read;
     }
-    if (file.size() > largestVaultFileBytes) {
+    if (QFileInfo(path).size() > largestVaultFileBytes) {
         read.status = OpenStatus::TooLarge;
         return read;
     }
-    if (!file.open(QIODevice::ReadOnly)) {
+    const auto data = readStartOf(path, largestVaultFileBytes + 1);
+    if (!data) {
         read.status = OpenStatus::CannotRead;
         return read;
     }
-    read.data = file.read(largestVaultFileBytes + 1);
+    read.data = *data;
     if (read.data.size() > largestVaultFileBytes) {
         read.status = OpenStatus::TooLarge;
         return read;
@@ -268,6 +328,7 @@ OpenResult decrypt(const ReadFile& read, VaultKey key)
     result.contents = *contents;
     crypto::wipe(*contents);
     result.key = key;
+    result.stamp = read.data.left(headerLength + crypto::nonceLength);
     return result;
 }
 
@@ -314,14 +375,14 @@ OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key)
         read.header.parameters.iterations != key.parameters.iterations ||
         read.header.parameters.lanes != key.parameters.lanes ||
         (read.header.kdf == kdfArgon2idWithKeyfile) != key.usesKeyfile) {
-        result.status = OpenStatus::WrongPasswordOrDamaged;
+        result.status = OpenStatus::KeyChanged;
         return result;
     }
     return decrypt(read, key);
 }
 
 SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const VaultKey& key,
-                         const SaveStepCheck& check)
+                         const SaveStepCheck& check, QByteArray* writtenStamp)
 {
     const auto goOn = [&check](SaveStep step) { return !check || check(step); };
 
@@ -400,6 +461,9 @@ SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const 
         return SaveStatus::CannotReplace;
     }
     flushFolder(path);
+    if (writtenStamp) {
+        *writtenStamp = whole.left(headerLength + crypto::nonceLength);
+    }
     return SaveStatus::Saved;
 }
 

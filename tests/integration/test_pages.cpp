@@ -33,9 +33,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.15
+// test_pages.cpp 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: New Item shows its keyboard focus (P12)
 // v0.0.15: The vault chooser, the keyfile on the unlock page, the master password window (D-030, D-031)
 // v0.0.14: New Item's categories, a tag typed in the editor, the left column, the star, Settings > Customize and the
 //          template editor (D-027, D-028)
@@ -87,6 +88,7 @@ private slots:
     void categories_tags_favourites_and_templates_work_from_the_windows();
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
     void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
+    void new_item_shows_when_it_has_the_keyboard_focus();
 };
 
 void TestPages::initTestCase()
@@ -556,6 +558,30 @@ void TestPages::vaults_are_chosen_and_the_master_password_changed_from_the_windo
         warningText += warning.toString() + QLatin1Char('\n');
     }
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+}
+
+void TestPages::new_item_shows_when_it_has_the_keyboard_focus()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("focus.chronovault"))),
+                            QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    auto* button = window->findChild<QQuickItem*>(QStringLiteral("newItemButton"));
+    auto* fill = window->findChild<QQuickItem*>(QStringLiteral("newItemFill"));
+    QVERIFY(button && fill);
+    QCOMPARE(fill->property("border").value<QObject*>()->property("width").toInt(), 0);
+    button->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(button->property("visualFocus").toBool());
+    QVERIFY(fill->property("border").value<QObject*>()->property("width").toInt() >= 2);
+    controller->lock();
 }
 
 QTEST_MAIN(TestPages)

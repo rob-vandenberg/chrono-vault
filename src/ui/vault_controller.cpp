@@ -43,9 +43,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.15
+// vault_controller.cpp 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
 // v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
 //          master password or keyfile (D-030, D-031)
 // v0.0.14: Categories and templates, the person's own too; tags; favourites; attachments, read and written off the
@@ -232,6 +233,9 @@ QString openStatusText(OpenStatus status)
         return QCoreApplication::translate("VaultController", "That password does not open this vault.");
     case OpenStatus::TooLarge:
         return QCoreApplication::translate("VaultController", "This file is too large to be a vault.");
+    case OpenStatus::KeyChanged:
+        return QCoreApplication::translate("VaultController",
+                                           "This vault now has another master password. Unlock it with that one.");
     case OpenStatus::KeyfileNeeded:
         return QCoreApplication::translate("VaultController",
                                            "This vault also needs its keyfile. Choose it below, then unlock.");
@@ -299,6 +303,9 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     if (QCoreApplication::instance()) {
         QCoreApplication::instance()->installEventFilter(this);
     }
+    // The system says when the vault file or its folder changed (D-032).
+    connect(&watcher, &QFileSystemWatcher::fileChanged, this, &VaultController::checkForChangeElsewhere);
+    connect(&watcher, &QFileSystemWatcher::directoryChanged, this, &VaultController::checkForChangeElsewhere);
 
     const QString last = settings.value(lastVaultKey).toString();
     vaultList = settings.value(vaultListKey).toStringList();
@@ -446,15 +453,17 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
         }
         VaultKey newKey;
         SaveStatus status = SaveStatus::CannotWrite;
+        QByteArray written;
         if (fingerprint) {
             newKey = makeVaultKey(passwordBytes, parameters, *fingerprint);
-            status = newKey.isValid() ? saveVaultFile(newPath, contentsToJson({}), newKey) : SaveStatus::CannotWrite;
+            status = newKey.isValid() ? saveVaultFile(newPath, contentsToJson({}), newKey, {}, &written)
+                                      : SaveStatus::CannotWrite;
         }
         crypto::wipe(passwordBytes);
         QMetaObject::invokeMethod(
             qApp,
-            [self, newPath, newKey, status, attempt, keyfileFile, before, savedPassword,
-             fingerprint]() mutable {
+            [self, newPath, newKey, status, attempt, keyfileFile, before, savedPassword, fingerprint,
+             written]() mutable {
                 if (!self || attempt != self->unlockAttempt) {
                     newKey.wipe();
                     return;
@@ -478,6 +487,7 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
                 }
                 self->addVault(newPath);
                 self->rememberKeyfile(newPath, keyfileFile);
+                self->stamps->set(newPath, written);
                 if (before == State::Unlocked && !savedPassword.isEmpty() && self->path == self->primaryVault()) {
                     // Its password is kept in the primary as a Password item
                     // that names the vault's file (D-030); the new vault is
@@ -613,6 +623,7 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                               true);
                     return;
                 }
+                self->unlockedStamp = result.stamp;
                 self->unlocked(result.key, read.contents, *fingerprint);
             },
             Qt::QueuedConnection);
@@ -653,6 +664,7 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
                               true);
                     return;
                 }
+                self->unlockedStamp = result.stamp;
                 self->unlocked(result.key, read.contents, fingerprint);
             },
             Qt::QueuedConnection);
@@ -661,6 +673,7 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
 
 void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile)
 {
+    stamps->set(path, unlockedStamp);
     key = newKey;
     keyfileSecret = keyfile;
     contents = read;
@@ -713,6 +726,7 @@ void VaultController::closeVault()
     if (!unsavedSealed.isEmpty()) {
         unsavedSealed.clear();
         unsavedPath.clear();
+        unsavedStamp.clear();
         emit keptChangesChanged();
     }
     setPath(QString());
@@ -1283,6 +1297,130 @@ void VaultController::contentsChanged()
     emit revisionChanged();
 }
 
+void VaultController::watch()
+{
+    const QStringList watched = watcher.files() + watcher.directories();
+    if (!watched.isEmpty()) {
+        watcher.removePaths(watched);
+    }
+    if (path.isEmpty()) {
+        return;
+    }
+    // The folder too: a vault replaced by a save elsewhere is a new file.
+    watcher.addPath(QFileInfo(path).absolutePath());
+    if (QFileInfo::exists(path)) {
+        watcher.addPath(path);
+    }
+}
+
+void VaultController::checkForChangeElsewhere()
+{
+    if (!watcher.files().contains(path) && QFileInfo::exists(path)) {
+        watcher.addPath(path);
+    }
+    if (checkPending || readingAgain || currentState != State::Unlocked || dirty || savesRunning > 0) {
+        return;
+    }
+    checkPending = true;
+    const QString vaultFile = path;
+    const quint64 session = vaultSession;
+    const std::shared_ptr<Stamps> box = stamps;
+    QPointer<VaultController> self(this);
+    // On the save thread: after any save of this Chrono Vault's own.
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, session, box]() {
+        const QByteArray onDisk = vaultFileStamp(vaultFile);
+        const bool changed = !onDisk.isEmpty() && onDisk != box->get(vaultFile);
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, session, changed]() {
+                if (!self) {
+                    return;
+                }
+                self->checkPending = false;
+                if (changed && !self->readingAgain && session == self->vaultSession && self->path == vaultFile &&
+                    self->currentState == State::Unlocked && !self->dirty && self->savesRunning == 0) {
+                    self->readAgain(tr("The vault was changed elsewhere and was read again."), false);
+                }
+            },
+            Qt::QueuedConnection);
+    });
+}
+
+void VaultController::readAgain(const QString& said, bool important)
+{
+    readingAgain = true;
+    const QString vaultFile = path;
+    const quint64 session = vaultSession;
+    VaultKey kept = key;
+    kept.key = QByteArray(key.key.constData(), key.key.size());
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, session, kept, said, important]() mutable {
+        OpenResult opened = openVaultFileWithKey(vaultFile, kept);
+        kept.wipe();
+        ContentsResult read;
+        if (opened.status == OpenStatus::Opened) {
+            read = contentsFromJson(opened.contents);
+            crypto::wipe(opened.contents);
+        }
+        opened.key.wipe();
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, session, opened, read, said, important]() {
+                if (self) {
+                    self->readingAgain = false;
+                }
+                if (!self || session != self->vaultSession || self->path != vaultFile ||
+                    self->currentState != State::Unlocked) {
+                    return;
+                }
+                if (opened.status == OpenStatus::Opened && read.status == ContentsStatus::Read) {
+                    if (self->dirty || self->savesRunning > 0) {
+                        return; // changed here meanwhile: the next save keeps both (D-032)
+                    }
+                    self->stamps->set(vaultFile, opened.stamp);
+                    self->contents = read.contents;
+                    self->contentsChanged();
+                    self->say(said, important);
+                    return;
+                }
+                if (opened.status == OpenStatus::FileMissing) {
+                    return; // being replaced; the next change of the folder checks again
+                }
+                if (opened.status == OpenStatus::KeyChanged) {
+                    self->forgetUnlockedVault();
+                    self->setState(State::Locked);
+                    self->say((important ? said + QLatin1Char(' ') : QString()) +
+                                  tr("The vault was changed elsewhere and now has another master password. Unlock it "
+                                     "with that one."),
+                              true);
+                    return;
+                }
+                // Not readable yet, for example while a cloud folder is still
+                // writing it: the vault stays open, and its next change is
+                // checked again; its stamp stays the old one, so a save of
+                // this version never goes over the other (OR-15).
+                self->say((important ? said + QLatin1Char(' ') : QString()) +
+                              tr("The vault was changed elsewhere, but that version cannot be read yet. Your vault "
+                                 "stays open."),
+                          true);
+            },
+            Qt::QueuedConnection);
+    });
+}
+
+QString VaultController::conflictPathFor(const QString& vaultFile)
+{
+    const QFileInfo info(vaultFile);
+    const QString when = QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH.mm"));
+    const QString base = info.absolutePath() + QLatin1Char('/') + info.completeBaseName() + QStringLiteral(" (conflict ") +
+                         when;
+    QString candidate = base + QStringLiteral(").chronovault");
+    for (int number = 2; QFileInfo::exists(candidate); ++number) {
+        candidate = base + QStringLiteral(" %1).chronovault").arg(number);
+    }
+    return candidate;
+}
+
 QString VaultController::primaryVault() const
 {
     // Always the first: a primary on a drive that is not there at the moment
@@ -1444,7 +1582,8 @@ void VaultController::updateSavedPassword(const QString& vaultFile, const QStrin
     kept.key = QByteArray(primaryKey.key.constData(), primaryKey.key.size());
     const QString primary = primaryVault();
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&savePool, [self, kept, primary, vaultFile, password]() mutable {
+    const std::shared_ptr<Stamps> box = stamps;
+    (void)QtConcurrent::run(&savePool, [self, kept, primary, vaultFile, password, box]() mutable {
         bool updated = false;
         OpenResult opened = openVaultFileWithKey(primary, kept);
         if (opened.status == OpenStatus::Opened) {
@@ -1468,7 +1607,11 @@ void VaultController::updateSavedPassword(const QString& vaultFile, const QStrin
                     one.modified = QDateTime::currentDateTimeUtc();
                 }
                 QByteArray json = contentsToJson(read.contents);
-                updated = found && saveVaultFile(primary, json, opened.key) == SaveStatus::Saved;
+                QByteArray written;
+                updated = found && saveVaultFile(primary, json, opened.key, {}, &written) == SaveStatus::Saved;
+                if (updated) {
+                    box->set(primary, written);
+                }
                 crypto::wipe(json);
             }
         }
@@ -1562,8 +1705,11 @@ void VaultController::changeMasterPassword(const QString& current, const QString
     setState(State::Busy);
     say(tr("Changing the master password…"), false);
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&unlockPool, [self, currentBytes, newBytes, oldSecret, oldKey, parameters, snapshot,
-                                          vaultFile, keyfileFile, session, newPassword]() mutable {
+    const std::shared_ptr<Stamps> box = stamps;
+    // On the save thread, as every write of an open vault, so no check of a
+    // change made elsewhere reads it while it is replaced (D-032).
+    (void)QtConcurrent::run(&savePool, [self, currentBytes, newBytes, oldSecret, oldKey, parameters, snapshot,
+                                          vaultFile, keyfileFile, session, newPassword, box]() mutable {
         enum class Outcome { Changed, WrongPassword, KeyfileUnreadable, CannotWrite };
         Outcome outcome = Outcome::CannotWrite;
         VaultKey newKey;
@@ -1585,9 +1731,13 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                 QByteArray json = contentsToJson(snapshot);
                 // Safe as every save: the old vault stays until the new one is
                 // verified (OR-15).
-                outcome = newKey.isValid() && saveVaultFile(vaultFile, json, newKey) == SaveStatus::Saved
+                QByteArray written;
+                outcome = newKey.isValid() && saveVaultFile(vaultFile, json, newKey, {}, &written) == SaveStatus::Saved
                               ? Outcome::Changed
                               : Outcome::CannotWrite;
+                if (outcome == Outcome::Changed) {
+                    box->set(vaultFile, written);
+                }
                 crypto::wipe(json);
             }
         }
@@ -1776,6 +1926,7 @@ void VaultController::setPath(const QString& newPath)
             QSettings().setValue(lastVaultKey, path);
         }
         needKeyfile = false;
+        watch();
         emit vaultPathChanged();
         emit keyfileChanged();
     }
@@ -1791,14 +1942,32 @@ void VaultController::saveInBackground(const QString& itemId)
     ++savesRunning;
     setDirty(true);
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, snapshot, saveKey, itemId]() mutable {
+    const std::shared_ptr<Stamps> box = stamps;
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, snapshot, saveKey, itemId, box]() mutable {
         QByteArray json = contentsToJson(snapshot);
-        const SaveStatus status = saveVaultFile(vaultFile, json, saveKey);
+        // Changed elsewhere since this Chrono Vault read or wrote it: the
+        // other version stays, this one goes into a conflict copy (D-032).
+        const QByteArray expected = box->get(vaultFile);
+        const QByteArray onDisk = vaultFileStamp(vaultFile);
+        QString conflictPath;
+        SaveStatus status = SaveStatus::CannotWrite;
+        if (!expected.isEmpty() && !onDisk.isEmpty() && onDisk != expected) {
+            conflictPath = conflictPathFor(vaultFile);
+            // The stamp stays the old one until the other version is read, so
+            // no later save goes over it before then (OR-15).
+            status = saveVaultFile(conflictPath, json, saveKey);
+        } else {
+            QByteArray written;
+            status = saveVaultFile(vaultFile, json, saveKey, {}, &written);
+            if (status == SaveStatus::Saved) {
+                box->set(vaultFile, written);
+            }
+        }
         crypto::wipe(json);
         saveKey.wipe();
         QMetaObject::invokeMethod(
             qApp,
-            [self, status, itemId, vaultFile]() {
+            [self, status, itemId, vaultFile, conflictPath]() {
                 if (!self) {
                     return;
                 }
@@ -1833,6 +2002,16 @@ void VaultController::saveInBackground(const QString& itemId)
                     self->say(saveStatusText(status), true);
                     if (self->currentState == State::Unlocked) {
                         self->setFailed(true);
+                    }
+                }
+                if (!conflictPath.isEmpty() && status == SaveStatus::Saved) {
+                    self->addVault(conflictPath);
+                    if (self->currentState == State::Unlocked && self->path == vaultFile) {
+                        self->readAgain(tr("“%1” was changed elsewhere. Your version was kept as “%2”; the vault now "
+                                           "shows the other version.")
+                                            .arg(QFileInfo(vaultFile).completeBaseName(),
+                                                 QFileInfo(conflictPath).completeBaseName()),
+                                        true);
                     }
                 }
                 if (created) {
@@ -1888,6 +2067,7 @@ void VaultController::keepUnsavedWhileLocked()
     QByteArray json = contentsToJson(contents);
     unsavedSealed = crypto::seal(key.key, json, QByteArrayLiteral("unsaved"));
     unsavedPath = path;
+    unsavedStamp = stamps->get(path);
     crypto::wipe(json);
     emit keptChangesChanged();
 }
@@ -1906,11 +2086,49 @@ void VaultController::takeBackUnsaved()
     }
     const ContentsResult read = contentsFromJson(*json);
     crypto::wipe(*json);
-    if (read.status == ContentsStatus::Read) {
+    if (read.status != ContentsStatus::Read) {
+        return;
+    }
+    const QByteArray madeAgainst = unsavedStamp;
+    unsavedStamp.clear();
+    if (madeAgainst.isEmpty() || madeAgainst == unlockedStamp) {
         contents = read.contents;
         contentsChanged();
         saveInBackground(QString());
+        return;
     }
+    // Changed elsewhere while it was locked: the kept change goes into a
+    // conflict copy, never over the other version (D-032, P6).
+    const QString vaultFile = path;
+    VaultKey saveKey = key;
+    ++savesRunning;
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept = read.contents, saveKey]() mutable {
+        const QString conflictPath = conflictPathFor(vaultFile);
+        QByteArray keptJson = contentsToJson(kept);
+        const SaveStatus status = saveVaultFile(conflictPath, keptJson, saveKey);
+        crypto::wipe(keptJson);
+        saveKey.wipe();
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, conflictPath, status]() {
+                if (!self) {
+                    return;
+                }
+                --self->savesRunning;
+                if (status != SaveStatus::Saved) {
+                    self->say(tr("A change kept through the lock could not be written beside the vault, which was "
+                                 "changed elsewhere meanwhile: the folder cannot be written to, or the disk is full."),
+                              true);
+                    return;
+                }
+                self->addVault(conflictPath);
+                self->say(tr("“%1” was changed elsewhere while it was locked. Your change was kept as “%2”.")
+                              .arg(QFileInfo(vaultFile).completeBaseName(), QFileInfo(conflictPath).completeBaseName()),
+                          true);
+            },
+            Qt::QueuedConnection);
+    });
 }
 
 void VaultController::forgetUnlockedVault()

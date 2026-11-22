@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.15
+// Main.qml 0.0.16
 
 // --- Version history ----------------------------------------------------
+// v0.0.16: New Item shows a ring when it has the keyboard focus (P12)
 // v0.0.15: New vault and Open vault also with a vault unlocked; Change master password or keyfile (D-030, D-031)
 // v0.0.14: New Item lists every category with its templates (D-027)
 // v0.0.10: The program's colours from the start (D-023); New Item a flat fill in the program's blue
@@ -200,6 +201,9 @@ ApplicationWindow {
                            : parent.down ? Qt.darker(mainWindow.palette.highlight, 1.3)
                            : parent.hovered ? Qt.darker(mainWindow.palette.highlight, 1.15)
                            : mainWindow.palette.highlight
+                    // The keyboard focus, seen as a ring in the text's colour (P12).
+                    border.width: parent.visualFocus ? Math.max(2, Math.round(2 * Appearance.factor)) : 0
+                    border.color: mainWindow.palette.highlightedText
                 }
                 enabled: mainWindow.unlocked
                 onClicked: newItemMenu.popup(this, 0, height)

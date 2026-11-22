@@ -633,7 +633,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+51"/>
+        <location filename="../qml/Main.qml" line="+52"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -753,7 +753,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+48"/>
+        <location line="+51"/>
         <source>Generate Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1282,7 +1282,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+161"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+162"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1318,6 +1318,11 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>This vault now has another master password. Unlock it with that one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>This vault also needs its keyfile. Choose it below, then unlock.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1737,30 +1742,30 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+166"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+169"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1102"/>
+        <location line="+1251"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1098"/>
-        <location line="+1103"/>
+        <location line="-1247"/>
+        <location line="+1252"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1017"/>
-        <location line="+981"/>
+        <location line="-1163"/>
+        <location line="+1127"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1059"/>
+        <location line="-1208"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1771,14 +1776,14 @@
     </message>
     <message>
         <location line="+28"/>
-        <location line="+113"/>
-        <location line="+865"/>
-        <location line="+144"/>
+        <location line="+116"/>
+        <location line="+1006"/>
+        <location line="+149"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1069"/>
+        <location line="-1216"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1788,23 +1793,38 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+15"/>
         <source>%1 vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+890"/>
+        <location line="+895"/>
+        <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>The vault was changed elsewhere, but that version cannot be read yet. Your vault stays open.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+126"/>
         <source>Your new vault is ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-825"/>
-        <location line="+60"/>
+        <location line="-966"/>
+        <location line="+73"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-30"/>
+        <location line="-39"/>
+        <source>The password saved in “%1” for this vault no longer opens it. Type its master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>The keyfile could not be read. Choose it again below.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1814,7 +1834,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+159"/>
+        <location line="+41"/>
+        <source>This vault was changed elsewhere since it was opened. Unlock it with its master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+126"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1886,7 +1911,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+232"/>
+        <location line="+67"/>
+        <source>The vault was changed elsewhere and was read again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+291"/>
         <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1901,7 +1931,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+59"/>
         <source>The master password was changed.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1933,8 +1963,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+159"/>
+        <location line="+176"/>
+        <source>“%1” was changed elsewhere. Your version was kept as “%2”; the vault now shows the other version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
         <source>The vault “%1” was created, but its password could not be saved in “%2”. Open it from the list of vaults with its own password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+98"/>
+        <source>A change kept through the lock could not be written beside the vault, which was changed elsewhere meanwhile: the folder cannot be written to, or the disk is full.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>“%1” was changed elsewhere while it was locked. Your change was kept as “%2”.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
