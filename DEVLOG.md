@@ -230,3 +230,27 @@ File > Export…, after the master password and a plain warning (D-037); export 
 sees, item for item. Found along the way: the rule greying a dialog's OK button never took hold in four windows (set
 too early, before the button existed); `test_pages` grew past 20 seconds under ASan and was split (OR-11). Review round
 1: the export and a new keyfile are now readable by the person alone; problems are said in the export window too.
+
+## 22 November 2026: version 0.0.23: unlocking with a fingerprint (autonomous mode)
+
+Windows Hello through C++/WinRT (it compiled on the twin at the first try), fprintd and the Secret Service over D-Bus
+on Linux, a stand-in for the tests; the yearly master password reminder (D-038). Found along the way: the check for a
+reader ran on a thread with a pointer to an object that could go away first; it now uses an object of its own.
+Review round 1: on Linux the finger scan was never stopped (the reader stayed claimed after a typed password); a
+locked keyring whose prompt was dismissed counted as "key gone" and turned it off; a master password change asked for
+the finger unannounced and a cancel turned it off silently. Now: the scan stops at an unlock or a new scan; "keyring
+not reachable" is apart from "no key"; on Linux the new key is kept without a finger, on Windows the message says
+Windows Hello may ask once, and a failure says to turn it on again. A master password change restarts the reminder's
+year. Each with a test.
+Review round 2: removing the key on Linux could freeze the window while the keyring is slow (now off its thread); a
+kept key no longer fitting after a master password change on another computer gave a misleading message each time
+(now it turns the fingerprint off for that vault and says why); a disconnected reader now says "not available".
+Review round 3: turning the fingerprint off with the keyring locked could leave the key there unnoticed (now the
+keyring is opened first, the removal checked, and a failure said with the entry's name); the finger check spoke to
+fprintd from the window's thread (now every call is sent without waiting there).
+Review round 4: on Windows a Windows Hello prompt stayed open after the master password unlocked the vault (now
+closed); a finger unlock overtaken by another could leave its mark for a later opening, which on a "changed elsewhere"
+would have turned the fingerprint off wrongly (now the mark goes with its own attempt); on Linux a second click while
+the reader was still being claimed left it claimed until the program quit (each check now has its number, a late
+claim is given back); a reader's own error said nothing (now "not available"); Settings said "fingerprint reader" on
+Windows (now "Windows Hello is not set up"). These five need a real reader or a race in time, so no test reaches them.

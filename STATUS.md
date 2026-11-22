@@ -2,13 +2,13 @@
 
 ## Now
 
-**Version 0.0.22**: File > Export… in the reference program's format, after the master password, readable by the
-person alone (D-037). Before: website icons (0.0.20), the importer (0.0.19), the editor (0.0.18), the item (0.0.17).
+**Version 0.0.23**: unlocking with a fingerprint (Windows Hello; fprintd and the keyring on Linux) and the yearly
+master password reminder (D-038). Before: export (0.0.22), website icons (0.0.20), the importer (0.0.19).
 
 ## Next task
 
-In autonomous mode: 0.0.23, unlocking with a fingerprint (Windows Hello on Windows; fprintd and the desktop keyring
-on Linux), and the yearly master password reminder.
+The owner tests the fingerprint on his two laptops and the import and export. Then, by his choice: the reference
+program's settings Chrono Vault lacks, or `ROADMAP.md` step 10, merging.
 
 ## Open questions
 

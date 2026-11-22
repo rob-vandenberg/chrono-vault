@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Thirty-seven decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Thirty-eight decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, attachments, several vaults, the keyfile, a change made elsewhere, an item as the reference program has it, its editor, importing its export, website icons, and exporting in its format.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, attachments, several vaults, the keyfile, a change made elsewhere, an item as the reference program has it, its editor, importing its export, website icons, exporting in its format, and unlocking with a fingerprint.
 
 | Decision | What it settles |
 |---|---|
@@ -46,3 +46,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-035](decisions/D-035.md) | File > Import… of the reference program's export: everything, exactly as it holds it, in one save (autonomous mode) |
 | [D-036](decisions/D-036.md) | Website icons: off by default, asked of each website itself, kept in memory only (autonomous mode) |
 | [D-037](decisions/D-037.md) | Export in the reference program's format: master password first, a plain warning, the whole vault, readable by the person alone (autonomous mode) |
+| [D-038](decisions/D-038.md) | Unlocking with a fingerprint: Windows Hello on Windows, fprintd and the keyring on Linux (weaker), the master password once a year (autonomous mode) |

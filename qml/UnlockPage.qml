@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.15
+// UnlockPage.qml 0.0.23
 
 // --- Version history ----------------------------------------------------
+// v0.0.23: Unlocking with a fingerprint, asked at once; the yearly master password reminder (D-038)
 // v0.0.15: The keyfile, when the vault needs one, chosen here and remembered (D-031); after a lock, the primary
 //          vault's master password unlocks every vault (D-030)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
@@ -48,7 +49,14 @@ Item {
         passwordField.clear()
     }
 
-    onVisibleChanged: if (visible) passwordField.forceActiveFocus()
+    // The finger asked at once, unless the yearly reminder is due (D-038).
+    onVisibleChanged: {
+        if (!visible)
+            return
+        passwordField.forceActiveFocus()
+        if (VaultController.quickUnlockOn && !VaultController.reminderDue)
+            VaultController.unlockWithQuickUnlock()
+    }
 
     // After a try that did not open the vault, typing goes on in the field.
     Connections {
@@ -105,6 +113,31 @@ Item {
             text: qsTr("Unlock")
             Layout.fillWidth: true
             onClicked: unlockPage.unlockNow()
+        }
+        Button {
+            objectName: "quickUnlockButton"
+            visible: VaultController.quickUnlockOn && !VaultController.reminderDue
+            text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
+            flat: true
+            Layout.fillWidth: true
+            onClicked: VaultController.unlockWithQuickUnlock()
+        }
+        // Once a year the master password, so it is not forgotten (Q44).
+        Label {
+            objectName: "reminderText"
+            visible: VaultController.reminderDue
+            text: qsTr("Please type your master password: Chrono Vault asks for it once a year, so that you do not forget it.")
+            wrapMode: Text.Wrap
+            font.bold: true
+            Layout.fillWidth: true
+        }
+        Button {
+            objectName: "notNowButton"
+            visible: VaultController.reminderDue
+            text: qsTr("Not now")
+            flat: true
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: VaultController.dismissReminder()
         }
         Label {
             visible: VaultController.hasKeptChanges

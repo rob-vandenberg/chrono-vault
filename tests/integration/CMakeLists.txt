@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.22
+# tests/integration/CMakeLists.txt 0.0.23
 
 # --- Version history ----------------------------------------------------
+# v0.0.23: The fingerprint unlock test, with a stand-in
 # v0.0.22: The item pages test, apart from the pages test (OR-11)
 # v0.0.20: The website icons test
 # v0.0.17: The items test: history, sections, hidden fields, Trash and Archive
@@ -113,3 +114,8 @@ qt_add_executable(test_item_pages test_item_pages.cpp)
 target_link_libraries(test_item_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_item_pages)
 chrono_vault_add_test(test_item_pages)
+
+qt_add_executable(test_quick_unlock test_quick_unlock.cpp)
+target_link_libraries(test_quick_unlock PRIVATE chrono_vault_ui Qt6::Gui Qt6::Test)
+chrono_vault_strict_warnings(test_quick_unlock)
+chrono_vault_add_test(test_quick_unlock)

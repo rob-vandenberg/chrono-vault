@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.20
+// SettingsWindow.qml 0.0.23
 
 // --- Version history ----------------------------------------------------
+// v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (Security) (D-038)
 // v0.0.20: Use website icons (Customize), off by default (D-036)
 // v0.0.17: Hide sensitive fields (Security) and Show subtitles (Customize) (D-033)
 // v0.0.14: The Customize topic: the categories and templates of the open vault (D-027)
@@ -89,6 +90,7 @@ ApplicationWindow {
     property bool hideSensitive: true
     property bool showSubtitles: true
     property bool useWebsiteIcons: false
+    property bool masterPasswordReminder: true
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -105,6 +107,7 @@ ApplicationWindow {
         hideSensitive = VaultController.hideSensitive
         showSubtitles = VaultController.showSubtitles
         useWebsiteIcons = VaultController.useWebsiteIcons
+        masterPasswordReminder = VaultController.masterPasswordReminder
     }
 
     function showTheme(chosen) {
@@ -147,6 +150,8 @@ ApplicationWindow {
             VaultController.showSubtitles = showSubtitles
         if (VaultController.useWebsiteIcons !== useWebsiteIcons)
             VaultController.useWebsiteIcons = useWebsiteIcons
+        if (VaultController.masterPasswordReminder !== masterPasswordReminder)
+            VaultController.masterPasswordReminder = masterPasswordReminder
         // Starting at startup is written outside Chrono Vault and can fail:
         // the window stays open and says so, showing the setting as it is.
         if (VaultController.startAtStartup !== startAtStartup) {
@@ -187,6 +192,7 @@ ApplicationWindow {
         case 1:
             autoLockMinutes = defaults.autoLockMinutes
             hideSensitive = defaults.hideSensitive
+            masterPasswordReminder = defaults.masterPasswordReminder
             break
         case 2:
             clipboardClearSeconds = defaults.clipboardClearSeconds
@@ -468,6 +474,39 @@ ApplicationWindow {
                             checked: settingsWindow.hideSensitive
                             onToggled: settingsWindow.hideSensitive = checked
                             Layout.topMargin: Math.round(8 * Appearance.factor)
+                        }
+                        // Unlocking with a fingerprint (D-038): for the open
+                        // vault, at once, not with OK.
+                        Label {
+                            text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName || qsTr("fingerprint"))
+                            font.bold: true
+                            Layout.topMargin: Math.round(12 * Appearance.factor)
+                        }
+                        Label {
+                            text: !VaultController.quickUnlockAvailable
+                                  ? (Qt.platform.os === "windows"
+                                     ? qsTr("Windows Hello is not set up on this computer.")
+                                     : qsTr("No fingerprint reader is set up on this computer."))
+                                  : VaultController.state !== VaultController.Unlocked
+                                  ? qsTr("Unlock a vault to turn this on for it.")
+                                  : VaultController.quickUnlockOn
+                                  ? qsTr("On for this vault, on this computer.")
+                                  : qsTr("Off for this vault. Turning it on asks for your finger once.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.8
+                            Layout.fillWidth: true
+                        }
+                        Button {
+                            objectName: "quickUnlockToggle"
+                            enabled: VaultController.quickUnlockAvailable && VaultController.state === VaultController.Unlocked
+                            text: VaultController.quickUnlockOn ? qsTr("Turn off") : qsTr("Turn on")
+                            onClicked: VaultController.setQuickUnlock(!VaultController.quickUnlockOn)
+                        }
+                        CheckBox {
+                            objectName: "reminderBox"
+                            text: qsTr("Ask for the master password once a year, so it is not forgotten")
+                            checked: settingsWindow.masterPasswordReminder
+                            onToggled: settingsWindow.masterPasswordReminder = checked
                         }
                         Item { Layout.fillHeight: true }
                     }

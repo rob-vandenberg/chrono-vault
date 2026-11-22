@@ -19,6 +19,7 @@
 
 #include "item_list_model.h"
 #include "json_import.h"
+#include "quick_unlock.h"
 #include "vault_contents.h"
 #include "vault_file.h"
 
@@ -38,9 +39,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.22
+// vault_controller.h 0.0.23
 
 // --- Version history ----------------------------------------------------
+// v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export (D-035)
@@ -94,6 +96,12 @@ class VaultController : public QObject
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
     Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
     Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
+    Q_PROPERTY(bool quickUnlockAvailable READ quickUnlockAvailable NOTIFY quickUnlockChanged)
+    Q_PROPERTY(bool quickUnlockOn READ quickUnlockOn NOTIFY quickUnlockChanged)
+    Q_PROPERTY(QString quickUnlockName READ quickUnlockName CONSTANT)
+    Q_PROPERTY(bool reminderDue READ reminderDue NOTIFY quickUnlockChanged)
+    Q_PROPERTY(bool masterPasswordReminder READ masterPasswordReminder WRITE setMasterPasswordReminder NOTIFY
+                   quickUnlockChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
 
@@ -162,6 +170,21 @@ public:
     // Settings > Customize > Use website icons, off by default (D-036).
     [[nodiscard]] bool useWebsiteIcons() const { return websiteIconsOn; }
     void setUseWebsiteIcons(bool use);
+    // Unlocking with a fingerprint (D-038).
+    [[nodiscard]] bool quickUnlockAvailable() const { return quickAvailable; }
+    [[nodiscard]] bool quickUnlockOn() const { return quick && !path.isEmpty() && quick->has(path); }
+    [[nodiscard]] QString quickUnlockName() const { return quick ? quick->name() : QString(); }
+    // Once a year the master password is asked though a finger would do (the
+    // owner, Q44), unless the reminder is off.
+    [[nodiscard]] bool reminderDue() const;
+    [[nodiscard]] bool masterPasswordReminder() const { return reminderOn; }
+    void setMasterPasswordReminder(bool on);
+    Q_INVOKABLE void setQuickUnlock(bool on);
+    Q_INVOKABLE void unlockWithQuickUnlock();
+    // "Not now": the reminder waits another year.
+    Q_INVOKABLE void dismissReminder();
+    // Tests only: a stand-in for the fingerprint reader.
+    void setQuickUnlockForTests(std::unique_ptr<QuickUnlock> standIn);
     // Tests only: where a website's icon is asked for.
     void setIconAddressForTests(std::function<QUrl(const QString&)> address) { iconAddress = std::move(address); }
     void setShowSubtitles(bool show);
@@ -307,6 +330,7 @@ signals:
     void hideSensitiveChanged();
     void showSubtitlesChanged();
     void useWebsiteIconsChanged();
+    void quickUnlockChanged();
     void keepInTrayChanged();
     void startAtStartupChanged();
     void startMinimizedChanged();
@@ -358,6 +382,9 @@ private:
     void rememberPrimary();
     void forgetPrimary();
     void showCreated(CreatedVault created);
+    void connectQuickUnlock();
+    void recordMasterPassword();
+    void recordMasterPasswordIfNone();
     // Asks each website not asked yet for its icon (D-036).
     void fetchWebsiteIcons();
     // A change made elsewhere (D-032): the stamp of each vault file as this
@@ -399,6 +426,11 @@ private:
     bool hideSecrets = true;
     bool subtitlesShown = true;
     bool websiteIconsOn = false;
+    std::unique_ptr<QuickUnlock> quick;
+    bool quickAvailable = false;
+    bool reminderOn = true;
+    bool replacingQuickKey = false; // storing the new key after a master password change
+    bool openingByFinger = false;   // the vault is being opened with the key kept for the finger
     QNetworkAccessManager iconNetwork;
     QHash<QString, QString> websiteIcons; // host: "data:" address of its PNG, in memory only
     QSet<QString> iconsAsked;

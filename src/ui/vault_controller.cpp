@@ -28,6 +28,7 @@
 #include "version.h"
 
 #include <QClipboard>
+#include <QDataStream>
 #include <QCollator>
 #include <QDateTime>
 #include <QBuffer>
@@ -47,11 +48,13 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 #include <algorithm>
+#include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.22
+// vault_controller.cpp 0.0.23
 
 // --- Version history ----------------------------------------------------
+// v0.0.23: Unlocking with a fingerprint, and the yearly master password reminder (D-038)
 // v0.0.22: Export in the reference program's format, after the master password, off the window's thread (D-037)
 // v0.0.20: Website icons, asked of each website itself, kept in memory only (D-036)
 // v0.0.19: Importing the reference program's export, read off the window's thread, added in one save (D-035)
@@ -88,6 +91,34 @@ const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
 const QString showSubtitlesKey = QStringLiteral("view/showSubtitles");
 const QString websiteIconsKey = QStringLiteral("view/websiteIcons");
+const QString reminderKey = QStringLiteral("security/masterPasswordReminder");
+const QString lastPasswordKey = QStringLiteral("security/lastMasterPassword");
+constexpr int reminderDays = 365;
+
+// The vault's key whole, and its keyfile's fingerprint, as kept for the
+// finger (D-038).
+QByteArray quickSecretOf(const VaultKey& key, const QByteArray& keyfile)
+{
+    QByteArray secret;
+    QDataStream out(&secret, QIODevice::WriteOnly);
+    out << quint8(1) << key.key << key.salt << key.parameters.memoryKiB << key.parameters.iterations
+        << key.parameters.lanes << key.usesKeyfile << keyfile;
+    return secret;
+}
+
+std::optional<std::pair<VaultKey, QByteArray>> quickSecretFrom(const QByteArray& secret)
+{
+    QDataStream in(secret);
+    quint8 version = 0;
+    VaultKey key;
+    QByteArray keyfile;
+    in >> version >> key.key >> key.salt >> key.parameters.memoryKiB >> key.parameters.iterations >>
+        key.parameters.lanes >> key.usesKeyfile >> keyfile;
+    if (in.status() != QDataStream::Ok || version != 1 || !key.isValid()) {
+        return std::nullopt;
+    }
+    return std::pair{key, keyfile};
+}
 constexpr bool defaultWebsiteIcons = false;
 constexpr qint64 largestWebsiteIconBytes = 512 * 1024;
 constexpr bool defaultHideSensitive = true;
@@ -319,10 +350,32 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
         subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
         websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
+        reminderOn = settings.value(reminderKey, true).toBool();
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
         clearSeconds = std::clamp(settings.value(clipboardKey, defaultClipboardSeconds).toInt(), 0, 600);
         keepRunning = settings.value(keepInTrayKey, defaultKeepInTray).toBool();
         minimizedAtStart = settings.value(startMinimizedKey, defaultStartMinimized).toBool();
+    }
+
+    // Whether a reader is there is asked off the window's thread (D-038).
+    quick = makeQuickUnlock();
+    connectQuickUnlock();
+    {
+        QPointer<VaultController> self(this);
+        const QuickUnlock* asked = quick.get(); // only compared, never used there
+        (void)QtConcurrent::run([self, asked]() {
+            // An object of its own, so nothing it uses can go away meanwhile.
+            const bool there = makeQuickUnlock()->available();
+            QMetaObject::invokeMethod(
+                qApp,
+                [self, asked, there]() {
+                    if (self && self->quick.get() == asked && self->quickAvailable != there) {
+                        self->quickAvailable = there;
+                        emit self->quickUnlockChanged();
+                    }
+                },
+                Qt::QueuedConnection);
+        });
     }
 
     autoLockTimer.setSingleShot(true);
@@ -667,6 +720,9 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                     return;
                 }
                 self->unlockedStamp = result.stamp;
+                if (!savedPassword) {
+                    self->recordMasterPassword(); // typed: the reminder waits another year
+                }
                 self->unlocked(result.key, read.contents, *fingerprint);
             },
             Qt::QueuedConnection);
@@ -680,9 +736,12 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
     const QString vaultFile = path;
     const quint64 attempt = ++unlockAttempt;
     const QByteArray fingerprint = keyfileSecret;
+    // Whether this attempt is the finger's goes with the attempt itself, so a
+    // later one never takes it over.
+    const bool byFinger = std::exchange(openingByFinger, false);
     QPointer<VaultController> self(this);
     // On the save thread: after any write to this vault still running.
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint]() mutable {
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint, byFinger]() mutable {
         OpenResult result = openVaultFileWithKey(vaultFile, kept);
         ContentsResult read;
         if (result.status == OpenStatus::Opened) {
@@ -691,9 +750,22 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
         }
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, read, attempt, fingerprint]() mutable {
+            [self, result, read, attempt, fingerprint, byFinger]() mutable {
                 if (!self || attempt != self->unlockAttempt) {
                     result.key.wipe();
+                    return;
+                }
+                if (byFinger && result.status == OpenStatus::KeyChanged) {
+                    // The key kept for the finger no longer fits: the master
+                    // password was changed on another computer (D-038).
+                    result.key.wipe();
+                    self->quick->remove(self->path);
+                    self->setState(State::Locked);
+                    emit self->quickUnlockChanged();
+                    self->say(tr("The master password of this vault was changed on another computer. Type it, then "
+                                 "turn %1 on again in Settings > Security.")
+                                  .arg(self->quickUnlockName()),
+                              true);
                     return;
                 }
                 if (result.status != OpenStatus::Opened || read.status != ContentsStatus::Read) {
@@ -716,6 +788,9 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
 
 void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile)
 {
+    if (quick) {
+        quick->cancel(); // a finger still asked for is no longer needed
+    }
     stamps->set(path, unlockedStamp);
     key = newKey;
     keyfileSecret = keyfile;
@@ -1165,6 +1240,133 @@ void VaultController::fetchWebsiteIcons()
             emit revisionChanged();
         });
     }
+}
+
+void VaultController::connectQuickUnlock()
+{
+    connect(quick.get(), &QuickUnlock::stored, this, [this](bool ok) {
+        if (std::exchange(replacingQuickKey, false)) {
+            if (!ok) {
+                quick->remove(path);
+                say(tr("The master password was changed, but %1 could not keep it. Turn %1 on again in Settings > "
+                       "Security.")
+                        .arg(quickUnlockName()),
+                    true);
+            }
+            emit quickUnlockChanged();
+            return;
+        }
+        if (ok) {
+            recordMasterPasswordIfNone();
+            say(tr("%1 unlocks this vault from now on.").arg(quickUnlockName()), false);
+        } else {
+            say(tr("%1 could not be turned on for this vault.").arg(quickUnlockName()), true);
+        }
+        emit quickUnlockChanged();
+    });
+    connect(quick.get(), &QuickUnlock::removeFailed, this, [this](const QString& where) {
+        say(tr("The key could not be removed from the desktop keyring. Remove “%1” there by hand.").arg(where), true);
+    });
+    connect(quick.get(), &QuickUnlock::retrieved, this, [this](QuickUnlock::Result result, const QByteArray& secret) {
+        if (currentState != State::Locked) {
+            return;
+        }
+        const auto kept = result == QuickUnlock::Result::Done ? quickSecretFrom(secret) : std::nullopt;
+        if (kept) {
+            keyfileSecret = kept->second;
+            openingByFinger = true;
+            startOpenWithKey(kept->first);
+            return;
+        }
+        switch (result) {
+        case QuickUnlock::Result::Cancelled: say(QString(), false); break;
+        case QuickUnlock::Result::Failed: say(tr("That finger was not recognized. Try again, or use the master password."), true); break;
+        case QuickUnlock::Result::Unavailable:
+            say(tr("%1 is not available now. Use the master password.").arg(quickUnlockName()), true);
+            break;
+        default:
+            // Its key is gone (fingerprints changed, or the keyring emptied).
+            quick->remove(path);
+            emit quickUnlockChanged();
+            say(tr("%1 can no longer open this vault. Use the master password, then turn it on again in Settings > "
+                   "Security.")
+                    .arg(quickUnlockName()),
+                true);
+            break;
+        }
+    });
+}
+
+void VaultController::setQuickUnlockForTests(std::unique_ptr<QuickUnlock> standIn)
+{
+    quick = std::move(standIn);
+    connectQuickUnlock();
+    quickAvailable = quick->available();
+    emit quickUnlockChanged();
+}
+
+void VaultController::setQuickUnlock(bool on)
+{
+    if (!quick || path.isEmpty()) {
+        return;
+    }
+    if (!on) {
+        quick->remove(path);
+        emit quickUnlockChanged();
+        return;
+    }
+    if (currentState == State::Unlocked && quickAvailable) {
+        quick->store(path, quickSecretOf(key, keyfileSecret));
+    }
+}
+
+void VaultController::unlockWithQuickUnlock()
+{
+    if (currentState != State::Locked || !quickUnlockOn()) {
+        return;
+    }
+    say(tr("Waiting for your %1…").arg(quickUnlockName()), false);
+    quick->retrieve(path);
+}
+
+void VaultController::recordMasterPassword()
+{
+    QSettings settings;
+    QVariantMap times = settings.value(lastPasswordKey).toMap();
+    times.insert(path, QDateTime::currentDateTimeUtc());
+    settings.setValue(lastPasswordKey, times);
+    emit quickUnlockChanged();
+}
+
+void VaultController::recordMasterPasswordIfNone()
+{
+    if (!QSettings().value(lastPasswordKey).toMap().contains(path)) {
+        recordMasterPassword();
+    }
+}
+
+bool VaultController::reminderDue() const
+{
+    if (!reminderOn || !quickUnlockOn()) {
+        return false;
+    }
+    const QDateTime last = QSettings().value(lastPasswordKey).toMap().value(path).toDateTime();
+    return last.isValid() && last.daysTo(QDateTime::currentDateTimeUtc()) >= reminderDays;
+}
+
+void VaultController::setMasterPasswordReminder(bool on)
+{
+    if (reminderOn != on) {
+        reminderOn = on;
+        QSettings().setValue(reminderKey, on);
+        emit quickUnlockChanged();
+    }
+}
+
+void VaultController::dismissReminder()
+{
+    recordMasterPassword();
+    unlockWithQuickUnlock();
 }
 
 bool VaultController::touchScreen() const
@@ -2147,7 +2349,19 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                     } else if (self->savedPasswords.contains(self->path) && self->primaryKey.isValid()) {
                         self->updateSavedPassword(self->path, newPassword);
                     }
-                    self->say(tr("The master password was changed."), false);
+                    self->recordMasterPassword(); // just typed: the reminder waits a year
+                    if (self->quickUnlockOn()) {
+                        // The finger's key follows the new master password (D-038);
+                        // Windows Hello asks once more for that, and says so.
+                        // Said first, so a failure to keep it is the last word.
+                        self->say(tr("The master password was changed. %1 keeps the new one; it may ask you once.")
+                                      .arg(self->quickUnlockName()),
+                                  false);
+                        self->replacingQuickKey = true;
+                        self->quick->replace(self->path, quickSecretOf(self->key, self->keyfileSecret));
+                    } else {
+                        self->say(tr("The master password was changed."), false);
+                    }
                     emit self->masterPasswordChanged(true);
                     return;
                 case Outcome::WrongPassword:
@@ -2254,6 +2468,7 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("hideSensitive"), defaultHideSensitive},
         {QStringLiteral("showSubtitles"), defaultShowSubtitles},
         {QStringLiteral("useWebsiteIcons"), defaultWebsiteIcons},
+        {QStringLiteral("masterPasswordReminder"), true},
     };
 }
 
@@ -2316,6 +2531,7 @@ void VaultController::setPath(const QString& newPath)
         needKeyfile = false;
         watch();
         emit vaultPathChanged();
+        emit quickUnlockChanged();
         emit keyfileChanged();
     }
 }

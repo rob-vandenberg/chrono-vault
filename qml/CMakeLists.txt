@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.22
+# qml/CMakeLists.txt 0.0.23
 
 # --- Version history ----------------------------------------------------
+# v0.0.23: Unlocking with a fingerprint, a part per system (D-038)
 # v0.0.22: The export window (D-037)
 # v0.0.19: The import window (D-035)
 # v0.0.17: A field's row in the item's view, a file of its own (D-033)
@@ -77,6 +78,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/licences.cpp
         ../src/ui/licences.h
         ../src/ui/program_scale.cpp
+        ../src/ui/quick_unlock.cpp
+        ../src/ui/quick_unlock.h
         ../src/ui/program_scale.h
         ../src/ui/single_instance.cpp
         ../src/ui/single_instance.h
@@ -156,11 +159,23 @@ target_link_libraries(chrono_vault_ui
 if(LINUX)
     target_link_libraries(chrono_vault_ui PRIVATE Qt6::DBus)
 endif()
+# Unlocking with a fingerprint (D-038): fprintd and the keyring on Linux,
+# Windows Hello through C++/WinRT on Windows, none elsewhere yet.
+if(LINUX)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_linux.cpp)
+elseif(WIN32)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_windows.cpp)
+    target_link_libraries(chrono_vault_ui PRIVATE windowsapp)
+    set_source_files_properties(../src/ui/quick_unlock_windows.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
+else()
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_none.cpp)
+endif()
 chrono_vault_strict_warnings_for_sources(
     ../src/ui/app_setup.cpp
     ../src/ui/appearance.cpp
     ../src/ui/licences.cpp
     ../src/ui/program_scale.cpp
+    ../src/ui/quick_unlock.cpp
     ../src/ui/theme.cpp
     ../src/ui/autostart.cpp
     ../src/ui/item_icons.cpp
