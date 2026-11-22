@@ -2,14 +2,13 @@
 
 ## Now
 
-**Version 0.0.17**: an item as the reference program has it (D-033): sections as cards, its field types, hide marks,
-hidden and deleted fields, field history, subtitle and note, Trash and Archive, and its look; Hide sensitive fields
-and Show subtitles in the settings.
+**Version 0.0.18**: the editor as the reference program's (D-034): Cancel, "Add ▾" and Save at the top, a row per
+field with the drag handle and "…", Field Options, sections as headings; on Windows a save is tried again briefly when
+another program holds the vault (the owner's Q37). 0.0.17 brought the item as the reference program has it (D-033).
 
 ## Next task
 
-In autonomous mode, the owner's changelist for importing the reference program's export: 0.0.18 the editor as the
-reference program has it, 0.0.19 File > Import…, 0.0.20 website icons.
+In autonomous mode: 0.0.19 File > Import… of the reference program's export, then 0.0.20 website icons.
 
 ## Open questions
 

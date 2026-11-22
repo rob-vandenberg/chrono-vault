@@ -3,9 +3,9 @@
 Every design decision of Chrono Vault, one short file each in `decisions/`. A decision is written down only after
 the owner approved it with a Proceed (OR-13).
 
-Thirty-three decisions have been taken, from 20 to 22 November 2026: the platforms, the
+Thirty-four decisions have been taken, from 20 to 22 November 2026: the platforms, the
 language, the window toolkit, the licence, where the vault is stored, what the first version leaves out, how
-a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, attachments, several vaults, the keyfile, a change made elsewhere, and an item as the reference program has it.
+a password is used, translations, the order of the platforms, how releases are built, the settings window, the source layout, the encryption, the vault file, what a vault holds, the windows of the first version, the look, item icons, the icon, tray and starting, one instance with windows that remember, the update, the settings window's buttons, the theme and UI scaling, the update's windows, the main window's layout, --reset, categories and templates, tags and favourites, attachments, several vaults, the keyfile, a change made elsewhere, an item as the reference program has it, and its editor.
 
 | Decision | What it settles |
 |---|---|
@@ -42,3 +42,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-031](decisions/D-031.md) | The keyfile beside the master password (header format 2), and File > Change master password or keyfile (autonomous mode) |
 | [D-032](decisions/D-032.md) | A change made elsewhere: noticed by the file's stamp, read again, or both versions kept with a conflict copy (autonomous mode) |
 | [D-033](decisions/D-033.md) | An item as the reference program has it: sections as cards, its field types, hide marks, hidden and deleted fields, field history, subtitle and note, Trash and Archive (autonomous mode) |
+| [D-034](decisions/D-034.md) | The editor as the reference program's: Cancel, Add and Save at the top, a row per field with ≡ and "…", Field Options; a brief retry of a save on Windows (autonomous mode; the retry the owner's Q37) |

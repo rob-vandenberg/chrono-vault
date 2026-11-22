@@ -34,9 +34,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.17
+// vault_controller.h 0.0.18
 
 // --- Version history ----------------------------------------------------
+// v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
 // v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
 // v0.0.15: Several vaults, the first the primary, whose master password unlocks the others; a keyfile; changing the
@@ -84,6 +85,7 @@ class VaultController : public QObject
     Q_PROPERTY(bool trayAvailable READ trayAvailable NOTIFY trayAvailableChanged)
     Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
+    Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
 
@@ -147,6 +149,8 @@ public:
     [[nodiscard]] bool hideSensitive() const { return hideSecrets; }
     void setHideSensitive(bool hide);
     [[nodiscard]] bool showSubtitles() const { return subtitlesShown; }
+    // A touch screen is present: what shows under the mouse stays shown (D-034).
+    [[nodiscard]] bool touchScreen() const;
     void setShowSubtitles(bool show);
     [[nodiscard]] int clipboardClearSeconds() const { return clearSeconds; }
     void setClipboardClearSeconds(int seconds);

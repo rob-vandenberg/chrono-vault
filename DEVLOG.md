@@ -187,3 +187,14 @@ item already in the Trash opened the editor (now it moves straight to the Trash 
 `test_vaults` now and then saw a save fail with "access denied" at the last step, putting the new file in place; the
 same with the file watcher off, so the cause is outside Chrono Vault ([Speculation] the virus scanner holding the
 fresh file). Not new in 0.0.17; nothing is lost when it happens. Left to the owner (P16).
+
+## 22 November 2026: version 0.0.18: the editor as the reference program's (autonomous mode)
+
+The editor redrawn after the owner's pictures (D-034): Cancel, "Add ▾" and a blue Save; the icon with a pencil
+badge; a row per field with the drag handle and a blue "…" under the mouse; Field Options with name, type, Sensitive
+and Delete Field; sections as headings. On Windows, putting a saved vault in place is tried again briefly when another
+program holds it (the owner's Q37, P16).
+Review rounds for 0.0.18: Delete Field gave its window's settings to the next field; on a touch screen the drag handle
+and "…" could not be seen (now always shown where a touch screen is present); a field added and closed without Save
+left a false unsaved change; Cancel discarded unsaved edits without asking (now it asks, OR-15). Each with a test.
+On Windows the save's brief retry ended the intermittent failure of P16: three runs in a row clean.

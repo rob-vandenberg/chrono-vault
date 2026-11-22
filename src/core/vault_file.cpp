@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QThread>
 #include <QtEndian>
 
 #include <algorithm>
@@ -38,9 +39,11 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// vault_file.cpp 0.0.16
+// vault_file.cpp 0.0.18
 
 // --- Version history ----------------------------------------------------
+// v0.0.18: On Windows, putting the new file in place is tried again briefly while another program holds the vault
+//          (the owner, Q37)
 // v0.0.16: Vault files read so that another program, or a save, can replace them meanwhile (Windows);
 //          a vault file's stamp, different after every save, to notice a change made elsewhere (D-032)
 // v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
@@ -456,6 +459,21 @@ SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const 
     std::error_code error;
     std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
                             std::filesystem::path(path.toStdU16String()), error);
+#ifdef Q_OS_WIN
+    // On Windows a file another program holds open (a virus scanner reading
+    // the fresh vault, a sync program) cannot be replaced for that moment:
+    // the step is tried again, at most ten times within about a second, only
+    // for "access denied" or "in use" (the owner's decision, Q37). The old
+    // vault is untouched meanwhile (OR-15).
+    for (int attempt = 0; error && attempt < 10 &&
+                          (error.value() == ERROR_ACCESS_DENIED || error.value() == ERROR_SHARING_VIOLATION);
+         ++attempt) {
+        QThread::msleep(100);
+        error.clear();
+        std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
+                                std::filesystem::path(path.toStdU16String()), error);
+    }
+#endif
     if (error) {
         QFile::remove(savingPath);
         return SaveStatus::CannotReplace;

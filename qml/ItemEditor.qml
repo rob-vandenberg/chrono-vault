@@ -21,20 +21,22 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.17
+// ItemEditor.qml 0.0.18
 
 // --- Version history ----------------------------------------------------
-// v0.0.17: Every part of an item and its fields kept through an edit: hide marks, ids, hidden and deleted fields,
-//          subtitle, note, autosubmit (D-033)
+// v0.0.18: As the reference program's editor (D-034): Cancel, "Add ▾" and a blue Save at the top; the icon with a
+//          pencil badge; the title across the width; one row per field with its label at the right, the drag
+//          handle and a blue "…" under the mouse; Field Options; sections as headings
+// v0.0.17: Every part of an item and its fields kept through an edit (D-033)
 // v0.0.14: Every template; fields moved up and down and removed; a field of several lines; tags; attachments
-//          (D-027, D-028, D-029)
 // v0.0.9: The delete question reachable from the Item menu (D-025)
 // v0.0.7: Text sizes follow the UI scaling (D-023)
 // v0.0.5: Whoever waits for the editor hears when the person cancels
 // v0.0.4: One font in every field; the eye inside the password fields; the item's icon
 // v0.0.3: Initial release
 
-// One item: its title and fields, to read, copy and change.
+// One item being changed (D-034): its icon and title, its fields one per
+// row, its tags and attachments. Nothing is kept until Save.
 Item {
     id: editor
 
@@ -44,26 +46,44 @@ Item {
     property string categoryId: ""
     property string defaultIcon: ""
     property bool favourite: false
-    // What this editor does not show yet, kept as it was (D-033).
+    // What this editor does not change, kept as it was (D-033).
     property var kept: ({})
     // Files being read for this item; their answers come from the controller.
     property var waitingFor: []
     property bool isNew: false
     property bool changed: false
-    property string icon: ""   // the item's own icon, PNG in base64; empty for the template's
-    property int tick: 0
+    property string icon: ""   // the item's own icon, PNG in base64; empty for the category's
 
     property var afterAsking: null
     property var afterCancelling: null
+
+    readonly property int labelWidth: Math.round(220 * Appearance.factor)
+    readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
+    // The reference program's field types, in the order its Field Options lists them.
+    readonly property var kinds: [
+        { kind: "text", name: qsTr("Text") },
+        { kind: "password", name: qsTr("Password") },
+        { kind: "username", name: qsTr("Username") },
+        { kind: "email", name: qsTr("E-mail") },
+        { kind: "url", name: qsTr("Website") },
+        { kind: "phone", name: qsTr("Phone") },
+        { kind: "date", name: qsTr("Date") },
+        { kind: "numeric", name: qsTr("Number") },
+        { kind: "totp", name: qsTr("One-time code") },
+        { kind: "multiline", name: qsTr("Multi-line") },
+        { kind: "ccExpiry", name: qsTr("Card expiry") },
+        { kind: "ccCvc", name: qsTr("Security code") },
+        { kind: "ccPin", name: qsTr("PIN") },
+        { kind: "ccType", name: qsTr("Card type") }
+    ]
 
     signal closed()
     signal stored(string itemId)
 
     // Runs the action now, or, when there are changes not saved yet, after
-    // asking whether to save them (OR-15). When the person cancels, or the
-    // save does not succeed, the action is not run and "abandoned" is, if given.
+    // asking whether to save them (OR-15). A file still being read holds it
+    // up (D-029). When the person cancels, "abandoned" is run, if given.
     function whenFree(action, abandoned) {
-        // A file still being read would be lost by leaving now (D-029).
         if (itemId !== "" && waitingFor.length > 0) {
             readingDialog.open()
             if (abandoned)
@@ -79,12 +99,6 @@ Item {
         }
     }
 
-    // Item > Delete item… (D-025): the same question as the Delete button.
-    function askDelete() {
-        if (itemId !== "" && !isNew)
-            deleteDialog.open()
-    }
-
     function edit(map, isNewItem) {
         itemId = map.id
         isNote = map.isNote
@@ -92,7 +106,18 @@ Item {
         categoryId = map.categoryId
         defaultIcon = map.defaultIcon
         favourite = map.favourite
+        isNew = isNewItem
+        titleField.text = map.title
+        icon = map.icon
         waitingFor = []
+        fieldsModel.clear()
+        for (let field of map.fields)
+            fieldsModel.append({ role: field.role, label: field.label, name: field.name,
+                                 kind: field.kind, value: field.value, sensitive: field.sensitive === true,
+                                 deleted: field.deleted === true, hiddenType: field.hiddenType || "",
+                                 uid: field.uid || 0 })
+        kept = { subtitle: map.subtitle || "", note: map.note || "", autoSubmit: map.autoSubmit === true,
+                 website: map.website || "" }
         tagsModel.clear()
         for (let tag of map.tags)
             tagsModel.append({ tag: tag })
@@ -100,17 +125,6 @@ Item {
         attachmentsModel.clear()
         for (let attachment of map.attachments)
             attachmentsModel.append({ attachmentId: attachment.id, name: attachment.name, size: attachment.size })
-        isNew = isNewItem
-        titleField.text = map.title
-        icon = map.icon
-        fieldsModel.clear()
-        for (let field of map.fields)
-            fieldsModel.append({ role: field.role, label: field.label, name: field.name,
-                                 kind: field.kind, value: field.value, revealed: false,
-                                 sensitive: field.sensitive === true, deleted: field.deleted === true,
-                                 hiddenType: field.hiddenType || "", uid: field.uid || 0 })
-        kept = { subtitle: map.subtitle || "", note: map.note || "", autoSubmit: map.autoSubmit === true,
-                 website: map.website || "" }
         changed = false
         if (isNewItem)
             titleField.forceActiveFocus()
@@ -156,16 +170,19 @@ Item {
     }
 
     function addField(kind) {
-        fieldsModel.append({ role: "", label: qsTr("New field"), name: qsTr("New field"),
-                             kind: kind, value: "", revealed: false, sensitive: kind === "password",
-                             deleted: false, hiddenType: "", uid: 0 })
+        const isSection = kind === "section"
+        fieldsModel.append({ role: "", label: isSection ? qsTr("New section") : qsTr("New field"),
+                             name: isSection ? qsTr("New section") : qsTr("New field"), kind: kind, value: "",
+                             sensitive: kind === "password" || kind === "ccPin", deleted: false, hiddenType: "",
+                             uid: 0 })
         changed = true
+        return fieldsModel.count - 1
     }
 
-    // Moves a field one place up (-1) or down (1).
+    // Moves a field by this many places (D-034: the drag handle).
     function moveField(index, step) {
         const target = index + step
-        if (target < 0 || target >= fieldsModel.count)
+        if (step === 0 || target < 0 || target >= fieldsModel.count)
             return
         fieldsModel.move(index, target, 1)
         changed = true
@@ -198,11 +215,18 @@ Item {
             waitingFor = waitingFor.concat([requestId])
     }
 
+    function kindName(kind) {
+        for (const one of kinds) {
+            if (one.kind === kind)
+                return one.name
+        }
+        return kind === "section" ? qsTr("Section") : kind
+    }
+
     Connections {
         target: VaultController
         function onAttachmentRead(requestId, name, size, ok) {
-            const at = editor.waitingFor.indexOf(requestId)
-            if (at < 0)
+            if (editor.waitingFor.indexOf(requestId) < 0)
                 return
             editor.waitingFor = editor.waitingFor.filter(function(one) { return one !== requestId })
             if (ok) {
@@ -212,330 +236,470 @@ Item {
         }
     }
 
+    ListModel { id: fieldsModel }
     ListModel { id: tagsModel }
     ListModel { id: attachmentsModel }
 
-    Timer {
-        interval: 1000
-        repeat: true
-        running: editor.visible && editor.itemId !== ""
-        onTriggered: editor.tick++
-    }
-
-    ListModel { id: fieldsModel }
-
-    Label {
-        anchors.centerIn: parent
-        visible: editor.itemId === ""
-        text: qsTr("Choose an item on the left, or make a new one.")
-        opacity: 0.7
-    }
-
-    ScrollView {
-        id: scroller
+    ColumnLayout {
         anchors.fill: parent
         visible: editor.itemId !== ""
-        contentWidth: availableWidth
+        spacing: 0
 
-        ColumnLayout {
-            width: scroller.availableWidth - Math.round(24 * Appearance.factor)
-            x: 12
-            spacing: Math.round(10 * Appearance.factor)
+        // Cancel at the left; "Add ▾" and the blue Save at the right (D-034).
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.margins: Math.round(16 * Appearance.factor)
+            Layout.bottomMargin: Math.round(8 * Appearance.factor)
+            Button {
+                objectName: "cancelButton"
+                text: qsTr("Cancel")
+                // Cancel means: leave without keeping the changes.
+                // With changes not saved yet, asked first, never lost by one click
+                // (OR-15); without, the editor just closes.
+                onClicked: editor.whenFree(editor.close)
+            }
+            Item { Layout.fillWidth: true }
+            Button {
+                objectName: "addButton"
+                text: qsTr("Add") + "  ▾"
+                onClicked: addMenu.popup(this, 0, height)
+                Menu {
+                    id: addMenu
+                    Action {
+                        text: qsTr("Attachment")
+                        onTriggered: attachmentDialog.open()
+                    }
+                    Action {
+                        text: qsTr("Section")
+                        onTriggered: fieldOptions.showForNew("section")
+                    }
+                    Action {
+                        text: qsTr("Field")
+                        onTriggered: fieldOptions.showForNew("text")
+                    }
+                }
+            }
+            Button {
+                objectName: "saveButton"
+                text: qsTr("Save")
+                highlighted: true
+                // Not while a file is still being read: it would be left out.
+                enabled: (editor.changed || editor.isNew) && editor.waitingFor.length === 0
+                onClicked: editor.store()
+            }
+        }
 
-            Item { Layout.preferredHeight: 4 }
-
-            RowLayout {
-                spacing: Math.round(12 * Appearance.factor)
-                Layout.fillWidth: true
-
+        // The icon with its pencil badge, and the title across the width.
+        RowLayout {
+            spacing: Math.round(16 * Appearance.factor)
+            Layout.fillWidth: true
+            Layout.leftMargin: Math.round(16 * Appearance.factor)
+            Layout.rightMargin: Math.round(16 * Appearance.factor)
+            Layout.bottomMargin: Math.round(16 * Appearance.factor)
+            Item {
+                Layout.preferredWidth: Math.round(52 * Appearance.factor)
+                Layout.preferredHeight: Math.round(52 * Appearance.factor)
                 Image {
                     objectName: "itemIconImage"
+                    anchors.fill: parent
                     source: editor.icon !== "" ? "data:image/png;base64," + editor.icon : editor.defaultIcon
-                    sourceSize: Qt.size(Math.round(64 * Appearance.factor), Math.round(64 * Appearance.factor))
-                    Layout.preferredWidth: Math.round(64 * Appearance.factor)
-                    Layout.preferredHeight: Math.round(64 * Appearance.factor)
+                    sourceSize: Qt.size(width, height)
                 }
-                ColumnLayout {
-                    spacing: Math.round(4 * Appearance.factor)
-                    Button {
-                        text: qsTr("Choose icon…")
-                        onClicked: iconDialog.open()
+                ToolButton {
+                    objectName: "iconBadge"
+                    width: Math.round(22 * Appearance.factor)
+                    height: width
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.margins: -Math.round(4 * Appearance.factor)
+                    icon.source: "qrc:/icons/edit.svg"
+                    icon.color: editor.palette.buttonText
+                    icon.width: Math.round(12 * Appearance.factor)
+                    icon.height: Math.round(12 * Appearance.factor)
+                    background: Rectangle {
+                        radius: width / 2
+                        color: editor.palette.window
+                        border.color: editor.lineColour
                     }
-                    Button {
-                        text: qsTr("Remove icon")
-                        enabled: editor.icon !== ""
-                        onClicked: {
-                            editor.icon = ""
-                            editor.changed = true
+                    onClicked: iconMenu.popup(this, 0, height)
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Change the icon")
+                    Menu {
+                        id: iconMenu
+                        Action {
+                            text: qsTr("Choose icon…")
+                            onTriggered: iconDialog.open()
+                        }
+                        Action {
+                            text: qsTr("Remove icon")
+                            enabled: editor.icon !== ""
+                            onTriggered: {
+                                editor.icon = ""
+                                editor.changed = true
+                            }
                         }
                     }
                 }
-                Item { Layout.fillWidth: true }
             }
-
             TextField {
                 id: titleField
+                objectName: "titleField"
                 placeholderText: editor.isNote ? qsTr("Title of the note") : qsTr("Title, for example the site's name")
-                font.pointSize: Appearance.fontPointSize * 1.4
                 Layout.fillWidth: true
                 onTextEdited: editor.changed = true
             }
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: editor.palette.mid
+        }
 
-            Repeater {
-                model: fieldsModel
+        ScrollView {
+            id: scroller
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentWidth: availableWidth
+            clip: true
 
-                delegate: ColumnLayout {
-                    id: fieldRow
-                    required property int index
-                    required property var model
-                    readonly property bool isPassword: model.kind === "password" || model.sensitive === true
-                    readonly property bool isCode: model.kind === "totp"
-                    readonly property bool isCustom: model.role === ""
-                    // Kept but never shown, as in the reference program (D-033).
-                    visible: !(model.deleted === true || model.kind === "hidden")
-                    spacing: Math.round(2 * Appearance.factor)
+            ColumnLayout {
+                width: scroller.availableWidth - 2 * Math.round(24 * Appearance.factor)
+                x: Math.round(24 * Appearance.factor)
+                spacing: Math.round(4 * Appearance.factor)
+
+                Item { Layout.preferredHeight: Math.round(12 * Appearance.factor) }
+
+                Column {
+                    id: fieldColumn
                     Layout.fillWidth: true
+                    spacing: Math.round(4 * Appearance.factor)
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Label {
-                            visible: !fieldRow.isCustom
-                            text: fieldRow.model.name
-                            opacity: 0.8
+                    // The row whose top is nearest to y, for dragging.
+                    function indexAt(y) {
+                        let found = -1
+                        for (let index = 0; index < fieldRows.count; ++index) {
+                            const row = fieldRows.itemAt(index)
+                            if (row && row.visible && y >= row.y)
+                                found = index
                         }
-                        TextField {
-                            visible: fieldRow.isCustom
-                            text: fieldRow.model.label
-                            placeholderText: qsTr("Name of the field")
-                            Layout.preferredWidth: Math.round(220 * Appearance.factor)
-                            onTextEdited: {
-                                fieldsModel.setProperty(fieldRow.index, "label", text)
-                                editor.changed = true
+                        return found
+                    }
+
+                    Repeater {
+                        id: fieldRows
+                        model: fieldsModel
+                        delegate: Item {
+                            id: fieldRow
+                            required property int index
+                            required property var model
+                            readonly property bool isSection: model.kind === "section"
+                            readonly property bool isSecret: model.kind === "password" || model.sensitive === true
+                            // Shown under the mouse; always on a touch screen, which has no hover.
+                            readonly property bool active: rowHover.hovered || dragArea.pressed || VaultController.touchScreen
+                            // Kept but never shown, as in the reference program (D-033).
+                            visible: !(model.deleted === true || model.kind === "hidden")
+                            width: fieldColumn.width
+                            height: visible ? Math.max(Math.round(44 * Appearance.factor),
+                                                       line.implicitHeight + Math.round(12 * Appearance.factor)) : 0
+
+                            HoverHandler { id: rowHover }
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: Math.round(4 * Appearance.factor)
+                                color: Qt.rgba(editor.palette.text.r, editor.palette.text.g, editor.palette.text.b, 0.06)
+                                visible: fieldRow.active
+                            }
+
+                            RowLayout {
+                                id: line
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Math.round(12 * Appearance.factor)
+
+                                // The drag handle: drag it up or down to move the field.
+                                Label {
+                                    objectName: "dragHandle"
+                                    text: "≡"
+                                    font.pointSize: Appearance.fontPointSize * 1.3
+                                    opacity: fieldRow.active ? 0.8 : 0
+                                    Layout.leftMargin: Math.round(10 * Appearance.factor)
+                                    MouseArea {
+                                        id: dragArea
+                                        anchors.fill: parent
+                                        anchors.margins: -Math.round(6 * Appearance.factor)
+                                        cursorShape: Qt.SizeVerCursor
+                                        onPositionChanged: function(mouse) {
+                                            const point = mapToItem(fieldColumn, mouse.x, mouse.y)
+                                            const target = fieldColumn.indexAt(point.y)
+                                            if (target >= 0 && target !== fieldRow.index)
+                                                editor.moveField(fieldRow.index, target - fieldRow.index)
+                                        }
+                                    }
+                                }
+                                Label {
+                                    visible: !fieldRow.isSection
+                                    text: fieldRow.model.role === "" ? fieldRow.model.label : fieldRow.model.name
+                                    textFormat: Text.PlainText
+                                    horizontalAlignment: Text.AlignRight
+                                    opacity: 0.7
+                                    elide: Text.ElideRight
+                                    Layout.preferredWidth: editor.labelWidth - Math.round(30 * Appearance.factor)
+                                    Layout.alignment: fieldRow.model.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
+                                    Layout.topMargin: fieldRow.model.kind === "multiline" ? Math.round(8 * Appearance.factor) : 0
+                                }
+                                // A section's heading, bold, at the value column.
+                                Label {
+                                    objectName: "editorSectionHeading"
+                                    visible: fieldRow.isSection
+                                    text: fieldRow.model.label
+                                    textFormat: Text.PlainText
+                                    font.bold: true
+                                    opacity: 0.7
+                                    leftPadding: editor.labelWidth - Math.round(18 * Appearance.factor)
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: Math.round(10 * Appearance.factor)
+                                }
+                                TextField {
+                                    visible: !fieldRow.isSection && !fieldRow.isSecret && fieldRow.model.kind !== "multiline"
+                                    text: fieldRow.model.value
+                                    font.family: fieldRow.model.kind === "totp" ? "Noto Sans Mono" : Appearance.font.family
+                                    placeholderText: fieldRow.model.kind === "totp" ? qsTr("Enter secret key") : ""
+                                    Layout.fillWidth: true
+                                    onTextEdited: {
+                                        fieldsModel.setProperty(fieldRow.index, "value", text)
+                                        editor.changed = true
+                                    }
+                                }
+                                PasswordField {
+                                    visible: !fieldRow.isSection && fieldRow.isSecret
+                                    text: fieldRow.model.value
+                                    Layout.fillWidth: true
+                                    onTextEdited: {
+                                        fieldsModel.setProperty(fieldRow.index, "value", text)
+                                        editor.changed = true
+                                    }
+                                }
+                                TextArea {
+                                    visible: !fieldRow.isSection && !fieldRow.isSecret && fieldRow.model.kind === "multiline"
+                                    text: fieldRow.model.value
+                                    wrapMode: TextEdit.Wrap
+                                    Layout.fillWidth: true
+                                    Layout.minimumHeight: Math.round(80 * Appearance.factor)
+                                    onTextChanged: {
+                                        if (text !== fieldRow.model.value) {
+                                            fieldsModel.setProperty(fieldRow.index, "value", text)
+                                            editor.changed = true
+                                        }
+                                    }
+                                }
+                                Button {
+                                    visible: fieldRow.model.kind === "password"
+                                    text: qsTr("Generate")
+                                    onClicked: generator.openFor(fieldRow.index)
+                                }
+                                // Field Options, in blue, under the mouse.
+                                ToolButton {
+                                    objectName: "fieldOptionsButton"
+                                    text: "…"
+                                    palette.buttonText: editor.palette.highlight
+                                    opacity: fieldRow.active ? 1 : 0
+                                    Layout.alignment: fieldRow.model.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
+                                    onClicked: fieldOptions.showFor(fieldRow.index, false)
+                                }
                             }
                         }
-                        Item { Layout.fillWidth: true }
-                        ToolButton {
-                            objectName: "fieldUpButton"
-                            text: "↑"
-                            enabled: fieldRow.index > 0
-                            onClicked: editor.moveField(fieldRow.index, -1)
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Move the field up")
-                        }
-                        ToolButton {
-                            objectName: "fieldDownButton"
-                            text: "↓"
-                            enabled: fieldRow.index < fieldsModel.count - 1
-                            onClicked: editor.moveField(fieldRow.index, 1)
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("Move the field down")
-                        }
-                        Button {
+                    }
+                }
+
+                // Tags (D-028).
+                Label {
+                    text: qsTr("Tags")
+                    opacity: 0.7
+                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: Math.round(6 * Appearance.factor)
+                    visible: tagsModel.count > 0
+                    Repeater {
+                        model: tagsModel
+                        delegate: Button {
+                            required property int index
+                            required property string tag
+                            objectName: "tagChip"
+                            text: tag + "  ×"
                             flat: true
-                            text: qsTr("Remove field")
-                            onClicked: {
-                                fieldsModel.remove(fieldRow.index)
-                                editor.changed = true
-                            }
+                            onClicked: editor.removeTag(index)
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Remove this tag")
                         }
                     }
+                }
+                TextField {
+                    id: tagField
+                    objectName: "tagField"
+                    placeholderText: qsTr("Add a tag, for example Work/Servers, and press Enter")
+                    Layout.fillWidth: true
+                    onAccepted: editor.addTag()
+                }
 
-                    RowLayout {
+                // Attachments (D-029): kept inside the vault, sealed.
+                Label {
+                    visible: attachmentsModel.count > 0 || editor.waitingFor.length > 0
+                    text: qsTr("Attachments")
+                    opacity: 0.7
+                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                }
+                Repeater {
+                    model: attachmentsModel
+                    delegate: RowLayout {
+                        required property int index
+                        required property string name
+                        required property double size
                         Layout.fillWidth: true
-                        visible: fieldRow.model.kind !== "multiline"
-
-                        TextField {
-                            visible: !fieldRow.isPassword
-                            text: fieldRow.model.value
-                            placeholderText: fieldRow.isCode ? qsTr("The secret the site gives, or its otpauth:// address") : ""
-                            Layout.fillWidth: true
-                            onTextEdited: {
-                                fieldsModel.setProperty(fieldRow.index, "value", text)
-                                editor.changed = true
-                            }
-                        }
-                        PasswordField {
-                            visible: fieldRow.isPassword
-                            text: fieldRow.model.value
-                            Layout.fillWidth: true
-                            onTextEdited: {
-                                fieldsModel.setProperty(fieldRow.index, "value", text)
-                                editor.changed = true
-                            }
-                        }
-                        Button {
-                            visible: fieldRow.isPassword
-                            text: qsTr("Generate…")
-                            onClicked: generator.openFor(fieldRow.index)
-                        }
-                        Button {
-                            visible: !fieldRow.isCode
-                            enabled: fieldRow.model.value !== ""
-                            text: qsTr("Copy")
-                            onClicked: VaultController.copyToClipboard(fieldRow.model.value)
-                        }
-                    }
-
-                    RowLayout {
-                        visible: fieldRow.isCode && fieldRow.model.value !== ""
-                        readonly property string code: { editor.tick; return VaultController.oneTimeCode(fieldRow.model.value) }
-                        Label {
-                            text: parent.code === "" ? qsTr("This is not a valid one-time code secret.") : parent.code
-                            font.family: "Noto Sans Mono"
-                            font.pointSize: Appearance.fontPointSize * (parent.code === "" ? 1.0 : 1.6)
+                        Image {
+                            source: "qrc:/icons/attachment.svg"
+                            sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
                         }
                         Label {
-                            visible: parent.code !== ""
-                            text: { editor.tick; return qsTr("%n second(s) left", "", VaultController.oneTimeCodeSecondsLeft(fieldRow.model.value)) }
+                            text: name
+                            textFormat: Text.PlainText
+                            elide: Text.ElideMiddle
+                            Layout.fillWidth: true
+                        }
+                        Label {
+                            text: VaultController.sizeText(size)
                             opacity: 0.7
                         }
                         Button {
-                            visible: parent.code !== ""
-                            text: qsTr("Copy code")
-                            onClicked: VaultController.copyToClipboard(VaultController.oneTimeCode(fieldRow.model.value))
-                        }
-                    }
-
-                    TextArea {
-                        visible: fieldRow.model.kind === "multiline"
-                        text: fieldRow.model.value
-                        wrapMode: TextEdit.Wrap
-                        Layout.fillWidth: true
-                        Layout.minimumHeight: Math.round(80 * Appearance.factor)
-                        onTextChanged: {
-                            if (text !== fieldRow.model.value) {
-                                fieldsModel.setProperty(fieldRow.index, "value", text)
+                            flat: true
+                            text: qsTr("Remove")
+                            onClicked: {
+                                attachmentsModel.remove(index)
                                 editor.changed = true
                             }
                         }
                     }
-                }
-            }
-
-            RowLayout {
-                Button {
-                    text: qsTr("Add a text field")
-                    flat: true
-                    onClicked: editor.addField("text")
-                }
-                Button {
-                    text: qsTr("Add a password field")
-                    flat: true
-                    onClicked: editor.addField("password")
-                }
-                Button {
-                    text: qsTr("Add a field of several lines")
-                    flat: true
-                    onClicked: editor.addField("multiline")
-                }
-            }
-
-            // Tags (D-028): each shown with a cross to take it off; a new one
-            // typed below, a slash nesting it under another.
-            Label {
-                text: qsTr("Tags")
-                opacity: 0.8
-                Layout.topMargin: Math.round(6 * Appearance.factor)
-            }
-            Flow {
-                Layout.fillWidth: true
-                spacing: Math.round(6 * Appearance.factor)
-                visible: tagsModel.count > 0
-                Repeater {
-                    model: tagsModel
-                    delegate: Button {
-                        required property int index
-                        required property string tag
-                        objectName: "tagChip"
-                        text: tag + "  ×"
-                        flat: true
-                        onClicked: editor.removeTag(index)
-                        ToolTip.visible: hovered
-                        ToolTip.text: qsTr("Remove this tag")
-                    }
-                }
-            }
-            TextField {
-                id: tagField
-                objectName: "tagField"
-                placeholderText: qsTr("Add a tag, for example Work/Servers, and press Enter")
-                Layout.fillWidth: true
-                onAccepted: editor.addTag()
-            }
-
-            // Attachments (D-029): kept inside the vault, sealed.
-            Label {
-                text: qsTr("Attachments")
-                opacity: 0.8
-                Layout.topMargin: Math.round(6 * Appearance.factor)
-            }
-            Repeater {
-                model: attachmentsModel
-                delegate: RowLayout {
-                    required property int index
-                    required property string name
-                    required property double size
-                    Layout.fillWidth: true
-                    Image {
-                        source: "qrc:/icons/attachment.svg"
-                        sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
-                    }
-                    Label {
-                        text: name
-                        textFormat: Text.PlainText
-                        elide: Text.ElideMiddle
-                        Layout.fillWidth: true
-                    }
-                    Label {
-                        text: VaultController.sizeText(size)
-                        opacity: 0.7
-                    }
-                    Button {
-                        flat: true
-                        text: qsTr("Remove")
-                        onClicked: {
-                            attachmentsModel.remove(index)
-                            editor.changed = true
-                        }
-                    }
-                }
-            }
-            RowLayout {
-                Button {
-                    objectName: "addAttachmentButton"
-                    text: qsTr("Add attachment…")
-                    flat: true
-                    onClicked: attachmentDialog.open()
                 }
                 Label {
                     visible: editor.waitingFor.length > 0
                     text: qsTr("Reading the file…")
                     opacity: 0.7
                 }
-            }
 
-            RowLayout {
-                Layout.topMargin: Math.round(8 * Appearance.factor)
-                Button {
-                    text: qsTr("Save")
-                    highlighted: true
-                    // Not while a file is still being read: it would be left out.
-                    enabled: (editor.changed || editor.isNew) && editor.waitingFor.length === 0
-                    onClicked: editor.store()
-                }
-                Button {
-                    text: editor.isNew ? qsTr("Cancel") : qsTr("Close")
-                    onClicked: editor.whenFree(editor.close)
-                }
-                Item { Layout.fillWidth: true }
-                Button {
-                    visible: !editor.isNew
-                    text: qsTr("Delete…")
-                    onClicked: deleteDialog.open()
-                }
+                Item { Layout.preferredHeight: Math.round(24 * Appearance.factor) }
             }
+        }
+    }
 
-            Item { Layout.preferredHeight: 8 }
+    // A field's options (D-034): its name, its type, whether it is hidden,
+    // and Delete Field; a section has only its name.
+    DialogWindow {
+        id: fieldOptions
+        objectName: "fieldOptions"
+        memoryName: "fieldOptions"
+        property int fieldIndex: -1
+        property bool isSection: false
+        property bool isNewField: false
+        property bool changedBefore: false
+        title: qsTr("Field Options")
+        // A field added through "Add ▾": closed without Save, the editor is
+        // as it was, unsaved changes and all.
+        function showForNew(kind) {
+            changedBefore = editor.changed
+            showFor(editor.addField(kind), true)
+        }
+        standardButtons: Dialog.Save
+        function showFor(index, isNewField) {
+            const field = fieldsModel.get(index)
+            fieldIndex = index
+            fieldOptions.isNewField = isNewField
+            isSection = field.kind === "section"
+            nameField.text = field.role === "" ? field.label : field.name
+            nameField.enabled = field.role === ""
+            let chosen = 0
+            for (let at = 0; at < editor.kinds.length; ++at) {
+                if (editor.kinds[at].kind === field.kind)
+                    chosen = at
+            }
+            typeBox.currentIndex = chosen
+            sensitiveSwitch.checked = field.sensitive === true || field.kind === "password"
+            open()
+            nameField.forceActiveFocus()
+            nameField.selectAll()
+        }
+        leftButtons: Button {
+            objectName: "deleteFieldButton"
+            text: qsTr("Delete Field")
+            palette.buttonText: "#e53e3e"
+            onClicked: {
+                fieldsModel.remove(fieldOptions.fieldIndex)
+                editor.changed = true
+                fieldOptions.isNewField = false
+                // The field is gone: nothing of this window goes to the next one.
+                fieldOptions.fieldIndex = -1
+                fieldOptions.accept()
+            }
+        }
+        onAccepted: {
+            if (fieldIndex < 0 || fieldIndex >= fieldsModel.count)
+                return
+            if (fieldsModel.get(fieldIndex).role === "") {
+                const name = nameField.text.trim() === "" ? (isSection ? qsTr("Section") : qsTr("Field"))
+                                                           : nameField.text.trim()
+                fieldsModel.setProperty(fieldIndex, "label", name)
+                fieldsModel.setProperty(fieldIndex, "name", name)
+            }
+            if (!isSection) {
+                const kind = editor.kinds[typeBox.currentIndex].kind
+                fieldsModel.setProperty(fieldIndex, "kind", kind)
+                fieldsModel.setProperty(fieldIndex, "sensitive", sensitiveSwitch.checked || kind === "password")
+            }
+            editor.changed = true
+        }
+        // Closed without Save: a field just added is not added after all.
+        onRejected: {
+            if (isNewField && fieldIndex >= 0 && fieldIndex < fieldsModel.count) {
+                fieldsModel.remove(fieldIndex)
+                editor.changed = changedBefore
+            }
+            isNewField = false
+        }
+        GridLayout {
+            columns: 2
+            columnSpacing: Math.round(24 * Appearance.factor)
+            rowSpacing: Math.round(12 * Appearance.factor)
+            Layout.preferredWidth: Math.round(420 * Appearance.factor)
+            Label { text: fieldOptions.isSection ? qsTr("Section Name") : qsTr("Field Name") }
+            TextField {
+                id: nameField
+                objectName: "fieldNameField"
+                Layout.fillWidth: true
+                onAccepted: fieldOptions.accept()
+            }
+            Label {
+                visible: !fieldOptions.isSection
+                text: qsTr("Field Type")
+            }
+            ComboBox {
+                id: typeBox
+                objectName: "fieldTypeBox"
+                visible: !fieldOptions.isSection
+                model: editor.kinds
+                textRole: "name"
+                Layout.fillWidth: true
+            }
+            Label {
+                visible: !fieldOptions.isSection
+                text: qsTr("Sensitive")
+            }
+            Switch {
+                id: sensitiveSwitch
+                objectName: "sensitiveSwitch"
+                visible: !fieldOptions.isSection
+                Layout.alignment: Qt.AlignRight
+            }
         }
     }
 
@@ -574,9 +738,22 @@ Item {
     }
 
     DialogWindow {
+        id: readingDialog
+        objectName: "readingDialog"
+        memoryName: "readingAttachment"
+        title: qsTr("A file is being read")
+        standardButtons: Dialog.Ok
+        ColumnLayout {
+            Label {
+                text: qsTr("The file you added is still being read. Try again in a moment.")
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            }
+        }
+    }
 
+    DialogWindow {
         id: unsavedDialog
-
         memoryName: "unsavedChanges"
         objectName: "unsavedDialog"
         title: qsTr("Save your changes?")
@@ -614,42 +791,6 @@ Item {
             editor.afterCancelling = null
             if (abandoned)
                 abandoned()
-        }
-    }
-
-    DialogWindow {
-        id: readingDialog
-        objectName: "readingDialog"
-        memoryName: "readingAttachment"
-        title: qsTr("A file is being read")
-        standardButtons: Dialog.Ok
-        ColumnLayout {
-            Label {
-                text: qsTr("The file you added is still being read. Try again in a moment.")
-                wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
-            }
-        }
-    }
-
-    DialogWindow {
-
-        id: deleteDialog
-        objectName: "deleteDialog"
-
-        memoryName: "deleteItem"
-        title: qsTr("Move this item to the Trash?")
-        standardButtons: Dialog.Yes | Dialog.No
-        ColumnLayout {
-            Label {
-                text: qsTr("“%1” is moved to the Trash, where it can be restored.").arg(titleField.text)
-                wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
-            }
-        }
-        onAccepted: {
-            VaultController.moveToTrash(editor.itemId, true)
-            editor.close()
         }
     }
 }

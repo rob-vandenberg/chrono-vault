@@ -34,6 +34,7 @@
 #include <QLocale>
 #include <QSaveFile>
 #include <QGuiApplication>
+#include <QInputDevice>
 #include <QMimeData>
 #include <QPointer>
 #include <QSettings>
@@ -43,9 +44,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.17
+// vault_controller.cpp 0.0.18
 
 // --- Version history ----------------------------------------------------
+// v0.0.18: Whether a touch screen is present (D-034)
 // v0.0.17: The reference program's fields and items for the windows: sections, field types, hide marks, hidden and
 //          deleted fields, field history; Trash and Archive; Hide sensitive fields and Show subtitles (D-033)
 // v0.0.16: A change made elsewhere to the vault file noticed, read again, or kept beside it as a conflict copy (D-032)
@@ -960,6 +962,14 @@ void VaultController::setHideSensitive(bool hide)
         QSettings().setValue(hideSensitiveKey, hide);
         emit hideSensitiveChanged();
     }
+}
+
+bool VaultController::touchScreen() const
+{
+    const auto devices = QInputDevice::devices();
+    return std::any_of(devices.cbegin(), devices.cend(), [](const QInputDevice* device) {
+        return device->type() == QInputDevice::DeviceType::TouchScreen;
+    });
 }
 
 void VaultController::setShowSubtitles(bool show)
