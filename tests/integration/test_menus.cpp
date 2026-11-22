@@ -85,6 +85,7 @@ private slots:
     void the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts();
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
     void the_sidebar_collapses_to_icons_and_its_groups_fold();
+    void keyboard_shortcuts_are_set_on_their_page_and_kept();
 
 private:
     // The main window with a vault unlocked, and one item shown.
@@ -217,9 +218,10 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
                           "Copy Username [Shift+Ctrl+U]", "Copy E-mail [Shift+Ctrl+E]", "Copy Password [Shift+Ctrl+P]",
                           "Show Passwords [Shift+Ctrl+H]", "Copy URL [Shift+Ctrl+R]", "Copy OTP [Shift+Ctrl+T]",
                           "Launch URL [Shift+Ctrl+L]"}));
-    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Lock vault [Ctrl+L]", "Clear Clipboard [Ctrl+B]",
+    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Lock vault [Ctrl+L]", "Clear Clipboard [Shift+Ctrl+B]",
                                           "Generate Password [Ctrl+G]"}));
-    QCOMPARE(menuEntries(4), QStringList({"&Help", "Check for updates", "Support website", "About [F1]"}));
+    QCOMPARE(menuEntries(4), QStringList({"&Help", "Check for updates", "Support website", "Keyboard shortcuts…",
+                                          "About [F1]"}));
     // Backup and Restore are not built yet: greyed.
     QObject* file = window->findChild<QObject*>(QStringLiteral("fileMenu"));
     QVERIFY(file);
@@ -494,6 +496,83 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     };
     walk(root);
     QCOMPARE(handles, 2);
+}
+
+void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
+{
+    QVERIFY(open(QStringLiteral("keys")));
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QObject* catcher = window->findChild<QObject*>(QStringLiteral("keyCatcher"));
+    if (!catcher) {
+        catcher = settings->findChild<QObject*>(QStringLiteral("keyCatcher"));
+    }
+    QObject* ok = settings->findChild<QObject*>(QStringLiteral("okButton"));
+    QObject* cancel = settings->findChild<QObject*>(QStringLiteral("cancelButton"));
+    QObject* restore = settings->findChild<QObject*>(QStringLiteral("restoreDefaultsButton"));
+    QVERIFY(catcher && ok && cancel && restore);
+    QCOMPARE(controller->keysOf(QStringLiteral("sidebar")), QStringList{QStringLiteral("Ctrl+B")});
+    const auto keyMap = [settings](const char* action) {
+        return settings->property("keyMap").toMap().value(QString::fromLatin1(action)).toStringList();
+    };
+
+    // Help > Keyboard shortcuts… opens the page.
+    QMetaObject::invokeMethod(action(QStringLiteral("shortcutsAction")), "trigger");
+    QTRY_VERIFY(settings->property("visible").toBool());
+
+    // A new key added to Lock vault, kept with OK and shown in the menu.
+    QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Lock vault")));
+    QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
+    QCOMPARE(keyMap("lock"), QStringList({QStringLiteral("Ctrl+L"), QStringLiteral("Ctrl+K")}));
+
+    // A key already taken: Cancel changes nothing, OK moves that one key.
+    QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("copyOtp")), Q_ARG(QVariant, QStringLiteral("Copy OTP")));
+    QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
+    QCOMPARE(catcher->property("pendingKey").toString(), QStringLiteral("Ctrl+K"));
+    QVERIFY(QMetaObject::invokeMethod(catcher->findChild<QObject*>(QStringLiteral("keyTakenCancel")), "clicked"));
+    QCOMPARE(keyMap("lock"), QStringList({QStringLiteral("Ctrl+L"), QStringLiteral("Ctrl+K")}));
+    QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("copyOtp")), Q_ARG(QVariant, QStringLiteral("Copy OTP")));
+    QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
+    QVERIFY(QMetaObject::invokeMethod(catcher->findChild<QObject*>(QStringLiteral("keyTakenOk")), "clicked"));
+    QCOMPARE(keyMap("lock"), QStringList{QStringLiteral("Ctrl+L")});
+    QCOMPARE(keyMap("copyOtp"), QStringList({QStringLiteral("Shift+Ctrl+T"), QStringLiteral("Ctrl+K")}));
+
+    // A key removed: no key at all is allowed.
+    QMetaObject::invokeMethod(settings, "takeKey", Q_ARG(QVariant, QStringLiteral("generatePassword")), Q_ARG(QVariant, QStringLiteral("Ctrl+G")));
+    QVERIFY(keyMap("generatePassword").isEmpty());
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QCOMPARE(controller->keysOf(QStringLiteral("copyOtp")), QStringList({QStringLiteral("Shift+Ctrl+T"), QStringLiteral("Ctrl+K")}));
+    QVERIFY(controller->keysOf(QStringLiteral("generatePassword")).isEmpty());
+    QCOMPARE(action(QStringLiteral("generatePasswordAction"))->property("shownKeys").toString(), QString());
+
+    // Cancel throws changes away.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showShortcuts"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    QMetaObject::invokeMethod(settings, "takeKey", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Ctrl+L")));
+    QVERIFY(QMetaObject::invokeMethod(cancel, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QCOMPARE(controller->keysOf(QStringLiteral("lock")), QStringList{QStringLiteral("Ctrl+L")});
+
+    // A key the person set works: Ctrl+K copies the code; Ctrl+B collapses
+    // the sidebar.
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, QString())));
+    auto* quickWindow = qobject_cast<QQuickWindow*>(window);
+    quickWindow->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(quickWindow));
+    window->findChild<QQuickItem*>(QStringLiteral("itemList"))->forceActiveFocus();
+    QTest::keyClick(quickWindow, Qt::Key_B, Qt::ControlModifier);
+    QTRY_VERIFY(controller->sidebarCollapsed());
+    QTest::keyClick(quickWindow, Qt::Key_B, Qt::ControlModifier);
+    QTRY_VERIFY(!controller->sidebarCollapsed());
+
+    // Restore defaults puts back the keys Chrono Vault starts with.
+    QVERIFY(QMetaObject::invokeMethod(settings, "showShortcuts"));
+    QTRY_VERIFY(settings->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(!settings->property("visible").toBool());
+    QCOMPARE(controller->keysOf(QStringLiteral("copyOtp")), QStringList{QStringLiteral("Shift+Ctrl+T")});
+    QCOMPARE(controller->keysOf(QStringLiteral("generatePassword")), QStringList{QStringLiteral("Ctrl+G")});
 }
 
 QTEST_MAIN(TestMenus)

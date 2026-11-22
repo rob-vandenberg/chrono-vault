@@ -108,6 +108,8 @@ class VaultController : public QObject
     Q_PROPERTY(bool hideSensitive READ hideSensitive WRITE setHideSensitive NOTIFY hideSensitiveChanged)
     Q_PROPERTY(bool showSubtitles READ showSubtitles WRITE setShowSubtitles NOTIFY showSubtitlesChanged)
     // The View menu's choices, kept in the settings (D-039).
+    // Changes whenever a key is set, so bindings read the keys again.
+    Q_PROPERTY(int shortcutsRevision READ shortcutsRevision NOTIFY shortcutsChanged)
     Q_PROPERTY(bool showItemCounts READ showItemCounts WRITE setShowItemCounts NOTIFY viewChanged)
     Q_PROPERTY(bool sidebarHidden READ sidebarHidden WRITE setSidebarHidden NOTIFY viewChanged)
     Q_PROPERTY(bool showCategories READ showCategories WRITE setShowCategories NOTIFY viewChanged)
@@ -379,6 +381,14 @@ public:
     Q_INVOKABLE void copyToClipboard(const QString& text);
     // Tools > Clear Clipboard: empties it at once, whatever is on it (D-039).
     Q_INVOKABLE void clearClipboard();
+    // The keyboard shortcuts, each action's keys as the person set them, or
+    // the ones Chrono Vault starts with (D-045). An empty list: no key.
+    [[nodiscard]] Q_INVOKABLE QStringList keysOf(const QString& action) const;
+    [[nodiscard]] Q_INVOKABLE QStringList defaultKeysOf(const QString& action) const;
+    Q_INVOKABLE void setKeys(const QString& action, const QStringList& keys);
+    // A pressed key in words, modifiers first as the menus write them:
+    // "Shift+Ctrl+B"; empty for a modifier alone.
+    [[nodiscard]] Q_INVOKABLE QString keyName(int key, int modifiers) const;
     [[nodiscard]] Q_INVOKABLE QString generatePassword(int length, bool uppercase, bool lowercase, bool digits,
                                                        bool symbols) const;
     // The current one-time code for a secret, or empty when it is not one.
@@ -420,6 +430,7 @@ signals:
     void hideSensitiveChanged();
     void showSubtitlesChanged();
     void viewChanged();
+    void shortcutsChanged();
     void useWebsiteIconsChanged();
     void quickUnlockChanged();
     void keepInTrayChanged();
@@ -517,6 +528,8 @@ private:
     bool hideSecrets = true;
     bool subtitlesShown = true;
     [[nodiscard]] bool viewOption(const QString& name, bool fallback) const;
+    int keysRevision = 0;
+    [[nodiscard]] int shortcutsRevision() const { return keysRevision; }
     void setViewOption(const QString& name, bool on);
     bool websiteIconsOn = false;
     std::unique_ptr<QuickUnlock> quick;

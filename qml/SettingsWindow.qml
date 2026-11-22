@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.28
+// SettingsWindow.qml 0.0.35
 
 // --- Version history ----------------------------------------------------
+// v0.0.35: Keyboard shortcuts, after Chrono Viewer's page (D-045)
 // v0.0.28: The fingerprint one check box for all vaults, its touch in a popup; the switches no longer mirrored (D-043)
 // v0.0.27: General: Keep running in the tray last; the fingerprint a switch, its touch and outcome told here (D-042)
 // v0.0.25: Security: Change the Master Password, Autolock when (D-040)
@@ -77,6 +78,52 @@ ApplicationWindow {
         requestActivate()
     }
 
+    // Help > Keyboard shortcuts… (D-045).
+    function showShortcuts() {
+        showWindow()
+        topics.currentIndex = 4
+    }
+
+    // The actions whose keys the person sets, from the main window, so the
+    // page uses the menus' own words (D-045).
+    property var keyedActions: []
+    // The keys shown, by action, until OK keeps them.
+    property var keyMap: ({})
+    function loadKeys() {
+        const map = {}
+        for (const action of keyedActions)
+            map[action.actionId] = VaultController.keysOf(action.actionId)
+        keyMap = map
+    }
+    function keepKeys() {
+        for (const action of keyedActions) {
+            const keys = keyMap[action.actionId] || []
+            if (JSON.stringify(keys) !== JSON.stringify(VaultController.keysOf(action.actionId)))
+                VaultController.setKeys(action.actionId, keys)
+        }
+    }
+    // Who answers to a key now, other than this action; "" for nobody.
+    function holderOf(key, exceptAction) {
+        for (const action of keyedActions)
+            if (action.actionId !== exceptAction && (keyMap[action.actionId] || []).indexOf(key) >= 0)
+                return action.actionId
+        return ""
+    }
+    function giveKey(actionId, key) {
+        const map = Object.assign({}, keyMap)
+        const holder = holderOf(key, actionId)
+        if (holder !== "")
+            map[holder] = map[holder].filter(function(one) { return one !== key }) // only that one key
+        if ((map[actionId] || []).indexOf(key) < 0)
+            map[actionId] = (map[actionId] || []).concat([key])
+        keyMap = map
+    }
+    function takeKey(actionId, key) {
+        const map = Object.assign({}, keyMap)
+        map[actionId] = (map[actionId] || []).filter(function(one) { return one !== key })
+        keyMap = map
+    }
+
     // Opened at General (the View menu).
     function showGeneral() {
         showWindow()
@@ -124,6 +171,7 @@ ApplicationWindow {
         showSubtitles = VaultController.showSubtitles
         useWebsiteIcons = VaultController.useWebsiteIcons
         masterPasswordReminder = VaultController.masterPasswordReminder
+        loadKeys()
     }
 
     function showTheme(chosen) {
@@ -178,6 +226,7 @@ ApplicationWindow {
             VaultController.useWebsiteIcons = useWebsiteIcons
         if (VaultController.masterPasswordReminder !== masterPasswordReminder)
             VaultController.masterPasswordReminder = masterPasswordReminder
+        keepKeys()
         // Starting at startup is written outside Chrono Vault and can fail:
         // the window stays open and says so, showing the setting as it is.
         if (VaultController.startAtStartup !== startAtStartup) {
@@ -264,6 +313,13 @@ ApplicationWindow {
             showSubtitles = defaults.showSubtitles
             useWebsiteIcons = defaults.useWebsiteIcons
             break
+        case 4: {
+            const map = {}
+            for (const action of keyedActions)
+                map[action.actionId] = VaultController.defaultKeysOf(action.actionId)
+            keyMap = map
+            break
+        }
         }
     }
 
@@ -347,7 +403,8 @@ ApplicationWindow {
                     anchors.margins: parent.border.width
                     clip: true
                     currentIndex: 0
-                    model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard"), qsTr("Customize")]
+                    model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard"), qsTr("Customize"),
+                            qsTr("Keyboard shortcuts")]
                     delegate: Rectangle {
                         id: topic
                         required property int index
@@ -699,6 +756,159 @@ ApplicationWindow {
                         }
                         CustomizePage { Layout.fillWidth: true }
                     }
+
+                    // Keyboard shortcuts, after Chrono Viewer's page (D-045):
+                    // every action on its row with its keys one under the
+                    // other, a cross after each, a + on the first line.
+                    ColumnLayout {
+                        objectName: "shortcutsPage"
+                        spacing: Math.round(4 * Appearance.factor)
+                        // Escape cannot be set: it cancels and closes.
+                        RowLayout {
+                            Layout.fillWidth: true
+                            opacity: 0.5
+                            Label {
+                                text: qsTr("Cancel, close a window")
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: "Esc"
+                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                            }
+                            Item { Layout.preferredWidth: Math.round(64 * Appearance.factor) }
+                        }
+                        Repeater {
+                            model: settingsWindow.keyedActions
+                            delegate: RowLayout {
+                                id: shortcutRow
+                                required property var modelData
+                                readonly property string actionId: modelData.actionId
+                                readonly property var keys: settingsWindow.keyMap[actionId] || []
+                                objectName: "shortcutRow_" + actionId
+                                Layout.fillWidth: true
+                                Label {
+                                    text: shortcutRow.modelData.text.replace("&", "")
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignTop
+                                    topPadding: Math.round(6 * Appearance.factor)
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Layout.alignment: Qt.AlignTop
+                                    Label {
+                                        visible: shortcutRow.keys.length === 0
+                                        text: qsTr("no key")
+                                        opacity: 0.5
+                                        Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                        topPadding: Math.round(6 * Appearance.factor)
+                                    }
+                                    Repeater {
+                                        model: shortcutRow.keys
+                                        delegate: RowLayout {
+                                            required property string modelData
+                                            Label {
+                                                objectName: "shortcutKey"
+                                                text: modelData
+                                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                            }
+                                            ToolButton {
+                                                objectName: "removeKey_" + shortcutRow.actionId
+                                                text: "×"
+                                                onClicked: settingsWindow.takeKey(shortcutRow.actionId, modelData)
+                                            }
+                                        }
+                                    }
+                                }
+                                ToolButton {
+                                    objectName: "addKey_" + shortcutRow.actionId
+                                    text: "+"
+                                    Layout.alignment: Qt.AlignTop
+                                    onClicked: keyCatcher.askFor(shortcutRow.actionId, shortcutRow.modelData.text.replace("&", ""))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // The box that waits for a key: pressed, not typed (D-045). Escape
+        // cancels it.
+        Popup {
+            id: keyCatcher
+            objectName: "keyCatcher"
+            parent: Overlay.overlay
+            anchors.centerIn: parent
+            modal: true
+            focus: true
+            closePolicy: Popup.NoAutoClose
+            padding: Math.round(16 * Appearance.factor)
+            property string actionId: ""
+            property string actionName: ""
+            property string pendingKey: ""
+            function askFor(id, name) {
+                actionId = id
+                actionName = name
+                pendingKey = ""
+                open()
+                catcher.forceActiveFocus()
+            }
+            // A key pressed, or the tests' stand-in for one.
+            function take(key) {
+                if (key === "")
+                    return
+                if (settingsWindow.holderOf(key, actionId) !== "") {
+                    pendingKey = key // asked first: already assigned
+                    return
+                }
+                settingsWindow.giveKey(actionId, key)
+                close()
+            }
+            contentItem: ColumnLayout {
+                spacing: Math.round(12 * Appearance.factor)
+                Label {
+                    text: keyCatcher.pendingKey === ""
+                          ? qsTr("Press the new key for “%1”.").arg(keyCatcher.actionName)
+                          : qsTr("This key has already been assigned")
+                    font.bold: keyCatcher.pendingKey !== ""
+                }
+                Item {
+                    id: catcher
+                    focus: true
+                    implicitHeight: 1
+                    Keys.onPressed: function(event) {
+                        event.accepted = true
+                        if (keyCatcher.pendingKey !== "")
+                            return
+                        if (event.key === Qt.Key_Escape) {
+                            keyCatcher.close()
+                            return
+                        }
+                        keyCatcher.take(VaultController.keyName(event.key, event.modifiers))
+                    }
+                }
+                RowLayout {
+                    visible: keyCatcher.pendingKey !== ""
+                    Layout.alignment: Qt.AlignRight
+                    Button {
+                        objectName: "keyTakenOk"
+                        text: qsTr("OK")
+                        onClicked: {
+                            settingsWindow.giveKey(keyCatcher.actionId, keyCatcher.pendingKey)
+                            keyCatcher.close()
+                        }
+                    }
+                    Button {
+                        objectName: "keyTakenCancel"
+                        text: qsTr("Cancel")
+                        onClicked: keyCatcher.close()
+                    }
+                }
+                Button {
+                    visible: keyCatcher.pendingKey === ""
+                    text: qsTr("Cancel")
+                    Layout.alignment: Qt.AlignRight
+                    onClicked: keyCatcher.close()
                 }
             }
         }

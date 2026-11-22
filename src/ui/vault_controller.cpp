@@ -32,6 +32,7 @@
 #include <QCollator>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QKeySequence>
 #include <QBuffer>
 #include <QFile>
 #include <QImage>
@@ -2776,6 +2777,73 @@ void VaultController::copyToClipboard(const QString& text)
         clipboardTimer.stop();
         say(tr("Copied."), false);
     }
+}
+
+QStringList VaultController::defaultKeysOf(const QString& action) const
+{
+    // The keys Chrono Vault starts with: the reference program's (D-039),
+    // Ctrl+B for the sidebar and Shift+Ctrl+B to clear the clipboard (D-045).
+    static const QHash<QString, QStringList> defaults{
+        {QStringLiteral("quit"), {QStringLiteral("Ctrl+Q")}},
+        {QStringLiteral("archive"), {QStringLiteral("Shift+Backspace")}},
+        {QStringLiteral("moveToTrash"), {QStringLiteral("Backspace")}},
+        {QStringLiteral("copyUsername"), {QStringLiteral("Shift+Ctrl+U")}},
+        {QStringLiteral("copyEmail"), {QStringLiteral("Shift+Ctrl+E")}},
+        {QStringLiteral("copyPassword"), {QStringLiteral("Shift+Ctrl+P")}},
+        {QStringLiteral("showPasswords"), {QStringLiteral("Shift+Ctrl+H")}},
+        {QStringLiteral("copyUrl"), {QStringLiteral("Shift+Ctrl+R")}},
+        {QStringLiteral("copyOtp"), {QStringLiteral("Shift+Ctrl+T")}},
+        {QStringLiteral("launchUrl"), {QStringLiteral("Shift+Ctrl+L")}},
+        {QStringLiteral("lock"), {QStringLiteral("Ctrl+L")}},
+        {QStringLiteral("clearClipboard"), {QStringLiteral("Shift+Ctrl+B")}},
+        {QStringLiteral("generatePassword"), {QStringLiteral("Ctrl+G")}},
+        {QStringLiteral("about"), {QStringLiteral("F1")}},
+        {QStringLiteral("sidebar"), {QStringLiteral("Ctrl+B")}},
+    };
+    return defaults.value(action);
+}
+
+QStringList VaultController::keysOf(const QString& action) const
+{
+    QSettings settings;
+    const QString key = QStringLiteral("shortcuts/") + action;
+    return settings.contains(key) ? settings.value(key).toStringList() : defaultKeysOf(action);
+}
+
+void VaultController::setKeys(const QString& action, const QStringList& keys)
+{
+    QSettings settings;
+    const QString key = QStringLiteral("shortcuts/") + action;
+    if (keys == defaultKeysOf(action)) {
+        settings.remove(key);
+    } else {
+        // An empty list is kept as a list, so "no key" is remembered.
+        settings.setValue(key, keys.isEmpty() ? QVariant(QStringList{}) : QVariant(keys));
+    }
+    ++keysRevision;
+    emit shortcutsChanged();
+}
+
+QString VaultController::keyName(int key, int modifiers) const
+{
+    if (key == Qt::Key_Shift || key == Qt::Key_Control || key == Qt::Key_Alt || key == Qt::Key_Meta ||
+        key == Qt::Key_unknown || key == 0) {
+        return {};
+    }
+    QString name;
+    if (modifiers & Qt::ShiftModifier) {
+        name += QStringLiteral("Shift+");
+    }
+    if (modifiers & Qt::ControlModifier) {
+        name += QStringLiteral("Ctrl+");
+    }
+    if (modifiers & Qt::AltModifier) {
+        name += QStringLiteral("Alt+");
+    }
+    if (modifiers & Qt::MetaModifier) {
+        name += QStringLiteral("Meta+");
+    }
+    return name + QKeySequence(key).toString(QKeySequence::PortableText);
 }
 
 void VaultController::clearClipboard()

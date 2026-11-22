@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.25
+// Main.qml 0.0.35
 
 // --- Version history ----------------------------------------------------
+// v0.0.35: The keys of every action set by the person; Ctrl+B the sidebar (D-045)
 // v0.0.25: Autolock when the main window is closed; Settings > Security opens Change the Master Password (D-040)
 // v0.0.24: The menus after the reference program's, with their shortcuts (D-039)
 // v0.0.22: File > Export… (D-037)
@@ -64,8 +65,43 @@ ApplicationWindow {
     // A text field has the keyboard: the menus' shortcuts stand aside, so
     // Backspace deletes a letter, never the item (D-039).
     readonly property bool typing: activeFocusItem !== null && activeFocusItem.cursorPosition !== undefined
-    function keys(sequence) {
-        return typing ? "" : sequence
+    // The keys of every action, as the person set them (D-045): the menus
+    // show the first; each action answers to all of them.
+    function firstKey(actionId) {
+        VaultController.shortcutsRevision
+        const keys = VaultController.keysOf(actionId)
+        return keys.length > 0 ? keys[0] : ""
+    }
+    // The sidebar's collapse and expand, an action of its own with a key.
+    Action {
+        id: action_sidebar
+        property string actionId: "sidebar"
+        text: qsTr("Collapse or expand the sidebar")
+        enabled: mainWindow.unlocked
+        onTriggered: vaultPage.setCollapsed(!vaultPage.collapsed)
+    }
+    readonly property var keyedActions: [
+        action_newVault, action_openVault, action_changeMasterPassword, action_import, action_export,
+        action_preferences, action_quit, action_showItemCounts, action_hideSidebar, action_sidebar,
+        action_hideSensitive, action_showCategories, action_showTags, action_showOthers, action_archive,
+        action_moveToTrash, action_copyUsername, action_copyEmail, action_copyPassword, action_showPasswords,
+        action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_clearClipboard,
+        action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
+    ]
+    // One shortcut per action, from its keys as they are now. They stand aside
+    // while a text field is typed in; Quit answers in every window.
+    Instantiator {
+        model: mainWindow.keyedActions
+        delegate: Shortcut {
+            required property var modelData
+            readonly property bool quit: modelData.actionId === "quit"
+            sequences: {
+                VaultController.shortcutsRevision
+                return mainWindow.typing && !quit ? [] : VaultController.keysOf(modelData.actionId)
+            }
+            context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
+            onActivated: if (modelData.enabled) modelData.trigger()
+        }
     }
 
     readonly property string supportWebsite: "https://github.com/rob-vandenberg/chrono-vault"
@@ -162,16 +198,25 @@ ApplicationWindow {
                     objectName: "fileMenu"
                     title: qsTr("&File")
                     Action {
+                        id: action_newVault
+                        property string actionId: "newVault"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("New vault")
                         enabled: !mainWindow.busy
                         onTriggered: mainWindow.newVault()
                     }
                     Action {
+                        id: action_openVault
+                        property string actionId: "openVault"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Open vault")
                         enabled: !mainWindow.busy
                         onTriggered: mainWindow.openVault()
                     }
                     Action {
+                        id: action_changeMasterPassword
+                        property string actionId: "changeMasterPassword"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Change Master Password")
                         enabled: mainWindow.unlocked
                         onTriggered: mainWindow.changeMasterPassword()
@@ -179,34 +224,51 @@ ApplicationWindow {
                     MenuSeparator {}
                     // Not built yet.
                     Action {
+                        id: action_backup
+                        property string actionId: "backup"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Backup")
                         enabled: false
                     }
                     Action {
+                        id: action_restore
+                        property string actionId: "restore"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Restore")
                         enabled: false
                     }
                     MenuSeparator {}
                     Action {
+                        id: action_import
+                        property string actionId: "import"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Import")
                         enabled: mainWindow.unlocked
                         onTriggered: vaultPage.whenEditorFree(function() { importWindow.start() })
                     }
                     Action {
+                        id: action_export
+                        property string actionId: "export"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Export")
                         enabled: mainWindow.unlocked
                         onTriggered: vaultPage.whenEditorFree(function() { exportWindow.ask() })
                     }
                     MenuSeparator {}
                     Action {
+                        id: action_preferences
+                        property string actionId: "preferences"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Preferences")
                         onTriggered: settingsWindow.showWindow()
                     }
                     MenuSeparator {}
                     Action {
+                        id: action_quit
+                        property string actionId: "quit"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "quitAction"
                         text: qsTr("Quit")
-                        shortcut: "Ctrl+Q"
                         onTriggered: mainWindow.requestQuit()
                     }
                 }
@@ -214,6 +276,9 @@ ApplicationWindow {
                     objectName: "viewMenu"
                     title: qsTr("&View")
                     Action {
+                        id: action_showItemCounts
+                        property string actionId: "showItemCounts"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "showItemCountsAction"
                         text: qsTr("Show Item Counts")
                         checkable: true
@@ -224,6 +289,9 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_hideSidebar
+                        property string actionId: "hideSidebar"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "hideSidebarAction"
                         text: qsTr("Hide Sidebar")
                         checkable: true
@@ -234,6 +302,9 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_hideSensitive
+                        property string actionId: "hideSensitive"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "hideSensitiveAction"
                         text: qsTr("Hide Sensitive")
                         checkable: true
@@ -245,6 +316,9 @@ ApplicationWindow {
                     }
                     MenuSeparator {}
                     Action {
+                        id: action_showCategories
+                        property string actionId: "showCategories"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "showCategoriesAction"
                         text: qsTr("Categories")
                         checkable: true
@@ -255,6 +329,9 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_showTags
+                        property string actionId: "showTags"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "showTagsAction"
                         text: qsTr("Tags")
                         checkable: true
@@ -265,6 +342,9 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_showOthers
+                        property string actionId: "showOthers"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "showOthersAction"
                         text: qsTr("Others")
                         checkable: true
@@ -279,80 +359,89 @@ ApplicationWindow {
                     objectName: "itemMenu"
                     title: qsTr("&Item")
                     Action {
+                        id: action_archive
+                        property string actionId: "archive"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "archiveAction"
                         text: qsTr("Archive")
-                        property string shownKeys: "Shift+Backspace"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.chosenItem.archived !== true
                                  && mainWindow.chosenItem.trashed !== true
                         onTriggered: vaultPage.archiveChosen()
                     }
                     Action {
+                        id: action_moveToTrash
+                        property string actionId: "moveToTrash"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "moveToTrashAction"
                         text: qsTr("Move to Trash")
-                        property string shownKeys: "Backspace"
-                        shortcut: mainWindow.keys(shownKeys)
                         // Not for an item already in the Trash.
                         enabled: mainWindow.itemFree && mainWindow.chosenItem.trashed !== true
                         onTriggered: vaultPage.deleteChosen()
                     }
                     MenuSeparator {}
                     Action {
+                        id: action_copyUsername
+                        property string actionId: "copyUsername"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "copyUsernameAction"
                         text: qsTr("Copy Username")
-                        property string shownKeys: "Shift+Ctrl+U"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("username") !== ""
                         onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("username"))
                     }
                     Action {
+                        id: action_copyEmail
+                        property string actionId: "copyEmail"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "copyEmailAction"
                         text: qsTr("Copy E-mail")
-                        property string shownKeys: "Shift+Ctrl+E"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("email") !== ""
                         onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("email"))
                     }
                     Action {
+                        id: action_copyPassword
+                        property string actionId: "copyPassword"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "copyPasswordAction"
                         text: qsTr("Copy Password")
-                        property string shownKeys: "Shift+Ctrl+P"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("password") !== ""
                         onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("password"))
                     }
                     Action {
+                        id: action_showPasswords
+                        property string actionId: "showPasswords"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "showPasswordsAction"
                         text: qsTr("Show Passwords")
-                        property string shownKeys: "Shift+Ctrl+H"
-                        shortcut: mainWindow.keys(shownKeys)
                         // Shows them, and hides them again when chosen once more.
                         enabled: mainWindow.itemFree && VaultController.hideSensitive && mainWindow.hasSensitive
                         onTriggered: vaultPage.revealAll = !vaultPage.revealAll
                     }
                     Action {
+                        id: action_copyUrl
+                        property string actionId: "copyUrl"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "copyUrlAction"
                         text: qsTr("Copy URL")
-                        property string shownKeys: "Shift+Ctrl+R"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
                         onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("url"))
                     }
                     Action {
+                        id: action_copyOtp
+                        property string actionId: "copyOtp"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "copyOtpAction"
                         text: qsTr("Copy OTP")
-                        property string shownKeys: "Shift+Ctrl+T"
-                        shortcut: mainWindow.keys(shownKeys)
                         // Greyed too when the secret makes no code (a damaged import).
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("totp") !== ""
                                  && VaultController.oneTimeCode(mainWindow.fieldValue("totp")) !== ""
                         onTriggered: VaultController.copyToClipboard(VaultController.oneTimeCode(mainWindow.fieldValue("totp")))
                     }
                     Action {
+                        id: action_launchUrl
+                        property string actionId: "launchUrl"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "launchUrlAction"
                         text: qsTr("Launch URL")
-                        property string shownKeys: "Shift+Ctrl+L"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
                         onTriggered: mainWindow.launch(mainWindow.fieldValue("url"))
                     }
@@ -361,25 +450,28 @@ ApplicationWindow {
                     objectName: "toolsMenu"
                     title: qsTr("&Tools")
                     Action {
+                        id: action_lock
+                        property string actionId: "lock"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "lockAction"
                         text: qsTr("Lock vault")
-                        property string shownKeys: "Ctrl+L"
-                        shortcut: mainWindow.keys(shownKeys)
                         enabled: mainWindow.unlocked
                         onTriggered: VaultController.lock()
                     }
                     Action {
+                        id: action_clearClipboard
+                        property string actionId: "clearClipboard"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "clearClipboardAction"
                         text: qsTr("Clear Clipboard")
-                        property string shownKeys: "Ctrl+B"
-                        shortcut: mainWindow.keys(shownKeys)
                         onTriggered: VaultController.clearClipboard()
                     }
                     Action {
+                        id: action_generatePassword
+                        property string actionId: "generatePassword"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "generatePasswordAction"
                         text: qsTr("Generate Password")
-                        property string shownKeys: "Ctrl+G"
-                        shortcut: mainWindow.keys(shownKeys)
                         onTriggered: toolsGenerator.open()
                     }
                 }
@@ -387,6 +479,9 @@ ApplicationWindow {
                     objectName: "helpMenu"
                     title: qsTr("&Help")
                     Action {
+                        id: action_checkUpdates
+                        property string actionId: "checkUpdates"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Check for updates")
                         onTriggered: {
                             aboutWindow.open()
@@ -394,13 +489,26 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_supportWebsite
+                        property string actionId: "supportWebsite"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "supportWebsiteAction"
                         text: qsTr("Support website")
                         onTriggered: Qt.openUrlExternally(mainWindow.supportWebsite)
                     }
                     Action {
+                        id: action_shortcuts
+                        property string actionId: "shortcuts"
+                        property string shownKeys: mainWindow.firstKey(actionId)
+                        objectName: "shortcutsAction"
+                        text: qsTr("Keyboard shortcuts…")
+                        onTriggered: settingsWindow.showShortcuts()
+                    }
+                    Action {
+                        id: action_about
+                        property string actionId: "about"
+                        property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("About")
-                        shortcut: "F1"
                         onTriggered: aboutWindow.open()
                     }
                 }
@@ -550,13 +658,7 @@ ApplicationWindow {
         close()
     }
 
-    // Ctrl+Q in the program's other windows; in this one File > Quit has it.
-    Shortcut {
-        sequences: ["Ctrl+Q"]
-        context: Qt.ApplicationShortcut
-        enabled: !mainWindow.active
-        onActivated: mainWindow.requestQuit()
-    }
+
 
     // Closing never drops work without asking (OR-15).
     property bool quitAnyway: false
@@ -708,6 +810,7 @@ ApplicationWindow {
 
     SettingsWindow {
         id: settingsWindow
+        keyedActions: mainWindow.keyedActions
         onChangeMasterPasswordRequested: mainWindow.changeMasterPassword()
     }
 

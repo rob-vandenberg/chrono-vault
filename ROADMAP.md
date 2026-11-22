@@ -44,7 +44,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
 11. A dark tray icon.
 12. The compromised-password check (with step 12).
 13. Proxy settings, logs, Erase Everything.
-14. A keyboard shortcut editor that looks and works as Chrono Viewer's.
+14. ~~A keyboard shortcut editor that looks and works as Chrono Viewer's.~~ Done in 0.0.35 (D-045).
 
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.

@@ -19,7 +19,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location line="+33"/>
         <source>Check for update</source>
         <translation type="unfinished"></translation>
     </message>
@@ -848,7 +848,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+57"/>
+        <location filename="../qml/Main.qml" line="+58"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -858,48 +858,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+140"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+72"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+6"/>
         <source>&amp;View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+65"/>
+        <location line="+83"/>
         <source>&amp;Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+16"/>
         <source>Move to Trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+70"/>
+        <location line="+75"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+29"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+39"/>
         <source>New Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-33"/>
-        <location line="+84"/>
+        <location line="-45"/>
+        <location line="+96"/>
         <source>Generate Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -909,148 +909,158 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-274"/>
-        <location line="+282"/>
+        <location line="-320"/>
+        <location line="+328"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-319"/>
+        <location line="-511"/>
+        <source>Collapse or expand the sidebar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+125"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+8"/>
         <source>Open vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+8"/>
         <source>Change Master Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+10"/>
         <source>Backup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+7"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+8"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+8"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+30"/>
         <source>Show Item Counts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+13"/>
         <source>Hide Sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+13"/>
         <source>Hide Sensitive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+14"/>
         <source>Categories</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+13"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+13"/>
         <source>Others</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+17"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+21"/>
         <source>Copy Username</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Copy E-mail</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Copy Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Show Passwords</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>Copy URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Copy OTP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <source>Launch URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Clear Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+19"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+11"/>
         <source>Support website</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
+        <source>Keyboard shortcuts…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+118"/>
+        <location line="+115"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+129"/>
+        <location line="+123"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1223,46 +1233,46 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+141"/>
-        <location line="+330"/>
+        <location filename="../qml/SettingsWindow.qml" line="+189"/>
+        <location line="+339"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-285"/>
+        <location line="-293"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+84"/>
+        <location line="+91"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+80"/>
-        <location line="+168"/>
+        <location line="+169"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-168"/>
-        <location line="+308"/>
+        <location line="-169"/>
+        <location line="+309"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-308"/>
-        <location line="+42"/>
+        <location line="-309"/>
+        <location line="+43"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-42"/>
+        <location line="-43"/>
         <source>Customize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+46"/>
         <source>Theme</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1297,7 +1307,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-128"/>
+        <source>Keyboard shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+134"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1430,19 +1445,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+20"/>
+        <source>Cancel, close a window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+29"/>
+        <source>no key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+71"/>
+        <source>Press the new key for “%1”.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This key has already been assigned</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+61"/>
         <source>Restore defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-510"/>
-        <location line="+516"/>
+        <location line="-671"/>
+        <location line="+633"/>
+        <location line="+44"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-516"/>
-        <location line="+526"/>
+        <location line="-677"/>
+        <location line="+641"/>
+        <location line="+6"/>
+        <location line="+40"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1728,7 +1766,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+231"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+232"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1791,7 +1829,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+360"/>
+        <location filename="../qml/VaultPage.qml" line="+361"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2567,7 +2605,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+78"/>
         <source>The clipboard is cleared.</source>
         <translation type="unfinished"></translation>
     </message>
