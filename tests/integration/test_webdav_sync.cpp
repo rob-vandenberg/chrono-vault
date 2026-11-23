@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_sync.cpp 0.3.60
+// test_webdav_sync.cpp 0.3.61
 
 // --- Version history ----------------------------------------------------
+// v0.3.61: The first upload through a lock's placeholder that has no tag or size (pCloud)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057); its interruptions built apart
 
 using namespace chrono_vault;
@@ -233,6 +234,10 @@ private slots:
         first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
         QTRY_VERIFY_WITH_TIMEOUT(first->state() == State::Unlocked, 10000);
         QVERIFY(first->onWebDav());
+        // The first upload goes through a lock's placeholder, listed with no
+        // tag and no size, as pCloud lists one (0.3.61).
+        QTRY_VERIFY_WITH_TIMEOUT(!server.fileData(vaultName).isEmpty(), 10000);
+        QVERIFY(first->syncProblem().isEmpty());
         QVERIFY(addHere(*first, QStringLiteral("Mine")));
         QVERIFY(syncedNow(*first));
         QCOMPARE(titlesOfData(server.fileData(vaultName)), QStringList{QStringLiteral("Mine")});

@@ -18,6 +18,8 @@
 
 #include "webdav_client.h"
 
+#include "quick_unlock.h"
+
 #include <QAuthenticator>
 #include <QCryptographicHash>
 #include <QNetworkReply>
@@ -28,9 +30,10 @@
 #include <QXmlStreamReader>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.cpp 0.3.60
+// webdav_client.cpp 0.3.61
 
 // --- Version history ----------------------------------------------------
+// v0.3.61: Every request and its answer in the --debug log, never a password or a vault's bytes (D-057)
 // v0.3.60: Initial release (D-057)
 
 namespace chrono_vault {
@@ -226,6 +229,9 @@ QNetworkReply* WebDavClient::send(const QByteArray& verb, const QUrl& address, c
         request.setHeader(QNetworkRequest::ContentTypeHeader, QByteArrayLiteral("application/xml; charset=utf-8"));
     }
     QNetworkReply* reply = network.sendCustomRequest(request, verb, body);
+    fingerLog(QStringLiteral("webdav: %1 %2 (%3 bytes sent)")
+                  .arg(QString::fromLatin1(verb), address.toDisplayString(QUrl::RemoveUserInfo))
+                  .arg(body.size()));
     connect(reply, &QNetworkReply::downloadProgress, reply, [reply](qint64 received, qint64) {
         if (received > largestAnswerBytes) {
             reply->setProperty(tooLargeProperty, true);
@@ -278,6 +284,27 @@ void WebDavClient::whenDone(QNetworkReply* reply, std::function<void(WebDavReply
                 answer.body.clear();
                 answer.error = WebDavError::TooLarge;
             }
+        }
+        {
+            // The answer, for --debug: never a password or a vault's bytes.
+            QString headers;
+            for (const auto& [name, value] : reply->rawHeaderPairs()) {
+                const QByteArray lower = name.toLower();
+                if (lower != "set-cookie" && lower != "authorization" && lower != "www-authenticate") {
+                    headers += QStringLiteral(" | ") + QString::fromLatin1(name) + QStringLiteral(": ") +
+                               QString::fromLatin1(value);
+                }
+            }
+            QString shown = QStringLiteral("webdav:   -> status %1, error %2, qt error %3, %4 bytes%5")
+                                .arg(answer.status)
+                                .arg(static_cast<int>(answer.error))
+                                .arg(static_cast<int>(reply->error()))
+                                .arg(answer.body.size())
+                                .arg(headers);
+            if (reply->header(QNetworkRequest::ContentTypeHeader).toString().contains(QLatin1String("xml"))) {
+                shown += QStringLiteral("\nwebdav:   xml: ") + QString::fromUtf8(answer.body.left(3000));
+            }
+            fingerLog(shown);
         }
         done(answer, reply);
     });

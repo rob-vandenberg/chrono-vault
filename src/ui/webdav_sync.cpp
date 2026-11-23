@@ -18,6 +18,7 @@
 
 #include "webdav_sync.h"
 
+#include "quick_unlock.h"
 #include "settings_files.h"
 #include "vault_contents.h"
 #include "vault_merge.h"
@@ -34,9 +35,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// webdav_sync.cpp 0.3.60
+// webdav_sync.cpp 0.3.61
 
 // --- Version history ----------------------------------------------------
+// v0.3.61: A lock's empty placeholder is no version (pCloud); every step in the --debug log (D-057)
 // v0.3.60: Initial release (D-057)
 
 namespace chrono_vault {
@@ -274,6 +276,11 @@ void WebDavSync::round()
 
 void WebDavSync::downloaded(const WebDavReply& answer)
 {
+    fingerLog(QStringLiteral("webdav sync: round %1 downloaded: status %2, tag '%3', known tag '%4', %5 bytes")
+                  .arg(rounds)
+                  .arg(answer.status)
+                  .arg(QString::fromLatin1(answer.tag), QString::fromLatin1(where.tag))
+                  .arg(answer.body.size()));
     if (answer.error == WebDavError::NotFound) {
         remoteMissing = true; // first upload, or removed there: this device's version goes up
     } else if (!answer.ok()) {
@@ -421,6 +428,11 @@ void WebDavSync::downloaded(const WebDavReply& answer)
 
 void WebDavSync::prepared(const Prepared& ready)
 {
+    fingerLog(QStringLiteral("webdav sync: prepared: outcome %1, wrote working copy %2, upload %3 bytes, missing %4")
+                  .arg(static_cast<int>(ready.outcome))
+                  .arg(ready.wroteWorkingCopy)
+                  .arg(ready.upload.size())
+                  .arg(remoteMissing));
     if (ready.wroteWorkingCopy) {
         emit workingCopyChanged();
     }
@@ -529,6 +541,9 @@ void WebDavSync::lockForMove()
         }
         // A server without locks: the tag is checked right before the move.
         const QByteArray token = answer.ok() ? answer.body : QByteArray();
+        fingerLog(QStringLiteral("webdav sync: lock: error %1, token %2")
+                      .arg(static_cast<int>(answer.error))
+                      .arg(token.isEmpty() ? QStringLiteral("none") : QStringLiteral("given")));
         if (self->goOn(SyncStep::Locked)) {
             self->checkTag(token);
         }
@@ -550,8 +565,36 @@ void WebDavSync::checkTag(const QByteArray& lockToken)
             self->finishFrom(answer);
             return;
         }
-        // A lock on a missing file may make an empty one there: that is no
-        // version. Otherwise the tag must be the one this round started from.
+        if (self->remoteMissing && there) {
+            // Listed, though missing when this round began: a lock on a
+            // missing file may leave an empty placeholder (pCloud lists one
+            // with no tag, date or size, and answers 404 to reading it).
+            // Only content read back is another device's version.
+            self->client->get(self->where.fileName, {}, [self, lockToken](const WebDavReply& again) {
+                if (!self) {
+                    return;
+                }
+                const bool aVersion = again.ok() && !again.body.isEmpty();
+                fingerLog(QStringLiteral("webdav sync: placeholder check: status %1, %2 bytes, a version %3")
+                              .arg(again.status)
+                              .arg(again.body.size())
+                              .arg(aVersion));
+                if (!aVersion && !again.ok() && again.error != WebDavError::NotFound) {
+                    if (!lockToken.isEmpty()) {
+                        self->client->unlock(self->where.fileName, lockToken, [](const WebDavReply&) {});
+                    }
+                    self->finishFrom(again);
+                    return;
+                }
+                if (aVersion) {
+                    self->changedMeanwhile(lockToken);
+                } else {
+                    self->moveIntoPlace(lockToken);
+                }
+            });
+            return;
+        }
+        // The tag must be the one this round started from.
         if (!self->remoteMissing && there && answer.tag.isEmpty() && self->theirTag.isEmpty()) {
             // A server that gives no tags at all: its file is read again and
             // compared with the one this round merged with.
@@ -567,8 +610,15 @@ void WebDavSync::checkTag(const QByteArray& lockToken)
             });
             return;
         }
-        const bool changed = self->remoteMissing ? (there && answer.size != 0)
-                                                 : (!there || answer.tag.isEmpty() || answer.tag != self->theirTag);
+        const bool changed =
+            !self->remoteMissing && (!there || answer.tag.isEmpty() || answer.tag != self->theirTag);
+        fingerLog(QStringLiteral("webdav sync: tag check: there %1, missing before %2, size %3, tag '%4', expected '%5', "
+                                 "changed %6")
+                      .arg(there)
+                      .arg(self->remoteMissing)
+                      .arg(answer.size)
+                      .arg(QString::fromLatin1(answer.tag), QString::fromLatin1(self->theirTag))
+                      .arg(changed));
         if (changed) {
             self->changedMeanwhile(lockToken);
             return;
@@ -599,6 +649,7 @@ void WebDavSync::moveIntoPlace(const QByteArray& lockToken)
         if (!self) {
             return;
         }
+        fingerLog(QStringLiteral("webdav sync: move: error %1, status %2").arg(static_cast<int>(answer.error)).arg(answer.status));
         if (!answer.ok()) {
             if (!lockToken.isEmpty()) {
                 self->client->unlock(self->where.fileName, lockToken, [](const WebDavReply&) {});
@@ -681,6 +732,7 @@ void WebDavSync::finishFrom(const WebDavReply& answer)
 
 void WebDavSync::finish(SyncOutcome outcome, const QByteArray& certificate, const QString& conflictCopy)
 {
+    fingerLog(QStringLiteral("webdav sync: finished: outcome %1 after %2 rounds").arg(static_cast<int>(outcome)).arg(rounds));
     busy = false;
     uploading.clear();
     theirs.clear();

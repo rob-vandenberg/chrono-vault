@@ -495,3 +495,11 @@ redirects, the keyring's question waited for; round 2 names Windows cannot keep,
 master password changed here sent up, not taken for another device's; round 4 clean. Not testable here: a real
 server, the desktop keyring's question, Windows Credential Manager (the owner tests).
 
+## 23 November 2026: version 0.3.61: the first upload to pCloud
+
+The owner's test on pCloud ended as "Not synchronized: another device is saving it". Debug version 0.3.60.1 wrote
+every WebDAV request to the `--debug` log: after LOCK on the missing vault file pCloud lists an empty placeholder
+with tag, date and size "404 Not Found", which the version check took for another device's vault, three rounds.
+Fixed in `src/ui/webdav_sync.cpp` (checkTag reads the file: only content is a version); the test server lists
+placeholders the same way; the `--debug` lines kept (the owner's changelist item 3).
+

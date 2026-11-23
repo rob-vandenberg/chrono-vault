@@ -29,9 +29,10 @@
 #include <QUuid>
 
 // --- Version ------------------------------------------------------------
-// webdav_test_server.cpp 0.3.60
+// webdav_test_server.cpp 0.3.61
 
 // --- Version history ----------------------------------------------------
+// v0.3.61: A lock's placeholder listed as pCloud lists it: no tag, no size
 // v0.3.60: Initial release (D-057)
 
 namespace {
@@ -85,6 +86,9 @@ QByteArray entryXml(const QString& href, QByteArray tag, qint64 size, bool isFol
     QByteArray xml = "<d:response><d:href>" + QUrl::toPercentEncoding(href, "/") + "</d:href><d:propstat><d:prop>";
     if (isFolder) {
         xml += "<d:resourcetype><d:collection/></d:resourcetype>";
+    } else if (tag.isEmpty() && size == 0) {
+        // A lock's placeholder, as pCloud lists one: no tag, no date, no size.
+        xml += "<d:resourcetype/>";
     } else {
         xml += "<d:resourcetype/>" + (tag.isEmpty() ? QByteArray() : "<d:getetag>\"" + tag + "\"</d:getetag>") +
                "<d:getcontentlength>" +
@@ -215,14 +219,15 @@ void WebDavTestServer::answer(QTcpSocket* socket, const QByteArray& method, cons
             if (depth != "0") {
                 for (auto file = files.cbegin(); file != files.cend(); ++file) {
                     if (!file->data.isEmpty() || !file->lockToken.isEmpty()) {
-                        xml += entryXml(folderPath + file.key(), file->tag, file->data.size(), false);
+                        xml += entryXml(folderPath + file.key(), file->data.isEmpty() ? QByteArray() : file->tag,
+                                        file->data.size(), false);
                     }
                 }
             }
             status = 207;
         } else if (inFolder && files.contains(name)) {
             const File& file = files[name];
-            xml += entryXml(folderPath + name, file.tag, file.data.size(), false);
+            xml += entryXml(folderPath + name, file.data.isEmpty() ? QByteArray() : file.tag, file.data.size(), false);
             status = 207;
         } else {
             status = 404;
