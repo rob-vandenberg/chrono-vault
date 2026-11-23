@@ -744,7 +744,11 @@ ApplicationWindow {
                       : (VaultController.vaultPath === "" ? 0 : 1)
 
         WelcomePage { id: welcomePage }
-        UnlockPage { id: unlockPage }
+        UnlockPage {
+            id: unlockPage
+            onOpenRequested: welcomePage.openVault()
+            onCreateRequested: welcomePage.newVault()
+        }
         VaultPage {
             id: vaultPage
             onNewVaultRequested: mainWindow.newVault()

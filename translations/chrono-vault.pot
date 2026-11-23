@@ -1750,58 +1750,58 @@ msgctxt "Main|"
 msgid "Copy"
 msgstr ""
 
-#: ../qml/Main.qml:859
+#: ../qml/Main.qml:863
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:866
+#: ../qml/Main.qml:870
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:867
+#: ../qml/Main.qml:871
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:907
+#: ../qml/Main.qml:911
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:914
+#: ../qml/Main.qml:918
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
 
-#: ../qml/Main.qml:989
+#: ../qml/Main.qml:993
 msgctxt "Main|"
 msgid "Trust this certificate?"
 msgstr ""
 
-#: ../qml/Main.qml:991
+#: ../qml/Main.qml:995
 msgctxt "Main|"
 msgid "Trust it"
 msgstr ""
 
-#: ../qml/Main.qml:998
+#: ../qml/Main.qml:1002
 msgctxt "Main|"
 msgid ""
 "The WebDAV server's certificate is not trusted by this system. Trust it only "
 "when it is your server's. Its SHA-256 fingerprint:"
 msgstr ""
 
-#: ../qml/Main.qml:1016
+#: ../qml/Main.qml:1020
 msgctxt "Main|"
 msgid "WebDAV password"
 msgstr ""
 
-#: ../qml/Main.qml:1028
+#: ../qml/Main.qml:1032
 #, qt-format
 msgctxt "Main|"
 msgid "Type the password of the WebDAV server where “%1” is kept."
@@ -2459,115 +2459,130 @@ msgctxt "TemplateEditor|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:284
+#: ../qml/UnlockPage.qml:322
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:295
+#: ../qml/UnlockPage.qml:333
 msgctxt "UnlockPage|"
 msgid "This vault needs its keyfile."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:296
+#: ../qml/UnlockPage.qml:334
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:301
+#: ../qml/UnlockPage.qml:339
 msgctxt "UnlockPage|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:112
+#: ../qml/UnlockPage.qml:118
 msgctxt "UnlockPage|"
 msgid "Welcome to Chrono Vault"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:229
-msgctxt "UnlockPage|"
-msgid "Open or create another vault…"
-msgstr ""
-
-#: ../qml/UnlockPage.qml:239
+#: ../qml/UnlockPage.qml:270
 msgctxt "UnlockPage|"
 msgid "last used"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:117
+#: ../qml/UnlockPage.qml:123
 msgctxt "UnlockPage|"
 msgid "Enter the Master Password to unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:239
+#: ../qml/UnlockPage.qml:151
+msgctxt "UnlockPage|"
+msgid "this computer"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:153
+msgctxt "UnlockPage|"
+msgid "pCloud"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:250
+msgctxt "UnlockPage|"
+msgid "Open another vault…"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:270
 msgctxt "UnlockPage|"
 msgid "not found"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:262
+#: ../qml/UnlockPage.qml:293
 msgctxt "UnlockPage|"
 msgid "Master Password"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:308
+#: ../qml/UnlockPage.qml:314
+msgctxt "UnlockPage|"
+msgid "Create a new vault…"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:346
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Unlock with %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:318
+#: ../qml/UnlockPage.qml:356
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a day, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:319
+#: ../qml/UnlockPage.qml:357
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a month, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:320
+#: ../qml/UnlockPage.qml:358
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a quarter, "
 "so that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:321
+#: ../qml/UnlockPage.qml:359
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a year, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:330
+#: ../qml/UnlockPage.qml:368
 msgctxt "UnlockPage|"
 msgid "Not now"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:337
+#: ../qml/UnlockPage.qml:375
 msgctxt "UnlockPage|"
 msgid "A change could not be saved before the vault locked. Unlock to save it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:349
+#: ../qml/UnlockPage.qml:387
 msgctxt "UnlockPage|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:353
+#: ../qml/UnlockPage.qml:391
 msgctxt "UnlockPage|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you open another vault now, the change is lost."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:368
+#: ../qml/UnlockPage.qml:406
 msgctxt "UnlockPage|"
 msgid "Choose the vault's keyfile"
 msgstr ""
@@ -3124,113 +3139,108 @@ msgctxt "WelcomePage|"
 msgid "Welcome to Chrono Vault"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:69
-msgctxt "WelcomePage|"
-msgid "Create a new vault, or open one you already have."
-msgstr ""
-
-#: ../qml/WelcomePage.qml:81
+#: ../qml/WelcomePage.qml:76
 #, qt-format
 msgctxt "WelcomePage|"
 msgid "Your primary vault “%1” was not found."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:88 ../qml/WelcomePage.qml:90
+#: ../qml/WelcomePage.qml:83 ../qml/WelcomePage.qml:85
 msgctxt "WelcomePage|"
 msgid "Look again"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:95
+#: ../qml/WelcomePage.qml:91
+msgctxt "WelcomePage|"
+msgid "Open an existing vault…"
+msgstr ""
+
+#: ../qml/WelcomePage.qml:97
 msgctxt "WelcomePage|"
 msgid "Create a new vault…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:100
-msgctxt "WelcomePage|"
-msgid "Open a vault…"
-msgstr ""
-
-#: ../qml/WelcomePage.qml:149
+#: ../qml/WelcomePage.qml:146
 msgctxt "WelcomePage|"
 msgid "Where should the new vault be kept?"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:152 ../qml/WelcomePage.qml:169
+#: ../qml/WelcomePage.qml:149 ../qml/WelcomePage.qml:166
 msgctxt "WelcomePage|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:167
+#: ../qml/WelcomePage.qml:164
 msgctxt "WelcomePage|"
 msgid "Open a vault"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:169
+#: ../qml/WelcomePage.qml:166
 msgctxt "WelcomePage|"
 msgid "All files (*)"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:190
+#: ../qml/WelcomePage.qml:187
 msgctxt "WelcomePage|"
 msgid "Choose the master password"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:223
+#: ../qml/WelcomePage.qml:220
 msgctxt "WelcomePage|"
 msgid ""
 "This password opens the vault. Nobody can open it without it, not even you, "
 "so choose one you will remember."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:230
+#: ../qml/WelcomePage.qml:227
 msgctxt "WelcomePage|"
 msgid "Master password"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:236
+#: ../qml/WelcomePage.qml:233
 msgctxt "WelcomePage|"
 msgid "The same password again"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:242
+#: ../qml/WelcomePage.qml:239
 msgctxt "WelcomePage|"
 msgid "The two passwords are not the same yet."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:249
+#: ../qml/WelcomePage.qml:246
 msgctxt "WelcomePage|"
 msgid "Also lock the vault with a keyfile"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:255
+#: ../qml/WelcomePage.qml:252
 msgctxt "WelcomePage|"
 msgid ""
 "Without its keyfile the vault cannot be opened, not even with the right "
 "password. Keep a copy of the keyfile somewhere safe, apart from the vault."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:262
+#: ../qml/WelcomePage.qml:259
 msgctxt "WelcomePage|"
 msgid "No keyfile chosen yet."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:263
+#: ../qml/WelcomePage.qml:260
 #, qt-format
 msgctxt "WelcomePage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:270
+#: ../qml/WelcomePage.qml:267
 msgctxt "WelcomePage|"
 msgid "Choose a keyfile…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:274
+#: ../qml/WelcomePage.qml:271
 msgctxt "WelcomePage|"
 msgid "Make a new keyfile…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:284
+#: ../qml/WelcomePage.qml:281
 #, qt-format
 msgctxt "WelcomePage|"
 msgid ""
@@ -3238,17 +3248,17 @@ msgid ""
 "also opens this one"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:293
+#: ../qml/WelcomePage.qml:290
 msgctxt "WelcomePage|"
 msgid "Choose a keyfile"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:302
+#: ../qml/WelcomePage.qml:299
 msgctxt "WelcomePage|"
 msgid "Where should the new keyfile be kept?"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:305
+#: ../qml/WelcomePage.qml:302
 msgctxt "WelcomePage|"
 msgid "Chrono Vault keyfiles (*.chronovaultkey)"
 msgstr ""

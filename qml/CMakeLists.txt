@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.3.63
+# qml/CMakeLists.txt 0.3.66
 
 # --- Version history ----------------------------------------------------
 # v0.3.63: WebDavFileDialog.qml and the folder icon (D-057)
@@ -75,6 +75,7 @@ qt_add_qml_module(chrono_vault_ui
         WelcomePage.qml
         WebDavWindow.qml
         StorageWindow.qml
+        BigButton.qml
         WebDavFileDialog.qml
     SOURCES
         ../src/ui/app_setup.cpp

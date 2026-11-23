@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.3.65
+// WelcomePage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.3.66: As the unlock page, with only Open an existing vault… and Create a new vault…, big (the owner, D-058)
 // v0.3.65: The primary vault not found, with Look again (the owner, D-058)
 // v0.3.64: A new vault of this device by default in Documents/chrono-vault; the primary vault explained (D-058)
 // v0.3.62: The Select Storage window with its tiles; a failed new WebDAV vault reopens the WebDAV window (D-057)
@@ -46,30 +47,24 @@ Item {
     function newVault() { storageChoice.mode = "new"; storageChoice.open() }
     function openVault() { storageChoice.mode = "open"; storageChoice.open() }
 
-    Image {
-        source: "qrc:/icons/chrono-vault.svg"
-        sourceSize: Qt.size(Math.round(128 * Appearance.factor), Math.round(128 * Appearance.factor))
-        width: Math.round(128 * Appearance.factor)
-        height: Math.round(128 * Appearance.factor)
-        x: 16
-        y: 16
-    }
-
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: Math.round(16 * Appearance.factor)
-        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(420 * Appearance.factor))
+        spacing: Math.round(12 * Appearance.factor)
+        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(500 * Appearance.factor))
 
-        Label {
-            text: qsTr("Welcome to Chrono Vault")
-            font.pointSize: Appearance.fontPointSize * 1.8
+        // As the unlock page: no vault found, so only open and create (the owner, D-058).
+        Image {
+            source: "qrc:/icons/chrono-vault.svg"
+            sourceSize: Qt.size(Math.round(160 * Appearance.factor), Math.round(160 * Appearance.factor))
+            Layout.preferredWidth: Math.round(160 * Appearance.factor)
+            Layout.preferredHeight: Math.round(160 * Appearance.factor)
             Layout.alignment: Qt.AlignHCenter
         }
         Label {
-            text: qsTr("Create a new vault, or open one you already have.")
-            wrapMode: Text.Wrap
-            horizontalAlignment: Text.AlignHCenter
-            Layout.fillWidth: true
+            text: qsTr("Welcome to Chrono Vault")
+            font.pointSize: Appearance.fontPointSize * 2.2
+            Layout.alignment: Qt.AlignHCenter
+            Layout.bottomMargin: Math.round(24 * Appearance.factor)
         }
         // No vault found: said, and looked for again now and then (the owner, D-058).
         RowLayout {
@@ -91,15 +86,17 @@ Item {
                 onClicked: VaultController.checkVaults()
             }
         }
-        Button {
+        BigButton {
+            objectName: "openExistingButton"
+            text: qsTr("Open an existing vault…")
+            Layout.fillWidth: true
+            onClicked: welcomePage.openVault()
+        }
+        BigButton {
+            objectName: "createNewButton"
             text: qsTr("Create a new vault…")
             Layout.fillWidth: true
             onClicked: welcomePage.newVault()
-        }
-        Button {
-            text: qsTr("Open a vault…")
-            Layout.fillWidth: true
-            onClicked: welcomePage.openVault()
         }
     }
 

@@ -21,9 +21,11 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.3.65
+// UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.3.66: Open another vault… in the list, Create a new vault… below, each straight to Select Storage; the place under
+//          each vault; the list always below the field (the owner, D-058)
 // v0.3.65: The owner's design, bigger and rounded; only the vaults found, the last used struck through when not (D-058)
 // v0.3.64: As the owner's mockup: the icon and welcome, a dropdown of the vaults (the last used chosen), the field
 //          with its arrow; Open or create another vault… in the dropdown (D-058)
@@ -43,6 +45,10 @@ import QtQuick.Layouts
 // The locked vault: the master password opens it.
 Item {
     id: unlockPage
+    // The two other tasks, open a vault not listed and create one: Select
+    // Storage at once, in the start page's windows (the owner, D-058).
+    signal openRequested()
+    signal createRequested()
     // The keyboard back to the master password, after a menu (D-052).
     function focusPassword() {
         passwordField.forceActiveFocus()
@@ -139,6 +145,13 @@ Item {
             font.pointSize: Appearance.fontPointSize * 1.4
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(58 * Appearance.factor)
+            function placeOf(vaultFile) {
+                const place = VaultController.vaultPlace(vaultFile)
+                if (!place.onWebDav)
+                    return qsTr("this computer")
+                const host = String(place.address).replace(/^[a-z]+:\/\//i, "").split("/")[0]
+                return host.toLowerCase().indexOf("pcloud") >= 0 ? qsTr("pCloud") : host
+            }
             function iconOf(vaultFile) {
                 return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/storage-webdav.svg"
                                                                        : "qrc:/icons/storage-device.svg"
@@ -171,7 +184,11 @@ Item {
                 y: vaultBox.height + Math.round(4 * Appearance.factor)
                 width: vaultBox.width
                 padding: 1
-                implicitHeight: contentItem.implicitHeight + 2
+                // Below the field always, scrolling when the room below is short.
+                implicitHeight: Math.min(contentItem.implicitHeight + 2,
+                                         unlockPage.height - vaultBox.mapToItem(unlockPage, 0, 0).y - vaultBox.height
+                                         - Math.round(12 * Appearance.factor))
+                margins: 0
                 background: Rectangle {
                     radius: Math.round(8 * Appearance.factor)
                     color: vaultBox.palette.base
@@ -179,6 +196,7 @@ Item {
                 }
                 contentItem: ListView {
                     clip: true
+                    ScrollIndicator.vertical: ScrollIndicator {}
                     implicitHeight: contentHeight
                     model: vaultBox.popup.visible ? vaultBox.delegateModel : null
                     currentIndex: vaultBox.highlightedIndex
@@ -192,7 +210,7 @@ Item {
                 readonly property bool missing: !isOther && VaultController.foundVaults.indexOf(modelData) < 0
                 objectName: isOther ? "openOrCreateAnother" : "unlockVault_" + VaultController.vaultNameOf(modelData)
                 width: vaultBox.width - 2
-                height: Math.round(48 * Appearance.factor)
+                height: isOther ? Math.round(48 * Appearance.factor) : Math.round(60 * Appearance.factor)
                 font: vaultBox.font
                 highlighted: vaultBox.highlightedIndex === index && !missing
                 enabled: !missing
@@ -225,14 +243,27 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         Layout.preferredWidth: Math.round(24 * Appearance.factor)
                     }
-                    Label {
-                        text: vaultRow.isOther ? qsTr("Open or create another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
-                        textFormat: Text.PlainText
-                        font.pointSize: vaultBox.font.pointSize
-                        font.strikeout: vaultRow.missing
-                        opacity: vaultRow.missing ? 0.45 : vaultRow.isOther ? 0.8 : 1
-                        elide: Text.ElideRight
+                    ColumnLayout {
+                        spacing: 0
                         Layout.fillWidth: true
+                        Label {
+                            text: vaultRow.isOther ? qsTr("Open another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
+                            textFormat: Text.PlainText
+                            font.pointSize: vaultBox.font.pointSize
+                            font.strikeout: vaultRow.missing
+                            opacity: vaultRow.missing ? 0.45 : vaultRow.isOther ? 0.8 : 1
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        // Where it is kept, so two vaults of one name are told apart.
+                        Label {
+                            visible: !vaultRow.isOther
+                            text: vaultRow.isOther ? "" : vaultBox.placeOf(vaultRow.modelData)
+                            textFormat: Text.PlainText
+                            opacity: 0.6
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
                     }
                     Label {
                         visible: !vaultRow.isOther && (vaultRow.missing || vaultRow.modelData === VaultController.vaultPath)
@@ -246,7 +277,7 @@ Item {
                 // The list follows the vault shown again, whatever was picked.
                 currentIndex = Qt.binding(function() { return vaultBox.listed.indexOf(VaultController.vaultPath) })
                 if (chosen === other)
-                    unlockPage.leaveForAnother()
+                    unlockPage.openRequested()
                 else if (chosen !== VaultController.vaultPath)
                     VaultController.switchToVault(chosen)
                 passwordField.forceActiveFocus()
@@ -277,6 +308,13 @@ Item {
                 onAccepted: unlockPage.unlockNow()
                 onEnabledChanged: if (enabled && unlockPage.visible) forceActiveFocus()
             }
+        }
+        BigButton {
+            objectName: "createNewButton"
+            text: qsTr("Create a new vault…")
+            Layout.fillWidth: true
+            Layout.topMargin: Math.round(12 * Appearance.factor)
+            onClicked: unlockPage.createRequested()
         }
         Label {
             objectName: "unlockWaitText"

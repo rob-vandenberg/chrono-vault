@@ -1784,7 +1784,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+139"/>
+        <location line="+143"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2505,7 +2505,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+284"/>
+        <location filename="../qml/UnlockPage.qml" line="+322"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2525,27 +2525,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-189"/>
+        <location line="-221"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+117"/>
-        <source>Open or create another vault…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+10"/>
+        <location line="+152"/>
         <source>last used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-122"/>
+        <location line="-147"/>
         <source>Enter the Master Password to unlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+122"/>
+        <location line="+28"/>
+        <source>this computer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>pCloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+97"/>
+        <source>Open another vault…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
         <source>not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2555,7 +2565,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+21"/>
+        <source>Create a new vault…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
         <source>Unlock with %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3169,11 +3184,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
-        <source>Create a new vault, or open one you already have.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location line="+12"/>
         <source>Your primary vault “%1” was not found.</source>
         <translation type="unfinished"></translation>
@@ -3185,13 +3195,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
-        <source>Create a new vault…</source>
+        <location line="+6"/>
+        <source>Open an existing vault…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
-        <source>Open a vault…</source>
+        <location line="+6"/>
+        <source>Create a new vault…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

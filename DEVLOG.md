@@ -534,3 +534,9 @@ The owner's changelist items 1-9, no reviewers (his limits; review rounds later)
 (background, re-checks), `qml/UnlockPage.qml` (his design, the found vaults), `qml/WelcomePage.qml` (not found, ↻).
 Tests: `test_vaults` (the check), `test_main_window`, `test_unlock_waits`, `test_webdav_windows` updated.
 
+## 23 November 2026: version 0.3.66: one start page, two forms
+
+The owner's changelist items 1-8, no reviewers: `qml/BigButton.qml`, `qml/WelcomePage.qml` (only open and create),
+`qml/UnlockPage.qml` (Open another vault… in the list, Create a new vault… below, the place line), `qml/Main.qml`
+(the unlock page's two requests). Related tests pass (D-058 points 11-13).
+
