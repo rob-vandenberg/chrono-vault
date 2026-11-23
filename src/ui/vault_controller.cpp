@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.3.62
+// vault_controller.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: A lock keeps the vault used last on the unlock page (the owner, D-058)
 // v0.3.62: The end of creating a vault a function of its own, for a WebDAV vault's first upload (D-057)
 // v0.3.60: The WebDAV sync started at an unlock, stopped at a lock, kept up with a new key (D-057)
 // v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
@@ -1061,13 +1062,9 @@ void VaultController::lock()
     keepUnsavedWhileLocked();
     forgetUnlockedVault();
     forgetPrimary();
-    // Locking locks every vault; the primary's master password unlocks them
-    // again, and then the vault shown comes back (D-030).
-    const QString primary = primaryVault();
-    if (!primary.isEmpty() && primary != path && QFileInfo::exists(primary)) {
-        returnTo = path;
-        setPath(primary);
-    }
+    // Locking locks every vault; the unlock page shows the vault used last,
+    // whose own master password opens it (the owner, 0.3.64; until then the
+    // primary came back, D-030 point 5).
     say(QString(), false);
     setState(State::Locked);
 }

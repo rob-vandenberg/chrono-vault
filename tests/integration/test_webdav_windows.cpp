@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.3.63
+// test_webdav_windows.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: The unlock page's vault list and field
 // v0.3.63: One button Connect then Next…; Browse… and the WebDAV file dialog; the window's height
 // v0.3.62: The Select Storage tiles, the server list, the folder browser, the unlock page's address
 // v0.3.60: Initial release: the WebDAV windows and Settings > Vaults, driven as a person would (D-057)
@@ -233,11 +234,15 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(controller->onWebDav());
 
     // The left column says where it is kept; Tools > Sync Now is there.
-    // Locked, the unlock page names the server, not the copy here.
+    // Locked, the unlock page offers this vault, chosen, and asks its own
+    // master password (0.3.64).
     controller->lock();
-    QQuickItem* unlockPlace = inWindow(window, QStringLiteral("unlockVaultPlace"));
-    QVERIFY(unlockPlace);
-    QTRY_VERIFY(unlockPlace->property("text").toString().endsWith(QStringLiteral("/Work vaults/Home.chronovault")));
+    QQuickItem* vaultBox = inWindow(window, QStringLiteral("unlockVaultBox"));
+    QQuickItem* masterField = inWindow(window, QStringLiteral("masterPasswordField"));
+    QVERIFY(vaultBox && masterField);
+    QTRY_VERIFY(vaultBox->isVisible());
+    QCOMPARE(vaultBox->property("currentIndex").toInt(), 0);
+    QCOMPARE(masterField->property("placeholderText").toString(), QStringLiteral("Master password of Home"));
     controller->unlock(QStringLiteral("pass"));
     QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
     QQuickItem* place = inWindow(window, QStringLiteral("vaultPlace"));

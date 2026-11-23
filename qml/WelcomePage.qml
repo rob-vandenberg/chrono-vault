@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.3.62
+// WelcomePage.qml 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: A new vault of this device by default in Documents/chrono-vault; the primary vault explained (D-058)
 // v0.3.62: The Select Storage window with its tiles; a failed new WebDAV vault reopens the WebDAV window (D-057)
 // v0.3.60: A new vault, or one opened, on this computer or on a WebDAV server (D-057)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -86,8 +87,12 @@ Item {
         id: storageChoice
         onChosen: function(storage) {
             if (storage === "device") {
-                if (storageChoice.mode === "new")
+                if (storageChoice.mode === "new") {
+                    // Documents/chrono-vault until another folder was used (the owner, D-058).
+                    if (!createFileDialog.folderUsed)
+                        createFileDialog.currentFolder = FilePickers.vaultsFolder()
                     createFileDialog.open()
+                }
                 else
                     openFileDialog.open()
             } else {
@@ -117,6 +122,7 @@ Item {
 
     FilePicker {
         id: createFileDialog
+        property bool folderUsed: false
         memoryName: "WelcomePage.createFileDialog"
         parentWindow: welcomePage
         title: qsTr("Where should the new vault be kept?")
@@ -124,6 +130,7 @@ Item {
         defaultSuffix: "chronovault"
         nameFilters: [qsTr("Chrono Vault vaults (*.chronovault)")]
         onAccepted: {
+            folderUsed = true
             if (VaultController.canCreateAt(selectedFile)) {
                 newVaultDialog.webDavName = ""
                 newVaultDialog.file = selectedFile
@@ -252,7 +259,8 @@ Item {
                 id: saveInPrimary
                 objectName: "saveInPrimaryBox"
                 visible: newVaultDialog.offerSave
-                text: qsTr("Save this vault's password in “%1”").arg(VaultController.vaultNameOf(VaultController.primaryVault))
+                // What the primary vault is for, said where it matters (the owner, D-058).
+                text: qsTr("Keep this vault's password in your primary vault “%1”, so unlocking “%1” also opens this one").arg(VaultController.vaultNameOf(VaultController.primaryVault))
             }
         }
     }

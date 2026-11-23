@@ -24,12 +24,14 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTimer>
+#include <QFileInfo>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_file_pickers.cpp 0.2.51
+// test_file_pickers.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: A new vault's default folder, Documents/chrono-vault (D-058)
 // v0.2.51: Initial release (D-055)
 
 using namespace chrono_vault;
@@ -78,6 +80,20 @@ private slots:
         broken.write("<xbel><bookmark href=");
         broken.close();
         QVERIFY(places_here::placesInFile(broken.fileName()).isEmpty());
+    }
+
+    void a_new_vault_goes_to_documents_chrono_vault_by_default()
+    {
+        // A home folder of the test's own, so nothing is made in the real one.
+        QTemporaryDir home;
+        QVERIFY(home.isValid());
+        const QByteArray realHome = qgetenv("HOME");
+        qputenv("HOME", home.path().toUtf8());
+        const QUrl folder = FilePickers().vaultsFolder();
+        qputenv("HOME", realHome);
+        QVERIFY(folder.toLocalFile().endsWith(QStringLiteral("/chrono-vault")));
+        QVERIFY(folder.toLocalFile().startsWith(home.path()));
+        QVERIFY(QFileInfo(folder.toLocalFile()).isDir());
     }
 
     void a_dialog_shows_the_places_the_filter_and_the_file_and_keeps_its_size()

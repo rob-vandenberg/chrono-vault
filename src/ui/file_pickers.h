@@ -22,9 +22,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// file_pickers.h 0.2.51
+// file_pickers.h 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: The default folder of a new vault, Documents/chrono-vault (D-058)
 // v0.2.51: Initial release, after Chrono Viewer's file pickers (D-055)
 
 namespace chrono_vault {
@@ -58,6 +59,9 @@ public:
 
     // The person's home folder, where a dialog opens when nothing else says.
     [[nodiscard]] Q_INVOKABLE QUrl homeFolder() const;
+    // Where a new vault of this device goes by default: Documents/chrono-vault,
+    // made when asked for (the owner, D-058); the home folder when it cannot be.
+    [[nodiscard]] Q_INVOKABLE QUrl vaultsFolder() const;
 };
 
 } // namespace chrono_vault

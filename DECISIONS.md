@@ -66,3 +66,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-055](decisions/D-055.md) | File dialogs as Chrono Viewer's: Qt's widget dialog, the desktop's own places, a path to type |
 | [D-056](decisions/D-056.md) | Editing categories: name, icon and shown for every category; Reset for a built-in one |
 | [D-057](decisions/D-057.md) | WebDAV storage: a working copy here, synced and merged; the password in the system's store; a certificate trusted by its fingerprint |
+| [D-058](decisions/D-058.md) | The unlock page with a vault selector; a lock keeps the vault used last; new local vaults in Documents/chrono-vault |

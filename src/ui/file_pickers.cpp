@@ -31,9 +31,10 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// file_pickers.cpp 0.2.52
+// file_pickers.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: The default folder of a new vault, Documents/chrono-vault (D-058)
 // v0.2.52: Explorer's own dialog on Windows (D-055)
 // v0.2.51: Initial release, after Chrono Viewer's file pickers (D-055)
 
@@ -149,6 +150,16 @@ void FilePickers::closeOpenDialog()
 QUrl FilePickers::homeFolder() const
 {
     return QUrl::fromLocalFile(QDir::homePath());
+}
+
+QUrl FilePickers::vaultsFolder() const
+{
+    const QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    const QString folder = documents + QStringLiteral("/chrono-vault");
+    if (documents.isEmpty() || !QDir().mkpath(folder)) {
+        return homeFolder();
+    }
+    return QUrl::fromLocalFile(folder);
 }
 
 } // namespace chrono_vault

@@ -520,3 +520,11 @@ The owner's changelist items 1-11 and 13 (item 12, the related tests and reviewe
 `qml/StorageWindow.qml` (Local first), the folder's entries with size and time of change. `test_webdav_windows`
 updated and run; pictures checked.
 
+## 23 November 2026: version 0.3.64: the unlock page with a vault selector
+
+The owner's changelist items 1-13 (reviewers struck): `qml/UnlockPage.qml` as his mockup with the vault dropdown,
+`VaultController::lock` keeps the vault used last (D-030 point 5 replaced), `FilePickers::vaultsFolder` and the
+start in Documents/chrono-vault, the tick box explaining the primary vault (D-058). Tests: `test_vaults` and
+`test_webdav_windows` updated, `test_file_pickers` (the default folder); related tests pass; picture checked in light
+(the test's switch to dark does not take).
+

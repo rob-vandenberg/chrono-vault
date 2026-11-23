@@ -26,9 +26,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vaults.cpp 0.0.38
+// test_vaults.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.64: A lock keeps the vault used last; its own password opens it (D-058)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.15: Initial release: several vaults, the keyfile, changing the master password (D-030, D-031)
 
@@ -168,14 +169,24 @@ void TestVaults::a_lock_locks_every_vault_and_the_primary_unlocks_them_again()
 
     vaults->lock();
     QCOMPARE(vaults->state(), State::Locked);
-    QCOMPARE(vaults->vaultPath(), file("Home")); // the primary asks
-    vaults->unlock(QStringLiteral("work pass"));
-    QTRY_COMPARE(vaults->state(), State::Locked); // Work's own password is not the primary's
+    // The vault used last stays, with its own password (the owner, 0.3.64).
+    QCOMPARE(vaults->vaultPath(), file("Work"));
     vaults->unlock(QStringLiteral("home pass"));
-    // The primary unlocks, then the vault that was shown comes back.
+    QTRY_COMPARE(vaults->state(), State::Locked); // the primary's password is not Work's
+    vaults->unlock(QStringLiteral("work pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+    QCOMPARE(vaults->items()->rowCount(), 1);
+    // Locked again, the primary chosen and unlocked opens Work with the
+    // password saved in it.
+    vaults->lock();
+    vaults->switchToVault(file("Home"));
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    vaults->unlock(QStringLiteral("home pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    vaults->switchToVault(file("Work"));
     QTRY_COMPARE(vaults->vaultPath(), file("Work"));
     QTRY_COMPARE(vaults->state(), State::Unlocked);
-    QCOMPARE(vaults->items()->rowCount(), 1);
 }
 
 void TestVaults::a_vault_whose_password_is_not_saved_asks_for_it()
@@ -350,6 +361,8 @@ void TestVaults::a_changed_password_is_changed_in_the_primary_too()
     vaults->lock();
     vaults.reset();
     auto again = controller();
+    QCOMPARE(again->vaultPath(), file("Work")); // the vault used last (0.3.64)
+    again->switchToVault(file("Home"));
     QCOMPARE(again->vaultPath(), file("Home"));
     again->unlock(QStringLiteral("home pass"));
     QTRY_COMPARE(again->state(), State::Unlocked);
