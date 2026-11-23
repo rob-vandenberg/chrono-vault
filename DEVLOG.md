@@ -377,3 +377,7 @@ reference program's twenty field types (six new, contents format 6); `style/Swit
 
 The main window's Esc is no longer a shortcut but its own key handling, and the keyboard goes back to the content after
 a menu, Chrono Viewer's two fixes (`786104c`, `ae07b6c`), so Esc closes the About box on one of the owner's laptops (D-052).
+
+## 23 November 2026: version 0.1.43: Esc in every dialog's own keys
+
+Every dialog also takes Esc in its own key handling, as Chrono Viewer's QDialog does, next to its Cancel shortcut (D-052).

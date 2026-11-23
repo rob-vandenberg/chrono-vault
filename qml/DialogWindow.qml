@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.0.9
+// DialogWindow.qml 0.1.43
 
 // --- Version history ----------------------------------------------------
+// v0.1.43: Esc also through the window's own keys, as Chrono Viewer's QDialog
 // v0.0.9: Opened quietly, without taking the keyboard; a window that cannot be closed for a while; buttons of its own at the right (D-024)
 // v0.0.8: A narrow edge, as the settings window's; a place for the dialog's own buttons at the bottom left
 // v0.0.7: An application window with the program's font, so the UI scaling reaches it (D-023)
@@ -148,6 +149,14 @@ ApplicationWindow {
         id: layout
         anchors.fill: parent
         anchors.margins: dialogWindow.edge
+        // Esc also through the window's own keys, as Chrono Viewer's QDialog
+        // takes it (D-052): it closes the dialog when the shortcut did not.
+        Keys.onPressed: function(event) {
+            if (event.key === Qt.Key_Escape && event.modifiers === Qt.NoModifier) {
+                event.accepted = true
+                dialogWindow.reject()
+            }
+        }
         spacing: Math.round(10 * Appearance.factor)
 
         ColumnLayout {
