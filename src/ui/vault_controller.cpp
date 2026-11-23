@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.3.64
+// vault_controller.cpp 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.3.65: Which vaults are found, checked in the background and again now and then (the owner, D-058)
 // v0.3.64: A lock keeps the vault used last on the unlock page (the owner, D-058)
 // v0.3.62: The end of creating a vault a function of its own, for a WebDAV vault's first upload (D-057)
 // v0.3.60: The WebDAV sync started at an unlock, stopped at a lock, kept up with a new key (D-057)
@@ -454,7 +455,84 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     if (!last.isEmpty() && QFileInfo::exists(last)) {
         setPath(last);
         currentState = State::Locked;
+    } else if (!last.isEmpty()) {
+        missingLast = last; // listed struck through until it is found (D-058)
     }
+    // Which vaults are found, in the background (the owner, 0.3.65).
+    vaultRetry.setSingleShot(true);
+    connect(&vaultRetry, &QTimer::timeout, this, &VaultController::checkVaults);
+    QTimer::singleShot(0, this, &VaultController::checkVaults);
+}
+
+void VaultController::checkVaults()
+{
+    if (checkingVaults) {
+        return; // one look at a time, never two waiting on a slow drive
+    }
+    checkingVaults = true;
+    const QStringList all = vaultList;
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run([self, all]() {
+        QStringList found;
+        for (const QString& one : all) {
+            if (QFileInfo::exists(one)) {
+                found.append(one);
+            }
+        }
+        QMetaObject::invokeMethod(
+            qApp, [self, found]() { if (self) { self->vaultsChecked(found); } }, Qt::QueuedConnection);
+    });
+}
+
+void VaultController::vaultsChecked(const QStringList& found)
+{
+    checkingVaults = false;
+    foundList = found;
+    if (currentState == State::Unlocked || currentState == State::Busy) {
+        emit vaultsFoundChanged();
+        return;
+    }
+    const QString shown = path.isEmpty() ? missingLast : path;
+    if (!missingLast.isEmpty() && found.contains(missingLast)) {
+        // The vault used last is back: it is shown again.
+        const QString back = missingLast;
+        missingLast.clear();
+        setPath(back);
+        setState(State::Locked);
+    } else if (found.isEmpty()) {
+        // No vault at all: the start page says the primary was not found and
+        // looks again now and then (the owner: 5 s, then 20 s, then 1 min, for
+        // an hour at most).
+        if (missingLast.isEmpty() && !shown.isEmpty()) {
+            missingLast = shown; // the vault used last, not one chosen in its place
+        }
+        if (!path.isEmpty()) {
+            setPath(QString());
+        }
+        setState(State::NoVault);
+        if (missingSinceMs == 0) {
+            missingSinceMs = QDateTime::currentMSecsSinceEpoch();
+        }
+        const qint64 waited = QDateTime::currentMSecsSinceEpoch() - missingSinceMs;
+        if (!vaultList.isEmpty() && waited < 3600 * 1000) {
+            vaultRetry.start(waited < 60 * 1000 ? 5000 : waited < 600 * 1000 ? 20000 : 60000);
+        }
+    } else if (shown.isEmpty() || !found.contains(shown)) {
+        // The vault used last is missing: listed struck through; the primary,
+        // or else the first vault found, is chosen (the owner).
+        if (!shown.isEmpty()) {
+            missingLast = shown;
+        }
+        const QString primary = primaryVault();
+        const QString chosen = found.contains(primary) ? primary : found.constFirst();
+        setPath(chosen);
+        setState(State::Locked);
+    }
+    if (!found.isEmpty()) {
+        missingSinceMs = 0;
+        vaultRetry.stop();
+    }
+    emit vaultsFoundChanged();
 }
 
 VaultController::~VaultController()
@@ -2525,6 +2603,10 @@ void VaultController::addVault(const QString& vaultFile)
     }
     vaultList.append(vaultFile);
     VaultsFile().setValue(vaultListKey, vaultList);
+    if (!foundList.contains(vaultFile)) {
+        foundList.append(vaultFile); // just made or opened: it is there (D-058)
+        emit vaultsFoundChanged();
+    }
     emit vaultsChanged();
 }
 
@@ -3207,6 +3289,9 @@ void VaultController::setState(State state)
         }
         restartAutoLock();
         emit stateChanged();
+        if (state == State::Locked) {
+            QTimer::singleShot(0, this, &VaultController::checkVaults); // which vaults are there now
+        }
     }
 }
 

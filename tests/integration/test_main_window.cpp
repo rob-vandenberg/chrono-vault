@@ -96,7 +96,10 @@ void TestMainWindow::the_main_window_loads_without_qml_errors_and_is_titled_chro
     QCOMPARE(QGuiApplication::font().family(), QStringLiteral("Noto Sans"));
     auto* masterPassword = window->findChild<QObject*>(QStringLiteral("masterPasswordField"));
     QVERIFY(masterPassword != nullptr);
+    // The placeholder in the normal font, a typed password in the monospaced one (the owner, 0.3.65).
+    masterPassword->setProperty("text", QStringLiteral("typed"));
     QCOMPARE(masterPassword->property("font").value<QFont>().family(), QStringLiteral("Noto Sans Mono"));
+    masterPassword->setProperty("text", QString());
 
     // Leave nothing behind (OR-11): the window goes with the engine.
     window->close();

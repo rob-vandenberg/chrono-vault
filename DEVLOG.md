@@ -528,3 +528,9 @@ start in Documents/chrono-vault, the tick box explaining the primary vault (D-05
 `test_webdav_windows` updated, `test_file_pickers` (the default folder); related tests pass; picture checked in light
 (the test's switch to dark does not take).
 
+## 23 November 2026: version 0.3.65: vaults that are not found
+
+The owner's changelist items 1-9, no reviewers (his limits; review rounds later): `VaultController::checkVaults`
+(background, re-checks), `qml/UnlockPage.qml` (his design, the found vaults), `qml/WelcomePage.qml` (not found, ↻).
+Tests: `test_vaults` (the check), `test_main_window`, `test_unlock_waits`, `test_webdav_windows` updated.
+

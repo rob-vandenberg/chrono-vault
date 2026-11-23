@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.3.64
+// WelcomePage.qml 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.3.65: The primary vault not found, with Look again (the owner, D-058)
 // v0.3.64: A new vault of this device by default in Documents/chrono-vault; the primary vault explained (D-058)
 // v0.3.62: The Select Storage window with its tiles; a failed new WebDAV vault reopens the WebDAV window (D-057)
 // v0.3.60: A new vault, or one opened, on this computer or on a WebDAV server (D-057)
@@ -69,6 +70,26 @@ Item {
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
+        }
+        // No vault found: said, and looked for again now and then (the owner, D-058).
+        RowLayout {
+            visible: VaultController.noVaultFound
+            spacing: Math.round(6 * Appearance.factor)
+            Layout.alignment: Qt.AlignHCenter
+            Label {
+                objectName: "primaryNotFound"
+                text: qsTr("Your primary vault “%1” was not found.").arg(VaultController.vaultNameOf(VaultController.primaryVault))
+                textFormat: Text.PlainText
+                color: "#e53e3e"
+            }
+            ToolButton {
+                objectName: "retryVaultsButton"
+                text: "↻"
+                Accessible.name: qsTr("Look again")
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Look again")
+                onClicked: VaultController.checkVaults()
+            }
         }
         Button {
             text: qsTr("Create a new vault…")

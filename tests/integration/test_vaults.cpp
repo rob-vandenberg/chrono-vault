@@ -66,6 +66,7 @@ private slots:
 
     void a_second_vault_is_opened_with_its_password_saved_in_the_primary();
     void a_lock_locks_every_vault_and_the_primary_unlocks_them_again();
+    void vaults_not_found_are_hidden_and_looked_for_again();
     void a_vault_whose_password_is_not_saved_asks_for_it();
     void the_one_vault_of_an_older_version_becomes_the_primary();
     void a_vault_with_a_keyfile_needs_it_and_remembers_it();
@@ -187,6 +188,36 @@ void TestVaults::a_lock_locks_every_vault_and_the_primary_unlocks_them_again()
     vaults->switchToVault(file("Work"));
     QTRY_COMPARE(vaults->vaultPath(), file("Work"));
     QTRY_COMPARE(vaults->state(), State::Unlocked);
+}
+
+void TestVaults::vaults_not_found_are_hidden_and_looked_for_again()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    vaults->lock();
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+    // The vault used last is gone (its drive not connected): the primary is
+    // chosen, the last used kept to be shown struck through.
+    QVERIFY(QFile::rename(file("Work"), file("Work") + QStringLiteral(".away")));
+    vaults->checkVaults();
+    QTRY_COMPARE(vaults->vaultPath(), file("Home"));
+    QCOMPARE(vaults->missingVault(), file("Work"));
+    QCOMPARE(vaults->foundVaults(), QStringList{file("Home")});
+    // No vault at all: the start page, saying so.
+    QVERIFY(QFile::rename(file("Home"), file("Home") + QStringLiteral(".away")));
+    vaults->checkVaults();
+    QTRY_COMPARE(vaults->state(), State::NoVault);
+    QVERIFY(vaults->noVaultFound());
+    QCOMPARE(vaults->vaultPath(), QString());
+    // Back: the vault used last comes back by itself at the next look.
+    QVERIFY(QFile::rename(file("Home") + QStringLiteral(".away"), file("Home")));
+    QVERIFY(QFile::rename(file("Work") + QStringLiteral(".away"), file("Work")));
+    vaults->checkVaults();
+    QTRY_COMPARE(vaults->state(), State::Locked);
+    QTRY_COMPARE(vaults->vaultPath(), file("Work"));
+    QVERIFY(!vaults->noVaultFound());
+    QCOMPARE(vaults->missingVault(), QString());
 }
 
 void TestVaults::a_vault_whose_password_is_not_saved_asks_for_it()

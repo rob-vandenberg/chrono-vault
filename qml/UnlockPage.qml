@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.3.64
+// UnlockPage.qml 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.3.65: The owner's design, bigger and rounded; only the vaults found, the last used struck through when not (D-058)
 // v0.3.64: As the owner's mockup: the icon and welcome, a dropdown of the vaults (the last used chosen), the field
 //          with its arrow; Open or create another vault… in the dropdown (D-058)
 // v0.3.62: A WebDAV vault's server address, not its copy's path (D-057)
@@ -98,51 +99,58 @@ Item {
     ColumnLayout {
         anchors.centerIn: parent
         spacing: Math.round(12 * Appearance.factor)
-        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(420 * Appearance.factor))
+        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(500 * Appearance.factor))
 
         Image {
             source: "qrc:/icons/chrono-vault.svg"
-            sourceSize: Qt.size(Math.round(96 * Appearance.factor), Math.round(96 * Appearance.factor))
-            Layout.preferredWidth: Math.round(96 * Appearance.factor)
-            Layout.preferredHeight: Math.round(96 * Appearance.factor)
+            sourceSize: Qt.size(Math.round(160 * Appearance.factor), Math.round(160 * Appearance.factor))
+            Layout.preferredWidth: Math.round(160 * Appearance.factor)
+            Layout.preferredHeight: Math.round(160 * Appearance.factor)
             Layout.alignment: Qt.AlignHCenter
         }
         Label {
             text: qsTr("Welcome to Chrono Vault")
-            font.pointSize: Appearance.fontPointSize * 1.8
+            font.pointSize: Appearance.fontPointSize * 2.2
             Layout.alignment: Qt.AlignHCenter
         }
         Label {
-            text: qsTr("Choose your vault and enter its master password")
-            opacity: 0.8
+            text: qsTr("Enter the Master Password to unlock")
+            font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
+            Layout.topMargin: Math.round(24 * Appearance.factor)
             Layout.bottomMargin: Math.round(8 * Appearance.factor)
         }
 
         // Every vault Chrono Vault knows, each with its own master password;
         // the one used last is chosen (the owner, D-058).
-        Label { text: qsTr("Vault"); opacity: 0.8 }
         ComboBox {
             id: vaultBox
             objectName: "unlockVaultBox"
             readonly property string other: "\u0001other"
-            model: VaultController.vaults.concat([other])
-            currentIndex: VaultController.vaults.indexOf(VaultController.vaultPath)
+            // Only the vaults found; the one used last also when it is not,
+            // struck through (the owner, 0.3.65).
+            readonly property var listed: VaultController.foundVaults.concat(
+                VaultController.missingVault !== "" && VaultController.foundVaults.indexOf(VaultController.missingVault) < 0
+                    ? [VaultController.missingVault] : [])
+            model: listed.concat([other])
+            currentIndex: listed.indexOf(VaultController.vaultPath)
+            font.pointSize: Appearance.fontPointSize * 1.4
             Layout.fillWidth: true
+            Layout.preferredHeight: Math.round(58 * Appearance.factor)
             function iconOf(vaultFile) {
                 return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/storage-webdav.svg"
                                                                        : "qrc:/icons/storage-device.svg"
             }
             contentItem: RowLayout {
                 spacing: Math.round(8 * Appearance.factor)
-                Item { Layout.preferredWidth: Math.round(2 * Appearance.factor) }
+                Item { Layout.preferredWidth: Math.round(6 * Appearance.factor) }
                 Image {
                     source: vaultBox.iconOf(VaultController.vaultPath)
-                    sourceSize: Qt.size(Math.round(20 * Appearance.factor), Math.round(20 * Appearance.factor))
-                    Layout.preferredWidth: Math.round(20 * Appearance.factor)
-                    Layout.preferredHeight: Math.round(20 * Appearance.factor)
+                    sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
+                    Layout.preferredWidth: Math.round(24 * Appearance.factor)
+                    Layout.preferredHeight: Math.round(24 * Appearance.factor)
                 }
                 Label {
                     text: VaultController.vaultName
@@ -151,33 +159,84 @@ Item {
                     Layout.fillWidth: true
                 }
             }
+            // Rounded, as the owner's design.
+            background: Rectangle {
+                radius: Math.round(8 * Appearance.factor)
+                color: vaultBox.palette.base
+                border.color: vaultBox.activeFocus ? vaultBox.palette.highlight : vaultBox.palette.mid
+            }
+            // The list opens below the field, as big as it, in a rounded frame
+            // (the mockup the owner chose).
+            popup: Popup {
+                y: vaultBox.height + Math.round(4 * Appearance.factor)
+                width: vaultBox.width
+                padding: 1
+                implicitHeight: contentItem.implicitHeight + 2
+                background: Rectangle {
+                    radius: Math.round(8 * Appearance.factor)
+                    color: vaultBox.palette.base
+                    border.color: vaultBox.palette.mid
+                }
+                contentItem: ListView {
+                    clip: true
+                    implicitHeight: contentHeight
+                    model: vaultBox.popup.visible ? vaultBox.delegateModel : null
+                    currentIndex: vaultBox.highlightedIndex
+                }
+            }
             delegate: ItemDelegate {
                 id: vaultRow
                 required property string modelData
                 required property int index
                 readonly property bool isOther: modelData === vaultBox.other
+                readonly property bool missing: !isOther && VaultController.foundVaults.indexOf(modelData) < 0
                 objectName: isOther ? "openOrCreateAnother" : "unlockVault_" + VaultController.vaultNameOf(modelData)
-                width: vaultBox.width
-                highlighted: vaultBox.highlightedIndex === index
+                width: vaultBox.width - 2
+                height: Math.round(48 * Appearance.factor)
+                font: vaultBox.font
+                highlighted: vaultBox.highlightedIndex === index && !missing
+                enabled: !missing
+                background: Rectangle {
+                    color: vaultRow.highlighted ? vaultBox.palette.highlight : "transparent"
+                    opacity: vaultRow.highlighted ? 0.5 : 1
+                    radius: Math.round(6 * Appearance.factor)
+                    // A line above "Open or create another vault…".
+                    Rectangle {
+                        visible: vaultRow.isOther
+                        anchors.top: parent.top
+                        width: parent.width
+                        height: 1
+                        color: vaultBox.palette.mid
+                    }
+                }
                 contentItem: RowLayout {
-                    spacing: Math.round(8 * Appearance.factor)
+                    spacing: Math.round(10 * Appearance.factor)
                     Image {
                         visible: !vaultRow.isOther
                         source: vaultRow.isOther ? "" : vaultBox.iconOf(vaultRow.modelData)
-                        sourceSize: Qt.size(Math.round(20 * Appearance.factor), Math.round(20 * Appearance.factor))
-                        Layout.preferredWidth: Math.round(20 * Appearance.factor)
-                        Layout.preferredHeight: Math.round(20 * Appearance.factor)
+                        sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
+                        Layout.preferredWidth: Math.round(24 * Appearance.factor)
+                        Layout.preferredHeight: Math.round(24 * Appearance.factor)
+                    }
+                    Label {
+                        visible: vaultRow.isOther
+                        text: "+"
+                        font: vaultBox.font
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.preferredWidth: Math.round(24 * Appearance.factor)
                     }
                     Label {
                         text: vaultRow.isOther ? qsTr("Open or create another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
                         textFormat: Text.PlainText
-                        opacity: vaultRow.isOther ? 0.8 : 1
+                        font.pointSize: vaultBox.font.pointSize
+                        font.strikeout: vaultRow.missing
+                        opacity: vaultRow.missing ? 0.45 : vaultRow.isOther ? 0.8 : 1
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        visible: !vaultRow.isOther && vaultRow.modelData === VaultController.vaultPath
-                        text: qsTr("last used")
+                        visible: !vaultRow.isOther && (vaultRow.missing || vaultRow.modelData === VaultController.vaultPath)
+                        text: vaultRow.missing ? qsTr("not found") : qsTr("last used")
                         opacity: 0.7
                     }
                 }
@@ -185,7 +244,7 @@ Item {
             onActivated: function(index) {
                 const chosen = model[index]
                 // The list follows the vault shown again, whatever was picked.
-                currentIndex = Qt.binding(function() { return VaultController.vaults.indexOf(VaultController.vaultPath) })
+                currentIndex = Qt.binding(function() { return vaultBox.listed.indexOf(VaultController.vaultPath) })
                 if (chosen === other)
                     unlockPage.leaveForAnother()
                 else if (chosen !== VaultController.vaultPath)
@@ -194,30 +253,29 @@ Item {
             }
         }
 
-        Label { text: qsTr("Master password"); opacity: 0.8 }
         RowLayout {
             spacing: 0
             Layout.fillWidth: true
             PasswordField {
                 id: passwordField
                 objectName: "masterPasswordField"
-                placeholderText: qsTr("Master password of %1").arg(VaultController.vaultName)
+                placeholderText: qsTr("Master Password")
+                font.pointSize: Appearance.fontPointSize * 1.4
+                // The placeholder in the normal font, the password in the monospaced one.
+                font.family: text === "" ? Appearance.font.family : "Noto Sans Mono"
+                leftPadding: Math.round(14 * Appearance.factor)
+                // Rounded, as the owner's design.
+                background: Rectangle {
+                    radius: Math.round(8 * Appearance.factor)
+                    color: passwordField.palette.base
+                    border.color: passwordField.activeFocus ? passwordField.palette.highlight : passwordField.palette.mid
+                }
+                Layout.preferredHeight: Math.round(58 * Appearance.factor)
                 Layout.fillWidth: true
                 // Greyed while waiting after wrong master passwords (D-041).
                 enabled: VaultController.unlockWaitSeconds === 0
                 onAccepted: unlockPage.unlockNow()
                 onEnabledChanged: if (enabled && unlockPage.visible) forceActiveFocus()
-            }
-            Button {
-                objectName: "unlockButton"
-                text: "→"
-                Accessible.name: qsTr("Unlock")
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Unlock")
-                enabled: VaultController.unlockWaitSeconds === 0
-                Layout.preferredHeight: passwordField.implicitHeight
-                Layout.preferredWidth: passwordField.implicitHeight * 1.2
-                onClicked: unlockPage.unlockNow()
             }
         }
         Label {

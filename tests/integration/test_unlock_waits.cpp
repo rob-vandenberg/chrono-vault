@@ -211,22 +211,21 @@ void TestUnlockWaits::the_unlock_page_greys_and_counts_down()
     auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
     QVERIFY(!lockedVault(*controller, QStringLiteral("page")).isEmpty());
     QObject* field = window->findChild<QObject*>(QStringLiteral("masterPasswordField"));
-    QObject* unlockButton = window->findChild<QObject*>(QStringLiteral("unlockButton"));
     QObject* waitText = window->findChild<QObject*>(QStringLiteral("unlockWaitText"));
-    QVERIFY(field && unlockButton && waitText);
-    QVERIFY(unlockButton->property("enabled").toBool());
+    QVERIFY(field && waitText);
+    QVERIFY(field->property("enabled").toBool());
     for (int attempt = 1; attempt <= 5; ++attempt) {
         controller->moveClockForTests(60);
         typeWrong(*controller);
     }
-    QTRY_VERIFY(!unlockButton->property("enabled").toBool());
+    QTRY_VERIFY(!field->property("enabled").toBool());
     QVERIFY(!field->property("enabled").toBool());
     QVERIFY(waitText->property("visible").toBool());
     QCOMPARE(waitText->property("text").toString(), QStringLiteral("Try again in 1:00"));
     controller->moveClockForTests(8);
     QCOMPARE(waitText->property("text").toString(), QStringLiteral("Try again in 0:52"));
     controller->moveClockForTests(52);
-    QTRY_VERIFY(unlockButton->property("enabled").toBool());
+    QTRY_VERIFY(field->property("enabled").toBool());
     QVERIFY(field->property("enabled").toBool());
     QVERIFY(!waitText->property("visible").toBool());
 

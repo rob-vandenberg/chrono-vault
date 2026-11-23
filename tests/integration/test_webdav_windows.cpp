@@ -241,8 +241,8 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QQuickItem* masterField = inWindow(window, QStringLiteral("masterPasswordField"));
     QVERIFY(vaultBox && masterField);
     QTRY_VERIFY(vaultBox->isVisible());
-    QCOMPARE(vaultBox->property("currentIndex").toInt(), 0);
-    QCOMPARE(masterField->property("placeholderText").toString(), QStringLiteral("Master password of Home"));
+    QTRY_COMPARE(vaultBox->property("currentIndex").toInt(), 0);
+    QCOMPARE(masterField->property("placeholderText").toString(), QStringLiteral("Master Password"));
     controller->unlock(QStringLiteral("pass"));
     QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
     QQuickItem* place = inWindow(window, QStringLiteral("vaultPlace"));

@@ -163,6 +163,11 @@ class VaultController : public QObject
     Q_PROPERTY(bool syncing READ syncing NOTIFY syncChanged)
     Q_PROPERTY(QString certificateAsked READ certificateAsked NOTIFY syncChanged)
     Q_PROPERTY(bool webDavPasswordNeeded READ webDavPasswordNeeded NOTIFY syncChanged)
+    // The vaults whose files were found, the vault used last when it was not
+    // (listed struck through), and no vault found at all (D-058, 0.3.65).
+    Q_PROPERTY(QStringList foundVaults READ foundVaults NOTIFY vaultsFoundChanged)
+    Q_PROPERTY(QString missingVault READ missingVault NOTIFY vaultsFoundChanged)
+    Q_PROPERTY(bool noVaultFound READ noVaultFound NOTIFY vaultsFoundChanged)
 
 public:
     enum class State { NoVault, Locked, Busy, Unlocked };
@@ -439,6 +444,11 @@ public:
     [[nodiscard]] bool syncing() const { return syncer && syncer->running(); }
     [[nodiscard]] QString certificateAsked() const { return shownFingerprint(askedCertificate); }
     [[nodiscard]] bool webDavPasswordNeeded() const { return passwordNeeded; }
+    [[nodiscard]] QStringList foundVaults() const { return foundList; }
+    [[nodiscard]] QString missingVault() const { return missingLast; }
+    [[nodiscard]] bool noVaultFound() const { return !vaultList.isEmpty() && foundList.isEmpty() && !checkingVaults && currentState == State::NoVault; }
+    // Looks which vaults are there, in the background; ↻ on the start page.
+    Q_INVOKABLE void checkVaults();
     // Tools > Sync Now.
     Q_INVOKABLE void syncNow();
     // The answer to "Trust this certificate?" for the vault shown.
@@ -544,6 +554,7 @@ signals:
     // the one to show.
     void saved(const QString& itemId);
     void syncChanged();
+    void vaultsFoundChanged();
     // The answer to connectWebDav: the vault files in the folder, or why
     // not; certificate is the fingerprint to ask about, when that is why.
     void webDavConnected(bool ok, const QString& problem, const QStringList& vaultFiles, const QString& certificate);
@@ -757,6 +768,12 @@ private:
     QString copiedText;
 
     // WebDAV (D-057).
+    void vaultsChecked(const QStringList& found);
+    QStringList foundList;
+    QString missingLast;
+    bool checkingVaults = false;
+    qint64 missingSinceMs = 0;
+    QTimer vaultRetry;
     std::unique_ptr<WebDavSync> syncer;
     std::shared_ptr<SecretStore> secrets; // shared with the threads that ask it
     std::function<bool(SyncStep)> syncStepCheck;
