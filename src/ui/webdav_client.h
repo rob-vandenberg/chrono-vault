@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QDateTime>
 #include <QList>
 #include <QNetworkAccessManager>
 #include <QObject>
@@ -29,9 +30,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.h 0.3.62
+// webdav_client.h 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: A file's time of change, for the file dialog (D-057)
 // v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.60: Initial release (D-057)
 
@@ -84,6 +86,7 @@ struct WebDavEntry
     bool isFolder = false;
     QByteArray tag;
     qint64 size = -1;
+    QDateTime modified; // invalid when not said
 };
 
 // The few WebDAV requests Chrono Vault needs, made with Qt Network and never

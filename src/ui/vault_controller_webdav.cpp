@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.3.62
+// vault_controller_webdav.cpp 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: A folder's entries with their size and time of change, for the file dialog (D-057)
 // v0.3.62: The folder browser and New folder; an address read as typed; a non-WebDAV server said in words (D-057)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057)
 
@@ -338,23 +339,38 @@ void VaultController::showWebDavFolder(const WebDavAccount& account, bool connec
             return;
         }
         QStringList files;
-        QStringList folders;
-        for (const WebDavEntry& entry : entries) {
-            if (entry.isFolder) {
-                folders.append(entry.name);
-            } else if (entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
-                       !entry.name.contains(QLatin1String(".uploading"))) {
+        QVariantList shown; // folders first, then vaults, each by name
+        QList<WebDavEntry> sorted = entries;
+        std::sort(sorted.begin(), sorted.end(), [](const WebDavEntry& one, const WebDavEntry& other) {
+            if (one.isFolder != other.isFolder) {
+                return one.isFolder;
+            }
+            return one.name.compare(other.name, Qt::CaseInsensitive) < 0;
+        });
+        for (const WebDavEntry& entry : std::as_const(sorted)) {
+            const bool vault = !entry.isFolder && entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
+                               !entry.name.contains(QLatin1String(".uploading"));
+            if (!entry.isFolder && !vault) {
+                continue;
+            }
+            if (vault) {
                 files.append(entry.name);
             }
+            shown.append(QVariantMap{
+                {QStringLiteral("name"), entry.name},
+                {QStringLiteral("folder"), entry.isFolder},
+                {QStringLiteral("size"), entry.isFolder || entry.size < 0 ? QString() : self->sizeText(entry.size)},
+                {QStringLiteral("modified"), entry.modified.isValid()
+                                                 ? QLocale().toString(entry.modified.toLocalTime(), QLocale::ShortFormat)
+                                                 : QString()},
+            });
         }
-        files.sort(Qt::CaseInsensitive);
-        folders.sort(Qt::CaseInsensitive);
         self->connection = std::move(self->browsing);
         self->connectedFiles = files;
         if (connecting) {
             emit self->webDavConnected(true, QString(), files, QString());
         }
-        emit self->webDavFolderShown(asking->account().folder.toDisplayString(QUrl::RemoveUserInfo), folders, files);
+        emit self->webDavFolderShown(asking->account().folder.toDisplayString(QUrl::RemoveUserInfo), shown, files);
     });
 }
 
@@ -364,7 +380,16 @@ void VaultController::openWebDavFolder(const QString& name)
         return;
     }
     WebDavAccount account = connection->account();
-    if (name == QLatin1String("..")) {
+    if (name.contains(QLatin1String("://"))) {
+        // A whole address, for Back in the file dialog: only on the server
+        // already signed in to.
+        const QUrl address(name, QUrl::TolerantMode);
+        if (address.host() != account.folder.host() || address.scheme() != account.folder.scheme() ||
+            address.port() != account.folder.port()) {
+            return;
+        }
+        account.folder = address;
+    } else if (name == QLatin1String("..")) {
         account.folder = account.folder.resolved(QUrl(QStringLiteral("..")));
     } else {
         account.folder = connection->addressOf(name);

@@ -448,7 +448,12 @@
 <context>
     <name>IconNames</name>
     <message>
-        <location filename="../build/icon_headings/icon_headings.cpp" line="+5"/>
+        <location filename="../build/icon_headings/icon_headings.cpp" line="+4"/>
+        <source>pcloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>ABN-AMRO</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2326,7 +2331,7 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+42"/>
+        <location filename="../qml/StorageWindow.qml" line="+43"/>
         <source>Select Storage</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2337,6 +2342,11 @@
     </message>
     <message>
         <location line="+5"/>
+        <source>Local</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>Cloud</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2346,12 +2356,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
-        <source>Non-Cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
+        <location line="-13"/>
         <source>This Device</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2853,6 +2858,99 @@
     </message>
 </context>
 <context>
+    <name>WebDavFileDialog</name>
+    <message>
+        <location filename="../qml/WebDavFileDialog.qml" line="+51"/>
+        <source>Open a vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Save the new vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Choose a folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+56"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Choose folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>New folder…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Name of the new folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Modified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+58"/>
+        <source>This folder is empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>A vault with that name is already in this folder. Choose another name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>A name without /  : * ? &quot; &lt; &gt; |, not starting or ending with a dot.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>File name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>WebDavSync</name>
     <message>
         <location filename="../src/ui/webdav_sync.cpp" line="+191"/>
@@ -2913,7 +3011,7 @@
 <context>
     <name>WebDavWindow</name>
     <message>
-        <location filename="../qml/WebDavWindow.qml" line="+76"/>
+        <location filename="../qml/WebDavWindow.qml" line="+74"/>
         <source>New vault on a WebDAV server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2928,7 +3026,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+72"/>
+        <location line="+78"/>
         <source>Next…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2938,12 +3036,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+0"/>
-        <source>Move here</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+46"/>
+        <location line="+45"/>
         <source>“%1” goes to the WebDAV folder you choose and stays on this computer as well.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2998,7 +3091,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+49"/>
+        <source>Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Choose the folder with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Choose the folder and name with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Choose the vault with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-164"/>
         <source>Connecting…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3008,68 +3131,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+1"/>
+        <source>Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+117"/>
         <source>Trust this certificate only when it is your server&apos;s. Its SHA-256 fingerprint:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Trust this certificate and connect</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+14"/>
-        <source>Choose the vault:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Choose the folder for the new vault:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Choose the folder to move the vault to:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
-        <source>Up</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+12"/>
-        <source>New folder…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+17"/>
-        <source>Name of the new folder</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>Create</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+45"/>
-        <source>This folder is empty.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+9"/>
-        <source>Name of the new vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+12"/>
-        <source>A name without /  : * ? &quot; &lt; &gt; |, not starting or ending with a dot.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>A vault with that name is already in that folder. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3381,7 +3454,7 @@
     <message>
         <location line="+4"/>
         <location line="+2145"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+452"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+477"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3785,7 +3858,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-435"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-459"/>
         <source>The server cannot be reached. Check the address and the network.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3845,7 +3918,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+86"/>
+        <location line="+110"/>
         <source>A folder or file with that name is already there.</source>
         <translation type="unfinished"></translation>
     </message>

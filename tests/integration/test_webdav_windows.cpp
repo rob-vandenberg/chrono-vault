@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.3.62
+// test_webdav_windows.cpp 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: One button Connect then Next…; Browse… and the WebDAV file dialog; the window's height
 // v0.3.62: The Select Storage tiles, the server list, the folder browser, the unlock page's address
 // v0.3.60: Initial release: the WebDAV windows and Settings > Vaults, driven as a person would (D-057)
 
@@ -179,34 +180,47 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
 
     // The server's certificate is not trusted here: its fingerprint is shown,
     // and trusting it connects.
-    click(inWindow(webDav, QStringLiteral("webDavConnectButton")));
+    // One button: Connect until connected (the owner, 0.3.63).
+    QQuickItem* goButton = inWindow(webDav, QStringLiteral("webDavGoButton"));
+    QVERIFY(goButton);
+    QCOMPARE(goButton->property("text").toString(), QStringLiteral("Connect"));
+    click(goButton);
     QTRY_VERIFY_WITH_TIMEOUT(!webDav->property("certificate").toString().isEmpty(), 10000);
     QCOMPARE(webDav->property("certificate").toString().remove(QLatin1Char(':')).toLower().toLatin1(),
              WebDavTestServer::certificateFingerprint());
     click(inWindow(webDav, QStringLiteral("trustCertificateButton")));
     QTRY_VERIFY_WITH_TIMEOUT(webDav->property("connected").toBool(), 10000);
+    QCOMPARE(goButton->property("text").toString(), QStringLiteral("Next…"));
+    QVERIFY(!goButton->isEnabled());
+    // As tall as its content, whatever height it had.
+    auto* webDavWindow = qobject_cast<QQuickWindow*>(webDav);
+    QCOMPARE(webDavWindow->height(), webDavWindow->minimumHeight());
 
-    // A new folder in the browser, shown at once; the vault goes there.
-    click(inWindow(webDav, QStringLiteral("webDavNewFolderButton")));
-    inWindow(webDav, QStringLiteral("webDavFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
-    click(inWindow(webDav, QStringLiteral("webDavCreateFolderButton")));
-    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
-    QVERIFY(inWindow(webDav, QStringLiteral("webDavUpButton"))->isEnabled());
-    // Connect again: the browser starts at the server's folder, Up greyed.
-    QVERIFY(QMetaObject::invokeMethod(webDav, "connectNow"));
-    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("connected").toBool() &&
-                                 webDav->property("folderShown").toString() == webDav->property("serverRoot").toString(),
-                             10000);
-    QVERIFY(!inWindow(webDav, QStringLiteral("webDavUpButton"))->isEnabled());
-    QVERIFY(QMetaObject::invokeMethod(webDav, "openFolder", Q_ARG(QVariant, QStringLiteral("Work vaults"))));
-    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+    // Browse… opens the WebDAV file dialog: a new folder, shown at once,
+    // Back, Up, then the name and Save.
+    click(inWindow(webDav, QStringLiteral("webDavBrowseButton")));
+    QObject* files = webDav->findChild<QObject*>(QStringLiteral("webDavFileDialog"));
+    QVERIFY(files);
+    QTRY_VERIFY(files->property("visible").toBool());
+    click(inWindow(files, QStringLiteral("fileDialogNewFolderButton")));
+    inWindow(files, QStringLiteral("fileDialogFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
+    click(inWindow(files, QStringLiteral("fileDialogCreateFolderButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+    QVERIFY(inWindow(files, QStringLiteral("fileDialogUpButton"))->isEnabled());
+    click(inWindow(files, QStringLiteral("fileDialogBackButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString() == files->property("serverRoot").toString(), 10000);
+    QVERIFY(!inWindow(files, QStringLiteral("fileDialogUpButton"))->isEnabled());
+    QVERIFY(QMetaObject::invokeMethod(files, "go", Q_ARG(QVariant, QStringLiteral("Work vaults")), Q_ARG(QVariant, true)));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+    inWindow(files, QStringLiteral("fileDialogNameField"))->setProperty("text", QStringLiteral("Home"));
+    click(inWindow(files, QStringLiteral("fileDialogChooseButton")));
+    QTRY_VERIFY(!files->property("visible").toBool());
+    QVERIFY(inWindow(webDav, QStringLiteral("webDavChosenField"))->property("text").toString().endsWith(
+        QStringLiteral("/Work vaults/Home.chronovault")));
+    QVERIFY(goButton->isEnabled());
 
-    // The name, then the master password, as for a file here.
-    QQuickItem* name = inWindow(webDav, QStringLiteral("webDavNameField"));
-    QVERIFY(name && name->isVisible());
-    name->setProperty("text", QStringLiteral("Home"));
-    QVERIFY(webDav->property("ready").toBool());
-    click(inWindow(webDav, QStringLiteral("webDavGoButton")));
+    // Next…, then the master password, as for a file here.
+    click(goButton);
     QObject* masterPassword = window->findChild<QObject*>(QStringLiteral("newVaultDialog"));
     QVERIFY(masterPassword);
     QTRY_VERIFY(masterPassword->property("visible").toBool());

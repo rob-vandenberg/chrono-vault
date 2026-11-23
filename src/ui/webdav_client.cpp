@@ -30,9 +30,10 @@
 #include <QXmlStreamReader>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.cpp 0.3.62
+// webdav_client.cpp 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: A file's time of change, for the file dialog (D-057)
 // v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.61: Every request and its answer in the --debug log, never a password or a vault's bytes (D-057)
 // v0.3.60: Initial release (D-057)
@@ -169,6 +170,7 @@ std::optional<QList<WebDavEntry>> readFolderList(const QByteArray& xml, const QU
         entry.isFolder = isFolder;
         entry.tag = tagFrom(etag, modified);
         entry.size = size;
+        entry.modified = QDateTime::fromString(QString::fromLatin1(modified.trimmed()), Qt::RFC2822Date);
         if (!entry.name.isEmpty()) {
             entries.append(entry);
         }

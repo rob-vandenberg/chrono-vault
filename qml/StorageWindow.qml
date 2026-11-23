@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.3.62
+// StorageWindow.qml 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: Local at the top, Cloud below it (the owner)
 // v0.3.62: Initial release (D-057)
 
 // Where a vault is kept, as the reference program asks it: a tile per
@@ -92,6 +93,19 @@ DialogWindow {
             Layout.fillWidth: true
         }
         Label {
+            text: qsTr("Local")
+            font.bold: true
+        }
+        RowLayout {
+            spacing: Math.round(8 * Appearance.factor)
+            Tile {
+                objectName: "deviceTile"
+                text: qsTr("This Device")
+                iconSource: "qrc:/icons/storage-device.svg"
+                onClicked: storageWindow.choose("device")
+            }
+        }
+        Label {
             text: qsTr("Cloud")
             font.bold: true
         }
@@ -102,19 +116,6 @@ DialogWindow {
                 text: qsTr("WebDAV")
                 iconSource: "qrc:/icons/storage-webdav.svg"
                 onClicked: storageWindow.choose("webdav")
-            }
-        }
-        Label {
-            text: qsTr("Non-Cloud")
-            font.bold: true
-        }
-        RowLayout {
-            spacing: Math.round(8 * Appearance.factor)
-            Tile {
-                objectName: "deviceTile"
-                text: qsTr("This Device")
-                iconSource: "qrc:/icons/storage-device.svg"
-                onClicked: storageWindow.choose("device")
             }
         }
     }

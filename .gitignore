@@ -13,6 +13,7 @@ art/*
 !art/chrono-vault.svg
 !art/storage-webdav.svg
 !art/storage-device.svg
+!art/folder.svg
 !art/eye.svg
 !art/eye-hidden.svg
 !art/item-login.svg

@@ -513,3 +513,10 @@ the unlock page's address, Save closes the editor. Tests: `test_webdav_create` (
 opened left Chrono Vault pointing at it (now the folder shown changes only once listed); round 2 a second Connect
 kept the first server as the browser's top; round 3 clean.
 
+## 23 November 2026: version 0.3.63: a real file dialog for WebDAV
+
+The owner's changelist items 1-11 and 13 (item 12, the related tests and reviewers, struck: the owner tests it):
+`qml/WebDavFileDialog.qml` (new, with `art/folder.svg`), `qml/WebDavWindow.qml` (one button, Browse…, its height),
+`qml/StorageWindow.qml` (Local first), the folder's entries with size and time of change. `test_webdav_windows`
+updated and run; pictures checked.
+

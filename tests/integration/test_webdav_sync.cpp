@@ -269,7 +269,10 @@ private slots:
         shown.clear();
         first->openWebDavFolder(QStringLiteral(".."));
         QVERIFY(shown.wait(10000));
-        QCOMPARE(shown.constLast().at(1).toStringList(), QStringList{QStringLiteral("Work vaults")});
+        const QVariantList entries = shown.constLast().at(1).toList();
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.constFirst().toMap().value(QStringLiteral("name")).toString(), QStringLiteral("Work vaults"));
+        QVERIFY(entries.constFirst().toMap().value(QStringLiteral("folder")).toBool());
     }
 
     void its_own_leftover_upload_is_removed_and_the_same_bytes_are_no_change()

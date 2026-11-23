@@ -21,9 +21,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavWindow.qml 0.3.62
+// WebDavWindow.qml 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.63: One button: Connect, then Open, Next… or Move; the vault or folder chosen with Browse… in a file dialog of
+//          its own; the window as tall as its content (the owner, D-057)
 // v0.3.62: The server chosen from a list, the folder chosen in a browser with New folder; a reason shown when the
 //          window comes back (the owner, D-057)
 // v0.3.60: Initial release (D-057)
@@ -47,28 +49,24 @@ DialogWindow {
     property bool connected: false
     // "browse" while a folder is read or made, "act" while a vault is opened or moved.
     property string waitingFor: ""
-    property var folders: []
+    property var entries: []
     property var vaultFiles: []
     property string folderShown: ""
     property string serverRoot: ""
     property string chosenFile: ""
+    property string chosenFolder: ""
+    property bool chosen: false
     property string certificate: ""
     property string trusted: ""
     property string problem: ""
     readonly property int columnWidth: Math.round(460 * Appearance.factor)
+    // As tall as its content, whatever height was remembered (the owner).
+    maximumHeight: minimumHeight
     readonly property bool busy: connecting || waitingFor !== ""
 
-    readonly property string newFileName: nameField.text.trim() + ".chronovault"
-    readonly property bool nameTaken: vaultFiles.some(function(one) { return one.toLowerCase() === newFileName.toLowerCase() })
-    // A file name on every system, Windows' rules included (D-057).
-    function goodName(text) {
-        const name = text.trim()
-        return name !== "" && !/[\/\\:*?"<>|\x00-\x1f]/.test(text) && !name.startsWith(".") && !name.endsWith(".")
-                && !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(name)
-    }
-    readonly property bool ready: connected && !busy && (mode === "new" ? goodName(nameField.text) && !nameTaken
-                                                          : mode === "open" ? chosenFile !== ""
-                                                          : true)
+    // A choice made in the file dialog holds while the folder it was made in
+    // is still the one the connection is in.
+    readonly property bool ready: connected && !busy && chosen && folderShown === chosenFolder
 
     // A new vault's name, once a folder is chosen: the master password comes next.
     signal newVaultNamed(string name)
@@ -82,18 +80,17 @@ DialogWindow {
         connecting = false
         connected = false
         waitingFor = ""
-        folders = []
+        entries = []
         vaultFiles = []
         folderShown = ""
         serverRoot = ""
         chosenFile = ""
+        chosenFolder = ""
+        chosen = false
         certificate = ""
         trusted = ""
         problem = ""
         passwordField.clear()
-        nameField.clear()
-        folderNameField.clear()
-        newFolderRow.visible = false
     }
 
     // Shown again with the reason a new vault was not kept (D-057).
@@ -102,15 +99,20 @@ DialogWindow {
         problem = reason
     }
 
-    // The button at the bottom right: on to the master password, or open, or move.
+    // The button at the bottom right: Connect until connected, then on to
+    // the master password, or open, or move (the owner).
     function go() {
+        if (!connected) {
+            if (addressField.text.trim() !== "" && !busy)
+                connectNow()
+            return
+        }
         if (!ready)
             return
         if (mode === "new") {
-            const name = nameField.text.trim()
             passwordField.clear()
             accept()
-            newVaultNamed(name)
+            newVaultNamed(chosenFile)
         } else if (mode === "open") {
             waitingFor = "act"
             VaultController.openWebDavVault(chosenFile)
@@ -120,23 +122,24 @@ DialogWindow {
         }
     }
 
+    function browse() {
+        fileDialog.browseFrom(mode === "open" ? "open" : mode === "new" ? "save" : "folder", serverRoot, folderShown,
+                        entries, vaultFiles)
+    }
+
     function connectNow() {
         problem = ""
         connected = false
         // Each Connect starts the browser at that server's folder again.
         serverRoot = ""
         folderShown = ""
-        folders = []
+        entries = []
         vaultFiles = []
         chosenFile = ""
+        chosenFolder = ""
+        chosen = false
         connecting = true
         VaultController.connectWebDav(addressField.text, userField.text, passwordField.text, trusted)
-    }
-
-    function openFolder(name) {
-        problem = ""
-        waitingFor = "browse"
-        VaultController.openWebDavFolder(name)
     }
 
     onShown: {
@@ -147,8 +150,9 @@ DialogWindow {
 
     rightButtons: Button {
         objectName: "webDavGoButton"
-        text: webDavWindow.mode === "new" ? qsTr("Next…") : webDavWindow.mode === "open" ? qsTr("Open") : qsTr("Move here")
-        enabled: webDavWindow.ready
+        text: webDavWindow.connecting ? qsTr("Connecting…") : !webDavWindow.connected ? qsTr("Connect")
+            : webDavWindow.mode === "new" ? qsTr("Next…") : webDavWindow.mode === "open" ? qsTr("Open") : qsTr("Move")
+        enabled: webDavWindow.connected ? webDavWindow.ready : addressField.text.trim() !== "" && !webDavWindow.busy
         highlighted: true
         onClicked: webDavWindow.go()
     }
@@ -163,15 +167,14 @@ DialogWindow {
             webDavWindow.problem = problem
             webDavWindow.certificate = ok ? "" : certificate
         }
-        function onWebDavFolderShown(address, folders, files) {
+        function onWebDavFolderShown(address, entries, files) {
             if (!webDavWindow.visible)
                 return
             if (webDavWindow.serverRoot === "")
                 webDavWindow.serverRoot = address
             webDavWindow.folderShown = address
-            webDavWindow.folders = folders
+            webDavWindow.entries = entries
             webDavWindow.vaultFiles = files
-            webDavWindow.chosenFile = ""
             webDavWindow.waitingFor = ""
         }
         function onWebDavDone(ok, problem) {
@@ -249,15 +252,8 @@ DialogWindow {
             enabled: !webDavWindow.busy
             Layout.preferredWidth: webDavWindow.columnWidth
             onTextChanged: webDavWindow.connected = false
-            onAccepted: if (addressField.text !== "") webDavWindow.connectNow()
+            onAccepted: webDavWindow.go()
         }
-        Button {
-            objectName: "webDavConnectButton"
-            text: webDavWindow.connecting ? qsTr("Connecting…") : qsTr("Connect")
-            enabled: addressField.text.trim() !== "" && !webDavWindow.busy
-            onClicked: webDavWindow.connectNow()
-        }
-
         Label {
             objectName: "webDavProblem"
             visible: webDavWindow.problem !== ""
@@ -294,134 +290,44 @@ DialogWindow {
             }
         }
 
-        // The folder browser, once connected (the owner, D-057).
-        ColumnLayout {
+        // Once connected: the vault or folder, chosen in the WebDAV file
+        // dialog (the owner, D-057).
+        Label {
+            visible: webDavWindow.connected
+            text: webDavWindow.mode === "move" ? qsTr("Folder") : qsTr("Vault")
+        }
+        RowLayout {
             visible: webDavWindow.connected
             spacing: Math.round(6 * Appearance.factor)
-            Label {
-                text: webDavWindow.mode === "open" ? qsTr("Choose the vault:")
-                    : webDavWindow.mode === "new" ? qsTr("Choose the folder for the new vault:")
-                    : qsTr("Choose the folder to move the vault to:")
-                font.bold: true
+            Layout.preferredWidth: webDavWindow.columnWidth
+            TextField {
+                objectName: "webDavChosenField"
+                readOnly: true
+                placeholderText: webDavWindow.mode === "move" ? qsTr("Choose the folder with Browse…")
+                               : webDavWindow.mode === "new" ? qsTr("Choose the folder and name with Browse…")
+                               : qsTr("Choose the vault with Browse…")
+                text: !webDavWindow.chosen ? ""
+                      : webDavWindow.chosenFolder.replace(webDavWindow.serverRoot, "/").replace("//", "/")
+                        + (webDavWindow.chosenFile === "" ? "" : webDavWindow.chosenFile
+                           + (webDavWindow.mode === "new" ? ".chronovault" : ""))
+                Layout.fillWidth: true
             }
-            RowLayout {
-                spacing: Math.round(6 * Appearance.factor)
-                Layout.preferredWidth: webDavWindow.columnWidth
-                Button {
-                    objectName: "webDavUpButton"
-                    text: qsTr("Up")
-                    enabled: !webDavWindow.busy && webDavWindow.folderShown !== webDavWindow.serverRoot
-                    onClicked: webDavWindow.openFolder("..")
-                }
-                Label {
-                    objectName: "webDavFolderShown"
-                    text: webDavWindow.folderShown.replace(webDavWindow.serverRoot, "/").replace("//", "/")
-                    elide: Text.ElideMiddle
-                    Layout.fillWidth: true
-                }
-                Button {
-                    objectName: "webDavNewFolderButton"
-                    text: qsTr("New folder…")
-                    enabled: !webDavWindow.busy && webDavWindow.mode !== "open"
-                    visible: webDavWindow.mode !== "open"
-                    onClicked: {
-                        newFolderRow.visible = true
-                        folderNameField.forceActiveFocus()
-                    }
-                }
-            }
-            RowLayout {
-                id: newFolderRow
-                visible: false
-                spacing: Math.round(6 * Appearance.factor)
-                Layout.preferredWidth: webDavWindow.columnWidth
-                TextField {
-                    id: folderNameField
-                    objectName: "webDavFolderNameField"
-                    placeholderText: qsTr("Name of the new folder")
-                    Layout.fillWidth: true
-                    onAccepted: createFolderButton.clicked()
-                }
-                Button {
-                    id: createFolderButton
-                    objectName: "webDavCreateFolderButton"
-                    text: qsTr("Create")
-                    enabled: webDavWindow.goodName(folderNameField.text) && !webDavWindow.busy
-                    onClicked: {
-                        if (!enabled)
-                            return
-                        webDavWindow.problem = ""
-                        webDavWindow.waitingFor = "browse"
-                        VaultController.makeWebDavFolder(folderNameField.text)
-                        folderNameField.clear()
-                        newFolderRow.visible = false
-                    }
-                }
-            }
-            Frame {
-                padding: 1
-                Layout.preferredWidth: webDavWindow.columnWidth
-                Layout.preferredHeight: Math.round(180 * Appearance.factor)
-                ListView {
-                    id: browser
-                    objectName: "webDavBrowser"
-                    anchors.fill: parent
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    ScrollBar.vertical: ScrollBar {}
-                    model: webDavWindow.folders.map(function(name) { return { name: name, folder: true } })
-                           .concat(webDavWindow.vaultFiles.map(function(name) { return { name: name, folder: false } }))
-                    delegate: ItemDelegate {
-                        required property var modelData
-                        objectName: (modelData.folder ? "folder_" : "file_") + modelData.name
-                        width: ListView.view.width
-                        text: (modelData.folder ? "▸  " : "     ") + modelData.name
-                        font.bold: modelData.folder
-                        enabled: !webDavWindow.busy && (modelData.folder || webDavWindow.mode === "open")
-                        highlighted: !modelData.folder && modelData.name === webDavWindow.chosenFile
-                        onClicked: {
-                            if (modelData.folder)
-                                webDavWindow.openFolder(modelData.name)
-                            else
-                                webDavWindow.chosenFile = modelData.name
-                        }
-                        onDoubleClicked: if (!modelData.folder) { webDavWindow.chosenFile = modelData.name; webDavWindow.go() }
-                    }
-                    Label {
-                        anchors.centerIn: parent
-                        visible: browser.count === 0
-                        text: qsTr("This folder is empty.")
-                        opacity: 0.6
-                    }
-                }
+            Button {
+                objectName: "webDavBrowseButton"
+                text: qsTr("Browse…")
+                enabled: !webDavWindow.busy
+                onClicked: webDavWindow.browse()
             }
         }
+    }
 
-        Label {
-            visible: webDavWindow.connected && webDavWindow.mode === "new"
-            text: qsTr("Name of the new vault")
-        }
-        TextField {
-            id: nameField
-            objectName: "webDavNameField"
-            visible: webDavWindow.connected && webDavWindow.mode === "new"
-            Layout.preferredWidth: webDavWindow.columnWidth
-            onAccepted: webDavWindow.go()
-        }
-        Label {
-            objectName: "webDavNameProblem"
-            visible: nameField.visible && nameField.text.trim() !== "" && !webDavWindow.goodName(nameField.text)
-            text: qsTr("A name without / \\ : * ? \" < > |, not starting or ending with a dot.")
-            color: "#e53e3e"
-            wrapMode: Text.Wrap
-            Layout.preferredWidth: webDavWindow.columnWidth
-        }
-        Label {
-            visible: nameField.visible && webDavWindow.nameTaken
-            text: qsTr("A vault with that name is already in that folder. Choose another name.")
-            color: "#e53e3e"
-            wrapMode: Text.Wrap
-            Layout.preferredWidth: webDavWindow.columnWidth
+    WebDavFileDialog {
+        id: fileDialog
+        transientParent: webDavWindow
+        onChosen: function(fileName, folder) {
+            webDavWindow.chosenFile = fileName
+            webDavWindow.chosenFolder = folder
+            webDavWindow.chosen = true
         }
     }
 }

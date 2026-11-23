@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.3.62
+# qml/CMakeLists.txt 0.3.63
 
 # --- Version history ----------------------------------------------------
+# v0.3.63: WebDavFileDialog.qml and the folder icon (D-057)
 # v0.3.62: StorageWindow.qml and the two storage icons (D-057)
 # v0.3.60: WebDAV: the client, the sync, the system store for its password, its windows (D-057)
 # v0.2.56: CategoryEditor.qml (D-056)
@@ -74,6 +75,7 @@ qt_add_qml_module(chrono_vault_ui
         WelcomePage.qml
         WebDavWindow.qml
         StorageWindow.qml
+        WebDavFileDialog.qml
     SOURCES
         ../src/ui/app_setup.cpp
         ../src/ui/app_setup.h
@@ -153,6 +155,7 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/trash.svg"
         "${PROJECT_SOURCE_DIR}/art/storage-webdav.svg"
         "${PROJECT_SOURCE_DIR}/art/storage-device.svg"
+        "${PROJECT_SOURCE_DIR}/art/folder.svg"
 )
 # The licences Chrono Vault ships, shown in the About box (D-021).
 set_source_files_properties("${PROJECT_SOURCE_DIR}/LICENSE" PROPERTIES QT_RESOURCE_ALIAS "AGPL-3.0.txt")

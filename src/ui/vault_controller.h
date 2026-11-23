@@ -449,8 +449,9 @@ public:
     // answers. trustedCertificate is a fingerprint the person trusted, or "".
     Q_INVOKABLE void connectWebDav(const QString& address, const QString& user, const QString& password,
                                    const QString& trustedCertificate);
-    // The folder browser after Connect: a subfolder of the folder shown, or
-    // ".." for its parent; a new folder, which is then shown.
+    // The folder browser after Connect: a subfolder of the folder shown, ".."
+    // for its parent, or a whole address on the same server (Back); a new
+    // folder, which is then shown.
     Q_INVOKABLE void openWebDavFolder(const QString& name);
     Q_INVOKABLE void makeWebDavFolder(const QString& name);
     // An address that sends the password readable over the network.
@@ -549,8 +550,9 @@ signals:
     void webDavDone(bool ok, const QString& problem);
     // A new WebDAV vault that could not be made or put on the server; nothing was kept.
     void webDavCreateFailed(const QString& problem);
-    // A folder of the server, listed: shown in the folder browser.
-    void webDavFolderShown(const QString& address, const QStringList& folders, const QStringList& vaultFiles);
+    // A folder of the server, listed, for the WebDAV file dialog: each entry a
+    // map of name, folder, size and modified (as words), folders first.
+    void webDavFolderShown(const QString& address, const QVariantList& entries, const QStringList& vaultFiles);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

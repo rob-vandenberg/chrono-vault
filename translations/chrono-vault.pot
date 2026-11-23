@@ -430,563 +430,568 @@ msgctxt "GeneratorDialog|"
 msgid "Another one"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:5
+#: ../build/icon_headings/icon_headings.cpp:4
 msgctxt "IconNames|"
-msgid "ABN-AMRO"
+msgid "pcloud"
 msgstr ""
 
 #: ../build/icon_headings/icon_headings.cpp:6
 msgctxt "IconNames|"
-msgid "ING"
+msgid "ABN-AMRO"
 msgstr ""
 
 #: ../build/icon_headings/icon_headings.cpp:7
-#: ../build/icon_headings/icon_headings.cpp:18
+msgctxt "IconNames|"
+msgid "ING"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:8
+#: ../build/icon_headings/icon_headings.cpp:19
 msgctxt "IconNames|"
 msgid "Rabobank"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:9
+#: ../build/icon_headings/icon_headings.cpp:10
 msgctxt "IconNames|"
 msgid "ANWB"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:10
+#: ../build/icon_headings/icon_headings.cpp:11
 msgctxt "IconNames|"
 msgid "Computer"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:11
+#: ../build/icon_headings/icon_headings.cpp:12
 msgctxt "IconNames|"
 msgid "DigiD"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:12
+#: ../build/icon_headings/icon_headings.cpp:13
 msgctxt "IconNames|"
 msgid "EU_NL"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:13
+#: ../build/icon_headings/icon_headings.cpp:14
 msgctxt "IconNames|"
 msgid "Gmail"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:14
+#: ../build/icon_headings/icon_headings.cpp:15
 msgctxt "IconNames|"
 msgid "Laptop"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:15
+#: ../build/icon_headings/icon_headings.cpp:16
 msgctxt "IconNames|"
 msgid "NL"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:16
+#: ../build/icon_headings/icon_headings.cpp:17
 msgctxt "IconNames|"
 msgid "Nederland"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:17
+#: ../build/icon_headings/icon_headings.cpp:18
 msgctxt "IconNames|"
 msgid "PC"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:19
+#: ../build/icon_headings/icon_headings.cpp:20
 msgctxt "IconNames|"
 msgid "Shell"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:20
+#: ../build/icon_headings/icon_headings.cpp:21
 msgctxt "IconNames|"
 msgid "Signal"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:21
+#: ../build/icon_headings/icon_headings.cpp:22
 msgctxt "IconNames|"
 msgid "Sligro"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:22
+#: ../build/icon_headings/icon_headings.cpp:23
 msgctxt "IconNames|"
 msgid "Starburst"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:23
+#: ../build/icon_headings/icon_headings.cpp:24
 msgctxt "IconNames|"
 msgid "Tibber"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:24
+#: ../build/icon_headings/icon_headings.cpp:25
 msgctxt "IconNames|"
 msgid "TransIP"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:25
+#: ../build/icon_headings/icon_headings.cpp:26
 msgctxt "IconNames|"
 msgid "quintes"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:26
+#: ../build/icon_headings/icon_headings.cpp:27
 msgctxt "IconNames|"
 msgid "signal"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:28
+#: ../build/icon_headings/icon_headings.cpp:29
 msgctxt "IconNames|"
 msgid "bank"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:29
+#: ../build/icon_headings/icon_headings.cpp:30
 msgctxt "IconNames|"
 msgid "banknote"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:30
+#: ../build/icon_headings/icon_headings.cpp:31
 msgctxt "IconNames|"
 msgid "briefcase"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:31
+#: ../build/icon_headings/icon_headings.cpp:32
 msgctxt "IconNames|"
 msgid "car"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:32
+#: ../build/icon_headings/icon_headings.cpp:33
 msgctxt "IconNames|"
 msgid "card"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:33
+#: ../build/icon_headings/icon_headings.cpp:34
 msgctxt "IconNames|"
 msgid "cart"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:34
+#: ../build/icon_headings/icon_headings.cpp:35
 msgctxt "IconNames|"
 msgid "cloud"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:35
+#: ../build/icon_headings/icon_headings.cpp:36
 msgctxt "IconNames|"
 msgid "computer"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:36
+#: ../build/icon_headings/icon_headings.cpp:37
 msgctxt "IconNames|"
 msgid "documents"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:37
+#: ../build/icon_headings/icon_headings.cpp:38
 msgctxt "IconNames|"
 msgid "dollar"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:38
+#: ../build/icon_headings/icon_headings.cpp:39
 msgctxt "IconNames|"
 msgid "envelope"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:39
+#: ../build/icon_headings/icon_headings.cpp:40
 msgctxt "IconNames|"
 msgid "euro"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:40
+#: ../build/icon_headings/icon_headings.cpp:41
 msgctxt "IconNames|"
 msgid "folder"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:41
+#: ../build/icon_headings/icon_headings.cpp:42
 msgctxt "IconNames|"
 msgid "game"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:42
+#: ../build/icon_headings/icon_headings.cpp:43
 msgctxt "IconNames|"
 msgid "globe"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:43
+#: ../build/icon_headings/icon_headings.cpp:44
 msgctxt "IconNames|"
 msgid "heart"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:44
+#: ../build/icon_headings/icon_headings.cpp:45
 msgctxt "IconNames|"
 msgid "house"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:45
+#: ../build/icon_headings/icon_headings.cpp:46
 msgctxt "IconNames|"
 msgid "identity"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:46
+#: ../build/icon_headings/icon_headings.cpp:47
 msgctxt "IconNames|"
 msgid "login"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:47
+#: ../build/icon_headings/icon_headings.cpp:48
 msgctxt "IconNames|"
 msgid "miscellaneous"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:48
+#: ../build/icon_headings/icon_headings.cpp:49
 msgctxt "IconNames|"
 msgid "note"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:49
+#: ../build/icon_headings/icon_headings.cpp:50
 msgctxt "IconNames|"
 msgid "pass"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:50
+#: ../build/icon_headings/icon_headings.cpp:51
 msgctxt "IconNames|"
 msgid "password"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:51
+#: ../build/icon_headings/icon_headings.cpp:52
 msgctxt "IconNames|"
 msgid "phone"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:52
+#: ../build/icon_headings/icon_headings.cpp:53
 msgctxt "IconNames|"
 msgid "plane"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:53
+#: ../build/icon_headings/icon_headings.cpp:54
 msgctxt "IconNames|"
 msgid "school"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:54
+#: ../build/icon_headings/icon_headings.cpp:55
 msgctxt "IconNames|"
 msgid "server"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:55
+#: ../build/icon_headings/icon_headings.cpp:56
 msgctxt "IconNames|"
 msgid "shield"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:56
+#: ../build/icon_headings/icon_headings.cpp:57
 msgctxt "IconNames|"
 msgid "uncategorized"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:57
+#: ../build/icon_headings/icon_headings.cpp:58
 msgctxt "IconNames|"
 msgid "wifi"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:59
+#: ../build/icon_headings/icon_headings.cpp:60
 msgctxt "IconNames|"
 msgid "A"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:60
+#: ../build/icon_headings/icon_headings.cpp:61
 msgctxt "IconNames|"
 msgid "B"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:61
+#: ../build/icon_headings/icon_headings.cpp:62
 msgctxt "IconNames|"
 msgid "C"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:62
+#: ../build/icon_headings/icon_headings.cpp:63
 msgctxt "IconNames|"
 msgid "D"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:63
+#: ../build/icon_headings/icon_headings.cpp:64
 msgctxt "IconNames|"
 msgid "E"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:64
+#: ../build/icon_headings/icon_headings.cpp:65
 msgctxt "IconNames|"
 msgid "F"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:65
+#: ../build/icon_headings/icon_headings.cpp:66
 msgctxt "IconNames|"
 msgid "G"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:66
+#: ../build/icon_headings/icon_headings.cpp:67
 msgctxt "IconNames|"
 msgid "H"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:67
+#: ../build/icon_headings/icon_headings.cpp:68
 msgctxt "IconNames|"
 msgid "I"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:68
+#: ../build/icon_headings/icon_headings.cpp:69
 msgctxt "IconNames|"
 msgid "J"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:69
+#: ../build/icon_headings/icon_headings.cpp:70
 msgctxt "IconNames|"
 msgid "K"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:70
+#: ../build/icon_headings/icon_headings.cpp:71
 msgctxt "IconNames|"
 msgid "L"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:71
+#: ../build/icon_headings/icon_headings.cpp:72
 msgctxt "IconNames|"
 msgid "M"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:72
+#: ../build/icon_headings/icon_headings.cpp:73
 msgctxt "IconNames|"
 msgid "N"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:73
+#: ../build/icon_headings/icon_headings.cpp:74
 msgctxt "IconNames|"
 msgid "O"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:74
+#: ../build/icon_headings/icon_headings.cpp:75
 msgctxt "IconNames|"
 msgid "P"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:75
+#: ../build/icon_headings/icon_headings.cpp:76
 msgctxt "IconNames|"
 msgid "Q"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:76
+#: ../build/icon_headings/icon_headings.cpp:77
 msgctxt "IconNames|"
 msgid "R"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:77
+#: ../build/icon_headings/icon_headings.cpp:78
 msgctxt "IconNames|"
 msgid "S"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:78
+#: ../build/icon_headings/icon_headings.cpp:79
 msgctxt "IconNames|"
 msgid "T"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:79
+#: ../build/icon_headings/icon_headings.cpp:80
 msgctxt "IconNames|"
 msgid "U"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:80
+#: ../build/icon_headings/icon_headings.cpp:81
 msgctxt "IconNames|"
 msgid "V"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:81
+#: ../build/icon_headings/icon_headings.cpp:82
 msgctxt "IconNames|"
 msgid "W"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:82
+#: ../build/icon_headings/icon_headings.cpp:83
 msgctxt "IconNames|"
 msgid "X"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:83
+#: ../build/icon_headings/icon_headings.cpp:84
 msgctxt "IconNames|"
 msgid "Y"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:84
+#: ../build/icon_headings/icon_headings.cpp:85
 msgctxt "IconNames|"
 msgid "Z"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:86
+#: ../build/icon_headings/icon_headings.cpp:87
 msgctxt "IconNames|"
 msgid "a"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:87
+#: ../build/icon_headings/icon_headings.cpp:88
 msgctxt "IconNames|"
 msgid "b"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:88
+#: ../build/icon_headings/icon_headings.cpp:89
 msgctxt "IconNames|"
 msgid "c"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:89
+#: ../build/icon_headings/icon_headings.cpp:90
 msgctxt "IconNames|"
 msgid "d"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:90
+#: ../build/icon_headings/icon_headings.cpp:91
 msgctxt "IconNames|"
 msgid "e"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:91
+#: ../build/icon_headings/icon_headings.cpp:92
 msgctxt "IconNames|"
 msgid "f"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:92
+#: ../build/icon_headings/icon_headings.cpp:93
 msgctxt "IconNames|"
 msgid "g"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:93
+#: ../build/icon_headings/icon_headings.cpp:94
 msgctxt "IconNames|"
 msgid "h"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:94
+#: ../build/icon_headings/icon_headings.cpp:95
 msgctxt "IconNames|"
 msgid "i"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:95
+#: ../build/icon_headings/icon_headings.cpp:96
 msgctxt "IconNames|"
 msgid "j"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:96
+#: ../build/icon_headings/icon_headings.cpp:97
 msgctxt "IconNames|"
 msgid "k"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:97
+#: ../build/icon_headings/icon_headings.cpp:98
 msgctxt "IconNames|"
 msgid "l"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:98
+#: ../build/icon_headings/icon_headings.cpp:99
 msgctxt "IconNames|"
 msgid "m"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:99
+#: ../build/icon_headings/icon_headings.cpp:100
 msgctxt "IconNames|"
 msgid "n"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:100
+#: ../build/icon_headings/icon_headings.cpp:101
 msgctxt "IconNames|"
 msgid "o"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:101
+#: ../build/icon_headings/icon_headings.cpp:102
 msgctxt "IconNames|"
 msgid "p"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:102
+#: ../build/icon_headings/icon_headings.cpp:103
 msgctxt "IconNames|"
 msgid "q"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:103
+#: ../build/icon_headings/icon_headings.cpp:104
 msgctxt "IconNames|"
 msgid "r"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:104
+#: ../build/icon_headings/icon_headings.cpp:105
 msgctxt "IconNames|"
 msgid "s"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:105
+#: ../build/icon_headings/icon_headings.cpp:106
 msgctxt "IconNames|"
 msgid "t"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:106
+#: ../build/icon_headings/icon_headings.cpp:107
 msgctxt "IconNames|"
 msgid "u"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:107
+#: ../build/icon_headings/icon_headings.cpp:108
 msgctxt "IconNames|"
 msgid "v"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:108
+#: ../build/icon_headings/icon_headings.cpp:109
 msgctxt "IconNames|"
 msgid "w"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:109
+#: ../build/icon_headings/icon_headings.cpp:110
 msgctxt "IconNames|"
 msgid "x"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:110
+#: ../build/icon_headings/icon_headings.cpp:111
 msgctxt "IconNames|"
 msgid "y"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:111
+#: ../build/icon_headings/icon_headings.cpp:112
 msgctxt "IconNames|"
 msgid "z"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:113
+#: ../build/icon_headings/icon_headings.cpp:114
 msgctxt "IconNames|"
 msgid "0"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:114
+#: ../build/icon_headings/icon_headings.cpp:115
 msgctxt "IconNames|"
 msgid "1"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:115
+#: ../build/icon_headings/icon_headings.cpp:116
 msgctxt "IconNames|"
 msgid "2"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:116
+#: ../build/icon_headings/icon_headings.cpp:117
 msgctxt "IconNames|"
 msgid "3"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:117
+#: ../build/icon_headings/icon_headings.cpp:118
 msgctxt "IconNames|"
 msgid "4"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:118
+#: ../build/icon_headings/icon_headings.cpp:119
 msgctxt "IconNames|"
 msgid "5"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:119
+#: ../build/icon_headings/icon_headings.cpp:120
 msgctxt "IconNames|"
 msgid "6"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:120
+#: ../build/icon_headings/icon_headings.cpp:121
 msgctxt "IconNames|"
 msgid "7"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:121
+#: ../build/icon_headings/icon_headings.cpp:122
 msgctxt "IconNames|"
 msgid "8"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:122
+#: ../build/icon_headings/icon_headings.cpp:123
 msgctxt "IconNames|"
 msgid "9"
 msgstr ""
@@ -1037,37 +1042,37 @@ msgid_plural ""
 "instead. Delete it?"
 msgstr[0] ""
 
-#: ../build/icon_headings/icon_headings.cpp:4
+#: ../build/icon_headings/icon_headings.cpp:5
 msgctxt "IconSections|"
 msgid "Web"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:8
+#: ../build/icon_headings/icon_headings.cpp:9
 msgctxt "IconSections|"
 msgid "Credit Card"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:27
+#: ../build/icon_headings/icon_headings.cpp:28
 msgctxt "IconSections|"
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:58
+#: ../build/icon_headings/icon_headings.cpp:59
 msgctxt "IconSections|"
 msgid "Categories"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:85
+#: ../build/icon_headings/icon_headings.cpp:86
 msgctxt "IconSections|"
 msgid "Uppercase"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:112
+#: ../build/icon_headings/icon_headings.cpp:113
 msgctxt "IconSections|"
 msgid "Lowercase"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:123
+#: ../build/icon_headings/icon_headings.cpp:124
 msgctxt "IconSections|"
 msgid "Digits"
 msgstr ""
@@ -2289,32 +2294,32 @@ msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:42
+#: ../qml/StorageWindow.qml:43
 msgctxt "StorageWindow|"
 msgid "Select Storage"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:90
+#: ../qml/StorageWindow.qml:91
 msgctxt "StorageWindow|"
 msgid "Select where you already have or want to create your vault:"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:95
+#: ../qml/StorageWindow.qml:96
+msgctxt "StorageWindow|"
+msgid "Local"
+msgstr ""
+
+#: ../qml/StorageWindow.qml:109
 msgctxt "StorageWindow|"
 msgid "Cloud"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:102
+#: ../qml/StorageWindow.qml:116
 msgctxt "StorageWindow|"
 msgid "WebDAV"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:108
-msgctxt "StorageWindow|"
-msgid "Non-Cloud"
-msgstr ""
-
-#: ../qml/StorageWindow.qml:115
+#: ../qml/StorageWindow.qml:103
 msgctxt "StorageWindow|"
 msgid "This Device"
 msgstr ""
@@ -2812,6 +2817,96 @@ msgctxt "VaultPage|"
 msgid "Choose an item, or make a new one."
 msgstr ""
 
+#: ../qml/WebDavFileDialog.qml:51
+msgctxt "WebDavFileDialog|"
+msgid "Open a vault"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:51
+msgctxt "WebDavFileDialog|"
+msgid "Save the new vault"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:51
+msgctxt "WebDavFileDialog|"
+msgid "Choose a folder"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:107
+msgctxt "WebDavFileDialog|"
+msgid "Open"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:107
+msgctxt "WebDavFileDialog|"
+msgid "Save"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:107
+msgctxt "WebDavFileDialog|"
+msgid "Choose folder"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:142
+msgctxt "WebDavFileDialog|"
+msgid "Back"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:148
+msgctxt "WebDavFileDialog|"
+msgid "Up"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:161
+msgctxt "WebDavFileDialog|"
+msgid "New folder…"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:178
+msgctxt "WebDavFileDialog|"
+msgid "Name of the new folder"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:185
+msgctxt "WebDavFileDialog|"
+msgid "Create"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:214
+msgctxt "WebDavFileDialog|"
+msgid "Name"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:215
+msgctxt "WebDavFileDialog|"
+msgid "Size"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:216
+msgctxt "WebDavFileDialog|"
+msgid "Modified"
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:274
+msgctxt "WebDavFileDialog|"
+msgid "This folder is empty."
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:286
+msgctxt "WebDavFileDialog|"
+msgid "A vault with that name is already in this folder. Choose another name."
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:287
+msgctxt "WebDavFileDialog|"
+msgid "A name without /  : * ? \" < > |, not starting or ending with a dot."
+msgstr ""
+
+#: ../qml/WebDavFileDialog.qml:296
+msgctxt "WebDavFileDialog|"
+msgid "File name:"
+msgstr ""
+
 #: ../src/ui/webdav_sync.cpp:191
 msgctxt "WebDavSync|"
 msgid "the server cannot be reached"
@@ -2867,79 +2962,74 @@ msgctxt "WebDavSync|"
 msgid "stopped"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:76
+#: ../qml/WebDavWindow.qml:74
 msgctxt "WebDavWindow|"
 msgid "New vault on a WebDAV server"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:77
+#: ../qml/WebDavWindow.qml:75
 msgctxt "WebDavWindow|"
 msgid "Open a vault on a WebDAV server"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:78
+#: ../qml/WebDavWindow.qml:76
 msgctxt "WebDavWindow|"
 msgid "Move the vault to a WebDAV server"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:150
+#: ../qml/WebDavWindow.qml:154
 msgctxt "WebDavWindow|"
 msgid "Next…"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:150
+#: ../qml/WebDavWindow.qml:154
 msgctxt "WebDavWindow|"
 msgid "Open"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:150
-msgctxt "WebDavWindow|"
-msgid "Move here"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:196
+#: ../qml/WebDavWindow.qml:199
 #, qt-format
 msgctxt "WebDavWindow|"
 msgid ""
 "“%1” goes to the WebDAV folder you choose and stays on this computer as well."
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:200
+#: ../qml/WebDavWindow.qml:203
 msgctxt "WebDavWindow|"
 msgid "Server"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:206
+#: ../qml/WebDavWindow.qml:209
 msgctxt "WebDavWindow|"
 msgid "pCloud (Europe)"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:206
+#: ../qml/WebDavWindow.qml:209
 msgctxt "WebDavWindow|"
 msgid "pCloud (US)"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:206
+#: ../qml/WebDavWindow.qml:209
 msgctxt "WebDavWindow|"
 msgid "Other WebDAV server"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:208
+#: ../qml/WebDavWindow.qml:211
 msgctxt "WebDavWindow|"
 msgid "Choose the server…"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:220
+#: ../qml/WebDavWindow.qml:223
 msgctxt "WebDavWindow|"
 msgid "Address"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:224
+#: ../qml/WebDavWindow.qml:227
 msgctxt "WebDavWindow|"
 msgid "https://example.org/remote.php/webdav"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:232
+#: ../qml/WebDavWindow.qml:235
 msgctxt "WebDavWindow|"
 msgid ""
 "This address is not encrypted (http). The vault itself stays encrypted, but "
@@ -2947,91 +3037,71 @@ msgid ""
 "it."
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:237
+#: ../qml/WebDavWindow.qml:240
 msgctxt "WebDavWindow|"
 msgid "User name"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:245
+#: ../qml/WebDavWindow.qml:248
 msgctxt "WebDavWindow|"
 msgid "Password"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:256
+#: ../qml/WebDavWindow.qml:297
+msgctxt "WebDavWindow|"
+msgid "Folder"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:297
+msgctxt "WebDavWindow|"
+msgid "Vault"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:306
+msgctxt "WebDavWindow|"
+msgid "Choose the folder with Browse…"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:307
+msgctxt "WebDavWindow|"
+msgid "Choose the folder and name with Browse…"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:308
+msgctxt "WebDavWindow|"
+msgid "Choose the vault with Browse…"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:317
+msgctxt "WebDavWindow|"
+msgid "Browse…"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:153
 msgctxt "WebDavWindow|"
 msgid "Connecting…"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:256
+#: ../qml/WebDavWindow.qml:153
 msgctxt "WebDavWindow|"
 msgid "Connect"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:275
+#: ../qml/WebDavWindow.qml:154
+msgctxt "WebDavWindow|"
+msgid "Move"
+msgstr ""
+
+#: ../qml/WebDavWindow.qml:271
 msgctxt "WebDavWindow|"
 msgid ""
 "Trust this certificate only when it is your server's. Its SHA-256 "
 "fingerprint:"
 msgstr ""
 
-#: ../qml/WebDavWindow.qml:288
+#: ../qml/WebDavWindow.qml:284
 msgctxt "WebDavWindow|"
 msgid "Trust this certificate and connect"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:302
-msgctxt "WebDavWindow|"
-msgid "Choose the vault:"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:303
-msgctxt "WebDavWindow|"
-msgid "Choose the folder for the new vault:"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:304
-msgctxt "WebDavWindow|"
-msgid "Choose the folder to move the vault to:"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:312
-msgctxt "WebDavWindow|"
-msgid "Up"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:324
-msgctxt "WebDavWindow|"
-msgid "New folder…"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:341
-msgctxt "WebDavWindow|"
-msgid "Name of the new folder"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:348
-msgctxt "WebDavWindow|"
-msgid "Create"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:393
-msgctxt "WebDavWindow|"
-msgid "This folder is empty."
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:402
-msgctxt "WebDavWindow|"
-msgid "Name of the new vault"
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:414
-msgctxt "WebDavWindow|"
-msgid "A name without /  : * ? \" < > |, not starting or ending with a dot."
-msgstr ""
-
-#: ../qml/WebDavWindow.qml:421
-msgctxt "WebDavWindow|"
-msgid "A vault with that name is already in that folder. Choose another name."
 msgstr ""
 
 #: ../qml/WelcomePage.qml:62
@@ -3373,13 +3443,13 @@ msgid "Choose where to keep the new vault."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:661 ../src/ui/vault_controller.cpp:2806
-#: ../src/ui/vault_controller_webdav.cpp:452
+#: ../src/ui/vault_controller_webdav.cpp:477
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:665 ../src/ui/vault_controller.cpp:2811
-#: ../src/ui/vault_controller_webdav.cpp:456
+#: ../src/ui/vault_controller_webdav.cpp:481
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
@@ -3401,13 +3471,13 @@ msgstr ""
 
 #: ../src/ui/vault_controller.cpp:651 ../src/ui/vault_controller.cpp:775
 #: ../src/ui/vault_controller.cpp:2603 ../src/ui/vault_controller.cpp:2816
-#: ../src/ui/vault_controller_webdav.cpp:460
-#: ../src/ui/vault_controller_webdav.cpp:549
+#: ../src/ui/vault_controller_webdav.cpp:485
+#: ../src/ui/vault_controller_webdav.cpp:574
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until your last change is saved, then try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:706 ../src/ui/vault_controller_webdav.cpp:512
+#: ../src/ui/vault_controller.cpp:706 ../src/ui/vault_controller_webdav.cpp:537
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. The vault was not created."
 msgstr ""
@@ -3835,44 +3905,44 @@ msgid_plural ""
 "%n item(s) deleted on one device and changed on the other were kept."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller_webdav.cpp:77
+#: ../src/ui/vault_controller_webdav.cpp:78
 msgctxt "chrono_vault::VaultController|"
 msgid "The server cannot be reached. Check the address and the network."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:79
+#: ../src/ui/vault_controller_webdav.cpp:80
 msgctxt "chrono_vault::VaultController|"
 msgid "The server refused the user name or password."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:81
+#: ../src/ui/vault_controller_webdav.cpp:82
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "That folder is not on the server. Create it there first, or check the "
 "address."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:83
+#: ../src/ui/vault_controller_webdav.cpp:84
 msgctxt "chrono_vault::VaultController|"
 msgid "The server's certificate is not trusted by this system."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:85
+#: ../src/ui/vault_controller_webdav.cpp:86
 msgctxt "chrono_vault::VaultController|"
 msgid "The file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:87
+#: ../src/ui/vault_controller_webdav.cpp:88
 msgctxt "chrono_vault::VaultController|"
 msgid "The address does not answer as a WebDAV folder."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:89
+#: ../src/ui/vault_controller_webdav.cpp:90
 msgctxt "chrono_vault::VaultController|"
 msgid "This address is not a WebDAV server. Check the address."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:96
+#: ../src/ui/vault_controller_webdav.cpp:97
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -3880,19 +3950,19 @@ msgid ""
 "https:// in place of http://."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:100
+#: ../src/ui/vault_controller_webdav.cpp:101
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "The server refused it (%1)."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:237
+#: ../src/ui/vault_controller_webdav.cpp:238
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Not synchronized: %1"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:257
+#: ../src/ui/vault_controller_webdav.cpp:258
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -3900,70 +3970,70 @@ msgid ""
 "with that one. Your version is kept as “%1”."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:307
+#: ../src/ui/vault_controller_webdav.cpp:308
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not a web address."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:393
+#: ../src/ui/vault_controller_webdav.cpp:418
 msgctxt "chrono_vault::VaultController|"
 msgid "A folder or file with that name is already there."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:411
+#: ../src/ui/vault_controller_webdav.cpp:436
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "Choose a name without / \\ : * ? \" < > |, not starting or ending with a dot."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:432
-#: ../src/ui/vault_controller_webdav.cpp:545
-#: ../src/ui/vault_controller_webdav.cpp:607
+#: ../src/ui/vault_controller_webdav.cpp:457
+#: ../src/ui/vault_controller_webdav.cpp:570
+#: ../src/ui/vault_controller_webdav.cpp:632
 msgctxt "chrono_vault::VaultController|"
 msgid "Connect to the WebDAV folder first."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:442
+#: ../src/ui/vault_controller_webdav.cpp:467
 msgctxt "chrono_vault::VaultController|"
 msgid "A vault with that name is already in that folder. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:471
+#: ../src/ui/vault_controller_webdav.cpp:496
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault on the WebDAV server…"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:513
+#: ../src/ui/vault_controller_webdav.cpp:538
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The new vault could not be created: this computer cannot write its copy, or "
 "the disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:525
+#: ../src/ui/vault_controller_webdav.cpp:550
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault could not be put on the WebDAV server: %1. Nothing was kept."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:589
+#: ../src/ui/vault_controller_webdav.cpp:614
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "That file is not a Chrono Vault vault, or this device cannot write its copy."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:611
+#: ../src/ui/vault_controller_webdav.cpp:636
 msgctxt "chrono_vault::VaultController|"
 msgid "That vault is already kept on a WebDAV server."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:616
+#: ../src/ui/vault_controller_webdav.cpp:641
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "A vault with the name “%1” is already in that folder."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:691
+#: ../src/ui/vault_controller_webdav.cpp:716
 msgctxt "chrono_vault::VaultController|"
 msgid "Not yet"
 msgstr ""
