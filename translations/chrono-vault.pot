@@ -1306,251 +1306,251 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:220 ../qml/SettingsWindow.qml:584
+#: ../qml/SettingsWindow.qml:221 ../qml/SettingsWindow.qml:585
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:268
+#: ../qml/SettingsWindow.qml:269
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:360
+#: ../qml/SettingsWindow.qml:361
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:637
+#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:638
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:771
+#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:811
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:505
+#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:506
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:441
+#: ../qml/SettingsWindow.qml:442
 msgctxt "SettingsWindow|"
 msgid "Customize"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:508
+#: ../qml/SettingsWindow.qml:509
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:515
+#: ../qml/SettingsWindow.qml:516
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:521
+#: ../qml/SettingsWindow.qml:522
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:527
+#: ../qml/SettingsWindow.qml:528
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:540
+#: ../qml/SettingsWindow.qml:541
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:603
+#: ../qml/SettingsWindow.qml:604
 msgctxt "SettingsWindow|"
 msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:591
+#: ../qml/SettingsWindow.qml:592
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:998
+#: ../qml/SettingsWindow.qml:443 ../qml/SettingsWindow.qml:1038
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:597
+#: ../qml/SettingsWindow.qml:598
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:610
+#: ../qml/SettingsWindow.qml:611
 msgctxt "SettingsWindow|"
 msgid "Use the Esc key to exit the program"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:615
+#: ../qml/SettingsWindow.qml:616
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:619
+#: ../qml/SettingsWindow.qml:620
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:619
+#: ../qml/SettingsWindow.qml:620
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:619
+#: ../qml/SettingsWindow.qml:620
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:619 ../qml/SettingsWindow.qml:662
-#: ../qml/SettingsWindow.qml:783 ../qml/SettingsWindow.qml:786
-#: ../qml/SettingsWindow.qml:792
+#: ../qml/SettingsWindow.qml:620 ../qml/SettingsWindow.qml:664
+#: ../qml/SettingsWindow.qml:823 ../qml/SettingsWindow.qml:826
+#: ../qml/SettingsWindow.qml:832
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:626
+#: ../qml/SettingsWindow.qml:627
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:645
+#: ../qml/SettingsWindow.qml:646
 msgctxt "SettingsWindow|"
 msgid "Change the Master Password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:650
+#: ../qml/SettingsWindow.qml:651
 msgctxt "SettingsWindow|"
 msgid "Change"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:671
+#: ../qml/SettingsWindow.qml:708
 msgctxt "SettingsWindow|"
 msgid "Autolock when"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:679
+#: ../qml/SettingsWindow.qml:716
 msgctxt "SettingsWindow|"
 msgid "Main window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:920
+#: ../qml/SettingsWindow.qml:960
 msgctxt "SettingsWindow|"
 msgid "Press the new key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:959
+#: ../qml/SettingsWindow.qml:999
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Press a key for “%1”"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1004
+#: ../qml/SettingsWindow.qml:1044
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:659
+#: ../qml/SettingsWindow.qml:660
 msgctxt "SettingsWindow|"
 msgid "Ask for the master password, so it is not forgotten, every"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:662
+#: ../qml/SettingsWindow.qml:664
 msgctxt "SettingsWindow|"
 msgid "Day"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:662
+#: ../qml/SettingsWindow.qml:664
 msgctxt "SettingsWindow|"
 msgid "Month"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:662
+#: ../qml/SettingsWindow.qml:664
 msgctxt "SettingsWindow|"
 msgid "Quarter"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:662
+#: ../qml/SettingsWindow.qml:664
 msgctxt "SettingsWindow|"
 msgid "Year"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:776
+#: ../qml/SettingsWindow.qml:816
 msgctxt "SettingsWindow|"
 msgid "Clear the clipboard after"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:796
+#: ../qml/SettingsWindow.qml:836
 msgctxt "SettingsWindow|"
 msgid "seconds"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:685
+#: ../qml/SettingsWindow.qml:722
 msgctxt "SettingsWindow|"
 msgid "System sleeps"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:693
+#: ../qml/SettingsWindow.qml:730
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault is idle for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:707 ../qml/SettingsWindow.qml:728
+#: ../qml/SettingsWindow.qml:746 ../qml/SettingsWindow.qml:768
 msgctxt "SettingsWindow|"
 msgid "Minutes"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:713
+#: ../qml/SettingsWindow.qml:752
 msgctxt "SettingsWindow|"
 msgid "System inactive for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:733
+#: ../qml/SettingsWindow.qml:773
 msgctxt "SettingsWindow|"
 msgid "This desktop does not tell how long the system has been inactive."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:742
+#: ../qml/SettingsWindow.qml:782
 msgctxt "SettingsWindow|"
 msgid "Hide sensitive fields: show them as dots until asked"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:752
+#: ../qml/SettingsWindow.qml:792
 msgctxt "SettingsWindow|"
 msgid "Use Windows Hello to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:753
+#: ../qml/SettingsWindow.qml:793
 msgctxt "SettingsWindow|"
 msgid "Use fingerprint to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:807
+#: ../qml/SettingsWindow.qml:847
 msgctxt "SettingsWindow|"
 msgid "Show subtitles in the item list"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:813
+#: ../qml/SettingsWindow.qml:853
 msgctxt "SettingsWindow|"
 msgid "Use website icons"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:818
+#: ../qml/SettingsWindow.qml:858
 msgctxt "SettingsWindow|"
 msgid ""
 "Each website in your vault is asked for its own icon, which that website can "
@@ -1558,39 +1558,39 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:839
+#: ../qml/SettingsWindow.qml:879
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:843
+#: ../qml/SettingsWindow.qml:883
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:877
+#: ../qml/SettingsWindow.qml:917
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1053
+#: ../qml/SettingsWindow.qml:1093
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1100
+#: ../qml/SettingsWindow.qml:1140
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:295 ../qml/SettingsWindow.qml:1069
-#: ../qml/SettingsWindow.qml:1106
+#: ../qml/SettingsWindow.qml:296 ../qml/SettingsWindow.qml:1109
+#: ../qml/SettingsWindow.qml:1146
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:295 ../qml/SettingsWindow.qml:978
-#: ../qml/SettingsWindow.qml:1075 ../qml/SettingsWindow.qml:1116
+#: ../qml/SettingsWindow.qml:296 ../qml/SettingsWindow.qml:1018
+#: ../qml/SettingsWindow.qml:1115 ../qml/SettingsWindow.qml:1156
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -1952,128 +1952,128 @@ msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/VaultPage.qml:424
+#: ../qml/VaultPage.qml:426
 msgctxt "VaultPage|"
 msgid "Local file"
 msgstr ""
 
-#: ../qml/VaultPage.qml:444
+#: ../qml/VaultPage.qml:446
 #, qt-format
 msgctxt "VaultPage|"
 msgid "%1 (primary)"
 msgstr ""
 
-#: ../qml/VaultPage.qml:458
+#: ../qml/VaultPage.qml:460
 msgctxt "VaultPage|"
 msgid "New vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:462
+#: ../qml/VaultPage.qml:464
 msgctxt "VaultPage|"
 msgid "Open vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:144 ../qml/VaultPage.qml:470
+#: ../qml/VaultPage.qml:146 ../qml/VaultPage.qml:472
 msgctxt "VaultPage|"
 msgid "Home"
 msgstr ""
 
-#: ../qml/VaultPage.qml:480
+#: ../qml/VaultPage.qml:482
 msgctxt "VaultPage|"
 msgid "Favorites"
 msgstr ""
 
-#: ../qml/VaultPage.qml:491
+#: ../qml/VaultPage.qml:493
 msgctxt "VaultPage|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/VaultPage.qml:515
+#: ../qml/VaultPage.qml:517
 msgctxt "VaultPage|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/VaultPage.qml:523
+#: ../qml/VaultPage.qml:525
 msgctxt "VaultPage|"
 msgid "No tags yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:549
+#: ../qml/VaultPage.qml:551
 msgctxt "VaultPage|"
 msgid "Rename tag…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:553
+#: ../qml/VaultPage.qml:555
 msgctxt "VaultPage|"
 msgid "Remove tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:563
+#: ../qml/VaultPage.qml:565
 msgctxt "VaultPage|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/VaultPage.qml:571
+#: ../qml/VaultPage.qml:573
 msgctxt "VaultPage|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/VaultPage.qml:582
+#: ../qml/VaultPage.qml:584
 msgctxt "VaultPage|"
 msgid "Trash"
 msgstr ""
 
-#: ../qml/VaultPage.qml:602
+#: ../qml/VaultPage.qml:604
 msgctxt "VaultPage|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/VaultPage.qml:615
+#: ../qml/VaultPage.qml:617
 msgctxt "VaultPage|"
 msgid "Sort By:"
 msgstr ""
 
-#: ../qml/VaultPage.qml:620 ../qml/VaultPage.qml:626
+#: ../qml/VaultPage.qml:622 ../qml/VaultPage.qml:628
 msgctxt "VaultPage|"
 msgid "Title"
 msgstr ""
 
-#: ../qml/VaultPage.qml:797
+#: ../qml/VaultPage.qml:799
 msgctxt "VaultPage|"
 msgid "Rename tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:808
+#: ../qml/VaultPage.qml:810
 msgctxt "VaultPage|"
 msgid "A slash nests a tag under another, as in “Work/Servers”."
 msgstr ""
 
-#: ../qml/VaultPage.qml:750
+#: ../qml/VaultPage.qml:752
 msgctxt "VaultPage|"
 msgid "No items yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:386
+#: ../qml/VaultPage.qml:388
 msgctxt "VaultPage|"
 msgid "Expand the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:386
+#: ../qml/VaultPage.qml:388
 msgctxt "VaultPage|"
 msgid "Collapse the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:749
+#: ../qml/VaultPage.qml:751
 msgctxt "VaultPage|"
 msgid "Nothing found."
 msgstr ""
 
-#: ../qml/VaultPage.qml:750
+#: ../qml/VaultPage.qml:752
 msgctxt "VaultPage|"
 msgid "No items here."
 msgstr ""
 
-#: ../qml/VaultPage.qml:762
+#: ../qml/VaultPage.qml:764
 msgctxt "VaultPage|"
 msgid "Choose an item, or make a new one."
 msgstr ""

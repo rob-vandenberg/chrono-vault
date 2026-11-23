@@ -407,3 +407,8 @@ open when its splitter is dragged past 120 (the owner; D-039, D-042).
 ## 23 November 2026: version 0.2.48: a larger dead zone for the sidebar snap
 
 The sidebar snaps after 100 pixels of travel each way: shut past 80, open past 164 (the owner, D-042).
+
+## 23 November 2026: version 0.2.49: narrower Security fields, the sidebar snap at 80
+
+Settings > Security: the reminder box as wide as its longest word (open: the word with 5 pixels either side), the two
+minutes fields 40 pixels narrower; the sidebar snaps after 80 pixels of travel each way (the owner, D-042).

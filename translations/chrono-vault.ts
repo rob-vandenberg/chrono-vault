@@ -1339,7 +1339,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+220"/>
+        <location filename="../qml/SettingsWindow.qml" line="+221"/>
         <location line="+364"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -1362,12 +1362,12 @@
     </message>
     <message>
         <location line="-196"/>
-        <location line="+330"/>
+        <location line="+369"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-330"/>
+        <location line="-369"/>
         <location line="+64"/>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -1414,12 +1414,12 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+556"/>
+        <location line="+595"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-401"/>
+        <location line="-440"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1450,15 +1450,15 @@
     </message>
     <message>
         <location line="+0"/>
-        <location line="+43"/>
-        <location line="+121"/>
+        <location line="+44"/>
+        <location line="+159"/>
         <location line="+3"/>
         <location line="+6"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-166"/>
+        <location line="-205"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1473,7 +1473,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+57"/>
         <source>Autolock when</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1483,7 +1483,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+241"/>
+        <location line="+244"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1498,12 +1498,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-345"/>
+        <location line="-384"/>
         <source>Ask for the master password, so it is not forgotten, every</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+4"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1523,7 +1523,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+114"/>
+        <location line="+152"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1533,7 +1533,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-111"/>
+        <location line="-114"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1543,18 +1543,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
-        <location line="+21"/>
+        <location line="+16"/>
+        <location line="+22"/>
         <source>Minutes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-15"/>
+        <location line="-16"/>
         <source>System inactive for</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+21"/>
         <source>This desktop does not tell how long the system has been inactive.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1614,15 +1614,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-805"/>
-        <location line="+774"/>
+        <location line="-844"/>
+        <location line="+813"/>
         <location line="+37"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-811"/>
-        <location line="+683"/>
+        <location line="-850"/>
+        <location line="+722"/>
         <location line="+97"/>
         <location line="+41"/>
         <source>Cancel</source>
@@ -1988,7 +1988,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+424"/>
+        <location filename="../qml/VaultPage.qml" line="+426"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>

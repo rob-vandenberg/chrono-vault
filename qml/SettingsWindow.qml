@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.1.44
+// SettingsWindow.qml 0.2.49
 
 // --- Version history ----------------------------------------------------
+// v0.2.49: The reminder box as wide as its longest word; the minutes fields 40 narrower (the owner)
 // v0.1.44: The key box and the question about a key in use as windows of their own, as Chrono Viewer's (D-053)
 // v0.0.40: The reminder just below Change the Master Password (D-050)
 // v0.0.39: Autolock tick boxes in a frame; the reminder a choice; the clipboard on one line; a normal scroll bar (D-049)
@@ -658,10 +659,46 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             Label { text: qsTr("Ask for the master password, so it is not forgotten, every") }
                             ComboBox {
+                                id: reminderBox
                                 objectName: "reminderBox"
                                 model: [qsTr("Day"), qsTr("Month"), qsTr("Quarter"), qsTr("Year"), qsTr("Never")]
                                 currentIndex: settingsWindow.masterPasswordReminder
                                 onActivated: function(index) { settingsWindow.masterPasswordReminder = index }
+                                // As wide as its longest word (the owner): closed, the
+                                // word and the arrow; open, the word with 5 pixels on
+                                // either side. The chosen word is shown semi-bold in
+                                // the list, so that is what is measured.
+                                readonly property int margin: Math.round(5 * Appearance.factor)
+                                readonly property real widestWord: {
+                                    let widest = 0
+                                    for (const word of model)
+                                        widest = Math.max(widest, reminderMeasure.advanceWidth(word))
+                                    return Math.ceil(widest)
+                                }
+                                FontMetrics {
+                                    id: reminderMeasure
+                                    font.family: reminderBox.font.family
+                                    font.pixelSize: reminderBox.font.pixelSize > 0 ? reminderBox.font.pixelSize : -1
+                                    font.pointSize: reminderBox.font.pointSize > 0 ? reminderBox.font.pointSize : -1
+                                    font.weight: Font.DemiBold
+                                }
+                                // Fusion's text field keeps 4 pixels at either side of
+                                // the word; the arrow has a slot of its own.
+                                padding: 0
+                                spacing: 0
+                                Layout.preferredWidth: 4 + widestWord + 4 + (indicator ? indicator.width : 0)
+                                popup.width: widestWord + 2 * margin + 2 * popup.padding
+                                delegate: MenuItem {
+                                    required property var model
+                                    required property int index
+                                    width: ListView.view.width
+                                    leftPadding: reminderBox.margin
+                                    rightPadding: reminderBox.margin
+                                    text: model[reminderBox.textRole]
+                                    font.weight: reminderBox.currentIndex === index ? Font.DemiBold : Font.Normal
+                                    highlighted: reminderBox.highlightedIndex === index
+                                    hoverEnabled: reminderBox.hoverEnabled
+                                }
                             }
                         }
                         // Autolock when (D-040): four tick boxes in a frame of
@@ -703,6 +740,8 @@ ApplicationWindow {
                                         editable: true
                                         enabled: settingsWindow.idleLockOn
                                         onValueModified: settingsWindow.autoLockMinutes = value
+                                        // 40 pixels narrower (the owner, 23 November 2026).
+                                        Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
                                     }
                                     Label { text: qsTr("Minutes") }
                                 }
@@ -724,6 +763,7 @@ ApplicationWindow {
                                         editable: true
                                         enabled: VaultController.systemIdleAvailable && settingsWindow.systemIdleLockOn
                                         onValueModified: settingsWindow.systemIdleMinutes = value
+                                        Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
                                     }
                                     Label { text: qsTr("Minutes") }
                                 }
