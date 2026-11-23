@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/unit/CMakeLists.txt 0.0.22
+# tests/unit/CMakeLists.txt 0.3.60
 
 # --- Version history ----------------------------------------------------
+# v0.3.60: The WebDAV client's test, with our own test server (D-057)
 # v0.0.22: The exporter's test (D-037)
 # v0.0.19: The importer's test (D-035)
 # v0.0.5: The release check test
@@ -44,3 +45,10 @@ foreach(core_test IN ITEMS test_crypto test_vault_file test_vault_contents test_
     chrono_vault_strict_warnings(${core_test})
     chrono_vault_add_test(${core_test})
 endforeach()
+
+# The WebDAV client against a small WebDAV server of our own (D-057).
+qt_add_executable(test_webdav_client test_webdav_client.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+target_include_directories(test_webdav_client PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_webdav_client PRIVATE chrono_vault_ui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_webdav_client)
+chrono_vault_add_test(test_webdav_client)

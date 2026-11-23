@@ -39,9 +39,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// vault_file.cpp 0.0.22
+// vault_file.cpp 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: A vault read from bytes, and bytes written as a vault file safely, for WebDAV (D-057)
 // v0.0.22: A new keyfile readable by the person alone
 // v0.0.18: On Windows, putting the new file in place is tried again briefly while another program holds the vault
 //          (the owner, Q37)
@@ -275,23 +276,11 @@ struct ReadFile
     Header header;
 };
 
-ReadFile readVaultFile(const QString& path)
+// The header of a vault's bytes checked; status Opened means "go on".
+ReadFile checkVaultData(const QByteArray& data)
 {
     ReadFile read;
-    if (!QFileInfo::exists(path)) {
-        read.status = OpenStatus::FileMissing;
-        return read;
-    }
-    if (QFileInfo(path).size() > largestVaultFileBytes) {
-        read.status = OpenStatus::TooLarge;
-        return read;
-    }
-    const auto data = readStartOf(path, largestVaultFileBytes + 1);
-    if (!data) {
-        read.status = OpenStatus::CannotRead;
-        return read;
-    }
-    read.data = *data;
+    read.data = data;
     if (read.data.size() > largestVaultFileBytes) {
         read.status = OpenStatus::TooLarge;
         return read;
@@ -319,6 +308,55 @@ ReadFile readVaultFile(const QString& path)
     }
     read.status = OpenStatus::Opened;
     return read;
+}
+
+ReadFile readVaultFile(const QString& path)
+{
+    ReadFile read;
+    if (!QFileInfo::exists(path)) {
+        read.status = OpenStatus::FileMissing;
+        return read;
+    }
+    if (QFileInfo(path).size() > largestVaultFileBytes) {
+        read.status = OpenStatus::TooLarge;
+        return read;
+    }
+    const auto data = readStartOf(path, largestVaultFileBytes + 1);
+    if (!data) {
+        read.status = OpenStatus::CannotRead;
+        return read;
+    }
+    return checkVaultData(*data);
+}
+
+// One step puts the file written beside the vault in its place; false when
+// it cannot, the written file then removed.
+bool replaceWith(const QString& savingPath, const QString& path)
+{
+    std::error_code error;
+    std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
+                            std::filesystem::path(path.toStdU16String()), error);
+#ifdef Q_OS_WIN
+    // On Windows a file another program holds open (a virus scanner reading
+    // the fresh vault, a sync program) cannot be replaced for that moment:
+    // the step is tried again, at most ten times within about a second, only
+    // for "access denied" or "in use" (the owner's decision, Q37). The old
+    // vault is untouched meanwhile (OR-15).
+    for (int attempt = 0; error && attempt < 10 &&
+                          (error.value() == ERROR_ACCESS_DENIED || error.value() == ERROR_SHARING_VIOLATION);
+         ++attempt) {
+        QThread::msleep(100);
+        error.clear();
+        std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
+                                std::filesystem::path(path.toStdU16String()), error);
+    }
+#endif
+    if (error) {
+        QFile::remove(savingPath);
+        return false;
+    }
+    flushFolder(path);
+    return true;
 }
 
 OpenResult decrypt(const ReadFile& read, VaultKey key)
@@ -369,10 +407,11 @@ OpenResult openVaultFile(const QString& path, const QByteArray& password, const 
     return decrypt(read, key);
 }
 
-OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key)
+namespace {
+
+OpenResult openCheckedWithKey(const ReadFile& read, const VaultKey& key)
 {
     OpenResult result;
-    const ReadFile read = readVaultFile(path);
     if (read.status != OpenStatus::Opened) {
         result.status = read.status;
         return result;
@@ -385,6 +424,48 @@ OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key)
         return result;
     }
     return decrypt(read, key);
+}
+
+} // namespace
+
+OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key)
+{
+    return openCheckedWithKey(readVaultFile(path), key);
+}
+
+OpenResult openVaultDataWithKey(const QByteArray& data, const VaultKey& key)
+{
+    return openCheckedWithKey(checkVaultData(data), key);
+}
+
+SaveStatus saveVaultData(const QString& path, const QByteArray& data)
+{
+    if (checkVaultData(data).status != OpenStatus::Opened) {
+        return SaveStatus::CannotWrite; // only a vault is ever written as one (OR-15)
+    }
+    const QString savingPath = savingPathFor(path);
+    {
+        QFile saving(savingPath);
+        if (!saving.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            return SaveStatus::CannotWrite;
+        }
+        if (saving.write(data) != data.size() || !flushToDisk(saving)) {
+            saving.close();
+            QFile::remove(savingPath);
+            return SaveStatus::CannotWrite;
+        }
+        saving.close();
+    }
+    {
+        QFile written(savingPath);
+        const QByteArray readBack = written.open(QIODevice::ReadOnly) ? written.readAll() : QByteArray();
+        written.close();
+        if (readBack != data) {
+            QFile::remove(savingPath);
+            return SaveStatus::VerifyFailed;
+        }
+    }
+    return replaceWith(savingPath, path) ? SaveStatus::Saved : SaveStatus::CannotReplace;
 }
 
 SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const VaultKey& key,
@@ -459,29 +540,9 @@ SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const 
     }
 
     // One step replaces the old vault with the new one.
-    std::error_code error;
-    std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
-                            std::filesystem::path(path.toStdU16String()), error);
-#ifdef Q_OS_WIN
-    // On Windows a file another program holds open (a virus scanner reading
-    // the fresh vault, a sync program) cannot be replaced for that moment:
-    // the step is tried again, at most ten times within about a second, only
-    // for "access denied" or "in use" (the owner's decision, Q37). The old
-    // vault is untouched meanwhile (OR-15).
-    for (int attempt = 0; error && attempt < 10 &&
-                          (error.value() == ERROR_ACCESS_DENIED || error.value() == ERROR_SHARING_VIOLATION);
-         ++attempt) {
-        QThread::msleep(100);
-        error.clear();
-        std::filesystem::rename(std::filesystem::path(savingPath.toStdU16String()),
-                                std::filesystem::path(path.toStdU16String()), error);
-    }
-#endif
-    if (error) {
-        QFile::remove(savingPath);
+    if (!replaceWith(savingPath, path)) {
         return SaveStatus::CannotReplace;
     }
-    flushFolder(path);
     if (writtenStamp) {
         *writtenStamp = whole.left(headerLength + crypto::nonceLength);
     }

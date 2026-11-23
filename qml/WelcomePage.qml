@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.2.51
+// WelcomePage.qml 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: A new vault, or one opened, on this computer or on a WebDAV server (D-057)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.15: A new vault may also be locked with a keyfile, chosen or made; its password may be saved in the primary
@@ -38,8 +39,9 @@ Item {
     id: welcomePage
 
     // File > New vault… and Open vault… (D-025).
-    function newVault() { createFileDialog.open() }
-    function openVault() { openFileDialog.open() }
+    // Where the vault is kept is asked first (ref, D-057).
+    function newVault() { storageChoice.mode = "new"; storageChoice.open() }
+    function openVault() { storageChoice.mode = "open"; storageChoice.open() }
 
     Image {
         source: "qrc:/icons/chrono-vault.svg"
@@ -69,12 +71,57 @@ Item {
         Button {
             text: qsTr("Create a new vault…")
             Layout.fillWidth: true
-            onClicked: createFileDialog.open()
+            onClicked: welcomePage.newVault()
         }
         Button {
             text: qsTr("Open a vault…")
             Layout.fillWidth: true
-            onClicked: openFileDialog.open()
+            onClicked: welcomePage.openVault()
+        }
+    }
+
+    // This computer or a WebDAV server (ref, REQUIREMENTS.md 5.4.1).
+    DialogWindow {
+        id: storageChoice
+        objectName: "storageChoice"
+        memoryName: "storageChoice"
+        property string mode: "new"
+        title: mode === "new" ? qsTr("Where should the new vault be kept?") : qsTr("Where is the vault kept?")
+        standardButtons: Dialog.Cancel
+
+        ColumnLayout {
+            spacing: Math.round(8 * Appearance.factor)
+            width: Math.round(360 * Appearance.factor)
+            Button {
+                objectName: "onThisComputerButton"
+                text: qsTr("On this computer…")
+                Layout.fillWidth: true
+                onClicked: {
+                    storageChoice.accept()
+                    if (storageChoice.mode === "new")
+                        createFileDialog.open()
+                    else
+                        openFileDialog.open()
+                }
+            }
+            Button {
+                objectName: "onWebDavButton"
+                text: qsTr("On a WebDAV server…")
+                Layout.fillWidth: true
+                onClicked: {
+                    storageChoice.accept()
+                    webDavWindow.mode = storageChoice.mode
+                    webDavWindow.open()
+                }
+            }
+        }
+    }
+
+    WebDavWindow {
+        id: webDavWindow
+        onNewVaultNamed: function(name) {
+            newVaultDialog.webDavName = name
+            newVaultDialog.open()
         }
     }
 
@@ -88,6 +135,7 @@ Item {
         nameFilters: [qsTr("Chrono Vault vaults (*.chronovault)")]
         onAccepted: {
             if (VaultController.canCreateAt(selectedFile)) {
+                newVaultDialog.webDavName = ""
                 newVaultDialog.file = selectedFile
                 newVaultDialog.open()
             }
@@ -107,10 +155,13 @@ Item {
     DialogWindow {
 
         id: newVaultDialog
+        objectName: "newVaultDialog"
 
         memoryName: "newVault"
 
         property url file
+        // The new vault's name on the WebDAV server, "" for a file here (D-057).
+        property string webDavName: ""
         property url keyfile
         // Asked when the window opens: whether the primary vault is unlocked.
         property bool offerSave: false
@@ -134,8 +185,12 @@ Item {
             firstPassword.forceActiveFocus()
         }
         onAccepted: {
-            VaultController.createVault(file, firstPassword.text, secondPassword.text,
-                                        useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
+            if (webDavName !== "")
+                VaultController.createWebDavVault(webDavName, firstPassword.text, secondPassword.text,
+                                                  useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
+            else
+                VaultController.createVault(file, firstPassword.text, secondPassword.text,
+                                            useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
             firstPassword.clear()
             secondPassword.clear()
         }
@@ -153,11 +208,13 @@ Item {
             }
             PasswordField {
                 id: firstPassword
+                objectName: "newVaultPassword"
                 placeholderText: qsTr("Master password")
                 Layout.fillWidth: true
             }
             PasswordField {
                 id: secondPassword
+                objectName: "newVaultPasswordAgain"
                 placeholderText: qsTr("The same password again")
                 Layout.fillWidth: true
                 onAccepted: if (newVaultDialog.ready) newVaultDialog.accept()

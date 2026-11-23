@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.0.40
+# tests/integration/CMakeLists.txt 0.3.60
 
 # --- Version history ----------------------------------------------------
+# v0.3.60: The WebDAV sync and windows tests, with our own test server (D-057)
 # v0.0.40: test_icon_picker (D-050)
 # v0.0.23: The fingerprint unlock test, with a stand-in
 # v0.0.22: The item pages test, apart from the pages test (OR-11)
@@ -155,3 +156,25 @@ qt_add_executable(test_icon_picker test_icon_picker.cpp)
 target_link_libraries(test_icon_picker PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_icon_picker)
 chrono_vault_add_test(test_icon_picker)
+
+# A vault kept on a WebDAV server: two devices, a server of our own (D-057).
+qt_add_executable(test_webdav_sync test_webdav_sync.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+target_include_directories(test_webdav_sync PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_webdav_sync PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_webdav_sync)
+chrono_vault_add_test(test_webdav_sync)
+
+# The same test's interruptions at every step, apart (OR-11: under 20 seconds).
+qt_add_executable(test_webdav_interruptions test_webdav_sync.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+target_compile_definitions(test_webdav_interruptions PRIVATE CHRONO_VAULT_WEBDAV_INTERRUPTIONS)
+target_include_directories(test_webdav_interruptions PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_webdav_interruptions PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_webdav_interruptions)
+chrono_vault_add_test(test_webdav_interruptions)
+
+qt_add_executable(test_webdav_windows test_webdav_windows.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+target_include_directories(test_webdav_windows PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_webdav_windows PRIVATE
+    chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_webdav_windows)
+chrono_vault_add_test(test_webdav_windows)

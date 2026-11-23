@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.2.56
+// test_menus.cpp 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: Tools > Sync Now, greyed for a vault on this computer (D-057)
 // v0.2.56: Edit… and Reset or Delete on every category; Edit… on a right-click in the sidebar (D-056)
 // v0.2.50: Keys a text field never uses are commands while typing
 // v0.2.49: The sidebar snap after 80 pixels each way
@@ -233,8 +234,12 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
                           "Copy Username [Shift+Ctrl+U]", "Copy E-mail [Shift+Ctrl+E]", "Copy Password [Shift+Ctrl+P]",
                           "Show Passwords [Shift+Ctrl+H]", "Copy URL [Shift+Ctrl+R]", "Copy OTP [Shift+Ctrl+T]",
                           "Launch URL [Shift+Ctrl+L]"}));
-    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Lock vault [Ctrl+L]", "Clear Clipboard [Shift+Ctrl+B]",
-                                          "Generate Password [Ctrl+G]"}));
+    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Lock vault [Ctrl+L]", "Sync Now [Ctrl+J]",
+                                          "Clear Clipboard [Shift+Ctrl+B]", "Generate Password [Ctrl+G]"}));
+    // Sync Now only for a vault kept on a WebDAV server (D-057).
+    QObject* syncNow = window->findChild<QObject*>(QStringLiteral("syncNowAction"));
+    QVERIFY(syncNow);
+    QVERIFY(!syncNow->property("enabled").toBool());
     QCOMPARE(menuEntries(4), QStringList({"&Help", "Check for updates", "Support website", "Keyboard shortcuts…",
                                           "About [F1]"}));
     // Backup and Restore are not built yet: greyed.

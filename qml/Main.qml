@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.2.50
+// Main.qml 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: Tools > Sync Now; the questions of a WebDAV sync: a certificate to trust, the server's password (D-057)
 // v0.2.50: While typing, only keys a text field uses stand aside; every other key is a command (the owner)
 // v0.2.46: The shortcuts only while the main window has the keyboard (P33); 5 pixels more above and below the top bar
 // v0.1.44: Every shortcut stands aside while the settings wait for a new key (D-053)
@@ -115,7 +116,7 @@ ApplicationWindow {
         action_preferences, action_quit, action_showItemCounts, action_hideSidebar, action_sidebar,
         action_hideSensitive, action_showCategories, action_showTags, action_showOthers, action_archive,
         action_moveToTrash, action_copyUsername, action_copyEmail, action_copyPassword, action_showPasswords,
-        action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_clearClipboard,
+        action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_syncNow, action_clearClipboard,
         action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
     ]
     // One shortcut per action, from its keys as they are now. Keys a text
@@ -543,6 +544,15 @@ ApplicationWindow {
                         onTriggered: VaultController.lock()
                     }
                     Action {
+                        id: action_syncNow
+                        property string actionId: "syncNow"
+                        property string shownKeys: mainWindow.firstKey(actionId)
+                        objectName: "syncNowAction"
+                        text: qsTr("Sync Now")
+                        enabled: mainWindow.unlocked && VaultController.onWebDav
+                        onTriggered: VaultController.syncNow()
+                    }
+                    Action {
                         id: action_clearClipboard
                         property string actionId: "clearClipboard"
                         property string shownKeys: mainWindow.firstKey(actionId)
@@ -967,5 +977,73 @@ ApplicationWindow {
     WindowMemory {
         window: mainWindow
         name: "main"
+    }
+
+    // The questions of a WebDAV sync (D-057): a certificate the system does
+    // not trust, and the server's password when the system's store lacks it.
+    DialogWindow {
+        id: certificateWindow
+        objectName: "certificateWindow"
+        memoryName: "certificate"
+        transientParent: mainWindow
+        title: qsTr("Trust this certificate?")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        Component.onCompleted: certificateWindow.standardButton(Dialog.Ok).text = qsTr("Trust it")
+        onAccepted: VaultController.trustCertificate(true)
+        onRejected: VaultController.trustCertificate(false)
+        ColumnLayout {
+            spacing: Math.round(8 * Appearance.factor)
+            width: Math.round(420 * Appearance.factor)
+            Label {
+                text: qsTr("The WebDAV server's certificate is not trusted by this system. Trust it only when it is your server's. Its SHA-256 fingerprint:")
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            Label {
+                text: VaultController.certificateAsked
+                font.family: "Noto Sans Mono"
+                wrapMode: Text.WrapAnywhere
+                Layout.fillWidth: true
+            }
+        }
+    }
+
+    DialogWindow {
+        id: webDavPasswordWindow
+        objectName: "webDavPasswordWindow"
+        memoryName: "webDavPassword"
+        transientParent: mainWindow
+        title: qsTr("WebDAV password")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        onShown: serverPassword.forceActiveFocus()
+        onAccepted: {
+            VaultController.giveWebDavPassword(serverPassword.text)
+            serverPassword.clear()
+        }
+        onRejected: serverPassword.clear()
+        ColumnLayout {
+            spacing: Math.round(8 * Appearance.factor)
+            width: Math.round(380 * Appearance.factor)
+            Label {
+                text: qsTr("Type the password of the WebDAV server where “%1” is kept.").arg(VaultController.vaultName)
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            PasswordField {
+                id: serverPassword
+                Layout.fillWidth: true
+                onAccepted: if (text !== "") webDavPasswordWindow.accept()
+            }
+        }
+    }
+
+    Connections {
+        target: VaultController
+        function onSyncChanged() {
+            if (VaultController.certificateAsked !== "" && !certificateWindow.visible)
+                certificateWindow.open()
+            if (VaultController.webDavPasswordNeeded && !webDavPasswordWindow.visible)
+                webDavPasswordWindow.open()
+        }
     }
 }

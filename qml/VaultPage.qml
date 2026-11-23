@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.2.56
+// VaultPage.qml 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: Under the vault's name: WebDAV for a vault kept there, and why its last sync failed (D-057)
 // v0.2.56: A right-click on a category offers Edit… (the owner, D-056)
 // v0.2.49: The sidebar snaps after 80 pixels of travel each way (the owner)
 // v0.2.48: The sidebar snaps after 100 pixels of travel each way (the owner)
@@ -424,8 +425,20 @@ Item {
                                     Layout.fillWidth: true
                                 }
                                 Label {
-                                    text: qsTr("Local file")
+                                    objectName: "vaultPlace"
+                                    text: VaultController.onWebDav ? qsTr("WebDAV") : qsTr("Local file")
                                     opacity: 0.7
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+                                // Why the last sync failed; gone after the next good one (D-057).
+                                Label {
+                                    objectName: "syncProblem"
+                                    visible: VaultController.syncProblem !== ""
+                                    text: VaultController.syncProblem
+                                    color: "#d32f2f"
+                                    wrapMode: Text.Wrap
+                                    maximumLineCount: 3
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }

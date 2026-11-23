@@ -46,3 +46,12 @@ The version lives only in the `project(...)` line of `CMakeLists.txt` (CPP-2); t
 (`src/ui/vault_controller.cpp`) keeps the base (the version last read or written), reads the other version on the
 save thread when the vault file's stamp changed, merges on the window's thread, and saves the result with the usual
 atomic, verified save.
+
+## 6. WebDAV storage (D-057)
+
+`src/ui/webdav_client.*` makes the WebDAV requests with Qt Network. `src/ui/webdav_sync.*` syncs one vault's working
+copy (an ordinary vault file on this device) with its server: download when the tag changed, merge with
+`src/core/vault_merge.*` against the base file, upload under a temporary name, read it back, move it into place under
+a lock. Where each vault is kept is in `chrono-vault.conf` (`vaults/webdav`); the password is in the system's store
+(`src/ui/secret_store*`). The controller's part is `src/ui/vault_controller_webdav.cpp`; the windows are
+`qml/WebDavWindow.qml`, the choice in `qml/WelcomePage.qml` and Settings > Vaults in `qml/SettingsWindow.qml`.

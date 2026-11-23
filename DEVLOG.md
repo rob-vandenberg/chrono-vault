@@ -480,3 +480,18 @@ No reviewers (the owner).
 ## 23 November 2026: version 0.2.59: the editor's labels 50 to the left
 
 `qml/ItemEditor.qml` `labelWidth` 220 → 170, as the view in 0.2.46 (the owner). No reviewers (one value).
+
+## 23 November 2026: version 0.3.60: WebDAV storage
+
+`ROADMAP.md` step 11 (D-057), the owner's changelist items 1-27; version 0.3.60 at the owner's word. Built:
+`src/ui/webdav_client.*` (Qt Network), `src/ui/webdav_sync.*` (download, merge, upload, read back, lock, move),
+`src/ui/secret_store*` (keyring, Credential Manager), `src/ui/vault_controller_webdav.cpp`, `qml/WebDavWindow.qml`,
+the choice in `qml/WelcomePage.qml`, Settings > Vaults, Tools > Sync Now, the line in the left column;
+`openVaultDataWithKey` and `saveVaultData` in `src/core/vault_file.*`. Tests: `test_webdav_client`,
+`test_webdav_sync`, `test_webdav_interruptions` (a sync stopped at each of its seven steps loses nothing),
+`test_webdav_windows`, with a WebDAV server of our own (`tests/webdav_test_server.*`), and `test_menus`. Four review
+rounds: round 1 an open edit kept when another device changed the master password, 403 no longer a wrong password,
+redirects, the keyring's question waited for; round 2 names Windows cannot keep, servers without tags; round 3 a
+master password changed here sent up, not taken for another device's; round 4 clean. Not testable here: a real
+server, the desktop keyring's question, Windows Credential Manager (the owner tests).
+

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.2.56
+# qml/CMakeLists.txt 0.3.60
 
 # --- Version history ----------------------------------------------------
+# v0.3.60: WebDAV: the client, the sync, the system store for its password, its windows (D-057)
 # v0.2.56: CategoryEditor.qml (D-056)
 # v0.0.40: IconPicker.qml, icon_library (D-050)
 # v0.0.38: settings_files (D-026)
@@ -70,6 +71,7 @@ qt_add_qml_module(chrono_vault_ui
         UpdatedWindow.qml
         VaultPage.qml
         WelcomePage.qml
+        WebDavWindow.qml
     SOURCES
         ../src/ui/app_setup.cpp
         ../src/ui/app_setup.h
@@ -106,6 +108,12 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/updater.h
         ../src/ui/vault_controller.cpp
         ../src/ui/vault_controller.h
+        ../src/ui/vault_controller_webdav.cpp
+        ../src/ui/secret_store.h
+        ../src/ui/webdav_client.cpp
+        ../src/ui/webdav_client.h
+        ../src/ui/webdav_sync.cpp
+        ../src/ui/webdav_sync.h
         ../src/ui/window_memory.cpp
         ../src/ui/window_memory.h
 )
@@ -180,6 +188,16 @@ if(LINUX)
 endif()
 # Unlocking with a fingerprint (D-038): fprintd and the keyring on Linux,
 # Windows Hello through C++/WinRT on Windows, none elsewhere yet.
+# The system's store for the WebDAV password (D-057): the keyring on Linux,
+# the Credential Manager on Windows, none elsewhere yet.
+if(LINUX)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/secret_store_linux.cpp)
+elseif(WIN32)
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/secret_store_windows.cpp)
+    target_link_libraries(chrono_vault_ui PRIVATE advapi32)
+else()
+    target_sources(chrono_vault_ui PRIVATE ../src/ui/secret_store_none.cpp)
+endif()
 if(LINUX)
     target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_linux.cpp)
 elseif(WIN32)
@@ -217,5 +235,8 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/system_tray.cpp
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
+    ../src/ui/vault_controller_webdav.cpp
+    ../src/ui/webdav_client.cpp
+    ../src/ui/webdav_sync.cpp
     ../src/ui/window_memory.cpp
 )

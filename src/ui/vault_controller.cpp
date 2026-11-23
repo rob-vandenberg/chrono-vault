@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.2.56
+// vault_controller.cpp 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: The WebDAV sync started at an unlock, stopped at a lock, kept up with a new key (D-057)
 // v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
 // v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.1.41: The icon sections' loop variable iconPath, no longer hiding a member (Microsoft's compiler)
@@ -340,6 +341,17 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     savePool.setMaxThreadCount(1);
     unlockPool.setMaxThreadCount(1);
     filePool.setMaxThreadCount(1);
+
+    // WebDAV (D-057): synced every 10 minutes and within 5 seconds of a save.
+    secrets = makeSecretStore();
+    syncSoonTimer.setSingleShot(true);
+    connect(&syncTimer, &QTimer::timeout, this, &VaultController::syncNow);
+    connect(&syncSoonTimer, &QTimer::timeout, this, &VaultController::syncNow);
+    connect(this, &VaultController::saved, this, [this]() {
+        if (syncer) {
+            syncSoonTimer.start(5000);
+        }
+    });
 
     SettingsFile settings;
     {
@@ -704,6 +716,7 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
                     return;
                 }
                 self->addVault(newPath);
+                self->placeTaken(newPath); // a new vault kept on a WebDAV server (D-057)
                 self->rememberKeyfile(newPath, keyfileFile);
                 self->stamps->set(newPath, written);
                 if (before == State::Unlocked && !savedPassword.isEmpty() && self->path == self->primaryVault()) {
@@ -1020,6 +1033,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     contentsChanged();
     setState(State::Unlocked);
     fetchWebsiteIcons(); // now that it counts as unlocked (D-036)
+    startWebDav();       // every unlock syncs a vault kept on a server (D-057)
     if (path == primaryVault()) {
         rememberPrimary();
         // After a lock, back to the vault that was shown (D-030).
@@ -2567,6 +2581,7 @@ void VaultController::showCreated(CreatedVault created)
     say(tr("Your new vault is ready."), false);
     setState(State::Unlocked);
     fetchWebsiteIcons();
+    startWebDav(); // a new vault kept on a server goes there now (D-057)
     if (primaryVault() == created.path) {
         rememberPrimary();
     }
@@ -2860,6 +2875,9 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                     self->key = newKey;
                     self->keyfileSecret = *fingerprint;
                     self->rememberKeyfile(self->path, keyfileFile);
+                    if (self->syncer) {
+                        self->startWebDav(); // the sync goes on with the new key (D-057)
+                    }
                     if (self->path == self->primaryVault()) {
                         self->rememberPrimary();
                     } else if (self->savedPasswords.contains(self->path) && self->primaryKey.isValid()) {
@@ -3044,6 +3062,7 @@ QStringList VaultController::defaultKeysOf(const QString& action) const
         {QStringLiteral("copyOtp"), {QStringLiteral("Shift+Ctrl+T")}},
         {QStringLiteral("launchUrl"), {QStringLiteral("Shift+Ctrl+L")}},
         {QStringLiteral("lock"), {QStringLiteral("Ctrl+L")}},
+        {QStringLiteral("syncNow"), {QStringLiteral("Ctrl+J")}},
         {QStringLiteral("clearClipboard"), {QStringLiteral("Shift+Ctrl+B")}},
         {QStringLiteral("generatePassword"), {QStringLiteral("Ctrl+G")}},
         {QStringLiteral("about"), {QStringLiteral("F1")}},
@@ -3493,6 +3512,7 @@ void VaultController::takeBackUnsaved()
 
 void VaultController::forgetUnlockedVault()
 {
+    stopWebDav();
     setDirty(false);
     setFailed(false);
     key.wipe();

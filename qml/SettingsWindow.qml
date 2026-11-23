@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.2.53
+// SettingsWindow.qml 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: The Vaults topic: where each vault is kept, its last sync, Move to WebDAV… and Disconnect… (D-057)
 // v0.2.53: Windows Hello: no popup on Windows, a red line at the bottom left while it is open (the owner)
 // v0.2.52: The reminder text "again, once every"; Change right after its text; the clipboard field 40 narrower (the owner)
 // v0.2.49: The reminder box as wide as its longest word; the minutes fields 40 narrower (the owner)
@@ -448,7 +449,7 @@ ApplicationWindow {
                     clip: true
                     currentIndex: 0
                     model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard"), qsTr("Customize"),
-                            qsTr("Keyboard shortcuts")]
+                            qsTr("Keyboard shortcuts"), qsTr("Vaults")]
                     delegate: Rectangle {
                         id: topic
                         required property int index
@@ -946,6 +947,143 @@ ApplicationWindow {
                                                                          shortcutRow.modelData.text.replace("&", ""))
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                    // Vaults (ref, D-057): where each vault is kept and when it
+                    // was last synchronized; Move to WebDAV… and Disconnect….
+                    ColumnLayout {
+                        objectName: "vaultsPage"
+                        spacing: Math.round(8 * Appearance.factor)
+                        Label {
+                            text: qsTr("Vaults")
+                            font.pointSize: Appearance.fontPointSize * 1.4
+                        }
+                        Repeater {
+                            model: VaultController.vaults
+                            delegate: Frame {
+                                id: vaultRow
+                                required property string modelData
+                                // Read again whenever the vaults or their syncs change.
+                                property var place: VaultController.vaultPlace(modelData)
+                                Layout.fillWidth: true
+                                Connections {
+                                    target: VaultController
+                                    function onSyncChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
+                                    function onVaultsChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
+                                }
+                                RowLayout {
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    spacing: Math.round(8 * Appearance.factor)
+                                    ColumnLayout {
+                                        spacing: Math.round(2 * Appearance.factor)
+                                        Layout.fillWidth: true
+                                        Label {
+                                            text: VaultController.vaultNameOf(vaultRow.modelData)
+                                            textFormat: Text.PlainText
+                                            font.bold: true
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                        Label {
+                                            text: vaultRow.place.onWebDav ? qsTr("WebDAV: %1").arg(vaultRow.place.address)
+                                                                          : qsTr("This computer: %1").arg(vaultRow.place.address)
+                                            textFormat: Text.PlainText
+                                            opacity: 0.7
+                                            elide: Text.ElideMiddle
+                                            Layout.fillWidth: true
+                                        }
+                                        Label {
+                                            visible: vaultRow.place.onWebDav === true
+                                            text: qsTr("Last synchronized: %1").arg(vaultRow.place.lastSynced || "")
+                                            opacity: 0.7
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                    Button {
+                                        objectName: "moveToWebDav_" + VaultController.vaultNameOf(vaultRow.modelData)
+                                        visible: !vaultRow.place.onWebDav
+                                        text: qsTr("Move to WebDAV…")
+                                        onClicked: {
+                                            moveWindow.mode = "move"
+                                            moveWindow.moveVault = vaultRow.modelData
+                                            moveWindow.open()
+                                        }
+                                    }
+                                    Button {
+                                        objectName: "disconnect_" + VaultController.vaultNameOf(vaultRow.modelData)
+                                        visible: vaultRow.place.onWebDav === true
+                                        text: qsTr("Disconnect…")
+                                        onClicked: {
+                                            disconnectWindow.vaultFile = vaultRow.modelData
+                                            disconnectWindow.open()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        WebDavWindow {
+                            id: moveWindow
+                            objectName: "moveToWebDavWindow"
+                            transientParent: settingsWindow
+                        }
+                        DialogWindow {
+                            id: disconnectWindow
+                            objectName: "disconnectWindow"
+                            memoryName: "disconnectWebDav"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            property bool busy: false
+                            property string problem: ""
+                            title: qsTr("Disconnect from WebDAV")
+                            standardButtons: Dialog.Cancel
+                            onShown: {
+                                busy = false
+                                problem = ""
+                                alsoDelete.checked = false
+                            }
+                            rightButtons: Button {
+                                objectName: "disconnectButton"
+                                text: qsTr("Disconnect")
+                                enabled: !disconnectWindow.busy
+                                onClicked: {
+                                    disconnectWindow.busy = true
+                                    VaultController.disconnectWebDav(disconnectWindow.vaultFile, alsoDelete.checked)
+                                }
+                            }
+                            Connections {
+                                target: VaultController
+                                function onWebDavDone(ok, problem) {
+                                    if (!disconnectWindow.busy)
+                                        return
+                                    disconnectWindow.busy = false
+                                    if (ok)
+                                        disconnectWindow.accept()
+                                    else
+                                        disconnectWindow.problem = problem
+                                }
+                            }
+                            ColumnLayout {
+                                spacing: Math.round(8 * Appearance.factor)
+                                width: Math.round(400 * Appearance.factor)
+                                Label {
+                                    text: qsTr("“%1” stops synchronizing and stays on this computer as a vault of its own.").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                CheckBox {
+                                    id: alsoDelete
+                                    objectName: "alsoDeleteBox"
+                                    text: qsTr("Also delete the vault on the server")
+                                }
+                                Label {
+                                    visible: disconnectWindow.problem !== ""
+                                    text: disconnectWindow.problem
+                                    color: "#e53e3e"
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
                                 }
                             }
                         }

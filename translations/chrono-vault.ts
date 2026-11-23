@@ -1271,7 +1271,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+190"/>
+        <location filename="../qml/ItemEditor.qml" line="+191"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -1562,7 +1562,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+64"/>
+        <location filename="../qml/Main.qml" line="+65"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1602,7 +1602,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+38"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1623,13 +1623,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-320"/>
-        <location line="+328"/>
+        <location line="-329"/>
+        <location line="+337"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-565"/>
+        <location line="-574"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1745,6 +1745,11 @@
     </message>
     <message>
         <location line="+9"/>
+        <source>Sync Now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>Clear Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1796,6 +1801,31 @@
     <message>
         <location line="+7"/>
         <source>Try saving again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+75"/>
+        <source>Trust this certificate?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Trust it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>The WebDAV server&apos;s certificate is not trusted by this system. Trust it only when it is your server&apos;s. Its SHA-256 fingerprint:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>WebDAV password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Type the password of the WebDAV server where “%1” is kept.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1947,7 +1977,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+223"/>
+        <location filename="../qml/SettingsWindow.qml" line="+224"/>
         <location line="+370"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2022,12 +2052,18 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+597"/>
+        <location line="+734"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-442"/>
+        <location line="-734"/>
+        <location line="+508"/>
+        <source>Vaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-353"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2096,7 +2132,52 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+246"/>
+        <location line="+266"/>
+        <source>WebDAV: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This computer: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Last synchronized: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Move to WebDAV…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Disconnect…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Disconnect from WebDAV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Disconnect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>“%1” stops synchronizing and stays on this computer as a vault of its own.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Also delete the vault on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2111,7 +2192,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-382"/>
+        <location line="-519"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2212,7 +2293,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+176"/>
+        <location line="+313"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2227,15 +2308,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-856"/>
-        <location line="+815"/>
+        <location line="-993"/>
+        <location line="+952"/>
         <location line="+47"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-862"/>
-        <location line="+724"/>
+        <location line="-999"/>
+        <location line="+861"/>
         <location line="+97"/>
         <location line="+51"/>
         <source>Cancel</source>
@@ -2538,7 +2619,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+220"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+221"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2601,12 +2682,12 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+427"/>
+        <location filename="../qml/VaultPage.qml" line="+429"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+31"/>
         <source>%1 (primary)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2621,13 +2702,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-318"/>
-        <location line="+326"/>
+        <location line="-330"/>
+        <location line="+338"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="-57"/>
+        <source>WebDAV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+67"/>
         <source>Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2708,7 +2794,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-380"/>
+        <location line="-392"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2718,7 +2804,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+379"/>
+        <location line="+391"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2734,9 +2820,180 @@
     </message>
 </context>
 <context>
+    <name>WebDavSync</name>
+    <message>
+        <location filename="../src/ui/webdav_sync.cpp" line="+188"/>
+        <source>the server cannot be reached</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the user name or password is wrong</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the folder is not found on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the server&apos;s certificate is not trusted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the vault on the server has another master password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the vault on the server cannot be read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>another device is saving it; tried again soon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the vault is too large for the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the server refused it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the vault on this device cannot be read or written</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>stopped</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WebDavWindow</name>
+    <message>
+        <location filename="../qml/WebDavWindow.qml" line="+67"/>
+        <source>New vault on a WebDAV server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Open a vault on a WebDAV server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Move the vault to a WebDAV server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <source>Next…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <source>“%1” goes to the WebDAV folder and stays on this computer as well.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>WebDAV folder address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>https://example.org/remote.php/webdav/Vaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>This address is not encrypted (http). The vault itself stays encrypted, but your WebDAV user name and password cross the network readable by anyone on it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>User name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Connecting…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Connect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Trust this certificate only when it is your server&apos;s. Its SHA-256 fingerprint:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Trust this certificate and connect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Vault to open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>There is no vault in this folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Name of the new vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Connected. The vault is put in this folder as “%1.chronovault”.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>A name without /  : * ? &quot; &lt; &gt; |, not starting or ending with a dot.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>A vault with that name is already in that folder. Choose another name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+59"/>
+        <location filename="../qml/WelcomePage.qml" line="+61"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2756,13 +3013,29 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+12"/>
+        <location line="+43"/>
         <source>Where should the new vault be kept?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+3"/>
-        <location line="+15"/>
+        <location line="-43"/>
+        <source>Where is the vault kept?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>On this computer…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>On a WebDAV server…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <location line="+16"/>
         <source>Chrono Vault vaults (*.chronovault)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2777,22 +3050,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+21"/>
         <source>Choose the master password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+33"/>
         <source>This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>Master password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+6"/>
         <source>The same password again</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3034,30 +3307,30 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+314"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+325"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2136"/>
+        <location line="+2139"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2132"/>
-        <location line="+2137"/>
+        <location line="-2135"/>
+        <location line="+2140"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2047"/>
-        <location line="+1947"/>
+        <location line="-2049"/>
+        <location line="+1949"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2029"/>
+        <location line="-2032"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3068,14 +3341,15 @@
     </message>
     <message>
         <location line="+37"/>
-        <location line="+117"/>
-        <location line="+1826"/>
+        <location line="+118"/>
+        <location line="+1828"/>
         <location line="+213"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+401"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2101"/>
+        <location line="-2104"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3085,12 +3359,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+16"/>
         <source>%1 vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1715"/>
+        <location line="+1716"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3105,7 +3379,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1701"/>
+        <location line="-1702"/>
         <location line="+82"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -3136,7 +3410,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+137"/>
+        <location line="+138"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3334,7 +3608,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+293"/>
+        <location line="+294"/>
         <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3369,7 +3643,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+67"/>
         <source>The master password was changed. %1 keeps the new one; it may ask you once.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3406,7 +3680,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+78"/>
+        <location line="+79"/>
         <source>The clipboard is cleared.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3438,6 +3712,98 @@
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-325"/>
+        <source>The server cannot be reached. Check the address and the network.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The server refused the user name or password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>That folder is not on the server. Create it there first, or check the address.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The server&apos;s certificate is not trusted by this system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The file is too large to be a vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The address does not answer as a WebDAV folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The server sends this address elsewhere (%1). Check the address, for example https:// in place of http://.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>The server refused it (%1).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+137"/>
+        <source>Not synchronized: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>The vault was given another master password on another device. Unlock it with that one. Your version is kept as “%1”.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+49"/>
+        <source>That is not a web address.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <location line="+45"/>
+        <location line="+62"/>
+        <source>Connect to the WebDAV folder first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-97"/>
+        <source>Choose a name for the new vault without / \ : * ? &quot; &lt; &gt; |, not starting or ending with a dot.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>A vault with that name is already in that folder. Choose another name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+73"/>
+        <source>That file is not a Chrono Vault vault, or this device cannot write its copy.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>That vault is already kept on a WebDAV server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>A vault with the name “%1” is already in that folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+75"/>
+        <source>Not yet</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

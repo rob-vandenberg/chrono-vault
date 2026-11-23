@@ -26,6 +26,9 @@
 #include "vault_contents.h"
 #include "vault_merge.h"
 #include "vault_file.h"
+#include "secret_store.h"
+#include "webdav_client.h"
+#include "webdav_sync.h"
 
 #include <QFileSystemWatcher>
 #include <QNetworkAccessManager>
@@ -43,9 +46,11 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.2.56
+// vault_controller.h 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: A vault kept on a WebDAV server: its working copy synced, connecting, creating, opening, moving and
+//          disconnecting (D-057)
 // v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
 // v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter renamed
@@ -148,6 +153,15 @@ class VaultController : public QObject
                    quickUnlockChanged)
     Q_PROPERTY(int clipboardClearSeconds READ clipboardClearSeconds WRITE setClipboardClearSeconds NOTIFY
                    clipboardClearSecondsChanged)
+    // WebDAV (D-057): whether the vault shown is kept on a server, why its
+    // last sync failed ("" when it did not), whether a sync runs, a
+    // certificate to be trusted (its fingerprint, "" for none) and whether
+    // the server's password must be typed.
+    Q_PROPERTY(bool onWebDav READ onWebDav NOTIFY syncChanged)
+    Q_PROPERTY(QString syncProblem READ syncProblem NOTIFY syncChanged)
+    Q_PROPERTY(bool syncing READ syncing NOTIFY syncChanged)
+    Q_PROPERTY(QString certificateAsked READ certificateAsked NOTIFY syncChanged)
+    Q_PROPERTY(bool webDavPasswordNeeded READ webDavPasswordNeeded NOTIFY syncChanged)
 
 public:
     enum class State { NoVault, Locked, Busy, Unlocked };
@@ -418,6 +432,41 @@ public:
     // Saves again after a save failed.
     Q_INVOKABLE void retrySave();
 
+    // WebDAV (D-057).
+    [[nodiscard]] bool onWebDav() const { return syncer != nullptr || webDavWaiting; }
+    [[nodiscard]] QString syncProblem() const { return syncTrouble; }
+    [[nodiscard]] bool syncing() const { return syncer && syncer->running(); }
+    [[nodiscard]] QString certificateAsked() const { return shownFingerprint(askedCertificate); }
+    [[nodiscard]] bool webDavPasswordNeeded() const { return passwordNeeded; }
+    // Tools > Sync Now.
+    Q_INVOKABLE void syncNow();
+    // The answer to "Trust this certificate?" for the vault shown.
+    Q_INVOKABLE void trustCertificate(bool trust);
+    // The server's password, when the system's store does not have it.
+    Q_INVOKABLE void giveWebDavPassword(const QString& password);
+    // Signs in to a WebDAV folder and lists its vaults: webDavConnected
+    // answers. trustedCertificate is a fingerprint the person trusted, or "".
+    Q_INVOKABLE void connectWebDav(const QString& address, const QString& user, const QString& password,
+                                   const QString& trustedCertificate);
+    // An address that sends the password readable over the network.
+    [[nodiscard]] Q_INVOKABLE bool isPlainHttp(const QString& address) const;
+    // With the folder connected: a new vault kept there, one already there
+    // copied to this device, or a vault of this device moved there;
+    // webDavDone answers the last two.
+    Q_INVOKABLE void createWebDavVault(const QString& name, const QString& password, const QString& repeated,
+                                       const QUrl& keyfile = QUrl(), bool savePassword = false);
+    Q_INVOKABLE void openWebDavVault(const QString& fileName);
+    Q_INVOKABLE void moveToWebDav(const QString& vaultFile);
+    // Stops syncing a vault: it stays on this device; the server's copy is
+    // deleted only when asked.
+    Q_INVOKABLE void disconnectWebDav(const QString& vaultFile, bool deleteOnServer);
+    // For Settings > Vaults: onWebDav, address, user, lastSynced (as words).
+    [[nodiscard]] Q_INVOKABLE QVariantMap vaultPlace(const QString& vaultFile) const;
+    // Tests: a stand-in for the system's store, and a sync stopped at a step.
+    void setSecretStoreForTests(std::unique_ptr<SecretStore> standIn) { secrets = std::move(standIn); }
+    void setSyncStepCheckForTests(std::function<bool(SyncStep)> check) { syncStepCheck = std::move(check); }
+    [[nodiscard]] WebDavSync* syncForTests() const { return syncer.get(); }
+
     // Copies text, marked as secret for clipboard history tools, and clears
     // it again after the chosen number of seconds (D-007).
     Q_INVOKABLE void copyToClipboard(const QString& text);
@@ -488,6 +537,11 @@ signals:
     // The vault was saved after a change; the item with this id, if any, is
     // the one to show.
     void saved(const QString& itemId);
+    void syncChanged();
+    // The answer to connectWebDav: the vault files in the folder, or why
+    // not; certificate is the fingerprint to ask about, when that is why.
+    void webDavConnected(bool ok, const QString& problem, const QStringList& vaultFiles, const QString& certificate);
+    void webDavDone(bool ok, const QString& problem);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
@@ -564,6 +618,18 @@ private:
     void mergeWithOther(const QString& vaultFile, const VaultContents& theirs, const QByteArray& theirStamp,
                         const QString& itemId);
     [[nodiscard]] static QString mergeText(const MergeResult& merged);
+
+    // WebDAV (D-057), in vault_controller_webdav.cpp.
+    void startWebDav();
+    void stopWebDav();
+    void makeSyncer(const WebDavPlace& place, const QString& password);
+    void syncFinished(SyncOutcome outcome, const QByteArray& certificate, const QString& conflictCopy);
+    void keepWebDavPassword(const WebDavPlace& place, const QString& password);
+    void withWebDavPassword(const WebDavPlace& place, std::function<void(std::optional<QString>)> then);
+    void placeTaken(const QString& vaultFile);
+    [[nodiscard]] QString newWorkingCopyPath(const QString& name) const;
+    [[nodiscard]] static QString shownFingerprint(const QByteArray& fingerprint);
+    [[nodiscard]] static QString connectProblem(const WebDavReply& answer);
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
@@ -672,6 +738,21 @@ private:
     QTimer autoLockTimer;
     QTimer clipboardTimer;
     QString copiedText;
+
+    // WebDAV (D-057).
+    std::unique_ptr<WebDavSync> syncer;
+    std::shared_ptr<SecretStore> secrets; // shared with the threads that ask it
+    std::function<bool(SyncStep)> syncStepCheck;
+    QTimer syncTimer;      // every 10 minutes while unlocked (ref)
+    QTimer syncSoonTimer;  // within 5 seconds of a save (ref)
+    QString syncTrouble;
+    QByteArray askedCertificate;
+    bool passwordNeeded = false;
+    bool webDavWaiting = false;           // the shown vault's sync waits for its password
+    QHash<QString, QString> webDavPasswords; // by place id, in memory while the program runs
+    std::unique_ptr<WebDavClient> connection; // the folder being connected in the windows
+    QStringList connectedFiles;
+    std::optional<std::pair<QString, WebDavPlace>> pendingPlace; // a new vault's, until it is made
 };
 
 } // namespace chrono_vault

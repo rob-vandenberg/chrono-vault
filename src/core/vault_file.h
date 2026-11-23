@@ -26,9 +26,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_file.h 0.0.16
+// vault_file.h 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.3.60: A vault read from bytes, and bytes written as a vault file safely, for WebDAV (D-057)
 // v0.0.16: A vault file's stamp, different after every save, to notice a change made elsewhere (D-032)
 // v0.0.15: A keyfile beside the master password: header format 2 (D-031); opening with a key kept from before (D-030)
 // v0.0.2: Initial release
@@ -124,6 +125,10 @@ inline constexpr qint64 largestVaultFileBytes = 256LL * 1024 * 1024;
 // KeyChanged (D-030, D-032).
 [[nodiscard]] OpenResult openVaultFileWithKey(const QString& path, const VaultKey& key);
 
+// The same for a vault's bytes, for example as a WebDAV server gave them
+// (D-057); FileMissing never comes from it.
+[[nodiscard]] OpenResult openVaultDataWithKey(const QByteArray& data, const VaultKey& key);
+
 // The largest keyfile that is read (D-031).
 inline constexpr qint64 largestKeyfileBytes = 64LL * 1024 * 1024;
 
@@ -147,6 +152,12 @@ inline constexpr qint64 largestKeyfileBytes = 64LL * 1024 * 1024;
 // When writtenStamp is given, it receives the stamp of the file written.
 [[nodiscard]] SaveStatus saveVaultFile(const QString& path, const QByteArray& contents, const VaultKey& key,
                                        const SaveStepCheck& check = {}, QByteArray* writtenStamp = nullptr);
+
+// Writes a vault's bytes, as they are, to path, safely: only bytes that
+// begin as a vault are written, beside it, flushed, read back and compared,
+// and only then put in its place (OR-15). For a vault copied from a WebDAV
+// server, whose key is not known yet (D-057).
+[[nodiscard]] SaveStatus saveVaultData(const QString& path, const QByteArray& data);
 
 // The name of the file a save writes before it replaces the vault.
 [[nodiscard]] QString savingPathFor(const QString& path);
