@@ -23,9 +23,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.1.41
+// item_list_model.h 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template (D-027, D-028)
@@ -45,7 +46,7 @@ class ItemListModel : public QAbstractListModel
     QML_UNCREATABLE("The controller owns the list")
 
 public:
-    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole, InitialRole, FavouriteRole };
+    enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole, InitialRole, FavouriteRole, MergedRole };
 
     explicit ItemListModel(QObject* parent = nullptr);
 

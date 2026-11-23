@@ -19,6 +19,7 @@
 #include "item_list_model.h"
 #include "updater.h"
 #include "vault_controller.h"
+#include "vault_file.h"
 
 #include <QQmlApplicationEngine>
 #include <QQmlError>
@@ -34,9 +35,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.1.41
+// test_item_pages.cpp 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: A merge note on the item and its mark in the list (D-054)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: Initial release: the item's view, the editor, the import and the export windows, moved here from
@@ -101,6 +103,7 @@ private slots:
     void notes_arrow_keys_cards_and_the_switch();
     void the_import_window_offers_import_and_closes_at_a_lock();
     void the_export_window_asks_the_master_password_first();
+    void a_merge_note_is_shown_on_the_item_and_in_the_list();
 };
 
 void TestItemPages::initTestCase()
@@ -482,6 +485,53 @@ void TestItemPages::notes_arrow_keys_cards_and_the_switch()
     }
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
     controller->lock();
+}
+
+// A title changed here and, a minute later, elsewhere: the item shows the
+// note with "Use the other value", and the list its mark (D-054).
+void TestItemPages::a_merge_note_is_shown_on_the_item_and_in_the_list()
+{
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    const QString vaultFile = folder.filePath(QStringLiteral("merge.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(vaultFile), QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Bank"));
+    const QString id = item.value(QStringLiteral("id")).toString();
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+
+    {
+        const OpenResult opened = openVaultFile(vaultFile, "a");
+        ContentsResult read = contentsFromJson(opened.contents);
+        read.contents.items[0].title = QStringLiteral("The bank");
+        read.contents.items[0].modified = QDateTime::currentDateTimeUtc().addSecs(60);
+        QCOMPARE(saveVaultFile(vaultFile, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
+    }
+    QVariantMap mine = controller->item(id);
+    mine.insert(QStringLiteral("title"), QStringLiteral("My bank"));
+    QVERIFY(controller->saveItem(mine));
+    QTRY_VERIFY(controller->isIdle());
+    QTRY_VERIFY(!controller->mergeNotes(id).isEmpty());
+
+    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
+    auto* root = qobject_cast<QQuickWindow*>(window)->contentItem();
+    QTRY_COMPARE(visualItems(root, QStringLiteral("mergeNote")).size(), 1);
+    QTRY_VERIFY(visualItems(root, QStringLiteral("mergedMark")).constFirst()->isVisible());
+    QQuickItem* use = visualItems(root, QStringLiteral("useOtherValueButton")).constFirst();
+    QVERIFY(use->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(use, "clicked"));
+    QTRY_VERIFY(visualItems(root, QStringLiteral("mergeNote")).isEmpty());
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->item(id).value(QStringLiteral("title")).toString(), QStringLiteral("My bank"));
 }
 
 QTEST_MAIN(TestItemPages)

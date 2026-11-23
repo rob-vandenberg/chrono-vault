@@ -17,11 +17,14 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "item_list_model.h"
 #include "json_import.h"
 #include "quick_unlock.h"
 #include "system_activity.h"
 #include "vault_contents.h"
+#include "vault_merge.h"
 #include "vault_file.h"
 
 #include <QFileSystemWatcher>
@@ -40,9 +43,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.0.40
+// vault_controller.h 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter renamed
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never (D-049)
 // v0.0.38: The Esc setting (D-048)
@@ -375,6 +379,14 @@ public:
     Q_INVOKABLE bool saveItem(const QVariantMap& item);
     // Deletes an item for good (from the Trash, after asking).
     Q_INVOKABLE void deleteItem(const QString& id);
+    // What a merge left on an item (D-054): each a map with "kind" ("both" or
+    // "deleted"), "label" (the field or text it concerns), "otherValue" and
+    // "hidden" (a value shown as dots).
+    [[nodiscard]] Q_INVOKABLE QVariantList mergeNotes(const QString& itemId) const;
+    // The value that did not stand put in place; the one shown goes into the
+    // field's history.
+    Q_INVOKABLE void useOtherValue(const QString& itemId, int index);
+    Q_INVOKABLE void dismissMergeNote(const QString& itemId, int index);
     // Moves an item into the Trash or out of it, into the Archive or out of
     // it (D-033).
     Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);
@@ -517,6 +529,9 @@ private:
     struct Stamps
     {
         QMutex lock;
+        // Raised each time a merge is taken in: a save queued before it is
+        // passed over (D-054).
+        std::atomic<quint64> epoch{0};
         QHash<QString, QByteArray> known;
         void set(const QString& vaultFile, const QByteArray& stamp)
         {
@@ -536,6 +551,9 @@ private:
     void readAgain(const QString& said, bool important);
     // Where a version of the vault that is not kept in it is written.
     [[nodiscard]] static QString conflictPathFor(const QString& vaultFile);
+    void mergeWithOther(const QString& vaultFile, const VaultContents& theirs, const QByteArray& theirStamp,
+                        const QString& itemId);
+    [[nodiscard]] static QString mergeText(const MergeResult& merged);
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
@@ -600,6 +618,10 @@ private:
     bool trayExists = false;
 
     VaultContents contents;
+    // The version this Chrono Vault last read from or wrote to the vault file:
+    // what both sides agreed on, the base of a merge (D-054).
+    VaultContents base;
+    QString mergeSaid; // the message of the last merge, kept after the save that follows
     VaultKey key;
     crypto::KdfParameters kdfParameters;
     ItemListModel listModel;
@@ -633,6 +655,7 @@ private:
     // Unsaved changes kept through a lock, sealed with the vault's key so
     // nothing readable stays in memory (OR-15).
     QByteArray unsavedSealed;
+    QByteArray unsavedBaseSealed; // the base of that change, for a merge at the unlock (D-054)
     QString unsavedPath;
     quint64 unlockAttempt = 0;
 

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.1.42
+// VaultPage.qml 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: A red dot on an item a merge left a note on (D-054)
 // v0.1.42: listItem (D-052)
 // v0.1.41: Up, Down, Page Up, Page Down, Home and End show the item they move to (D-051)
 // v0.0.39: Collapsed entries as tall as expanded, with larger icons (D-049)
@@ -686,6 +687,15 @@ Item {
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
+                        }
+                        // Something a merge left to settle (D-054).
+                        Rectangle {
+                            objectName: "mergedMark"
+                            visible: model.merged
+                            implicitWidth: Math.round(8 * Appearance.factor)
+                            implicitHeight: implicitWidth
+                            radius: width / 2
+                            color: "#d32f2f"
                         }
                     }
                     onClicked: vaultPage.showItem(model.itemId)

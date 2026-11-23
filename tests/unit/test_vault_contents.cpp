@@ -22,9 +22,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.1.41
+// test_vault_contents.cpp 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: Format 7 (D-054)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.40: Tests of the icon picker and the reminder's place (D-050)
 // v0.0.17: Contents format 4: sections, field types, hide marks, hidden and deleted fields, history, ids; an item's
@@ -170,7 +171,7 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":7,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":8,"items":[]})").status, ContentsStatus::NewerFormat);
 }
 
 // The vault's own icons are kept and read back; a damaged list fails the
@@ -194,7 +195,7 @@ void TestVaultContents::the_vaults_own_icons_are_kept()
     second.id = QUuid::createUuid();
     older.items = {first, second};
     QByteArray json = contentsToJson(older);
-    json.replace("\"format\":6", "\"format\":4");
+    json.replace("\"format\":7", "\"format\":4");
     const ContentsResult read = contentsFromJson(json);
     QCOMPARE(read.status, ContentsStatus::Read);
     QCOMPARE(read.contents.customIcons, QList<QByteArray>{first.icon});

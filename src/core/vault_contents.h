@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.1.41
+// vault_contents.h 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
 // v0.1.41: The reference program's other field types (D-051)
 // v0.0.40: The vault's own icons (D-050)
 // v0.0.17: Sections, the reference program's field types, a hide mark on any field, hidden and deleted fields, field
@@ -108,6 +109,32 @@ struct Attachment
     friend bool operator==(const Attachment&, const Attachment&) = default;
 };
 
+// What a merge left on an item for the person to see (D-054): a value
+// changed differently on two devices (the newest stands, the other is kept
+// here and in the field's history), or an item deleted on the other device
+// but changed here, which therefore came back.
+struct MergeNote
+{
+    enum class Kind { ChangedOnBoth, DeletedElsewhere };
+    Kind kind = Kind::ChangedOnBoth;
+    qint64 fieldUid = 0; // the field; 0 for one of the item's own texts
+    QString property;    // "title", "subtitle", "note" or "website" when fieldUid is 0
+    QString otherValue;  // the value that did not stand
+    QDateTime when;      // when the merge was made
+
+    friend bool operator==(const MergeNote&, const MergeNote&) = default;
+};
+
+// An item deleted for good, remembered so the deletion reaches the other
+// devices (D-054). Kept for good: about 30 bytes each.
+struct DeletedItem
+{
+    QUuid id;
+    QDateTime when;
+
+    friend bool operator==(const DeletedItem&, const DeletedItem&) = default;
+};
+
 struct Item
 {
     QUuid id;
@@ -127,6 +154,7 @@ struct Item
     QByteArray icon; // PNG, 64 by 64 at most; empty for the category's own icon (D-018)
     QDateTime created;
     QDateTime modified;
+    QList<MergeNote> mergeNotes; // shown on the item until the person settles them (D-054)
 
     friend bool operator==(const Item&, const Item&) = default;
 };
@@ -162,6 +190,7 @@ struct VaultContents
     // The vault's own icons, PNG each, offered in the icon picker; kept in
     // the vault so they come along to every device (D-050).
     QList<QByteArray> customIcons;
+    QList<DeletedItem> deletedItems; // format 7 (D-054)
 
     friend bool operator==(const VaultContents&, const VaultContents&) = default;
 };

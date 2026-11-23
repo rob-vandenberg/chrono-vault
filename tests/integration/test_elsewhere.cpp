@@ -25,9 +25,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_elsewhere.cpp 0.0.38
+// test_elsewhere.cpp 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: A change here and one elsewhere merged, no longer a conflict copy (D-054)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.16: Initial release: a change made elsewhere to the vault file (D-032)
 
@@ -49,6 +50,20 @@ void addElsewhere(const QString& vaultFile, const QByteArray& password, const QS
     item.id = QUuid::createUuid();
     item.title = title;
     read.contents.items.append(item);
+    QCOMPARE(saveVaultFile(vaultFile, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
+}
+
+// Another Chrono Vault changes the title of an item, at a later moment.
+void retitleElsewhere(const QString& vaultFile, const QByteArray& password, const QString& from, const QString& to)
+{
+    const OpenResult opened = openVaultFile(vaultFile, password);
+    ContentsResult read = contentsFromJson(opened.contents);
+    for (Item& item : read.contents.items) {
+        if (item.title == from) {
+            item.title = to;
+            item.modified = QDateTime::currentDateTimeUtc().addSecs(60);
+        }
+    }
     QCOMPARE(saveVaultFile(vaultFile, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
 }
 
@@ -98,9 +113,11 @@ private slots:
 
     void a_change_made_elsewhere_is_read_again();
     void a_change_here_and_one_elsewhere_are_both_kept();
+    void the_same_text_changed_here_and_elsewhere_is_noted_and_can_be_swapped();
+    void a_deletion_here_stays_after_a_merge();
     void a_change_kept_through_a_lock_never_goes_over_one_made_elsewhere();
     void a_vault_given_another_password_elsewhere_locks_and_says_so();
-    void a_conflict_copy_that_cannot_be_written_never_lets_a_save_go_over_the_other_version();
+    void a_merge_that_cannot_be_written_is_tried_again_and_keeps_both();
     void a_version_that_cannot_be_read_yet_keeps_the_vault_open();
     void a_conflict_with_a_version_not_readable_yet_never_lets_a_save_go_over_it();
 
@@ -179,20 +196,68 @@ void TestElsewhere::a_change_here_and_one_elsewhere_are_both_kept()
 {
     auto controller = unlocked(vaultPath);
     QVERIFY(controller);
-    // Changed elsewhere, and here before this Chrono Vault heard of it.
+    QTRY_VERIFY(controller->isIdle());
+    // Changed elsewhere, and here before this Chrono Vault heard of it: both
+    // versions are merged (D-054), with no conflict copy.
     addElsewhere(vaultPath, "pass", QStringLiteral("Theirs"));
     QVariantMap mine = controller->newLogin();
     mine.insert(QStringLiteral("title"), QStringLiteral("Mine"));
     QVERIFY(controller->saveItem(mine));
 
-    QTRY_VERIFY(!conflictOf(*controller).isEmpty());
-    const QString conflict = conflictOf(*controller);
-    QTRY_COMPARE(shownTitles(*controller), QStringList{QStringLiteral("Theirs")});
-    QVERIFY(controller->messageIsTrouble());
-    QVERIFY(controller->message().contains(QFileInfo(conflict).completeBaseName()));
-    QCOMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("Theirs")});
-    QCOMPARE(titlesIn(conflict, "pass"), QStringList{QStringLiteral("Mine")});
+    QTRY_COMPARE(titlesIn(vaultPath, "pass"), QStringList({"Mine", "Theirs"}));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(shownTitles(*controller), QStringList({"Mine", "Theirs"}));
+    QVERIFY(controller->message().contains(QStringLiteral("merged")));
+    QVERIFY(conflictOf(*controller).isEmpty());
     QVERIFY(!controller->unsavedChanges());
+}
+
+void TestElsewhere::the_same_text_changed_here_and_elsewhere_is_noted_and_can_be_swapped()
+{
+    auto controller = unlocked(vaultPath);
+    QVERIFY(controller);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Bank"));
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    const QString id = item.value(QStringLiteral("id")).toString();
+
+    // Elsewhere "The bank", a minute later than "My bank" here.
+    retitleElsewhere(vaultPath, "pass", QStringLiteral("Bank"), QStringLiteral("The bank"));
+    QVariantMap mine = controller->item(id);
+    mine.insert(QStringLiteral("title"), QStringLiteral("My bank"));
+    QVERIFY(controller->saveItem(mine));
+
+    QTRY_COMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("The bank")});
+    QTRY_VERIFY(controller->isIdle());
+    QVERIFY(controller->messageIsTrouble());
+    QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::MergedRole).toBool(), true);
+    const QVariantList notes = controller->mergeNotes(id);
+    QCOMPARE(notes.size(), 1);
+    QCOMPARE(notes[0].toMap().value(QStringLiteral("otherValue")).toString(), QStringLiteral("My bank"));
+
+    // "Use the other value" puts it in place, and the note goes.
+    controller->useOtherValue(id, 0);
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("My bank")});
+    QVERIFY(controller->mergeNotes(id).isEmpty());
+    QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::MergedRole).toBool(), false);
+}
+
+void TestElsewhere::a_deletion_here_stays_after_a_merge()
+{
+    auto controller = unlocked(vaultPath);
+    QVERIFY(controller);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Old"));
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    // Elsewhere an item is added; here "Old" is deleted for good meanwhile.
+    addElsewhere(vaultPath, "pass", QStringLiteral("Theirs"));
+    controller->deleteItem(item.value(QStringLiteral("id")).toString());
+    QTRY_COMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("Theirs")});
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(shownTitles(*controller), QStringList{QStringLiteral("Theirs")});
 }
 
 void TestElsewhere::a_change_kept_through_a_lock_never_goes_over_one_made_elsewhere()
@@ -220,11 +285,11 @@ void TestElsewhere::a_change_kept_through_a_lock_never_goes_over_one_made_elsewh
 
     controller->unlock(QStringLiteral("pass"));
     QTRY_COMPARE(controller->state(), State::Unlocked);
-    QTRY_VERIFY(!conflictOf(*controller).isEmpty());
+    // Merged with the other version (D-054): both kept, no conflict copy.
+    QTRY_COMPARE(titlesIn(vaultFile, "pass"), QStringList({"Mine", "Theirs"}));
     QTRY_VERIFY(controller->isIdle());
-    QCOMPARE(shownTitles(*controller), QStringList{QStringLiteral("Theirs")});
-    QCOMPARE(titlesIn(vaultFile, "pass"), QStringList{QStringLiteral("Theirs")});
-    QCOMPARE(titlesIn(conflictOf(*controller), "pass"), QStringList{QStringLiteral("Mine")});
+    QCOMPARE(shownTitles(*controller), QStringList({"Mine", "Theirs"}));
+    QVERIFY(conflictOf(*controller).isEmpty());
 #endif
 }
 
@@ -241,7 +306,7 @@ void TestElsewhere::a_vault_given_another_password_elsewhere_locks_and_says_so()
     QTRY_COMPARE(controller->state(), State::Unlocked);
 }
 
-void TestElsewhere::a_conflict_copy_that_cannot_be_written_never_lets_a_save_go_over_the_other_version()
+void TestElsewhere::a_merge_that_cannot_be_written_is_tried_again_and_keeps_both()
 {
 #ifdef Q_OS_WIN
     QSKIP("A folder cannot be made read-only for its owner on Windows.");
@@ -260,12 +325,12 @@ void TestElsewhere::a_conflict_copy_that_cannot_be_written_never_lets_a_save_go_
     QTRY_VERIFY(controller->saveFailed());
     QVERIFY(QFile::setPermissions(sharedFolder, QFileDevice::ReadOwner | QFileDevice::WriteOwner |
                                                     QFileDevice::ExeOwner));
-    // Tried again: still both kept, the other version never written over.
-    controller->retrySave();
-    QTRY_VERIFY(!conflictOf(*controller).isEmpty());
-    QTRY_VERIFY(controller->isIdle());
     QCOMPARE(titlesIn(vaultFile, "pass"), QStringList{QStringLiteral("Theirs")});
-    QCOMPARE(titlesIn(conflictOf(*controller), "pass"), QStringList{QStringLiteral("Mine")});
+    // Tried again: the merge of both is written (D-054).
+    controller->retrySave();
+    QTRY_COMPARE(titlesIn(vaultFile, "pass"), QStringList({"Mine", "Theirs"}));
+    QTRY_VERIFY(controller->isIdle());
+    QVERIFY(conflictOf(*controller).isEmpty());
 #endif
 }
 

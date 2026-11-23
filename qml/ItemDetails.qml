@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.1.41
+// ItemDetails.qml 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: The notes a merge left, with Use the other value, Delete Permanently and OK or Keep (D-054)
 // v0.1.41: The cards on the theme's Base colour (D-051)
 // v0.0.24: Item > Show Passwords shows every sensitive field (D-039)
 // v0.0.17: As the reference program shows an item (D-033): every section its own card under its heading, every
@@ -47,6 +48,8 @@ Item {
     // Read again whenever the vault's items change.
     property int refresh: 0
     readonly property var item: itemId !== "" && refresh >= 0 ? VaultController.item(itemId) : ({})
+    // What a merge left on the item to settle (D-054).
+    readonly property var mergeNotes: itemId !== "" && refresh >= 0 ? VaultController.mergeNotes(itemId) : []
 
     // The fields as cards: [{heading, rows: [field…]}]; a section without a
     // field to show is left out, as the reference program does (D-033).
@@ -194,6 +197,58 @@ Item {
                         visible: itemDetails.item.trashed === true
                         text: qsTr("Delete Permanently…")
                         onClicked: deleteForeverDialog.open()
+                    }
+                }
+
+                // What a merge left to settle (D-054): a value changed on two
+                // devices, or the item deleted on one and changed on another.
+                Repeater {
+                    model: itemDetails.mergeNotes
+                    delegate: Rectangle {
+                        id: mergeNote
+                        objectName: "mergeNote"
+                        required property var modelData
+                        required property int index
+                        Layout.fillWidth: true
+                        implicitHeight: noteLayout.implicitHeight + 2 * Math.round(10 * Appearance.factor)
+                        radius: Math.round(6 * Appearance.factor)
+                        color: "transparent"
+                        border.color: "#d32f2f"
+                        border.width: Math.max(1, Math.round(Appearance.factor))
+                        RowLayout {
+                            id: noteLayout
+                            anchors.fill: parent
+                            anchors.margins: Math.round(10 * Appearance.factor)
+                            spacing: Math.round(8 * Appearance.factor)
+                            Label {
+                                Layout.fillWidth: true
+                                wrapMode: Text.Wrap
+                                textFormat: Text.PlainText
+                                text: mergeNote.modelData.kind === "deleted"
+                                      ? qsTr("Deleted on one device and changed on another, so it was kept.")
+                                      : qsTr("“%1” was changed on two devices. The newest change stands; the other was: %2")
+                                            .arg(mergeNote.modelData.label)
+                                            .arg(mergeNote.modelData.hidden && !itemDetails.revealAll
+                                                 ? "••••••••" : mergeNote.modelData.otherValue)
+                            }
+                            Button {
+                                objectName: "useOtherValueButton"
+                                visible: mergeNote.modelData.kind === "both"
+                                text: qsTr("Use the other value")
+                                onClicked: VaultController.useOtherValue(itemDetails.itemId, mergeNote.index)
+                            }
+                            Button {
+                                objectName: "deleteAgainButton"
+                                visible: mergeNote.modelData.kind === "deleted"
+                                text: qsTr("Delete Permanently…")
+                                onClicked: deleteForeverDialog.open()
+                            }
+                            Button {
+                                objectName: "dismissMergeNoteButton"
+                                text: mergeNote.modelData.kind === "deleted" ? qsTr("Keep") : qsTr("OK")
+                                onClicked: VaultController.dismissMergeNote(itemDetails.itemId, mergeNote.index)
+                            }
+                        }
                     }
                 }
 

@@ -199,7 +199,7 @@
 <context>
     <name>Field</name>
     <message>
-        <location filename="../src/core/vault_contents.cpp" line="+407"/>
+        <location filename="../src/core/vault_contents.cpp" line="+463"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -522,7 +522,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+135"/>
+        <location filename="../qml/ItemDetails.qml" line="+138"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -570,11 +570,37 @@
     </message>
     <message>
         <location line="+13"/>
+        <location line="+45"/>
         <source>Delete Permanently…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+72"/>
+        <location line="-15"/>
+        <source>Deleted on one device and changed on another, so it was kept.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>“%1” was changed on two devices. The newest change stands; the other was: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Use the other value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Keep</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+74"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1899,7 +1925,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+218"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+219"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1962,7 +1988,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+385"/>
+        <location filename="../qml/VaultPage.qml" line="+386"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2049,7 +2075,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+159"/>
+        <location line="+168"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2064,7 +2090,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-351"/>
+        <location line="-360"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2074,7 +2100,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+350"/>
+        <location line="+359"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2396,24 +2422,24 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+1957"/>
+        <location line="+2052"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1953"/>
-        <location line="+1958"/>
+        <location line="-2048"/>
+        <location line="+2053"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1868"/>
-        <location line="+1768"/>
+        <location line="-1963"/>
+        <location line="+1863"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1850"/>
+        <location line="-1945"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2425,13 +2451,13 @@
     <message>
         <location line="+37"/>
         <location line="+117"/>
-        <location line="+1647"/>
+        <location line="+1742"/>
         <location line="+213"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1922"/>
+        <location line="-2017"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2446,7 +2472,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1536"/>
+        <location line="+1631"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2461,7 +2487,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1522"/>
+        <location line="-1617"/>
         <location line="+82"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -2492,7 +2518,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+136"/>
+        <location line="+137"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2507,13 +2533,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+74"/>
-        <location line="+884"/>
+        <location line="+75"/>
+        <location line="+976"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-801"/>
+        <location line="-918"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Subtitle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Website</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+111"/>
         <source>Reading the export…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2667,7 +2713,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+292"/>
+        <location line="+293"/>
         <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2744,7 +2790,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+191"/>
+        <location line="+232"/>
         <source>“%1” was changed elsewhere. Your version was kept as “%2”; the vault now shows the other version.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2754,14 +2800,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+106"/>
-        <source>A change kept through the lock could not be written beside the vault, which was changed elsewhere meanwhile: the folder cannot be written to, or the disk is full.</source>
+        <location line="+32"/>
+        <source>The vault was changed elsewhere; both versions were merged.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n item(s) had a value changed on both devices: the newest change stands, the other is kept in the item.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
         <location line="+6"/>
-        <source>“%1” was changed elsewhere while it was locked. Your change was kept as “%2”.</source>
-        <translation type="unfinished"></translation>
+        <source>%n item(s) deleted on one device and changed on the other were kept.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 </TS>

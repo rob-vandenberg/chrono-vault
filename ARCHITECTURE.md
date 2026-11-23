@@ -39,3 +39,10 @@ The version lives only in the `project(...)` line of `CMakeLists.txt` (CPP-2); t
    chooses, and puts the contents into JSON for a save, all off the window's thread (OR-5).
 4. `src/ui/item_list_model.*`: the item list, narrowed to Home, Favorites, a category or a tag.
 5. `qml/CustomizePage.qml` and `qml/TemplateEditor.qml`: Settings > Customize.
+
+## 5. Merging (D-054)
+
+`src/core/vault_merge.*` merges two `VaultContents` against a base, without disk or keys. The controller
+(`src/ui/vault_controller.cpp`) keeps the base (the version last read or written), reads the other version on the
+save thread when the vault file's stamp changed, merges on the window's thread, and saves the result with the usual
+atomic, verified save.

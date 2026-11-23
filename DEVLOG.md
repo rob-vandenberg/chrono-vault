@@ -386,3 +386,9 @@ Every dialog also takes Esc in its own key handling, as Chrono Viewer's QDialog 
 
 Settings > Keyboard shortcuts: the key box and the question about a key in use are windows of their own, as Chrono
 Viewer's; while they are open no shortcut answers, so every key is the new key (D-053, P29).
+
+## 23 November 2026: version 0.2.45: merging
+
+`ROADMAP.md` step 10. A change here and one elsewhere are merged against the base, no longer kept as a conflict copy;
+the newest change stands, the other is kept in the field's history and in a note on the item; items deleted for good
+are remembered, contents format 7 (D-054). Tests: `tests/unit/test_vault_merge.cpp`, `test_elsewhere`, the item page.

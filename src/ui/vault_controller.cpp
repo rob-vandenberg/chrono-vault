@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.1.41
+// vault_controller.cpp 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.1.41: The icon sections' loop variable iconPath, no longer hiding a member (Microsoft's compiler)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter no longer hides a member
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never; no local key hiding the member (D-049)
@@ -1008,6 +1009,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     key = newKey;
     keyfileSecret = keyfile;
     contents = read;
+    base = read;
     if (needKeyfile && !key.usesKeyfile) {
         needKeyfile = false;
         emit keyfileChanged();
@@ -1141,6 +1143,7 @@ bool VaultController::saveItem(const QVariantMap& map)
     if (existing != contents.items.end()) {
         changed.trashed = existing->trashed;
         changed.archived = existing->archived;
+        changed.mergeNotes = existing->mergeNotes;
     }
     // Each field keeps its earlier values: a changed value goes into its
     // history with the time it was set (D-033).
@@ -1231,8 +1234,100 @@ void VaultController::deleteItem(const QString& id)
         return;
     }
     contents.items.erase(removed, contents.items.end());
+    // Remembered, so the deletion reaches the other devices (D-054).
+    contents.deletedItems.append(DeletedItem{QUuid::fromString(id), QDateTime::currentDateTimeUtc()});
     contentsChanged();
     saveInBackground(QString());
+}
+
+QVariantList VaultController::mergeNotes(const QString& itemId) const
+{
+    QVariantList notes;
+    for (const Item& item : contents.items) {
+        if (item.id.toString(QUuid::WithoutBraces) != itemId) {
+            continue;
+        }
+        for (const MergeNote& note : item.mergeNotes) {
+            QString label;
+            bool hidden = false;
+            if (note.fieldUid != 0) {
+                for (const Field& field : item.fields) {
+                    if (field.uid == note.fieldUid) {
+                        label = field.isCustom() ? field.label : roleName(field.role);
+                        hidden = field.isHidden();
+                    }
+                }
+            } else if (note.property == QLatin1String("title")) {
+                label = tr("Title");
+            } else if (note.property == QLatin1String("subtitle")) {
+                label = tr("Subtitle");
+            } else if (note.property == QLatin1String("note")) {
+                label = tr("Notes");
+            } else if (note.property == QLatin1String("website")) {
+                label = tr("Website");
+            }
+            notes.append(QVariantMap{
+                {QStringLiteral("kind"),
+                 note.kind == MergeNote::Kind::DeletedElsewhere ? QStringLiteral("deleted") : QStringLiteral("both")},
+                {QStringLiteral("label"), label},
+                {QStringLiteral("otherValue"), note.otherValue},
+                {QStringLiteral("hidden"), hidden},
+            });
+        }
+    }
+    return notes;
+}
+
+void VaultController::useOtherValue(const QString& itemId, int index)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    for (Item& item : contents.items) {
+        if (item.id.toString(QUuid::WithoutBraces) != itemId || index < 0 || index >= item.mergeNotes.size()) {
+            continue;
+        }
+        const MergeNote note = item.mergeNotes.takeAt(index);
+        const QDateTime now = QDateTime::currentDateTimeUtc();
+        if (note.fieldUid != 0) {
+            for (Field& field : item.fields) {
+                if (field.uid == note.fieldUid && field.value != note.otherValue) {
+                    if (!field.value.isEmpty()) {
+                        field.history.append(FieldChange{field.value, field.changed.isValid() ? field.changed : now});
+                    }
+                    field.value = note.otherValue;
+                    field.changed = now;
+                }
+            }
+        } else if (note.property == QLatin1String("title")) {
+            item.title = note.otherValue;
+        } else if (note.property == QLatin1String("subtitle")) {
+            item.subtitle = note.otherValue;
+        } else if (note.property == QLatin1String("note")) {
+            item.note = note.otherValue;
+        } else if (note.property == QLatin1String("website")) {
+            item.website = note.otherValue;
+        }
+        item.modified = now;
+        contentsChanged();
+        saveInBackground(itemId);
+        return;
+    }
+}
+
+void VaultController::dismissMergeNote(const QString& itemId, int index)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    for (Item& item : contents.items) {
+        if (item.id.toString(QUuid::WithoutBraces) == itemId && index >= 0 && index < item.mergeNotes.size()) {
+            item.mergeNotes.removeAt(index);
+            contentsChanged();
+            saveInBackground(itemId);
+            return;
+        }
+    }
 }
 
 void VaultController::moveToTrash(const QString& id, bool trashed)
@@ -2236,6 +2331,7 @@ void VaultController::readAgain(const QString& said, bool important)
                     }
                     self->stamps->set(vaultFile, opened.stamp);
                     self->contents = read.contents;
+                    self->base = read.contents;
                     self->contentsChanged();
                     self->say(said, important);
                     return;
@@ -3046,19 +3142,50 @@ void VaultController::saveInBackground(const QString& itemId)
     setDirty(true);
     QPointer<VaultController> self(this);
     const std::shared_ptr<Stamps> box = stamps;
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, snapshot, saveKey, itemId, box]() mutable {
+    const quint64 epoch = box->epoch.load();
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, snapshot, saveKey, itemId, box, epoch]() mutable {
+        // A save queued before a merge was taken in: the merged save that
+        // follows holds this change too, and this one would undo the merge.
+        if (epoch != box->epoch.load()) {
+            saveKey.wipe();
+            QMetaObject::invokeMethod(
+                qApp,
+                [self]() {
+                    if (self) {
+                        --self->savesRunning;
+                    }
+                },
+                Qt::QueuedConnection);
+            return;
+        }
         QByteArray json = contentsToJson(snapshot);
         // Changed elsewhere since this Chrono Vault read or wrote it: the
-        // other version stays, this one goes into a conflict copy (D-032).
+        // other version is read and merged with this one (D-054); only when
+        // it cannot be read with this key does this one go into a conflict
+        // copy, the other staying (D-032).
         const QByteArray expected = box->get(vaultFile);
         const QByteArray onDisk = vaultFileStamp(vaultFile);
         QString conflictPath;
+        std::optional<VaultContents> theirs;
+        QByteArray theirStamp;
         SaveStatus status = SaveStatus::CannotWrite;
         if (!expected.isEmpty() && !onDisk.isEmpty() && onDisk != expected) {
-            conflictPath = conflictPathFor(vaultFile);
-            // The stamp stays the old one until the other version is read, so
-            // no later save goes over it before then (OR-15).
-            status = saveVaultFile(conflictPath, json, saveKey);
+            OpenResult opened = openVaultFileWithKey(vaultFile, saveKey);
+            if (opened.status == OpenStatus::Opened) {
+                ContentsResult read = contentsFromJson(opened.contents);
+                crypto::wipe(opened.contents);
+                if (read.status == ContentsStatus::Read) {
+                    theirs = std::move(read.contents);
+                    theirStamp = opened.stamp;
+                }
+            }
+            opened.key.wipe();
+            if (!theirs) {
+                conflictPath = conflictPathFor(vaultFile);
+                // The stamp stays the old one until the other version is
+                // read, so no later save goes over it before then (OR-15).
+                status = saveVaultFile(conflictPath, json, saveKey);
+            }
         } else {
             QByteArray written;
             status = saveVaultFile(vaultFile, json, saveKey, {}, &written);
@@ -3070,11 +3197,15 @@ void VaultController::saveInBackground(const QString& itemId)
         saveKey.wipe();
         QMetaObject::invokeMethod(
             qApp,
-            [self, status, itemId, vaultFile, conflictPath]() {
+            [self, status, itemId, vaultFile, conflictPath, theirs, theirStamp, snapshot]() {
                 if (!self) {
                     return;
                 }
                 --self->savesRunning;
+                if (theirs) {
+                    self->mergeWithOther(vaultFile, *theirs, theirStamp, itemId);
+                    return;
+                }
                 // A new vault waits for its password to be saved in the
                 // primary before it is shown (D-030).
                 std::optional<CreatedVault> created;
@@ -3087,14 +3218,20 @@ void VaultController::saveInBackground(const QString& itemId)
                     // The save that was running at the lock succeeded: the
                     // copy kept through the lock is on disk now.
                     self->unsavedSealed.clear();
+                    self->unsavedBaseSealed.clear();
                     self->unsavedPath.clear();
                     emit self->keptChangesChanged();
+                }
+                if (status == SaveStatus::Saved && conflictPath.isEmpty() && self->path == vaultFile) {
+                    self->base = snapshot; // what both sides now agree on (D-054)
                 }
                 if (status == SaveStatus::Saved) {
                     if (self->savesRunning == 0 && self->currentState == State::Unlocked) {
                         self->setDirty(false);
                         self->setFailed(false);
-                        if (self->trouble) {
+                        // A merge's own message stays: it says what the person
+                        // should look at (D-054).
+                        if (self->trouble && self->message() != self->mergeSaid) {
                             self->say(QString(), false);
                         }
                     }
@@ -3132,6 +3269,39 @@ void VaultController::saveInBackground(const QString& itemId)
             },
             Qt::QueuedConnection);
     });
+}
+
+void VaultController::mergeWithOther(const QString& vaultFile, const VaultContents& theirs,
+                                     const QByteArray& theirStamp, const QString& itemId)
+{
+    if (currentState != State::Unlocked || path != vaultFile) {
+        return; // locked meanwhile: the change kept through the lock is merged at the unlock
+    }
+    // Saves queued before this are passed over: the save below holds them.
+    ++stamps->epoch;
+    stamps->set(vaultFile, theirStamp);
+    const MergeResult merged = mergeContents(&base, contents, theirs, QDateTime::currentDateTimeUtc());
+    base = theirs;
+    contents = merged.contents;
+    contentsChanged();
+    mergeSaid = mergeText(merged);
+    say(mergeSaid, merged.itemsChangedOnBoth > 0 || merged.itemsBack > 0);
+    saveInBackground(itemId);
+}
+
+QString VaultController::mergeText(const MergeResult& merged)
+{
+    QString text = tr("The vault was changed elsewhere; both versions were merged.");
+    if (merged.itemsChangedOnBoth > 0) {
+        text += QLatin1Char(' ') + tr("%n item(s) had a value changed on both devices: the newest change stands, "
+                                      "the other is kept in the item.",
+                                      nullptr, merged.itemsChangedOnBoth);
+    }
+    if (merged.itemsBack > 0) {
+        text += QLatin1Char(' ') +
+                tr("%n item(s) deleted on one device and changed on the other were kept.", nullptr, merged.itemsBack);
+    }
+    return text;
 }
 
 void VaultController::restartAutoLock()
@@ -3177,6 +3347,9 @@ void VaultController::keepUnsavedWhileLocked()
     }
     QByteArray json = contentsToJson(contents);
     unsavedSealed = crypto::seal(key.key, json, QByteArrayLiteral("unsaved"));
+    crypto::wipe(json);
+    json = contentsToJson(base);
+    unsavedBaseSealed = crypto::seal(key.key, json, QByteArrayLiteral("unsaved base"));
     unsavedPath = path;
     unsavedStamp = stamps->get(path);
     crypto::wipe(json);
@@ -3193,6 +3366,7 @@ void VaultController::takeBackUnsaved()
     unsavedPath.clear();
     emit keptChangesChanged();
     if (!json) {
+        unsavedBaseSealed.clear();
         return;
     }
     const ContentsResult read = contentsFromJson(*json);
@@ -3203,43 +3377,31 @@ void VaultController::takeBackUnsaved()
     const QByteArray madeAgainst = unsavedStamp;
     unsavedStamp.clear();
     if (madeAgainst.isEmpty() || madeAgainst == unlockedStamp) {
+        unsavedBaseSealed.clear();
         contents = read.contents;
         contentsChanged();
         saveInBackground(QString());
         return;
     }
-    // Changed elsewhere while it was locked: the kept change goes into a
-    // conflict copy, never over the other version (D-032, P6).
-    const QString vaultFile = path;
-    VaultKey saveKey = key;
-    ++savesRunning;
-    QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept = read.contents, saveKey]() mutable {
-        const QString conflictPath = conflictPathFor(vaultFile);
-        QByteArray keptJson = contentsToJson(kept);
-        const SaveStatus status = saveVaultFile(conflictPath, keptJson, saveKey);
-        crypto::wipe(keptJson);
-        saveKey.wipe();
-        QMetaObject::invokeMethod(
-            qApp,
-            [self, vaultFile, conflictPath, status]() {
-                if (!self) {
-                    return;
-                }
-                --self->savesRunning;
-                if (status != SaveStatus::Saved) {
-                    self->say(tr("A change kept through the lock could not be written beside the vault, which was "
-                                 "changed elsewhere meanwhile: the folder cannot be written to, or the disk is full."),
-                              true);
-                    return;
-                }
-                self->addVault(conflictPath);
-                self->say(tr("“%1” was changed elsewhere while it was locked. Your change was kept as “%2”.")
-                              .arg(QFileInfo(vaultFile).completeBaseName(), QFileInfo(conflictPath).completeBaseName()),
-                          true);
-            },
-            Qt::QueuedConnection);
-    });
+    // Changed elsewhere while it was locked: the kept change is merged with
+    // the version read at the unlock, against the base it was made on
+    // (D-054, P6).
+    std::optional<VaultContents> keptBase;
+    if (auto baseJson = crypto::open(key.key, unsavedBaseSealed, QByteArrayLiteral("unsaved base"))) {
+        const ContentsResult readBase = contentsFromJson(*baseJson);
+        crypto::wipe(*baseJson);
+        if (readBase.status == ContentsStatus::Read) {
+            keptBase = readBase.contents;
+        }
+    }
+    unsavedBaseSealed.clear();
+    const MergeResult merged =
+        mergeContents(keptBase ? &*keptBase : nullptr, read.contents, contents, QDateTime::currentDateTimeUtc());
+    contents = merged.contents;
+    contentsChanged();
+    mergeSaid = mergeText(merged);
+    say(mergeSaid, merged.itemsChangedOnBoth > 0 || merged.itemsBack > 0);
+    saveInBackground(QString());
 }
 
 void VaultController::forgetUnlockedVault()
@@ -3254,6 +3416,7 @@ void VaultController::forgetUnlockedVault()
         createdVault.reset();
     }
     contents = {};
+    base = {};
     pendingAttachments.clear();
     pendingImport.reset();
     // Website icons are kept in memory only, and only while unlocked (D-036).

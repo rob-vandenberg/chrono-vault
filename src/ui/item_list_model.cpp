@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.1.41
+// item_list_model.cpp 0.2.45
 
 // --- Version history ----------------------------------------------------
+// v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.17: The item's own subtitle first; Trash and Archive apart from the rest (D-033)
@@ -96,6 +97,7 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     }
     case IsNoteRole: return item.categoryId == QLatin1String("note");
     case FavouriteRole: return item.favourite;
+    case MergedRole: return !item.mergeNotes.isEmpty(); // something a merge left to settle (D-054)
     case IconRole:
         if (!item.icon.isEmpty()) {
             return QString(QStringLiteral("data:image/png;base64,") + QString::fromLatin1(item.icon.toBase64()));
@@ -111,7 +113,7 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
 QHash<int, QByteArray> ItemListModel::roleNames() const
 {
     return {{IdRole, "itemId"}, {TitleRole, "title"}, {SubtitleRole, "subtitle"}, {IsNoteRole, "isNote"},
-            {IconRole, "icon"}, {InitialRole, "initial"}, {FavouriteRole, "favourite"}};
+            {IconRole, "icon"}, {InitialRole, "initial"}, {FavouriteRole, "favourite"}, {MergedRole, "merged"}};
 }
 
 void ItemListModel::setContents(const VaultContents& contents)
