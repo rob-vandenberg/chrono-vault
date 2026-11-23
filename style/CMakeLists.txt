@@ -4,9 +4,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# style/CMakeLists.txt 0.0.39
+# style/CMakeLists.txt 0.1.41
 #
 # --- Version history ----------------------------------------------------
+# v0.1.41: Switch.qml (D-051)
 # v0.0.39: ScrollBar.qml (D-049)
 # v0.0.10: Initial release (D-023)
 
@@ -36,6 +37,7 @@ qt_add_qml_module(chrono_vault_style
         ScaledCheckIndicator.qml
         Slider.qml
         SpinBox.qml
+        Switch.qml
         TextArea.qml
         TextField.qml
         ToolButton.qml

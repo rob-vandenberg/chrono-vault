@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.0.39
+// VaultPage.qml 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: Up, Down, Page Up, Page Down, Home and End show the item they move to (D-051)
 // v0.0.39: Collapsed entries as tall as expanded, with larger icons (D-049)
 // v0.0.27: The sidebar collapses to its icons; its groups fold; Archive and Trash with icons; wider splitters (D-042)
 // v0.0.24: Hide Sidebar, the groups shown by choice, item counts, Archive and Show Passwords from the menu (D-039)
@@ -593,6 +594,28 @@ Item {
                 currentIndex: -1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                // Up, Down, Page Up, Page Down, Home and End show the item they
+                // move to, as a click does, an edit not saved yet asked about
+                // first (D-051).
+                Keys.onPressed: function(event) {
+                    if (event.modifiers !== Qt.NoModifier || count === 0)
+                        return
+                    const page = Math.max(1, Math.floor(height / Math.max(1, currentItem ? currentItem.height : 40)) - 1)
+                    let row = currentIndex
+                    switch (event.key) {
+                    case Qt.Key_Up: row = currentIndex < 0 ? 0 : currentIndex - 1; break
+                    case Qt.Key_Down: row = currentIndex + 1; break
+                    case Qt.Key_PageUp: row = currentIndex - page; break
+                    case Qt.Key_PageDown: row = currentIndex + page; break
+                    case Qt.Key_Home: row = 0; break
+                    case Qt.Key_End: row = count - 1; break
+                    default: return
+                    }
+                    event.accepted = true
+                    row = Math.max(0, Math.min(count - 1, row))
+                    if (row !== currentIndex)
+                        vaultPage.showItem(VaultController.items.idAt(row))
+                }
 
                 section.property: "initial"
                 section.criteria: ViewSection.FullString

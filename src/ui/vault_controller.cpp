@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.0.40
+// vault_controller.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The icon sections' loop variable iconPath, no longer hiding a member (Microsoft's compiler)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter no longer hides a member
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never; no local key hiding the member (D-049)
 // v0.0.38: Settings in chrono-vault.ini, vaults in chrono-vault.conf, no carry-over; the Esc setting (D-026, D-048)
@@ -2802,9 +2803,9 @@ QVariantList VaultController::iconSections() const
     QVariantList sections;
     for (const IconSection& section : readIconSections(personalIconsFolder())) {
         QVariantList icons;
-        for (const QString& path : section.files) {
-            icons.append(QVariantMap{{QStringLiteral("name"), QFileInfo(path).completeBaseName()},
-                                     {QStringLiteral("url"), QUrl::fromLocalFile(path)}});
+        for (const QString& iconPath : section.files) {
+            icons.append(QVariantMap{{QStringLiteral("name"), QFileInfo(iconPath).completeBaseName()},
+                                     {QStringLiteral("url"), QUrl::fromLocalFile(iconPath)}});
         }
         // A heading without a translation is shown as written (the owner).
         sections.append(QVariantMap{

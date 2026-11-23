@@ -27,9 +27,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// json_import.cpp 0.0.22
+// json_import.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The reference program's other field types read (D-051)
 // v0.0.22: Chrono Vault's own built-in templates, as its export names them, come back as themselves (D-037)
 // v0.0.19: Initial release (D-035)
 
@@ -55,6 +56,10 @@ FieldKind kindOf(const QString& type)
         {QStringLiteral("section"), FieldKind::Section},   {QStringLiteral("ccExpiry"), FieldKind::CardExpiry},
         {QStringLiteral("ccCvc"), FieldKind::CardCvc},     {QStringLiteral("ccPin"), FieldKind::CardPin},
         {QStringLiteral("ccType"), FieldKind::CardType},
+        {QStringLiteral("pin"), FieldKind::Pin},           {QStringLiteral("ccName"), FieldKind::CardName},
+        {QStringLiteral("ccNumber"), FieldKind::CardNumber}, {QStringLiteral("ccBankname"), FieldKind::CardBankName},
+        {QStringLiteral("ccTxnpassword"), FieldKind::CardTransactionPassword},
+        {QStringLiteral("ccValidfrom"), FieldKind::CardValidFrom},
     };
     if (type.startsWith(QLatin1Char('.'))) {
         return FieldKind::Hidden;

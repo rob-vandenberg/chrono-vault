@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.0.40
+// vault_contents.h 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The reference program's other field types (D-051)
 // v0.0.40: The vault's own icons (D-050)
 // v0.0.17: Sections, the reference program's field types, a hide mark on any field, hidden and deleted fields, field
 //          history and ids; an item's own subtitle and note, trash, archive and autosubmit; contents format 4 (D-033)
@@ -60,6 +61,13 @@ enum class FieldKind {
     CardType,
     Section,
     Hidden,
+    // The reference program's other types (D-051).
+    Pin,
+    CardName,
+    CardNumber,
+    CardBankName,
+    CardTransactionPassword,
+    CardValidFrom,
 };
 
 // An earlier value of a field, kept when the value changed (D-033).
@@ -186,7 +194,8 @@ inline constexpr qsizetype largestAttachmentsTotal = 150 * 1024 * 1024;
     field.label = label;
     field.kind = kind;
     field.value = value;
-    field.sensitive = kind == FieldKind::Password || kind == FieldKind::CardPin;
+    field.sensitive = kind == FieldKind::Password || kind == FieldKind::CardPin || kind == FieldKind::Pin ||
+                      kind == FieldKind::CardTransactionPassword;
     return field;
 }
 

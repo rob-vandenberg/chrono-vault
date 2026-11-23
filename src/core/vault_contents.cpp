@@ -27,9 +27,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.0.40
+// vault_contents.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The contents format 6: the reference program's other field types (D-051)
 // v0.0.40: The contents format 5: the vault's own icons (D-050)
 // v0.0.17: The contents format 4: sections, the reference program's field types, hide marks, hidden and deleted
 //          fields, field history and ids, an item's subtitle and note, trash, archive, autosubmit (D-033)
@@ -46,8 +47,9 @@ namespace {
 // Format 2 added the item's icon (D-018); format 3 the categories and
 // templates, tags, favourites and attachments (D-027 to D-029); format 4
 // what the reference program's items hold (D-033); format 5 the vault's own
-// icons (D-050). Older formats are read.
-constexpr int contentsFormat = 5;
+// icons (D-050); format 6 the reference program's other field types (D-051).
+// Older formats are read.
+constexpr int contentsFormat = 6;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -61,7 +63,8 @@ constexpr FieldKind allKinds[] = {
     FieldKind::Text,     FieldKind::Password,   FieldKind::WebAddress, FieldKind::OneTimeCode, FieldKind::MultiLine,
     FieldKind::Email,    FieldKind::Username,   FieldKind::Phone,      FieldKind::Date,        FieldKind::Numeric,
     FieldKind::CardExpiry, FieldKind::CardCvc,  FieldKind::CardPin,    FieldKind::CardType,    FieldKind::Section,
-    FieldKind::Hidden,
+    FieldKind::Hidden,   FieldKind::Pin,        FieldKind::CardName,   FieldKind::CardNumber,  FieldKind::CardBankName,
+    FieldKind::CardTransactionPassword, FieldKind::CardValidFrom,
 };
 
 QString kindName(FieldKind kind)
@@ -471,6 +474,12 @@ QString fieldKindName(FieldKind kind)
     case FieldKind::CardType: return QStringLiteral("ccType");
     case FieldKind::Section: return QStringLiteral("section");
     case FieldKind::Hidden: return QStringLiteral("hidden");
+    case FieldKind::Pin: return QStringLiteral("pin");
+    case FieldKind::CardName: return QStringLiteral("ccName");
+    case FieldKind::CardNumber: return QStringLiteral("ccNumber");
+    case FieldKind::CardBankName: return QStringLiteral("ccBankname");
+    case FieldKind::CardTransactionPassword: return QStringLiteral("ccTxnpassword");
+    case FieldKind::CardValidFrom: return QStringLiteral("ccValidfrom");
     }
     return QStringLiteral("text");
 }

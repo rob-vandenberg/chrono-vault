@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.0.20
+// item_list_model.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.17: The item's own subtitle first; Trash and Archive apart from the rest (D-033)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template; the search also
@@ -159,6 +160,14 @@ int ItemListModel::rowOf(const QString& id) const
         }
     }
     return -1;
+}
+
+QString ItemListModel::idAt(int row) const
+{
+    if (row < 0 || row >= shownItems.size()) {
+        return {};
+    }
+    return shownItems.at(row).id.toString(QUuid::WithoutBraces);
 }
 
 int ItemListModel::countOf(const QString& filter) const

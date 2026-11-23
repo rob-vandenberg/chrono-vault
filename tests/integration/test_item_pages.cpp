@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.0.38
+// test_item_pages.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: Initial release: the item's view, the editor, the import and the export windows, moved here from
 //          test_pages.cpp so that neither runs past 20 seconds (OR-11)
@@ -97,6 +98,7 @@ private slots:
     void cleanupTestCase();
     void an_item_shows_a_card_per_section_and_hidden_values_as_dots();
     void the_editor_changes_fields_through_field_options();
+    void notes_arrow_keys_cards_and_the_switch();
     void the_import_window_offers_import_and_closes_at_a_lock();
     void the_export_window_asks_the_master_password_first();
 };
@@ -221,13 +223,20 @@ void TestItemPages::the_editor_changes_fields_through_field_options()
     QVERIFY(QMetaObject::invokeMethod(page, "newItem", Q_ARG(QVariant, QStringLiteral("note"))));
     const QString id = editor->property("itemId").toString();
 
-    // A field added and given a name, a type and the hide mark.
+    // A field the person names "Notes" is an ordinary field (D-051).
     QVariant index;
+    QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("multiline"))));
+    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
+    QTRY_VERIFY(options->property("opened").toBool());
+    options->findChild<QObject*>(QStringLiteral("fieldNameField"))->setProperty("text", QStringLiteral("Notes"));
+    QVERIFY(QMetaObject::invokeMethod(options, "accept"));
+
+    // A field added and given a name, a type and the hide mark.
     QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("text"))));
     QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
     QTRY_VERIFY(options->property("opened").toBool());
     options->findChild<QObject*>(QStringLiteral("fieldNameField"))->setProperty("text", QStringLiteral("PIN code"));
-    options->findChild<QObject*>(QStringLiteral("fieldTypeBox"))->setProperty("currentIndex", 7); // Number
+    options->findChild<QObject*>(QStringLiteral("fieldTypeBox"))->setProperty("currentIndex", 3); // Numeric
     options->findChild<QObject*>(QStringLiteral("sensitiveSwitch"))->setProperty("checked", true);
     QVERIFY(QMetaObject::invokeMethod(options, "accept"));
 
@@ -375,6 +384,104 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
     QVERIFY(QMetaObject::invokeMethod(saveDialog, "close"));
     controller->lock();
     QTRY_VERIFY(!exportWindow->property("opened").toBool());
+}
+
+// The one Notes of every item, the arrow keys in the list, the cards' colour
+// and Chrono Vault's own switch (D-051).
+void TestItemPages::notes_arrow_keys_cards_and_the_switch()
+{
+    QTemporaryDir folder;
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst());
+    showMainWindow(window, false, false);
+    QVERIFY(QTest::qWaitForWindowExposed(window));
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("notes.chronovault"))),
+                            QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
+    QVERIFY(page && editor);
+
+    // A new item: the Notes box is there, its text kept with Save.
+    QVERIFY(QMetaObject::invokeMethod(page, "newItem", Q_ARG(QVariant, QStringLiteral("login"))));
+    const QString first = editor->property("itemId").toString();
+    QObject* notes = editor->findChild<QObject*>(QStringLiteral("noteArea"));
+    QVERIFY(notes);
+    QCOMPARE(notes->property("placeholderText").toString(), QStringLiteral("Add Note"));
+    notes->setProperty("text", QStringLiteral("Bought in 2024"));
+    editor->setProperty("changed", true);
+    editor->findChild<QObject*>(QStringLiteral("titleField"))->setProperty("text", QStringLiteral("Alpha"));
+    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->item(first).value(QStringLiteral("note")).toString(), QStringLiteral("Bought in 2024"));
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+
+    // A second item, then the arrow keys move the item shown.
+    QVERIFY(QMetaObject::invokeMethod(page, "newItem", Q_ARG(QVariant, QStringLiteral("login"))));
+    const QString second = editor->property("itemId").toString();
+    editor->findChild<QObject*>(QStringLiteral("titleField"))->setProperty("text", QStringLiteral("Beta"));
+    QVERIFY(QMetaObject::invokeMethod(editor, "store"));
+    QTRY_VERIFY(controller->isIdle());
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+    QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, first)));
+    auto* list = window->findChild<QQuickItem*>(QStringLiteral("itemList"));
+    QVERIFY(list);
+    list->forceActiveFocus();
+    QTest::keyClick(window, Qt::Key_Down);
+    QTRY_COMPARE(page->property("chosenItemId").toString(), second);
+    QTest::keyClick(window, Qt::Key_Up);
+    QTRY_COMPARE(page->property("chosenItemId").toString(), first);
+    QTest::keyClick(window, Qt::Key_End);
+    QTRY_COMPARE(page->property("chosenItemId").toString(), second);
+
+    // The cards stand on the theme's Base colour.
+    bool baseCard = false;
+    for (QQuickItem* item : window->contentItem()->findChildren<QQuickItem*>()) {
+        if (QString::fromLatin1(item->metaObject()->className()).startsWith(QStringLiteral("QQuickRectangle")) &&
+            item->isVisible() && item->property("color").value<QColor>() == QGuiApplication::palette().color(QPalette::Base)) {
+            baseCard = true;
+        }
+    }
+    QVERIFY(baseCard);
+
+    // Chrono Vault's own switch: blue with the knob at the right when on.
+    QVERIFY(QMetaObject::invokeMethod(page, "editChosen"));
+    QVariant index;
+    QVERIFY(QMetaObject::invokeMethod(editor, "addField", Q_RETURN_ARG(QVariant, index), Q_ARG(QVariant, QStringLiteral("text"))));
+    QObject* options = window->findChild<QObject*>(QStringLiteral("fieldOptions"));
+    QVERIFY(QMetaObject::invokeMethod(options, "showFor", Q_ARG(QVariant, index), Q_ARG(QVariant, true)));
+    QTRY_VERIFY(options->property("opened").toBool());
+    QObject* toggle = options->findChild<QObject*>(QStringLiteral("sensitiveSwitch"));
+    QVERIFY(toggle);
+    auto* track = toggle->findChild<QQuickItem*>(QStringLiteral("switchTrack"));
+    auto* knob = toggle->findChild<QQuickItem*>(QStringLiteral("switchKnob"));
+    QVERIFY(track && knob);
+    toggle->setProperty("checked", false);
+    QTRY_VERIFY(knob->x() < track->width() / 2);
+    // Choosing PIN as the type switches Sensitive on (D-051).
+    QObject* typeBox = options->findChild<QObject*>(QStringLiteral("fieldTypeBox"));
+    QVERIFY(QMetaObject::invokeMethod(typeBox, "activated", Q_ARG(int, 2)));
+    QVERIFY(toggle->property("checked").toBool());
+    toggle->setProperty("checked", false);
+    toggle->setProperty("checked", true);
+    QTRY_VERIFY(knob->x() > track->width() / 2);
+    QCOMPARE(track->property("color").value<QColor>(), QGuiApplication::palette().color(QPalette::Highlight));
+    QVERIFY(QMetaObject::invokeMethod(options, "close"));
+    editor->setProperty("changed", false);
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+    controller->lock();
 }
 
 QTEST_MAIN(TestItemPages)

@@ -27,7 +27,7 @@
 <context>
     <name>Category</name>
     <message>
-        <location filename="../src/core/templates.cpp" line="+99"/>
+        <location filename="../src/core/templates.cpp" line="+101"/>
         <source>Login</source>
         <translation type="unfinished"></translation>
     </message>
@@ -199,7 +199,7 @@
 <context>
     <name>Field</name>
     <message>
-        <location filename="../src/core/vault_contents.cpp" line="+404"/>
+        <location filename="../src/core/vault_contents.cpp" line="+407"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -434,7 +434,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+139"/>
+        <location line="+142"/>
         <source>Custom Icons</source>
         <translation type="unfinished"></translation>
     </message>
@@ -445,13 +445,13 @@
     </message>
     <message>
         <location line="+42"/>
-        <location line="+30"/>
+        <location line="+31"/>
         <source>Add Custom Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-22"/>
-        <location line="+39"/>
+        <location line="-23"/>
+        <location line="+40"/>
         <source>Delete icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -522,7 +522,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+134"/>
+        <location filename="../qml/ItemDetails.qml" line="+135"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -637,7 +637,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+175"/>
+        <location filename="../qml/ItemEditor.qml" line="+184"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -653,7 +653,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+170"/>
+        <location line="+187"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -683,12 +683,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-306"/>
+        <location line="-323"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-213"/>
+        <location line="-219"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -698,67 +698,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+7"/>
         <source>Username</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>E-mail</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Website</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="-1"/>
         <source>Phone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="-3"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>One-time code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Multi-line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Card expiry</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Security code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="-2"/>
         <source>PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Card type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+97"/>
+        <location line="+114"/>
         <location line="+1"/>
         <source>New section</source>
         <translation type="unfinished"></translation>
@@ -766,17 +726,17 @@
     <message>
         <location line="+48"/>
         <location line="+42"/>
-        <location line="+380"/>
+        <location line="+397"/>
         <source>Section</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-360"/>
+        <location line="-377"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+433"/>
+        <location line="+456"/>
         <source>Add an attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -796,7 +756,77 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-484"/>
+        <location line="-702"/>
+        <source>Numeric</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Email</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>One-time Code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Multiline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cardholder Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Card Number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>CVC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Card PIN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Expiry Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bank Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Transaction Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Card Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Valid From</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+179"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -807,12 +837,12 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+376"/>
+        <location line="+393"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-308"/>
+        <location line="-325"/>
         <source>Change the icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -827,7 +857,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location line="+20"/>
+        <source>Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Add Note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+96"/>
         <source>Field Options</source>
         <translation type="unfinished"></translation>
     </message>
@@ -857,7 +897,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+53"/>
+        <location line="+59"/>
         <source>The file you added is still being read. Try again in a moment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1848,7 +1888,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+217"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+218"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1911,7 +1951,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+378"/>
+        <location filename="../qml/VaultPage.qml" line="+379"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1998,7 +2038,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+137"/>
+        <location line="+159"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2013,7 +2053,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-329"/>
+        <location line="-351"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2023,7 +2063,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+328"/>
+        <location line="+350"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2676,7 +2716,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+134"/>
+        <location line="+131"/>
         <source>Copied. The clipboard is cleared in %n second(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>

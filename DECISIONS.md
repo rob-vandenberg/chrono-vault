@@ -59,3 +59,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-048](decisions/D-048.md) | "Use the Esc key to exit the program": Esc in the main window, not in edit mode, closes it |
 | [D-049](decisions/D-049.md) | Settings tidied (Autolock tick boxes in a frame, the reminder a choice, the clipboard on one line), normal scroll bars, collapsed entries as tall as expanded, Esc in the About box |
 | [D-050](decisions/D-050.md) | The icon picker: the vault's own icons, the shipped icons from `icons/` by `icons.md`, the editor's buttons and icon click |
+| [D-051](decisions/D-051.md) | Arrow keys show the item; cards on Base; the one Notes per item; the reference program's twenty field types; our own switch |

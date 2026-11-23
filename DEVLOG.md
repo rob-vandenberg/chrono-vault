@@ -364,3 +364,11 @@ builds the Windows setup again (D-049).
 (icon_library); their headings through the translation; the editor's Add at the left, Save and Cancel at the right,
 the icon clickable; the reminder below Change the Master Password; keyName's parameter renamed for Microsoft's
 compiler (D-050).
+
+## 23 November 2026: version 0.1.41: a clearer name in the icon code
+
+The loop variable in `VaultController::iconSections` is `iconPath`; it no longer hides the member `path`, which
+Microsoft's compiler refused. The 0.0.40 setup was built with this change before it was in git.
+Also in 0.1.41 (D-051): Up, Down, Page Up, Page Down, Home and End in the item list show the item; the cards on the
+theme's Base colour; the item's own Notes box in the editor, the built-in templates without a "Notes" field; the
+reference program's twenty field types (six new, contents format 6); `style/Switch.qml`, the owner's switch.

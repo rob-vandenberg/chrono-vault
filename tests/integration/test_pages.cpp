@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.0.38
+// test_pages.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The item, editor, import and export tests moved to test_item_pages.cpp (OR-11: under 20 seconds)
 // v0.0.21: File > Import… opens its file chooser, which belongs to a window
@@ -170,7 +171,7 @@ void TestPages::a_login_made_in_the_editor_is_saved_without_qml_errors()
     QVERIFY(!editor->property("isNew").toBool());
 
     const QVariantMap stored = controller->item(editor->property("itemId").toString());
-    QCOMPARE(stored.value(QStringLiteral("fields")).toList().size(), 6);
+    QCOMPARE(stored.value(QStringLiteral("fields")).toList().size(), 5);
 
     QVERIFY(QMetaObject::invokeMethod(editor, "close"));
     controller->lock();

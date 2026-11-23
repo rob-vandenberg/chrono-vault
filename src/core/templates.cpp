@@ -21,9 +21,10 @@
 #include <QUrl>
 
 // --- Version ------------------------------------------------------------
-// templates.cpp 0.0.20
+// templates.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: No Notes field in the built-in templates (D-051)
 // v0.0.20: The website an item belongs to, for its icon (D-036)
 // v0.0.17: A new item's fields get their ids at once; fields made with makeField, a PIN hidden (D-033)
 // v0.0.14: Initial release (D-027)
@@ -39,7 +40,8 @@ Field field(const char* role, FieldKind kind)
 
 Template builtIn(const char* id, const char* categoryId, QList<Field> fields)
 {
-    fields.append(field("notes", FieldKind::MultiLine));
+    // No "Notes" field: every item has its own Notes, apart from its fields
+    // (the owner, D-051).
     return Template{QString::fromLatin1(id), QString::fromLatin1(categoryId), {}, fields, true};
 }
 

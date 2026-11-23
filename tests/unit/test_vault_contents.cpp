@@ -22,9 +22,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.0.40
+// test_vault_contents.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.40: Tests of the icon picker and the reminder's place (D-050)
 // v0.0.17: Contents format 4: sections, field types, hide marks, hidden and deleted fields, history, ids; an item's
 //          subtitle, note, trash, archive, autosubmit, website; format 3 still read (D-033)
@@ -63,6 +64,7 @@ private slots:
     void an_empty_vault_comes_back_empty();
     void a_newer_format_is_refused();
     void the_vaults_own_icons_are_kept();
+    void the_reference_programs_other_field_types_are_stored_by_its_words();
     void the_old_formats_1_and_2_are_still_read();
     void a_tag_is_kept_trimmed_and_nested_by_slashes();
     void contents_of_the_wrong_shape_are_damaged_data();
@@ -78,7 +80,8 @@ void TestVaultContents::a_new_login_has_the_login_fields()
     for (const Field& field : item.fields) {
         roles << field.role;
     }
-    QCOMPARE(roles, QStringList({"username", "password", "url", "totp", "notes"}));
+    // No "Notes" field: the item has its own Notes (D-051).
+    QCOMPARE(roles, QStringList({"username", "password", "url", "totp"}));
     QCOMPARE(item.fields.at(1).kind, FieldKind::Password);
     QCOMPARE(roleName(QStringLiteral("username")), QStringLiteral("User name"));
 }
@@ -87,8 +90,8 @@ void TestVaultContents::a_new_secure_note_has_only_notes()
 {
     const Item item = itemFrom("note");
     QCOMPARE(item.categoryId, QStringLiteral("note"));
-    QCOMPARE(item.fields.size(), 1);
-    QCOMPARE(item.fields.constFirst().kind, FieldKind::MultiLine);
+    // No fields: its text is the item's own Notes (D-051).
+    QVERIFY(item.fields.isEmpty());
 }
 
 void TestVaultContents::every_built_in_template_has_a_built_in_category_and_named_fields()
@@ -167,7 +170,7 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":6,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":7,"items":[]})").status, ContentsStatus::NewerFormat);
 }
 
 // The vault's own icons are kept and read back; a damaged list fails the
@@ -191,7 +194,7 @@ void TestVaultContents::the_vaults_own_icons_are_kept()
     second.id = QUuid::createUuid();
     older.items = {first, second};
     QByteArray json = contentsToJson(older);
-    json.replace("\"format\":5", "\"format\":4");
+    json.replace("\"format\":6", "\"format\":4");
     const ContentsResult read = contentsFromJson(json);
     QCOMPARE(read.status, ContentsStatus::Read);
     QCOMPARE(read.contents.customIcons, QList<QByteArray>{first.icon});
@@ -297,6 +300,24 @@ void TestVaultContents::contents_of_the_wrong_shape_are_damaged()
     const ContentsResult result = contentsFromJson(json);
     QCOMPARE(result.status, ContentsStatus::Damaged);
     QVERIFY(result.contents.items.isEmpty());
+}
+
+// The six field types added after the reference program's list, stored under
+// its own words so an import and an export keep them (D-051).
+void TestVaultContents::the_reference_programs_other_field_types_are_stored_by_its_words()
+{
+    const QList<std::pair<FieldKind, QString>> kinds{
+        {FieldKind::Pin, QStringLiteral("pin")},
+        {FieldKind::CardName, QStringLiteral("ccName")},
+        {FieldKind::CardNumber, QStringLiteral("ccNumber")},
+        {FieldKind::CardBankName, QStringLiteral("ccBankname")},
+        {FieldKind::CardTransactionPassword, QStringLiteral("ccTxnpassword")},
+        {FieldKind::CardValidFrom, QStringLiteral("ccValidfrom")},
+    };
+    for (const auto& [kind, name] : kinds) {
+        QCOMPARE(fieldKindName(kind), name);
+        QCOMPARE(fieldKindFromName(name), std::optional<FieldKind>(kind));
+    }
 }
 
 QTEST_GUILESS_MAIN(TestVaultContents)

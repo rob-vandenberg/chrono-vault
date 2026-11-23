@@ -23,9 +23,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.0.20
+// item_list_model.h 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
 // v0.0.14: Narrowed to a category, a tag or the favourites; the subtitle and icon of every template (D-027, D-028)
 // v0.0.9: The letter an item is grouped under (D-025)
@@ -64,6 +65,8 @@ public:
 
     // The row of the item with this id, or -1.
     [[nodiscard]] Q_INVOKABLE int rowOf(const QString& id) const;
+    // The id of the item in this row, or nothing.
+    [[nodiscard]] Q_INVOKABLE QString idAt(int row) const;
     // How many items a view of the left column holds ("" for Home,
     // "favourites", "category:<id>", "tag:<tag>", "archive", "trash"),
     // whatever the search (D-039).

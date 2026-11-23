@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.0.24
+// ItemDetails.qml 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The cards on the theme's Base colour (D-051)
 // v0.0.24: Item > Show Passwords shows every sensitive field (D-039)
 // v0.0.17: As the reference program shows an item (D-033): every section its own card under its heading, every
 //          field type, hidden values as dots, History in a field's menu, the note, Last Modified and Created,
@@ -237,7 +238,7 @@ Item {
                             objectName: "fieldCard"
                             Layout.fillWidth: true
                             implicitHeight: rows.implicitHeight
-                            color: Qt.lighter(itemDetails.palette.window, 1.12)
+                            color: itemDetails.palette.base // the theme's Base (the owner, D-051)
                             border.color: itemDetails.lineColour
                             radius: Math.round(6 * Appearance.factor)
                             Column {
@@ -257,7 +258,7 @@ Item {
                     visible: (itemDetails.item.note || "") !== ""
                     Layout.fillWidth: true
                     implicitHeight: noteRow.implicitHeight
-                    color: Qt.lighter(itemDetails.palette.window, 1.12)
+                    color: itemDetails.palette.base // the theme's Base (the owner, D-051)
                     border.color: itemDetails.lineColour
                     radius: Math.round(6 * Appearance.factor)
                     FieldRow {
@@ -274,7 +275,7 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: attachmentRows.implicitHeight
                     visible: (itemDetails.item.attachments || []).length > 0
-                    color: Qt.lighter(itemDetails.palette.window, 1.12)
+                    color: itemDetails.palette.base // the theme's Base (the owner, D-051)
                     border.color: itemDetails.lineColour
                     radius: Math.round(6 * Appearance.factor)
                     Column {

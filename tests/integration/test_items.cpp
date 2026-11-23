@@ -24,9 +24,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.0.38
+// test_items.cpp 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The vault exported, only with the master password (D-037)
 // v0.0.19: An export imported into a vault, through the controller (D-035)
@@ -201,11 +202,11 @@ void TestItems::sections_hidden_deleted_fields_and_the_items_own_parts_are_kept(
     for (const QVariant& field : kept.value(QStringLiteral("fields")).toList()) {
         kinds << field.toMap().value(QStringLiteral("kind")).toString();
     }
-    QCOMPARE(kinds, QStringList({"multiline", "section", "text", "hidden", "date"}));
+    QCOMPARE(kinds, QStringList({"section", "text", "hidden", "date"}));
     const QVariantList keptFields = kept.value(QStringLiteral("fields")).toList();
-    QVERIFY(keptFields.at(2).toMap().value(QStringLiteral("sensitive")).toBool());
-    QCOMPARE(keptFields.at(3).toMap().value(QStringLiteral("hiddenType")).toString(), QStringLiteral(".twoFA"));
-    QVERIFY(keptFields.at(4).toMap().value(QStringLiteral("deleted")).toBool());
+    QVERIFY(keptFields.at(1).toMap().value(QStringLiteral("sensitive")).toBool());
+    QCOMPARE(keptFields.at(2).toMap().value(QStringLiteral("hiddenType")).toString(), QStringLiteral(".twoFA"));
+    QVERIFY(keptFields.at(3).toMap().value(QStringLiteral("deleted")).toBool());
     QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::SubtitleRole).toString(),
              QStringLiteral("my own line"));
 }

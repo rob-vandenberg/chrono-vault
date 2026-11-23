@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.0.40
+// ItemEditor.qml 0.1.41
 
 // --- Version history ----------------------------------------------------
+// v0.1.41: The item's own Notes box; the reference program's field types and names (D-051)
 // v0.0.40: Add at the left, Save and Cancel at the right; a click on the icon opens the icon picker (D-050)
 // v0.0.18: As the reference program's editor (D-034): Cancel, "Add ▾" and a blue Save at the top; the icon with a
 //          pencil badge; the title across the width; one row per field with its label at the right, the drag
@@ -61,22 +62,35 @@ Item {
     readonly property int labelWidth: Math.round(220 * Appearance.factor)
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
     // The reference program's field types, in the order its Field Options lists them.
+    // The field types, with the reference program's names, in its order
+    // (D-051).
     readonly property var kinds: [
         { kind: "text", name: qsTr("Text") },
         { kind: "password", name: qsTr("Password") },
-        { kind: "username", name: qsTr("Username") },
-        { kind: "email", name: qsTr("E-mail") },
-        { kind: "url", name: qsTr("Website") },
-        { kind: "phone", name: qsTr("Phone") },
+        { kind: "pin", name: qsTr("PIN") },
+        { kind: "numeric", name: qsTr("Numeric") },
         { kind: "date", name: qsTr("Date") },
-        { kind: "numeric", name: qsTr("Number") },
-        { kind: "totp", name: qsTr("One-time code") },
-        { kind: "multiline", name: qsTr("Multi-line") },
-        { kind: "ccExpiry", name: qsTr("Card expiry") },
-        { kind: "ccCvc", name: qsTr("Security code") },
-        { kind: "ccPin", name: qsTr("PIN") },
-        { kind: "ccType", name: qsTr("Card type") }
+        { kind: "email", name: qsTr("Email") },
+        { kind: "url", name: qsTr("URL") },
+        { kind: "phone", name: qsTr("Phone") },
+        { kind: "username", name: qsTr("Username") },
+        { kind: "totp", name: qsTr("One-time Code") },
+        { kind: "multiline", name: qsTr("Multiline") },
+        { kind: "ccName", name: qsTr("Cardholder Name") },
+        { kind: "ccNumber", name: qsTr("Card Number") },
+        { kind: "ccCvc", name: qsTr("CVC") },
+        { kind: "ccPin", name: qsTr("Card PIN") },
+        { kind: "ccExpiry", name: qsTr("Expiry Date") },
+        { kind: "ccBankname", name: qsTr("Bank Name") },
+        { kind: "ccTxnpassword", name: qsTr("Transaction Password") },
+        { kind: "ccType", name: qsTr("Card Type") },
+        { kind: "ccValidfrom", name: qsTr("Valid From") }
     ]
+
+    // The kinds that hide their value from the start (D-051).
+    function secretKind(kind) {
+        return kind === "password" || kind === "ccPin" || kind === "pin" || kind === "ccTxnpassword"
+    }
 
     signal closed()
     signal stored(string itemId)
@@ -117,8 +131,8 @@ Item {
                                  kind: field.kind, value: field.value, sensitive: field.sensitive === true,
                                  deleted: field.deleted === true, hiddenType: field.hiddenType || "",
                                  uid: field.uid || 0 })
-        kept = { subtitle: map.subtitle || "", note: map.note || "", autoSubmit: map.autoSubmit === true,
-                 website: map.website || "" }
+        kept = { subtitle: map.subtitle || "", autoSubmit: map.autoSubmit === true, website: map.website || "" }
+        noteArea.text = map.note || ""
         tagsModel.clear()
         for (let tag of map.tags)
             tagsModel.append({ tag: tag })
@@ -162,7 +176,7 @@ Item {
         if (VaultController.saveItem({ id: itemId, templateId: templateId, categoryId: categoryId,
                                        title: titleField.text, fields: fields, icon: icon, tags: tags,
                                        favourite: favourite, attachments: attachments, subtitle: kept.subtitle,
-                                       note: kept.note, autoSubmit: kept.autoSubmit, website: kept.website })) {
+                                       note: noteArea.text, autoSubmit: kept.autoSubmit, website: kept.website })) {
             isNew = false
             changed = false
             titleField.text = VaultController.item(itemId).title
@@ -174,7 +188,7 @@ Item {
         const isSection = kind === "section"
         fieldsModel.append({ role: "", label: isSection ? qsTr("New section") : qsTr("New field"),
                              name: isSection ? qsTr("New section") : qsTr("New field"), kind: kind, value: "",
-                             sensitive: kind === "password" || kind === "ccPin", deleted: false, hiddenType: "",
+                             sensitive: editor.secretKind(kind), deleted: false, hiddenType: "",
                              uid: 0 })
         changed = true
         return fieldsModel.count - 1
@@ -509,6 +523,23 @@ Item {
                     }
                 }
 
+                // The item's own Notes: every item has exactly one, always
+                // shown here, never deleted (the owner, D-051).
+                Label {
+                    text: qsTr("Notes")
+                    opacity: 0.7
+                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                }
+                TextArea {
+                    id: noteArea
+                    objectName: "noteArea"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.max(implicitHeight, Math.round(120 * Appearance.factor))
+                    placeholderText: qsTr("Add Note")
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: if (activeFocus) editor.changed = true
+                }
+
                 // Tags (D-028).
                 Label {
                     text: qsTr("Tags")
@@ -686,6 +717,11 @@ Item {
                 model: editor.kinds
                 textRole: "name"
                 Layout.fillWidth: true
+                // A kind that hides its value starts hidden (D-051).
+                onActivated: function(index) {
+                    if (editor.secretKind(editor.kinds[index].kind))
+                        sensitiveSwitch.checked = true
+                }
             }
             Label {
                 visible: !fieldOptions.isSection
