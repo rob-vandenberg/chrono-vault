@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.0.40
+// IconPicker.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.40: Initial release (D-050)
 
 // "Choose Icon" (D-050), after the reference program's picker: the vault's
@@ -256,8 +257,10 @@ DialogWindow {
         iconDeleted(icon)
     }
 
-    FileDialog {
+    FilePicker {
         id: addDialog
+        memoryName: "IconPicker.addDialog"
+        parentWindow: picker
         title: qsTr("Add Custom Icon")
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)")]

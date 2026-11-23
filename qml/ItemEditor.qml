@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.1.41
+// ItemEditor.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.1.41: The item's own Notes box; the reference program's field types and names (D-051)
 // v0.0.40: Add at the left, Save and Cancel at the right; a click on the icon opens the icon picker (D-050)
 // v0.0.18: As the reference program's editor (D-034): Cancel, "Add ▾" and a blue Save at the top; the icon with a
@@ -756,8 +757,10 @@ Item {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: attachmentDialog
+        memoryName: "ItemEditor.attachmentDialog"
+        parentWindow: editor
         title: qsTr("Add an attachment")
         fileMode: FileDialog.OpenFile
         onAccepted: editor.addAttachment(selectedFile)

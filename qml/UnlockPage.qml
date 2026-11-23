@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.1.42
+// UnlockPage.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.1.42: focusPassword (D-052)
 // v0.0.39: The reminder says how often it asks (D-049)
 // v0.0.27: The finger asked whenever the page is on screen: at a start, for another vault, back from the tray (D-042)
@@ -216,8 +217,10 @@ Item {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: unlockKeyfileDialog
+        memoryName: "UnlockPage.unlockKeyfileDialog"
+        parentWindow: unlockPage
         title: qsTr("Choose the vault's keyfile")
         fileMode: FileDialog.OpenFile
         onAccepted: {

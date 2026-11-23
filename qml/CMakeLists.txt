@@ -49,6 +49,7 @@ qt_add_qml_module(chrono_vault_ui
         AboutWindow.qml
         ExportWindow.qml
         FieldRow.qml
+        FilePicker.qml
         GeneratorDialog.qml
         IconPicker.qml
         ImportWindow.qml
@@ -73,6 +74,10 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/appearance.cpp
         ../src/ui/appearance.h
         ../src/ui/autostart.cpp
+        ../src/ui/file_pickers.cpp
+        ../src/ui/file_pickers.h
+        ../src/ui/places_here.cpp
+        ../src/ui/places_here.h
         ../src/ui/autostart.h
         ../src/ui/icon_library.cpp
         ../src/ui/icon_library.h
@@ -194,6 +199,8 @@ else()
 endif()
 chrono_vault_strict_warnings_for_sources(
     ../src/ui/app_setup.cpp
+    ../src/ui/file_pickers.cpp
+    ../src/ui/places_here.cpp
     ../src/ui/appearance.cpp
     ../src/ui/licences.cpp
     ../src/ui/program_scale.cpp

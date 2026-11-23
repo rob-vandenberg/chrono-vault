@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.0.22
+// ExportWindow.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: Initial release (D-037)
 
 // File > Export… (D-037): a plain warning that the export holds every
@@ -108,8 +109,9 @@ DialogWindow {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: saveDialog
+        memoryName: "ExportWindow.saveDialog"
         objectName: "exportSaveDialog"
         parentWindow: exportWindow
         title: qsTr("Where should the export be saved?")

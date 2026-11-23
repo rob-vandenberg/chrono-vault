@@ -63,3 +63,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-052](decisions/D-052.md) | Esc as Chrono Viewer has it: not a shortcut, and the keyboard back to the content after a menu |
 | [D-053](decisions/D-053.md) | The key box as Chrono Viewer's: windows of their own, every key the new key, the question about a key in use |
 | [D-054](decisions/D-054.md) | Merging: automatic, three-way; the newest change stands with a note; deletions travel |
+| [D-055](decisions/D-055.md) | File dialogs as Chrono Viewer's: Qt's widget dialog, the desktop's own places, a path to type |

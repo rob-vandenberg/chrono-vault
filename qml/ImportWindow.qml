@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.0.22
+// ImportWindow.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.21: The file chooser belongs to the main window, so it shows: this window is still hidden when it opens
 // v0.0.19: Initial release (D-035)
@@ -96,8 +97,9 @@ DialogWindow {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: exportDialog
+        memoryName: "ImportWindow.exportDialog"
         objectName: "exportDialog"
         // This window is still hidden when the chooser opens: it belongs to
         // the main window, or it would not be shown.

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.2.46
+// ItemDetails.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.2.46: The labels end 50 pixels further left (the owner)
 // v0.2.45: The notes a merge left, with Use the other value, Delete Permanently and OK or Keep (D-054)
 // v0.1.41: The cards on the theme's Base colour (D-051)
@@ -515,8 +516,10 @@ Item {
         saveDialog.open()
     }
 
-    FileDialog {
+    FilePicker {
         id: saveDialog
+        memoryName: "ItemDetails.saveDialog"
+        parentWindow: itemDetails
         title: qsTr("Save the attachment")
         fileMode: FileDialog.SaveFile
         onAccepted: VaultController.saveAttachment(itemDetails.itemId, itemDetails.savingAttachment.id, selectedFile)

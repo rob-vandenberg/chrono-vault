@@ -416,3 +416,9 @@ minutes fields 40 pixels narrower; the sidebar snaps after 80 pixels of travel e
 ## 23 November 2026: version 0.2.50: keys that cannot be typed are commands while typing
 
 Only keys a text field uses stand aside while one has the keyboard; F1 opens About on the unlock page (the owner, D-039).
+
+## 23 November 2026: version 0.2.51: file dialogs as Chrono Viewer's
+
+Every file dialog is Qt's widget dialog with the desktop's own places, a path to type, its size and folder kept, and
+closed by a lock (D-055). Two review rounds; round 1 found the folder not kept and a dialog outliving a lock, both
+fixed with tests; round 2 found nothing real.

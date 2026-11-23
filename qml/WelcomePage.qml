@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.0.22
+// WelcomePage.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.15: A new vault may also be locked with a keyfile, chosen or made; its password may be saved in the primary
 //          vault (D-030, D-031)
@@ -77,8 +78,10 @@ Item {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: createFileDialog
+        memoryName: "WelcomePage.createFileDialog"
+        parentWindow: welcomePage
         title: qsTr("Where should the new vault be kept?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "chronovault"
@@ -91,8 +94,10 @@ Item {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: openFileDialog
+        memoryName: "WelcomePage.openFileDialog"
+        parentWindow: welcomePage
         title: qsTr("Open a vault")
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("Chrono Vault vaults (*.chronovault)"), qsTr("All files (*)")]
@@ -205,15 +210,19 @@ Item {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: keyfileOpenDialog
+        memoryName: "WelcomePage.keyfileOpenDialog"
+        parentWindow: welcomePage
         title: qsTr("Choose a keyfile")
         fileMode: FileDialog.OpenFile
         onAccepted: newVaultDialog.keyfile = selectedFile
     }
 
-    FileDialog {
+    FilePicker {
         id: keyfileSaveDialog
+        memoryName: "WelcomePage.keyfileSaveDialog"
+        parentWindow: welcomePage
         title: qsTr("Where should the new keyfile be kept?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "chronovaultkey"

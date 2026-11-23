@@ -31,13 +31,20 @@
 #include <QtTest>
 #include <QQuickItem>
 #include <QFile>
+#include <QDir>
 #include <QQuickWindow>
 #include <QSignalSpy>
+#include <QApplication>
+#include <QFileDialog>
+#include <QLineEdit>
+#include <QTimer>
+#include <functional>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.2.45
+// test_item_pages.cpp 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: The file dialogs answered as a person would (D-055)
 // v0.2.45: A merge note on the item and its mark in the list (D-054)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -91,6 +98,23 @@ QList<QQuickItem*> visualItems(QQuickItem* root, const QString& name)
 // locked, all without a single QML error.
 // The windows of an item, of importing and of exporting, driven as a person
 // would, without a single QML error.
+// Answers the next file dialog from a timer, as a person would: `answer`
+// looks at it, then accepts or cancels it (D-055). A file dialog waits for
+// the person, so the answer has to be on its way before it opens.
+void answerNextFileDialog(std::function<void(QFileDialog*)> answer)
+{
+    auto* poll = new QTimer;
+    poll->setInterval(20);
+    QObject::connect(poll, &QTimer::timeout, poll, [poll, answer]() {
+        if (auto* dialog = qobject_cast<QFileDialog*>(QApplication::activeModalWidget())) {
+            poll->stop();
+            poll->deleteLater();
+            answer(dialog);
+        }
+    });
+    poll->start();
+}
+
 class TestItemPages : public QObject
 {
     Q_OBJECT
@@ -326,14 +350,18 @@ void TestItemPages::the_import_window_offers_import_and_closes_at_a_lock()
     }
     QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
     QVERIFY(importWindow);
-    QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
-    QObject* exportDialog = importWindow->findChild<QObject*>(QStringLiteral("exportDialog"));
     // The chooser opens, and belongs to a window, or a desktop may not show
     // it: the import window itself is still hidden then.
-    QVERIFY(exportDialog);
-    QTRY_VERIFY(exportDialog->property("visible").toBool());
-    QVERIFY(exportDialog->property("parentWindow").value<QWindow*>() != nullptr);
-    QVERIFY(QMetaObject::invokeMethod(exportDialog, "close"));
+    bool asked = false;
+    bool belongs = false;
+    answerNextFileDialog([&](QFileDialog* dialog) {
+        asked = true;
+        belongs = dialog->windowHandle() != nullptr && dialog->windowHandle()->transientParent() != nullptr;
+        dialog->reject();
+    });
+    QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
+    QTRY_VERIFY(asked);
+    QVERIFY(belongs);
     importWindow->setProperty("reading", true);
     controller->readImport(QUrl::fromLocalFile(exportFile));
     QTRY_VERIFY(importWindow->property("opened").toBool());
@@ -379,13 +407,52 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
     exportWindow->findChild<QObject*>(QStringLiteral("exportPasswordField"))->setProperty("text", QStringLiteral("a"));
     QVERIFY(exportButton->property("enabled").toBool());
     // Export… chooses where, the window staying open.
+    bool chosen = false;
+    bool stillOpen = false;
+    answerNextFileDialog([&](QFileDialog* dialog) {
+        chosen = true;
+        stillOpen = exportWindow->property("opened").toBool();
+        dialog->reject();
+    });
     QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    QTRY_VERIFY(chosen);
+    QVERIFY(stillOpen);
+
+    // Saved in a folder of the person's choice: the dialog starts there the
+    // next time, as Qt's own did (D-055).
+    QDir(folder.path()).mkdir(QStringLiteral("exports"));
+    const QString target = folder.filePath(QStringLiteral("exports/mine.json"));
+    answerNextFileDialog([&](QFileDialog* dialog) {
+        // As a person: into the folder, then the name typed.
+        dialog->setDirectory(QFileInfo(target).absolutePath());
+        auto* name = dialog->findChild<QLineEdit*>(QStringLiteral("fileNameEdit"));
+        QVERIFY(name);
+        name->setText(QFileInfo(target).fileName());
+        static_cast<QDialog*>(dialog)->accept();
+    });
+    QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    QTRY_VERIFY(QFile::exists(target));
     QObject* saveDialog = exportWindow->findChild<QObject*>(QStringLiteral("exportSaveDialog"));
     QVERIFY(saveDialog);
-    QTRY_VERIFY(saveDialog->property("visible").toBool());
-    QVERIFY(exportWindow->property("opened").toBool());
-    QVERIFY(QMetaObject::invokeMethod(saveDialog, "close"));
-    controller->lock();
+    QCOMPARE(saveDialog->property("currentFolder").toUrl(), QUrl::fromLocalFile(folder.filePath(QStringLiteral("exports"))));
+
+    // A lock while the dialog is open closes it as Cancel: nothing is written.
+    QTRY_VERIFY(!exportWindow->property("busy").toBool());
+    exportWindow->findChild<QObject*>(QStringLiteral("exportPasswordField"))->setProperty("text", QStringLiteral("a"));
+    const QString second = folder.filePath(QStringLiteral("exports/second.json"));
+    bool closedByLock = false;
+    answerNextFileDialog([&](QFileDialog* dialog) {
+        dialog->setDirectory(QFileInfo(second).absolutePath());
+        if (auto* name = dialog->findChild<QLineEdit*>(QStringLiteral("fileNameEdit"))) {
+            name->setText(QFileInfo(second).fileName());
+        }
+        controller->lock();
+        closedByLock = !dialog->isVisible();
+    });
+    QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    QTRY_VERIFY(closedByLock);
+    QVERIFY(QApplication::activeModalWidget() == nullptr);
+    QVERIFY(!QFile::exists(second));
     QTRY_VERIFY(!exportWindow->property("opened").toBool());
 }
 

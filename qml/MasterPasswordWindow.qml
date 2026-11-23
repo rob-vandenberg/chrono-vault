@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.0.22
+// MasterPasswordWindow.qml 0.2.51
 
 // --- Version history ----------------------------------------------------
+// v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.21: The keyfile choosers belong to this window, so they show
 // v0.0.15: Initial release (D-031)
@@ -128,15 +129,17 @@ DialogWindow {
         }
     }
 
-    FileDialog {
+    FilePicker {
         id: chooseDialog
+        memoryName: "MasterPasswordWindow.chooseDialog"
         parentWindow: passwordWindow
         title: qsTr("Choose a keyfile")
         fileMode: FileDialog.OpenFile
         onAccepted: passwordWindow.keyfile = selectedFile
     }
-    FileDialog {
+    FilePicker {
         id: makeDialog
+        memoryName: "MasterPasswordWindow.makeDialog"
         parentWindow: passwordWindow
         title: qsTr("Where should the new keyfile be kept?")
         fileMode: FileDialog.SaveFile

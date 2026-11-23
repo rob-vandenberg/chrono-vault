@@ -161,7 +161,7 @@
 <context>
     <name>ExportWindow</name>
     <message>
-        <location filename="../qml/ExportWindow.qml" line="+37"/>
+        <location filename="../qml/ExportWindow.qml" line="+38"/>
         <source>Export the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -186,7 +186,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+19"/>
         <source>Where should the export be saved?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -429,7 +429,7 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+37"/>
+        <location filename="../qml/IconPicker.qml" line="+38"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -445,13 +445,13 @@
     </message>
     <message>
         <location line="+42"/>
-        <location line="+31"/>
+        <location line="+33"/>
         <source>Add Custom Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-23"/>
-        <location line="+40"/>
+        <location line="-25"/>
+        <location line="+42"/>
         <source>Delete icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -489,7 +489,7 @@
 <context>
     <name>ImportWindow</name>
     <message>
-        <location filename="../qml/ImportWindow.qml" line="+41"/>
+        <location filename="../qml/ImportWindow.qml" line="+42"/>
         <source>Import from %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -504,7 +504,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+24"/>
         <source>Choose the export of %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -522,7 +522,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+139"/>
+        <location filename="../qml/ItemDetails.qml" line="+140"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -655,7 +655,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+27"/>
         <source>Save the attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -663,7 +663,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+189"/>
+        <location filename="../qml/ItemEditor.qml" line="+190"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -762,7 +762,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+461"/>
+        <location line="+463"/>
         <source>Add an attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -782,7 +782,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-712"/>
+        <location line="-714"/>
         <source>Numeric</source>
         <translation type="unfinished"></translation>
     </message>
@@ -923,7 +923,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+59"/>
+        <location line="+61"/>
         <source>The file you added is still being read. Try again in a moment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -954,7 +954,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+63"/>
+        <location filename="../qml/Main.qml" line="+64"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -964,7 +964,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+218"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1021,12 +1021,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-562"/>
+        <location line="-565"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+176"/>
+        <location line="+179"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1194,7 +1194,7 @@
 <context>
     <name>MasterPasswordWindow</name>
     <message>
-        <location filename="../qml/MasterPasswordWindow.qml" line="+37"/>
+        <location filename="../qml/MasterPasswordWindow.qml" line="+38"/>
         <source>Change master password or keyfile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1249,12 +1249,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <source>Choose a keyfile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+8"/>
         <source>Where should the new keyfile be kept?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1773,7 +1773,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+116"/>
+        <location filename="../qml/UnlockPage.qml" line="+117"/>
         <source>Master password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1853,7 +1853,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+15"/>
         <source>Choose the vault&apos;s keyfile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2118,7 +2118,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+58"/>
+        <location filename="../qml/WelcomePage.qml" line="+59"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2138,13 +2138,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+10"/>
         <source>Where should the new vault be kept?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+3"/>
-        <location line="+13"/>
+        <location line="+15"/>
         <source>Chrono Vault vaults (*.chronovault)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2219,12 +2219,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+9"/>
         <source>Choose a keyfile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+9"/>
         <source>Where should the new keyfile be kept?</source>
         <translation type="unfinished"></translation>
     </message>

@@ -112,9 +112,14 @@ chrono_vault_strict_warnings(test_website_icons)
 chrono_vault_add_test(test_website_icons)
 
 qt_add_executable(test_item_pages test_item_pages.cpp)
-target_link_libraries(test_item_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+target_link_libraries(test_item_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_item_pages)
 chrono_vault_add_test(test_item_pages)
+
+qt_add_executable(test_file_pickers test_file_pickers.cpp)
+target_link_libraries(test_file_pickers PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_file_pickers)
+chrono_vault_add_test(test_file_pickers)
 
 qt_add_executable(test_menus test_menus.cpp)
 target_link_libraries(test_menus PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
