@@ -19,6 +19,7 @@
 #include "vault_controller.h"
 
 #include <QClipboard>
+#include <QCursor>
 #include <QFile>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -33,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.2.46
+// test_menus.cpp 0.2.47
 
 // --- Version history ----------------------------------------------------
+// v0.2.47: Counts above 0 only; the sidebar snaps shut and open when dragged (the owner)
 // v0.2.46: The main window's shortcuts do nothing with the settings window in front (P33)
 // v0.1.42: Tests of Esc through the menu bar and the About box (D-052)
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
@@ -89,6 +91,7 @@ private slots:
     void the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts();
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
     void the_sidebar_collapses_to_icons_and_its_groups_fold();
+    void the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged();
     void after_a_menu_the_content_holds_the_keyboard();
     void keyboard_shortcuts_are_set_on_their_page_and_kept();
 
@@ -405,7 +408,14 @@ void TestMenus::the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts(
     QTRY_VERIFY(visualItem(root, QStringLiteral("count_")));
     QCOMPARE(visualItem(root, QStringLiteral("count_"))->property("text").toString(), QStringLiteral("1"));
     QCOMPARE(visualItem(root, QStringLiteral("count_archive"))->property("text").toString(), QStringLiteral("1"));
-    QCOMPARE(visualItem(root, QStringLiteral("count_trash"))->property("text").toString(), QStringLiteral("0"));
+    // A count of 0 is not shown, and its entry's name keeps that room; an
+    // entry with a count leaves room for it (the owner, 23 November 2026).
+    QVERIFY(!visualItem(root, QStringLiteral("count_trash")));
+    QQuickItem* trashEntry = visualItem(root, QStringLiteral("trashEntry"));
+    QQuickItem* homeEntry = visualItem(root, QStringLiteral("homeEntry"));
+    QCOMPARE(trashEntry->property("rightPadding").toReal(), trashEntry->property("padding").toReal());
+    QVERIFY(homeEntry->property("rightPadding").toReal() >
+            homeEntry->property("padding").toReal() + visualItem(root, QStringLiteral("count_"))->width());
     QCOMPARE(visualItem(root, QStringLiteral("count_category:login"))->property("text").toString(),
              QStringLiteral("1"));
     QVERIFY(SettingsFile().value(QStringLiteral("view/showItemCounts")).toBool());
@@ -697,6 +707,52 @@ void TestMenus::after_a_menu_the_content_holds_the_keyboard()
     QTest::keyClick(quickWindow, Qt::Key_Escape);
     QTRY_VERIFY(!quickWindow->isVisible());
     controller->setEscapeExits(false);
+}
+
+// Dragged narrower, the sidebar holds at 180 until the pointer passes 120,
+// then collapses; dragged wider, it holds at its icons until the pointer
+// passes 120, then opens at 180 (the owner, 23 November 2026).
+void TestMenus::the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged()
+{
+    QVERIFY(open(QStringLiteral("snap")));
+    auto* quickWindow = qobject_cast<QQuickWindow*>(window);
+    auto* column = window->findChild<QQuickItem*>(QStringLiteral("vaultColumn"));
+    QVERIFY(column);
+    if (controller->sidebarCollapsed()) {
+        QVERIFY(QMetaObject::invokeMethod(visualItem(quickWindow->contentItem(), QStringLiteral("sidebarToggle")),
+                                          "clicked"));
+    }
+    QTRY_VERIFY(column->width() > 180);
+    const int y = 300;
+    const auto moveTo = [&](int x) {
+        QCursor::setPos(quickWindow->mapToGlobal(QPoint(x, y)));
+        QTest::mouseMove(quickWindow, QPoint(x, y));
+        QTest::qWait(60);
+    };
+    // Narrower: held at 180 at 150, shut past 120.
+    int handle = qRound(column->width()) + 4;
+    QCursor::setPos(quickWindow->mapToGlobal(QPoint(handle, y)));
+    QTest::mousePress(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(handle, y));
+    moveTo(handle - 10);
+    moveTo(150);
+    QCOMPARE(qRound(column->width()), 180);
+    QVERIFY(!controller->sidebarCollapsed());
+    moveTo(110);
+    QTRY_VERIFY(controller->sidebarCollapsed());
+    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(110, y));
+    QTRY_COMPARE(qRound(column->width()), 64);
+    // Wider: held at its icons at 100, open at 180 past 120.
+    handle = qRound(column->width()) + 4;
+    QCursor::setPos(quickWindow->mapToGlobal(QPoint(handle, y)));
+    QTest::mousePress(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(handle, y));
+    moveTo(handle + 10);
+    moveTo(100);
+    QVERIFY(controller->sidebarCollapsed());
+    QCOMPARE(qRound(column->width()), 64);
+    moveTo(130);
+    QTRY_VERIFY(!controller->sidebarCollapsed());
+    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(130, y));
+    QTRY_COMPARE(qRound(column->width()), 180);
 }
 
 QTEST_MAIN(TestMenus)

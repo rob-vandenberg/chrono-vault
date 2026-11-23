@@ -2,7 +2,7 @@
 
 ## Now
 
-**Version 0.2.46**: the main window's shortcuts only while it has the keyboard (P33); the owner's layout changes. Before, 0.2.45: merging, `ROADMAP.md` step 10 (D-054). Before, 0.1.44: Settings > Keyboard shortcuts as Chrono Viewer's: every key pressed in the key box is the new key, and a key in use is asked about (D-053). Before, 0.1.43: every dialog also takes Esc in its own keys (D-052). Before, 0.1.42: Esc as Chrono Viewer has it, so it closes the About box also with "Use the Esc key to exit the
+**Version 0.2.47**: item counts above 0 only, long names cut off, the sidebar snap (the owner). Before, 0.2.46: the main window's shortcuts only while it has the keyboard (P33); the owner's layout changes. Before, 0.2.45: merging, `ROADMAP.md` step 10 (D-054). Before, 0.1.44: Settings > Keyboard shortcuts as Chrono Viewer's: every key pressed in the key box is the new key, and a key in use is asked about (D-053). Before, 0.1.43: every dialog also takes Esc in its own keys (D-052). Before, 0.1.42: Esc as Chrono Viewer has it, so it closes the About box also with "Use the Esc key to exit the
 program" ticked (D-052). Before, 0.1.41: arrow keys show the item; the cards on the theme's Base colour; the one Notes box per item; the
 reference program's twenty field types; our own switch (D-051); `iconPath` for Microsoft's compiler. Before, 0.0.40: the icon picker: the vault's own icons kept in the vault, the shipped icons from `icons/` as
 `icons.md` lists them, copied into the person's own folder; the editor's Add, Save and Cancel; the reminder below

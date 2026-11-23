@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.2.46
+// VaultPage.qml 0.2.47
 
 // --- Version history ----------------------------------------------------
+// v0.2.47: Counts above 0 only, long names cut off before them; minimum 180; the sidebar snaps shut or open past 120 when dragged (the owner)
 // v0.2.46: The sidebar on Base; the item list 5 pixels in at each side (the owner)
 // v0.2.45: A red dot on an item a merge left a note on (D-054)
 // v0.1.42: listItem (D-052)
@@ -84,6 +85,21 @@ Item {
         vaultColumn.SplitView.preferredWidth = on ? collapsedWidth : expandedWidth
     }
     Component.onCompleted: if (collapsed) vaultColumn.SplitView.preferredWidth = collapsedWidth
+    // The narrowest the expanded sidebar gets (the owner, 23 November 2026).
+    readonly property int sidebarMinimum: Math.round(180 * Appearance.factor)
+    // Dragging its splitter: the sidebar holds at its minimum, or at its icons,
+    // while the pointer goes on; past this point it snaps shut or open, as
+    // the collapse button does (the owner, 23 November 2026).
+    readonly property int snapPoint: Math.round(120 * Appearance.factor)
+    function dragSidebarTo(x) {
+        if (!collapsed && x < snapPoint) {
+            setCollapsed(true)
+            expandedWidth = sidebarMinimum
+        } else if (collapsed && x > snapPoint) {
+            expandedWidth = sidebarMinimum
+            setCollapsed(false)
+        }
+    }
 
     // An entry of the left column: its icon alone while collapsed, its name
     // then shown on hover (D-042).
@@ -99,6 +115,26 @@ Item {
         icon.height: vaultPage.collapsed ? vaultPage.collapsedIconSize : Math.round(16 * Appearance.factor)
         topPadding: vaultPage.collapsed ? Math.floor((implicitHeight - icon.height) / 2) : padding
         bottomPadding: vaultPage.collapsed ? Math.ceil((implicitHeight - icon.height) / 2) : padding
+        // The number of items under it, with View > Show Item Counts (D-039):
+        // only above 0 (the owner). A long name ends in "…" before it, and
+        // takes its room when no number is shown.
+        property string countFilter: ""
+        property bool counted: false
+        readonly property int itemCount: counted && VaultController.revision >= 0
+                                         ? VaultController.items.countOf(countFilter) : 0
+        readonly property bool countShown: counted && VaultController.showItemCounts && !vaultPage.collapsed
+                                           && itemCount > 0
+        rightPadding: padding + (countShown ? countLabel.implicitWidth + Math.round(10 * Appearance.factor) : 0)
+        Label {
+            id: countLabel
+            objectName: "count_" + parent.countFilter
+            visible: parent.countShown
+            text: parent.itemCount
+            opacity: 0.6
+            anchors.right: parent.right
+            anchors.rightMargin: Math.round(10 * Appearance.factor)
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
     readonly property int collapsedIconSize: Math.round(24 * Appearance.factor)
     // An expanded entry, never shown: its height is every entry's height.
@@ -144,17 +180,6 @@ Item {
 
     // A number of items at the right of an entry of the left column, with
     // View > Show Item Counts (D-039).
-    component CountLabel: Label {
-        property string filter: ""
-        objectName: "count_" + filter
-        visible: VaultController.showItemCounts && !vaultPage.collapsed
-        text: VaultController.revision >= 0 ? VaultController.items.countOf(filter) : ""
-        opacity: 0.6
-        anchors.right: parent.right
-        anchors.rightMargin: Math.round(10 * Appearance.factor)
-        anchors.verticalCenter: parent.verticalCenter
-    }
-
     // A new item from a template (D-027).
     function newItem(templateId) {
         editor.whenFree(function() {
@@ -303,7 +328,17 @@ Item {
         // 8 pixels to catch with the mouse (the owner); the line shown stays
         // as thin as before (D-042).
         handle: Item {
+            id: splitHandle
             implicitWidth: Math.max(8, Math.round(8 * Appearance.factor))
+            // The sidebar's own splitter, while held: where the pointer is
+            // decides whether the sidebar snaps shut or open.
+            Timer {
+                interval: 16
+                repeat: true
+                running: splitHandle.SplitHandle.pressed && vaultColumn.visible
+                         && splitHandle.x <= vaultColumn.width + 1
+                onTriggered: vaultPage.dragSidebarTo(Appearance.pointerIn(vaultPage).x)
+            }
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 2
@@ -322,7 +357,7 @@ Item {
             visible: !VaultController.sidebarHidden
             SplitView.preferredWidth: Math.round(220 * Appearance.factor)
             // Collapsed: a narrow column of fixed width (D-042).
-            SplitView.minimumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Math.round(160 * Appearance.factor)
+            SplitView.minimumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : vaultPage.sidebarMinimum
             SplitView.maximumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Number.POSITIVE_INFINITY
             padding: vaultPage.collapsed ? Math.round(6 * Appearance.factor) : Math.round(12 * Appearance.factor)
             // The cards' own colour, the theme's Base (the owner, 23 November 2026).
@@ -438,7 +473,7 @@ Item {
                         highlighted: VaultController.filter === ""
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("")
-                        CountLabel { filter: "" }
+                        counted: true; countFilter: ""
                     }
                     SideEntry {
                         objectName: "favouritesEntry"
@@ -448,7 +483,7 @@ Item {
                         highlighted: VaultController.filter === "favourites"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("favourites")
-                        CountLabel { filter: "favourites" }
+                        counted: true; countFilter: "favourites"
                     }
 
                     GroupHeading {
@@ -470,7 +505,8 @@ Item {
                             highlighted: VaultController.filter === "category:" + modelData.id
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("category:" + modelData.id)
-                            CountLabel { filter: "category:" + parent.modelData.id }
+                            counted: true
+                            countFilter: "category:" + modelData.id
                         }
                     }
 
@@ -502,7 +538,7 @@ Item {
                             highlighted: VaultController.filter === "tag:" + modelData.tag
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("tag:" + modelData.tag)
-                            CountLabel { filter: "tag:" + tagEntry.modelData.tag }
+                            counted: true; countFilter: "tag:" + tagEntry.modelData.tag
                             TapHandler {
                                 acceptedButtons: Qt.RightButton
                                 onTapped: tagMenu.popup()
@@ -538,7 +574,7 @@ Item {
                         highlighted: VaultController.filter === "archive"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("archive")
-                        CountLabel { filter: "archive" }
+                        counted: true; countFilter: "archive"
                     }
                     SideEntry {
                         objectName: "trashEntry"
@@ -549,7 +585,7 @@ Item {
                         highlighted: VaultController.filter === "trash"
                         Layout.fillWidth: true
                         onClicked: vaultPage.choose("trash")
-                        CountLabel { filter: "trash" }
+                        counted: true; countFilter: "trash"
                     }
                 }
             }

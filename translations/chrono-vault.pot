@@ -1952,128 +1952,128 @@ msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/VaultPage.qml:389
+#: ../qml/VaultPage.qml:424
 msgctxt "VaultPage|"
 msgid "Local file"
 msgstr ""
 
-#: ../qml/VaultPage.qml:409
+#: ../qml/VaultPage.qml:444
 #, qt-format
 msgctxt "VaultPage|"
 msgid "%1 (primary)"
 msgstr ""
 
-#: ../qml/VaultPage.qml:423
+#: ../qml/VaultPage.qml:458
 msgctxt "VaultPage|"
 msgid "New vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:427
+#: ../qml/VaultPage.qml:462
 msgctxt "VaultPage|"
 msgid "Open vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:108 ../qml/VaultPage.qml:435
+#: ../qml/VaultPage.qml:144 ../qml/VaultPage.qml:470
 msgctxt "VaultPage|"
 msgid "Home"
 msgstr ""
 
-#: ../qml/VaultPage.qml:445
+#: ../qml/VaultPage.qml:480
 msgctxt "VaultPage|"
 msgid "Favorites"
 msgstr ""
 
-#: ../qml/VaultPage.qml:456
+#: ../qml/VaultPage.qml:491
 msgctxt "VaultPage|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/VaultPage.qml:479
+#: ../qml/VaultPage.qml:515
 msgctxt "VaultPage|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/VaultPage.qml:487
+#: ../qml/VaultPage.qml:523
 msgctxt "VaultPage|"
 msgid "No tags yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:513
+#: ../qml/VaultPage.qml:549
 msgctxt "VaultPage|"
 msgid "Rename tag…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:517
+#: ../qml/VaultPage.qml:553
 msgctxt "VaultPage|"
 msgid "Remove tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:527
+#: ../qml/VaultPage.qml:563
 msgctxt "VaultPage|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/VaultPage.qml:535
+#: ../qml/VaultPage.qml:571
 msgctxt "VaultPage|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/VaultPage.qml:546
+#: ../qml/VaultPage.qml:582
 msgctxt "VaultPage|"
 msgid "Trash"
 msgstr ""
 
-#: ../qml/VaultPage.qml:566
+#: ../qml/VaultPage.qml:602
 msgctxt "VaultPage|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/VaultPage.qml:579
+#: ../qml/VaultPage.qml:615
 msgctxt "VaultPage|"
 msgid "Sort By:"
 msgstr ""
 
-#: ../qml/VaultPage.qml:584 ../qml/VaultPage.qml:590
+#: ../qml/VaultPage.qml:620 ../qml/VaultPage.qml:626
 msgctxt "VaultPage|"
 msgid "Title"
 msgstr ""
 
-#: ../qml/VaultPage.qml:761
+#: ../qml/VaultPage.qml:797
 msgctxt "VaultPage|"
 msgid "Rename tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:772
+#: ../qml/VaultPage.qml:808
 msgctxt "VaultPage|"
 msgid "A slash nests a tag under another, as in “Work/Servers”."
 msgstr ""
 
-#: ../qml/VaultPage.qml:714
+#: ../qml/VaultPage.qml:750
 msgctxt "VaultPage|"
 msgid "No items yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:351
+#: ../qml/VaultPage.qml:386
 msgctxt "VaultPage|"
 msgid "Expand the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:351
+#: ../qml/VaultPage.qml:386
 msgctxt "VaultPage|"
 msgid "Collapse the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:713
+#: ../qml/VaultPage.qml:749
 msgctxt "VaultPage|"
 msgid "Nothing found."
 msgstr ""
 
-#: ../qml/VaultPage.qml:714
+#: ../qml/VaultPage.qml:750
 msgctxt "VaultPage|"
 msgid "No items here."
 msgstr ""
 
-#: ../qml/VaultPage.qml:726
+#: ../qml/VaultPage.qml:762
 msgctxt "VaultPage|"
 msgid "Choose an item, or make a new one."
 msgstr ""

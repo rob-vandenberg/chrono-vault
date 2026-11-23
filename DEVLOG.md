@@ -398,3 +398,8 @@ are remembered, contents format 7 (D-054). Tests: `tests/unit/test_vault_merge.c
 The main window's shortcuts answer only while it has the keyboard (P33, D-053). The owner's layout changes: the
 sidebar on the cards' colour (Base), the top bar 5 pixels more above and below, the item list 5 pixels in at each
 side, the labels of an item ending 50 pixels further left.
+
+## 23 November 2026: version 0.2.47: item counts, long names and the sidebar snap
+
+Counts above 0 only; long sidebar names end in "…" before their count; the sidebar at least 180 wide, snapping shut or
+open when its splitter is dragged past 120 (the owner; D-039, D-042).

@@ -20,7 +20,9 @@
 #include "theme.h"
 #include "scaling.h"
 
+#include <QCursor>
 #include <QEvent>
+#include <QQuickItem>
 #include <QFontInfo>
 #include <QGuiApplication>
 #include <QScreen>
@@ -31,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.0.38
+// appearance.cpp 0.2.47
 
 // --- Version history ----------------------------------------------------
+// v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.13: The size of a window's title bar and frame
 // v0.0.12: The free room of a window's screen, which a minimum gives way to; --reset at the start (D-026)
@@ -181,6 +184,12 @@ QSize Appearance::screenRoom(QObject* window) const
     const auto* shown = qobject_cast<QWindow*>(window);
     const QScreen* screen = shown && shown->screen() ? shown->screen() : QGuiApplication::primaryScreen();
     return screen ? screen->availableGeometry().size() : QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+}
+
+QPointF Appearance::pointerIn(QObject* item) const
+{
+    const auto* shown = qobject_cast<QQuickItem*>(item);
+    return shown ? shown->mapFromGlobal(QCursor::pos()) : QPointF();
 }
 
 QSize Appearance::frameOf(QObject* window) const

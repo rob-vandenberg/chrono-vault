@@ -1988,7 +1988,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+389"/>
+        <location filename="../qml/VaultPage.qml" line="+424"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2008,8 +2008,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-319"/>
-        <location line="+327"/>
+        <location line="-318"/>
+        <location line="+326"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2024,7 +2024,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+24"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2090,7 +2090,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-363"/>
+        <location line="-364"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2100,7 +2100,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+362"/>
+        <location line="+363"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>

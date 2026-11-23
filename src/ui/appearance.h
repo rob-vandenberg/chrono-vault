@@ -18,6 +18,7 @@
 
 #include <QFont>
 #include <QPalette>
+#include <QPointF>
 #include <QSize>
 #include <QObject>
 #include <QtQml/qqmlregistration.h>
@@ -25,9 +26,10 @@
 class QEvent;
 
 // --- Version ------------------------------------------------------------
-// appearance.h 0.0.13
+// appearance.h 0.2.47
 
 // --- Version history ----------------------------------------------------
+// v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.13: The size of a window's title bar and frame
 // v0.0.12: The free room of a window's screen, which a minimum gives way to
 // v0.0.10: The program's colours for every window (D-023)
@@ -91,6 +93,10 @@ public:
     // width is left plus right, height is top plus bottom. Known once the
     // window is shown; empty before.
     [[nodiscard]] Q_INVOKABLE QSize frameOf(QObject* window) const;
+    // Where the mouse pointer is, in an item's own coordinates: a splitter
+    // being dragged holds its column at its minimum while the pointer goes
+    // on, and the column snaps shut or open past a point (the owner).
+    [[nodiscard]] Q_INVOKABLE QPointF pointerIn(QObject* item) const;
 
     // Keeps them, and shows them.
     Q_INVOKABLE void keep(int theme, int scale);
