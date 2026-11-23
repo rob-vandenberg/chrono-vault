@@ -618,52 +618,52 @@ msgctxt "ItemDetails|"
 msgid "Save the attachment"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:184 ../qml/ItemEditor.qml:185
+#: ../qml/ItemEditor.qml:189 ../qml/ItemEditor.qml:190
 msgctxt "ItemEditor|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:353
+#: ../qml/ItemEditor.qml:358
 msgctxt "ItemEditor|"
 msgid "Title of the note"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:353
+#: ../qml/ItemEditor.qml:358
 msgctxt "ItemEditor|"
 msgid "Title, for example the site's name"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:540
+#: ../qml/ItemEditor.qml:545
 msgctxt "ItemEditor|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:558
+#: ../qml/ItemEditor.qml:563
 msgctxt "ItemEditor|"
 msgid "Remove this tag"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:565
+#: ../qml/ItemEditor.qml:570
 msgctxt "ItemEditor|"
 msgid "Add a tag, for example Work/Servers, and press Enter"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:573
+#: ../qml/ItemEditor.qml:578
 msgctxt "ItemEditor|"
 msgid "Attachments"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:600
+#: ../qml/ItemEditor.qml:605
 msgctxt "ItemEditor|"
 msgid "Remove"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:610
+#: ../qml/ItemEditor.qml:615
 msgctxt "ItemEditor|"
 msgid "Reading the file…"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:287
+#: ../qml/ItemEditor.qml:292
 msgctxt "ItemEditor|"
 msgid "Save"
 msgstr ""
@@ -698,39 +698,39 @@ msgctxt "ItemEditor|"
 msgid "PIN"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:184 ../qml/ItemEditor.qml:185
+#: ../qml/ItemEditor.qml:189 ../qml/ItemEditor.qml:190
 msgctxt "ItemEditor|"
 msgid "New section"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:233 ../qml/ItemEditor.qml:275
-#: ../qml/ItemEditor.qml:672
+#: ../qml/ItemEditor.qml:238 ../qml/ItemEditor.qml:280
+#: ../qml/ItemEditor.qml:677
 msgctxt "ItemEditor|"
 msgid "Section"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:295
+#: ../qml/ItemEditor.qml:300
 msgctxt "ItemEditor|"
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:751
+#: ../qml/ItemEditor.qml:761
 msgctxt "ItemEditor|"
 msgid "Add an attachment"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:788
+#: ../qml/ItemEditor.qml:798
 msgctxt "ItemEditor|"
 msgid "Save your changes?"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:792
+#: ../qml/ItemEditor.qml:802
 #, qt-format
 msgctxt "ItemEditor|"
 msgid "“%1” has changes that are not saved yet."
 msgstr ""
 
-#: ../qml/ItemEditor.qml:773
+#: ../qml/ItemEditor.qml:783
 msgctxt "ItemEditor|"
 msgid "A file is being read"
 msgstr ""
@@ -805,77 +805,77 @@ msgctxt "ItemEditor|"
 msgid "Valid From"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:266
+#: ../qml/ItemEditor.qml:271
 msgctxt "ItemEditor|"
 msgid "Add"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:271
+#: ../qml/ItemEditor.qml:276
 msgctxt "ItemEditor|"
 msgid "Attachment"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:279 ../qml/ItemEditor.qml:672
+#: ../qml/ItemEditor.qml:284 ../qml/ItemEditor.qml:677
 msgctxt "ItemEditor|"
 msgid "Field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:347
+#: ../qml/ItemEditor.qml:352
 msgctxt "ItemEditor|"
 msgid "Change the icon"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:473
+#: ../qml/ItemEditor.qml:478
 msgctxt "ItemEditor|"
 msgid "Enter secret key"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:504
+#: ../qml/ItemEditor.qml:509
 msgctxt "ItemEditor|"
 msgid "Generate"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:524
+#: ../qml/ItemEditor.qml:529
 msgctxt "ItemEditor|"
 msgid "Notes"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:533
+#: ../qml/ItemEditor.qml:538
 msgctxt "ItemEditor|"
 msgid "Add Note"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:629
+#: ../qml/ItemEditor.qml:634
 msgctxt "ItemEditor|"
 msgid "Field Options"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:657
+#: ../qml/ItemEditor.qml:662
 msgctxt "ItemEditor|"
 msgid "Delete Field"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:697
+#: ../qml/ItemEditor.qml:702
 msgctxt "ItemEditor|"
 msgid "Section Name"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:697
+#: ../qml/ItemEditor.qml:702
 msgctxt "ItemEditor|"
 msgid "Field Name"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:706
+#: ../qml/ItemEditor.qml:711
 msgctxt "ItemEditor|"
 msgid "Field Type"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:718
+#: ../qml/ItemEditor.qml:728
 msgctxt "ItemEditor|"
 msgid "Sensitive"
 msgstr ""
 
-#: ../qml/ItemEditor.qml:777
+#: ../qml/ItemEditor.qml:787
 msgctxt "ItemEditor|"
 msgid "The file you added is still being read. Try again in a moment."
 msgstr ""
@@ -900,243 +900,243 @@ msgctxt "ItemIcons|"
 msgid "Choose a JPG, PNG, BMP, ICO or SVG picture."
 msgstr ""
 
-#: ../qml/Main.qml:60
+#: ../qml/Main.qml:62
 #, qt-format
 msgctxt "Main|"
 msgid "%1 – Chrono Vault %2"
 msgstr ""
 
-#: ../qml/Main.qml:61
+#: ../qml/Main.qml:63
 #, qt-format
 msgctxt "Main|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/Main.qml:219
+#: ../qml/Main.qml:251
 msgctxt "Main|"
 msgid "&File"
 msgstr ""
 
-#: ../qml/Main.qml:291
+#: ../qml/Main.qml:323
 msgctxt "Main|"
 msgid "Quit"
 msgstr ""
 
-#: ../qml/Main.qml:297
+#: ../qml/Main.qml:329
 msgctxt "Main|"
 msgid "&View"
 msgstr ""
 
-#: ../qml/Main.qml:380
+#: ../qml/Main.qml:412
 msgctxt "Main|"
 msgid "&Item"
 msgstr ""
 
-#: ../qml/Main.qml:396
+#: ../qml/Main.qml:428
 msgctxt "Main|"
 msgid "Move to Trash"
 msgstr ""
 
-#: ../qml/Main.qml:471
+#: ../qml/Main.qml:503
 msgctxt "Main|"
 msgid "&Tools"
 msgstr ""
 
-#: ../qml/Main.qml:500
+#: ../qml/Main.qml:532
 msgctxt "Main|"
 msgid "&Help"
 msgstr ""
 
-#: ../qml/Main.qml:539
+#: ../qml/Main.qml:571
 msgctxt "Main|"
 msgid "New Item"
 msgstr ""
 
-#: ../qml/Main.qml:494 ../qml/Main.qml:590
+#: ../qml/Main.qml:526 ../qml/Main.qml:622
 msgctxt "Main|"
 msgid "Generate Password"
 msgstr ""
 
-#: ../qml/Main.qml:602
+#: ../qml/Main.qml:634
 msgctxt "Main|"
 msgid "Lock the vault"
 msgstr ""
 
-#: ../qml/Main.qml:282 ../qml/Main.qml:610
+#: ../qml/Main.qml:314 ../qml/Main.qml:642
 msgctxt "Main|"
 msgid "Preferences"
 msgstr ""
 
-#: ../qml/Main.qml:81
+#: ../qml/Main.qml:83
 msgctxt "Main|"
 msgid "Collapse or expand the sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:224
+#: ../qml/Main.qml:256
 msgctxt "Main|"
 msgid "New vault"
 msgstr ""
 
-#: ../qml/Main.qml:232
+#: ../qml/Main.qml:264
 msgctxt "Main|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/Main.qml:240
+#: ../qml/Main.qml:272
 msgctxt "Main|"
 msgid "Change Master Password"
 msgstr ""
 
-#: ../qml/Main.qml:250
+#: ../qml/Main.qml:282
 msgctxt "Main|"
 msgid "Backup"
 msgstr ""
 
-#: ../qml/Main.qml:257
+#: ../qml/Main.qml:289
 msgctxt "Main|"
 msgid "Restore"
 msgstr ""
 
-#: ../qml/Main.qml:265
+#: ../qml/Main.qml:297
 msgctxt "Main|"
 msgid "Import"
 msgstr ""
 
-#: ../qml/Main.qml:273
+#: ../qml/Main.qml:305
 msgctxt "Main|"
 msgid "Export"
 msgstr ""
 
-#: ../qml/Main.qml:303
+#: ../qml/Main.qml:335
 msgctxt "Main|"
 msgid "Show Item Counts"
 msgstr ""
 
-#: ../qml/Main.qml:316
+#: ../qml/Main.qml:348
 msgctxt "Main|"
 msgid "Hide Sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:329
+#: ../qml/Main.qml:361
 msgctxt "Main|"
 msgid "Hide Sensitive"
 msgstr ""
 
-#: ../qml/Main.qml:343
+#: ../qml/Main.qml:375
 msgctxt "Main|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/Main.qml:356
+#: ../qml/Main.qml:388
 msgctxt "Main|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/Main.qml:369
+#: ../qml/Main.qml:401
 msgctxt "Main|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/Main.qml:386
+#: ../qml/Main.qml:418
 msgctxt "Main|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/Main.qml:407
+#: ../qml/Main.qml:439
 msgctxt "Main|"
 msgid "Copy Username"
 msgstr ""
 
-#: ../qml/Main.qml:416
+#: ../qml/Main.qml:448
 msgctxt "Main|"
 msgid "Copy E-mail"
 msgstr ""
 
-#: ../qml/Main.qml:425
+#: ../qml/Main.qml:457
 msgctxt "Main|"
 msgid "Copy Password"
 msgstr ""
 
-#: ../qml/Main.qml:434
+#: ../qml/Main.qml:466
 msgctxt "Main|"
 msgid "Show Passwords"
 msgstr ""
 
-#: ../qml/Main.qml:444
+#: ../qml/Main.qml:476
 msgctxt "Main|"
 msgid "Copy URL"
 msgstr ""
 
-#: ../qml/Main.qml:453
+#: ../qml/Main.qml:485
 msgctxt "Main|"
 msgid "Copy OTP"
 msgstr ""
 
-#: ../qml/Main.qml:464
+#: ../qml/Main.qml:496
 msgctxt "Main|"
 msgid "Launch URL"
 msgstr ""
 
-#: ../qml/Main.qml:477
+#: ../qml/Main.qml:509
 msgctxt "Main|"
 msgid "Lock vault"
 msgstr ""
 
-#: ../qml/Main.qml:486
+#: ../qml/Main.qml:518
 msgctxt "Main|"
 msgid "Clear Clipboard"
 msgstr ""
 
-#: ../qml/Main.qml:505
+#: ../qml/Main.qml:537
 msgctxt "Main|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/Main.qml:516
+#: ../qml/Main.qml:548
 msgctxt "Main|"
 msgid "Support website"
 msgstr ""
 
-#: ../qml/Main.qml:524
+#: ../qml/Main.qml:556
 msgctxt "Main|"
 msgid "Keyboard shortcuts…"
 msgstr ""
 
-#: ../qml/Main.qml:531
+#: ../qml/Main.qml:563
 msgctxt "Main|"
 msgid "About"
 msgstr ""
 
-#: ../qml/Main.qml:646
+#: ../qml/Main.qml:678
 msgctxt "Main|"
 msgid "Copy"
 msgstr ""
 
-#: ../qml/Main.qml:769
+#: ../qml/Main.qml:817
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:776
+#: ../qml/Main.qml:824
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:777
+#: ../qml/Main.qml:825
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:817
+#: ../qml/Main.qml:865
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:824
+#: ../qml/Main.qml:872
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
@@ -1279,234 +1279,251 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:209 ../qml/SettingsWindow.qml:573
+#: ../qml/SettingsWindow.qml:220 ../qml/SettingsWindow.qml:584
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:257
+#: ../qml/SettingsWindow.qml:268
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:349
+#: ../qml/SettingsWindow.qml:360
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:430 ../qml/SettingsWindow.qml:626
+#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:637
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:430 ../qml/SettingsWindow.qml:760
+#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:771
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:430 ../qml/SettingsWindow.qml:494
+#: ../qml/SettingsWindow.qml:441 ../qml/SettingsWindow.qml:505
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:430
+#: ../qml/SettingsWindow.qml:441
 msgctxt "SettingsWindow|"
 msgid "Customize"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:497
+#: ../qml/SettingsWindow.qml:508
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:504
+#: ../qml/SettingsWindow.qml:515
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:510
+#: ../qml/SettingsWindow.qml:521
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:516
+#: ../qml/SettingsWindow.qml:527
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:529
+#: ../qml/SettingsWindow.qml:540
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:592
+#: ../qml/SettingsWindow.qml:603
 msgctxt "SettingsWindow|"
 msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:580
+#: ../qml/SettingsWindow.qml:591
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:431
+#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:998
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:586
+#: ../qml/SettingsWindow.qml:597
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:599
+#: ../qml/SettingsWindow.qml:610
 msgctxt "SettingsWindow|"
 msgid "Use the Esc key to exit the program"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:604
+#: ../qml/SettingsWindow.qml:615
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:608
+#: ../qml/SettingsWindow.qml:619
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:608
+#: ../qml/SettingsWindow.qml:619
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:608
+#: ../qml/SettingsWindow.qml:619
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:608 ../qml/SettingsWindow.qml:651
-#: ../qml/SettingsWindow.qml:772 ../qml/SettingsWindow.qml:775
-#: ../qml/SettingsWindow.qml:781
+#: ../qml/SettingsWindow.qml:619 ../qml/SettingsWindow.qml:662
+#: ../qml/SettingsWindow.qml:783 ../qml/SettingsWindow.qml:786
+#: ../qml/SettingsWindow.qml:792
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:615
+#: ../qml/SettingsWindow.qml:626
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:634
+#: ../qml/SettingsWindow.qml:645
 msgctxt "SettingsWindow|"
 msgid "Change the Master Password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:639
+#: ../qml/SettingsWindow.qml:650
 msgctxt "SettingsWindow|"
 msgid "Change"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:660
+#: ../qml/SettingsWindow.qml:671
 msgctxt "SettingsWindow|"
 msgid "Autolock when"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:668
+#: ../qml/SettingsWindow.qml:679
 msgctxt "SettingsWindow|"
 msgid "Main window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:648
+#: ../qml/SettingsWindow.qml:920
+msgctxt "SettingsWindow|"
+msgid "Press the new key"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:959
+#, qt-format
+msgctxt "SettingsWindow|"
+msgid "Press a key for “%1”"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:1004
+#, qt-format
+msgctxt "SettingsWindow|"
+msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:659
 msgctxt "SettingsWindow|"
 msgid "Ask for the master password, so it is not forgotten, every"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:651
+#: ../qml/SettingsWindow.qml:662
 msgctxt "SettingsWindow|"
 msgid "Day"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:651
+#: ../qml/SettingsWindow.qml:662
 msgctxt "SettingsWindow|"
 msgid "Month"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:651
+#: ../qml/SettingsWindow.qml:662
 msgctxt "SettingsWindow|"
 msgid "Quarter"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:651
+#: ../qml/SettingsWindow.qml:662
 msgctxt "SettingsWindow|"
 msgid "Year"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:765
+#: ../qml/SettingsWindow.qml:776
 msgctxt "SettingsWindow|"
 msgid "Clear the clipboard after"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:785
+#: ../qml/SettingsWindow.qml:796
 msgctxt "SettingsWindow|"
 msgid "seconds"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:674
+#: ../qml/SettingsWindow.qml:685
 msgctxt "SettingsWindow|"
 msgid "System sleeps"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:682
+#: ../qml/SettingsWindow.qml:693
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault is idle for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:696 ../qml/SettingsWindow.qml:717
+#: ../qml/SettingsWindow.qml:707 ../qml/SettingsWindow.qml:728
 msgctxt "SettingsWindow|"
 msgid "Minutes"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:702
+#: ../qml/SettingsWindow.qml:713
 msgctxt "SettingsWindow|"
 msgid "System inactive for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:722
+#: ../qml/SettingsWindow.qml:733
 msgctxt "SettingsWindow|"
 msgid "This desktop does not tell how long the system has been inactive."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:731
+#: ../qml/SettingsWindow.qml:742
 msgctxt "SettingsWindow|"
 msgid "Hide sensitive fields: show them as dots until asked"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:741
+#: ../qml/SettingsWindow.qml:752
 msgctxt "SettingsWindow|"
 msgid "Use Windows Hello to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:742
+#: ../qml/SettingsWindow.qml:753
 msgctxt "SettingsWindow|"
 msgid "Use fingerprint to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:796
+#: ../qml/SettingsWindow.qml:807
 msgctxt "SettingsWindow|"
 msgid "Show subtitles in the item list"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:802
+#: ../qml/SettingsWindow.qml:813
 msgctxt "SettingsWindow|"
 msgid "Use website icons"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:807
+#: ../qml/SettingsWindow.qml:818
 msgctxt "SettingsWindow|"
 msgid ""
 "Each website in your vault is asked for its own icon, which that website can "
@@ -1514,45 +1531,39 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:828
+#: ../qml/SettingsWindow.qml:839
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:832
+#: ../qml/SettingsWindow.qml:843
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:866
+#: ../qml/SettingsWindow.qml:877
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:932
-#, qt-format
-msgctxt "SettingsWindow|"
-msgid "Press the new key for “%1”."
-msgstr ""
-
-#: ../qml/SettingsWindow.qml:933
+#: ../qml/SettingsWindow.qml:1053
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:994
+#: ../qml/SettingsWindow.qml:1100
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:284 ../qml/SettingsWindow.qml:956
-#: ../qml/SettingsWindow.qml:1000
+#: ../qml/SettingsWindow.qml:295 ../qml/SettingsWindow.qml:1069
+#: ../qml/SettingsWindow.qml:1106
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:284 ../qml/SettingsWindow.qml:964
-#: ../qml/SettingsWindow.qml:970 ../qml/SettingsWindow.qml:1010
+#: ../qml/SettingsWindow.qml:295 ../qml/SettingsWindow.qml:978
+#: ../qml/SettingsWindow.qml:1075 ../qml/SettingsWindow.qml:1116
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -1692,100 +1703,100 @@ msgctxt "TemplateEditor|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:111
+#: ../qml/UnlockPage.qml:116
 msgctxt "UnlockPage|"
 msgid "Master password"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:121
+#: ../qml/UnlockPage.qml:126
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:132
+#: ../qml/UnlockPage.qml:137
 msgctxt "UnlockPage|"
 msgid "This vault needs its keyfile."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:133
+#: ../qml/UnlockPage.qml:138
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:138
+#: ../qml/UnlockPage.qml:143
 msgctxt "UnlockPage|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:144
+#: ../qml/UnlockPage.qml:149
 msgctxt "UnlockPage|"
 msgid "Unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:152
+#: ../qml/UnlockPage.qml:157
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Unlock with %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:162
+#: ../qml/UnlockPage.qml:167
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a day, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:163
+#: ../qml/UnlockPage.qml:168
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a month, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:164
+#: ../qml/UnlockPage.qml:169
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a quarter, "
 "so that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:165
+#: ../qml/UnlockPage.qml:170
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a year, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:174
+#: ../qml/UnlockPage.qml:179
 msgctxt "UnlockPage|"
 msgid "Not now"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:181
+#: ../qml/UnlockPage.qml:186
 msgctxt "UnlockPage|"
 msgid "A change could not be saved before the vault locked. Unlock to save it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:187
+#: ../qml/UnlockPage.qml:192
 msgctxt "UnlockPage|"
 msgid "Open another vault…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:199
+#: ../qml/UnlockPage.qml:204
 msgctxt "UnlockPage|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:203
+#: ../qml/UnlockPage.qml:208
 msgctxt "UnlockPage|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you open another vault now, the change is lost."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:216
+#: ../qml/UnlockPage.qml:221
 msgctxt "UnlockPage|"
 msgid "Choose the vault's keyfile"
 msgstr ""
@@ -1914,128 +1925,128 @@ msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/VaultPage.qml:379
+#: ../qml/VaultPage.qml:385
 msgctxt "VaultPage|"
 msgid "Local file"
 msgstr ""
 
-#: ../qml/VaultPage.qml:399
+#: ../qml/VaultPage.qml:405
 #, qt-format
 msgctxt "VaultPage|"
 msgid "%1 (primary)"
 msgstr ""
 
-#: ../qml/VaultPage.qml:413
+#: ../qml/VaultPage.qml:419
 msgctxt "VaultPage|"
 msgid "New vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:417
+#: ../qml/VaultPage.qml:423
 msgctxt "VaultPage|"
 msgid "Open vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:105 ../qml/VaultPage.qml:425
+#: ../qml/VaultPage.qml:106 ../qml/VaultPage.qml:431
 msgctxt "VaultPage|"
 msgid "Home"
 msgstr ""
 
-#: ../qml/VaultPage.qml:435
+#: ../qml/VaultPage.qml:441
 msgctxt "VaultPage|"
 msgid "Favorites"
 msgstr ""
 
-#: ../qml/VaultPage.qml:446
+#: ../qml/VaultPage.qml:452
 msgctxt "VaultPage|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/VaultPage.qml:469
+#: ../qml/VaultPage.qml:475
 msgctxt "VaultPage|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/VaultPage.qml:477
+#: ../qml/VaultPage.qml:483
 msgctxt "VaultPage|"
 msgid "No tags yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:503
+#: ../qml/VaultPage.qml:509
 msgctxt "VaultPage|"
 msgid "Rename tag…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:507
+#: ../qml/VaultPage.qml:513
 msgctxt "VaultPage|"
 msgid "Remove tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:517
+#: ../qml/VaultPage.qml:523
 msgctxt "VaultPage|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/VaultPage.qml:525
+#: ../qml/VaultPage.qml:531
 msgctxt "VaultPage|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/VaultPage.qml:536
+#: ../qml/VaultPage.qml:542
 msgctxt "VaultPage|"
 msgid "Trash"
 msgstr ""
 
-#: ../qml/VaultPage.qml:556
+#: ../qml/VaultPage.qml:562
 msgctxt "VaultPage|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/VaultPage.qml:569
+#: ../qml/VaultPage.qml:575
 msgctxt "VaultPage|"
 msgid "Sort By:"
 msgstr ""
 
-#: ../qml/VaultPage.qml:574 ../qml/VaultPage.qml:580
+#: ../qml/VaultPage.qml:580 ../qml/VaultPage.qml:586
 msgctxt "VaultPage|"
 msgid "Title"
 msgstr ""
 
-#: ../qml/VaultPage.qml:739
+#: ../qml/VaultPage.qml:745
 msgctxt "VaultPage|"
 msgid "Rename tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:750
+#: ../qml/VaultPage.qml:756
 msgctxt "VaultPage|"
 msgid "A slash nests a tag under another, as in “Work/Servers”."
 msgstr ""
 
-#: ../qml/VaultPage.qml:692
+#: ../qml/VaultPage.qml:698
 msgctxt "VaultPage|"
 msgid "No items yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:341
+#: ../qml/VaultPage.qml:347
 msgctxt "VaultPage|"
 msgid "Expand the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:341
+#: ../qml/VaultPage.qml:347
 msgctxt "VaultPage|"
 msgid "Collapse the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:691
+#: ../qml/VaultPage.qml:697
 msgctxt "VaultPage|"
 msgid "Nothing found."
 msgstr ""
 
-#: ../qml/VaultPage.qml:692
+#: ../qml/VaultPage.qml:698
 msgctxt "VaultPage|"
 msgid "No items here."
 msgstr ""
 
-#: ../qml/VaultPage.qml:704
+#: ../qml/VaultPage.qml:710
 msgctxt "VaultPage|"
 msgid "Choose an item, or make a new one."
 msgstr ""

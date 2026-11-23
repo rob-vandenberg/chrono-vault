@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.0.40
+// SettingsWindow.qml 0.1.44
 
 // --- Version history ----------------------------------------------------
+// v0.1.44: The key box and the question about a key in use as windows of their own, as Chrono Viewer's (D-053)
 // v0.0.40: The reminder just below Change the Master Password (D-050)
 // v0.0.39: Autolock tick boxes in a frame; the reminder a choice; the clipboard on one line; a normal scroll bar (D-049)
 // v0.0.38: "Use the Esc key to exit the program" in General (D-048)
@@ -107,6 +108,9 @@ ApplicationWindow {
     property var keyedActions: []
     // The keys shown, by action, until OK keeps them.
     property var keyMap: ({})
+    // While the box waits for a key, or asks about a key in use, no shortcut
+    // answers anywhere: every key is the new key (P29).
+    readonly property bool catchingAKey: keyCatcher.visible || keyTaken.visible
     function loadKeys() {
         const map = {}
         for (const action of keyedActions)
@@ -126,6 +130,13 @@ ApplicationWindow {
             if (action.actionId !== exceptAction && (keyMap[action.actionId] || []).indexOf(key) >= 0)
                 return action.actionId
         return ""
+    }
+    // An action's words as its menu shows them.
+    function nameOf(actionId) {
+        for (const action of keyedActions)
+            if (action.actionId === actionId)
+                return action.text.replace("&", "")
+        return actionId
     }
     function giveKey(actionId, key) {
         const map = Object.assign({}, keyMap)
@@ -364,7 +375,7 @@ ApplicationWindow {
     // closes only the list.
     Shortcut {
         sequences: [StandardKey.Cancel]
-        enabled: !frequencyBox.popup.visible
+        enabled: !frequencyBox.popup.visible && !catchingAKey
         onActivated: settingsWindow.close()
     }
     // OK is the default button: Enter keeps the changes, unless a button has
@@ -372,7 +383,7 @@ ApplicationWindow {
     // "Check for updates" is open (then Enter chooses in it).
     Shortcut {
         sequences: ["Return", "Enter"]
-        enabled: !frequencyBox.popup.visible
+        enabled: !frequencyBox.popup.visible && !catchingAKey
         onActivated: {
             const focused = settingsWindow.activeFocusItem
             if (focused instanceof Button)
@@ -893,17 +904,23 @@ ApplicationWindow {
             }
         }
 
-        // The box that waits for a key: pressed, not typed (D-045). Escape
-        // cancels it.
-        Popup {
+        // The box that waits for a key, as Chrono Viewer's (D-053): a window
+        // of its own that holds the keyboard, so every key pressed becomes the
+        // new key and never runs a command. Escape cancels it; its Cancel
+        // never takes the focus, so Space, Return and Tab arrive as keys.
+        ApplicationWindow {
             id: keyCatcher
             objectName: "keyCatcher"
-            parent: Overlay.overlay
-            anchors.centerIn: parent
-            modal: true
-            focus: true
-            closePolicy: Popup.NoAutoClose
-            padding: Math.round(16 * Appearance.factor)
+            font: Appearance.font
+            Component.onCompleted: Appearance.dress(this)
+            transientParent: settingsWindow
+            flags: Qt.Dialog
+            modality: Qt.ApplicationModal
+            visible: false
+            title: qsTr("Press the new key")
+            color: palette.window
+            width: Math.max(Math.round(300 * Appearance.factor), catchLayout.implicitWidth + 2 * catchLayout.anchors.margins)
+            height: catchLayout.implicitHeight + 2 * catchLayout.anchors.margins
             property string actionId: ""
             property string actionName: ""
             property string pendingKey: ""
@@ -911,27 +928,38 @@ ApplicationWindow {
                 actionId = id
                 actionName = name
                 pendingKey = ""
-                open()
+                x = settingsWindow.x + (settingsWindow.width - width) / 2
+                y = settingsWindow.y + (settingsWindow.height - height) / 2
+                show()
+                raise()
+                requestActivate()
                 catcher.forceActiveFocus()
             }
             // A key pressed, or the tests' stand-in for one.
             function take(key) {
                 if (key === "")
                     return
-                if (settingsWindow.holderOf(key, actionId) !== "") {
-                    pendingKey = key // asked first: already assigned
+                close()
+                if ((settingsWindow.keyMap[actionId] || []).indexOf(key) >= 0)
+                    return // it already answers to this one
+                const holder = settingsWindow.holderOf(key, actionId)
+                if (holder !== "") {
+                    pendingKey = key
+                    keyTaken.ask(key, settingsWindow.nameOf(holder), actionName)
                     return
                 }
                 settingsWindow.giveKey(actionId, key)
-                close()
             }
-            contentItem: ColumnLayout {
+            ColumnLayout {
+                id: catchLayout
+                anchors.fill: parent
+                anchors.margins: Math.round(12 * Appearance.factor)
                 spacing: Math.round(12 * Appearance.factor)
                 Label {
-                    text: keyCatcher.pendingKey === ""
-                          ? qsTr("Press the new key for “%1”.").arg(keyCatcher.actionName)
-                          : qsTr("This key has already been assigned")
-                    font.bold: keyCatcher.pendingKey !== ""
+                    text: qsTr("Press a key for “%1”").arg(keyCatcher.actionName)
+                    textFormat: Text.PlainText
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
                 }
                 Item {
                     id: catcher
@@ -939,8 +967,6 @@ ApplicationWindow {
                     implicitHeight: 1
                     Keys.onPressed: function(event) {
                         event.accepted = true
-                        if (keyCatcher.pendingKey !== "")
-                            return
                         if (event.key === Qt.Key_Escape) {
                             keyCatcher.close()
                             return
@@ -948,28 +974,108 @@ ApplicationWindow {
                         keyCatcher.take(VaultController.keyName(event.key, event.modifiers))
                     }
                 }
-                RowLayout {
-                    visible: keyCatcher.pendingKey !== ""
-                    Layout.alignment: Qt.AlignRight
-                    Button {
-                        objectName: "keyTakenOk"
-                        text: qsTr("OK")
-                        onClicked: {
-                            settingsWindow.giveKey(keyCatcher.actionId, keyCatcher.pendingKey)
-                            keyCatcher.close()
-                        }
-                    }
-                    Button {
-                        objectName: "keyTakenCancel"
-                        text: qsTr("Cancel")
-                        onClicked: keyCatcher.close()
-                    }
-                }
                 Button {
-                    visible: keyCatcher.pendingKey === ""
                     text: qsTr("Cancel")
+                    focusPolicy: Qt.NoFocus
                     Layout.alignment: Qt.AlignRight
                     onClicked: keyCatcher.close()
+                }
+            }
+        }
+
+        // A key already in use, asked as Chrono Viewer asks it: OK gives the
+        // key to the new action and takes that one key from the old one;
+        // Cancel, the default, changes nothing.
+        ApplicationWindow {
+            id: keyTaken
+            objectName: "keyTaken"
+            font: Appearance.font
+            Component.onCompleted: Appearance.dress(this)
+            transientParent: settingsWindow
+            flags: Qt.Dialog
+            modality: Qt.ApplicationModal
+            visible: false
+            title: qsTr("Keyboard shortcuts")
+            color: palette.window
+            width: Math.max(Math.round(380 * Appearance.factor), takenLayout.implicitWidth + 2 * takenLayout.anchors.margins)
+            height: takenLayout.implicitHeight + 2 * takenLayout.anchors.margins
+            property string informative: ""
+            function ask(key, oldName, newName) {
+                informative = qsTr("%1 is assigned to “%2”. Reassign it to “%3”?").arg(key).arg(oldName).arg(newName)
+                x = settingsWindow.x + (settingsWindow.width - width) / 2
+                y = settingsWindow.y + (settingsWindow.height - height) / 2
+                show()
+                raise()
+                requestActivate()
+                takenCancel.forceActiveFocus()
+            }
+            function answer(ok) {
+                if (ok)
+                    settingsWindow.giveKey(keyCatcher.actionId, keyCatcher.pendingKey)
+                keyCatcher.pendingKey = ""
+                close()
+            }
+            onClosing: keyCatcher.pendingKey = ""
+            ColumnLayout {
+                id: takenLayout
+                anchors.fill: parent
+                anchors.margins: Math.round(12 * Appearance.factor)
+                spacing: Math.round(12 * Appearance.factor)
+                Keys.onPressed: function(event) {
+                    if (event.key === Qt.Key_Escape) {
+                        event.accepted = true
+                        keyTaken.answer(false)
+                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        event.accepted = true
+                        keyTaken.answer(takenOk.activeFocus)
+                    }
+                }
+                RowLayout {
+                    spacing: Math.round(12 * Appearance.factor)
+                    // The question mark of a question box.
+                    Rectangle {
+                        Layout.alignment: Qt.AlignTop
+                        implicitWidth: Math.round(32 * Appearance.factor)
+                        implicitHeight: implicitWidth
+                        radius: width / 2
+                        color: keyTaken.palette.highlight
+                        Label {
+                            anchors.centerIn: parent
+                            text: "?"
+                            font.bold: true
+                            font.pixelSize: parent.height * 0.6
+                            color: keyTaken.palette.highlightedText
+                        }
+                    }
+                    ColumnLayout {
+                        spacing: Math.round(6 * Appearance.factor)
+                        Label {
+                            text: qsTr("This key has already been assigned")
+                            font.bold: true
+                        }
+                        Label {
+                            text: keyTaken.informative
+                            textFormat: Text.PlainText
+                            wrapMode: Text.Wrap
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+                RowLayout {
+                    Layout.alignment: Qt.AlignRight
+                    Button {
+                        id: takenOk
+                        objectName: "keyTakenOk"
+                        text: qsTr("OK")
+                        onClicked: keyTaken.answer(true)
+                    }
+                    Button {
+                        id: takenCancel
+                        objectName: "keyTakenCancel"
+                        text: qsTr("Cancel")
+                        highlighted: true
+                        onClicked: keyTaken.answer(false)
+                    }
                 }
             }
         }

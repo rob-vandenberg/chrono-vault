@@ -381,3 +381,8 @@ a menu, Chrono Viewer's two fixes (`786104c`, `ae07b6c`), so Esc closes the Abou
 ## 23 November 2026: version 0.1.43: Esc in every dialog's own keys
 
 Every dialog also takes Esc in its own key handling, as Chrono Viewer's QDialog does, next to its Cancel shortcut (D-052).
+
+## 23 November 2026: version 0.1.44: the key box as Chrono Viewer's
+
+Settings > Keyboard shortcuts: the key box and the question about a key in use are windows of their own, as Chrono
+Viewer's; while they are open no shortcut answers, so every key is the new key (D-053, P29).

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.1.42
+// Main.qml 0.1.44
 
 // --- Version history ----------------------------------------------------
+// v0.1.44: Every shortcut stands aside while the settings wait for a new key (D-053)
 // v0.1.42: Esc through the window's own keys, not a shortcut; the keyboard back to the content after a menu, as Chrono Viewer (D-052)
 // v0.0.39: Esc in the main window only while it has the keys, so Esc closes the About box (D-049)
 // v0.0.38: Esc closes the main window when "Use the Esc key to exit the program" is ticked (D-048)
@@ -92,7 +93,10 @@ ApplicationWindow {
         action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
     ]
     // One shortcut per action, from its keys as they are now. They stand aside
-    // while a text field is typed in; Quit answers in every window.
+    // while a text field is typed in, and all of them, Quit too, while the
+    // settings wait for a new key (P29: a window's shortcuts still answer
+    // while a window opened over it has the keyboard); Quit answers in every
+    // window.
     Instantiator {
         model: mainWindow.keyedActions
         delegate: Shortcut {
@@ -100,7 +104,8 @@ ApplicationWindow {
             readonly property bool quit: modelData.actionId === "quit"
             sequences: {
                 VaultController.shortcutsRevision
-                return mainWindow.typing && !quit ? [] : VaultController.keysOf(modelData.actionId)
+                return settingsWindow.catchingAKey || (mainWindow.typing && !quit)
+                        ? [] : VaultController.keysOf(modelData.actionId)
             }
             context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
             onActivated: if (modelData.enabled) modelData.trigger()

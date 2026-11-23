@@ -563,15 +563,41 @@ void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
     QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
     QCOMPARE(keyMap("lock"), QStringList({QStringLiteral("Ctrl+L"), QStringLiteral("Ctrl+K")}));
 
+    // While the box waits, a key is the new key, never a command (P29):
+    // Shift+Ctrl+P (Copy Password) asks about the key in use; Return is
+    // taken as a key and leaves the settings window open.
+    {
+        auto* box = qobject_cast<QWindow*>(catcher);
+        QVERIFY(box);
+        QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Lock vault")));
+        box->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), box);
+        QTest::keyClick(box, Qt::Key_P, Qt::ShiftModifier | Qt::ControlModifier);
+        QTRY_COMPARE(catcher->property("pendingKey").toString(), QStringLiteral("Shift+Ctrl+P"));
+        QVERIFY(QMetaObject::invokeMethod(settings->findChild<QObject*>(QStringLiteral("keyTakenCancel")), "clicked"));
+        QCOMPARE(keyMap("copyPassword"), QStringList{QStringLiteral("Shift+Ctrl+P")});
+        QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Lock vault")));
+        box->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), box);
+        QTest::keyClick(box, Qt::Key_Return);
+        QTRY_VERIFY(keyMap("lock").contains(QStringLiteral("Return")));
+        QVERIFY(settings->property("visible").toBool());
+        QMetaObject::invokeMethod(settings, "takeKey", Q_ARG(QVariant, QStringLiteral("lock")), Q_ARG(QVariant, QStringLiteral("Return")));
+    }
+
     // A key already taken: Cancel changes nothing, OK moves that one key.
     QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("copyOtp")), Q_ARG(QVariant, QStringLiteral("Copy OTP")));
     QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
     QCOMPARE(catcher->property("pendingKey").toString(), QStringLiteral("Ctrl+K"));
-    QVERIFY(QMetaObject::invokeMethod(catcher->findChild<QObject*>(QStringLiteral("keyTakenCancel")), "clicked"));
+    QObject* keyTaken = settings->findChild<QObject*>(QStringLiteral("keyTaken"));
+    QVERIFY(keyTaken && keyTaken->property("visible").toBool());
+    QVERIFY(!catcher->property("visible").toBool());
+    QVERIFY(keyTaken->property("informative").toString().contains(QStringLiteral("Ctrl+K")));
+    QVERIFY(QMetaObject::invokeMethod(settings->findChild<QObject*>(QStringLiteral("keyTakenCancel")), "clicked"));
     QCOMPARE(keyMap("lock"), QStringList({QStringLiteral("Ctrl+L"), QStringLiteral("Ctrl+K")}));
     QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("copyOtp")), Q_ARG(QVariant, QStringLiteral("Copy OTP")));
     QMetaObject::invokeMethod(catcher, "take", Q_ARG(QVariant, QStringLiteral("Ctrl+K")));
-    QVERIFY(QMetaObject::invokeMethod(catcher->findChild<QObject*>(QStringLiteral("keyTakenOk")), "clicked"));
+    QVERIFY(QMetaObject::invokeMethod(settings->findChild<QObject*>(QStringLiteral("keyTakenOk")), "clicked"));
     QCOMPARE(keyMap("lock"), QStringList{QStringLiteral("Ctrl+L")});
     QCOMPARE(keyMap("copyOtp"), QStringList({QStringLiteral("Shift+Ctrl+T"), QStringLiteral("Ctrl+K")}));
 

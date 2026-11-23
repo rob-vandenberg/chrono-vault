@@ -637,7 +637,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+184"/>
+        <location filename="../qml/ItemEditor.qml" line="+189"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -688,7 +688,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-219"/>
+        <location line="-224"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -718,7 +718,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+114"/>
+        <location line="+119"/>
         <location line="+1"/>
         <source>New section</source>
         <translation type="unfinished"></translation>
@@ -736,7 +736,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+456"/>
+        <location line="+461"/>
         <source>Add an attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -756,7 +756,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-702"/>
+        <location line="-712"/>
         <source>Numeric</source>
         <translation type="unfinished"></translation>
     </message>
@@ -826,7 +826,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+179"/>
+        <location line="+184"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -892,7 +892,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+17"/>
         <source>Sensitive</source>
         <translation type="unfinished"></translation>
     </message>
@@ -928,7 +928,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+60"/>
+        <location filename="../qml/Main.qml" line="+62"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -938,7 +938,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+158"/>
+        <location line="+188"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -995,12 +995,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-529"/>
+        <location line="-559"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+143"/>
+        <location line="+173"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1140,7 +1140,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+123"/>
+        <location line="+139"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1313,7 +1313,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+209"/>
+        <location filename="../qml/SettingsWindow.qml" line="+220"/>
         <location line="+364"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -1388,11 +1388,12 @@
     </message>
     <message>
         <location line="-149"/>
+        <location line="+556"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+155"/>
+        <location line="-401"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1456,7 +1457,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-20"/>
+        <location line="+241"/>
+        <source>Press the new key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+39"/>
+        <source>Press a key for “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>%1 is assigned to “%2”. Reassign it to “%3”?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-345"/>
         <source>Ask for the master password, so it is not forgotten, every</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1562,32 +1578,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+66"/>
-        <source>Press the new key for “%1”.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="+176"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+47"/>
         <source>Restore defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-710"/>
-        <location line="+672"/>
-        <location line="+44"/>
+        <location line="-805"/>
+        <location line="+774"/>
+        <location line="+37"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-716"/>
-        <location line="+680"/>
-        <location line="+6"/>
-        <location line="+40"/>
+        <location line="-811"/>
+        <location line="+683"/>
+        <location line="+97"/>
+        <location line="+41"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1736,7 +1747,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+111"/>
+        <location filename="../qml/UnlockPage.qml" line="+116"/>
         <source>Master password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1951,7 +1962,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+379"/>
+        <location filename="../qml/VaultPage.qml" line="+385"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1971,8 +1982,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-312"/>
-        <location line="+320"/>
+        <location line="-317"/>
+        <location line="+325"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
