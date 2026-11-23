@@ -439,3 +439,11 @@ Hello's answer. Hello gets the window with the keyboard as owner (`RequestCreate
 `RequestSignForWindowAsync`, `GetWindowIdFromWindow` loaded at run time), so it opens over Chrono Vault where Windows
 has those calls (D-038 point 10). Linux unchanged. No reviewers (the owner tests it). Compiled on the twin; the twin's
 full build stops in `tests/unit/test_vault_merge.cpp` line 72 (C4715, from 0.2.45), not touched.
+
+## 23 November 2026: version 0.2.54: one font size of our own
+
+The font was Noto Sans at the system's size: 11 points on the owner's Linux, 9 on Windows, so at Windows' 125% the
+text stayed Linux's size while everything else was 125%. Now 11 points on every system (`programFontPoints`); the
+scalings enlarge it with the rest (the owner, D-017, with his rule: one design, identical on Linux and Windows). Test:
+`test_appearance` checks 11 points from a 9-point system; its double-scale check now compares the size set, not the
+drawn size (rounded to whole pixels). Pictures on Linux match the owner's. No reviewers (the owner tests it).

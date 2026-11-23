@@ -22,9 +22,10 @@
 class QWindow;
 
 // --- Version ------------------------------------------------------------
-// app_setup.h 0.0.38
+// app_setup.h 0.2.54
 
 // --- Version history ----------------------------------------------------
+// v0.2.54: The font size of our own, 11 points (the owner, D-017)
 // v0.0.38: --reset and the carry-over moved out (D-026)
 // v0.0.4: Initial release
 
@@ -35,6 +36,10 @@ namespace chrono_vault {
 // text. Called before any window loads, by the program and by the tests
 // alike, so the tests check what people see.
 void applyStyle();
+
+// The size of every text before the scalings, the same on every system
+// (the owner, D-017).
+inline constexpr double programFontPoints = 11.0;
 
 // The monospaced font, for passwords and one-time codes.
 inline constexpr char monospacedFontFamily[] = "Noto Sans Mono";

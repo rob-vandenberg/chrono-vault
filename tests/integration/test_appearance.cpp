@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.0.38
+// test_appearance.cpp 0.2.54
 
 // --- Version history ----------------------------------------------------
+// v0.2.54: The font is 11 points whatever the system's size (the owner, D-017)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: The settings window at 730 by 650; the slider's steps, marks above it and room around it
 // v0.0.10: The kept look drawn from the start, whatever the desktop's theme; text, icons, boxes and margins double at 200%
@@ -60,6 +61,7 @@ class TestAppearance : public QObject
 private slots:
     void initTestCase();
     void cleanupTestCase();
+    void the_font_is_eleven_points_whatever_the_system();
     void light_and_dark_are_two_looks_and_follow_asks_the_system();
     void a_theme_is_kept_under_its_name();
     void the_scale_stays_within_its_limits_and_never_scales_twice();
@@ -86,6 +88,18 @@ void TestAppearance::cleanupTestCase()
     settings.sync();
     QFile::remove(settings.fileName());
     QFile::remove(VaultsFile().fileName());
+}
+
+// Chrono Vault's own size, so it looks the same on every system: a system
+// at 9 points (Windows) gets 11 as well (the owner, D-017).
+void TestAppearance::the_font_is_eleven_points_whatever_the_system()
+{
+    QFont system = QGuiApplication::font();
+    system.setPointSizeF(9.0);
+    QGuiApplication::setFont(system);
+    applyStyle();
+    QCOMPARE(QGuiApplication::font().pointSizeF(), 11.0);
+    QCOMPARE(QGuiApplication::font().family(), QStringLiteral("Noto Sans"));
 }
 
 void TestAppearance::light_and_dark_are_two_looks_and_follow_asks_the_system()
@@ -257,7 +271,9 @@ void TestAppearance::at_twice_the_scale_text_icons_boxes_and_margins_all_double(
 
     const auto measure = [&]() {
         QObject* indicator = box->property("indicator").value<QObject*>();
-        return QList<double>{QFontInfo(QGuiApplication::font()).pointSizeF(),
+        // The size set, not the one drawn: drawn, it is rounded to whole
+        // pixels (11 points come out as 11.25, 22 as 21.75).
+        return QList<double>{QGuiApplication::font().pointSizeF(),
                              indicator ? indicator->property("width").toDouble() : -1.0,
                              about->property("edge").toDouble(), box->property("padding").toDouble()};
     };

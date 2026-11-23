@@ -27,9 +27,10 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// app_setup.cpp 0.0.38
+// app_setup.cpp 0.2.54
 
 // --- Version history ----------------------------------------------------
+// v0.2.54: The font 11 points on every system, not the system's size (the owner, D-017)
 // v0.0.38: --reset and the carry-over moved out (D-026)
 // v0.0.10: Chrono Vault's own style over Fusion, for the UI scaling (D-023)
 // v0.0.4: Initial release
@@ -47,9 +48,12 @@ void applyStyle()
                              ":/fonts/NotoSansMono-Regular.ttf"}) {
         QFontDatabase::addApplicationFont(QString::fromLatin1(file));
     }
-    // The system's normal size, in Chrono Vault's own font.
+    // Chrono Vault's own font at its own size, 11 points on every system, so
+    // that it looks the same on each; the scalings enlarge it from there
+    // (the owner, D-017).
     QFont font = QGuiApplication::font();
     font.setFamily(QStringLiteral("Noto Sans"));
+    font.setPointSizeF(programFontPoints);
     QGuiApplication::setFont(font);
 }
 
