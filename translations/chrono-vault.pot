@@ -26,131 +26,151 @@ msgctxt "AboutWindow|"
 msgid "Check for update"
 msgstr ""
 
-#: ../src/core/templates.cpp:101
+#: ../src/core/templates.cpp:102
 msgctxt "Category|"
 msgid "Login"
 msgstr ""
 
-#: ../src/core/templates.cpp:102
+#: ../src/core/templates.cpp:103
 msgctxt "Category|"
 msgid "Credit card"
 msgstr ""
 
-#: ../src/core/templates.cpp:103
+#: ../src/core/templates.cpp:104
 msgctxt "Category|"
 msgid "Identity"
 msgstr ""
 
-#: ../src/core/templates.cpp:104
+#: ../src/core/templates.cpp:105
 msgctxt "Category|"
 msgid "Secure note"
 msgstr ""
 
-#: ../src/core/templates.cpp:105
+#: ../src/core/templates.cpp:106
 msgctxt "Category|"
 msgid "Password"
 msgstr ""
 
-#: ../src/core/templates.cpp:106
+#: ../src/core/templates.cpp:107
 msgctxt "Category|"
 msgid "Finance"
 msgstr ""
 
-#: ../src/core/templates.cpp:107
+#: ../src/core/templates.cpp:108
 msgctxt "Category|"
 msgid "Computer"
 msgstr ""
 
-#: ../src/core/templates.cpp:108
+#: ../src/core/templates.cpp:109
 msgctxt "Category|"
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:41
+#: ../qml/CategoryEditor.qml:35
+msgctxt "CategoryEditor|"
+msgid "Edit category"
+msgstr ""
+
+#: ../qml/CategoryEditor.qml:60
+msgctxt "CategoryEditor|"
+msgid "Name:"
+msgstr ""
+
+#: ../qml/CategoryEditor.qml:69
+msgctxt "CategoryEditor|"
+msgid "Icon:"
+msgstr ""
+
+#: ../qml/CategoryEditor.qml:78
+msgctxt "CategoryEditor|"
+msgid "Choose an icon"
+msgstr ""
+
+#: ../qml/CategoryEditor.qml:92
+msgctxt "CategoryEditor|"
+msgid "Shown in the left column"
+msgstr ""
+
+#: ../qml/CustomizePage.qml:42
 msgctxt "CustomizePage|"
 msgid "Customize"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:46
+#: ../qml/CustomizePage.qml:47
 msgctxt "CustomizePage|"
 msgid "Unlock a vault to change its categories and templates."
 msgstr ""
 
-#: ../qml/CustomizePage.qml:52
+#: ../qml/CustomizePage.qml:53
 msgctxt "CustomizePage|"
 msgid ""
 "The categories and templates belong to the vault that is open. Changes here "
 "are kept in it at once."
 msgstr ""
 
-#: ../qml/CustomizePage.qml:60
+#: ../qml/CustomizePage.qml:61
 msgctxt "CustomizePage|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:81
+#: ../qml/CustomizePage.qml:82
 msgctxt "CustomizePage|"
 msgid "Shown in the left column"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:85
+#: ../qml/CustomizePage.qml:86
 #, qt-format
 msgctxt "CustomizePage|"
 msgid "%n item(s)"
 msgid_plural "%n item(s)"
 msgstr[0] ""
 
-#: ../qml/CustomizePage.qml:90
-msgctxt "CustomizePage|"
-msgid "Rename…"
-msgstr ""
-
-#: ../qml/CustomizePage.qml:95 ../qml/CustomizePage.qml:142
+#: ../qml/CustomizePage.qml:101 ../qml/CustomizePage.qml:149
 msgctxt "CustomizePage|"
 msgid "Delete"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:103
+#: ../qml/CustomizePage.qml:101
+msgctxt "CustomizePage|"
+msgid "Reset"
+msgstr ""
+
+#: ../qml/CustomizePage.qml:110
 msgctxt "CustomizePage|"
 msgid "New category…"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:109
+#: ../qml/CustomizePage.qml:116
 msgctxt "CustomizePage|"
 msgid "Templates"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:132
+#: ../qml/CustomizePage.qml:139
 msgctxt "CustomizePage|"
 msgid "Copy…"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:137
+#: ../qml/CustomizePage.qml:91 ../qml/CustomizePage.qml:144
 msgctxt "CustomizePage|"
 msgid "Edit…"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:150
+#: ../qml/CustomizePage.qml:157
 msgctxt "CustomizePage|"
 msgid "New template…"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:152
+#: ../qml/CustomizePage.qml:159
 msgctxt "CustomizePage|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:168
+#: ../qml/CustomizePage.qml:182
 msgctxt "CustomizePage|"
 msgid "New category"
 msgstr ""
 
-#: ../qml/CustomizePage.qml:168
-msgctxt "CustomizePage|"
-msgid "Rename category"
-msgstr ""
-
-#: ../qml/CustomizePage.qml:179
+#: ../qml/CustomizePage.qml:193
 msgctxt "CustomizePage|"
 msgid "Name of the category:"
 msgstr ""
@@ -194,167 +214,167 @@ msgctxt "ExportWindow|"
 msgid "JSON exports (*.json)"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:463
+#: ../src/core/vault_contents.cpp:495
 msgctxt "Field|"
 msgid "User name"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:464
+#: ../src/core/vault_contents.cpp:496
 msgctxt "Field|"
 msgid "Password"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:465
+#: ../src/core/vault_contents.cpp:497
 msgctxt "Field|"
 msgid "Web address"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:466
+#: ../src/core/vault_contents.cpp:498
 msgctxt "Field|"
 msgid "One-time code"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:467
+#: ../src/core/vault_contents.cpp:499
 msgctxt "Field|"
 msgid "Notes"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:468
+#: ../src/core/vault_contents.cpp:500
 msgctxt "Field|"
 msgid "Email address"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:469
+#: ../src/core/vault_contents.cpp:501
 msgctxt "Field|"
 msgid "Server"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:470
+#: ../src/core/vault_contents.cpp:502
 msgctxt "Field|"
 msgid "Cardholder"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:471
+#: ../src/core/vault_contents.cpp:503
 msgctxt "Field|"
 msgid "Card number"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:472
+#: ../src/core/vault_contents.cpp:504
 msgctxt "Field|"
 msgid "Expiry date"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:473
+#: ../src/core/vault_contents.cpp:505
 msgctxt "Field|"
 msgid "Security code"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:474
+#: ../src/core/vault_contents.cpp:506
 msgctxt "Field|"
 msgid "PIN"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:475
+#: ../src/core/vault_contents.cpp:507
 msgctxt "Field|"
 msgid "Full name"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:476
+#: ../src/core/vault_contents.cpp:508
 msgctxt "Field|"
 msgid "Date of birth"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:477
+#: ../src/core/vault_contents.cpp:509
 msgctxt "Field|"
 msgid "Address"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:478
+#: ../src/core/vault_contents.cpp:510
 msgctxt "Field|"
 msgid "Phone"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:479
+#: ../src/core/vault_contents.cpp:511
 msgctxt "Field|"
 msgid "Number"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:480
+#: ../src/core/vault_contents.cpp:512
 msgctxt "Field|"
 msgid "Nationality"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:481
+#: ../src/core/vault_contents.cpp:513
 msgctxt "Field|"
 msgid "Issued on"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:482
+#: ../src/core/vault_contents.cpp:514
 msgctxt "Field|"
 msgid "Expires on"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:483
+#: ../src/core/vault_contents.cpp:515
 msgctxt "Field|"
 msgid "Bank"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:484
+#: ../src/core/vault_contents.cpp:516
 msgctxt "Field|"
 msgid "Account holder"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:485
+#: ../src/core/vault_contents.cpp:517
 msgctxt "Field|"
 msgid "Account number"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:486
+#: ../src/core/vault_contents.cpp:518
 msgctxt "Field|"
 msgid "IBAN"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:487
+#: ../src/core/vault_contents.cpp:519
 msgctxt "Field|"
 msgid "BIC"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:488
+#: ../src/core/vault_contents.cpp:520
 msgctxt "Field|"
 msgid "Network name"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:489
+#: ../src/core/vault_contents.cpp:521
 msgctxt "Field|"
 msgid "Security"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:490
+#: ../src/core/vault_contents.cpp:522
 msgctxt "Field|"
 msgid "Product"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:491
+#: ../src/core/vault_contents.cpp:523
 msgctxt "Field|"
 msgid "License key"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:492
+#: ../src/core/vault_contents.cpp:524
 msgctxt "Field|"
 msgid "Licensed to"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:493
+#: ../src/core/vault_contents.cpp:525
 msgctxt "Field|"
 msgid "Organization"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:494
+#: ../src/core/vault_contents.cpp:526
 msgctxt "Field|"
 msgid "Member number"
 msgstr ""
 
-#: ../src/core/vault_contents.cpp:495
+#: ../src/core/vault_contents.cpp:527
 msgctxt "Field|"
 msgid "Vault file"
 msgstr ""
@@ -415,6 +435,567 @@ msgctxt "GeneratorDialog|"
 msgid "Another one"
 msgstr ""
 
+#: ../build/icon_headings/icon_headings.cpp:5
+msgctxt "IconNames|"
+msgid "ABN-AMRO"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:6
+msgctxt "IconNames|"
+msgid "ING"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:7
+#: ../build/icon_headings/icon_headings.cpp:18
+msgctxt "IconNames|"
+msgid "Rabobank"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:9
+msgctxt "IconNames|"
+msgid "ANWB"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:10
+msgctxt "IconNames|"
+msgid "Computer"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:11
+msgctxt "IconNames|"
+msgid "DigiD"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:12
+msgctxt "IconNames|"
+msgid "EU_NL"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:13
+msgctxt "IconNames|"
+msgid "Gmail"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:14
+msgctxt "IconNames|"
+msgid "Laptop"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:15
+msgctxt "IconNames|"
+msgid "NL"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:16
+msgctxt "IconNames|"
+msgid "Nederland"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:17
+msgctxt "IconNames|"
+msgid "PC"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:19
+msgctxt "IconNames|"
+msgid "Shell"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:20
+msgctxt "IconNames|"
+msgid "Signal"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:21
+msgctxt "IconNames|"
+msgid "Sligro"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:22
+msgctxt "IconNames|"
+msgid "Starburst"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:23
+msgctxt "IconNames|"
+msgid "Tibber"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:24
+msgctxt "IconNames|"
+msgid "TransIP"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:25
+msgctxt "IconNames|"
+msgid "quintes"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:26
+msgctxt "IconNames|"
+msgid "signal"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:28
+msgctxt "IconNames|"
+msgid "bank"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:29
+msgctxt "IconNames|"
+msgid "banknote"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:30
+msgctxt "IconNames|"
+msgid "briefcase"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:31
+msgctxt "IconNames|"
+msgid "car"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:32
+msgctxt "IconNames|"
+msgid "card"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:33
+msgctxt "IconNames|"
+msgid "cart"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:34
+msgctxt "IconNames|"
+msgid "cloud"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:35
+msgctxt "IconNames|"
+msgid "computer"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:36
+msgctxt "IconNames|"
+msgid "documents"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:37
+msgctxt "IconNames|"
+msgid "dollar"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:38
+msgctxt "IconNames|"
+msgid "envelope"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:39
+msgctxt "IconNames|"
+msgid "euro"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:40
+msgctxt "IconNames|"
+msgid "folder"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:41
+msgctxt "IconNames|"
+msgid "game"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:42
+msgctxt "IconNames|"
+msgid "globe"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:43
+msgctxt "IconNames|"
+msgid "heart"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:44
+msgctxt "IconNames|"
+msgid "house"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:45
+msgctxt "IconNames|"
+msgid "identity"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:46
+msgctxt "IconNames|"
+msgid "login"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:47
+msgctxt "IconNames|"
+msgid "miscellaneous"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:48
+msgctxt "IconNames|"
+msgid "note"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:49
+msgctxt "IconNames|"
+msgid "pass"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:50
+msgctxt "IconNames|"
+msgid "password"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:51
+msgctxt "IconNames|"
+msgid "phone"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:52
+msgctxt "IconNames|"
+msgid "plane"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:53
+msgctxt "IconNames|"
+msgid "school"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:54
+msgctxt "IconNames|"
+msgid "server"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:55
+msgctxt "IconNames|"
+msgid "shield"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:56
+msgctxt "IconNames|"
+msgid "uncategorized"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:57
+msgctxt "IconNames|"
+msgid "wifi"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:59
+msgctxt "IconNames|"
+msgid "A"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:60
+msgctxt "IconNames|"
+msgid "B"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:61
+msgctxt "IconNames|"
+msgid "C"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:62
+msgctxt "IconNames|"
+msgid "D"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:63
+msgctxt "IconNames|"
+msgid "E"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:64
+msgctxt "IconNames|"
+msgid "F"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:65
+msgctxt "IconNames|"
+msgid "G"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:66
+msgctxt "IconNames|"
+msgid "H"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:67
+msgctxt "IconNames|"
+msgid "I"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:68
+msgctxt "IconNames|"
+msgid "J"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:69
+msgctxt "IconNames|"
+msgid "K"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:70
+msgctxt "IconNames|"
+msgid "L"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:71
+msgctxt "IconNames|"
+msgid "M"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:72
+msgctxt "IconNames|"
+msgid "N"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:73
+msgctxt "IconNames|"
+msgid "O"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:74
+msgctxt "IconNames|"
+msgid "P"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:75
+msgctxt "IconNames|"
+msgid "Q"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:76
+msgctxt "IconNames|"
+msgid "R"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:77
+msgctxt "IconNames|"
+msgid "S"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:78
+msgctxt "IconNames|"
+msgid "T"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:79
+msgctxt "IconNames|"
+msgid "U"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:80
+msgctxt "IconNames|"
+msgid "V"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:81
+msgctxt "IconNames|"
+msgid "W"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:82
+msgctxt "IconNames|"
+msgid "X"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:83
+msgctxt "IconNames|"
+msgid "Y"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:84
+msgctxt "IconNames|"
+msgid "Z"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:86
+msgctxt "IconNames|"
+msgid "a"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:87
+msgctxt "IconNames|"
+msgid "b"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:88
+msgctxt "IconNames|"
+msgid "c"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:89
+msgctxt "IconNames|"
+msgid "d"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:90
+msgctxt "IconNames|"
+msgid "e"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:91
+msgctxt "IconNames|"
+msgid "f"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:92
+msgctxt "IconNames|"
+msgid "g"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:93
+msgctxt "IconNames|"
+msgid "h"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:94
+msgctxt "IconNames|"
+msgid "i"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:95
+msgctxt "IconNames|"
+msgid "j"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:96
+msgctxt "IconNames|"
+msgid "k"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:97
+msgctxt "IconNames|"
+msgid "l"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:98
+msgctxt "IconNames|"
+msgid "m"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:99
+msgctxt "IconNames|"
+msgid "n"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:100
+msgctxt "IconNames|"
+msgid "o"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:101
+msgctxt "IconNames|"
+msgid "p"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:102
+msgctxt "IconNames|"
+msgid "q"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:103
+msgctxt "IconNames|"
+msgid "r"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:104
+msgctxt "IconNames|"
+msgid "s"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:105
+msgctxt "IconNames|"
+msgid "t"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:106
+msgctxt "IconNames|"
+msgid "u"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:107
+msgctxt "IconNames|"
+msgid "v"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:108
+msgctxt "IconNames|"
+msgid "w"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:109
+msgctxt "IconNames|"
+msgid "x"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:110
+msgctxt "IconNames|"
+msgid "y"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:111
+msgctxt "IconNames|"
+msgid "z"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:113
+msgctxt "IconNames|"
+msgid "0"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:114
+msgctxt "IconNames|"
+msgid "1"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:115
+msgctxt "IconNames|"
+msgid "2"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:116
+msgctxt "IconNames|"
+msgid "3"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:117
+msgctxt "IconNames|"
+msgid "4"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:118
+msgctxt "IconNames|"
+msgid "5"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:119
+msgctxt "IconNames|"
+msgid "6"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:120
+msgctxt "IconNames|"
+msgid "7"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:121
+msgctxt "IconNames|"
+msgid "8"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:122
+msgctxt "IconNames|"
+msgid "9"
+msgstr ""
+
 #: ../qml/IconPicker.qml:38
 msgctxt "IconPicker|"
 msgid "Choose Icon"
@@ -461,14 +1042,34 @@ msgctxt "IconSections|"
 msgid "Web"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:5
+#: ../build/icon_headings/icon_headings.cpp:8
 msgctxt "IconSections|"
 msgid "Credit Card"
 msgstr ""
 
-#: ../build/icon_headings/icon_headings.cpp:6
+#: ../build/icon_headings/icon_headings.cpp:27
 msgctxt "IconSections|"
 msgid "Miscellaneous"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:58
+msgctxt "IconSections|"
+msgid "Categories"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:85
+msgctxt "IconSections|"
+msgid "Uppercase"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:112
+msgctxt "IconSections|"
+msgid "Lowercase"
+msgstr ""
+
+#: ../build/icon_headings/icon_headings.cpp:123
+msgctxt "IconSections|"
+msgid "Digits"
 msgstr ""
 
 #: ../qml/ImportWindow.qml:42
@@ -1600,67 +2201,67 @@ msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
 
-#: ../src/core/templates.cpp:127
+#: ../src/core/templates.cpp:131
 msgctxt "Template|"
 msgid "Login"
 msgstr ""
 
-#: ../src/core/templates.cpp:128
+#: ../src/core/templates.cpp:132
 msgctxt "Template|"
 msgid "Email account"
 msgstr ""
 
-#: ../src/core/templates.cpp:129
+#: ../src/core/templates.cpp:133
 msgctxt "Template|"
 msgid "Credit card"
 msgstr ""
 
-#: ../src/core/templates.cpp:130
+#: ../src/core/templates.cpp:134
 msgctxt "Template|"
 msgid "Identity"
 msgstr ""
 
-#: ../src/core/templates.cpp:131
+#: ../src/core/templates.cpp:135
 msgctxt "Template|"
 msgid "Passport"
 msgstr ""
 
-#: ../src/core/templates.cpp:132
+#: ../src/core/templates.cpp:136
 msgctxt "Template|"
 msgid "Driver's license"
 msgstr ""
 
-#: ../src/core/templates.cpp:133
+#: ../src/core/templates.cpp:137
 msgctxt "Template|"
 msgid "Secure note"
 msgstr ""
 
-#: ../src/core/templates.cpp:134
+#: ../src/core/templates.cpp:138
 msgctxt "Template|"
 msgid "Password"
 msgstr ""
 
-#: ../src/core/templates.cpp:135
+#: ../src/core/templates.cpp:139
 msgctxt "Template|"
 msgid "Bank account"
 msgstr ""
 
-#: ../src/core/templates.cpp:136
+#: ../src/core/templates.cpp:140
 msgctxt "Template|"
 msgid "Wi-Fi"
 msgstr ""
 
-#: ../src/core/templates.cpp:137
+#: ../src/core/templates.cpp:141
 msgctxt "Template|"
 msgid "Server"
 msgstr ""
 
-#: ../src/core/templates.cpp:138
+#: ../src/core/templates.cpp:142
 msgctxt "Template|"
 msgid "Software license"
 msgstr ""
 
-#: ../src/core/templates.cpp:139
+#: ../src/core/templates.cpp:143
 msgctxt "Template|"
 msgid "Membership"
 msgstr ""
@@ -1894,191 +2495,196 @@ msgctxt "UpdatedWindow|"
 msgid "Restart"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:219
+#: ../src/ui/vault_controller.cpp:220
 msgctxt "VaultController|"
 msgid "Field"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:227
+#: ../src/ui/vault_controller.cpp:228
 msgctxt "VaultController|"
 msgid "Section"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:296
+#: ../src/ui/vault_controller.cpp:297
 msgctxt "VaultController|"
 msgid "The vault file is no longer where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:298
+#: ../src/ui/vault_controller.cpp:299
 msgctxt "VaultController|"
 msgid "The vault file could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:300
+#: ../src/ui/vault_controller.cpp:301
 msgctxt "VaultController|"
 msgid "This file is not a Chrono Vault vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:302
+#: ../src/ui/vault_controller.cpp:303
 msgctxt "VaultController|"
 msgid ""
 "This vault was made by a newer Chrono Vault. Update Chrono Vault to open it."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:305
+#: ../src/ui/vault_controller.cpp:306
 msgctxt "VaultController|"
 msgid "That password does not open this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:307
+#: ../src/ui/vault_controller.cpp:308
 msgctxt "VaultController|"
 msgid "This file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:309
+#: ../src/ui/vault_controller.cpp:310
 msgctxt "VaultController|"
 msgid "This vault now has another master password. Unlock it with that one."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:312
+#: ../src/ui/vault_controller.cpp:313
 msgctxt "VaultController|"
 msgid "This vault also needs its keyfile. Choose it below, then unlock."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:323
+#: ../src/ui/vault_controller.cpp:324
 msgctxt "VaultController|"
 msgid ""
 "Your change could not be saved: the folder cannot be written to, or the disk "
 "is full. The vault on disk is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:329
+#: ../src/ui/vault_controller.cpp:330
 msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/VaultPage.qml:426
+#: ../qml/VaultPage.qml:427
 msgctxt "VaultPage|"
 msgid "Local file"
 msgstr ""
 
-#: ../qml/VaultPage.qml:446
+#: ../qml/VaultPage.qml:447
 #, qt-format
 msgctxt "VaultPage|"
 msgid "%1 (primary)"
 msgstr ""
 
-#: ../qml/VaultPage.qml:460
+#: ../qml/VaultPage.qml:461
 msgctxt "VaultPage|"
 msgid "New vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:464
+#: ../qml/VaultPage.qml:465
 msgctxt "VaultPage|"
 msgid "Open vault…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:146 ../qml/VaultPage.qml:472
+#: ../qml/VaultPage.qml:147 ../qml/VaultPage.qml:473
 msgctxt "VaultPage|"
 msgid "Home"
 msgstr ""
 
-#: ../qml/VaultPage.qml:482
+#: ../qml/VaultPage.qml:483
 msgctxt "VaultPage|"
 msgid "Favorites"
 msgstr ""
 
-#: ../qml/VaultPage.qml:493
+#: ../qml/VaultPage.qml:494
 msgctxt "VaultPage|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/VaultPage.qml:517
+#: ../qml/VaultPage.qml:522
+msgctxt "VaultPage|"
+msgid "Edit…"
+msgstr ""
+
+#: ../qml/VaultPage.qml:534
 msgctxt "VaultPage|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/VaultPage.qml:525
+#: ../qml/VaultPage.qml:542
 msgctxt "VaultPage|"
 msgid "No tags yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:551
+#: ../qml/VaultPage.qml:568
 msgctxt "VaultPage|"
 msgid "Rename tag…"
 msgstr ""
 
-#: ../qml/VaultPage.qml:555
+#: ../qml/VaultPage.qml:572
 msgctxt "VaultPage|"
 msgid "Remove tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:565
+#: ../qml/VaultPage.qml:582
 msgctxt "VaultPage|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/VaultPage.qml:573
+#: ../qml/VaultPage.qml:590
 msgctxt "VaultPage|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/VaultPage.qml:584
+#: ../qml/VaultPage.qml:601
 msgctxt "VaultPage|"
 msgid "Trash"
 msgstr ""
 
-#: ../qml/VaultPage.qml:604
+#: ../qml/VaultPage.qml:621
 msgctxt "VaultPage|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/VaultPage.qml:617
+#: ../qml/VaultPage.qml:634
 msgctxt "VaultPage|"
 msgid "Sort By:"
 msgstr ""
 
-#: ../qml/VaultPage.qml:622 ../qml/VaultPage.qml:628
+#: ../qml/VaultPage.qml:639 ../qml/VaultPage.qml:645
 msgctxt "VaultPage|"
 msgid "Title"
 msgstr ""
 
-#: ../qml/VaultPage.qml:799
+#: ../qml/VaultPage.qml:824
 msgctxt "VaultPage|"
 msgid "Rename tag"
 msgstr ""
 
-#: ../qml/VaultPage.qml:810
+#: ../qml/VaultPage.qml:835
 msgctxt "VaultPage|"
 msgid "A slash nests a tag under another, as in “Work/Servers”."
 msgstr ""
 
-#: ../qml/VaultPage.qml:752
+#: ../qml/VaultPage.qml:769
 msgctxt "VaultPage|"
 msgid "No items yet."
 msgstr ""
 
-#: ../qml/VaultPage.qml:388
+#: ../qml/VaultPage.qml:389
 msgctxt "VaultPage|"
 msgid "Expand the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:388
+#: ../qml/VaultPage.qml:389
 msgctxt "VaultPage|"
 msgid "Collapse the sidebar"
 msgstr ""
 
-#: ../qml/VaultPage.qml:751
+#: ../qml/VaultPage.qml:768
 msgctxt "VaultPage|"
 msgid "Nothing found."
 msgstr ""
 
-#: ../qml/VaultPage.qml:752
+#: ../qml/VaultPage.qml:769
 msgctxt "VaultPage|"
 msgid "No items here."
 msgstr ""
 
-#: ../qml/VaultPage.qml:764
+#: ../qml/VaultPage.qml:781
 msgctxt "VaultPage|"
 msgid "Choose an item, or make a new one."
 msgstr ""
@@ -2416,85 +3022,85 @@ msgid ""
 "Chrono Vault %1 is installed and runs the next time you start Chrono Vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:643
+#: ../src/ui/vault_controller.cpp:644
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose where to keep the new vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:647 ../src/ui/vault_controller.cpp:2699
+#: ../src/ui/vault_controller.cpp:648 ../src/ui/vault_controller.cpp:2784
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:651 ../src/ui/vault_controller.cpp:2704
+#: ../src/ui/vault_controller.cpp:652 ../src/ui/vault_controller.cpp:2789
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:741 ../src/ui/vault_controller.cpp:2604
+#: ../src/ui/vault_controller.cpp:742 ../src/ui/vault_controller.cpp:2689
 msgctxt "chrono_vault::VaultController|"
 msgid "A file with that name already exists. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:659
+#: ../src/ui/vault_controller.cpp:660
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:600
+#: ../src/ui/vault_controller.cpp:601
 msgctxt "chrono_vault::VaultController|"
 msgid "The setting to start at startup could not be saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:637 ../src/ui/vault_controller.cpp:754
-#: ../src/ui/vault_controller.cpp:2496 ../src/ui/vault_controller.cpp:2709
+#: ../src/ui/vault_controller.cpp:638 ../src/ui/vault_controller.cpp:755
+#: ../src/ui/vault_controller.cpp:2581 ../src/ui/vault_controller.cpp:2794
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until your last change is saved, then try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:692
+#: ../src/ui/vault_controller.cpp:693
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. The vault was not created."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:700
+#: ../src/ui/vault_controller.cpp:701
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The new vault could not be created: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:715
+#: ../src/ui/vault_controller.cpp:716
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 vault"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2346
+#: ../src/ui/vault_controller.cpp:2431
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere and now has another master password. Unlock "
 "it with that one."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2356
+#: ../src/ui/vault_controller.cpp:2441
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere, but that version cannot be read yet. Your "
 "vault stays open."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2482
+#: ../src/ui/vault_controller.cpp:2567
 msgctxt "chrono_vault::VaultController|"
 msgid "Your new vault is ready."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:865 ../src/ui/vault_controller.cpp:947
+#: ../src/ui/vault_controller.cpp:866 ../src/ui/vault_controller.cpp:948
 msgctxt "chrono_vault::VaultController|"
 msgid "Unlocking…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:899
+#: ../src/ui/vault_controller.cpp:900
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2502,17 +3108,17 @@ msgid ""
 "master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:907
+#: ../src/ui/vault_controller.cpp:908
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. Choose it again below."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:928
+#: ../src/ui/vault_controller.cpp:929
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault opened, but what it holds is damaged. It was not changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:977
+#: ../src/ui/vault_controller.cpp:978
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2520,29 +3126,29 @@ msgid ""
 "then turn %1 on again in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:989
+#: ../src/ui/vault_controller.cpp:990
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This vault was changed elsewhere since it was opened. Unlock it with its "
 "master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1126
+#: ../src/ui/vault_controller.cpp:1127
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled note"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1127
+#: ../src/ui/vault_controller.cpp:1128
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled login"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1128
+#: ../src/ui/vault_controller.cpp:1129
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled item"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1203 ../src/ui/vault_controller.cpp:2179
+#: ../src/ui/vault_controller.cpp:1204 ../src/ui/vault_controller.cpp:2264
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2550,58 +3156,58 @@ msgid ""
 "attachment first."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1261
+#: ../src/ui/vault_controller.cpp:1262
 msgctxt "chrono_vault::VaultController|"
 msgid "Title"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1263
+#: ../src/ui/vault_controller.cpp:1264
 msgctxt "chrono_vault::VaultController|"
 msgid "Subtitle"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1265
+#: ../src/ui/vault_controller.cpp:1266
 msgctxt "chrono_vault::VaultController|"
 msgid "Notes"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1267
+#: ../src/ui/vault_controller.cpp:1268
 msgctxt "chrono_vault::VaultController|"
 msgid "Website"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1378
+#: ../src/ui/vault_controller.cpp:1379
 msgctxt "chrono_vault::VaultController|"
 msgid "Reading the export…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1400
+#: ../src/ui/vault_controller.cpp:1401
 msgctxt "chrono_vault::VaultController|"
 msgid "The file could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1402
+#: ../src/ui/vault_controller.cpp:1403
 msgctxt "chrono_vault::VaultController|"
 msgid "The file is too large to be an export."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1404
+#: ../src/ui/vault_controller.cpp:1405
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "This file is not an export of %1."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1405
+#: ../src/ui/vault_controller.cpp:1406
 msgctxt "chrono_vault::VaultController|"
 msgid "The export is damaged. Nothing was imported."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1427
+#: ../src/ui/vault_controller.cpp:1428
 msgctxt "chrono_vault::VaultController|"
 msgid "Nothing was imported: choose the export again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1440
+#: ../src/ui/vault_controller.cpp:1441
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2609,19 +3215,19 @@ msgid ""
 "imported."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1468
+#: ../src/ui/vault_controller.cpp:1469
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n item(s) imported."
 msgid_plural "%n item(s) imported."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1564 ../src/ui/vault_controller.cpp:1566
+#: ../src/ui/vault_controller.cpp:1565 ../src/ui/vault_controller.cpp:1567
 msgctxt "chrono_vault::VaultController|"
 msgid "Not recognized. Try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1578
+#: ../src/ui/vault_controller.cpp:1579
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2629,24 +3235,24 @@ msgid ""
 "in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1596
+#: ../src/ui/vault_controller.cpp:1597
 msgctxt "chrono_vault::VaultController|"
 msgid "That finger was not recognized."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1598
+#: ../src/ui/vault_controller.cpp:1599
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "The %1 is not available now."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1606
+#: ../src/ui/vault_controller.cpp:1607
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 could not be turned on for this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1612
+#: ../src/ui/vault_controller.cpp:1613
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2654,24 +3260,24 @@ msgid ""
 "hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1629
+#: ../src/ui/vault_controller.cpp:1630
 msgctxt "chrono_vault::VaultController|"
 msgid "That finger was not recognized. Try again, or use the master password."
-msgstr ""
-
-#: ../src/ui/vault_controller.cpp:1633
-#, qt-format
-msgctxt "chrono_vault::VaultController|"
-msgid "%1 is not available now. Use the master password."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:1634
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
+msgid "%1 is not available now. Use the master password."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:1635
+#, qt-format
+msgctxt "chrono_vault::VaultController|"
 msgid "%1 Use the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1641
+#: ../src/ui/vault_controller.cpp:1642
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2679,63 +3285,64 @@ msgid ""
 "again in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1732
+#: ../src/ui/vault_controller.cpp:1733
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Waiting for your %1…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1869
+#: ../src/ui/vault_controller.cpp:1887 ../src/ui/vault_controller.cpp:1971
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the category a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1874 ../src/ui/vault_controller.cpp:1880
+#: ../src/ui/vault_controller.cpp:1892 ../src/ui/vault_controller.cpp:1898
+#: ../src/ui/vault_controller.cpp:1976 ../src/ui/vault_controller.cpp:1982
 msgctxt "chrono_vault::VaultController|"
 msgid "There is already a category with that name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1908
+#: ../src/ui/vault_controller.cpp:1926
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This category still holds items or templates. Move or delete them first."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1957
+#: ../src/ui/vault_controller.cpp:2042
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the template a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2010
+#: ../src/ui/vault_controller.cpp:2095
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copy of %1"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2068
+#: ../src/ui/vault_controller.cpp:2153
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the tag a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2163
+#: ../src/ui/vault_controller.cpp:2248
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is larger than %2, the most an attachment may hold."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2170
+#: ../src/ui/vault_controller.cpp:2255
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2224
+#: ../src/ui/vault_controller.cpp:2309
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2226
+#: ../src/ui/vault_controller.cpp:2311
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2743,12 +3350,12 @@ msgid ""
 "full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2294
+#: ../src/ui/vault_controller.cpp:2379
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was changed elsewhere and was read again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2587
+#: ../src/ui/vault_controller.cpp:2672
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2756,19 +3363,19 @@ msgid ""
 "changed. Change it there by hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2618
+#: ../src/ui/vault_controller.cpp:2703
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The keyfile could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2640
+#: ../src/ui/vault_controller.cpp:2725
 msgctxt "chrono_vault::VaultController|"
 msgid "Exporting…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2671
+#: ../src/ui/vault_controller.cpp:2756
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2776,70 +3383,70 @@ msgid ""
 "delete it when done."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2678
+#: ../src/ui/vault_controller.cpp:2763
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the master password. Nothing was exported."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2681
+#: ../src/ui/vault_controller.cpp:2766
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The export could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2724
+#: ../src/ui/vault_controller.cpp:2809
 msgctxt "chrono_vault::VaultController|"
 msgid "Changing the master password…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2788
+#: ../src/ui/vault_controller.cpp:2873
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password was changed. %1 keeps the new one; it may ask you once."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2794
+#: ../src/ui/vault_controller.cpp:2879
 msgctxt "chrono_vault::VaultController|"
 msgid "The master password was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2799
+#: ../src/ui/vault_controller.cpp:2884
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the current master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2802
+#: ../src/ui/vault_controller.cpp:2887
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. Nothing was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2806
+#: ../src/ui/vault_controller.cpp:2891
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password could not be changed: the folder cannot be written to, "
 "or the disk is full. The vault is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2937
+#: ../src/ui/vault_controller.cpp:3024
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied. The clipboard is cleared in %n second(s)."
 msgid_plural "Copied. The clipboard is cleared in %n second(s)."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:2940
+#: ../src/ui/vault_controller.cpp:3027
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3018
+#: ../src/ui/vault_controller.cpp:3105
 msgctxt "chrono_vault::VaultController|"
 msgid "The clipboard is cleared."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3250
+#: ../src/ui/vault_controller.cpp:3337
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2847,7 +3454,7 @@ msgid ""
 "shows the other version."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3262
+#: ../src/ui/vault_controller.cpp:3349
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2855,12 +3462,12 @@ msgid ""
 "Open it from the list of vaults with its own password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3294
+#: ../src/ui/vault_controller.cpp:3381
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was changed elsewhere; both versions were merged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3296
+#: ../src/ui/vault_controller.cpp:3383
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -2871,7 +3478,7 @@ msgid_plural ""
 "the other is kept in the item."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:3302
+#: ../src/ui/vault_controller.cpp:3389
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n item(s) deleted on one device and changed on the other were kept."

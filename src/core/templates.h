@@ -22,9 +22,10 @@
 #include <QString>
 
 // --- Version ------------------------------------------------------------
-// templates.h 0.0.20
+// templates.h 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: A category's name and icon as the person gave them (D-056)
 // v0.0.20: The website an item belongs to, for its icon (D-036)
 // v0.0.14: Initial release (D-027)
 
@@ -37,8 +38,9 @@ namespace chrono_vault {
 // The built-in templates, each with its category and fields (D-027).
 [[nodiscard]] const QList<Template>& builtInTemplates();
 
-// The name a person sees: translated for a built-in one, as given for one
-// of the person's own, the id itself when it is unknown.
+// The name a person sees: translated for a built-in one unless the person
+// renamed it (D-056), as given for one of the person's own, the id itself
+// when it is unknown.
 [[nodiscard]] QString categoryName(const QString& id, const VaultContents& contents);
 [[nodiscard]] QString templateName(const Template& itemTemplate);
 
@@ -53,7 +55,11 @@ namespace chrono_vault {
 // address; empty when it has none.
 [[nodiscard]] QString websiteHostOf(const Item& item);
 
-// The picture shown for an item without an icon of its own: its category's.
-[[nodiscard]] QString categoryIconSource(const QString& categoryId);
+// The picture shown for an item without an icon of its own: its category's,
+// the icon the person gave it if any (D-056), else the program's own.
+[[nodiscard]] QString categoryIconSource(const QString& categoryId, const VaultContents& contents);
+
+// What the person changed of a built-in category; nothing when unchanged.
+[[nodiscard]] const Category* builtInCategoryChange(const QString& id, const VaultContents& contents);
 
 } // namespace chrono_vault

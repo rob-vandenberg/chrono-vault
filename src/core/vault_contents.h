@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.2.45
+// vault_contents.h 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
 // v0.1.41: The reference program's other field types (D-051)
 // v0.0.40: The vault's own icons (D-050)
@@ -159,11 +160,14 @@ struct Item
     friend bool operator==(const Item&, const Item&) = default;
 };
 
-// A category the person made (D-027). The built-in ones are in templates.h.
+// A category the person made (D-027). The built-in ones are in templates.h;
+// what the person changed of one is kept as a Category with its id, an empty
+// name or icon meaning the program's own (D-056).
 struct Category
 {
     QString id;
     QString name;
+    QByteArray icon; // PNG, as an item's; empty for the program's own (format 8, D-056)
 
     friend bool operator==(const Category&, const Category&) = default;
 };
@@ -191,6 +195,7 @@ struct VaultContents
     // the vault so they come along to every device (D-050).
     QList<QByteArray> customIcons;
     QList<DeletedItem> deletedItems; // format 7 (D-054)
+    QList<Category> builtInCategoryChanges; // format 8: the built-in ones as the person changed them (D-056)
 
     friend bool operator==(const VaultContents&, const VaultContents&) = default;
 };

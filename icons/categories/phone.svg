@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>category-phone.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M28 0 L100 0 C115.464 0 128 12.536 128 28 L128 100 C128 115.464 115.464 128 100 128 L28 128 C12.536 128 0 115.464 0 100 L0 28 C0 12.536 12.536 0 28 0 Z" fill="#553c9a"/>
+    <path d="M47 14 L81 14 C87.075 14 92 18.925 92 25 L92 103 C92 109.075 87.075 114 81 114 L47 114 C40.925 114 36 109.075 36 103 L36 25 C36 18.925 40.925 14 47 14 Z" fill="#ffffff"/>
+    <path d="M48 27 L80 27 C81.657 27 83 28.343 83 30 L83 88 C83 89.657 81.657 91 80 91 L48 91 C46.343 91 45 89.657 45 88 L45 30 C45 28.343 46.343 27 48 27 Z" fill="#553c9a"/>
+    <circle cx="64" cy="101" r="5" fill="#553c9a"/>
+  </g>
+</svg>

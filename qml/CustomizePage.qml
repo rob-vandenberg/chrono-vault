@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// CustomizePage.qml 0.0.14
+// CustomizePage.qml 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Edit… for every category; Reset for a built-in one, Delete for the person's own (the owner, D-056)
 // v0.0.14: Initial release (D-027)
 
 // Settings > Customize (D-027): the categories and templates of the unlocked
@@ -86,14 +87,20 @@ ColumnLayout {
                 opacity: 0.7
             }
             Button {
-                visible: !categoryRow.modelData.builtIn
-                text: qsTr("Rename…")
-                onClicked: categoryDialog.ask(categoryRow.modelData.id, categoryRow.modelData.name)
+                objectName: "categoryEdit_" + categoryRow.modelData.id
+                text: qsTr("Edit…")
+                onClicked: {
+                    categoryEditor.active = true
+                    categoryEditor.item.edit(categoryRow.modelData)
+                }
             }
+            // Always on: a Reset of a category already as the program has it
+            // changes nothing (the owner).
             Button {
-                visible: !categoryRow.modelData.builtIn
-                text: qsTr("Delete")
-                onClicked: VaultController.deleteCategory(categoryRow.modelData.id)
+                objectName: "categoryRemove_" + categoryRow.modelData.id
+                text: categoryRow.modelData.builtIn ? qsTr("Reset") : qsTr("Delete")
+                onClicked: categoryRow.modelData.builtIn ? VaultController.resetCategory(categoryRow.modelData.id)
+                                                         : VaultController.deleteCategory(categoryRow.modelData.id)
             }
         }
     }
@@ -159,13 +166,20 @@ ColumnLayout {
         objectName: "templateEditor"
     }
 
-    // A category of the person's own: new, or renamed.
+    // Made when first opened, so the window holds no hidden dialog before.
+    Loader {
+        id: categoryEditor
+        active: false
+        sourceComponent: CategoryEditor {}
+    }
+
+    // A new category of the person's own.
     DialogWindow {
         id: categoryDialog
         objectName: "categoryDialog"
         memoryName: "category"
         property string categoryId: ""
-        title: categoryId === "" ? qsTr("New category") : qsTr("Rename category")
+        title: qsTr("New category")
         standardButtons: Dialog.Ok | Dialog.Cancel
         function ask(id, name) {
             categoryId = id

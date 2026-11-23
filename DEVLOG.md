@@ -452,3 +452,14 @@ drawn size (rounded to whole pixels). Pictures on Linux match the owner's. No re
 
 11 points made Chrono Vault about 20% larger than the other programs on Windows (normal there: 9 points). Now 10
 points on every system, the middle road (the owner, D-017). No reviewers (the owner tests it).
+
+## 23 November 2026: version 0.2.56: editing categories, and the owner's icons
+
+The owner's icons ship in `icons/categories` and `icons/symbols/uppercase`, `lowercase`, `digits`; `icons.md` may
+name a folder inside a folder; a line starting with "-" is a folder taken out; a shipped folder the person's
+`icons.md` does not name is added at its end at start; an icon's name is its file name, translated (D-050). Every
+category is edited in one dialog (name, icon, shown), from Customize and a right-click in the left column; Reset for
+a built-in one; the changes to built-in categories kept in the vault, contents format 8, merged (D-056). The Edit
+dialog is made when first opened: kept hidden inside the settings window, its icon picker's OK button was found by
+`test_menus` in place of the settings' own. `fieldOf` in `test_vault_merge.cpp` returns on every path (P42). One
+review round (2 reviewers), nothing real.

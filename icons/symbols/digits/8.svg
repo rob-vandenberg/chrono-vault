@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: the digit 8. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#6b46c1"/>
+  <ellipse cx="64" cy="46" rx="18" ry="16" fill="none" stroke="#ffffff" stroke-width="13"/><ellipse cx="64" cy="80" rx="21" ry="18" fill="none" stroke="#ffffff" stroke-width="13"/>
+</svg>

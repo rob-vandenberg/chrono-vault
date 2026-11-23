@@ -105,7 +105,7 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
         if (const QString site = websiteIcons.value(websiteHostOf(item)); !site.isEmpty()) {
             return site;
         }
-        return categoryIconSource(item.categoryId);
+        return categoryIconSource(item.categoryId, allContents);
     default: return {};
     }
 }

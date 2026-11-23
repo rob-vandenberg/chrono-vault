@@ -21,9 +21,10 @@
 #include <QUrl>
 
 // --- Version ------------------------------------------------------------
-// templates.cpp 0.1.41
+// templates.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: A category's name and icon as the person gave them (D-056)
 // v0.1.41: No Notes field in the built-in templates (D-051)
 // v0.0.20: The website an item belongs to, for its icon (D-036)
 // v0.0.17: A new item's fields get their ids at once; fields made with makeField, a PIN hidden (D-033)
@@ -108,6 +109,9 @@ QString categoryName(const QString& id, const VaultContents& contents)
         {QStringLiteral("misc"), QT_TRANSLATE_NOOP("Category", "Miscellaneous")},
     };
     if (const auto found = names.constFind(id); found != names.constEnd()) {
+        if (const Category* changed = builtInCategoryChange(id, contents); changed && !changed->name.isEmpty()) {
+            return changed->name;
+        }
         return QCoreApplication::translate("Category", found.value());
     }
     for (const Category& category : contents.categories) {
@@ -195,8 +199,33 @@ QString websiteHostOf(const Item& item)
     return url.host().toLower();
 }
 
-QString categoryIconSource(const QString& categoryId)
+const Category* builtInCategoryChange(const QString& id, const VaultContents& contents)
 {
+    for (const Category& changed : contents.builtInCategoryChanges) {
+        if (changed.id == id) {
+            return &changed;
+        }
+    }
+    return nullptr;
+}
+
+QString categoryIconSource(const QString& categoryId, const VaultContents& contents)
+{
+    QByteArray given;
+    if (isBuiltInCategory(categoryId)) {
+        if (const Category* changed = builtInCategoryChange(categoryId, contents)) {
+            given = changed->icon;
+        }
+    } else {
+        for (const Category& own : contents.categories) {
+            if (own.id == categoryId) {
+                given = own.icon;
+            }
+        }
+    }
+    if (!given.isEmpty()) {
+        return QStringLiteral("data:image/png;base64,") + QString::fromLatin1(given.toBase64());
+    }
     return QStringLiteral("qrc:/icons/item-%1.svg").arg(isBuiltInCategory(categoryId) ? categoryId : QStringLiteral("misc"));
 }
 

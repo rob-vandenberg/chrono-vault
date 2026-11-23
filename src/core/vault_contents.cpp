@@ -27,9 +27,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.2.45
+// vault_contents.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
 // v0.1.41: The contents format 6: the reference program's other field types (D-051)
 // v0.0.40: The contents format 5: the vault's own icons (D-050)
@@ -48,9 +49,11 @@ namespace {
 // Format 2 added the item's icon (D-018); format 3 the categories and
 // templates, tags, favourites and attachments (D-027 to D-029); format 4
 // what the reference program's items hold (D-033); format 5 the vault's own
-// icons (D-050); format 6 the reference program's other field types (D-051).
+// icons (D-050); format 6 the reference program's other field types (D-051);
+// format 7 merging (D-054); format 8 a category's icon and the changes to
+// built-in categories (D-056).
 // Older formats are read.
-constexpr int contentsFormat = 7;
+constexpr int contentsFormat = 8;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -455,6 +458,35 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
     return item;
 }
 
+// A category: its id, its name and, from format 8, its icon (D-056). A
+// change to a built-in one may leave the name empty: the program's own.
+QJsonObject categoryToJson(const Category& category)
+{
+    QJsonObject object{{QStringLiteral("id"), category.id}, {QStringLiteral("name"), category.name}};
+    if (!category.icon.isEmpty()) {
+        object.insert(QStringLiteral("icon"), QString::fromLatin1(category.icon.toBase64()));
+    }
+    return object;
+}
+
+std::optional<Category> categoryFromJson(const QJsonValue& value, int format)
+{
+    const QJsonObject object = value.toObject();
+    if (!value.isObject() || !isString(object, "id") || !isString(object, "name") || text(object, "id").isEmpty() ||
+        text(object, "id").size() > largestTextLength) {
+        return std::nullopt;
+    }
+    Category category{text(object, "id"), text(object, "name"), {}};
+    if (object.contains(QStringLiteral("icon"))) {
+        const auto icon = bytesFromBase64(object.value(QStringLiteral("icon")), largestIconBytes);
+        if (format < 8 || !icon || icon->isEmpty()) {
+            return std::nullopt;
+        }
+        category.icon = *icon;
+    }
+    return category;
+}
+
 } // namespace
 
 QString roleName(const QString& role)
@@ -572,9 +604,16 @@ QByteArray contentsToJson(const VaultContents& contents)
     if (!contents.categories.isEmpty()) {
         QJsonArray categories;
         for (const Category& category : contents.categories) {
-            categories.append(QJsonObject{{QStringLiteral("id"), category.id}, {QStringLiteral("name"), category.name}});
+            categories.append(categoryToJson(category));
         }
         root.insert(QStringLiteral("categories"), categories);
+    }
+    if (!contents.builtInCategoryChanges.isEmpty()) {
+        QJsonArray changes;
+        for (const Category& category : contents.builtInCategoryChanges) {
+            changes.append(categoryToJson(category));
+        }
+        root.insert(QStringLiteral("builtInCategories"), changes);
     }
     if (!contents.templates.isEmpty()) {
         QJsonArray templates;
@@ -651,12 +690,25 @@ ContentsResult contentsFromJson(const QByteArray& json)
             return result;
         }
         for (const QJsonValue& value : categories.toArray()) {
-            const QJsonObject object = value.toObject();
-            if (!value.isObject() || !isString(object, "id") || !isString(object, "name") ||
-                text(object, "id").isEmpty() || text(object, "id").size() > largestTextLength) {
+            const auto category = categoryFromJson(value, format);
+            if (!category) {
                 return result;
             }
-            contents.categories.append(Category{text(object, "id"), text(object, "name")});
+            contents.categories.append(*category);
+        }
+    }
+    // Format 8 (D-056): the built-in categories as the person changed them.
+    if (root.contains(QStringLiteral("builtInCategories"))) {
+        const QJsonValue changes = root.value(QStringLiteral("builtInCategories"));
+        if (format < 8 || !changes.isArray() || changes.toArray().size() > largestListCount) {
+            return result;
+        }
+        for (const QJsonValue& value : changes.toArray()) {
+            const auto category = categoryFromJson(value, format);
+            if (!category) {
+                return result;
+            }
+            contents.builtInCategoryChanges.append(*category);
         }
     }
     if (root.contains(QStringLiteral("templates"))) {

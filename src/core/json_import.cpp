@@ -326,7 +326,7 @@ ImportResult readExport(const QByteArray& json, const VaultContents& existing)
             if (id.isEmpty()) {
                 id = category;
                 if (!categoryKnown(id)) {
-                    result.categories.append(Category{id, exportCategory.isEmpty() ? category : exportCategory});
+                    result.categories.append(Category{id, exportCategory.isEmpty() ? category : exportCategory, {}});
                 }
             }
             categoryIds.insert(category, id);

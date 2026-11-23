@@ -25,9 +25,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_customizing.cpp 0.0.38
+// test_customizing.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Editing and resetting every category: name, icon, shown (D-056)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.14: Initial release: categories and templates, tags, favourites and attachments (D-027, D-028, D-029)
 
@@ -83,6 +84,7 @@ private slots:
 
     void the_built_in_categories_and_templates_are_there_and_stay();
     void an_own_category_is_made_renamed_hidden_and_deleted_only_when_empty();
+    void every_category_is_edited_and_a_built_in_one_reset();
     void an_own_template_is_made_copied_changed_and_deleted_and_its_items_keep_their_fields();
     void an_item_from_any_template_is_saved_in_its_category();
     void tags_nest_narrow_the_list_and_are_renamed_and_removed_everywhere();
@@ -206,6 +208,42 @@ void TestCustomizing::an_own_category_is_made_renamed_hidden_and_deleted_only_wh
     controller->deleteItem(id);
     QVERIFY(controller->deleteCategory(cars));
     QVERIFY(findIn(controller->categories(), cars).isEmpty());
+}
+
+// Built-in or the person's own: name, icon and shown are kept in the vault;
+// Reset puts a built-in one back as the program has it (the owner, D-056).
+void TestCustomizing::every_category_is_edited_and_a_built_in_one_reset()
+{
+    auto controller = unlockedController();
+    QVERIFY(controller);
+    const QString png = QString::fromLatin1(QByteArrayLiteral("\x89PNG-ish").toBase64());
+    QVERIFY(!controller->editCategory(QStringLiteral("login"), QStringLiteral("Finance"), QString(), true)); // taken
+    QVERIFY(controller->editCategory(QStringLiteral("login"), QStringLiteral("Websites"), png, false));
+    const QString cars = controller->saveCategory(QString(), QStringLiteral("Cars"));
+    QVERIFY(controller->editCategory(cars, QStringLiteral("Vehicles"), png, true));
+
+    lockAndUnlock(*controller);
+    QVariantMap login = findIn(controller->categories(), QStringLiteral("login"));
+    QCOMPARE(login.value("name").toString(), QStringLiteral("Websites"));
+    QCOMPARE(login.value("ownIcon").toString(), png);
+    QVERIFY(login.value("icon").toString().startsWith(QStringLiteral("data:image/png;base64,")));
+    QVERIFY(login.value("hidden").toBool());
+    QCOMPARE(findIn(controller->categories(), cars).value("name").toString(), QStringLiteral("Vehicles"));
+    QCOMPARE(findIn(controller->categories(), cars).value("ownIcon").toString(), png);
+
+    // The program's own name, typed again, is not kept: it follows the translation.
+    QVERIFY(controller->editCategory(QStringLiteral("card"), QStringLiteral("Credit card"), QString(), true));
+    QCOMPARE(findIn(controller->categories(), QStringLiteral("card")).value("name").toString(),
+             QStringLiteral("Credit card"));
+
+    controller->resetCategory(QStringLiteral("login"));
+    controller->resetCategory(QStringLiteral("login")); // already reset: nothing changes
+    lockAndUnlock(*controller);
+    login = findIn(controller->categories(), QStringLiteral("login"));
+    QCOMPARE(login.value("name").toString(), QStringLiteral("Login"));
+    QCOMPARE(login.value("ownIcon").toString(), QString());
+    QCOMPARE(login.value("icon").toString(), QStringLiteral("qrc:/icons/item-login.svg"));
+    QVERIFY(!login.value("hidden").toBool());
 }
 
 void TestCustomizing::an_own_template_is_made_copied_changed_and_deleted_and_its_items_keep_their_fields()

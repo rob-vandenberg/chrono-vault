@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.2.45
+// vault_controller.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
 // v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.1.41: The icon sections' loop variable iconPath, no longer hiding a member (Microsoft's compiler)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter no longer hides a member
@@ -263,7 +264,7 @@ QVariantMap toMap(const Item& item, const VaultContents& contents)
         {QStringLiteral("modified"), momentText(item.modified)},
         {QStringLiteral("fields"), fieldsToList(item.fields, true)},
         {QStringLiteral("icon"), QString::fromLatin1(item.icon.toBase64())},
-        {QStringLiteral("defaultIcon"), categoryIconSource(item.categoryId)},
+        {QStringLiteral("defaultIcon"), categoryIconSource(item.categoryId, contents)},
         {QStringLiteral("tags"), item.tags},
         {QStringLiteral("favourite"), item.favourite},
         {QStringLiteral("attachments"), attachments},
@@ -1825,6 +1826,19 @@ void VaultController::setFilter(const QString& filter)
     }
 }
 
+QByteArray VaultController::givenCategoryIcon(const QString& id) const
+{
+    if (const Category* changed = builtInCategoryChange(id, contents)) {
+        return changed->icon;
+    }
+    for (const Category& own : contents.categories) {
+        if (own.id == id) {
+            return own.icon;
+        }
+    }
+    return {};
+}
+
 QVariantList VaultController::categories() const
 {
     QStringList ids = builtInCategoryIds();
@@ -1838,7 +1852,11 @@ QVariantList VaultController::categories() const
         list.append(QVariantMap{
             {QStringLiteral("id"), id},
             {QStringLiteral("name"), categoryName(id, contents)},
-            {QStringLiteral("icon"), categoryIconSource(id)},
+            {QStringLiteral("icon"), categoryIconSource(id, contents)},
+            // For the Edit dialog (D-056): the icon the person gave it, PNG in
+            // base64 or "", and the program's own.
+            {QStringLiteral("ownIcon"), QString::fromLatin1(givenCategoryIcon(id).toBase64())},
+            {QStringLiteral("defaultIcon"), categoryIconSource(id, VaultContents{})},
             {QStringLiteral("builtIn"), isBuiltInCategory(id)},
             {QStringLiteral("hidden"), contents.hiddenCategories.contains(id)},
             {QStringLiteral("count"), static_cast<int>(count)},
@@ -1886,7 +1904,7 @@ QString VaultController::saveCategory(const QString& id, const QString& name)
                                     [&id](const Category& one) { return one.id == id; });
     if (id.isEmpty() || found == contents.categories.end()) {
         keptId = QUuid::createUuid().toString(QUuid::WithoutBraces);
-        contents.categories.append(Category{keptId, kept});
+        contents.categories.append(Category{keptId, kept, {}});
     } else {
         found->name = kept;
     }
@@ -1935,6 +1953,73 @@ void VaultController::setCategoryHidden(const QString& id, bool hidden)
         }
     } else {
         contents.hiddenCategories.removeAll(id);
+    }
+    contentsChanged();
+    saveInBackground(QString());
+}
+
+bool VaultController::editCategory(const QString& id, const QString& name, const QString& icon, bool shown)
+{
+    const bool builtIn = isBuiltInCategory(id);
+    const auto own = std::find_if(contents.categories.begin(), contents.categories.end(),
+                                  [&id](const Category& one) { return one.id == id; });
+    if (currentState != State::Unlocked || (!builtIn && own == contents.categories.end())) {
+        return false;
+    }
+    const QString kept = name.simplified();
+    if (kept.isEmpty()) {
+        say(tr("Give the category a name."), true);
+        return false;
+    }
+    for (const QString& other : builtInCategoryIds()) {
+        if (other != id && categoryName(other, contents).compare(kept, Qt::CaseInsensitive) == 0) {
+            say(tr("There is already a category with that name."), true);
+            return false;
+        }
+    }
+    for (const Category& other : std::as_const(contents.categories)) {
+        if (other.id != id && other.name.compare(kept, Qt::CaseInsensitive) == 0) {
+            say(tr("There is already a category with that name."), true);
+            return false;
+        }
+    }
+    const QByteArray png = QByteArray::fromBase64(icon.toLatin1());
+    if (builtIn) {
+        // Kept only as far as it differs from the program's own: its name
+        // left as it is goes on following the translation (D-056).
+        Category changed{id, {}, png};
+        if (kept != categoryName(id, VaultContents{})) {
+            changed.name = kept;
+        }
+        contents.builtInCategoryChanges.removeIf([&id](const Category& one) { return one.id == id; });
+        if (!changed.name.isEmpty() || !changed.icon.isEmpty()) {
+            contents.builtInCategoryChanges.append(changed);
+        }
+    } else {
+        own->name = kept;
+        own->icon = png;
+    }
+    contents.hiddenCategories.removeAll(id);
+    if (!shown) {
+        contents.hiddenCategories.append(id);
+        if (chosenFilter == QLatin1String("category:") + id) {
+            setFilter(QString());
+        }
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    return true;
+}
+
+void VaultController::resetCategory(const QString& id)
+{
+    if (currentState != State::Unlocked || !isBuiltInCategory(id)) {
+        return;
+    }
+    const auto changes = contents.builtInCategoryChanges.removeIf([&id](const Category& one) { return one.id == id; });
+    const auto hidden = contents.hiddenCategories.removeAll(id);
+    if (changes == 0 && hidden == 0) {
+        return; // already as the program has it
     }
     contentsChanged();
     saveInBackground(QString());
@@ -2900,7 +2985,9 @@ QVariantList VaultController::iconSections() const
     for (const IconSection& section : readIconSections(personalIconsFolder())) {
         QVariantList icons;
         for (const QString& iconPath : section.files) {
-            icons.append(QVariantMap{{QStringLiteral("name"), QFileInfo(iconPath).completeBaseName()},
+            // Its file name is its name, translated where a translation exists (the owner).
+            const QString name = QFileInfo(iconPath).completeBaseName();
+            icons.append(QVariantMap{{QStringLiteral("name"), QCoreApplication::translate("IconNames", name.toUtf8().constData())},
                                      {QStringLiteral("url"), QUrl::fromLocalFile(iconPath)}});
         }
         // A heading without a translation is shown as written (the owner).

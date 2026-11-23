@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.2.49
+// VaultPage.qml 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: A right-click on a category offers Edit… (the owner, D-056)
 // v0.2.49: The sidebar snaps after 80 pixels of travel each way (the owner)
 // v0.2.48: The sidebar snaps after 100 pixels of travel each way (the owner)
 // v0.2.47: Counts above 0 only, long names cut off before them; minimum 180; the sidebar snaps shut or open past 120 when dragged (the owner)
@@ -499,6 +500,7 @@ Item {
                         model: VaultController.showCategories && !VaultController.categoriesFolded
                                ? vaultColumn.categoryList.filter(function(category) { return !category.hidden }) : []
                         delegate: SideEntry {
+                            id: categoryEntry
                             required property var modelData
                             objectName: "categoryEntry_" + modelData.id
                             text: modelData.name
@@ -509,6 +511,21 @@ Item {
                             onClicked: vaultPage.choose("category:" + modelData.id)
                             counted: true
                             countFilter: "category:" + modelData.id
+                            TapHandler {
+                                acceptedButtons: Qt.RightButton
+                                onTapped: categoryMenu.popup()
+                            }
+                            Menu {
+                                id: categoryMenu
+                                objectName: "categoryMenu_" + categoryEntry.modelData.id
+                                Action {
+                                    text: qsTr("Edit…")
+                                    onTriggered: {
+                                        sidebarCategoryEditor.active = true
+                                        sidebarCategoryEditor.item.edit(categoryEntry.modelData)
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -788,6 +805,14 @@ Item {
                 }
             }
         }
+    }
+
+    // A category edited from its right-click menu (D-056); made when first
+    // opened, so the window holds no hidden dialog before.
+    Loader {
+        id: sidebarCategoryEditor
+        active: false
+        sourceComponent: CategoryEditor {}
     }
 
     // Renames a tag and the tags nested under it, in every item (D-028).

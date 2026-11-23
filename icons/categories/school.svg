@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a graduation cap. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#44337a"/>
+  <path d="M64 24 L114 46 L64 68 L14 46 Z" fill="#ffffff"/><path d="M36 62 L64 74 L92 62 V86 Q64 102 36 86 Z" fill="#ffffff"/><path d="M104 50 V82" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

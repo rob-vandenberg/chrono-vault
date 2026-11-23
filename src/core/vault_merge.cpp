@@ -23,9 +23,10 @@
 #include <tuple>
 
 // --- Version ------------------------------------------------------------
-// vault_merge.cpp 0.2.45
+// vault_merge.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: The changes to built-in categories merged as the person's own categories (D-056)
 // v0.2.45: Initial release (D-054)
 
 namespace chrono_vault {
@@ -424,6 +425,9 @@ MergeResult mergeContents(const VaultContents* base, const VaultContents& mine, 
     // The person's own categories and templates, hidden categories and icons.
     result.categories = mergeById(base != nullptr ? &base->categories : nullptr, mine.categories, theirs.categories,
                                   false, [](const Category& one) { return one.id; });
+    result.builtInCategoryChanges =
+        mergeById(base != nullptr ? &base->builtInCategoryChanges : nullptr, mine.builtInCategoryChanges,
+                  theirs.builtInCategoryChanges, false, [](const Category& one) { return one.id; });
     result.templates = mergeById(base != nullptr ? &base->templates : nullptr, mine.templates, theirs.templates, false,
                                  [](const Template& one) { return one.id; });
     result.hiddenCategories = mergeSet(base != nullptr ? &base->hiddenCategories : nullptr, mine.hiddenCategories,

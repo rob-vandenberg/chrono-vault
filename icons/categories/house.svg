@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>category-house.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M28 0 L100 0 C115.464 0 128 12.536 128 28 L128 100 C128 115.464 115.464 128 100 128 L28 128 C12.536 128 0 115.464 0 100 L0 28 C0 12.536 12.536 0 28 0 Z" fill="#c53030"/>
+    <path d="M16 60 L64 18 L112 60 L98 60 L98 104 C98 106.667 96.667 108 94 108 L74 108 L74 77 C74 75.343 72.657 74 71 74 L57 74 C55.343 74 54 75.343 54 77 L54 108 L34 108 C31.333 108 30 106.667 30 104 L30 60 Z" fill="#ffffff"/>
+  </g>
+</svg>

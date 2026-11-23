@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a finance item, a dollar sign. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#2c7a7b"/>
+  <path d="M86 44 Q82 32 64 32 Q42 32 42 49 Q42 62 64 64 Q86 66 86 80 Q86 96 64 96 Q44 96 40 84" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M64 18 V32 M64 96 V110" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

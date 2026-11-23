@@ -19,9 +19,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_merge.cpp 0.2.45
+// test_vault_merge.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: fieldOf returns on every path (Microsoft's compiler); the changes to built-in categories merged (D-056)
 // v0.2.45: Initial release (D-054)
 
 using namespace chrono_vault;
@@ -69,6 +70,8 @@ const Field& fieldOf(const Item& item, qint64 uid)
         }
     }
     qFatal("no such field");
+    static const Field none; // never reached: Microsoft's compiler does not know qFatal ends here
+    return none;
 }
 
 } // namespace
@@ -89,6 +92,30 @@ private slots:
         QCOMPARE(fieldOf(merged.contents.items[0], 2).value, QStringLiteral("new"));
         QVERIFY(merged.contents.items[0].mergeNotes.isEmpty());
         QCOMPARE(merged.itemsChangedOnBoth, 0);
+    }
+
+    // A category's name and icon, built-in or the person's own, come along
+    // from the other side like any other change (D-056).
+    void a_category_changed_on_one_side_is_taken()
+    {
+        VaultContents base;
+        base.categories = {Category{QStringLiteral("own"), QStringLiteral("Cars"), {}}};
+        VaultContents mine = base;
+        VaultContents theirs = base;
+        theirs.categories[0].icon = QByteArrayLiteral("png");
+        theirs.builtInCategoryChanges = {Category{QStringLiteral("login"), QStringLiteral("Websites"), {}}};
+        const MergeResult merged = mergeContents(&base, mine, theirs, now);
+        QCOMPARE(merged.contents.categories.size(), 1);
+        QCOMPARE(merged.contents.categories[0].icon, QByteArrayLiteral("png"));
+        QCOMPARE(merged.contents.builtInCategoryChanges.size(), 1);
+        QCOMPARE(merged.contents.builtInCategoryChanges[0].name, QStringLiteral("Websites"));
+
+        // Reset on the other side, unchanged here: it stays reset.
+        VaultContents changedBase = merged.contents;
+        VaultContents reset = changedBase;
+        reset.builtInCategoryChanges.clear();
+        const MergeResult afterReset = mergeContents(&changedBase, changedBase, reset, now);
+        QVERIFY(afterReset.contents.builtInCategoryChanges.isEmpty());
     }
 
     void changes_to_different_fields_are_both_kept()

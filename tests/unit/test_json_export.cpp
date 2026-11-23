@@ -77,7 +77,7 @@ private slots:
 void TestJsonExport::every_item_comes_back_as_it_was_exported()
 {
     VaultContents contents;
-    contents.categories << Category{QStringLiteral("8b0e6a3e-1c1d-4c0a-9a4b-2f4a51c0d001"), QStringLiteral("Bank cards")};
+    contents.categories << Category{QStringLiteral("8b0e6a3e-1c1d-4c0a-9a4b-2f4a51c0d001"), QStringLiteral("Bank cards"), {}};
     contents.templates << Template{QStringLiteral("8b0e6a3e-1c1d-4c0a-9a4b-2f4a51c0d002"), contents.categories.constFirst().id,
                                    QStringLiteral("Bank cards"), {makeField({}, QStringLiteral("Number"), FieldKind::Text)},
                                    false};

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a briefcase. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#744210"/>
+  <path d="M48 42 V32 Q48 26 54 26 H74 Q80 26 80 32 V42" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="42" width="96" height="64" rx="9" fill="#ffffff"/><path d="M16 68 H112" fill="none" stroke="#744210" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

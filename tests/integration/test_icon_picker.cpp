@@ -32,9 +32,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_icon_picker.cpp 0.0.40
+// test_icon_picker.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Folders inside folders, "-" lines, shipped lines added (the owner, D-050)
 // v0.0.40: Initial release (D-050)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -103,6 +104,54 @@ private slots:
         // No icons.md: no sections, nothing fails.
         QTemporaryDir empty;
         QVERIFY(readIconSections(empty.path()).isEmpty());
+    }
+
+    // A folder inside a folder is a section of its own, in the order of
+    // icons.md; a line starting with "-" is a folder taken out (the owner).
+    void folders_inside_folders_and_lines_taken_out()
+    {
+        QTemporaryDir icons;
+        for (const char* name : {"symbols/uppercase", "symbols/digits", "web"}) {
+            QVERIFY(QDir(icons.path()).mkpath(QString::fromLatin1(name)));
+        }
+        QVERIFY(!picture(icons.filePath(QStringLiteral("symbols/uppercase/A.png")), Qt::red).isEmpty());
+        QVERIFY(!picture(icons.filePath(QStringLiteral("symbols/digits/0.png")), Qt::blue).isEmpty());
+        QVERIFY(!picture(icons.filePath(QStringLiteral("web/w.png")), Qt::green).isEmpty());
+        writeText(icons.filePath(QStringLiteral("icons.md")),
+                  "symbols/uppercase: Uppercase\nsymbols/../web: Sneaky\n/web: Rooted\n- web: Web\nsymbols/digits: Digits\n");
+        const QList<IconSection> sections = readIconSections(icons.path());
+        QCOMPARE(sections.size(), 2);
+        QCOMPARE(sections[0].folder, QStringLiteral("symbols/uppercase"));
+        QCOMPARE(sections[1].heading, QStringLiteral("Digits"));
+        QCOMPARE(sections[1].files.size(), 1);
+    }
+
+    // After an update, a folder that ships and that the person's icons.md
+    // does not name is added at its end; their own lines, and a line they
+    // took out, stay as they are (the owner).
+    void shipped_lines_are_added_and_lines_taken_out_stay_out()
+    {
+        QTemporaryDir installed;
+        QTemporaryDir home;
+        const QString personal = home.filePath(QStringLiteral("chrono-vault/icons"));
+        setIconsFoldersForTests(installed.path(), personal);
+        for (const char* name : {"web", "creditcard", "symbols/digits"}) {
+            QVERIFY(QDir(installed.path()).mkpath(QString::fromLatin1(name)));
+        }
+        writeText(installed.filePath(QStringLiteral("icons.md")),
+                  "web: Web\ncreditcard: Credit Card\nsymbols/digits: Digits\n");
+        QDir().mkpath(personal);
+        writeText(personal + QStringLiteral("/icons.md"), "web: My sites\n- creditcard: Credit Card\n\n");
+        QVERIFY(copyMissingIcons());
+        QFile kept(personal + QStringLiteral("/icons.md"));
+        QVERIFY(kept.open(QIODevice::ReadOnly));
+        QCOMPARE(kept.readAll(), QByteArray("web: My sites\n- creditcard: Credit Card\nsymbols/digits: Digits\n"));
+        kept.close();
+        // A second start adds nothing more.
+        QVERIFY(copyMissingIcons());
+        QVERIFY(kept.open(QIODevice::ReadOnly));
+        QCOMPARE(kept.readAll(), QByteArray("web: My sites\n- creditcard: Credit Card\nsymbols/digits: Digits\n"));
+        setIconsFoldersForTests(QString(), QString());
     }
 
     void the_shipped_icons_are_copied_and_nothing_is_written_over()

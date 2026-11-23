@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a plane. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#3c6e9f"/>
+  <g transform="rotate(45 64 64)"><path d="M56 22 Q56 14 64 14 Q72 14 72 22 V102 Q72 110 64 110 Q56 110 56 102 Z" fill="#ffffff"/><path d="M64 50 L110 74 V86 L64 70 L18 86 V74 Z" fill="#ffffff"/><path d="M64 92 L86 104 V112 L64 104 L42 112 V104 Z" fill="#ffffff"/></g>
+</svg>

@@ -43,9 +43,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.2.45
+// vault_controller.h 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
 // v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
 // v0.0.40: The vault's own icons and the icon sections (D-050); keyName's parameter renamed
 // v0.0.39: The reminder every Day, Month, Quarter, Year or Never (D-049)
@@ -345,6 +346,13 @@ public:
     // Only a category of the person's own that no item or template uses.
     Q_INVOKABLE bool deleteCategory(const QString& id);
     Q_INVOKABLE void setCategoryHidden(const QString& id, bool hidden);
+    // Any category, built-in or the person's own (D-056): its name, its icon
+    // (PNG in base64, "" for the program's own) and whether it is shown in
+    // the left column. False, with a message, when it is not kept.
+    Q_INVOKABLE bool editCategory(const QString& id, const QString& name, const QString& icon, bool shown);
+    // A built-in category back as the program has it: its name, its icon,
+    // shown in the left column (D-056).
+    Q_INVOKABLE void resetCategory(const QString& id);
     // A template of the person's own, new (empty id) or changed: {id, name,
     // categoryId, fields: [{role, label, kind}]}. Its id, or empty.
     Q_INVOKABLE QString saveTemplate(const QVariantMap& itemTemplate);
@@ -485,6 +493,8 @@ protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+    // The icon the person gave a category, built-in or their own; empty for none (D-056).
+    [[nodiscard]] QByteArray givenCategoryIcon(const QString& id) const;
     // A vault just created whose password is being saved in the primary: it
     // is shown once that save is on disk (D-030).
     struct CreatedVault

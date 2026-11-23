@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a secure note. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#ed8936"/>
+  <path d="M34 20 H76 L98 42 V102 Q98 108 92 108 H40 Q34 108 34 102 Z" fill="#ffffff"/><path d="M76 20 V42 H98" fill="none" stroke="#ed8936" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 64 H84 M48 84 H74" fill="none" stroke="#ed8936" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

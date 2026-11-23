@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>category-car.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M28 0 L100 0 C115.464 0 128 12.536 128 28 L128 100 C128 115.464 115.464 128 100 128 L28 128 C12.536 128 0 115.464 0 100 L0 28 C0 12.536 12.536 0 28 0 Z" fill="#3182ce"/>
+    <path d="M18 64 L30 38 C32.667 32.667 37.333 30 44 30 L79 30 C85.667 30 90.333 32.667 93 38 L101.163 55.688 L110.1 55.688 C114.143 55.688 116 57.822 116 62.312 L116 78 C116 82 114 84 110 84 L24 84 C20 84 18 82 18 78 Z" fill="#ffffff"/>
+    <polygon points="37,56 45,40 78,40 86,56" fill="#3182ce"/>
+    <circle cx="40" cy="84" r="12" fill="#ffffff" stroke="#3182ce" stroke-width="6"/>
+    <circle cx="87" cy="84" r="12" fill="#ffffff" stroke="#3182ce" stroke-width="6"/>
+  </g>
+</svg>

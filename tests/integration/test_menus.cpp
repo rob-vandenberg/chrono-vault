@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.2.50
+// test_menus.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Edit… and Reset or Delete on every category; Edit… on a right-click in the sidebar (D-056)
 // v0.2.50: Keys a text field never uses are commands while typing
 // v0.2.49: The sidebar snap after 80 pixels each way
 // v0.2.48: The sidebar snap after 100 pixels each way
@@ -95,6 +96,7 @@ private slots:
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
     void the_sidebar_collapses_to_icons_and_its_groups_fold();
     void the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged();
+    void every_category_has_edit_and_reset_or_delete_and_a_right_click_menu();
     void after_a_menu_the_content_holds_the_keyboard();
     void keyboard_shortcuts_are_set_on_their_page_and_kept();
 
@@ -777,6 +779,42 @@ void TestMenus::the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged()
     QTRY_VERIFY(!controller->sidebarCollapsed());
     QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(155, y));
     QTRY_COMPARE(qRound(column->width()), 180);
+}
+
+// Customize: Edit… on every category, then Reset for a built-in one and
+// Delete for the person's own; in the sidebar a right-click offers Edit…,
+// which opens the same dialog (the owner, D-056).
+void TestMenus::every_category_has_edit_and_reset_or_delete_and_a_right_click_menu()
+{
+    QVERIFY(open(QStringLiteral("categories")));
+    const QString cars = controller->saveCategory(QString(), QStringLiteral("Cars"));
+    QVERIFY(!cars.isEmpty());
+    auto* settings = qobject_cast<QQuickWindow*>(window->findChild<QObject*>(QStringLiteral("settingsWindow")));
+    QVERIFY(settings && QMetaObject::invokeMethod(settings, "showWindow"));
+    settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 3);
+    QQuickItem* root = settings->contentItem();
+    QQuickItem* edit = nullptr;
+    QTRY_VERIFY((edit = visualItem(root, QStringLiteral("categoryEdit_login"))) != nullptr);
+    QVERIFY(visualItem(root, QLatin1String("categoryEdit_") + cars));
+    QCOMPARE(visualItem(root, QStringLiteral("categoryRemove_login"))->property("text").toString(), QStringLiteral("Reset"));
+    QCOMPARE(visualItem(root, QLatin1String("categoryRemove_") + cars)->property("text").toString(),
+             QStringLiteral("Delete"));
+    // No dialog waits hidden until Edit… is used.
+    QVERIFY(!settings->findChild<QObject*>(QStringLiteral("categoryEditor")));
+    QVERIFY(QMetaObject::invokeMethod(edit, "clicked"));
+    QObject* editor = nullptr;
+    QTRY_VERIFY((editor = settings->findChild<QObject*>(QStringLiteral("categoryEditor"))) != nullptr);
+    QTRY_VERIFY(editor->property("visible").toBool());
+    QCOMPARE(editor->findChild<QObject*>(QStringLiteral("categoryNameField"))->property("text").toString(),
+             QStringLiteral("Login"));
+    QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
+
+    // The sidebar: a right-click menu with Edit… on each category.
+    QTRY_VERIFY(visualItem(qobject_cast<QQuickWindow*>(window)->contentItem(), QStringLiteral("categoryEntry_login")));
+    QVERIFY(window->findChild<QObject*>(QStringLiteral("categoryMenu_login")) ||
+            visualItem(qobject_cast<QQuickWindow*>(window)->contentItem(), QStringLiteral("categoryEntry_login"))
+                ->findChild<QObject*>(QStringLiteral("categoryMenu_login")));
 }
 
 QTEST_MAIN(TestMenus)

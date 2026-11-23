@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a game controller. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#805ad5"/>
+  <path d="M38 38 H90 Q110 38 114 62 L118 88 Q120 102 106 102 Q98 102 92 92 L86 84 H42 L36 92 Q30 102 22 102 Q8 102 10 88 L14 62 Q18 38 38 38 Z" fill="#ffffff"/><path d="M40 52 V72 M30 62 H50" fill="none" stroke="#805ad5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="86" cy="56" r="6" fill="#805ad5"/><circle cx="98" cy="70" r="6" fill="#805ad5"/>
+</svg>

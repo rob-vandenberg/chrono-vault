@@ -22,9 +22,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_contents.cpp 0.2.45
+// test_vault_contents.cpp 0.2.56
 
 // --- Version history ----------------------------------------------------
+// v0.2.56: Format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: Format 7 (D-054)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.40: Tests of the icon picker and the reminder's place (D-050)
@@ -112,10 +113,10 @@ void TestVaultContents::every_built_in_template_has_a_built_in_category_and_name
     QCOMPARE(builtInTemplates().size(), 13);
     // A category of the person's own shows the name they gave it.
     VaultContents contents;
-    contents.categories << Category{QStringLiteral("own"), QStringLiteral("Cars")};
+    contents.categories << Category{QStringLiteral("own"), QStringLiteral("Cars"), {}};
     QCOMPARE(categoryName(QStringLiteral("own"), contents), QStringLiteral("Cars"));
     QCOMPARE(categoryName(QStringLiteral("card"), contents), QStringLiteral("Credit card"));
-    QCOMPARE(categoryIconSource(QStringLiteral("own")), QStringLiteral("qrc:/icons/item-misc.svg"));
+    QCOMPARE(categoryIconSource(QStringLiteral("own"), contents), QStringLiteral("qrc:/icons/item-misc.svg"));
 }
 
 void TestVaultContents::contents_come_back_exactly_as_they_were_written()
@@ -152,10 +153,14 @@ void TestVaultContents::contents_come_back_exactly_as_they_were_written()
     card.templateId = QStringLiteral("8a2e");
     card.categoryId = QStringLiteral("own");
     contents.items << login << trashed << card;
-    contents.categories << Category{QStringLiteral("own"), QStringLiteral("Cars")};
+    contents.categories << Category{QStringLiteral("own"), QStringLiteral("Cars"), {}};
     contents.templates << Template{QStringLiteral("8a2e"), QStringLiteral("own"), QStringLiteral("Car"),
                                    {makeField({}, QStringLiteral("Plate"), FieldKind::Text)}, false};
     contents.hiddenCategories << QStringLiteral("finance");
+    // Format 8 (D-056): a category's icon, and a built-in one as the person changed it.
+    contents.categories[0].icon = QByteArrayLiteral("\x89PNG own");
+    contents.builtInCategoryChanges << Category{QStringLiteral("login"), QStringLiteral("Websites"), {}}
+                                    << Category{QStringLiteral("card"), QString(), QByteArrayLiteral("\x89PNG card")};
 
     const ContentsResult result = contentsFromJson(contentsToJson(contents));
     QCOMPARE(result.status, ContentsStatus::Read);
@@ -171,7 +176,7 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":8,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":9,"items":[]})").status, ContentsStatus::NewerFormat);
 }
 
 // The vault's own icons are kept and read back; a damaged list fails the
@@ -195,7 +200,7 @@ void TestVaultContents::the_vaults_own_icons_are_kept()
     second.id = QUuid::createUuid();
     older.items = {first, second};
     QByteArray json = contentsToJson(older);
-    json.replace("\"format\":7", "\"format\":4");
+    json.replace("\"format\":8", "\"format\":4");
     const ContentsResult read = contentsFromJson(json);
     QCOMPARE(read.status, ContentsStatus::Read);
     QCOMPARE(read.contents.customIcons, QList<QByteArray>{first.icon});

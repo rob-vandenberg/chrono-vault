@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.0.40
+# qml/CMakeLists.txt 0.2.56
 
 # --- Version history ----------------------------------------------------
+# v0.2.56: CategoryEditor.qml (D-056)
 # v0.0.40: IconPicker.qml, icon_library (D-050)
 # v0.0.38: settings_files (D-026)
 # v0.0.23: Unlocking with a fingerprint, a part per system (D-038)
@@ -52,6 +53,7 @@ qt_add_qml_module(chrono_vault_ui
         FilePicker.qml
         GeneratorDialog.qml
         IconPicker.qml
+        CategoryEditor.qml
         ImportWindow.qml
         DialogWindow.qml
         ItemEditor.qml

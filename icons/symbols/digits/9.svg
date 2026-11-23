@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>digit-9.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M28 0 L100 0 C115.464 0 128 12.536 128 28 L128 100 C128 115.464 115.464 128 100 128 L28 128 C12.536 128 0 115.464 0 100 L0 28 C0 12.536 12.536 0 28 0 Z" fill="#97266d"/>
+    <path d="M46.62 93.632 C59.272 100.556 88.983 95.949 84.974 50.124 C83.915 38.02 73.244 29.066 61.14 30.125 C49.036 31.184 40.082 41.855 41.141 53.959 C42.2 66.063 52.871 75.016 64.975 73.957 C77.079 72.898 86.033 62.228 84.974 50.124" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
