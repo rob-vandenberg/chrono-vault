@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// CategoryEditor.qml 0.2.56
+// CategoryEditor.qml 0.2.57
 
 // --- Version history ----------------------------------------------------
+// v0.2.57: The icon at the left with a pen badge, the whole icon a button; the name beside it (the owner)
 // v0.2.56: Initial release (D-056)
 
 // Edit a category, built-in or the person's own (D-056): its name, its icon
@@ -52,40 +53,67 @@ DialogWindow {
         nameField.selectAll()
     }
 
-    GridLayout {
-        columns: 2
-        columnSpacing: Math.round(12 * Appearance.factor)
-        rowSpacing: Math.round(8 * Appearance.factor)
+    readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
 
-        Label { text: qsTr("Name:") }
-        TextField {
-            id: nameField
-            objectName: "categoryNameField"
-            Layout.preferredWidth: Math.round(280 * Appearance.factor)
-            Layout.fillWidth: true
-            onAccepted: categoryEditor.accept()
-        }
-
-        Label { text: qsTr("Icon:") }
-        // A click on the icon opens the icon picker, as in the item editor.
-        AbstractButton {
-            id: iconButton
-            objectName: "categoryIconButton"
-            implicitWidth: Math.round(40 * Appearance.factor)
-            implicitHeight: implicitWidth
-            hoverEnabled: true
-            ToolTip.visible: hovered
-            ToolTip.text: qsTr("Choose an icon")
-            contentItem: Image {
-                source: categoryEditor.icon !== "" ? "data:image/png;base64," + categoryEditor.icon
-                                                   : categoryEditor.defaultIcon
-                sourceSize: Qt.size(width, height)
-                fillMode: Image.PreserveAspectFit
+    // The icon at the left with a pen in a small circle, the whole icon a
+    // button; the name to its right (the owner, as the item editor's).
+    ColumnLayout {
+        spacing: Math.round(12 * Appearance.factor)
+        RowLayout {
+            spacing: Math.round(16 * Appearance.factor)
+            Item {
+                objectName: "categoryIcon"
+                Layout.preferredWidth: Math.round(52 * Appearance.factor)
+                Layout.preferredHeight: Math.round(52 * Appearance.factor)
+                Image {
+                    anchors.fill: parent
+                    source: categoryEditor.icon !== "" ? "data:image/png;base64," + categoryEditor.icon
+                                                       : categoryEditor.defaultIcon
+                    sourceSize: Qt.size(width, height)
+                    fillMode: Image.PreserveAspectFit
+                }
+                ToolButton {
+                    objectName: "categoryIconBadge"
+                    width: Math.round(22 * Appearance.factor)
+                    height: width
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.margins: -Math.round(4 * Appearance.factor)
+                    icon.source: "qrc:/icons/edit.svg"
+                    icon.color: categoryEditor.palette.buttonText
+                    icon.width: Math.round(12 * Appearance.factor)
+                    icon.height: Math.round(12 * Appearance.factor)
+                    background: Rectangle {
+                        radius: width / 2
+                        color: categoryEditor.palette.window
+                        border.color: categoryEditor.lineColour
+                    }
+                    onClicked: iconPicker.start(categoryEditor.defaultIcon)
+                }
+                MouseArea {
+                    objectName: "categoryIconArea"
+                    anchors.fill: parent
+                    z: -1 // the badge, on top, answers for itself
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: iconPicker.start(categoryEditor.defaultIcon)
+                    ToolTip.visible: containsMouse
+                    ToolTip.text: qsTr("Change the icon")
+                }
             }
-            onClicked: iconPicker.start(categoryEditor.defaultIcon)
+            Label {
+                text: qsTr("Name:")
+                Layout.alignment: Qt.AlignVCenter
+            }
+            TextField {
+                id: nameField
+                objectName: "categoryNameField"
+                Layout.preferredWidth: Math.round(280 * Appearance.factor)
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                onAccepted: categoryEditor.accept()
+            }
         }
-
-        Item { width: 1; height: 1 }
         CheckBox {
             id: shownBox
             objectName: "categoryShownBox"

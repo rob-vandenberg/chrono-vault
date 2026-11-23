@@ -66,27 +66,22 @@ msgctxt "Category|"
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:35
+#: ../qml/CategoryEditor.qml:36
 msgctxt "CategoryEditor|"
 msgid "Edit category"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:60
+#: ../qml/CategoryEditor.qml:101
+msgctxt "CategoryEditor|"
+msgid "Change the icon"
+msgstr ""
+
+#: ../qml/CategoryEditor.qml:105
 msgctxt "CategoryEditor|"
 msgid "Name:"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:69
-msgctxt "CategoryEditor|"
-msgid "Icon:"
-msgstr ""
-
-#: ../qml/CategoryEditor.qml:78
-msgctxt "CategoryEditor|"
-msgid "Choose an icon"
-msgstr ""
-
-#: ../qml/CategoryEditor.qml:92
+#: ../qml/CategoryEditor.qml:120
 msgctxt "CategoryEditor|"
 msgid "Shown in the left column"
 msgstr ""
@@ -996,37 +991,42 @@ msgctxt "IconNames|"
 msgid "9"
 msgstr ""
 
-#: ../qml/IconPicker.qml:38
+#: ../qml/IconPicker.qml:39
 msgctxt "IconPicker|"
 msgid "Choose Icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:180
+#: ../qml/IconPicker.qml:173
+msgctxt "IconPicker|"
+msgid "Search"
+msgstr ""
+
+#: ../qml/IconPicker.qml:201
 msgctxt "IconPicker|"
 msgid "Custom Icons"
 msgstr ""
 
-#: ../qml/IconPicker.qml:189
+#: ../qml/IconPicker.qml:213
 msgctxt "IconPicker|"
 msgid "Default icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:231 ../qml/IconPicker.qml:264
+#: ../qml/IconPicker.qml:255 ../qml/IconPicker.qml:288
 msgctxt "IconPicker|"
 msgid "Add Custom Icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:239 ../qml/IconPicker.qml:281
+#: ../qml/IconPicker.qml:263 ../qml/IconPicker.qml:305
 msgctxt "IconPicker|"
 msgid "Delete icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:266
+#: ../qml/IconPicker.qml:290
 msgctxt "IconPicker|"
 msgid "Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)"
 msgstr ""
 
-#: ../qml/IconPicker.qml:285
+#: ../qml/IconPicker.qml:309
 #, qt-format
 msgctxt "IconPicker|"
 msgid ""

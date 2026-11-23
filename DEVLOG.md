@@ -463,3 +463,11 @@ a built-in one; the changes to built-in categories kept in the vault, contents f
 dialog is made when first opened: kept hidden inside the settings window, its icon picker's OK button was found by
 `test_menus` in place of the settings' own. `fieldOf` in `test_vault_merge.cpp` returns on every path (P42). One
 review round (2 reviewers), nothing real.
+
+## 23 November 2026: version 0.2.57: searching the icons
+
+Choose Icon has a Search field: by the shown name, any case, anywhere in the name; groups without a match and the
+vault's own icons (no names) are left out; empty at each opening (the owner, D-050 point 9). The Edit category
+dialog: the icon at the left with a pen badge, the whole icon a button, "Name:" beside it (D-056 point 8). One
+review round (2 reviewers), nothing real; remarked, not faults: no "no results" line, the search field not focused
+at opening.

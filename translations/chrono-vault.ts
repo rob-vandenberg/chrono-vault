@@ -70,27 +70,22 @@
 <context>
     <name>CategoryEditor</name>
     <message>
-        <location filename="../qml/CategoryEditor.qml" line="+35"/>
+        <location filename="../qml/CategoryEditor.qml" line="+36"/>
         <source>Edit category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+65"/>
+        <source>Change the icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
-        <source>Icon:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+9"/>
-        <source>Choose an icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+14"/>
+        <location line="+15"/>
         <source>Shown in the left column</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1017,17 +1012,22 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+38"/>
+        <location filename="../qml/IconPicker.qml" line="+39"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+142"/>
+        <location line="+134"/>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+28"/>
         <source>Custom Icons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+12"/>
         <source>Default icon</source>
         <translation type="unfinished"></translation>
     </message>

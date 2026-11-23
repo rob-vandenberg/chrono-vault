@@ -32,9 +32,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_icon_picker.cpp 0.2.56
+// test_icon_picker.cpp 0.2.57
 
 // --- Version history ----------------------------------------------------
+// v0.2.57: Searching the icons by name; the category dialog's icon opens the picker (the owner)
 // v0.2.56: Folders inside folders, "-" lines, shipped lines added (the owner, D-050)
 // v0.0.40: Initial release (D-050)
 
@@ -219,6 +220,99 @@ private slots:
         QVERIFY(controller.item(id).value(QStringLiteral("icon")).toString().isEmpty());
         QTRY_VERIFY(!controller.unsavedChanges());
         controller.lock();
+    }
+
+    // The search field narrows the icons by name, any case, anywhere in the
+    // name; a group without a match and the vault's own icons are left out;
+    // emptied, everything shows again (the owner).
+    void the_icons_are_searched_by_name()
+    {
+        QTemporaryDir installed;
+        QTemporaryDir home;
+        QTemporaryDir folder;
+        const QString personal = home.filePath(QStringLiteral("chrono-vault/icons"));
+        setIconsFoldersForTests(installed.path(), personal);
+        for (const char* name : {"banks", "symbols/digits"}) {
+            QVERIFY(QDir(installed.path()).mkpath(QString::fromLatin1(name)));
+        }
+        QVERIFY(!picture(installed.filePath(QStringLiteral("banks/RABOBANK.png")), Qt::blue).isEmpty());
+        QVERIFY(!picture(installed.filePath(QStringLiteral("banks/ING.png")), Qt::red).isEmpty());
+        QVERIFY(!picture(installed.filePath(QStringLiteral("symbols/digits/0.png")), Qt::green).isEmpty());
+        writeText(installed.filePath(QStringLiteral("icons.md")), "banks: Banks\nsymbols/digits: Digits\n");
+        QVERIFY(copyMissingIcons());
+
+        QQmlApplicationEngine engine;
+        engine.loadFromModule("ChronoVault", "Main");
+        auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst());
+        showMainWindow(window, false, false);
+        QVERIFY(QTest::qWaitForWindowExposed(window));
+        auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+        controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+        controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("search.chronovault"))),
+                                QStringLiteral("a"), QStringLiteral("a"));
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        auto* picker = qobject_cast<QQuickWindow*>(window->findChild<QObject*>(QStringLiteral("iconPicker")));
+        QVERIFY(picker);
+        QVERIFY(QMetaObject::invokeMethod(picker, "start", Q_ARG(QVariant, QStringLiteral("qrc:/icons/item-login.svg"))));
+        QTRY_VERIFY(picker->isVisible());
+        QObject* search = picker->findChild<QObject*>(QStringLiteral("iconSearchField"));
+        QObject* custom = picker->findChild<QObject*>(QStringLiteral("customIcons"));
+        QVERIFY(search && custom);
+        QCOMPARE(picker->property("shownSections").toList().size(), 2);
+
+        search->setProperty("text", QStringLiteral("boba"));
+        QVariantList shown = picker->property("shownSections").toList();
+        QCOMPARE(shown.size(), 1);
+        QCOMPARE(shown[0].toMap().value(QStringLiteral("heading")).toString(), QStringLiteral("Banks"));
+        const QVariantList icons = shown[0].toMap().value(QStringLiteral("icons")).toList();
+        QCOMPARE(icons.size(), 1);
+        QCOMPARE(icons[0].toMap().value(QStringLiteral("name")).toString(), QStringLiteral("RABOBANK"));
+        QVERIFY(!custom->property("visible").toBool());
+
+        search->setProperty("text", QStringLiteral("nothing like it"));
+        QVERIFY(picker->property("shownSections").toList().isEmpty());
+        search->setProperty("text", QString());
+        QCOMPARE(picker->property("shownSections").toList().size(), 2);
+        QVERIFY(custom->property("visible").toBool());
+
+        // Opened again, the search starts empty.
+        search->setProperty("text", QStringLiteral("ing"));
+        QVERIFY(QMetaObject::invokeMethod(picker, "close"));
+        QVERIFY(QMetaObject::invokeMethod(picker, "start", Q_ARG(QVariant, QStringLiteral("qrc:/icons/item-login.svg"))));
+        QCOMPARE(search->property("text").toString(), QString());
+        QVERIFY(QMetaObject::invokeMethod(picker, "close"));
+
+        // The category dialog: a click anywhere on its icon opens its picker.
+        QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+        QVERIFY(page);
+        QVariantMap login;
+        for (const QVariant& one : controller->categories()) {
+            if (one.toMap().value(QStringLiteral("id")) == QStringLiteral("login")) {
+                login = one.toMap();
+            }
+        }
+        QObject* loader = nullptr;
+        for (QObject* child : page->findChildren<QObject*>()) {
+            if (QString::fromLatin1(child->metaObject()->className()).startsWith(QStringLiteral("QQuickLoader")) &&
+                child->property("sourceComponent").isValid() && !child->property("active").toBool()) {
+                loader = child;
+            }
+        }
+        QVERIFY(loader);
+        loader->setProperty("active", true);
+        auto* dialog = qobject_cast<QQuickWindow*>(loader->property("item").value<QObject*>());
+        QVERIFY(dialog);
+        QVERIFY(QMetaObject::invokeMethod(dialog, "edit", Q_ARG(QVariant, login)));
+        QTRY_VERIFY(dialog->isExposed());
+        auto* icon = dialog->findChild<QQuickItem*>(QStringLiteral("categoryIcon"));
+        auto* categoryPicker = qobject_cast<QQuickWindow*>(dialog->findChild<QObject*>(QStringLiteral("categoryIconPicker")));
+        QVERIFY(icon && categoryPicker);
+        const QPoint topLeft = icon->mapToScene(QPointF(icon->width() / 4, icon->height() / 4)).toPoint();
+        QTest::mouseClick(dialog, Qt::LeftButton, Qt::NoModifier, topLeft);
+        QTRY_VERIFY(categoryPicker->isVisible());
+        QVERIFY(QMetaObject::invokeMethod(categoryPicker, "close"));
+        QVERIFY(QMetaObject::invokeMethod(dialog, "close"));
+        setIconsFoldersForTests(QString(), QString());
     }
 
     void the_editor_opens_the_picker_and_takes_its_choice()

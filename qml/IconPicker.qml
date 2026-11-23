@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.2.51
+// IconPicker.qml 0.2.57
 
 // --- Version history ----------------------------------------------------
+// v0.2.57: A search field: by name, any case, anywhere in the name (the owner, D-050)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.40: Initial release (D-050)
 
@@ -47,6 +48,15 @@ DialogWindow {
     property url defaultSource
     property var customIcons: []
     property var sections: []
+    // What is typed in the search field, and the groups that match it: by
+    // the icon's name as shown, any case, anywhere in the name; a group with
+    // no match is left out (the owner).
+    readonly property string searchText: searchField.text.trim().toLowerCase()
+    readonly property var shownSections: searchText === "" ? sections : sections.map(function(section) {
+        return { heading: section.heading,
+                 icons: section.icons.filter(function(icon) {
+                     return icon.name.toLowerCase().indexOf(picker.searchText) >= 0 }) }
+    }).filter(function(section) { return section.icons.length > 0 })
     // The icon a right-click was made on.
     property string menuIcon: ""
     readonly property int tileSize: Math.round(44 * Appearance.factor)
@@ -60,6 +70,7 @@ DialogWindow {
     function start(categoryIcon) {
         defaultSource = categoryIcon
         chosen = ""
+        searchField.text = ""
         reload()
         open()
     }
@@ -155,6 +166,14 @@ DialogWindow {
         Layout.topMargin: Math.round(8 * Appearance.factor)
     }
 
+    // As the search field above the item list (the owner).
+    TextField {
+        id: searchField
+        objectName: "iconSearchField"
+        placeholderText: qsTr("Search")
+        Layout.fillWidth: true
+    }
+
     ScrollView {
         id: scroll
         objectName: "iconScroll"
@@ -177,9 +196,14 @@ DialogWindow {
             width: scroll.availableWidth
             spacing: Math.round(8 * Appearance.factor)
 
-            Heading { text: qsTr("Custom Icons") }
+            // The vault's own icons have no names: not shown while searching.
+            Heading {
+                text: qsTr("Custom Icons")
+                visible: picker.searchText === ""
+            }
             Flow {
                 objectName: "customIcons"
+                visible: picker.searchText === ""
                 Layout.fillWidth: true
                 spacing: Math.round(10 * Appearance.factor)
                 Tile {
@@ -200,7 +224,7 @@ DialogWindow {
             }
 
             Repeater {
-                model: picker.sections
+                model: picker.shownSections
                 delegate: ColumnLayout {
                     id: section
                     required property var modelData
