@@ -70,7 +70,7 @@
 <context>
     <name>CategoryEditor</name>
     <message>
-        <location filename="../qml/CategoryEditor.qml" line="+36"/>
+        <location filename="../qml/CategoryEditor.qml" line="+37"/>
         <source>Edit category</source>
         <translation type="unfinished"></translation>
     </message>
@@ -85,8 +85,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
-        <source>Shown in the left column</source>
+        <location line="+17"/>
+        <source>Show in sidebar</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

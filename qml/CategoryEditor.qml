@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// CategoryEditor.qml 0.2.57
+// CategoryEditor.qml 0.2.58
 
 // --- Version history ----------------------------------------------------
+// v0.2.58: "Show in sidebar", under "Name:" and 4 pixels higher (the owner)
 // v0.2.57: The icon at the left with a pen badge, the whole icon a button; the name beside it (the owner)
 // v0.2.56: Initial release (D-056)
 
@@ -114,10 +115,15 @@ DialogWindow {
                 onAccepted: categoryEditor.accept()
             }
         }
+        // Under "Name:", 4 pixels higher (the owner): past the icon and the
+        // row's spacing.
         CheckBox {
             id: shownBox
             objectName: "categoryShownBox"
-            text: qsTr("Shown in the left column")
+            text: qsTr("Show in sidebar")
+            // Its own padding taken off, so its square stands under "Name:".
+            Layout.leftMargin: Math.round((52 + 16) * Appearance.factor) - leftPadding
+            Layout.topMargin: -Math.round(4 * Appearance.factor)
         }
     }
 

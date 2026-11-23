@@ -66,24 +66,24 @@ msgctxt "Category|"
 msgid "Miscellaneous"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:36
+#: ../qml/CategoryEditor.qml:37
 msgctxt "CategoryEditor|"
 msgid "Edit category"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:101
+#: ../qml/CategoryEditor.qml:102
 msgctxt "CategoryEditor|"
 msgid "Change the icon"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:105
+#: ../qml/CategoryEditor.qml:106
 msgctxt "CategoryEditor|"
 msgid "Name:"
 msgstr ""
 
-#: ../qml/CategoryEditor.qml:120
+#: ../qml/CategoryEditor.qml:123
 msgctxt "CategoryEditor|"
-msgid "Shown in the left column"
+msgid "Show in sidebar"
 msgstr ""
 
 #: ../qml/CustomizePage.qml:42

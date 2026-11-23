@@ -471,3 +471,8 @@ vault's own icons (no names) are left out; empty at each opening (the owner, D-0
 dialog: the icon at the left with a pen badge, the whole icon a button, "Name:" beside it (D-056 point 8). One
 review round (2 reviewers), nothing real; remarked, not faults: no "no results" line, the search field not focused
 at opening.
+
+## 23 November 2026: version 0.2.58: the category dialog's tick box
+
+"Show in sidebar", its square under "Name:" (its own padding taken off), 4 pixels higher (the owner, D-056 point 8).
+No reviewers (the owner).
