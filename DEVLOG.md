@@ -476,3 +476,7 @@ at opening.
 
 "Show in sidebar", its square under "Name:" (its own padding taken off), 4 pixels higher (the owner, D-056 point 8).
 No reviewers (the owner).
+
+## 23 November 2026: version 0.2.59: the editor's labels 50 to the left
+
+`qml/ItemEditor.qml` `labelWidth` 220 → 170, as the view in 0.2.46 (the owner). No reviewers (one value).

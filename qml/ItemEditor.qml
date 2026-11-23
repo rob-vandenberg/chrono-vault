@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.2.51
+// ItemEditor.qml 0.2.59
 
 // --- Version history ----------------------------------------------------
+// v0.2.59: The labels and fields 50 to the left, as the view (the owner)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.1.41: The item's own Notes box; the reference program's field types and names (D-051)
 // v0.0.40: Add at the left, Save and Cancel at the right; a click on the icon opens the icon picker (D-050)
@@ -60,7 +61,7 @@ Item {
     property var afterAsking: null
     property var afterCancelling: null
 
-    readonly property int labelWidth: Math.round(220 * Appearance.factor)
+    readonly property int labelWidth: Math.round(170 * Appearance.factor) // 50 to the left, as the view (the owner, 23 November 2026)
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
     // The reference program's field types, in the order its Field Options lists them.
     // The field types, with the reference program's names, in its order
