@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.2.47
+// VaultPage.qml 0.2.48
 
 // --- Version history ----------------------------------------------------
+// v0.2.48: The sidebar snaps after 100 pixels of travel each way (the owner)
 // v0.2.47: Counts above 0 only, long names cut off before them; minimum 180; the sidebar snaps shut or open past 120 when dragged (the owner)
 // v0.2.46: The sidebar on Base; the item list 5 pixels in at each side (the owner)
 // v0.2.45: A red dot on an item a merge left a note on (D-054)
@@ -88,14 +89,14 @@ Item {
     // The narrowest the expanded sidebar gets (the owner, 23 November 2026).
     readonly property int sidebarMinimum: Math.round(180 * Appearance.factor)
     // Dragging its splitter: the sidebar holds at its minimum, or at its icons,
-    // while the pointer goes on; past this point it snaps shut or open, as
+    // while the pointer travels 100 pixels more; then it snaps shut or open, as
     // the collapse button does (the owner, 23 November 2026).
-    readonly property int snapPoint: Math.round(120 * Appearance.factor)
+    readonly property int snapTravel: Math.round(100 * Appearance.factor)
     function dragSidebarTo(x) {
-        if (!collapsed && x < snapPoint) {
+        if (!collapsed && x < sidebarMinimum - snapTravel) {
             setCollapsed(true)
             expandedWidth = sidebarMinimum
-        } else if (collapsed && x > snapPoint) {
+        } else if (collapsed && x > collapsedWidth + snapTravel) {
             expandedWidth = sidebarMinimum
             setCollapsed(false)
         }

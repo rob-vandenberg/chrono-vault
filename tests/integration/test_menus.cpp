@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.2.47
+// test_menus.cpp 0.2.48
 
 // --- Version history ----------------------------------------------------
+// v0.2.48: The sidebar snap after 100 pixels each way
 // v0.2.47: Counts above 0 only; the sidebar snaps shut and open when dragged (the owner)
 // v0.2.46: The main window's shortcuts do nothing with the settings window in front (P33)
 // v0.1.42: Tests of Esc through the menu bar and the About box (D-052)
@@ -709,9 +710,9 @@ void TestMenus::after_a_menu_the_content_holds_the_keyboard()
     controller->setEscapeExits(false);
 }
 
-// Dragged narrower, the sidebar holds at 180 until the pointer passes 120,
-// then collapses; dragged wider, it holds at its icons until the pointer
-// passes 120, then opens at 180 (the owner, 23 November 2026).
+// Dragged narrower, the sidebar holds at 180 until the pointer passes 80,
+// then collapses; dragged wider, it holds at its icons (64) until the pointer
+// passes 164, then opens at 180: 100 pixels each way (the owner).
 void TestMenus::the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged()
 {
     QVERIFY(open(QStringLiteral("snap")));
@@ -729,29 +730,29 @@ void TestMenus::the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged()
         QTest::mouseMove(quickWindow, QPoint(x, y));
         QTest::qWait(60);
     };
-    // Narrower: held at 180 at 150, shut past 120.
+    // Narrower: held at 180 at 100, shut past 80.
     int handle = qRound(column->width()) + 4;
     QCursor::setPos(quickWindow->mapToGlobal(QPoint(handle, y)));
     QTest::mousePress(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(handle, y));
     moveTo(handle - 10);
-    moveTo(150);
+    moveTo(100);
     QCOMPARE(qRound(column->width()), 180);
     QVERIFY(!controller->sidebarCollapsed());
-    moveTo(110);
+    moveTo(70);
     QTRY_VERIFY(controller->sidebarCollapsed());
-    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(110, y));
+    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(70, y));
     QTRY_COMPARE(qRound(column->width()), 64);
-    // Wider: held at its icons at 100, open at 180 past 120.
+    // Wider: held at its icons at 150, open at 180 past 164.
     handle = qRound(column->width()) + 4;
     QCursor::setPos(quickWindow->mapToGlobal(QPoint(handle, y)));
     QTest::mousePress(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(handle, y));
     moveTo(handle + 10);
-    moveTo(100);
+    moveTo(150);
     QVERIFY(controller->sidebarCollapsed());
     QCOMPARE(qRound(column->width()), 64);
-    moveTo(130);
+    moveTo(175);
     QTRY_VERIFY(!controller->sidebarCollapsed());
-    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(130, y));
+    QTest::mouseRelease(quickWindow, Qt::LeftButton, Qt::NoModifier, QPoint(175, y));
     QTRY_COMPARE(qRound(column->width()), 180);
 }
 

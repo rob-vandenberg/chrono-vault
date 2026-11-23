@@ -403,3 +403,7 @@ side, the labels of an item ending 50 pixels further left.
 
 Counts above 0 only; long sidebar names end in "…" before their count; the sidebar at least 180 wide, snapping shut or
 open when its splitter is dragged past 120 (the owner; D-039, D-042).
+
+## 23 November 2026: version 0.2.48: a larger dead zone for the sidebar snap
+
+The sidebar snaps after 100 pixels of travel each way: shut past 80, open past 164 (the owner, D-042).
