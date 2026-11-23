@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.2.45
+// ItemDetails.qml 0.2.46
 
 // --- Version history ----------------------------------------------------
+// v0.2.46: The labels end 50 pixels further left (the owner)
 // v0.2.45: The notes a merge left, with Use the other value, Delete Permanently and OK or Keep (D-054)
 // v0.1.41: The cards on the theme's Base colour (D-051)
 // v0.0.24: Item > Show Passwords shows every sensitive field (D-039)
@@ -69,7 +70,7 @@ Item {
         }
         return result.filter(function(card) { return card.rows.length > 0 })
     }
-    readonly property int labelWidth: Math.round(220 * Appearance.factor)
+    readonly property int labelWidth: Math.round(170 * Appearance.factor) // 50 to the left (the owner, 23 November 2026)
     readonly property int rowHeight: Math.round(54 * Appearance.factor)
     // Card borders and the lines between rows: a faint shade of the text,
     // seen on a light and a dark page alike.

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.1.44
+// Main.qml 0.2.46
 
 // --- Version history ----------------------------------------------------
+// v0.2.46: The shortcuts only while the main window has the keyboard (P33); 5 pixels more above and below the top bar
 // v0.1.44: Every shortcut stands aside while the settings wait for a new key (D-053)
 // v0.1.42: Esc through the window's own keys, not a shortcut; the keyboard back to the content after a menu, as Chrono Viewer (D-052)
 // v0.0.39: Esc in the main window only while it has the keys, so Esc closes the About box (D-049)
@@ -69,6 +70,10 @@ ApplicationWindow {
     // A text field has the keyboard: the menus' shortcuts stand aside, so
     // Backspace deletes a letter, never the item (D-039).
     readonly property bool typing: activeFocusItem !== null && activeFocusItem.cursorPosition !== undefined
+    // The main window itself has the keyboard: not the settings window or
+    // another window of ours in front of it (P33). Only then do its shortcuts
+    // answer, Quit excepted.
+    readonly property bool holdsKeyboard: active && activeFocusItem !== null
     // The keys of every action, as the person set them (D-045): the menus
     // show the first; each action answers to all of them.
     function firstKey(actionId) {
@@ -104,7 +109,7 @@ ApplicationWindow {
             readonly property bool quit: modelData.actionId === "quit"
             sequences: {
                 VaultController.shortcutsRevision
-                return settingsWindow.catchingAKey || (mainWindow.typing && !quit)
+                return settingsWindow.catchingAKey || (!quit && (mainWindow.typing || !mainWindow.holdsKeyboard))
                         ? [] : VaultController.keysOf(modelData.actionId)
             }
             context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
@@ -232,6 +237,9 @@ ApplicationWindow {
     // right. What needs an unlocked vault is greyed until then.
     header: ToolBar {
         objectName: "topBar"
+        // 5 pixels more above and below (the owner, 23 November 2026).
+        topPadding: SafeArea.margins.top + Math.round(5 * Appearance.factor)
+        bottomPadding: SafeArea.margins.bottom + Math.round(5 * Appearance.factor)
         RowLayout {
             anchors.fill: parent
             anchors.rightMargin: Math.round(8 * Appearance.factor)

@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.1.42
+// test_menus.cpp 0.2.46
 
 // --- Version history ----------------------------------------------------
+// v0.2.46: The main window's shortcuts do nothing with the settings window in front (P33)
 // v0.1.42: Tests of Esc through the menu bar and the About box (D-052)
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -365,6 +366,26 @@ void TestMenus::shortcuts_stand_aside_while_a_text_field_is_typed_in()
     QTRY_VERIFY(!window->property("typing").toBool());
     QTest::keyClick(quickWindow, Qt::Key_U, Qt::ShiftModifier | Qt::ControlModifier);
     QCOMPARE(QGuiApplication::clipboard()->text(), QStringLiteral("rob"));
+
+    // With the settings window in front, the main window's shortcuts do
+    // nothing (P33); with the main window in front again, they answer.
+    QGuiApplication::clipboard()->clear();
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    auto* settingsQuick = qobject_cast<QQuickWindow*>(settings);
+    settingsQuick->requestActivate();
+    QTRY_COMPARE(QGuiApplication::focusWindow(), settingsQuick);
+    QTRY_VERIFY(!window->property("holdsKeyboard").toBool());
+    QTest::keyClick(settingsQuick, Qt::Key_U, Qt::ShiftModifier | Qt::ControlModifier);
+    QVERIFY(QGuiApplication::clipboard()->text().isEmpty());
+    settingsQuick->close();
+    quickWindow->requestActivate();
+    QTRY_COMPARE(QGuiApplication::focusWindow(), quickWindow);
+    list->forceActiveFocus();
+    QTRY_VERIFY(window->property("holdsKeyboard").toBool());
+    QTest::keyClick(quickWindow, Qt::Key_U, Qt::ShiftModifier | Qt::ControlModifier);
+    QCOMPARE(QGuiApplication::clipboard()->text(), QStringLiteral("rob"));
+
     QTest::keyClick(quickWindow, Qt::Key_Backspace);
     QTRY_VERIFY(controller->item(id).value(QStringLiteral("trashed")).toBool());
 }

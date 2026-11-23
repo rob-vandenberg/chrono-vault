@@ -392,3 +392,9 @@ Viewer's; while they are open no shortcut answers, so every key is the new key (
 `ROADMAP.md` step 10. A change here and one elsewhere are merged against the base, no longer kept as a conflict copy;
 the newest change stands, the other is kept in the field's history and in a note on the item; items deleted for good
 are remembered, contents format 7 (D-054). Tests: `tests/unit/test_vault_merge.cpp`, `test_elsewhere`, the item page.
+
+## 23 November 2026: version 0.2.46: shortcuts only in the main window, and the layout
+
+The main window's shortcuts answer only while it has the keyboard (P33, D-053). The owner's layout changes: the
+sidebar on the cards' colour (Base), the top bar 5 pixels more above and below, the item list 5 pixels in at each
+side, the labels of an item ending 50 pixels further left.

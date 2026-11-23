@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.2.45
+// VaultPage.qml 0.2.46
 
 // --- Version history ----------------------------------------------------
+// v0.2.46: The sidebar on Base; the item list 5 pixels in at each side (the owner)
 // v0.2.45: A red dot on an item a merge left a note on (D-054)
 // v0.1.42: listItem (D-052)
 // v0.1.41: Up, Down, Page Up, Page Down, Home and End show the item they move to (D-051)
@@ -324,6 +325,8 @@ Item {
             SplitView.minimumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Math.round(160 * Appearance.factor)
             SplitView.maximumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Number.POSITIVE_INFINITY
             padding: vaultPage.collapsed ? Math.round(6 * Appearance.factor) : Math.round(12 * Appearance.factor)
+            // The cards' own colour, the theme's Base (the owner, 23 November 2026).
+            background: Rectangle { color: vaultPage.palette.base }
 
             readonly property var categoryList: VaultController.revision >= 0 ? VaultController.categories() : []
             readonly property var tagList: VaultController.revision >= 0 ? VaultController.tags() : []
@@ -565,13 +568,13 @@ Item {
                 onTextEdited: VaultController.searchText = text
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(8 * Appearance.factor)
-                Layout.leftMargin: Math.round(8 * Appearance.factor)
-                Layout.rightMargin: Math.round(8 * Appearance.factor)
+                Layout.leftMargin: Math.round(13 * Appearance.factor)
+                Layout.rightMargin: Math.round(13 * Appearance.factor)
             }
 
             RowLayout {
                 spacing: Math.round(2 * Appearance.factor)
-                Layout.leftMargin: Math.round(8 * Appearance.factor)
+                Layout.leftMargin: Math.round(13 * Appearance.factor)
                 Label {
                     text: qsTr("Sort By:")
                     opacity: 0.7
@@ -601,6 +604,9 @@ Item {
                 currentIndex: -1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                // 5 pixels more at the left and right (the owner, 23 November 2026).
+                Layout.leftMargin: Math.round(5 * Appearance.factor)
+                Layout.rightMargin: Math.round(5 * Appearance.factor)
                 // Up, Down, Page Up, Page Down, Home and End show the item they
                 // move to, as a click does, an edit not saved yet asked about
                 // first (D-051).

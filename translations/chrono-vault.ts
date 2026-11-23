@@ -522,7 +522,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+138"/>
+        <location filename="../qml/ItemDetails.qml" line="+139"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -954,7 +954,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+62"/>
+        <location filename="../qml/Main.qml" line="+63"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -964,7 +964,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+188"/>
+        <location line="+195"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1021,12 +1021,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-559"/>
+        <location line="-562"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+173"/>
+        <location line="+176"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1988,7 +1988,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+386"/>
+        <location filename="../qml/VaultPage.qml" line="+389"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2008,8 +2008,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-317"/>
-        <location line="+325"/>
+        <location line="-319"/>
+        <location line="+327"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2075,7 +2075,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+168"/>
+        <location line="+171"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2090,7 +2090,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-360"/>
+        <location line="-363"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2100,7 +2100,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+359"/>
+        <location line="+362"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
