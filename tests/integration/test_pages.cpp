@@ -29,6 +29,7 @@
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtTest>
 #include <QQuickItem>
+#include <QDir>
 #include <QFile>
 #include <QQuickWindow>
 #include <QSignalSpy>
@@ -37,6 +38,7 @@
 // test_pages.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: A change kept through a lock is asked about before another vault
 // v0.3.62: Save closes the editor on the saved item
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -114,6 +116,7 @@ private slots:
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
     void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
     void new_item_shows_when_it_has_the_keyboard_focus();
+    void a_change_kept_through_a_lock_is_asked_about_before_another_vault();
 };
 
 void TestPages::initTestCase()
@@ -622,6 +625,118 @@ void TestPages::new_item_shows_when_it_has_the_keyboard_focus()
     QTRY_VERIFY(button->property("visualFocus").toBool());
     QVERIFY(fill->property("border").value<QObject*>()->property("width").toInt() >= 2);
     controller->lock();
+}
+
+void TestPages::a_change_kept_through_a_lock_is_asked_about_before_another_vault()
+{
+#ifdef Q_OS_WIN
+    QSKIP("A folder cannot be made read-only for its owner on Windows.");
+#else
+    // Its own primary and list, whatever ran before (OR-11).
+    SettingsFile().clear();
+    VaultsFile().clear();
+    QTemporaryDir folder;
+    QVERIFY(folder.isValid());
+    QVERIFY(QDir(folder.path()).mkdir(QStringLiteral("home")));
+    const QString homeFolder = folder.filePath(QStringLiteral("home"));
+    const QString home = homeFolder + QStringLiteral("/home.chronovault");
+    const QString work = folder.filePath(QStringLiteral("work.chronovault"));
+
+    QList<QQmlError> qmlWarnings;
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+                     [&qmlWarnings](const QList<QQmlError>& warnings) { qmlWarnings.append(warnings); });
+    engine.loadFromModule("ChronoVault", "Main");
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(home), QStringLiteral("a"), QStringLiteral("a"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    controller->createVault(QUrl::fromLocalFile(work), QStringLiteral("b"), QStringLiteral("b"), QUrl(), true);
+    QTRY_COMPARE(controller->vaultPath(), work);
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QTRY_VERIFY(controller->isIdle());
+    QObject* vaultPage = window->findChild<QObject*>(QStringLiteral("vaultPage"));
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "switchVault", Q_ARG(QVariant, home)));
+    QTRY_COMPARE(controller->vaultPath(), home);
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QTRY_VERIFY(controller->isIdle());
+
+    // A save that fails, kept through the lock.
+    QVERIFY(QFile::setPermissions(homeFolder, QFileDevice::ReadOwner | QFileDevice::ExeOwner));
+    QVariantMap mine = controller->newLogin();
+    mine.insert(QStringLiteral("title"), QStringLiteral("Mine"));
+    QVERIFY(controller->saveItem(mine));
+    QTRY_VERIFY(controller->saveFailed());
+    controller->lock();
+    QVERIFY(QFile::setPermissions(homeFolder, QFileDevice::ReadOwner | QFileDevice::WriteOwner |
+                                                  QFileDevice::ExeOwner));
+    QVERIFY(controller->hasKeptChanges());
+    QTRY_COMPARE(controller->state(), State::Locked);
+    QCOMPARE(controller->vaultPath(), home);
+
+    // Another vault in the list, or Create a new vault…: asked first, and
+    // Cancel keeps the change and the vault.
+    QObject* leaveDialog = window->findChild<QObject*>(QStringLiteral("leaveVaultDialog"));
+    QObject* vaultBox = window->findChild<QObject*>(QStringLiteral("unlockVaultBox"));
+    // The unlock page's own, not the start page's of the same name.
+    QObject* createNew = nullptr;
+    for (QObject* one : window->findChildren<QObject*>(QStringLiteral("createNewButton"))) {
+        if (one->property("text").toString() == QStringLiteral("Create a new vault…") &&
+            one->parent() == vaultBox->parent()) {
+            createNew = one;
+        }
+    }
+    QVERIFY(leaveDialog && vaultBox && createNew);
+    controller->checkVaults();
+    QTRY_VERIFY(vaultBox->property("listed").toStringList().contains(work));
+    const int workIndex = int(vaultBox->property("listed").toStringList().indexOf(work));
+    QVERIFY(QMetaObject::invokeMethod(vaultBox, "activated", Q_ARG(int, workIndex)));
+    QTRY_VERIFY(leaveDialog->property("opened").toBool());
+    QCOMPARE(controller->vaultPath(), home);
+    QVERIFY(QMetaObject::invokeMethod(leaveDialog, "reject"));
+    QTRY_VERIFY(!leaveDialog->property("opened").toBool());
+    QVERIFY(controller->hasKeptChanges());
+    QCOMPARE(controller->vaultPath(), home);
+    QVERIFY(QMetaObject::invokeMethod(createNew, "clicked"));
+    QTRY_VERIFY(leaveDialog->property("opened").toBool());
+    QVERIFY(QMetaObject::invokeMethod(leaveDialog, "reject"));
+    QTRY_VERIFY(!leaveDialog->property("opened").toBool());
+    QVERIFY(controller->hasKeptChanges());
+
+    // Discard, then Cancel where the new vault would be kept: no other vault
+    // was opened, so the change stays.
+    QVERIFY(QMetaObject::invokeMethod(createNew, "clicked"));
+    QTRY_VERIFY(leaveDialog->property("opened").toBool());
+    QVERIFY(QMetaObject::invokeMethod(leaveDialog, "discard"));
+    QObject* storage = window->findChild<QObject*>(QStringLiteral("storageWindow"));
+    QVERIFY(storage);
+    QTRY_VERIFY(storage->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(storage, "reject"));
+    QTRY_VERIFY(!storage->property("visible").toBool());
+    QVERIFY(controller->hasKeptChanges());
+    QCOMPARE(controller->vaultPath(), home);
+
+    // Discard gives the change up, then goes on to the vault picked; a
+    // password typed for the vault before is not kept for the next.
+    QObject* masterField = window->findChild<QObject*>(QStringLiteral("masterPasswordField"));
+    QVERIFY(masterField);
+    masterField->setProperty("text", QStringLiteral("a"));
+    QVERIFY(QMetaObject::invokeMethod(vaultBox, "activated", Q_ARG(int, workIndex)));
+    QTRY_VERIFY(leaveDialog->property("opened").toBool());
+    QVERIFY(QMetaObject::invokeMethod(leaveDialog, "discard"));
+    QTRY_COMPARE(controller->vaultPath(), work);
+    QCOMPARE(masterField->property("text").toString(), QString());
+    QVERIFY(!controller->hasKeptChanges());
+    QVERIFY(!leaveDialog->property("opened").toBool());
+
+    QString warningText;
+    for (const QQmlError& warning : std::as_const(qmlWarnings)) {
+        warningText += warning.toString() + QLatin1Char('\n');
+    }
+    QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
+#endif
 }
 
 QTEST_MAIN(TestPages)

@@ -49,6 +49,7 @@
 // vault_controller.h 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: giveUpKeptChangesOnLeaving, leavingFor
 // v0.3.62: The WebDAV folder browser; a new WebDAV vault kept only after its first upload (D-057)
 // v0.3.60: A vault kept on a WebDAV server: its working copy synced, connecting, creating, opening, moving and
 //          disconnecting (D-057)
@@ -344,6 +345,9 @@ public:
     Q_INVOKABLE void lock();
     // Back to the start, to create or choose another vault.
     Q_INVOKABLE void closeVault();
+    // The person agreed to give up a change kept through a lock: it goes once
+    // another vault is opened, created or switched to, not before (OR-15).
+    Q_INVOKABLE void giveUpKeptChangesOnLeaving();
 
     // An item as the editor uses it: {id, templateId, templateName,
     // categoryId, isNote, title, fields: [{role, label, name, kind, value}],
@@ -589,6 +593,9 @@ private:
     void setFailed(bool hasFailed);
     void keepUnsavedWhileLocked();
     void takeBackUnsaved();
+    void discardKeptChanges();
+    // Called as the person goes to another vault.
+    void leavingFor(const QString& vaultFile);
     // The list and every window that shows the contents are told of a change.
     void contentsChanged();
     void setItemPlace(const QString& id, bool Item::*place, bool on);
@@ -768,10 +775,11 @@ private:
     QString copiedText;
 
     // WebDAV (D-057).
-    void vaultsChecked(const QStringList& found);
+    void vaultsChecked(const QStringList& checked, QStringList found);
     QStringList foundList;
     QString missingLast;
     bool checkingVaults = false;
+    bool keptChangesGivenUp = false;
     qint64 missingSinceMs = 0;
     QTimer vaultRetry;
     std::unique_ptr<WebDavSync> syncer;

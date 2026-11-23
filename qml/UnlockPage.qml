@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: A change kept through a lock is asked about before another vault; the password field cleared when the vault changes
 // v0.3.66: Open another vault… in the list, Create a new vault… below, each straight to Select Storage; the place under
 //          each vault; the list always below the field (the owner, D-058)
 // v0.3.65: The owner's design, bigger and rounded; only the vaults found, the last used struck through when not (D-058)
@@ -54,13 +55,16 @@ Item {
         passwordField.forceActiveFocus()
     }
 
-    // To the start page, to open or create another vault; a change kept
-    // through a lock is asked about first.
-    function leaveForAnother() {
-        if (VaultController.hasKeptChanges)
+    // To another vault, or to open or create one: a change kept through a
+    // lock is asked about first, as it would be lost (OR-15).
+    property var afterLeaving: null
+    function leaveForAnother(then) {
+        if (VaultController.hasKeptChanges) {
+            afterLeaving = then
             leaveDialog.open()
-        else
-            VaultController.closeVault()
+        } else {
+            then()
+        }
     }
 
     function unlockNow() {
@@ -86,7 +90,11 @@ Item {
     Component.onCompleted: askFinger()
     Connections {
         target: VaultController
-        function onVaultPathChanged() { unlockPage.askFinger() }
+        // A password typed for one vault is never tried on another.
+        function onVaultPathChanged() {
+            passwordField.clear()
+            unlockPage.askFinger()
+        }
     }
     Connections {
         target: unlockPage.Window.window
@@ -277,9 +285,9 @@ Item {
                 // The list follows the vault shown again, whatever was picked.
                 currentIndex = Qt.binding(function() { return vaultBox.listed.indexOf(VaultController.vaultPath) })
                 if (chosen === other)
-                    unlockPage.openRequested()
+                    unlockPage.leaveForAnother(function() { unlockPage.openRequested() })
                 else if (chosen !== VaultController.vaultPath)
-                    VaultController.switchToVault(chosen)
+                    unlockPage.leaveForAnother(function() { VaultController.switchToVault(chosen) })
                 passwordField.forceActiveFocus()
             }
         }
@@ -314,7 +322,7 @@ Item {
             text: qsTr("Create a new vault…")
             Layout.fillWidth: true
             Layout.topMargin: Math.round(12 * Appearance.factor)
-            onClicked: unlockPage.createRequested()
+            onClicked: unlockPage.leaveForAnother(function() { unlockPage.createRequested() })
         }
         Label {
             objectName: "unlockWaitText"
@@ -382,6 +390,7 @@ Item {
     DialogWindow {
 
         id: leaveDialog
+        objectName: "leaveVaultDialog"
 
         memoryName: "leaveVault"
         title: qsTr("A change is not saved")
@@ -395,8 +404,13 @@ Item {
         }
         onDiscarded: {
             leaveDialog.close()
-            VaultController.closeVault()
+            VaultController.giveUpKeptChangesOnLeaving()
+            const then = unlockPage.afterLeaving
+            unlockPage.afterLeaving = null
+            if (then)
+                then()
         }
+        onRejected: unlockPage.afterLeaving = null
     }
 
     FilePicker {

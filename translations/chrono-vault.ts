@@ -2505,7 +2505,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+322"/>
+        <location filename="../qml/UnlockPage.qml" line="+330"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2605,7 +2605,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2615,7 +2615,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+20"/>
         <source>Choose the vault&apos;s keyfile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2687,7 +2687,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+224"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+225"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2890,7 +2890,7 @@
 <context>
     <name>WebDavFileDialog</name>
     <message>
-        <location filename="../qml/WebDavFileDialog.qml" line="+51"/>
+        <location filename="../qml/WebDavFileDialog.qml" line="+54"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2920,7 +2920,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="+39"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3041,7 +3041,7 @@
 <context>
     <name>WebDavWindow</name>
     <message>
-        <location filename="../qml/WebDavWindow.qml" line="+74"/>
+        <location filename="../qml/WebDavWindow.qml" line="+75"/>
         <source>New vault on a WebDAV server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3483,32 +3483,32 @@
 <context>
     <name>chrono_vault::VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+402"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+408"/>
         <source>Choose where to keep the new vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2145"/>
+        <location line="+2169"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+477"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2141"/>
-        <location line="+2146"/>
+        <location line="-2165"/>
+        <location line="+2170"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2049"/>
-        <location line="+1949"/>
+        <location line="-2073"/>
+        <location line="+1973"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2038"/>
+        <location line="-2062"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3520,15 +3520,15 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+1828"/>
-        <location line="+213"/>
+        <location line="+1851"/>
+        <location line="+214"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <location line="+89"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2110"/>
+        <location line="-2134"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -3544,7 +3544,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1709"/>
+        <location line="+1731"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3554,12 +3554,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+130"/>
+        <location line="+131"/>
         <source>Your new vault is ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1702"/>
+        <location line="-1724"/>
         <location line="+82"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
@@ -3590,7 +3590,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="+155"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3788,7 +3788,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+298"/>
+        <location line="+300"/>
         <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
         <translation type="unfinished"></translation>
     </message>

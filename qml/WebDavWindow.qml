@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // WebDavWindow.qml 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: Leaving the file dialog without a new choice goes back to the folder of the choice shown
 // v0.3.63: One button: Connect, then Open, Next… or Move; the vault or folder chosen with Browse… in a file dialog of
 //          its own; the window as tall as its content (the owner, D-057)
 // v0.3.62: The server chosen from a list, the folder chosen in a browser with New folder; a reason shown when the
@@ -328,6 +329,14 @@ DialogWindow {
             webDavWindow.chosenFile = fileName
             webDavWindow.chosenFolder = folder
             webDavWindow.chosen = true
+        }
+        // Left without a new choice after looking elsewhere: the choice still
+        // shown holds, so the connection goes back to its folder.
+        onRejected: {
+            if (webDavWindow.chosen && webDavWindow.folderShown !== webDavWindow.chosenFolder) {
+                webDavWindow.waitingFor = "browse"
+                VaultController.openWebDavFolder(webDavWindow.chosenFolder)
+            }
         }
     }
 }

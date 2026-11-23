@@ -540,3 +540,15 @@ The owner's changelist items 1-8, no reviewers: `qml/BigButton.qml`, `qml/Welcom
 `qml/UnlockPage.qml` (Open another vault… in the list, Create a new vault… below, the place line), `qml/Main.qml`
 (the unlock page's two requests). Related tests pass (D-058 points 11-13).
 
+
+## 24 November 2026: version 0.3.67: the review rounds skipped in 0.3.63 to 0.3.66
+
+The owner's Proceed, autonomous mode. The reviewers saw the range 0.3.62..HEAD by a `git reset --mixed 0.3.62` (files
+untouched, commits put back afterwards). Five rounds; real faults fixed, each with a test: a change kept through a
+lock was put at risk without a word when another vault was picked or opened from the unlock page (OR-15; asked again,
+and given up only once another vault is really opened, `giveUpKeptChangesOnLeaving`); a password typed for one vault
+stayed in the field when the vault shown changed; a cancelled Browse… left Open, Next… or Move greyed out; a refused
+New folder left a bogus Back step; a look at which vaults exist, still running, dropped a vault made meanwhile (no
+test: it depends on timing, OR-11). Not real: no Unlock button (the owner's design), flicker of the not-found line
+(no signal while looking), `#` and `?` in folder names (checked: the address comes back the same). Round 5 found
+nothing real. The 12 related tests pass.

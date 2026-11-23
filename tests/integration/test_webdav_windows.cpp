@@ -36,6 +36,7 @@
 // test_webdav_windows.cpp 0.3.64
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
 // v0.3.64: The unlock page's vault list and field
 // v0.3.63: One button Connect then Next…; Browse… and the WebDAV file dialog; the window's height
 // v0.3.62: The Select Storage tiles, the server list, the folder browser, the unlock page's address
@@ -219,6 +220,25 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(inWindow(webDav, QStringLiteral("webDavChosenField"))->property("text").toString().endsWith(
         QStringLiteral("/Work vaults/Home.chronovault")));
     QVERIFY(goButton->isEnabled());
+
+    // Browse… again, Up, a folder the server refuses: Back gains no step for
+    // the folder that was not made. Cancel keeps the choice, and Next… stays
+    // enabled.
+    click(inWindow(webDav, QStringLiteral("webDavBrowseButton")));
+    QTRY_VERIFY(files->property("visible").toBool());
+    click(inWindow(files, QStringLiteral("fileDialogUpButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString() == files->property("serverRoot").toString(), 10000);
+    const qsizetype steps = files->property("history").toList().size();
+    click(inWindow(files, QStringLiteral("fileDialogNewFolderButton")));
+    inWindow(files, QStringLiteral("fileDialogFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
+    click(inWindow(files, QStringLiteral("fileDialogCreateFolderButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(!files->property("problem").toString().isEmpty(), 10000);
+    QCOMPARE(files->property("history").toList().size(), steps);
+    QVERIFY(QMetaObject::invokeMethod(files, "reject"));
+    QTRY_VERIFY(!files->property("visible").toBool());
+    QTRY_VERIFY_WITH_TIMEOUT(goButton->isEnabled(), 10000);
+    QVERIFY(inWindow(webDav, QStringLiteral("webDavChosenField"))->property("text").toString().endsWith(
+        QStringLiteral("/Work vaults/Home.chronovault")));
 
     // Next…, then the master password, as for a file here.
     click(goButton);

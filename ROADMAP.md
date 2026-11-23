@@ -47,6 +47,9 @@ The menus and settings of the reference program that Chrono Vault does not have 
 14. ~~A keyboard shortcut editor that looks and works as Chrono Viewer's.~~ Done in 0.0.35 (D-045).
 15. An "Attachments" box always below Tags in the editor, as the reference program's: "Drag and drop or click here / to
     attach files"; a click opens the file chooser, dropped files are added (the owner, 23 November 2026).
+16. Merge with…: a second vault merged into the open one, its master password asked; conflicts settled in one dialog
+    after the merge, after Chrono Mail's Sync conflicts dialog; the same dialog then proposed for sync conflicts
+    (D-054). The owner, 23 November 2026.
 
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.

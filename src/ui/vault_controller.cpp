@@ -57,6 +57,7 @@
 // vault_controller.cpp 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: A kept change given up only once another vault is opened; a vault added during a look counts as found
 // v0.3.65: Which vaults are found, checked in the background and again now and then (the owner, D-058)
 // v0.3.64: A lock keeps the vault used last on the unlock page (the owner, D-058)
 // v0.3.62: The end of creating a vault a function of its own, for a WebDAV vault's first upload (D-057)
@@ -480,13 +481,19 @@ void VaultController::checkVaults()
             }
         }
         QMetaObject::invokeMethod(
-            qApp, [self, found]() { if (self) { self->vaultsChecked(found); } }, Qt::QueuedConnection);
+            qApp, [self, all, found]() { if (self) { self->vaultsChecked(all, found); } }, Qt::QueuedConnection);
     });
 }
 
-void VaultController::vaultsChecked(const QStringList& found)
+void VaultController::vaultsChecked(const QStringList& checked, QStringList found)
 {
     checkingVaults = false;
+    // A vault made or opened while the look ran is there, though not looked at.
+    for (const QString& one : std::as_const(foundList)) {
+        if (!checked.contains(one) && !found.contains(one)) {
+            found.append(one);
+        }
+    }
     foundList = found;
     if (currentState == State::Unlocked || currentState == State::Busy) {
         emit vaultsFoundChanged();
@@ -860,6 +867,7 @@ void VaultController::chooseVault(const QUrl& file)
     forgetUnlockedVault();
     ++unlockAttempt; // a create or unlock still running no longer counts
     addVault(chosen);
+    leavingFor(chosen);
     setPath(chosen);
     say(QString(), false);
     setState(State::Locked);
@@ -1154,16 +1162,37 @@ void VaultController::closeVault()
     returnTo.clear();
     ++unlockAttempt;
     // The window has asked the person before this (OR-15).
-    if (!unsavedSealed.isEmpty()) {
-        unsavedSealed.clear();
-        unsavedPath.clear();
-        unsavedStamp.clear();
-        emit keptChangesChanged();
-    }
+    discardKeptChanges();
     setPath(QString());
     VaultsFile().remove(lastVaultKey);
     say(QString(), false);
     setState(State::NoVault);
+}
+
+void VaultController::giveUpKeptChangesOnLeaving()
+{
+    keptChangesGivenUp = !unsavedSealed.isEmpty();
+}
+
+void VaultController::leavingFor(const QString& vaultFile)
+{
+    if (keptChangesGivenUp && vaultFile != unsavedPath) {
+        discardKeptChanges();
+    }
+    keptChangesGivenUp = false;
+}
+
+void VaultController::discardKeptChanges()
+{
+    keptChangesGivenUp = false;
+    if (unsavedSealed.isEmpty()) {
+        return;
+    }
+    unsavedSealed.clear();
+    unsavedBaseSealed.clear();
+    unsavedPath.clear();
+    unsavedStamp.clear();
+    emit keptChangesChanged();
 }
 
 QVariantMap VaultController::item(const QString& id) const
@@ -2659,6 +2688,7 @@ void VaultController::forgetPrimary()
 void VaultController::showCreated(CreatedVault created)
 {
     forgetUnlockedVault();
+    leavingFor(created.path);
     setPath(created.path);
     keyfileSecret = created.keyfile;
     key = created.key;
@@ -2689,6 +2719,7 @@ void VaultController::switchToVault(const QString& vaultFile)
     forgetUnlockedVault();
     ++unlockAttempt;
     addVault(vaultFile);
+    leavingFor(vaultFile);
     setPath(vaultFile);
     needKeyfile = false;
     emit keyfileChanged();

@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // WebDavFileDialog.qml 0.3.63
 
 // --- Version history ----------------------------------------------------
+// v0.3.67: A folder joins Back's history only once the next one is shown
 // v0.3.63: Initial release (the owner, D-057)
 
 // A file dialog for a WebDAV server (D-057), laid out as Chrono Vault's own
@@ -42,6 +43,8 @@ DialogWindow {
     property var entries: []
     property var vaultFiles: []
     property var history: []
+    // The folder being left; it joins the history only once the next one is shown.
+    property string leaving: ""
     property bool waiting: false
     property string problem: ""
 
@@ -72,6 +75,7 @@ DialogWindow {
         entries = list
         vaultFiles = files
         history = []
+        leaving = ""
         problem = ""
         waiting = false
         nameField.clear()
@@ -79,8 +83,7 @@ DialogWindow {
         open()
     }
     function go(name, remember) {
-        if (remember)
-            history = history.concat([folderShown])
+        leaving = remember ? folderShown : ""
         problem = ""
         waiting = true
         VaultController.openWebDavFolder(name)
@@ -115,6 +118,9 @@ DialogWindow {
         function onWebDavFolderShown(address, entries, files) {
             if (!fileDialog.visible)
                 return
+            if (fileDialog.leaving !== "" && fileDialog.leaving !== address)
+                fileDialog.history = fileDialog.history.concat([fileDialog.leaving])
+            fileDialog.leaving = ""
             fileDialog.folderShown = address
             fileDialog.entries = entries
             fileDialog.vaultFiles = files
@@ -126,6 +132,7 @@ DialogWindow {
             if (!fileDialog.visible || !fileDialog.waiting)
                 return
             fileDialog.waiting = false
+            fileDialog.leaving = ""
             if (!ok)
                 fileDialog.problem = problem
         }
@@ -187,7 +194,7 @@ DialogWindow {
                 onClicked: {
                     if (!enabled)
                         return
-                    fileDialog.history = fileDialog.history.concat([fileDialog.folderShown])
+                    fileDialog.leaving = fileDialog.folderShown
                     fileDialog.problem = ""
                     fileDialog.waiting = true
                     VaultController.makeWebDavFolder(folderNameField.text)
