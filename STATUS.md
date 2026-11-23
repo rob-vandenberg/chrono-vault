@@ -2,7 +2,8 @@
 
 ## Now
 
-**Version 0.1.41**: arrow keys show the item; the cards on the theme's Base colour; the one Notes box per item; the
+**Version 0.1.42**: Esc as Chrono Viewer has it, so it closes the About box also with "Use the Esc key to exit the
+program" ticked (D-052). Before, 0.1.41: arrow keys show the item; the cards on the theme's Base colour; the one Notes box per item; the
 reference program's twenty field types; our own switch (D-051); `iconPath` for Microsoft's compiler. Before, 0.0.40: the icon picker: the vault's own icons kept in the vault, the shipped icons from `icons/` as
 `icons.md` lists them, copied into the person's own folder; the editor's Add, Save and Cancel; the reminder below
 Change the Master Password (D-050). Before, 0.0.39: Settings tidied: Autolock's four tick boxes in a frame, the master password reminder every Day,

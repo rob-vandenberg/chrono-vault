@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.1.41
+// VaultPage.qml 0.1.42
 
 // --- Version history ----------------------------------------------------
+// v0.1.42: listItem (D-052)
 // v0.1.41: Up, Down, Page Up, Page Down, Home and End show the item they move to (D-051)
 // v0.0.39: Collapsed entries as tall as expanded, with larger icons (D-049)
 // v0.0.27: The sidebar collapses to its icons; its groups fold; Archive and Trash with icons; wider splitters (D-042)
@@ -190,6 +191,11 @@ Item {
             editor.close()
             VaultController.filter = filter
         })
+    }
+
+    // The item list, which takes the keyboard back after a menu (D-052).
+    function listItem() {
+        return itemList
     }
 
     function showItem(id) {

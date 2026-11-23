@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.0.39
+// test_menus.cpp 0.1.42
 
 // --- Version history ----------------------------------------------------
+// v0.1.42: Tests of Esc through the menu bar and the About box (D-052)
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: the sidebar collapses to its icons, its groups fold, the splitters (D-042)
@@ -87,6 +88,7 @@ private slots:
     void the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts();
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
     void the_sidebar_collapses_to_icons_and_its_groups_fold();
+    void after_a_menu_the_content_holds_the_keyboard();
     void keyboard_shortcuts_are_set_on_their_page_and_kept();
 
 private:
@@ -610,6 +612,44 @@ void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
     QTRY_VERIFY(!settings->property("visible").toBool());
     QCOMPARE(controller->keysOf(QStringLiteral("copyOtp")), QStringList{QStringLiteral("Shift+Ctrl+T")});
     QCOMPARE(controller->keysOf(QStringLiteral("generatePassword")), QStringList{QStringLiteral("Ctrl+G")});
+}
+
+// After a menu closes, the keyboard is back in the window's content, never
+// kept by the menu bar, which would keep Esc for itself (D-052).
+void TestMenus::after_a_menu_the_content_holds_the_keyboard()
+{
+    QVERIFY(open(QStringLiteral("focus")));
+    auto* quickWindow = qobject_cast<QQuickWindow*>(window);
+    QVERIFY(quickWindow);
+    QVERIFY(QTest::qWaitForWindowExposed(quickWindow));
+    quickWindow->requestActivate();
+    QTRY_VERIFY(quickWindow->isActive());
+    QObject* viewMenu = window->findChild<QObject*>(QStringLiteral("viewMenu"));
+    QVERIFY(viewMenu);
+    QVERIFY(QMetaObject::invokeMethod(viewMenu, "open"));
+    QTRY_VERIFY(viewMenu->property("opened").toBool());
+    QVERIFY(QMetaObject::invokeMethod(viewMenu, "close"));
+    QTRY_VERIFY(!viewMenu->property("visible").toBool());
+    auto* list = window->findChild<QQuickItem*>(QStringLiteral("itemList"));
+    QVERIFY(list);
+    QTRY_VERIFY(list->hasActiveFocus());
+    // Menus by keyboard still work: Alt+F opens File, and it stays open.
+    QObject* fileMenu = window->findChild<QObject*>(QStringLiteral("fileMenu"));
+    QVERIFY(fileMenu);
+    QTest::keyClick(quickWindow, Qt::Key_F, Qt::AltModifier);
+    QTRY_VERIFY(fileMenu->property("opened").toBool());
+    QTest::qWait(200);
+    QVERIFY(fileMenu->property("visible").toBool());
+    QTest::keyClick(quickWindow, Qt::Key_Escape);
+    QTRY_VERIFY(!fileMenu->property("visible").toBool());
+    QTRY_VERIFY(list->hasActiveFocus());
+    // Esc there, with "Use the Esc key to exit the program" ticked, closes
+    // the window as its close button does.
+    controller->setTrayAvailable(true);
+    controller->setEscapeExits(true);
+    QTest::keyClick(quickWindow, Qt::Key_Escape);
+    QTRY_VERIFY(!quickWindow->isVisible());
+    controller->setEscapeExits(false);
 }
 
 QTEST_MAIN(TestMenus)

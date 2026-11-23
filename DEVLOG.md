@@ -372,3 +372,8 @@ Microsoft's compiler refused. The 0.0.40 setup was built with this change before
 Also in 0.1.41 (D-051): Up, Down, Page Up, Page Down, Home and End in the item list show the item; the cards on the
 theme's Base colour; the item's own Notes box in the editor, the built-in templates without a "Notes" field; the
 reference program's twenty field types (six new, contents format 6); `style/Switch.qml`, the owner's switch.
+
+## 23 November 2026: version 0.1.42: Esc as Chrono Viewer has it
+
+The main window's Esc is no longer a shortcut but its own key handling, and the keyboard goes back to the content after
+a menu, Chrono Viewer's two fixes (`786104c`, `ae07b6c`), so Esc closes the About box on one of the owner's laptops (D-052).

@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_main_window.cpp 0.0.39
+// test_main_window.cpp 0.1.42
 
 // --- Version history ----------------------------------------------------
+// v0.1.42: Tests of Esc through the menu bar and the About box (D-052)
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: The About box at 555 by 440, never smaller
@@ -290,7 +291,20 @@ void TestMainWindow::esc_closes_the_about_box_and_only_the_about_box()
     QVERIFY(QTest::qWaitForWindowExposed(mainWindow));
     auto* about = qobject_cast<QQuickWindow*>(mainWindow->findChild<QObject*>(QStringLiteral("aboutWindow")));
     QVERIFY(about);
-    QVERIFY(QMetaObject::invokeMethod(about, "open"));
+    // Opened as you do: Help in the menu bar, then About (D-052).
+    QObject* helpMenu = mainWindow->findChild<QObject*>(QStringLiteral("helpMenu"));
+    QVERIFY(helpMenu);
+    QVERIFY(QMetaObject::invokeMethod(helpMenu, "open"));
+    QTRY_VERIFY(helpMenu->property("opened").toBool());
+    QObject* aboutAction = nullptr;
+    for (QObject* action : mainWindow->findChildren<QObject*>()) {
+        if (action->property("actionId").toString() == QStringLiteral("about")) {
+            aboutAction = action;
+        }
+    }
+    QVERIFY(aboutAction);
+    QVERIFY(QMetaObject::invokeMethod(aboutAction, "trigger"));
+    QVERIFY(QMetaObject::invokeMethod(helpMenu, "close"));
     QTRY_VERIFY(about->isVisible());
     about->requestActivate();
     QTRY_COMPARE(QGuiApplication::focusWindow(), static_cast<QWindow*>(about));

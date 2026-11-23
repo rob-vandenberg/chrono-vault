@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.0.39
+// UnlockPage.qml 0.1.42
 
 // --- Version history ----------------------------------------------------
+// v0.1.42: focusPassword (D-052)
 // v0.0.39: The reminder says how often it asks (D-049)
 // v0.0.27: The finger asked whenever the page is on screen: at a start, for another vault, back from the tray (D-042)
 // v0.0.26: Greyed with "Try again in" while waiting after wrong master passwords (D-041)
@@ -37,6 +38,10 @@ import QtQuick.Layouts
 // The locked vault: the master password opens it.
 Item {
     id: unlockPage
+    // The keyboard back to the master password, after a menu (D-052).
+    function focusPassword() {
+        passwordField.forceActiveFocus()
+    }
 
     Image {
         source: "qrc:/icons/chrono-vault.svg"

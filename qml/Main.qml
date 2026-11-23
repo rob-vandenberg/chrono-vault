@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.0.39
+// Main.qml 0.1.42
 
 // --- Version history ----------------------------------------------------
+// v0.1.42: Esc through the window's own keys, not a shortcut; the keyboard back to the content after a menu, as Chrono Viewer (D-052)
 // v0.0.39: Esc in the main window only while it has the keys, so Esc closes the About box (D-049)
 // v0.0.38: Esc closes the main window when "Use the Esc key to exit the program" is ticked (D-048)
 // v0.0.35: The keys of every action set by the person; Ctrl+B the sidebar (D-045)
@@ -106,22 +107,47 @@ ApplicationWindow {
         }
     }
 
-    // "Use the Esc key to exit the program" (D-048): Esc in this window, not
-    // in edit mode, works as the window's close button: to the tray when
-    // Chrono Vault keeps running there, otherwise the program ends. An open
-    // menu or dialog takes its Esc first.
-    Shortcut {
-        objectName: "escapeExitsShortcut"
-        sequences: ["Esc"]
-        context: Qt.WindowShortcut
-        autoRepeat: false
-        // Only while this window itself has the keys: Qt counts a window
-        // shortcut also in the windows this one opens (and calls this window
-        // active then), and two shortcuts on Esc there, the dialog's own
-        // Cancel, cancel each other out, so Esc would not close the About
-        // box (D-049).
-        enabled: VaultController.escapeExits && !vaultPage.editing && mainWindow.activeFocusItem !== null
-        onActivated: mainWindow.close()
+    // Keeping the keyboard in the window's content, as Chrono Viewer does
+    // (D-052): when a menu closes, or nothing has the focus, the menu bar
+    // would otherwise keep it, and a menu bar keeps Esc for itself.
+    function focusContent() {
+        if (VaultController.state === VaultController.Unlocked) {
+            const list = vaultPage.listItem()
+            if (list)
+                list.forceActiveFocus()
+            else
+                pages.forceActiveFocus()
+        } else if (unlockPage.visible) {
+            unlockPage.focusPassword()
+        } else {
+            pages.forceActiveFocus()
+        }
+    }
+    function inMenuBar(item) {
+        for (let it = item; it; it = it.parent) {
+            if (it === topMenuBar)
+                return true
+        }
+        return false
+    }
+    function aMenuIsOpen() {
+        for (let index = 0; index < topMenuBar.count; ++index) {
+            const menu = topMenuBar.menuAt(index)
+            if (menu && menu.visible)
+                return true
+        }
+        return false
+    }
+    onActiveFocusItemChanged: {
+        if (!active || aMenuIsOpen())
+            return
+        if (activeFocusItem === null || activeFocusItem === contentItem || inMenuBar(activeFocusItem))
+            Qt.callLater(function() {
+                if (mainWindow.active && !mainWindow.aMenuIsOpen()
+                        && (mainWindow.activeFocusItem === null || mainWindow.activeFocusItem === mainWindow.contentItem
+                            || mainWindow.inMenuBar(mainWindow.activeFocusItem)))
+                    mainWindow.focusContent()
+            })
     }
 
     readonly property string supportWebsite: "https://github.com/rob-vandenberg/chrono-vault"
@@ -210,6 +236,7 @@ ApplicationWindow {
             // Vault does (D-039). A shortcut never acts while a text field is
             // being typed in.
             MenuBar {
+                id: topMenuBar
                 objectName: "menuBar"
                 background: Item {}
                 // The menus take the free room, so the buttons stand at the right.
@@ -648,13 +675,29 @@ ApplicationWindow {
     }
 
     StackLayout {
+        id: pages
+        objectName: "pages"
         anchors.fill: parent
+        focus: true
         enabled: !mainWindow.busy
+        // "Use the Esc key to exit the program" (D-048): Esc is not a
+        // shortcut, as in Chrono Viewer (D-052). It reaches the window's own
+        // keys only when nothing in it (a menu, a popup, a field, a dialog)
+        // took it first, never from another window, and then works as the
+        // close button: to the tray when Chrono Vault keeps running there,
+        // otherwise the program ends. Not in edit mode.
+        Keys.onPressed: function(event) {
+            if (event.key === Qt.Key_Escape && event.modifiers === Qt.NoModifier && !event.isAutoRepeat
+                    && VaultController.escapeExits && !vaultPage.editing) {
+                event.accepted = true
+                mainWindow.close()
+            }
+        }
         currentIndex: VaultController.state === VaultController.Unlocked ? 2
                       : (VaultController.vaultPath === "" ? 0 : 1)
 
         WelcomePage { id: welcomePage }
-        UnlockPage {}
+        UnlockPage { id: unlockPage }
         VaultPage {
             id: vaultPage
             onNewVaultRequested: mainWindow.newVault()
