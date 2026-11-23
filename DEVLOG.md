@@ -422,3 +422,11 @@ Only keys a text field uses stand aside while one has the keyboard; F1 opens Abo
 Every file dialog is Qt's widget dialog with the desktop's own places, a path to type, its size and folder kept, and
 closed by a lock (D-055). Two review rounds; round 1 found the folder not kept and a dialog outliving a lock, both
 fixed with tests; round 2 found nothing real.
+
+## 23 November 2026: version 0.2.52: Explorer's file dialog on Windows
+
+On Windows every file dialog is Explorer's own, with its own places, look and size; Linux unchanged (the owner,
+D-055). Qt's dialog there was unreadable in dark: `QWidget::setStyle` on the dialog reaches none of its child widgets.
+Settings > Security: "Ask for the master password again, once every"; Change right after its text. Settings >
+Clipboard: the seconds field 40 pixels narrower. No reviewers (the owner struck them); the Windows dialog is the
+owner's to test.

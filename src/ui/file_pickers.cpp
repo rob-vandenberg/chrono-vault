@@ -31,14 +31,23 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// file_pickers.cpp 0.2.51
+// file_pickers.cpp 0.2.52
 
 // --- Version history ----------------------------------------------------
+// v0.2.52: Explorer's own dialog on Windows (D-055)
 // v0.2.51: Initial release, after Chrono Viewer's file pickers (D-055)
 
 namespace chrono_vault {
 
 namespace {
+
+// On Windows the dialog is Explorer's own, which brings its own places, look
+// and size; elsewhere it is Qt's own window, as Chrono Viewer's (D-055).
+#ifdef Q_OS_WIN
+constexpr bool explorersOwn = true;
+#else
+constexpr bool explorersOwn = false;
+#endif
 
 // A dialog first opens at 880 by 640 times the UI scaling, as Chrono
 // Viewer's; a size the person left it at wins.
@@ -79,8 +88,8 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
                        const QString& defaultSuffix, const QUrl& selectedFile, const QUrl& folder, QObject* window)
 {
     QFileDialog dialog;
-    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
-    if (QStyle* style = fusion()) {
+    dialog.setOption(QFileDialog::DontUseNativeDialog, !explorersOwn);
+    if (QStyle* style = fusion(); style != nullptr && !explorersOwn) {
         dialog.setStyle(style);
     }
     dialog.setWindowTitle(title);
@@ -98,24 +107,32 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
     } else {
         dialog.setDirectory(folder.isLocalFile() ? folder.toLocalFile() : QDir::homePath());
     }
-    dialog.setSidebarUrls(places_here::everyPlace());
+    if (!explorersOwn) {
+        dialog.setSidebarUrls(places_here::everyPlace());
+    }
 
-    // Over the window it was opened from, and put back as it was left.
+    // Over the window it was opened from, which waits for it (Explorer's too:
+    // Qt gives it this window as its owner); Qt's own is put back as it was
+    // left, Explorer remembers its own size.
     dialog.winId();
     if (QWindow* over = windowOf(window); over != nullptr && dialog.windowHandle() != nullptr) {
         dialog.windowHandle()->setTransientParent(over);
     }
-    const QByteArray kept = SettingsFile().value(memoryKey(memoryName)).toByteArray();
-    if (kept.isEmpty() || !dialog.restoreGeometry(kept)) {
-        const double factor = Appearance::factor();
-        dialog.resize(qRound(firstWidth * factor), qRound(firstHeight * factor));
+    if (!explorersOwn) {
+        const QByteArray kept = SettingsFile().value(memoryKey(memoryName)).toByteArray();
+        if (kept.isEmpty() || !dialog.restoreGeometry(kept)) {
+            const double factor = Appearance::factor();
+            dialog.resize(qRound(firstWidth * factor), qRound(firstHeight * factor));
+        }
+        places_here::showEveryPlaceWhole(dialog);
     }
-    places_here::showEveryPlaceWhole(dialog);
 
     openDialog() = &dialog;
     const bool chosen = dialog.exec() == QDialog::Accepted;
     openDialog() = nullptr;
-    SettingsFile().setValue(memoryKey(memoryName), dialog.saveGeometry());
+    if (!explorersOwn) {
+        SettingsFile().setValue(memoryKey(memoryName), dialog.saveGeometry());
+    }
     if (!chosen || dialog.selectedUrls().isEmpty()) {
         return {};
     }

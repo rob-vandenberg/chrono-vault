@@ -1339,7 +1339,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+221"/>
+        <location filename="../qml/SettingsWindow.qml" line="+222"/>
         <location line="+364"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -1414,12 +1414,12 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+595"/>
+        <location line="+597"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-440"/>
+        <location line="-442"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1451,29 +1451,34 @@
     <message>
         <location line="+0"/>
         <location line="+44"/>
-        <location line="+159"/>
+        <location line="+161"/>
         <location line="+3"/>
         <location line="+6"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-205"/>
+        <location line="-207"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+20"/>
         <source>Change the Master Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+4"/>
         <source>Change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+9"/>
+        <source>Ask for the master password again, once every</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
         <source>Autolock when</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1483,7 +1488,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+244"/>
+        <location line="+246"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1498,12 +1503,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-384"/>
-        <source>Ask for the master password, so it is not forgotten, every</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
+        <location line="-382"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1528,12 +1528,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+22"/>
         <source>seconds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-114"/>
+        <location line="-116"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1574,7 +1574,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+54"/>
+        <location line="+56"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1614,15 +1614,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-844"/>
-        <location line="+813"/>
+        <location line="-846"/>
+        <location line="+815"/>
         <location line="+37"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-850"/>
-        <location line="+722"/>
+        <location line="-852"/>
+        <location line="+724"/>
         <location line="+97"/>
         <location line="+41"/>
         <source>Cancel</source>

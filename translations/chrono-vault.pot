@@ -1306,251 +1306,251 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:221 ../qml/SettingsWindow.qml:585
+#: ../qml/SettingsWindow.qml:222 ../qml/SettingsWindow.qml:586
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:269
+#: ../qml/SettingsWindow.qml:270
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:361
+#: ../qml/SettingsWindow.qml:362
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Settings – Chrono Vault %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:638
+#: ../qml/SettingsWindow.qml:443 ../qml/SettingsWindow.qml:639
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:811
+#: ../qml/SettingsWindow.qml:443 ../qml/SettingsWindow.qml:812
 msgctxt "SettingsWindow|"
 msgid "Clipboard"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:442 ../qml/SettingsWindow.qml:506
+#: ../qml/SettingsWindow.qml:443 ../qml/SettingsWindow.qml:507
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:442
+#: ../qml/SettingsWindow.qml:443
 msgctxt "SettingsWindow|"
 msgid "Customize"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:509
+#: ../qml/SettingsWindow.qml:510
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:516
+#: ../qml/SettingsWindow.qml:517
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:522
+#: ../qml/SettingsWindow.qml:523
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:528
+#: ../qml/SettingsWindow.qml:529
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:541
+#: ../qml/SettingsWindow.qml:542
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:604
+#: ../qml/SettingsWindow.qml:605
 msgctxt "SettingsWindow|"
 msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:592
+#: ../qml/SettingsWindow.qml:593
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:443 ../qml/SettingsWindow.qml:1038
+#: ../qml/SettingsWindow.qml:444 ../qml/SettingsWindow.qml:1041
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:598
+#: ../qml/SettingsWindow.qml:599
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:611
+#: ../qml/SettingsWindow.qml:612
 msgctxt "SettingsWindow|"
 msgid "Use the Esc key to exit the program"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:616
+#: ../qml/SettingsWindow.qml:617
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:620
+#: ../qml/SettingsWindow.qml:621
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:620
+#: ../qml/SettingsWindow.qml:621
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:620
+#: ../qml/SettingsWindow.qml:621
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:620 ../qml/SettingsWindow.qml:664
-#: ../qml/SettingsWindow.qml:823 ../qml/SettingsWindow.qml:826
-#: ../qml/SettingsWindow.qml:832
+#: ../qml/SettingsWindow.qml:621 ../qml/SettingsWindow.qml:665
+#: ../qml/SettingsWindow.qml:826 ../qml/SettingsWindow.qml:829
+#: ../qml/SettingsWindow.qml:835
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:627
+#: ../qml/SettingsWindow.qml:628
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:646
+#: ../qml/SettingsWindow.qml:648
 msgctxt "SettingsWindow|"
 msgid "Change the Master Password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:651
+#: ../qml/SettingsWindow.qml:652
 msgctxt "SettingsWindow|"
 msgid "Change"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:708
+#: ../qml/SettingsWindow.qml:661
+msgctxt "SettingsWindow|"
+msgid "Ask for the master password again, once every"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:709
 msgctxt "SettingsWindow|"
 msgid "Autolock when"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:716
+#: ../qml/SettingsWindow.qml:717
 msgctxt "SettingsWindow|"
 msgid "Main window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:960
+#: ../qml/SettingsWindow.qml:963
 msgctxt "SettingsWindow|"
 msgid "Press the new key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:999
+#: ../qml/SettingsWindow.qml:1002
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Press a key for “%1”"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1044
+#: ../qml/SettingsWindow.qml:1047
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:660
-msgctxt "SettingsWindow|"
-msgid "Ask for the master password, so it is not forgotten, every"
-msgstr ""
-
-#: ../qml/SettingsWindow.qml:664
+#: ../qml/SettingsWindow.qml:665
 msgctxt "SettingsWindow|"
 msgid "Day"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:664
+#: ../qml/SettingsWindow.qml:665
 msgctxt "SettingsWindow|"
 msgid "Month"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:664
+#: ../qml/SettingsWindow.qml:665
 msgctxt "SettingsWindow|"
 msgid "Quarter"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:664
+#: ../qml/SettingsWindow.qml:665
 msgctxt "SettingsWindow|"
 msgid "Year"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:816
+#: ../qml/SettingsWindow.qml:817
 msgctxt "SettingsWindow|"
 msgid "Clear the clipboard after"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:836
+#: ../qml/SettingsWindow.qml:839
 msgctxt "SettingsWindow|"
 msgid "seconds"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:722
+#: ../qml/SettingsWindow.qml:723
 msgctxt "SettingsWindow|"
 msgid "System sleeps"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:730
+#: ../qml/SettingsWindow.qml:731
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault is idle for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:746 ../qml/SettingsWindow.qml:768
+#: ../qml/SettingsWindow.qml:747 ../qml/SettingsWindow.qml:769
 msgctxt "SettingsWindow|"
 msgid "Minutes"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:752
+#: ../qml/SettingsWindow.qml:753
 msgctxt "SettingsWindow|"
 msgid "System inactive for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:773
+#: ../qml/SettingsWindow.qml:774
 msgctxt "SettingsWindow|"
 msgid "This desktop does not tell how long the system has been inactive."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:782
+#: ../qml/SettingsWindow.qml:783
 msgctxt "SettingsWindow|"
 msgid "Hide sensitive fields: show them as dots until asked"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:792
+#: ../qml/SettingsWindow.qml:793
 msgctxt "SettingsWindow|"
 msgid "Use Windows Hello to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:793
+#: ../qml/SettingsWindow.qml:794
 msgctxt "SettingsWindow|"
 msgid "Use fingerprint to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:847
+#: ../qml/SettingsWindow.qml:850
 msgctxt "SettingsWindow|"
 msgid "Show subtitles in the item list"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:853
+#: ../qml/SettingsWindow.qml:856
 msgctxt "SettingsWindow|"
 msgid "Use website icons"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:858
+#: ../qml/SettingsWindow.qml:861
 msgctxt "SettingsWindow|"
 msgid ""
 "Each website in your vault is asked for its own icon, which that website can "
@@ -1558,39 +1558,39 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:879
+#: ../qml/SettingsWindow.qml:882
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:883
+#: ../qml/SettingsWindow.qml:886
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:917
+#: ../qml/SettingsWindow.qml:920
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1093
+#: ../qml/SettingsWindow.qml:1096
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1140
+#: ../qml/SettingsWindow.qml:1143
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:296 ../qml/SettingsWindow.qml:1109
-#: ../qml/SettingsWindow.qml:1146
+#: ../qml/SettingsWindow.qml:297 ../qml/SettingsWindow.qml:1112
+#: ../qml/SettingsWindow.qml:1149
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:296 ../qml/SettingsWindow.qml:1018
-#: ../qml/SettingsWindow.qml:1115 ../qml/SettingsWindow.qml:1156
+#: ../qml/SettingsWindow.qml:297 ../qml/SettingsWindow.qml:1021
+#: ../qml/SettingsWindow.qml:1118 ../qml/SettingsWindow.qml:1159
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""

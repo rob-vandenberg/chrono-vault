@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.2.49
+// SettingsWindow.qml 0.2.52
 
 // --- Version history ----------------------------------------------------
+// v0.2.52: The reminder text "again, once every"; Change right after its text; the clipboard field 40 narrower (the owner)
 // v0.2.49: The reminder box as wide as its longest word; the minutes fields 40 narrower (the owner)
 // v0.1.44: The key box and the question about a key in use as windows of their own, as Chrono Viewer's (D-053)
 // v0.0.40: The reminder just below Change the Master Password (D-050)
@@ -642,9 +643,9 @@ ApplicationWindow {
                         // (the reference program's settings).
                         RowLayout {
                             Layout.fillWidth: true
+                            // The button right after the text (the owner).
                             Label {
                                 text: qsTr("Change the Master Password")
-                                Layout.fillWidth: true
                             }
                             Button {
                                 objectName: "changeMasterPasswordButton"
@@ -657,7 +658,7 @@ ApplicationWindow {
                         // would do; Quarter by default (D-049).
                         RowLayout {
                             Layout.fillWidth: true
-                            Label { text: qsTr("Ask for the master password, so it is not forgotten, every") }
+                            Label { text: qsTr("Ask for the master password again, once every") }
                             ComboBox {
                                 id: reminderBox
                                 objectName: "reminderBox"
@@ -816,6 +817,8 @@ ApplicationWindow {
                             Label { text: qsTr("Clear the clipboard after") }
                             SpinBox {
                                 objectName: "clipboardBox"
+                                // 40 narrower than its own width (the owner).
+                                Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
                                 from: 0
                                 to: 600
                                 value: settingsWindow.clipboardClearSeconds
