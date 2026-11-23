@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.2.46
+// Main.qml 0.2.50
 
 // --- Version history ----------------------------------------------------
+// v0.2.50: While typing, only keys a text field uses stand aside; every other key is a command (the owner)
 // v0.2.46: The shortcuts only while the main window has the keyboard (P33); 5 pixels more above and below the top bar
 // v0.1.44: Every shortcut stands aside while the settings wait for a new key (D-053)
 // v0.1.42: Esc through the window's own keys, not a shortcut; the keyboard back to the content after a menu, as Chrono Viewer (D-052)
@@ -74,6 +75,26 @@ ApplicationWindow {
     // another window of ours in front of it (P33). Only then do its shortcuts
     // answer, Quit excepted.
     readonly property bool holdsKeyboard: active && activeFocusItem !== null
+    // A key a text field uses itself (D-039): typing, moving and deleting,
+    // and its own Ctrl combinations. Only those stand aside while a text
+    // field has the keyboard; every other key is a command (the owner).
+    function editsText(key) {
+        const plus = key.endsWith("++")
+        const parts = plus ? key.slice(0, -2).split("+").concat(["+"]) : key.split("+")
+        const name = parts[parts.length - 1]
+        const modifiers = parts.slice(0, -1)
+        if (modifiers.indexOf("Alt") >= 0 || modifiers.indexOf("Meta") >= 0)
+            return false
+        const moving = ["Backspace", "Del", "Left", "Right", "Up", "Down", "Home", "End"]
+        if (modifiers.indexOf("Ctrl") < 0)
+            return name.length === 1 || moving.indexOf(name) >= 0
+                   || ["Space", "Return", "Enter", "Tab", "Backtab", "PgUp", "PgDown", "Ins"].indexOf(name) >= 0
+        if (moving.indexOf(name) >= 0)
+            return true
+        if (modifiers.indexOf("Shift") >= 0)
+            return name === "Z"
+        return ["A", "C", "V", "X", "Z", "Y", "Ins"].indexOf(name) >= 0
+    }
     // The keys of every action, as the person set them (D-045): the menus
     // show the first; each action answers to all of them.
     function firstKey(actionId) {
@@ -97,8 +118,8 @@ ApplicationWindow {
         action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_clearClipboard,
         action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
     ]
-    // One shortcut per action, from its keys as they are now. They stand aside
-    // while a text field is typed in, and all of them, Quit too, while the
+    // One shortcut per action, from its keys as they are now. Keys a text
+    // field uses stand aside while one is typed in, and all of them, Quit too, while the
     // settings wait for a new key (P29: a window's shortcuts still answer
     // while a window opened over it has the keyboard); Quit answers in every
     // window.
@@ -109,8 +130,11 @@ ApplicationWindow {
             readonly property bool quit: modelData.actionId === "quit"
             sequences: {
                 VaultController.shortcutsRevision
-                return settingsWindow.catchingAKey || (!quit && (mainWindow.typing || !mainWindow.holdsKeyboard))
-                        ? [] : VaultController.keysOf(modelData.actionId)
+                if (settingsWindow.catchingAKey || (!quit && !mainWindow.holdsKeyboard))
+                    return []
+                const keys = VaultController.keysOf(modelData.actionId)
+                return mainWindow.typing && !quit
+                       ? keys.filter(function(key) { return !mainWindow.editsText(key) }) : keys
             }
             context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
             onActivated: if (modelData.enabled) modelData.trigger()

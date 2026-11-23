@@ -412,3 +412,7 @@ The sidebar snaps after 100 pixels of travel each way: shut past 80, open past 1
 
 Settings > Security: the reminder box as wide as its longest word (open: the word with 5 pixels either side), the two
 minutes fields 40 pixels narrower; the sidebar snaps after 80 pixels of travel each way (the owner, D-042).
+
+## 23 November 2026: version 0.2.50: keys that cannot be typed are commands while typing
+
+Only keys a text field uses stand aside while one has the keyboard; F1 opens About on the unlock page (the owner, D-039).

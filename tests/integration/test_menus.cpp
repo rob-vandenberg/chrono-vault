@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.2.49
+// test_menus.cpp 0.2.50
 
 // --- Version history ----------------------------------------------------
+// v0.2.50: Keys a text field never uses are commands while typing
 // v0.2.49: The sidebar snap after 80 pixels each way
 // v0.2.48: The sidebar snap after 100 pixels each way
 // v0.2.47: Counts above 0 only; the sidebar snaps shut and open when dragged (the owner)
@@ -364,6 +365,27 @@ void TestMenus::shortcuts_stand_aside_while_a_text_field_is_typed_in()
     QTest::keyClick(quickWindow, Qt::Key_Backspace);
     QCOMPARE(search->property("text").toString(), QString());
     QVERIFY(!controller->item(id).value(QStringLiteral("trashed")).toBool());
+
+    // Keys a text field never uses are commands while typing (the owner):
+    // Shift+Ctrl+U copies, F1 opens About; Ctrl+A stays the field's own.
+    QGuiApplication::clipboard()->clear();
+    QTest::keyClick(quickWindow, Qt::Key_U, Qt::ShiftModifier | Qt::ControlModifier);
+    QCOMPARE(QGuiApplication::clipboard()->text(), QStringLiteral("rob"));
+    QTest::keyClick(quickWindow, Qt::Key_X);
+    QTest::keyClick(quickWindow, Qt::Key_Y);
+    QTest::keyClick(quickWindow, Qt::Key_A, Qt::ControlModifier);
+    QCOMPARE(search->property("selectedText").toString(), QStringLiteral("xy"));
+    QTest::keyClick(quickWindow, Qt::Key_Backspace);
+    QCOMPARE(search->property("text").toString(), QString());
+    QObject* about = window->findChild<QObject*>(QStringLiteral("aboutWindow"));
+    QVERIFY(about);
+    QTest::keyClick(quickWindow, Qt::Key_F1);
+    QTRY_VERIFY(about->property("visible").toBool());
+    QMetaObject::invokeMethod(about, "close");
+    QTRY_VERIFY(!about->property("visible").toBool());
+    quickWindow->requestActivate();
+    QTRY_COMPARE(QGuiApplication::focusWindow(), quickWindow);
+    search->forceActiveFocus();
 
     // Outside a text field, Shift+Ctrl+U copies and Backspace moves to the Trash.
     auto* list = window->findChild<QQuickItem*>(QStringLiteral("itemList"));
