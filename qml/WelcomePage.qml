@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.3.60
+// WelcomePage.qml 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: The Select Storage window with its tiles; a failed new WebDAV vault reopens the WebDAV window (D-057)
 // v0.3.60: A new vault, or one opened, on this computer or on a WebDAV server (D-057)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
@@ -80,39 +81,18 @@ Item {
         }
     }
 
-    // This computer or a WebDAV server (ref, REQUIREMENTS.md 5.4.1).
-    DialogWindow {
+    // Where the vault is kept: a tile per storage (ref, REQUIREMENTS.md 5.4.1).
+    StorageWindow {
         id: storageChoice
-        objectName: "storageChoice"
-        memoryName: "storageChoice"
-        property string mode: "new"
-        title: mode === "new" ? qsTr("Where should the new vault be kept?") : qsTr("Where is the vault kept?")
-        standardButtons: Dialog.Cancel
-
-        ColumnLayout {
-            spacing: Math.round(8 * Appearance.factor)
-            width: Math.round(360 * Appearance.factor)
-            Button {
-                objectName: "onThisComputerButton"
-                text: qsTr("On this computer…")
-                Layout.fillWidth: true
-                onClicked: {
-                    storageChoice.accept()
-                    if (storageChoice.mode === "new")
-                        createFileDialog.open()
-                    else
-                        openFileDialog.open()
-                }
-            }
-            Button {
-                objectName: "onWebDavButton"
-                text: qsTr("On a WebDAV server…")
-                Layout.fillWidth: true
-                onClicked: {
-                    storageChoice.accept()
-                    webDavWindow.mode = storageChoice.mode
-                    webDavWindow.open()
-                }
+        onChosen: function(storage) {
+            if (storage === "device") {
+                if (storageChoice.mode === "new")
+                    createFileDialog.open()
+                else
+                    openFileDialog.open()
+            } else {
+                webDavWindow.mode = storageChoice.mode
+                webDavWindow.open()
             }
         }
     }
@@ -122,6 +102,16 @@ Item {
         onNewVaultNamed: function(name) {
             newVaultDialog.webDavName = name
             newVaultDialog.open()
+        }
+    }
+
+    // A new WebDAV vault that did not reach the server: nothing was kept, and
+    // the WebDAV window comes back with the reason (D-057).
+    Connections {
+        target: VaultController
+        function onWebDavCreateFailed(problem) {
+            webDavWindow.mode = "new"
+            webDavWindow.openWithProblem(problem)
         }
     }
 

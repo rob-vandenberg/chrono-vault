@@ -29,9 +29,10 @@
 #include <QUuid>
 
 // --- Version ------------------------------------------------------------
-// webdav_test_server.cpp 0.3.61
+// webdav_test_server.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Subfolders and MKCOL, for the folder browser
 // v0.3.61: A lock's placeholder listed as pCloud lists it: no tag, no size
 // v0.3.60: Initial release (D-057)
 
@@ -157,7 +158,9 @@ QString WebDavTestServer::nameOf(const QByteArray& target, bool* inFolder, bool*
 {
     const QString path = QUrl(QString::fromLatin1(target)).path(QUrl::FullyDecoded);
     *isFolder = folders.contains(path) || folders.contains(path + QLatin1Char('/'));
-    *inFolder = path.startsWith(folderPath) && !path.mid(folderPath.size()).contains(QLatin1Char('/'));
+    // A file of the folder or of one of its subfolders, by its path below it
+    // ("Home.chronovault", "Work/Home.chronovault").
+    *inFolder = path.startsWith(folderPath) && !path.endsWith(QLatin1Char('/'));
     return *inFolder ? path.mid(folderPath.size()) : QString();
 }
 
@@ -215,10 +218,23 @@ void WebDavTestServer::answer(QTcpSocket* socket, const QByteArray& method, cons
         const QByteArray depth = headers.value("depth", "1");
         QByteArray xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><d:multistatus xmlns:d=\"DAV:\">";
         if (isFolder) {
-            xml += entryXml(folderPath, {}, 0, true);
+            QString here = QUrl(QString::fromLatin1(target)).path(QUrl::FullyDecoded);
+            if (!here.endsWith(QLatin1Char('/'))) {
+                here += QLatin1Char('/');
+            }
+            xml += entryXml(here, {}, 0, true);
             if (depth != "0") {
+                for (const QString& folder : std::as_const(folders)) {
+                    const QString below = folder.mid(here.size());
+                    if (folder.startsWith(here) && below.size() > 1 && below.indexOf(QLatin1Char('/')) == below.size() - 1) {
+                        xml += entryXml(folder, {}, 0, true);
+                    }
+                }
+                const QString inHere = here.mid(folderPath.size());
                 for (auto file = files.cbegin(); file != files.cend(); ++file) {
-                    if (!file->data.isEmpty() || !file->lockToken.isEmpty()) {
+                    const bool direct = here.startsWith(folderPath) && file.key().startsWith(inHere) &&
+                                        !file.key().mid(inHere.size()).contains(QLatin1Char('/'));
+                    if (direct && (!file->data.isEmpty() || !file->lockToken.isEmpty())) {
                         xml += entryXml(folderPath + file.key(), file->data.isEmpty() ? QByteArray() : file->tag,
                                         file->data.size(), false);
                     }
@@ -236,8 +252,17 @@ void WebDavTestServer::answer(QTcpSocket* socket, const QByteArray& method, cons
             replyBody = xml + "</d:multistatus>";
             replyHeaders << "Content-Type: application/xml; charset=utf-8";
         }
+    } else if (method == "MKCOL") {
+        const QString made = QUrl(QString::fromLatin1(target)).path(QUrl::FullyDecoded);
+        const QString asFolder = made.endsWith(QLatin1Char('/')) ? made : made + QLatin1Char('/');
+        if (folders.contains(asFolder) || files.contains(made.mid(folderPath.size()))) {
+            status = 405; // already there
+        } else {
+            folders.insert(asFolder);
+            status = 201;
+        }
     } else if (!inFolder) {
-        status = 409; // only files in the one folder
+        status = 409; // only files in the folder and its subfolders
     } else if (method == "GET") {
         if (!files.contains(name) || files[name].data.isEmpty()) {
             status = 404;

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a vault on this device, a computer screen on its stand. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#4a5568"/>
+  <rect x="18" y="24" width="92" height="62" rx="7" fill="#ffffff"/>
+  <rect x="27" y="33" width="74" height="44" rx="3" fill="#4a5568"/>
+  <path d="M56 86 L52 102 H76 L72 86 Z" fill="#ffffff"/>
+  <path d="M42 104 H86" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+</svg>

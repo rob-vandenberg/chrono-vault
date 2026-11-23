@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.3.61 LANGUAGES CXX)
+project(chrono-vault VERSION 0.3.62 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
 # CMakeLists.txt 0.2.51
 
 # --- Version history ----------------------------------------------------
+# v0.3.62: Version 0.3.62
 # v0.3.61: Version 0.3.61
 # v0.3.60: Version 0.3.60: WebDAV storage (D-057)
 # v0.2.59: Version 0.2.59

@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.3.60
+// test_webdav_windows.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: The Select Storage tiles, the server list, the folder browser, the unlock page's address
 // v0.3.60: Initial release: the WebDAV windows and Settings > Vaults, driven as a person would (D-057)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -147,16 +148,26 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
 
     // File > New vault… asks where first.
     QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
-    QObject* choice = window->findChild<QObject*>(QStringLiteral("storageChoice"));
+    // A tile per storage (0.3.62).
+    QObject* choice = window->findChild<QObject*>(QStringLiteral("storageWindow"));
     QVERIFY(choice);
     QTRY_VERIFY(choice->property("visible").toBool());
-    click(inWindow(choice, QStringLiteral("onWebDavButton")));
+    QVERIFY(inWindow(choice, QStringLiteral("deviceTile")));
+    click(inWindow(choice, QStringLiteral("webDavTile")));
     QObject* webDav = window->findChild<QObject*>(QStringLiteral("webDavWindow"));
     QVERIFY(webDav);
     QTRY_VERIFY(webDav->property("visible").toBool());
     QCOMPARE(webDav->property("mode").toString(), QStringLiteral("new"));
 
     QQuickItem* address = inWindow(webDav, QStringLiteral("webDavAddressField"));
+    // The address starts empty; pCloud's is filled in only when chosen.
+    QQuickItem* serverBox = inWindow(webDav, QStringLiteral("webDavServerBox"));
+    QVERIFY(address && serverBox);
+    QCOMPARE(address->property("text").toString(), QString());
+    QVERIFY(QMetaObject::invokeMethod(serverBox, "activated", Q_ARG(int, 0)));
+    QCOMPARE(address->property("text").toString(), QStringLiteral("https://ewebdav.pcloud.com"));
+    QVERIFY(QMetaObject::invokeMethod(serverBox, "activated", Q_ARG(int, 2)));
+    QCOMPARE(address->property("text").toString(), QString());
     QQuickItem* warning = inWindow(webDav, QStringLiteral("plainHttpWarning"));
     QVERIFY(address && warning);
     address->setProperty("text", QStringLiteral("http://example.org/dav"));
@@ -175,6 +186,21 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     click(inWindow(webDav, QStringLiteral("trustCertificateButton")));
     QTRY_VERIFY_WITH_TIMEOUT(webDav->property("connected").toBool(), 10000);
 
+    // A new folder in the browser, shown at once; the vault goes there.
+    click(inWindow(webDav, QStringLiteral("webDavNewFolderButton")));
+    inWindow(webDav, QStringLiteral("webDavFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
+    click(inWindow(webDav, QStringLiteral("webDavCreateFolderButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+    QVERIFY(inWindow(webDav, QStringLiteral("webDavUpButton"))->isEnabled());
+    // Connect again: the browser starts at the server's folder, Up greyed.
+    QVERIFY(QMetaObject::invokeMethod(webDav, "connectNow"));
+    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("connected").toBool() &&
+                                 webDav->property("folderShown").toString() == webDav->property("serverRoot").toString(),
+                             10000);
+    QVERIFY(!inWindow(webDav, QStringLiteral("webDavUpButton"))->isEnabled());
+    QVERIFY(QMetaObject::invokeMethod(webDav, "openFolder", Q_ARG(QVariant, QStringLiteral("Work vaults"))));
+    QTRY_VERIFY_WITH_TIMEOUT(webDav->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+
     // The name, then the master password, as for a file here.
     QQuickItem* name = inWindow(webDav, QStringLiteral("webDavNameField"));
     QVERIFY(name && name->isVisible());
@@ -189,10 +215,17 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     inWindow(masterPassword, QStringLiteral("newVaultPasswordAgain"))->setProperty("text", QStringLiteral("pass"));
     QVERIFY(QMetaObject::invokeMethod(masterPassword, "accept"));
     QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
-    QTRY_VERIFY_WITH_TIMEOUT(!server.fileData(QStringLiteral("Home.chronovault")).isEmpty(), 10000);
+    QTRY_VERIFY_WITH_TIMEOUT(!server.fileData(QStringLiteral("Work vaults/Home.chronovault")).isEmpty(), 10000);
     QVERIFY(controller->onWebDav());
 
     // The left column says where it is kept; Tools > Sync Now is there.
+    // Locked, the unlock page names the server, not the copy here.
+    controller->lock();
+    QQuickItem* unlockPlace = inWindow(window, QStringLiteral("unlockVaultPlace"));
+    QVERIFY(unlockPlace);
+    QTRY_VERIFY(unlockPlace->property("text").toString().endsWith(QStringLiteral("/Work vaults/Home.chronovault")));
+    controller->unlock(QStringLiteral("pass"));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
     QQuickItem* place = inWindow(window, QStringLiteral("vaultPlace"));
     QVERIFY(place);
     QCOMPARE(place->property("text").toString(), QStringLiteral("WebDAV"));
@@ -217,7 +250,7 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     click(inWindow(disconnectWindow, QStringLiteral("disconnectButton")));
     QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);
     QTRY_VERIFY(!disconnectWindow->property("visible").toBool());
-    QVERIFY(server.files.contains(QStringLiteral("Home.chronovault")));
+    QVERIFY(server.files.contains(QStringLiteral("Work vaults/Home.chronovault")));
     QQuickItem* move = inWindow(settings, QStringLiteral("moveToWebDav_Home"));
     QTRY_VERIFY(move && move->isVisible());
     QTRY_COMPARE(place->property("text").toString(), QStringLiteral("Local file"));

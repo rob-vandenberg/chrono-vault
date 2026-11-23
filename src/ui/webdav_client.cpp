@@ -30,9 +30,10 @@
 #include <QXmlStreamReader>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.cpp 0.3.61
+// webdav_client.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.61: Every request and its answer in the --debug log, never a password or a vault's bytes (D-057)
 // v0.3.60: Initial release (D-057)
 
@@ -361,6 +362,14 @@ void WebDavClient::move(const QString& from, const QString& to, const QByteArray
 void WebDavClient::remove(const QString& name, Done done)
 {
     QNetworkReply* reply = send("DELETE", addressOf(name), {}, {});
+    whenDone(reply, [done = std::move(done)](WebDavReply answer, QNetworkReply*) { done(answer); });
+}
+
+void WebDavClient::makeFolder(const QString& name, Done done)
+{
+    QUrl address = addressOf(name);
+    address.setPath(address.path() + QLatin1Char('/'));
+    QNetworkReply* reply = send("MKCOL", address, {}, {});
     whenDone(reply, [done = std::move(done)](WebDavReply answer, QNetworkReply*) { done(answer); });
 }
 

@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.3.60
+// vault_controller.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: The end of creating a vault a function of its own, for a WebDAV vault's first upload (D-057)
 // v0.3.60: The WebDAV sync started at an unlock, stopped at a lock, kept up with a new key (D-057)
 // v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
 // v0.2.45: A change here and one elsewhere merged against the base; the notes a merge leaves (D-054)
@@ -715,36 +716,42 @@ void VaultController::createVault(const QUrl& file, const QString& password, con
                               true);
                     return;
                 }
-                self->addVault(newPath);
-                self->placeTaken(newPath); // a new vault kept on a WebDAV server (D-057)
-                self->rememberKeyfile(newPath, keyfileFile);
-                self->stamps->set(newPath, written);
-                if (before == State::Unlocked && !savedPassword.isEmpty() && self->path == self->primaryVault()) {
-                    // Its password is kept in the primary as a Password item
-                    // that names the vault's file (D-030); the new vault is
-                    // shown once that is on disk, so a failure is said on the
-                    // primary, where it can be tried again.
-                    const auto passwordTemplate = findTemplate(QStringLiteral("password"), self->contents);
-                    Item saved = newItem(*passwordTemplate);
-                    saved.title = tr("%1 vault").arg(QFileInfo(newPath).completeBaseName());
-                    saved.fields.insert(1, makeField(QStringLiteral("vaultfile"), {}, FieldKind::Text, newPath));
-                    saved.fields[0].value = savedPassword;
-                    giveFieldsIds(saved);
-                    self->contents.items.append(saved);
-                    self->contentsChanged();
-                    self->createdVault = CreatedVault{newPath, newKey, *fingerprint};
-                    self->setState(State::Unlocked);
-                    self->saveInBackground(QString());
-                    self->rememberPrimary();
-                    return;
-                }
-                if (before == State::Unlocked && self->path == self->primaryVault()) {
-                    self->rememberPrimary();
-                }
-                self->showCreated(CreatedVault{newPath, newKey, *fingerprint});
+                self->finishCreating(newPath, newKey, *fingerprint, written, keyfileFile, before, savedPassword);
             },
             Qt::QueuedConnection);
     });
+}
+
+void VaultController::finishCreating(const QString& newPath, VaultKey newKey, const QByteArray& fingerprint,
+                                     const QByteArray& written, const QString& keyfileFile, State before,
+                                     const QString& savedPassword)
+{
+    addVault(newPath);
+    rememberKeyfile(newPath, keyfileFile);
+    stamps->set(newPath, written);
+    if (before == State::Unlocked && !savedPassword.isEmpty() && path == primaryVault()) {
+        // Its password is kept in the primary as a Password item
+        // that names the vault's file (D-030); the new vault is
+        // shown once that is on disk, so a failure is said on the
+        // primary, where it can be tried again.
+        const auto passwordTemplate = findTemplate(QStringLiteral("password"), contents);
+        Item saved = newItem(*passwordTemplate);
+        saved.title = tr("%1 vault").arg(QFileInfo(newPath).completeBaseName());
+        saved.fields.insert(1, makeField(QStringLiteral("vaultfile"), {}, FieldKind::Text, newPath));
+        saved.fields[0].value = savedPassword;
+        giveFieldsIds(saved);
+        contents.items.append(saved);
+        contentsChanged();
+        createdVault = CreatedVault{newPath, newKey, fingerprint};
+        setState(State::Unlocked);
+        saveInBackground(QString());
+        rememberPrimary();
+        return;
+    }
+    if (before == State::Unlocked && path == primaryVault()) {
+        rememberPrimary();
+    }
+    showCreated(CreatedVault{newPath, newKey, fingerprint});
 }
 
 bool VaultController::canCreateAt(const QUrl& file)

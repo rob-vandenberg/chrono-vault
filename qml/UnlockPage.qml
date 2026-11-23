@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.2.51
+// UnlockPage.qml 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: A WebDAV vault's server address, not its copy's path (D-057)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.1.42: focusPassword (D-052)
 // v0.0.39: The reminder says how often it asks (D-049)
@@ -104,8 +105,12 @@ Item {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
         }
+        // Where the vault is kept: its server for a WebDAV vault, never the
+        // copy on this computer (D-057).
         Label {
-            text: VaultController.vaultPath
+            objectName: "unlockVaultPlace"
+            text: VaultController.vaultPlace(VaultController.vaultPath).address
+            textFormat: Text.PlainText
             elide: Text.ElideMiddle
             opacity: 0.7
             Layout.fillWidth: true

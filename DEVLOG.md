@@ -503,3 +503,13 @@ with tag, date and size "404 Not Found", which the version check took for anothe
 Fixed in `src/ui/webdav_sync.cpp` (checkTag reads the file: only content is a version); the test server lists
 placeholders the same way; the `--debug` lines kept (the owner's changelist item 3).
 
+## 23 November 2026: version 0.3.62: the WebDAV flow after the owner's pCloud test
+
+The owner's changelist items 1-18: `qml/StorageWindow.qml` (tiles, our own two icons), `qml/WebDavWindow.qml`
+rebuilt (server list, folder browser, New folder), the first upload before a new vault is kept
+(`VaultController::finishCreating` split from `createVault`), own leftover uploads removed, the same bytes no change,
+the unlock page's address, Save closes the editor. Tests: `test_webdav_create` (new), `test_webdav_client`,
+`test_webdav_windows`, `test_pages`; the test server learnt subfolders and MKCOL. Three review rounds: round 1 a folder that could not be
+opened left Chrono Vault pointing at it (now the folder shown changes only once listed); round 2 a second Connect
+kept the first server as the browser's top; round 3 clean.
+

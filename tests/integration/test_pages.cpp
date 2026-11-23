@@ -34,9 +34,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.1.41
+// test_pages.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Save closes the editor on the saved item
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The item, editor, import and export tests moved to test_item_pages.cpp (OR-11: under 20 seconds)
@@ -174,6 +175,17 @@ void TestPages::a_login_made_in_the_editor_is_saved_without_qml_errors()
     QCOMPARE(stored.value(QStringLiteral("fields")).toList().size(), 5);
 
     QVERIFY(QMetaObject::invokeMethod(editor, "close"));
+
+    // Save stores the item and closes the editor on it (the owner, 0.3.62).
+    QVERIFY(QMetaObject::invokeMethod(vaultPage, "newLogin"));
+    QObject* save = editor->findChild<QObject*>(QStringLiteral("saveButton"));
+    QVERIFY(save != nullptr);
+    QVERIFY(QMetaObject::invokeMethod(save, "clicked"));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->items()->rowCount(), 2);
+    QCOMPARE(editor->property("itemId").toString(), QString());
+    QVERIFY(!vaultPage->property("chosenItemId").toString().isEmpty());
+
     controller->lock();
     QCOMPARE(controller->state(), State::Locked);
 

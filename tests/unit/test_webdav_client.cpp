@@ -24,9 +24,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_client.cpp 0.3.60
+// test_webdav_client.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Making a folder
 // v0.3.60: Initial release (D-057)
 
 using namespace chrono_vault;
@@ -146,6 +147,20 @@ private slots:
         QVERIFY(waitFor([&](auto done) {
                     client.unlock(QStringLiteral("Home.chronovault"), locked.body, done);
                 }).ok());
+    }
+
+    void makesAFolderOnce()
+    {
+        WebDavTestServer server;
+        WebDavClient client(accountOf(server));
+        QVERIFY(waitFor([&](auto done) { client.makeFolder(QStringLiteral("Work vaults"), done); }).ok());
+        QCOMPARE(waitFor([&](auto done) { client.makeFolder(QStringLiteral("Work vaults"), done); }).status, 405);
+        std::optional<QList<WebDavEntry>> listed;
+        client.list([&](const WebDavReply&, const QList<WebDavEntry>& entries) { listed = entries; });
+        QTRY_VERIFY_WITH_TIMEOUT(listed.has_value(), 10000);
+        QCOMPARE(listed->size(), 1);
+        QVERIFY(listed->constFirst().isFolder);
+        QCOMPARE(listed->constFirst().name, QStringLiteral("Work vaults"));
     }
 
     void aServerWithoutLocksSaysSo()

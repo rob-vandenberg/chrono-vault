@@ -11,6 +11,8 @@ chrono-vault.sh
 # named on a line of its own (the owner's rule of 21 November 2026).
 art/*
 !art/chrono-vault.svg
+!art/storage-webdav.svg
+!art/storage-device.svg
 !art/eye.svg
 !art/eye-hidden.svg
 !art/item-login.svg

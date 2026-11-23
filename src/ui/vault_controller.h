@@ -46,9 +46,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.3.60
+// vault_controller.h 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: The WebDAV folder browser; a new WebDAV vault kept only after its first upload (D-057)
 // v0.3.60: A vault kept on a WebDAV server: its working copy synced, connecting, creating, opening, moving and
 //          disconnecting (D-057)
 // v0.2.56: Editing and resetting every category; the icons' names translated (D-056)
@@ -448,6 +449,10 @@ public:
     // answers. trustedCertificate is a fingerprint the person trusted, or "".
     Q_INVOKABLE void connectWebDav(const QString& address, const QString& user, const QString& password,
                                    const QString& trustedCertificate);
+    // The folder browser after Connect: a subfolder of the folder shown, or
+    // ".." for its parent; a new folder, which is then shown.
+    Q_INVOKABLE void openWebDavFolder(const QString& name);
+    Q_INVOKABLE void makeWebDavFolder(const QString& name);
     // An address that sends the password readable over the network.
     [[nodiscard]] Q_INVOKABLE bool isPlainHttp(const QString& address) const;
     // With the folder connected: a new vault kept there, one already there
@@ -542,6 +547,10 @@ signals:
     // not; certificate is the fingerprint to ask about, when that is why.
     void webDavConnected(bool ok, const QString& problem, const QStringList& vaultFiles, const QString& certificate);
     void webDavDone(bool ok, const QString& problem);
+    // A new WebDAV vault that could not be made or put on the server; nothing was kept.
+    void webDavCreateFailed(const QString& problem);
+    // A folder of the server, listed: shown in the folder browser.
+    void webDavFolderShown(const QString& address, const QStringList& folders, const QStringList& vaultFiles);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
@@ -583,6 +592,11 @@ private:
     void rememberPrimary();
     void forgetPrimary();
     void showCreated(CreatedVault created);
+    // The end of creating a vault: in the list, its password perhaps in the
+    // primary, shown (D-030); a WebDAV vault only after its first upload (D-057).
+    void finishCreating(const QString& newPath, VaultKey newKey, const QByteArray& fingerprint,
+                        const QByteArray& written, const QString& keyfileFile, State before,
+                        const QString& savedPassword);
     void connectQuickUnlock();
     void recordMasterPassword();
     void recordMasterPasswordIfNone();
@@ -626,10 +640,11 @@ private:
     void syncFinished(SyncOutcome outcome, const QByteArray& certificate, const QString& conflictCopy);
     void keepWebDavPassword(const WebDavPlace& place, const QString& password);
     void withWebDavPassword(const WebDavPlace& place, std::function<void(std::optional<QString>)> then);
-    void placeTaken(const QString& vaultFile);
     [[nodiscard]] QString newWorkingCopyPath(const QString& name) const;
     [[nodiscard]] static QString shownFingerprint(const QByteArray& fingerprint);
     [[nodiscard]] static QString connectProblem(const WebDavReply& answer);
+    [[nodiscard]] static QString webDavNameProblem(const QString& name);
+    void showWebDavFolder(const WebDavAccount& account, bool connecting);
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
@@ -750,9 +765,9 @@ private:
     bool passwordNeeded = false;
     bool webDavWaiting = false;           // the shown vault's sync waits for its password
     QHash<QString, QString> webDavPasswords; // by place id, in memory while the program runs
-    std::unique_ptr<WebDavClient> connection; // the folder being connected in the windows
+    std::unique_ptr<WebDavClient> connection; // the folder shown in the WebDAV window
+    std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;
-    std::optional<std::pair<QString, WebDavPlace>> pendingPlace; // a new vault's, until it is made
 };
 
 } // namespace chrono_vault

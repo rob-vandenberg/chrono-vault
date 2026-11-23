@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_sync.cpp 0.3.61
+// test_webdav_sync.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: A failed first upload leaves nothing; the folder browser; leftovers; the same bytes (built apart)
 // v0.3.61: The first upload through a lock's placeholder that has no tag or size (pCloud)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057); its interruptions built apart
 
@@ -74,7 +75,7 @@ private:
     QHash<QString, QByteArray> kept;
 };
 
-QStringList titlesOfData(const QByteArray& data, const QByteArray& password = "pass")
+[[maybe_unused]] QStringList titlesOfData(const QByteArray& data, const QByteArray& password = "pass")
 {
     QTemporaryDir folder;
     const QString file = folder.filePath(QStringLiteral("read.chronovault"));
@@ -91,7 +92,7 @@ QStringList titlesOfData(const QByteArray& data, const QByteArray& password = "p
 }
 
 // Another device adds an item to the vault on the server.
-void addOnServer(WebDavTestServer& server, const QString& title)
+[[maybe_unused]] void addOnServer(WebDavTestServer& server, const QString& title)
 {
     QTemporaryDir folder;
     const QString file = folder.filePath(QStringLiteral("other.chronovault"));
@@ -109,7 +110,7 @@ void addOnServer(WebDavTestServer& server, const QString& title)
     server.setFile(vaultName, written.readAll());
 }
 
-QStringList shownTitles(VaultController& controller)
+[[maybe_unused]] QStringList shownTitles(VaultController& controller)
 {
     QStringList titles;
     for (int row = 0; row < controller.items()->rowCount(); ++row) {
@@ -119,7 +120,7 @@ QStringList shownTitles(VaultController& controller)
     return titles;
 }
 
-bool addHere(VaultController& controller, const QString& title)
+[[maybe_unused]] bool addHere(VaultController& controller, const QString& title)
 {
     QVariantMap item = controller.newLogin();
     item.insert(QStringLiteral("title"), title);
@@ -179,7 +180,7 @@ private slots:
         QFile::remove(VaultsFile().fileName());
     }
 
-#ifdef CHRONO_VAULT_WEBDAV_INTERRUPTIONS
+#if defined(CHRONO_VAULT_WEBDAV_INTERRUPTIONS)
     // Built as test_webdav_interruptions, so each test stays under 20 seconds (OR-11).
     void a_sync_stopped_at_any_step_loses_nothing_data()
     {
@@ -225,6 +226,75 @@ private slots:
         QVERIFY(first->syncProblem().isEmpty());
     }
 
+#elif defined(CHRONO_VAULT_WEBDAV_CREATE)
+    // Built as test_webdav_create, so each test stays under 20 seconds (OR-11).
+    void a_new_vault_that_cannot_reach_the_server_leaves_nothing()
+    {
+        WebDavTestServer server;
+        auto first = device();
+        QVERIFY(connected(*first, server));
+        server.refuseWith = 507; // the server's disk is full
+        QSignalSpy failed(first.get(), &VaultController::webDavCreateFailed);
+        first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QVERIFY(failed.wait(10000));
+        QVERIFY(failed.constFirst().at(0).toString().contains(QStringLiteral("Nothing was kept")));
+        QCOMPARE(first->state(), State::NoVault);
+        QVERIFY(first->vaults().isEmpty());
+        QVERIFY(QDir(webDavDataFolder()).entryList(QDir::Files).isEmpty());
+        QVERIFY(!VaultsFile().value(QStringLiteral("vaults/webdav")).toMap().contains(webDavDataFolder() + QStringLiteral("/Home.chronovault")));
+    }
+
+    void a_vault_goes_in_the_folder_chosen_in_the_browser()
+    {
+        WebDavTestServer server;
+        auto first = device();
+        QVERIFY(connected(*first, server));
+        QSignalSpy shown(first.get(), &VaultController::webDavFolderShown);
+        first->makeWebDavFolder(QStringLiteral("Work vaults"));
+        QVERIFY(shown.wait(10000));
+        QVERIFY(shown.constLast().at(0).toString().endsWith(QStringLiteral("/Work vaults/")));
+        first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_VERIFY_WITH_TIMEOUT(first->state() == State::Unlocked, 10000);
+        QVERIFY(!server.fileData(QStringLiteral("Work vaults/Home.chronovault")).isEmpty());
+        // A folder that cannot be opened leaves the one shown: the next vault
+        // still goes there.
+        QSignalSpy done(first.get(), &VaultController::webDavDone);
+        first->openWebDavFolder(QStringLiteral("Gone"));
+        QVERIFY(done.wait(10000));
+        QVERIFY(!done.constLast().at(0).toBool());
+        first->createWebDavVault(QStringLiteral("Second"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_VERIFY_WITH_TIMEOUT(!server.fileData(QStringLiteral("Work vaults/Second.chronovault")).isEmpty(), 10000);
+
+        // Up again: the folder is listed in the folder above.
+        shown.clear();
+        first->openWebDavFolder(QStringLiteral(".."));
+        QVERIFY(shown.wait(10000));
+        QCOMPARE(shown.constLast().at(1).toStringList(), QStringList{QStringLiteral("Work vaults")});
+    }
+
+    void its_own_leftover_upload_is_removed_and_the_same_bytes_are_no_change()
+    {
+        WebDavTestServer server;
+        auto first = device();
+        QVERIFY(connected(*first, server));
+        first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_VERIFY_WITH_TIMEOUT(first->state() == State::Unlocked, 10000);
+        QVERIFY(syncedNow(*first));
+        const QString id = webDavPlaceOf(first->vaultPath())->id;
+        const QString leftover = vaultName + QStringLiteral(".") + id + QStringLiteral(".uploading");
+        const QString othersLeftover = vaultName + QStringLiteral(".0123.uploading");
+        server.setFile(leftover, QByteArrayLiteral("stopped upload"));
+        server.setFile(othersLeftover, QByteArrayLiteral("another device's"));
+        // The same bytes under a new tag, as pCloud gives one after an upload.
+        const QByteArray before = server.fileData(vaultName);
+        server.setFile(vaultName, before);
+        QVERIFY(syncedNow(*first));
+        QVERIFY(!server.files.contains(leftover));
+        QVERIFY(server.files.contains(othersLeftover));
+        QCOMPARE(server.fileData(vaultName), before);
+        QVERIFY(!first->message().contains(QStringLiteral("changed elsewhere")));
+        QVERIFY(first->syncProblem().isEmpty());
+    }
 #else
     void a_new_vault_goes_to_the_server()
     {

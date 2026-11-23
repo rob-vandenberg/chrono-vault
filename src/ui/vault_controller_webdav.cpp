@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.3.60
+// vault_controller_webdav.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: The folder browser and New folder; an address read as typed; a non-WebDAV server said in words (D-057)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057)
 
 // The controller's WebDAV part (D-057). A vault kept on a server has a
@@ -84,9 +85,10 @@ QString VaultController::connectProblem(const WebDavReply& answer)
         return tr("The file is too large to be a vault.");
     case WebDavError::Damaged:
         return tr("The address does not answer as a WebDAV folder.");
+    case WebDavError::NotSupported:
+        return tr("This address is not a WebDAV server. Check the address.");
     case WebDavError::Changed:
     case WebDavError::Locked:
-    case WebDavError::NotSupported:
     case WebDavError::Server:
         break;
     }
@@ -298,7 +300,8 @@ void VaultController::connectWebDav(const QString& address, const QString& user,
     if (!given.contains(QLatin1String("://"))) {
         given.prepend(QStringLiteral("https://"));
     }
-    const QUrl folder(given, QUrl::StrictMode);
+    // Read as typed: a space becomes %20 (the owner's test, 0.3.62).
+    const QUrl folder(given, QUrl::TolerantMode);
     const QString scheme = folder.scheme().toLower();
     if (!folder.isValid() || folder.host().isEmpty() || (scheme != QLatin1String("https") && scheme != QLatin1String("http"))) {
         emit webDavConnected(false, tr("That is not a web address."), {}, QString());
@@ -306,31 +309,108 @@ void VaultController::connectWebDav(const QString& address, const QString& user,
     }
     QByteArray trusted = trustedCertificate.toLatin1().toLower();
     trusted.replace(':', "");
-    connectedFiles.clear();
-    connection = std::make_unique<WebDavClient>(
-        WebDavAccount{folder.adjusted(QUrl::RemoveUserInfo), user, password, trusted});
-    WebDavClient* asking = connection.get();
+    showWebDavFolder(WebDavAccount{folder.adjusted(QUrl::RemoveUserInfo), user, password, trusted}, true);
+}
+
+void VaultController::showWebDavFolder(const WebDavAccount& account, bool connecting)
+{
+    // The folder shown changes only once its list came: a folder that cannot
+    // be read leaves the one on screen, and what is made, opened or moved
+    // goes where the person sees (0.3.62 review).
+    browsing = std::make_unique<WebDavClient>(account);
+    WebDavClient* asking = browsing.get();
+    if (connecting) {
+        connection.reset();
+        connectedFiles.clear();
+    }
     QPointer<VaultController> self(this);
-    asking->list([self, asking](const WebDavReply& answer, const QList<WebDavEntry>& entries) {
-        if (!self || self->connection.get() != asking) {
+    asking->list([self, asking, connecting](const WebDavReply& answer, const QList<WebDavEntry>& entries) {
+        if (!self || self->browsing.get() != asking) {
             return;
         }
         if (!answer.ok()) {
-            emit self->webDavConnected(false, connectProblem(answer), {},
-                                       shownFingerprint(answer.certificate));
+            self->browsing.reset();
+            if (connecting) {
+                emit self->webDavConnected(false, connectProblem(answer), {}, shownFingerprint(answer.certificate));
+            } else {
+                emit self->webDavDone(false, connectProblem(answer));
+            }
             return;
         }
         QStringList files;
+        QStringList folders;
         for (const WebDavEntry& entry : entries) {
-            if (!entry.isFolder && entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
-                !entry.name.contains(QLatin1String(".uploading"))) {
+            if (entry.isFolder) {
+                folders.append(entry.name);
+            } else if (entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
+                       !entry.name.contains(QLatin1String(".uploading"))) {
                 files.append(entry.name);
             }
         }
         files.sort(Qt::CaseInsensitive);
+        folders.sort(Qt::CaseInsensitive);
+        self->connection = std::move(self->browsing);
         self->connectedFiles = files;
-        emit self->webDavConnected(true, QString(), files, QString());
+        if (connecting) {
+            emit self->webDavConnected(true, QString(), files, QString());
+        }
+        emit self->webDavFolderShown(asking->account().folder.toDisplayString(QUrl::RemoveUserInfo), folders, files);
     });
+}
+
+void VaultController::openWebDavFolder(const QString& name)
+{
+    if (!connection) {
+        return;
+    }
+    WebDavAccount account = connection->account();
+    if (name == QLatin1String("..")) {
+        account.folder = account.folder.resolved(QUrl(QStringLiteral("..")));
+    } else {
+        account.folder = connection->addressOf(name);
+    }
+    showWebDavFolder(account, false);
+}
+
+void VaultController::makeWebDavFolder(const QString& name)
+{
+    if (!connection) {
+        return;
+    }
+    const QString problem = webDavNameProblem(name);
+    if (!problem.isEmpty()) {
+        emit webDavDone(false, problem);
+        return;
+    }
+    WebDavClient* asking = connection.get();
+    const QString clean = name.trimmed();
+    QPointer<VaultController> self(this);
+    asking->makeFolder(clean, [self, asking, clean](const WebDavReply& answer) {
+        if (!self || self->connection.get() != asking) {
+            return;
+        }
+        if (!answer.ok()) {
+            emit self->webDavDone(false, answer.status == 405 ? tr("A folder or file with that name is already there.")
+                                                             : connectProblem(answer));
+            return;
+        }
+        self->openWebDavFolder(clean); // into the new folder
+    });
+}
+
+QString VaultController::webDavNameProblem(const QString& name)
+{
+    // The name is a file name here and on the server: what Windows refuses
+    // is refused on every system, so a name works on every device.
+    static const QRegularExpression notInAName(QStringLiteral("[/\\\\:*?\"<>|\\x00-\\x1f]"));
+    static const QRegularExpression reserved(QStringLiteral("^(con|prn|aux|nul|com[1-9]|lpt[1-9])$"),
+                                             QRegularExpression::CaseInsensitiveOption);
+    const QString clean = name.trimmed();
+    if (clean.isEmpty() || clean.contains(notInAName) || clean.startsWith(QLatin1Char('.')) ||
+        clean.endsWith(QLatin1Char('.')) || clean.contains(reserved)) {
+        return tr("Choose a name without / \\ : * ? \" < > |, not starting or ending with a dot.");
+    }
+    return QString();
 }
 
 QString VaultController::newWorkingCopyPath(const QString& name) const
@@ -352,14 +432,8 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
         say(tr("Connect to the WebDAV folder first."), true);
         return;
     }
-    // The name is a file name here and on the server: what Windows refuses
-    // is refused on every system, so a name works on every device.
-    static const QRegularExpression notInAName(QStringLiteral("[/\\\\:*?\"<>|\\x00-\\x1f]"));
-    static const QRegularExpression reserved(QStringLiteral("^(con|prn|aux|nul|com[1-9]|lpt[1-9])$"),
-                                             QRegularExpression::CaseInsensitiveOption);
-    if (cleanName.isEmpty() || cleanName.contains(notInAName) || cleanName.startsWith(QLatin1Char('.')) ||
-        cleanName.endsWith(QLatin1Char('.')) || cleanName.contains(reserved)) {
-        say(tr("Choose a name for the new vault without / \\ : * ? \" < > |, not starting or ending with a dot."), true);
+    if (const QString problem = webDavNameProblem(cleanName); !problem.isEmpty()) {
+        say(problem, true);
         return;
     }
     const QString fileName = cleanName + vaultSuffix;
@@ -374,21 +448,95 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
     place.fileName = fileName;
     place.user = connection->account().user;
     place.trustedCertificate = connection->account().trustedCertificate;
-    const QString workingCopy = newWorkingCopyPath(cleanName);
-    pendingPlace = std::pair{workingCopy, place};
-    webDavPasswords.insert(place.id, connection->account().password);
-    createVault(QUrl::fromLocalFile(workingCopy), password, repeated, keyfile, savePassword);
-}
-
-void VaultController::placeTaken(const QString& vaultFile)
-{
-    if (!pendingPlace || pendingPlace->first != vaultFile) {
+    if (password.isEmpty()) {
+        say(tr("Choose a master password."), true);
         return;
     }
-    const WebDavPlace place = pendingPlace->second;
-    pendingPlace.reset();
-    rememberWebDavPlace(vaultFile, place);
-    keepWebDavPassword(place, webDavPasswords.value(place.id));
+    if (password != repeated) {
+        say(tr("The two passwords are not the same."), true);
+        return;
+    }
+    if (currentState == State::Unlocked && (dirty || savesRunning > 0)) {
+        say(tr("Wait until your last change is saved, then try again."), true);
+        return;
+    }
+    // The new vault is made here, put on the server, and only then kept:
+    // a first upload that fails leaves nothing behind (the owner, 0.3.62).
+    const QString workingCopy = newWorkingCopyPath(cleanName);
+    const QString serverPassword = connection->account().password;
+    const QString keyfileFile = keyfile.isLocalFile() ? keyfile.toLocalFile() : keyfile.toString();
+    const QString savedPassword = savePassword && canSaveInPrimary() ? password : QString();
+    const State before = currentState;
+    setState(State::Busy);
+    say(tr("Creating the vault on the WebDAV server…"), false);
+    QByteArray passwordBytes = password.toUtf8();
+    const crypto::KdfParameters parameters = kdfParameters;
+    const quint64 attempt = ++unlockAttempt;
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&unlockPool, [self, workingCopy, passwordBytes, parameters, attempt, keyfileFile, before,
+                                          savedPassword, place, serverPassword]() mutable {
+        std::optional<QByteArray> fingerprint = QByteArray();
+        if (!keyfileFile.isEmpty()) {
+            fingerprint = keyfileFingerprint(keyfileFile);
+        }
+        VaultKey newKey;
+        SaveStatus status = SaveStatus::CannotWrite;
+        QByteArray written;
+        if (fingerprint) {
+            newKey = makeVaultKey(passwordBytes, parameters, *fingerprint);
+            status = newKey.isValid() ? saveVaultFile(workingCopy, contentsToJson({}), newKey, {}, &written)
+                                      : SaveStatus::CannotWrite;
+        }
+        crypto::wipe(passwordBytes);
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, workingCopy, newKey, status, attempt, keyfileFile, before, savedPassword, fingerprint, written,
+             place, serverPassword]() mutable {
+                if (!self || attempt != self->unlockAttempt) {
+                    newKey.wipe();
+                    QFile::remove(workingCopy);
+                    return;
+                }
+                const auto failed = [self, workingCopy, before, place](const QString& problem) {
+                    QFile::remove(workingCopy);
+                    QFile::remove(webDavBasePath(place.id));
+                    forgetWebDavPlace(workingCopy);
+                    self->setState(before == State::Unlocked ? State::Unlocked
+                                   : self->path.isEmpty()    ? State::NoVault
+                                                             : State::Locked);
+                    self->say(problem, true);
+                    emit self->webDavCreateFailed(problem);
+                };
+                if (!fingerprint || status != SaveStatus::Saved) {
+                    newKey.wipe();
+                    failed(!fingerprint ? tr("The keyfile could not be read. The vault was not created.")
+                                        : tr("The new vault could not be created: this computer cannot write its "
+                                             "copy, or the disk is full."));
+                    return;
+                }
+                auto* first = new WebDavSync(workingCopy, place, serverPassword, newKey, &self->savePool, self);
+                QObject::connect(
+                    first, &WebDavSync::finished, self,
+                    [self, first, workingCopy, newKey, fingerprint, written, keyfileFile, before, savedPassword, place,
+                     serverPassword, failed](SyncOutcome outcome, const QByteArray&, const QString&) mutable {
+                        first->deleteLater();
+                        if (outcome != SyncOutcome::Synced) {
+                            newKey.wipe();
+                            failed(tr("The vault could not be put on the WebDAV server: %1. Nothing was kept.")
+                                       .arg(syncOutcomeText(outcome)));
+                            return;
+                        }
+                        self->keepWebDavPassword(place, serverPassword);
+                        self->finishCreating(workingCopy, newKey, *fingerprint, written, keyfileFile, before,
+                                             savedPassword);
+                    });
+                if (self->syncStepCheck) {
+                    first->setStepCheckForTests(self->syncStepCheck);
+                }
+                first->start();
+            },
+            Qt::QueuedConnection);
+    });
 }
 
 void VaultController::openWebDavVault(const QString& fileName)

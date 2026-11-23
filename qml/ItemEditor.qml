@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.2.59
+// ItemEditor.qml 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Save closes the editor on the saved item (the owner)
 // v0.2.59: The labels and fields 50 to the left, as the view (the owner)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.1.41: The item's own Notes box; the reference program's field types and names (D-051)
@@ -295,7 +296,12 @@ Item {
                 highlighted: true
                 // Not while a file is still being read: it would be left out.
                 enabled: (editor.changed || editor.isNew) && editor.waitingFor.length === 0
-                onClicked: editor.store()
+                // Stored, then the editor closes on the saved item (the owner, 0.3.62).
+                onClicked: {
+                    editor.store()
+                    if (!editor.changed && !editor.isNew)
+                        editor.close()
+                }
             }
             Button {
                 objectName: "cancelButton"

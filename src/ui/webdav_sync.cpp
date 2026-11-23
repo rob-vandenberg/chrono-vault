@@ -35,9 +35,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// webdav_sync.cpp 0.3.61
+// webdav_sync.cpp 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Its own leftover upload removed first; the server's bytes equal to the base are no change (D-057)
 // v0.3.61: A lock's empty placeholder is no version (pCloud); every step in the --debug log (D-057)
 // v0.3.60: Initial release (D-057)
 
@@ -219,6 +220,7 @@ struct WebDavSync::Prepared
     QByteArray upload;        // what goes to the server; empty when nothing
     QByteArray stamp;         // the working copy's stamp, as uploaded or taken
     QString conflictCopy;
+    bool theirsUnchanged = false; // the server's bytes are the base's, under a new tag
 };
 
 WebDavSync::WebDavSync(QString workingCopy, WebDavPlace place, QString password, const VaultKey& vaultKey,
@@ -256,7 +258,16 @@ void WebDavSync::start()
     }
     busy = true;
     rounds = 0;
-    round();
+    // An upload of this vault left by an earlier sync that was stopped goes
+    // first (the owner: clean up after yourself); one of another device's
+    // is never touched, it may still be uploading.
+    QPointer<WebDavSync> self(this);
+    client->remove(uploadName(), [self](const WebDavReply& answer) {
+        fingerLog(QStringLiteral("webdav sync: leftover upload removed: status %1").arg(answer.status));
+        if (self) {
+            self->round();
+        }
+    });
 }
 
 void WebDavSync::round()
@@ -316,6 +327,24 @@ void WebDavSync::downloaded(const WebDavReply& answer)
             ready.stamp = mineBytes->left(stampLength);
             if (missing || ready.stamp != synced) {
                 // Opened once to be sure only a whole vault ever goes up.
+                OpenResult check = openVaultDataWithKey(*mineBytes, useKey);
+                crypto::wipe(check.contents);
+                check.key.wipe();
+                if (check.status != OpenStatus::Opened) {
+                    finishWith(SyncOutcome::LocalTrouble);
+                    return;
+                }
+                ready.upload = *mineBytes;
+            }
+            finishWith(SyncOutcome::Synced);
+            return;
+        }
+        if (readWhole(base).value_or(QByteArray()) == their) {
+            // The version both last agreed on, under a new tag (pCloud gives
+            // one soon after an upload): nothing changed there.
+            ready.theirsUnchanged = true;
+            ready.stamp = mineBytes->left(stampLength);
+            if (ready.stamp != synced) {
                 OpenResult check = openVaultDataWithKey(*mineBytes, useKey);
                 crypto::wipe(check.contents);
                 check.key.wipe();
@@ -428,11 +457,13 @@ void WebDavSync::downloaded(const WebDavReply& answer)
 
 void WebDavSync::prepared(const Prepared& ready)
 {
-    fingerLog(QStringLiteral("webdav sync: prepared: outcome %1, wrote working copy %2, upload %3 bytes, missing %4")
+    fingerLog(QStringLiteral("webdav sync: prepared: outcome %1, wrote working copy %2, upload %3 bytes, missing %4, "
+                             "server unchanged under a new tag %5")
                   .arg(static_cast<int>(ready.outcome))
                   .arg(ready.wroteWorkingCopy)
                   .arg(ready.upload.size())
-                  .arg(remoteMissing));
+                  .arg(remoteMissing)
+                  .arg(ready.theirsUnchanged));
     if (ready.wroteWorkingCopy) {
         emit workingCopyChanged();
     }

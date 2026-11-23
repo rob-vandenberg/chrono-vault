@@ -29,9 +29,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.h 0.3.60
+// webdav_client.h 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.60: Initial release (D-057)
 
 class QNetworkReply;
@@ -110,6 +111,8 @@ public:
     // move is made under that lock.
     void move(const QString& from, const QString& to, const QByteArray& lockToken, Done done);
     void remove(const QString& name, Done done);
+    // A new folder in the folder (MKCOL).
+    void makeFolder(const QString& name, Done done);
     // The file's version tag (PROPFIND, depth 0); NotFound when it is not there.
     void tagOf(const QString& name, Done done);
     // An exclusive write lock for a short while; the token comes back in body.
