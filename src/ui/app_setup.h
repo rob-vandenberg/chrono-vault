@@ -22,9 +22,10 @@
 class QWindow;
 
 // --- Version ------------------------------------------------------------
-// app_setup.h 0.2.54
+// app_setup.h 0.2.55
 
 // --- Version history ----------------------------------------------------
+// v0.2.55: 10 points, between Windows' 9 and the owner's Linux 11 (the owner, D-017)
 // v0.2.54: The font size of our own, 11 points (the owner, D-017)
 // v0.0.38: --reset and the carry-over moved out (D-026)
 // v0.0.4: Initial release
@@ -39,7 +40,7 @@ void applyStyle();
 
 // The size of every text before the scalings, the same on every system
 // (the owner, D-017).
-inline constexpr double programFontPoints = 11.0;
+inline constexpr double programFontPoints = 10.0;
 
 // The monospaced font, for passwords and one-time codes.
 inline constexpr char monospacedFontFamily[] = "Noto Sans Mono";

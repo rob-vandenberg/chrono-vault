@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.2.54
+// test_appearance.cpp 0.2.55
 
 // --- Version history ----------------------------------------------------
+// v0.2.55: The font is 10 points whatever the system's size (the owner, D-017)
 // v0.2.54: The font is 11 points whatever the system's size (the owner, D-017)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: The settings window at 730 by 650; the slider's steps, marks above it and room around it
@@ -61,7 +62,7 @@ class TestAppearance : public QObject
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    void the_font_is_eleven_points_whatever_the_system();
+    void the_font_is_ten_points_whatever_the_system();
     void light_and_dark_are_two_looks_and_follow_asks_the_system();
     void a_theme_is_kept_under_its_name();
     void the_scale_stays_within_its_limits_and_never_scales_twice();
@@ -91,14 +92,14 @@ void TestAppearance::cleanupTestCase()
 }
 
 // Chrono Vault's own size, so it looks the same on every system: a system
-// at 9 points (Windows) gets 11 as well (the owner, D-017).
-void TestAppearance::the_font_is_eleven_points_whatever_the_system()
+// at 9 points (Windows) gets 10 as well (the owner, D-017).
+void TestAppearance::the_font_is_ten_points_whatever_the_system()
 {
     QFont system = QGuiApplication::font();
     system.setPointSizeF(9.0);
     QGuiApplication::setFont(system);
     applyStyle();
-    QCOMPARE(QGuiApplication::font().pointSizeF(), 11.0);
+    QCOMPARE(QGuiApplication::font().pointSizeF(), 10.0);
     QCOMPARE(QGuiApplication::font().family(), QStringLiteral("Noto Sans"));
 }
 

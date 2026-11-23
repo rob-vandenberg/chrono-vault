@@ -447,3 +447,8 @@ text stayed Linux's size while everything else was 125%. Now 11 points on every 
 scalings enlarge it with the rest (the owner, D-017, with his rule: one design, identical on Linux and Windows). Test:
 `test_appearance` checks 11 points from a 9-point system; its double-scale check now compares the size set, not the
 drawn size (rounded to whole pixels). Pictures on Linux match the owner's. No reviewers (the owner tests it).
+
+## 23 November 2026: version 0.2.55: 10 points
+
+11 points made Chrono Vault about 20% larger than the other programs on Windows (normal there: 9 points). Now 10
+points on every system, the middle road (the owner, D-017). No reviewers (the owner tests it).
