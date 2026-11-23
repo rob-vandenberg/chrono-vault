@@ -430,3 +430,12 @@ D-055). Qt's dialog there was unreadable in dark: `QWidget::setStyle` on the dia
 Settings > Security: "Ask for the master password again, once every"; Change right after its text. Settings >
 Clipboard: the seconds field 40 pixels narrower. No reviewers (the owner struck them); the Windows dialog is the
 owner's to test.
+
+## 23 November 2026: version 0.2.53: Windows Hello over Chrono Vault
+
+On Windows, ticking "Use Windows Hello to unlock vault" opens no box of our own (its Cancel could not stop Hello);
+the settings window says "Waiting for Windows Hello fingerprint..." in red at its bottom left, the tick box follows
+Hello's answer. Hello gets the window with the keyboard as owner (`RequestCreateForWindowAsync`,
+`RequestSignForWindowAsync`, `GetWindowIdFromWindow` loaded at run time), so it opens over Chrono Vault where Windows
+has those calls (D-038 point 10). Linux unchanged. No reviewers (the owner tests it). Compiled on the twin; the twin's
+full build stops in `tests/unit/test_vault_merge.cpp` line 72 (C4715, from 0.2.45), not touched.

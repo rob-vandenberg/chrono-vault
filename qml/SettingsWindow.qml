@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.2.52
+// SettingsWindow.qml 0.2.53
 
 // --- Version history ----------------------------------------------------
+// v0.2.53: Windows Hello: no popup on Windows, a red line at the bottom left while it is open (the owner)
 // v0.2.52: The reminder text "again, once every"; Change right after its text; the clipboard field 40 narrower (the owner)
 // v0.2.49: The reminder box as wide as its longest word; the minutes fields 40 narrower (the owner)
 // v0.1.44: The key box and the question about a key in use as windows of their own, as Chrono Viewer's (D-053)
@@ -273,6 +274,11 @@ ApplicationWindow {
         close()
     }
 
+    // On Windows, Windows Hello shows its own window with its own Cancel: no
+    // popup here, only a line at the bottom left while it is open and what
+    // came of it (the owner, D-038).
+    property bool helloOnTheLine: Qt.platform.os === "windows"
+
     // Ticking the fingerprint: "Touch the fingerprint reader…" with Cancel,
     // then what came of it, in a popup (the owner, D-043).
     Popup {
@@ -281,7 +287,8 @@ ApplicationWindow {
         anchors.centerIn: parent
         modal: true
         closePolicy: Popup.NoAutoClose
-        visible: settingsWindow.visible && (VaultController.quickUnlockBusy || VaultController.quickUnlockMessage !== "")
+        visible: settingsWindow.visible && !settingsWindow.helloOnTheLine
+                 && (VaultController.quickUnlockBusy || VaultController.quickUnlockMessage !== "")
         padding: Math.round(16 * Appearance.factor)
         contentItem: ColumnLayout {
             spacing: Math.round(12 * Appearance.factor)
@@ -1134,8 +1141,18 @@ ApplicationWindow {
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
+            Label {
+                id: helloLine
+                objectName: "helloLine"
+                text: VaultController.quickUnlockBusy ? qsTr("Waiting for Windows Hello fingerprint...")
+                                                      : VaultController.quickUnlockMessage
+                visible: settingsWindow.helloOnTheLine && settingsWindow.problem === "" && text !== ""
+                color: "#e53e3e"
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
             Item {
-                visible: settingsWindow.problem === ""
+                visible: settingsWindow.problem === "" && !helloLine.visible
                 Layout.fillWidth: true
             }
             Button {

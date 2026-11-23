@@ -1321,7 +1321,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+165"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+221"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1339,18 +1339,18 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+222"/>
-        <location line="+364"/>
+        <location filename="../qml/SettingsWindow.qml" line="+223"/>
+        <location line="+370"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-316"/>
+        <location line="-322"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+92"/>
+        <location line="+98"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1609,22 +1609,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+44"/>
+        <source>Waiting for Windows Hello fingerprint...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>Restore defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-846"/>
+        <location line="-856"/>
         <location line="+815"/>
-        <location line="+37"/>
+        <location line="+47"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-852"/>
+        <location line="-862"/>
         <location line="+724"/>
         <location line="+97"/>
-        <location line="+41"/>
+        <location line="+51"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>

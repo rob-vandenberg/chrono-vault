@@ -20,23 +20,34 @@
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
+#include <QGuiApplication>
 #include <QPointer>
+#include <QWindow>
 #include "settings_files.h"
 
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Metadata.h>
 #include <winrt/Windows.Security.Credentials.h>
 #include <winrt/Windows.Security.Cryptography.h>
 #include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.UI.h>
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 
 #include <future>
 #include <memory>
+#include <optional>
 #include <mutex>
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.0.38
+// quick_unlock_windows.cpp 0.2.53
 
 // --- Version history ----------------------------------------------------
+// v0.2.53: Windows Hello opens over Chrono Vault where Windows can (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
 
@@ -99,6 +110,46 @@ struct Pending
     }
 };
 
+// Windows Hello opens over this window where Windows can say so: the calls
+// that take an owner window and the function that names one are asked for
+// while running, so an older Windows keeps the calls without one.
+std::optional<winrt::Windows::UI::WindowId> ownerOf(quintptr window)
+{
+    if (window == 0) {
+        return std::nullopt;
+    }
+    using Metadata = winrt::Windows::Foundation::Metadata::ApiInformation;
+    try {
+        if (!Metadata::IsMethodPresent(L"Windows.Security.Credentials.KeyCredentialManager",
+                                       L"RequestCreateForWindowAsync") ||
+            !Metadata::IsMethodPresent(L"Windows.Security.Credentials.KeyCredential", L"RequestSignForWindowAsync")) {
+            return std::nullopt;
+        }
+    } catch (const winrt::hresult_error&) {
+        return std::nullopt;
+    }
+    using Naming = HRESULT(WINAPI*)(HWND, winrt::Windows::UI::WindowId*);
+    static const Naming naming = []() -> Naming {
+        const HMODULE library = LoadLibraryExW(L"ext-ms-win-windowing-external-l1-1-0.dll", nullptr,
+                                               LOAD_LIBRARY_SEARCH_SYSTEM32);
+        return library != nullptr
+                   ? reinterpret_cast<Naming>(reinterpret_cast<void*>(GetProcAddress(library, "GetWindowIdFromWindow")))
+                   : nullptr;
+    }();
+    winrt::Windows::UI::WindowId id{};
+    if (naming == nullptr || FAILED(naming(reinterpret_cast<HWND>(window), &id))) {
+        return std::nullopt;
+    }
+    return id;
+}
+
+// The Chrono Vault window that has the keyboard now, on the window's thread.
+quintptr ownerWindow()
+{
+    const QWindow* window = QGuiApplication::focusWindow();
+    return window != nullptr ? static_cast<quintptr>(window->winId()) : 0;
+}
+
 struct Signed
 {
     QuickUnlock::Result result = QuickUnlock::Result::Failed;
@@ -107,16 +158,19 @@ struct Signed
 
 // Runs on a thread of its own: WinRT's waiting calls may not run on the
 // window's thread.
-Signed sign(const QString& vault, const QByteArray& challenge, bool create, Pending& pending)
+Signed sign(const QString& vault, const QByteArray& challenge, bool create, quintptr window, Pending& pending)
 {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     Signed answer;
     try {
+        const std::optional<winrt::Windows::UI::WindowId> owner = ownerOf(window);
         const winrt::hstring name(credentialName(vault).toStdWString());
         const credentials::KeyCredentialRetrievalResult found =
-            create ? pending.wait(credentials::KeyCredentialManager::RequestCreateAsync(
-                         name, credentials::KeyCredentialCreationOption::ReplaceExisting))
-                   : pending.wait(credentials::KeyCredentialManager::OpenAsync(name));
+            !create  ? pending.wait(credentials::KeyCredentialManager::OpenAsync(name))
+            : owner ? pending.wait(credentials::KeyCredentialManager::RequestCreateForWindowAsync(
+                          *owner, name, credentials::KeyCredentialCreationOption::ReplaceExisting))
+                    : pending.wait(credentials::KeyCredentialManager::RequestCreateAsync(
+                          name, credentials::KeyCredentialCreationOption::ReplaceExisting));
         switch (found.Status()) {
         case credentials::KeyCredentialStatus::Success: break;
         case credentials::KeyCredentialStatus::UserCanceled: answer.result = QuickUnlock::Result::Cancelled; return answer;
@@ -126,7 +180,9 @@ Signed sign(const QString& vault, const QByteArray& challenge, bool create, Pend
         const auto buffer = cryptography::CryptographicBuffer::CreateFromByteArray(winrt::array_view<uint8_t const>(
             reinterpret_cast<const uint8_t*>(challenge.constData()),
             reinterpret_cast<const uint8_t*>(challenge.constData()) + challenge.size()));
-        const credentials::KeyCredentialOperationResult signedChallenge = pending.wait(found.Credential().RequestSignAsync(buffer));
+        const credentials::KeyCredentialOperationResult signedChallenge =
+            owner ? pending.wait(found.Credential().RequestSignForWindowAsync(*owner, buffer))
+                  : pending.wait(found.Credential().RequestSignAsync(buffer));
         if (signedChallenge.Status() == credentials::KeyCredentialStatus::UserCanceled) {
             answer.result = QuickUnlock::Result::Cancelled;
             return answer;
@@ -176,9 +232,10 @@ public:
         cancel();
         auto pending = std::make_shared<Pending>();
         asking = pending;
+        const quintptr window = ownerWindow();
         emit fingerReady(); // Windows Hello shows its own window now
-        std::thread([self, vault, secret, challenge, pending]() {
-            const Signed answer = sign(vault, challenge, true, *pending);
+        std::thread([self, vault, secret, challenge, window, pending]() {
+            const Signed answer = sign(vault, challenge, true, window, *pending);
             bool stopped = false;
             {
                 const std::lock_guard<std::mutex> guard(pending->lock);
@@ -223,9 +280,10 @@ public:
         cancel();
         auto pending = std::make_shared<Pending>();
         asking = pending;
+        const quintptr window = ownerWindow();
         emit fingerReady(); // Windows Hello shows its own window now
-        std::thread([self, vault, challenge, sealed, pending]() {
-            const Signed answer = sign(vault, challenge, false, *pending);
+        std::thread([self, vault, challenge, sealed, window, pending]() {
+            const Signed answer = sign(vault, challenge, false, window, *pending);
             {
                 const std::lock_guard<std::mutex> guard(pending->lock);
                 if (pending->stopped) {
