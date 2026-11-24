@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.78.3
+// ImportWindow.qml 0.5.80
 
 // --- Version history ----------------------------------------------------
+// v0.5.80: Only a comment (D-055)
 // v0.5.78.3: Next… a button of its own: the window stays open and owns the export's file dialog, as Browse… (a debug version)
 // v0.5.78.2: Next… for an export goes straight to the file dialog, the window not shown again first (a debug version)
 // v0.5.78.1: Next… for an export in the --debug log (a debug version)
@@ -83,8 +84,7 @@ DialogWindow {
         problem = ""
         if (source === "export") {
             // The window stays open and the file dialog belongs to it, as
-            // Browse… does: a dialog opened over a window just hidden was
-            // sometimes never shown on Windows (0.5.78.1's log).
+            // Browse… does.
             FilePickers.logImportStep("Import window stays open", importWindow)
             exportDialog.open()
             return

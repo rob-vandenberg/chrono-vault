@@ -43,9 +43,10 @@
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.4.74
+// quick_unlock_windows.cpp 0.5.80
 
 // --- Version history ----------------------------------------------------
+// v0.5.80: Every thread that talks to Windows Hello closes down its COM set-up when it ends (D-055)
 // v0.4.74: Windows Hello's own window brought to the front when Windows shows it (the owner)
 // v0.4.73: Windows Hello always given the window that asks (the owner)
 // v0.4.72.1: Debug lines: the window Windows Hello is given, the one in front, the call used (the owner)
@@ -90,6 +91,23 @@ QString oldCredentialName(const QString& vault)
     return QStringLiteral("Chrono Vault ") + vaultId(vault);
 }
 
+// COM as a thread that talks to Windows Hello needs it, closed down when the
+// thread is done. A thread that set it up and just ended left Explorer's file
+// dialog hanging afterwards (measured, D-055). Made before any Windows object
+// of the thread, so it goes after the last of them.
+class HelloThread
+{
+public:
+    HelloThread() { winrt::init_apartment(winrt::apartment_type::multi_threaded); }
+    ~HelloThread()
+    {
+        winrt::clear_factory_cache();
+        winrt::uninit_apartment();
+    }
+    HelloThread(const HelloThread&) = delete;
+    HelloThread& operator=(const HelloThread&) = delete;
+};
+
 // The Windows Hello request a check is waiting for, so that it can be
 // stopped when the vault is unlocked another way.
 struct Pending
@@ -107,10 +125,18 @@ struct Pending
                 operation.Cancel();
             }
         }
-        auto answer = operation.get(); // a stopped request throws
-        const std::lock_guard<std::mutex> guard(lock);
-        request = nullptr;
-        return answer;
+        // Let go of on every way out, a stopped request's throw too: the
+        // thread closes COM down next (HelloThread).
+        struct LetGo
+        {
+            Pending& pending;
+            ~LetGo()
+            {
+                const std::lock_guard<std::mutex> guard(pending.lock);
+                pending.request = nullptr;
+            }
+        } letGo{*this};
+        return operation.get();
     }
 
     void stop()
@@ -238,7 +264,7 @@ void logRequest(const char* what, quintptr window)
 // thread.
 QuickUnlock::Result verify(quintptr window, const QString& message, Pending& pending)
 {
-    winrt::init_apartment(winrt::apartment_type::multi_threaded);
+    const HelloThread com;
     try {
         const winrt::hstring text(message.toStdWString());
         winrt::Windows::Foundation::IAsyncOperation<consent::UserConsentVerificationResult> asking{nullptr};
@@ -297,7 +323,7 @@ public:
     [[nodiscard]] bool available() const override
     {
         return std::async(std::launch::async, []() {
-                   winrt::init_apartment(winrt::apartment_type::multi_threaded);
+                   const HelloThread com;
                    try {
                        return consent::UserConsentVerifier::CheckAvailabilityAsync().get() ==
                               consent::UserConsentVerifierAvailability::Available;
@@ -459,7 +485,7 @@ private:
         }
         settings.remove(oldSettingsKey(vault));
         std::thread([vault]() {
-            winrt::init_apartment(winrt::apartment_type::multi_threaded);
+            const HelloThread com;
             try {
                 credentials::KeyCredentialManager::DeleteAsync(winrt::hstring(oldCredentialName(vault).toStdWString()))
                     .get();

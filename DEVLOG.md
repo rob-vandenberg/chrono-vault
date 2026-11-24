@@ -677,3 +677,11 @@ one step Chrono Vault took that no other program takes: `dialog.winId()` before 
 QFileDialog's own Qt window into being to give it an owner by hand. That step now runs only for Qt's own dialog
 (Linux); Qt gives Explorer's dialog the active window as owner (`src/ui/file_pickers.cpp`, D-055). The Next… button of
 0.5.78.3 stays; the --debug import lines stay too, written only with --debug.
+
+## 24 November 2026: version 0.5.80: the Windows Hello threads close down COM
+
+The owner's changelist items 1-5. 0.5.79's cause (the dialog's own Qt window) was wrong. A test program on the computer
+that fails separated it: the check for Windows Hello made at every start, also with Windows Hello turned off, hung the
+run; with its thread closing COM down, or kept alive, it did not (D-055 has the figures and what is not known).
+`HelloThread` in `src/ui/quick_unlock_windows.cpp` closes COM down on all three threads; a request is let go of on every
+way out.

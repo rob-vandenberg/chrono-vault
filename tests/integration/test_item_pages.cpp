@@ -354,8 +354,7 @@ void TestItemPages::the_import_window_offers_import_and_closes_at_a_lock()
     QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
     QVERIFY(importWindow);
     // The chooser opens over the import window, which stays open, as Browse…
-    // does (0.5.78.3): a dialog over a window just hidden was sometimes never
-    // shown on Windows.
+    // does (0.5.78.3).
     bool asked = false;
     bool belongs = false;
     bool windowOpen = false;
