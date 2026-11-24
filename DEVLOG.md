@@ -576,3 +576,9 @@ one. Now `IUserConsentVerifierInterop::RequestVerificationForWindowAsync` with C
 DPAPI (`src/ui/quick_unlock_windows.cpp`, D-038 point 11); compiled on the twin, the owner tests it. "Unlock with
 Windows Hello" as wide as its text (`qml/UnlockPage.qml`, checked in `test_reader`). The translation check of the owner
 found every text translatable; `test_every_string_translatable` now also checks choices, continuation lines and lists.
+
+## 24 November 2026: debug version 0.4.72.1: where Windows Hello opens
+
+The owner: in 0.4.72 Windows Hello still opens under Chrono Vault on his Windows 10. The debug version (no tests, no
+reviewers, the owner's rule) writes to the `--debug` log at every Windows Hello request the window it is given, Qt's
+focus window, the window in front and whose it is, the call used, and the answer (`src/ui/quick_unlock_windows.cpp`).

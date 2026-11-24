@@ -43,9 +43,10 @@
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.4.72
+// quick_unlock_windows.cpp 0.4.72.1
 
 // --- Version history ----------------------------------------------------
+// v0.4.72.1: Debug lines: the window Windows Hello is given, the one in front, the call used (the owner)
 // v0.4.72: Windows Hello asked over Chrono Vault's window on every Windows; the key kept with DPAPI (the owner, B)
 // v0.2.53: Windows Hello opens over Chrono Vault where Windows can (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -125,6 +126,32 @@ quintptr ownerWindow()
 {
     const QWindow* window = QGuiApplication::focusWindow();
     return window != nullptr ? static_cast<quintptr>(window->winId()) : 0;
+}
+
+QString titleOf(HWND window)
+{
+    wchar_t text[256] = {};
+    GetWindowTextW(window, text, 256);
+    return QString::fromWCharArray(text);
+}
+
+// For the --debug log (0.4.72.1): which window Windows Hello is given, which
+// window is in front, and which call is used.
+void logRequest(const char* what, quintptr window)
+{
+    const QWindow* focused = QGuiApplication::focusWindow();
+    const HWND front = GetForegroundWindow();
+    DWORD frontProcess = 0;
+    GetWindowThreadProcessId(front, &frontProcess);
+    fingerLog(QStringLiteral("hello %1: owner 0x%2 (Qt focus window: %3), in front 0x%4 \"%5\" (%6), call %7")
+                  .arg(QLatin1String(what))
+                  .arg(window, 0, 16)
+                  .arg(focused != nullptr ? QStringLiteral("\"%1\"").arg(focused->title()) : QStringLiteral("none"))
+                  .arg(reinterpret_cast<quintptr>(front), 0, 16)
+                  .arg(titleOf(front))
+                  .arg(frontProcess == GetCurrentProcessId() ? QStringLiteral("ours") : QStringLiteral("another program"))
+                  .arg(window != 0 ? QStringLiteral("RequestVerificationForWindowAsync")
+                                   : QStringLiteral("RequestVerificationAsync without an owner")));
 }
 
 // Asks Windows Hello whether it is the person, over the given window. Runs on
@@ -217,6 +244,7 @@ public:
         asking = pending;
         const quintptr window = ownerWindow();
         const QString message = QCoreApplication::translate("QuickUnlock", "Turn on Windows Hello for Chrono Vault");
+        logRequest("turning on", window);
         emit fingerReady(); // Windows Hello shows its own window now
         std::thread([self, vault, secret, window, message, pending]() {
             const Result answer = verify(window, message, *pending);
@@ -235,7 +263,10 @@ public:
                                                          : Result::Done;
             QMetaObject::invokeMethod(
                 qApp,
-                [self, vault, sealed, result]() {
+                [self, vault, sealed, result, answer]() {
+                    fingerLog(QStringLiteral("hello turning on: answered %1, kept: %2")
+                                  .arg(static_cast<int>(answer))
+                                  .arg(sealed.isEmpty() ? QStringLiteral("no") : QStringLiteral("yes")));
                     if (!self) {
                         return;
                     }
@@ -274,6 +305,7 @@ public:
         asking = pending;
         const quintptr window = ownerWindow();
         const QString message = QCoreApplication::translate("QuickUnlock", "Unlock Chrono Vault");
+        logRequest("unlocking", window);
         emit fingerReady(); // Windows Hello shows its own window now
         std::thread([self, sealed, window, message, pending]() {
             Result result = verify(window, message, *pending);
@@ -295,6 +327,7 @@ public:
             QMetaObject::invokeMethod(
                 qApp,
                 [self, result, secret]() {
+                    fingerLog(QStringLiteral("hello unlocking: answered %1").arg(static_cast<int>(result)));
                     if (self) {
                         emit self->retrieved(result, secret);
                     }
