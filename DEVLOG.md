@@ -668,3 +668,12 @@ window. Now Next… is a button of its own (`importNextButton`), so the Import w
 open and owns the export's file dialog, exactly as Browse… does, whose dialog never stuck. Cancel leaves the window
 open; OK reads Import, on the summary only (`qml/ImportWindow.qml`). `test_item_pages` checks the dialog belongs to the
 open Import window.
+
+## 24 November 2026: version 0.5.79: Explorer's file dialog no longer invisible on Windows
+
+The owner's Proceed (fix the cause, keep the operating system's own dialogs). The logs of 0.5.78.1 to 0.5.78.3 showed
+Explorer's dialog created, active and hidden every time, whatever window owned it, while Notepad's never stuck. The
+one step Chrono Vault took that no other program takes: `dialog.winId()` before the dialog opened, forcing the
+QFileDialog's own Qt window into being to give it an owner by hand. That step now runs only for Qt's own dialog
+(Linux); Qt gives Explorer's dialog the active window as owner (`src/ui/file_pickers.cpp`, D-055). The Next… button of
+0.5.78.3 stays; the --debug import lines stay too, written only with --debug.

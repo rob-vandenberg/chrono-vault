@@ -38,9 +38,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// file_pickers.cpp 0.5.78.2
+// file_pickers.cpp 0.5.79
 
 // --- Version history ----------------------------------------------------
+// v0.5.79: Explorer's dialog never given a Qt window of its own beforehand: it stayed invisible on Windows (D-055)
 // v0.5.78.2: The folder the import's file dialog opens in, in the --debug log (a debug version)
 // v0.5.78.1: Import's file dialog in the --debug log: the windows before, a second after it opens, and after (a debug version)
 // v0.3.64: The default folder of a new vault, Documents/chrono-vault (D-058)
@@ -191,14 +192,17 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
         dialog.setSidebarUrls(places_here::everyPlace());
     }
 
-    // Over the window it was opened from, which waits for it (Explorer's too:
-    // Qt gives it this window as its owner); Qt's own is put back as it was
-    // left, Explorer remembers its own size.
-    dialog.winId();
-    if (QWindow* over = windowOf(window); over != nullptr && dialog.windowHandle() != nullptr) {
-        dialog.windowHandle()->setTransientParent(over);
-    }
+    // Qt's own dialog stands over the window it was opened from, which waits
+    // for it, and is put back as it was left. Explorer's own is never given a
+    // Qt window of its own beforehand: forced into being, that window left
+    // Explorer's dialog created, active and invisible on Windows (0.5.78.1-3's
+    // logs). Qt gives Explorer's dialog the active window as its owner, as in
+    // any program, and Explorer remembers its own size.
     if (!explorersOwn) {
+        dialog.winId();
+        if (QWindow* over = windowOf(window); over != nullptr && dialog.windowHandle() != nullptr) {
+            dialog.windowHandle()->setTransientParent(over);
+        }
         const QByteArray kept = SettingsFile().value(memoryKey(memoryName)).toByteArray();
         if (kept.isEmpty() || !dialog.restoreGeometry(kept)) {
             const double factor = Appearance::factor();
