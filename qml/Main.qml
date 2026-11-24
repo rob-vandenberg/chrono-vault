@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.5.82
+// Main.qml 0.5.83
 
 // --- Version history ----------------------------------------------------
+// v0.5.83: The Item menu holds every action on the selected items (D-063)
 // v0.5.82: Delete, several items, the keyboard never nowhere; new and opened vaults from Settings (D-062)
 // v0.5.78: The menus' own colour; texts in dialogs wrap with the window (D-061)
 // v0.5.77: After an import, the Sync conflicts dialog when items differ (D-060)
@@ -142,7 +143,11 @@ ApplicationWindow {
                        ? keys.filter(function(key) { return !mainWindow.editsText(key) }) : keys
             }
             context: quit ? Qt.ApplicationShortcut : Qt.WindowShortcut
-            onActivated: if (modelData.enabled) modelData.trigger()
+            onActivated: {
+                const action = modelData.enabled || !modelData.inTheTrash ? modelData : modelData.inTheTrash
+                if (action.enabled)
+                    action.trigger()
+            }
         }
     }
 
@@ -456,23 +461,52 @@ ApplicationWindow {
                 MainMenu {
                     objectName: "itemMenu"
                     title: qsTr("&Item")
+                    // On the selected items, never on an entry of the
+                    // sidebar (D-063).
+                    Action {
+                        objectName: "favoriteAction"
+                        text: vaultPage.allFavourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
+                        onTriggered: vaultPage.favouriteChosen()
+                    }
                     Action {
                         id: action_archive
                         property string actionId: "archive"
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "archiveAction"
-                        text: qsTr("Archive")
-                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed && !vaultPage.allArchived
+                        text: vaultPage.allArchived ? qsTr("Unarchive") : qsTr("Archive")
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
                         onTriggered: vaultPage.archiveChosen()
+                    }
+                    CategoryMenu {
+                        objectName: "categoryAction"
+                        palette.base: mainWindow.palette.button
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
+                        onChosen: function(categoryId) { vaultPage.changeCategory(categoryId) }
                     }
                     Action {
                         id: action_moveToTrash
                         property string actionId: "moveToTrash"
                         property string shownKeys: mainWindow.firstKey(actionId)
+                        // In the Trash its keys delete for good (D-062).
+                        readonly property Action inTheTrash: action_deletePermanently
                         objectName: "moveToTrashAction"
-                        // Of an item in the Trash: deleting it for good (D-062).
-                        text: vaultPage.anyTrashed ? qsTr("Delete Permanently…") : qsTr("Move to Trash")
-                        enabled: mainWindow.itemsFree
+                        text: qsTr("Move to Trash")
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
+                        onTriggered: vaultPage.deleteChosen()
+                    }
+                    Action {
+                        objectName: "restoreAction"
+                        text: qsTr("Restore")
+                        enabled: mainWindow.itemsFree && vaultPage.anyTrashed
+                        onTriggered: vaultPage.restoreChosen()
+                    }
+                    Action {
+                        id: action_deletePermanently
+                        property string shownKeys: mainWindow.firstKey("moveToTrash")
+                        objectName: "deletePermanentlyAction"
+                        text: qsTr("Delete Permanently…")
+                        enabled: mainWindow.itemsFree && vaultPage.anyTrashed
                         onTriggered: vaultPage.deleteChosen()
                     }
                     MenuSeparator {}
@@ -785,6 +819,7 @@ ApplicationWindow {
             onNewVaultRequested: mainWindow.newVault()
             onOpenVaultRequested: mainWindow.openVault()
             onConflictRequested: function(itemId) { mainWindow.showConflict(itemId) }
+            onCustomizeRequested: settingsWindow.showCustomize()
         }
     }
 

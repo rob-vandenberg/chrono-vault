@@ -48,9 +48,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.5.82
+// vault_controller.h 0.5.83
 
 // --- Version history ----------------------------------------------------
+// v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once (D-062)
 // v0.5.81: Retry sync; every field of a conflict's item (D-061)
 // v0.5.78: Every difference a conflict; the sides' names; the person's own categories and templates (D-061)
@@ -511,6 +512,8 @@ public:
     // Several items at once (D-062), in one save and one message: place is
     // "trashed", "archived" or "favourite".
     Q_INVOKABLE void placeItems(const QStringList& ids, const QString& place, bool on);
+    // Their category alone: the fields and the template stay (D-063).
+    Q_INVOKABLE void setCategoryOf(const QStringList& ids, const QString& categoryId);
     Q_INVOKABLE void deleteItems(const QStringList& ids);
     [[nodiscard]] Q_INVOKABLE QStringList trashedItems() const;
     // Reads a picked picture as an item icon (D-018): the PNG in base64, or

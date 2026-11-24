@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.82
+// vault_controller.cpp 0.5.83
 
 // --- Version history ----------------------------------------------------
+// v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once; Delete moves to the Trash too (D-062)
 // v0.5.81: A source read for Import and for Retry sync alike (D-061)
 // v0.5.78: Merges told this device's id, its kept change as "mine"; an import notes every difference (D-061)
@@ -1538,6 +1539,37 @@ void VaultController::placeItems(const QStringList& ids, const QString& place, b
                           : tr("%n items are no longer archived.", nullptr, changed)),
             false);
     }
+}
+
+void VaultController::setCategoryOf(const QStringList& ids, const QString& categoryId)
+{
+    const bool known = isBuiltInCategory(categoryId)
+                       || std::any_of(contents.categories.cbegin(), contents.categories.cend(),
+                                      [&categoryId](const Category& one) { return one.id == categoryId; });
+    if (currentState != State::Unlocked || !known) {
+        return;
+    }
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    int changed = 0;
+    QString title;
+    for (Item& one : contents.items) {
+        if (one.categoryId == categoryId || !ids.contains(one.id.toString(QUuid::WithoutBraces))) {
+            continue;
+        }
+        one.categoryId = categoryId;
+        one.modified = now;
+        title = one.title;
+        ++changed;
+    }
+    if (changed == 0) {
+        return;
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    const QString name = categoryName(categoryId, contents);
+    say(changed == 1 ? tr("“%1” is now in %2.").arg(title, name)
+                     : tr("%n items are now in %1.", nullptr, changed).arg(name),
+        false);
 }
 
 void VaultController::deleteItems(const QStringList& ids)

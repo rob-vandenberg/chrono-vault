@@ -99,6 +99,14 @@
     </message>
 </context>
 <context>
+    <name>CategoryMenu</name>
+    <message>
+        <location filename="../qml/CategoryMenu.qml" line="+32"/>
+        <source>Change Category</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConflictWindow</name>
     <message>
         <location filename="../qml/ConflictWindow.qml" line="+228"/>
@@ -191,22 +199,12 @@
 <context>
     <name>CustomizePage</name>
     <message>
-        <location filename="../qml/CustomizePage.qml" line="+42"/>
+        <location filename="../qml/CustomizePage.qml" line="+44"/>
         <source>Customize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
-        <source>Unlock a vault to change its categories and templates.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+6"/>
-        <source>The categories and templates belong to the vault that is open. Changes here are kept in it at once.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
+        <location line="+19"/>
         <source>Categories</source>
         <translation type="unfinished"></translation>
     </message>
@@ -217,19 +215,20 @@
     </message>
     <message numerus="yes">
         <location line="+4"/>
+        <location line="+57"/>
         <source>%n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location line="+15"/>
-        <location line="+48"/>
+        <location line="-42"/>
+        <location line="+93"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-48"/>
+        <location line="-93"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
@@ -240,6 +239,26 @@
     </message>
     <message>
         <location line="+6"/>
+        <source>Tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>No tags yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Rename…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Templates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -249,13 +268,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-48"/>
-        <location line="+53"/>
+        <location line="-93"/>
+        <location line="+98"/>
         <source>Edit…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="-142"/>
+        <source>Unlock a vault to change its categories, tags and templates.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The categories, tags and templates belong to the vault that is open. Changes here are kept in it at once.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+149"/>
         <source>New template…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -265,13 +294,56 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+28"/>
         <source>New category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+11"/>
         <source>Name of the category:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>EmptyList</name>
+    <message>
+        <location filename="../qml/EmptyList.qml" line="+41"/>
+        <source>Nothing found for “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>No items yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>No favorites yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The Archive is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The Trash is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>No items with the tag “%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>No items in %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Use “New Item” to add the first one.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1686,7 +1758,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+69"/>
+        <location filename="../qml/Main.qml" line="+70"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1696,7 +1768,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+227"/>
+        <location line="+231"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1716,12 +1788,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+31"/>
         <source>Move to Trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+74"/>
+        <location line="+88"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1747,18 +1819,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-334"/>
-        <location line="+342"/>
+        <location line="-363"/>
+        <location line="+371"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-588"/>
+        <location line="-621"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+188"/>
+        <location line="+192"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1779,11 +1851,12 @@
     </message>
     <message>
         <location line="+7"/>
+        <location line="+160"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="-152"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1823,12 +1896,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+16"/>
+        <source>Remove from Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Add to Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+0"/>
+        <source>Unarchive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
         <source>Delete Permanently…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1913,7 +2001,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+144"/>
+        <location line="+145"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2121,7 +2209,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+243"/>
+        <location filename="../qml/SettingsWindow.qml" line="+250"/>
         <location line="+377"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2702,6 +2790,19 @@
     </message>
 </context>
 <context>
+    <name>TagDialog</name>
+    <message>
+        <location filename="../qml/TagDialog.qml" line="+34"/>
+        <source>Rename tag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>A slash nests a tag under another, as in “Work/Servers”.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Template</name>
     <message>
         <location filename="../src/core/templates.cpp" line="+22"/>
@@ -3042,7 +3143,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+241"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+242"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3103,9 +3204,42 @@
     </message>
 </context>
 <context>
+    <name>VaultOverview</name>
+    <message>
+        <location filename="../qml/VaultOverview.qml" line="+98"/>
+        <source>Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+647"/>
+        <location filename="../qml/VaultPage.qml" line="+710"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3125,33 +3259,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-527"/>
-        <location line="+535"/>
+        <location line="-554"/>
+        <location line="+562"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="-343"/>
-        <location line="+549"/>
-        <location line="+13"/>
+        <location line="-373"/>
+        <location line="+579"/>
+        <location line="+12"/>
         <source>%n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location line="-561"/>
+        <location line="-590"/>
         <source>“%1”</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
-        <location line="+538"/>
+        <location line="+30"/>
+        <location line="+548"/>
         <source>Restore %1?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-517"/>
+        <location line="-533"/>
         <source>Archive %1?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3161,12 +3295,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+13"/>
         <source>Move %1 to the Trash?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+239"/>
+        <location line="+257"/>
         <source>WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3212,13 +3346,12 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+358"/>
-        <location line="+45"/>
+        <location line="+362"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-392"/>
+        <location line="-351"/>
         <source>Trash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3244,58 +3377,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+12"/>
         <source>Empty Trash…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+244"/>
-        <source>%1 items selected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+10"/>
-        <location line="+45"/>
+        <location line="+259"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-45"/>
-        <location line="+45"/>
+        <location line="+0"/>
         <source>Add to Favorites</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-39"/>
-        <location line="+45"/>
+        <location line="+6"/>
         <source>Unarchive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-39"/>
-        <location line="+46"/>
+        <location line="+11"/>
         <source>Move to Trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-40"/>
-        <location line="+46"/>
+        <location line="+6"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-40"/>
-        <location line="+46"/>
+        <location line="+6"/>
         <source>Delete Permanently…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-31"/>
+        <location line="-40"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+54"/>
         <source>Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3310,43 +3432,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+35"/>
-        <source>Rename tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>A slash nests a tag under another, as in “Work/Servers”.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-234"/>
-        <source>No items yet.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-502"/>
+        <location line="-653"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Collapse the sidebar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+501"/>
-        <source>Nothing found.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>No items here.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+12"/>
-        <source>Choose an item, or make a new one.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3952,26 +4044,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2293"/>
+        <location line="+2324"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+494"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2289"/>
-        <location line="+2294"/>
+        <location line="-2320"/>
+        <location line="+2325"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2197"/>
-        <location line="+2097"/>
+        <location line="-2228"/>
+        <location line="+2128"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2186"/>
+        <location line="-2217"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3983,7 +4075,7 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+1975"/>
+        <location line="+2006"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+83"/>
         <location line="+358"/>
@@ -3993,7 +4085,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2258"/>
+        <location line="-2289"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -4009,7 +4101,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1060"/>
+        <location line="+1091"/>
         <source>%1 can no longer open this vault, so it was turned off. Unlock with the master password, then turn it on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4029,7 +4121,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1838"/>
+        <location line="-1869"/>
         <location line="+85"/>
         <location filename="../src/ui/vault_controller_pin.cpp" line="+228"/>
         <source>Unlocking…</source>
@@ -4082,12 +4174,12 @@
     </message>
     <message>
         <location line="+75"/>
-        <location line="+1148"/>
+        <location line="+1179"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1090"/>
+        <location line="-1121"/>
         <location filename="../src/ui/vault_controller_conflicts.cpp" line="+211"/>
         <location line="+123"/>
         <source>Title</source>
@@ -4163,7 +4255,19 @@
         </translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+31"/>
+        <source>“%1” is now in %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n items are now in %1.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+24"/>
         <source>“%1” was deleted permanently.</source>
         <translation type="unfinished"></translation>
     </message>

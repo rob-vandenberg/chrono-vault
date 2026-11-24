@@ -71,3 +71,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed |
 | [D-061](decisions/D-061.md) | The person decides every difference an import or a sync meets; the sides Vault/Import and This device/Other device |
 | [D-062](decisions/D-062.md) | What a person guesses is what happens: keys, mouse, several items, Delete asked, dialogs; Settings > Vaults; 5 pixels in every button |
+| [D-063](decisions/D-063.md) | Selected and focused; the Item menu on the selected items; Change Category; the empty list; the vault's counts |

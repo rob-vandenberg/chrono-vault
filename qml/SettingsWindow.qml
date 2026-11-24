@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.5.82
+// SettingsWindow.qml 0.5.83
 
 // --- Version history ----------------------------------------------------
+// v0.5.83: showCustomize (D-063)
 // v0.5.82: Vaults: Create vault and Open vault, the crown, no Restore defaults; its keys only while it has the keyboard (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.77: Vaults: Import… and Export… for any vault, unlocked first with its master password (D-060)
@@ -91,6 +92,12 @@ ApplicationWindow {
         show()
         raise()
         requestActivate()
+    }
+
+    // From the vault's counts (D-063).
+    function showCustomize() {
+        showWindow()
+        topics.currentIndex = 3
     }
 
     // Help > Keyboard shortcuts… (D-045).

@@ -2,7 +2,9 @@
 
 ## Now
 
-**Version 0.5.82**: what a person guesses is what happens (D-062): the list, sidebar, search, editor, dialogs and
+**Version 0.5.83**: the focused item apart from the selected ones, gray marks with a thin blue bar, every action in
+the Item menu and the right-click menu, Change Category, the tags in Settings > Customize, an empty list's drawing, the
+vault's clickable counts (D-063). Before, **0.5.82**: what a person guesses is what happens (D-062): the list, sidebar, search, editor, dialogs and
 Sync conflicts by every key and mouse click; several items; Delete asked; Settings > Vaults with Create vault, Open
 vault and the primary's crown; 5 pixels free in every button. Before, **0.5.81**: the Sync conflicts windows as Chrono Mail's (D-061): every field of the item, a split that keeps
 both values, Retry sync, Keep here only, columns that are dragged; an item deleted here and held by an import simply

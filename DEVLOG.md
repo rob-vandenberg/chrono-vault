@@ -703,3 +703,11 @@ The owner's changelist items 1-32, after his test of 0.5.81 and an agent that us
 `tests/integration/test_intuitive.cpp` drives it with mouse and keys. `test_sync_conflicts` now uses the program's style.
 Three review rounds: in round 1 the coder found Enter on Discard when a change could not be saved; round 2, the mark on
 an item just taken from a selection; both fixed with tests; round 3 clean.
+
+## 24 November 2026: version 0.5.83: selected and focused, the Item menu, the empty list
+
+The owner's changelist items 1-26, in autonomous mode (D-063). `qml/VaultPage.qml` (focus apart from selection, the
+marks), `qml/Main.qml` (the Item menu), `qml/CategoryMenu.qml`, `qml/EmptyList.qml`, `qml/VaultOverview.qml`,
+`qml/TagDialog.qml`, `qml/CustomizePage.qml`, `VaultController::setCategoryOf`, `art/empty-vault.svg`;
+`tests/integration/test_selecting.cpp` with the fixture it shares with `test_intuitive.cpp`.
+One review round of two, clean. The tests caught that a cut had removed Ctrl+F and the edit kept through a lock; restored.

@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.5.82
+// test_menus.cpp 0.5.83
 
 // --- Version history ----------------------------------------------------
+// v0.5.83: The Item menu on the selected items (D-063)
 // v0.5.82: Backspace asks first (D-062)
 // v0.5.76: Tools > Sync Conflicts… (D-060)
 // v0.3.60: Tools > Sync Now, greyed for a vault on this computer (D-057)
@@ -232,7 +233,8 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
     QCOMPARE(menuEntries(1), QStringList({"&View", "Show Item Counts", "Hide Sidebar", "Hide Sensitive", "---",
                                           "Categories", "Tags", "Others"}));
     QCOMPARE(menuEntries(2),
-             QStringList({"&Item", "Archive [Shift+Backspace]", "Move to Trash [Backspace]", "---",
+             QStringList({"&Item", "Add to Favorites", "Archive [Shift+Backspace]", "Change Category",
+                          "Move to Trash [Backspace]", "Restore", "Delete Permanently… [Backspace]", "---",
                           "Copy Username [Shift+Ctrl+U]", "Copy E-mail [Shift+Ctrl+E]", "Copy Password [Shift+Ctrl+P]",
                           "Show Passwords [Shift+Ctrl+H]", "Copy URL [Shift+Ctrl+R]", "Copy OTP [Shift+Ctrl+T]",
                           "Launch URL [Shift+Ctrl+L]"}));
@@ -341,13 +343,13 @@ void TestMenus::the_item_menu_copies_the_chosen_items_fields_and_greys_what_it_l
     QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
     QVERIFY(QMetaObject::invokeMethod(editor, "close"));
 
-    // Archive moves it into the Archive; then Archive is greyed for it.
+    // Archive moves it into the Archive; then it offers Unarchive (D-063).
     QTRY_VERIFY(action(QStringLiteral("archiveAction"))->property("enabled").toBool());
     QMetaObject::invokeMethod(action(QStringLiteral("archiveAction")), "trigger");
     QTRY_VERIFY(controller->item(id).value(QStringLiteral("archived")).toBool());
     controller->setFilter(QStringLiteral("archive"));
     QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
-    QTRY_VERIFY(!action(QStringLiteral("archiveAction"))->property("enabled").toBool());
+    QTRY_COMPARE(action(QStringLiteral("archiveAction"))->property("text").toString(), QStringLiteral("Unarchive"));
     QVERIFY(action(QStringLiteral("moveToTrashAction"))->property("enabled").toBool());
     QVERIFY(!note.isEmpty());
 }
