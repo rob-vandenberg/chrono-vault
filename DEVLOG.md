@@ -651,3 +651,11 @@ window holding the keyboard. The --debug log (`fingerprint.log`) now records eac
 window shown again, hidden, the file dialog opening with its owner, returned or cancelled) with Qt's active window and
 the window Windows has in front, and a second after the dialog opened every top-level window of Chrono Vault with its
 title, class, visibility, place and owner (`src/ui/file_pickers.cpp`, `qml/ImportWindow.qml`). Nothing else changes.
+
+## 24 November 2026: debug version 0.5.78.2: Next… for an export straight to the file dialog
+
+The owner's changelist items 1-6. 0.5.78.1's log of a stuck run showed Explorer's file dialog open, owned by the main
+window, active and in front, but hidden; 14 milliseconds before it opened, Next… had shown, raised and activated the
+Import window and hidden it again. Now Next… for an export goes straight to the file dialog, the Import window left
+hidden as the click left it (`qml/ImportWindow.qml`), and the log names the folder the dialog opens in
+(`src/ui/file_pickers.cpp`): a slow drive there would be the other possible cause.

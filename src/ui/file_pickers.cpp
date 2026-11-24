@@ -38,9 +38,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// file_pickers.cpp 0.5.78.1
+// file_pickers.cpp 0.5.78.2
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.2: The folder the import's file dialog opens in, in the --debug log (a debug version)
 // v0.5.78.1: Import's file dialog in the --debug log: the windows before, a second after it opens, and after (a debug version)
 // v0.3.64: The default folder of a new vault, Documents/chrono-vault (D-058)
 // v0.2.52: Explorer's own dialog on Windows (D-055)
@@ -209,7 +210,9 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
     // Import's export dialog in the --debug log (debug version 0.5.78.1).
     const bool logged = memoryName == QLatin1String("ImportWindow.exportDialog");
     if (logged) {
-        logWindows(QStringLiteral("file dialog opening, owner %1").arg(windowWords(windowOf(window))), nullptr);
+        logWindows(QStringLiteral("file dialog opening in folder \"%1\", owner %2")
+                       .arg(QDir::toNativeSeparators(dialog.directory().absolutePath()), windowWords(windowOf(window))),
+                   nullptr);
         QTimer::singleShot(1000, &dialog, []() { logEveryWindow(); });
     }
     openDialog() = &dialog;

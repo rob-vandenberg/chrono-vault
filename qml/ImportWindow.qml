@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.78.1
+// ImportWindow.qml 0.5.78.2
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.2: Next… for an export goes straight to the file dialog, the window not shown again first (a debug version)
 // v0.5.78.1: Next… for an export in the --debug log (a debug version)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.5.77: From another vault or from an export; then conflicts to settle (D-060)
@@ -134,8 +135,13 @@ DialogWindow {
     onAccepted: {
         if (step === "choose") {
             FilePickers.logImportStep("Next… clicked", importWindow)
-            open()
-            FilePickers.logImportStep("Import window shown again", importWindow)
+            // An export: straight to the file dialog, the window left hidden
+            // as the click left it; shown again only for another vault, whose
+            // password it asks.
+            if (source !== "export") {
+                open()
+                FilePickers.logImportStep("Import window shown again", importWindow)
+            }
             next()
             return
         }
