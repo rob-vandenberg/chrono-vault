@@ -106,7 +106,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>Retry sync</source>
         <translation type="unfinished"></translation>
     </message>
@@ -117,13 +117,13 @@
     </message>
     <message>
         <location line="+6"/>
-        <location line="+318"/>
+        <location line="+331"/>
         <location line="+2"/>
         <source>Keep both</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-306"/>
+        <location line="-318"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
@@ -183,7 +183,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+37"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -484,7 +484,7 @@
 <context>
     <name>FieldRow</name>
     <message>
-        <location filename="../qml/FieldRow.qml" line="+103"/>
+        <location filename="../qml/FieldRow.qml" line="+115"/>
         <location line="+46"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
@@ -639,6 +639,11 @@
     <message>
         <location line="+1"/>
         <source>TransIP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>laurel3-gold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1115,7 +1120,7 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+39"/>
+        <location filename="../qml/IconPicker.qml" line="+40"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1152,7 +1157,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+19"/>
+        <location line="+20"/>
         <source>This icon is used by %n item(s). They will get their category&apos;s icon instead. Delete it?</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1162,7 +1167,7 @@
 <context>
     <name>IconSections</name>
     <message>
-        <location filename="../build/icon_headings/icon_headings.cpp" line="-118"/>
+        <location filename="../build/icon_headings/icon_headings.cpp" line="-119"/>
         <source>Web</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1172,7 +1177,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+20"/>
         <source>Miscellaneous</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1275,7 +1280,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+143"/>
+        <location filename="../qml/ItemDetails.qml" line="+147"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1322,7 +1327,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+12"/>
         <source>Delete Permanently…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1382,17 +1387,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+242"/>
-        <source>Delete this item permanently?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>“%1” is removed from the vault for good. This cannot be undone.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+28"/>
+        <location line="+257"/>
         <source>Save the attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1400,13 +1395,13 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+193"/>
+        <location filename="../qml/ItemEditor.qml" line="+202"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+173"/>
+        <location line="+174"/>
         <source>Title of the note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1451,7 +1446,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-224"/>
+        <location line="-225"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1489,7 +1484,7 @@
     <message>
         <location line="+48"/>
         <location line="+42"/>
-        <location line="+402"/>
+        <location line="+403"/>
         <source>Section</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1519,7 +1514,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-720"/>
+        <location line="-721"/>
         <source>Numeric</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1600,7 +1595,7 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+398"/>
+        <location line="+399"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1691,7 +1686,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+68"/>
+        <location filename="../qml/Main.qml" line="+69"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1701,7 +1696,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+223"/>
+        <location line="+227"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1726,7 +1721,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+74"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1752,18 +1747,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-335"/>
-        <location line="+343"/>
+        <location line="-334"/>
+        <location line="+342"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-585"/>
+        <location line="-588"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+184"/>
+        <location line="+188"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1833,7 +1828,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+10"/>
+        <source>Delete Permanently…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
         <source>Copy Username</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1908,7 +1908,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+125"/>
+        <location line="+128"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1938,7 +1938,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+78"/>
+        <location line="+81"/>
         <source>Trust this certificate?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2121,7 +2121,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+239"/>
+        <location filename="../qml/SettingsWindow.qml" line="+243"/>
         <location line="+377"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2196,12 +2196,12 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+1005"/>
+        <location line="+1023"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1005"/>
+        <location line="-1023"/>
         <location line="+545"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2281,7 +2281,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+243"/>
+        <location line="+256"/>
+        <source>Primary vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>WebDAV: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2351,7 +2356,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-790"/>
+        <location line="-808"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2452,7 +2457,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+95"/>
+        <location line="+113"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2527,27 +2532,37 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+44"/>
-        <source>Waiting for Windows Hello fingerprint...</source>
+        <location line="+43"/>
+        <source>Create vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Open vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+13"/>
+        <source>Waiting for Windows Hello fingerprint...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
         <source>Restore defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1264"/>
-        <location line="+1223"/>
-        <location line="+47"/>
+        <location line="-1302"/>
+        <location line="+1241"/>
+        <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1270"/>
-        <location line="+1132"/>
+        <location line="-1308"/>
+        <location line="+1150"/>
         <location line="+97"/>
-        <location line="+52"/>
+        <location line="+72"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2593,17 +2608,17 @@
 <context>
     <name>SyncConflictsWindow</name>
     <message>
-        <location filename="../qml/SyncConflictsWindow.qml" line="+190"/>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+191"/>
         <source>Sync conflicts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+70"/>
         <source>Check all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-180"/>
+        <location line="-183"/>
         <source>What</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2634,12 +2649,12 @@
     </message>
     <message>
         <location line="+6"/>
-        <location line="+241"/>
+        <location line="+244"/>
         <source>Why</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+89"/>
+        <location line="+140"/>
         <source>No conflicts to settle.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2666,12 +2681,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-473"/>
+        <location line="-527"/>
         <source>Changed on two devices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+385"/>
+        <location line="+439"/>
         <source>Keep both</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2681,7 +2696,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-388"/>
+        <location line="-442"/>
         <source>Differs from an import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2830,7 +2845,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+386"/>
+        <location filename="../qml/UnlockPage.qml" line="+387"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2950,7 +2965,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+5"/>
         <source>This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3027,7 +3042,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+240"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+241"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3090,7 +3105,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+433"/>
+        <location filename="../qml/VaultPage.qml" line="+647"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3110,13 +3125,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-332"/>
-        <location line="+340"/>
+        <location line="-527"/>
+        <location line="+535"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <location line="-343"/>
+        <location line="+549"/>
+        <location line="+13"/>
+        <source>%n item(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
-        <location line="-57"/>
+        <location line="-561"/>
+        <source>“%1”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+538"/>
+        <source>Restore %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-517"/>
+        <source>Archive %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Unarchive %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Move %1 to the Trash?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+239"/>
         <source>WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3162,16 +3212,18 @@
     </message>
     <message>
         <location line="+8"/>
+        <location line="+358"/>
+        <location line="+45"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="-392"/>
         <source>Trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+34"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3187,7 +3239,78 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+180"/>
+        <location line="+16"/>
+        <source>Restore all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Empty Trash…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+244"/>
+        <source>%1 items selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+45"/>
+        <source>Remove from Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-45"/>
+        <location line="+45"/>
+        <source>Add to Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-39"/>
+        <location line="+45"/>
+        <source>Unarchive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-39"/>
+        <location line="+46"/>
+        <source>Move to Trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-40"/>
+        <location line="+46"/>
+        <source>Restore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-40"/>
+        <location line="+46"/>
+        <source>Delete Permanently…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-31"/>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Chrono Vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Delete permanently?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>%1 will be removed from the vault for good. This cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+35"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3197,12 +3320,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-67"/>
+        <location line="-234"/>
         <source>No items yet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-392"/>
+        <location line="-502"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3212,7 +3335,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+391"/>
+        <location line="+501"/>
         <source>Nothing found.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3519,7 +3642,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+65"/>
+        <location filename="../qml/WelcomePage.qml" line="+68"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3545,7 +3668,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+51"/>
         <source>Where should the new vault be kept?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3566,7 +3689,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+22"/>
         <source>Choose the master password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3829,26 +3952,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2214"/>
+        <location line="+2293"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+494"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2210"/>
-        <location line="+2215"/>
+        <location line="-2289"/>
+        <location line="+2294"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2118"/>
-        <location line="+2018"/>
+        <location line="-2197"/>
+        <location line="+2097"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2107"/>
+        <location line="-2186"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3860,7 +3983,7 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+1896"/>
+        <location line="+1975"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+83"/>
         <location line="+358"/>
@@ -3870,7 +3993,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2179"/>
+        <location line="-2258"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -3886,7 +4009,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+981"/>
+        <location line="+1060"/>
         <source>%1 can no longer open this vault, so it was turned off. Unlock with the master password, then turn it on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3906,7 +4029,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1759"/>
+        <location line="-1838"/>
         <location line="+85"/>
         <location filename="../src/ui/vault_controller_pin.cpp" line="+228"/>
         <source>Unlocking…</source>
@@ -3959,12 +4082,12 @@
     </message>
     <message>
         <location line="+75"/>
-        <location line="+1069"/>
+        <location line="+1148"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1011"/>
+        <location line="-1090"/>
         <location filename="../src/ui/vault_controller_conflicts.cpp" line="+211"/>
         <location line="+123"/>
         <source>Title</source>
@@ -3992,7 +4115,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+93"/>
+        <location line="+89"/>
+        <source>“%1” was moved to the Trash.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>“%1” was restored.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>“%1” was archived.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>“%1” is no longer archived.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+3"/>
+        <source>%n items were moved to the Trash.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n items were restored.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n items were archived.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n items are no longer archived.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>“%1” was deleted permanently.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+1"/>
+        <source>%n items were deleted permanently.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+50"/>
         <source>Reading the export…</source>
         <translation type="unfinished"></translation>
     </message>

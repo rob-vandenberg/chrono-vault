@@ -36,9 +36,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.0.38
+// test_tray.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Esc cancels the editor (D-062)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Keep running in the tray is the last of the three (D-042)
 // v0.0.10: The tray and start settings survive a new start; their old names carried over
@@ -418,7 +419,7 @@ void TestTray::esc_closes_the_main_window_only_when_ticked_and_not_editing()
     QTRY_VERIFY(!loaded.window->isVisible());
     QCOMPARE(quit.count(), 0);
 
-    // In edit mode Esc does nothing.
+    // In edit mode Esc cancels the editor, and only that (D-062).
     showMainWindow(loaded.window, false, true);
     QVERIFY(QTest::qWaitForWindowExposed(loaded.window));
     loaded.controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("esc.chronovault"))),
@@ -431,7 +432,7 @@ void TestTray::esc_closes_the_main_window_only_when_ticked_and_not_editing()
     QTRY_VERIFY(page->property("editing").toBool());
     QTest::keyClick(loaded.window, Qt::Key_Escape);
     QVERIFY(loaded.window->isVisible());
-    QVERIFY(page->property("editing").toBool());
+    QTRY_VERIFY(!page->property("editing").toBool());
 
     // Out of edit mode, without the tray: the program ends.
     QObject* editor = loaded.window->findChild<QObject*>(QStringLiteral("itemEditor"));

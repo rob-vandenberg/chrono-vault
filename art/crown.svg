@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a gold crown. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="4" y1="3" x2="18" y2="21">
+      <stop offset="0" stop-color="#fff0a8"/>
+      <stop offset="0.35" stop-color="#ecc550"/>
+      <stop offset="0.6" stop-color="#d09c22"/>
+      <stop offset="0.78" stop-color="#f1d26a"/>
+      <stop offset="1" stop-color="#a87614"/>
+    </linearGradient>
+  </defs>
+  <path d="M4.6 16.4 L2.6 7.6 L7.6 11.4 L12 4.6 L16.4 11.4 L21.4 7.6 L19.4 16.4 Z" fill="url(#gold)" stroke="#7d560c" stroke-width="0.5" stroke-linejoin="round"/>
+  <path d="M4.6 17.8 H19.4 V20.6 H4.6 Z" fill="url(#gold)" stroke="#7d560c" stroke-width="0.5" stroke-linejoin="round"/>
+  <circle cx="2.6" cy="6.6" r="1.7" fill="url(#gold)" stroke="#7d560c" stroke-width="0.5"/>
+  <circle cx="12" cy="3.6" r="1.9" fill="url(#gold)" stroke="#7d560c" stroke-width="0.5"/>
+  <circle cx="21.4" cy="6.6" r="1.7" fill="url(#gold)" stroke="#7d560c" stroke-width="0.5"/>
+</svg>

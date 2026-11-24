@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.5.78
+// UnlockPage.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Enter never throws a kept change away (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.4.73: The finger asked only once the window is active (the owner)
 // v0.4.72: Unlock with Windows Hello as wide as its text, centred (the owner)
@@ -452,6 +453,7 @@ Item {
         memoryName: "leaveVault"
         title: qsTr("A change is not saved")
         standardButtons: Dialog.Discard | Dialog.Cancel
+        defaultButton: Dialog.Cancel // Enter never throws a change away
         ColumnLayout {
             Label {
                 text: qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.")

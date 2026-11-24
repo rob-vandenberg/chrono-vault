@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.5.78
+// VaultPage.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: The list by mouse and keys as a person guesses, several items, Delete asked, the sidebar's keys, Ctrl+F (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.76: The item's sync conflict to the Sync conflicts dialog (D-060)
 // v0.3.60: Under the vault's name: WebDAV for a vault kept there, and why its last sync failed (D-057)
@@ -62,7 +63,21 @@ Item {
     // Item > Show Passwords: the shown item's sensitive fields as text, until
     // another item is chosen or the vault locks (D-039).
     property bool revealAll: false
-    onChosenItemIdChanged: revealAll = false
+    onChosenItemIdChanged: {
+        revealAll = false
+        leftOutId = ""
+        if (chosenItemId !== "")
+            selectedIds = [chosenItemId]
+        else if (selectedIds.length === 1)
+            selectedIds = []
+    }
+    // The items chosen together (D-062): one, the item shown at the right, or
+    // several, of which the right side says how many. The anchor is where a
+    // range begins.
+    property var selectedIds: []
+    property string anchorId: ""
+    property string leftOutId: ""
+    readonly property bool several: selectedIds.length > 1
     Connections {
         target: VaultController
         // Hide Sensitive switched: what Show Passwords showed is hidden again.
@@ -114,6 +129,10 @@ Item {
         ToolTip.visible: vaultPage.collapsed && hovered
         ToolTip.text: text
         Layout.fillWidth: true
+        // A click gives the sidebar the keyboard (D-062).
+        readonly property bool sideEntry: true
+        focusPolicy: Qt.NoFocus
+        onPressed: sideKeys.forceActiveFocus(Qt.MouseFocusReason)
         // Collapsed, an entry is exactly as tall as expanded, and its icon
         // larger, centred in that height (the owner, D-049).
         implicitHeight: entryMeasure.implicitHeight
@@ -191,6 +210,7 @@ Item {
         editor.whenFree(function() {
             itemList.currentIndex = -1
             chosenItemId = ""
+            selectedIds = []
             editor.edit(VaultController.newItemFrom(templateId), true)
         })
     }
@@ -215,6 +235,7 @@ Item {
         editor.whenFree(function() {
             editor.close()
             chosenItemId = ""
+            selectedIds = []
             VaultController.switchToVault(vaultFile)
         })
     }
@@ -224,6 +245,8 @@ Item {
     function choose(filter) {
         editor.whenFree(function() {
             editor.close()
+            if (several)
+                selectedIds = []
             VaultController.filter = filter
         })
     }
@@ -237,8 +260,118 @@ Item {
         editor.whenFree(function() {
             editor.close()
             chosenItemId = id
-            itemList.currentIndex = VaultController.items.rowOf(id)
+            selectedIds = [id]
+            anchorId = id
+            showRow(VaultController.items.rowOf(id))
         })
+    }
+
+    // The list's mark on this row, in view.
+    function showRow(row) {
+        itemList.currentIndex = row
+        if (row >= 0)
+            itemList.positionViewAtIndex(row, ListView.Contain)
+    }
+
+    // Several items chosen together, the mark on the last one touched.
+    function selectItems(ids, markId) {
+        editor.whenFree(function() {
+            editor.close()
+            chosenItemId = ids.length === 1 ? ids[0] : ""
+            selectedIds = ids
+            // Never on an item just taken away.
+            const mark = ids.indexOf(markId) >= 0 ? markId : ids.length > 0 ? ids[ids.length - 1] : ""
+            showRow(mark === "" ? -1 : VaultController.items.rowOf(mark))
+        })
+    }
+    function toggleItem(id) {
+        const at = selectedIds.indexOf(id)
+        const ids = at >= 0 ? selectedIds.filter(function(one) { return one !== id }) : selectedIds.concat([id])
+        anchorId = id
+        selectItems(ids, id)
+    }
+    function selectRangeTo(row) {
+        const items = VaultController.items
+        let from = items.rowOf(anchorId)
+        if (from < 0) {
+            from = row
+            anchorId = items.idAt(row)
+        }
+        const ids = []
+        for (let one = Math.min(from, row); one <= Math.max(from, row); ++one)
+            ids.push(items.idAt(one))
+        selectItems(ids, items.idAt(row))
+    }
+    function selectAll() {
+        const ids = []
+        for (let row = 0; row < itemList.count; ++row)
+            ids.push(VaultController.items.idAt(row))
+        if (ids.length > 0)
+            selectItems(ids, VaultController.items.idAt(Math.max(0, itemList.currentIndex)))
+    }
+    readonly property bool inTrash: VaultController.filter === "trash"
+    // What the chosen items are, for the menus.
+    readonly property var chosenItems: VaultController.revision >= 0
+                                       ? selectedIds.map(function(id) { return VaultController.item(id) })
+                                                    .filter(function(one) { return one.id !== undefined }) : []
+    readonly property bool anyTrashed: chosenItems.some(function(one) { return one.trashed === true })
+    readonly property bool allArchived: chosenItems.length > 0
+                                        && chosenItems.every(function(one) { return one.archived === true })
+    readonly property bool allFavourite: chosenItems.length > 0
+                                         && chosenItems.every(function(one) { return one.favourite === true })
+    // Done to the chosen items; then the one after them is chosen, so the
+    // next key acts on what the person sees.
+    function actOnChosen(action) {
+        actOn(selectedIds.slice(), action)
+    }
+    function actOn(ids, action) {
+        if (ids.length === 0)
+            return
+        const items = VaultController.items
+        let last = -1
+        for (const id of ids)
+            last = Math.max(last, items.rowOf(id))
+        let next = ""
+        for (let row = last + 1; row < itemList.count && next === ""; ++row) {
+            if (ids.indexOf(items.idAt(row)) < 0)
+                next = items.idAt(row)
+        }
+        for (let row = last; row >= 0 && next === ""; --row) {
+            if (ids.indexOf(items.idAt(row)) < 0)
+                next = items.idAt(row)
+        }
+        action(ids)
+        const shown = ids.filter(function(id) { return items.rowOf(id) >= 0 })
+        if (shown.length > 0)
+            return // still listed, such as a favorite
+        selectedIds = []
+        chosenItemId = ""
+        if (next !== "" && items.rowOf(next) >= 0)
+            showItem(next)
+    }
+    function favouriteChosen() {
+        const on = !allFavourite
+        actOnChosen(function(ids) { VaultController.placeItems(ids, "favourite", on) })
+    }
+    function restoreChosen() {
+        actOnChosen(function(ids) { VaultController.placeItems(ids, "trashed", false) })
+    }
+    // What the question is about: one title, or how many.
+    function nameOfChosen() {
+        return several ? qsTr("%n item(s)", "", selectedIds.length)
+                       : qsTr("“%1”").arg(chosenItems.length > 0 ? chosenItems[0].title : "")
+    }
+
+    // Enter or a double click on the item: its editor; not in the Trash.
+    function editShown() {
+        if (!several && chosenItemId !== "" && !editing && !anyTrashed)
+            editChosen()
+    }
+    function askRestore() {
+        if (several)
+            placeQuestion.ask(qsTr("Restore %1?").arg(nameOfChosen()), function() { vaultPage.restoreChosen() })
+        else
+            restoreChosen()
     }
 
     function editChosen() {
@@ -246,29 +379,35 @@ Item {
             editor.edit(VaultController.item(chosenItemId), false)
     }
 
-    // Item > Archive: the chosen item into the Archive (D-033), where
-    // Unarchive brings it back.
+    // Item > Archive: the chosen items into the Archive (D-033), where
+    // Unarchive brings them back.
     function archiveChosen() {
-        const id = chosenItemId
-        if (id === "")
-            return
-        editor.whenFree(function() {
-            if (editor.itemId === id)
+        const on = !allArchived
+        const go = function() {
+            editor.whenFree(function() {
                 editor.close()
-            VaultController.archiveItem(id, true)
-        })
+                actOnChosen(function(ids) { VaultController.placeItems(ids, "archived", on) })
+            })
+        }
+        if (several)
+            placeQuestion.ask(on ? qsTr("Archive %1?").arg(nameOfChosen()) : qsTr("Unarchive %1?").arg(nameOfChosen()), go)
+        else if (selectedIds.length === 1)
+            go()
     }
 
-    // Item > Delete item…: the question of the editor, about the chosen item.
+    // Delete, Backspace and Item > Move to Trash: asked first (D-062); in the
+    // Trash, about deleting for good.
     function deleteChosen() {
-        const id = chosenItemId
-        if (id === "")
+        if (selectedIds.length === 0)
             return
-        // Straight into the Trash, where Restore brings it back (D-033).
         editor.whenFree(function() {
-            if (editor.itemId === id)
-                editor.close()
-            VaultController.moveToTrash(id, true)
+            editor.close()
+            if (anyTrashed)
+                foreverQuestion.ask(selectedIds.slice(), nameOfChosen())
+            else
+                placeQuestion.ask(qsTr("Move %1 to the Trash?").arg(nameOfChosen()), function() {
+                    vaultPage.actOnChosen(function(ids) { VaultController.placeItems(ids, "trashed", true) })
+                })
         })
     }
 
@@ -301,6 +440,7 @@ Item {
         if (!visible) {
             editor.close()
             chosenItemId = ""
+            selectedIds = []
         } else {
             // The keyboard leaves the hidden password field for the list, so
             // typing never goes into a page no longer shown, and the menus'
@@ -314,11 +454,39 @@ Item {
     Connections {
         target: VaultController.items
         function onModelReset() {
+            // An item the search left out is shown again with the search gone.
+            if (vaultPage.leftOutId !== "" && vaultPage.chosenItemId === "" && !vaultPage.several && editor.itemId === ""
+                    && VaultController.items.rowOf(vaultPage.leftOutId) >= 0)
+                vaultPage.chosenItemId = vaultPage.leftOutId
             const id = editor.itemId !== "" ? editor.itemId : vaultPage.chosenItemId
             const row = id === "" ? -1 : VaultController.items.rowOf(id)
             itemList.currentIndex = row
-            if (editor.itemId === "" && vaultPage.chosenItemId !== "" && !vaultPage.stillShown(vaultPage.chosenItemId))
+            if (editor.itemId === "" && vaultPage.chosenItemId !== ""
+                    && (!vaultPage.stillShown(vaultPage.chosenItemId)
+                        || (row < 0 && VaultController.searchText !== ""))) {
+                const out = VaultController.searchText !== "" && vaultPage.stillShown(vaultPage.chosenItemId)
+                            ? vaultPage.chosenItemId : ""
                 vaultPage.chosenItemId = ""
+                vaultPage.leftOutId = out
+            }
+            if (vaultPage.several) {
+                const left = vaultPage.selectedIds.filter(function(one) { return VaultController.items.rowOf(one) >= 0 })
+                vaultPage.selectedIds = left
+                if (left.length === 1)
+                    vaultPage.chosenItemId = left[0]
+                if (left.length > 0)
+                    itemList.currentIndex = VaultController.items.rowOf(left[left.length - 1])
+            }
+        }
+    }
+
+    // Ctrl+F goes to the search field (D-062).
+    Shortcut {
+        sequences: [StandardKey.Find]
+        enabled: vaultPage.visible && Appearance.focusWindow === vaultPage.Window.window
+        onActivated: {
+            searchField.forceActiveFocus(Qt.ShortcutFocusReason)
+            searchField.selectAll()
         }
     }
 
@@ -374,6 +542,51 @@ Item {
             readonly property var categoryList: VaultController.revision >= 0 ? VaultController.categories() : []
             readonly property var tagList: VaultController.revision >= 0 ? VaultController.tags() : []
 
+            // Holds the keyboard for the sidebar (D-062): the keys choose a
+            // line, whose items show at once; the headings are skipped.
+            Item {
+                id: sideKeys
+                objectName: "sideKeys"
+                activeFocusOnTab: true
+                function entries() {
+                    const found = []
+                    for (let i = 0; i < sideColumn.children.length; ++i) {
+                        const one = sideColumn.children[i]
+                        if (one.sideEntry === true && one.visible)
+                            found.push(one)
+                    }
+                    found.sort(function(a, b) { return a.y - b.y })
+                    return found
+                }
+                Keys.onPressed: function(event) {
+                    if ((event.modifiers & ~Qt.KeypadModifier) !== Qt.NoModifier)
+                        return
+                    const all = entries()
+                    if (all.length === 0)
+                        return
+                    let at = all.findIndex(function(one) { return one.countFilter === VaultController.filter })
+                    const page = Math.max(1, Math.floor(columnScroll.height / Math.max(1, all[0].height)) - 1)
+                    switch (event.key) {
+                    case Qt.Key_Up: at = at - 1; break
+                    case Qt.Key_Down: at = at + 1; break
+                    case Qt.Key_PageUp: at = at - page; break
+                    case Qt.Key_PageDown: at = at + page; break
+                    case Qt.Key_Home: at = 0; break
+                    case Qt.Key_End: at = all.length - 1; break
+                    default: return
+                    }
+                    event.accepted = true
+                    const chosen = all[Math.max(0, Math.min(all.length - 1, at))]
+                    if (chosen.countFilter !== VaultController.filter)
+                        vaultPage.choose(chosen.countFilter)
+                    const view = columnScroll.contentItem
+                    if (chosen.y < view.contentY)
+                        view.contentY = chosen.y
+                    else if (chosen.y + chosen.height > view.contentY + view.height)
+                        view.contentY = chosen.y + chosen.height - view.height
+                }
+            }
+
             ScrollView {
                 id: columnScroll
                 anchors.fill: parent
@@ -381,6 +594,7 @@ Item {
                 clip: true
 
                 ColumnLayout {
+                    id: sideColumn
                     width: columnScroll.availableWidth
                     spacing: Math.round(2 * Appearance.factor)
 
@@ -634,7 +848,21 @@ Item {
             spacing: Math.round(4 * Appearance.factor)
 
             TextField {
+                id: searchField
                 objectName: "searchField"
+                // Down and Enter go to the list, Esc clears it and goes there
+                // too (D-062).
+                function toList() {
+                    itemList.forceActiveFocus(Qt.TabFocusReason)
+                    if (itemList.currentIndex < 0 && itemList.count > 0)
+                        vaultPage.showItem(VaultController.items.idAt(0))
+                }
+                Keys.onDownPressed: toList()
+                onAccepted: toList()
+                Keys.onEscapePressed: {
+                    VaultController.searchText = ""
+                    itemList.forceActiveFocus(Qt.TabFocusReason)
+                }
                 placeholderText: qsTr("Search")
                 text: VaultController.searchText
                 onTextEdited: VaultController.searchText = text
@@ -667,6 +895,36 @@ Item {
                 }
             }
 
+            // The Trash as a whole (D-062).
+            RowLayout {
+                visible: vaultPage.inTrash
+                spacing: Math.round(6 * Appearance.factor)
+                Layout.leftMargin: Math.round(13 * Appearance.factor)
+                readonly property bool any: VaultController.revision >= 0 && VaultController.items.countOf("trash") > 0
+                Button {
+                    objectName: "restoreAllButton"
+                    text: qsTr("Restore all")
+                    enabled: parent.any
+                    onClicked: {
+                        const ids = VaultController.trashedItems()
+                        placeQuestion.ask(qsTr("Restore %1?").arg(qsTr("%n item(s)", "", ids.length)), function() {
+                            vaultPage.chosenItemId = ""
+                            vaultPage.selectedIds = []
+                            VaultController.placeItems(ids, "trashed", false)
+                        })
+                    }
+                }
+                Button {
+                    objectName: "emptyTrashButton"
+                    text: qsTr("Empty Trash…")
+                    enabled: parent.any
+                    onClicked: {
+                        const ids = VaultController.trashedItems()
+                        foreverQuestion.ask(ids, qsTr("%n item(s)", "", ids.length))
+                    }
+                }
+            }
+
             ListView {
                 id: itemList
                 boundsBehavior: Flickable.StopAtBounds // no bounce (the owner, D-046)
@@ -679,11 +937,28 @@ Item {
                 // 5 pixels more at the left and right (the owner, 23 November 2026).
                 Layout.leftMargin: Math.round(5 * Appearance.factor)
                 Layout.rightMargin: Math.round(5 * Appearance.factor)
+                activeFocusOnTab: true
+                keyNavigationEnabled: false
+                highlightMoveDuration: 0 // the view is there at once, however far
+                property string typed: ""
+                Timer {
+                    id: typedEnds
+                    interval: 1000
+                    onTriggered: itemList.typed = ""
+                }
                 // Up, Down, Page Up, Page Down, Home and End show the item they
                 // move to, as a click does, an edit not saved yet asked about
-                // first (D-051).
+                // first (D-051); with Shift they choose a range, and letters
+                // jump to the item that starts with them (D-062).
                 Keys.onPressed: function(event) {
-                    if (event.modifiers !== Qt.NoModifier || count === 0)
+                    const modifiers = event.modifiers & ~Qt.KeypadModifier
+                    const shift = modifiers === Qt.ShiftModifier
+                    if (modifiers === Qt.ControlModifier && event.key === Qt.Key_A) {
+                        event.accepted = true
+                        vaultPage.selectAll()
+                        return
+                    }
+                    if ((modifiers !== Qt.NoModifier && !shift) || count === 0)
                         return
                     const page = Math.max(1, Math.floor(height / Math.max(1, currentItem ? currentItem.height : 40)) - 1)
                     let row = currentIndex
@@ -694,11 +969,29 @@ Item {
                     case Qt.Key_PageDown: row = currentIndex + page; break
                     case Qt.Key_Home: row = 0; break
                     case Qt.Key_End: row = count - 1; break
-                    default: return
+                    case Qt.Key_Return:
+                    case Qt.Key_Enter:
+                        if (!shift) {
+                            event.accepted = true
+                            vaultPage.editShown()
+                        }
+                        return
+                    default:
+                        if (event.text.length === 1 && event.text > " " || (event.text === " " && typed !== "")) {
+                            event.accepted = true
+                            typed += event.text
+                            typedEnds.restart()
+                            const found = VaultController.items.rowStartingWith(typed, currentIndex, typed.length > 1)
+                            if (found >= 0)
+                                vaultPage.showItem(VaultController.items.idAt(found))
+                        }
+                        return
                     }
                     event.accepted = true
                     row = Math.max(0, Math.min(count - 1, row))
-                    if (row !== currentIndex)
+                    if (shift)
+                        vaultPage.selectRangeTo(row)
+                    else if (row !== currentIndex || vaultPage.several)
                         vaultPage.showItem(VaultController.items.idAt(row))
                 }
 
@@ -719,7 +1012,11 @@ Item {
                     width: ListView.view.width
                     // The chosen item: a grey fill with a blue bar at its left
                     // edge, as in the reference program (D-033).
-                    readonly property bool chosen: ListView.isCurrentItem
+                    readonly property bool chosen: vaultPage.several
+                                                   ? vaultPage.selectedIds.indexOf(model.itemId) >= 0
+                                                   : ListView.isCurrentItem
+                    objectName: "itemRow_" + index
+                    focusPolicy: Qt.NoFocus
                     readonly property color textColour: vaultPage.palette.text
                     background: Rectangle {
                         color: listEntry.chosen ? Qt.rgba(vaultPage.palette.text.r, vaultPage.palette.text.g,
@@ -776,7 +1073,34 @@ Item {
                             color: "#d32f2f"
                         }
                     }
-                    onClicked: vaultPage.showItem(model.itemId)
+                    // A click gives the list the keyboard; Ctrl adds or takes
+                    // one away, Shift takes a range (D-062).
+                    property int heldKeys: Qt.NoModifier
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        gesturePolicy: TapHandler.DragThreshold
+                        onPressedChanged: if (pressed) listEntry.heldKeys = point.modifiers
+                    }
+                    onClicked: {
+                        itemList.forceActiveFocus(Qt.MouseFocusReason)
+                        if (heldKeys & Qt.ControlModifier)
+                            vaultPage.toggleItem(model.itemId)
+                        else if (heldKeys & Qt.ShiftModifier)
+                            vaultPage.selectRangeTo(index)
+                        else
+                            vaultPage.showItem(model.itemId)
+                    }
+                    onDoubleClicked: vaultPage.editShown()
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        onTapped: {
+                            itemList.forceActiveFocus(Qt.MouseFocusReason)
+                            if (vaultPage.selectedIds.indexOf(model.itemId) < 0)
+                                vaultPage.showItem(model.itemId)
+                            if (vaultPage.selectedIds.indexOf(model.itemId) >= 0)
+                                listMenu.popup()
+                        }
+                    }
                 }
 
                 Label {
@@ -792,7 +1116,7 @@ Item {
         // Right: nothing chosen, the chosen item read-only, or the editor.
         StackLayout {
             SplitView.fillWidth: true
-            currentIndex: editor.itemId !== "" ? 2 : (vaultPage.chosenItemId !== "" ? 1 : 0)
+            currentIndex: editor.itemId !== "" ? 2 : vaultPage.several ? 3 : (vaultPage.chosenItemId !== "" ? 1 : 0)
 
             Label {
                 text: qsTr("Choose an item, or make a new one.")
@@ -804,6 +1128,9 @@ Item {
                 itemId: vaultPage.chosenItemId
                 revealAll: vaultPage.revealAll
                 onEditRequested: vaultPage.editChosen()
+                onTrashRequested: vaultPage.deleteChosen()
+                onRestoreRequested: vaultPage.restoreChosen()
+                onArchiveRequested: vaultPage.archiveChosen()
                 onConflictRequested: function(itemId) { vaultPage.conflictRequested(itemId) }
             }
             ItemEditor {
@@ -811,17 +1138,181 @@ Item {
                 objectName: "itemEditor"
                 // Closed: back to the item it showed, when it is still there; a
                 // deleted item is no longer shown.
-                onClosed: {
+                onClosed: function(wasOpen) {
                     if (vaultPage.chosenItemId !== "" && !vaultPage.stillShown(vaultPage.chosenItemId))
                         vaultPage.chosenItemId = ""
                     itemList.currentIndex = vaultPage.chosenItemId === "" ? -1
                                             : VaultController.items.rowOf(vaultPage.chosenItemId)
+                    // The editor held the keyboard: back to the list.
+                    if (wasOpen && vaultPage.visible)
+                        itemList.forceActiveFocus()
                 }
                 onStored: function(itemId) {
                     vaultPage.chosenItemId = itemId
                     itemList.currentIndex = VaultController.items.rowOf(itemId)
                 }
             }
+
+            // Several items chosen together (D-062).
+            ColumnLayout {
+                objectName: "severalPage"
+                spacing: Math.round(12 * Appearance.factor)
+                Item { Layout.fillHeight: true }
+                Label {
+                    objectName: "severalLabel"
+                    text: qsTr("%1 items selected").arg(vaultPage.selectedIds.length)
+                    font.pointSize: Appearance.fontPointSize * 1.3
+                    Layout.alignment: Qt.AlignHCenter
+                }
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Math.round(6 * Appearance.factor)
+                    Button {
+                        objectName: "severalFavourite"
+                        visible: !vaultPage.anyTrashed
+                        text: vaultPage.allFavourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
+                        onClicked: vaultPage.favouriteChosen()
+                    }
+                    Button {
+                        objectName: "severalArchive"
+                        visible: !vaultPage.anyTrashed
+                        text: vaultPage.allArchived ? qsTr("Unarchive") : qsTr("Archive")
+                        onClicked: vaultPage.archiveChosen()
+                    }
+                    Button {
+                        objectName: "severalTrash"
+                        visible: !vaultPage.anyTrashed
+                        text: qsTr("Move to Trash")
+                        onClicked: vaultPage.deleteChosen()
+                    }
+                    Button {
+                        objectName: "severalRestore"
+                        visible: vaultPage.anyTrashed
+                        text: qsTr("Restore")
+                        onClicked: vaultPage.askRestore()
+                    }
+                    Button {
+                        objectName: "severalDelete"
+                        visible: vaultPage.anyTrashed
+                        text: qsTr("Delete Permanently…")
+                        onClicked: vaultPage.deleteChosen()
+                    }
+                }
+                Item { Layout.fillHeight: true }
+            }
+        }
+    }
+
+    // An item's right-click menu (D-062).
+    Menu {
+        id: listMenu
+        objectName: "itemListMenu"
+        MenuItem {
+            objectName: "listMenuEdit"
+            text: qsTr("Edit")
+            visible: !vaultPage.several && !vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.editShown()
+        }
+        MenuItem {
+            text: vaultPage.allFavourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
+            visible: !vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.favouriteChosen()
+        }
+        MenuItem {
+            text: vaultPage.allArchived ? qsTr("Unarchive") : qsTr("Archive")
+            visible: !vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.archiveChosen()
+        }
+        MenuItem {
+            objectName: "listMenuTrash"
+            text: qsTr("Move to Trash")
+            visible: !vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.deleteChosen()
+        }
+        MenuItem {
+            text: qsTr("Restore")
+            visible: vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.askRestore()
+        }
+        MenuItem {
+            text: qsTr("Delete Permanently…")
+            visible: vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.deleteChosen()
+        }
+    }
+
+    // Asked before several items, or any item into the Trash (D-062).
+    DialogWindow {
+        id: placeQuestion
+        objectName: "placeQuestion"
+        memoryName: "placeQuestion"
+        property string question: ""
+        property var action: null
+        title: qsTr("Chrono Vault")
+        standardButtons: Dialog.Yes | Dialog.No
+        function ask(words, doIt) {
+            question = words
+            action = doIt
+            open()
+        }
+        ColumnLayout {
+            Label {
+                objectName: "placeQuestionText"
+                text: placeQuestion.question
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
+            }
+        }
+        onAccepted: {
+            const doIt = action
+            action = null
+            if (doIt && VaultController.state === VaultController.Unlocked)
+                doIt()
+        }
+        onRejected: action = null
+    }
+    DialogWindow {
+        id: foreverQuestion
+        objectName: "foreverQuestion"
+        memoryName: "foreverQuestion"
+        property var ids: []
+        property string what: ""
+        title: qsTr("Delete permanently?")
+        standardButtons: Dialog.Yes | Dialog.No
+        defaultButton: Dialog.No // Enter never deletes for good
+        function ask(chosenIds, name) {
+            ids = chosenIds
+            what = name
+            open()
+        }
+        ColumnLayout {
+            Label {
+                text: qsTr("%1 will be removed from the vault for good. This cannot be undone.").arg(foreverQuestion.what)
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
+            }
+        }
+        onAccepted: {
+            const gone = ids
+            vaultPage.actOn(gone, function(all) { VaultController.deleteItems(all) })
+        }
+    }
+    // The vault locks: what was asked is no longer asked.
+    Connections {
+        target: VaultController
+        function onLocking() {
+            placeQuestion.reject()
+            foreverQuestion.reject()
         }
     }
 

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.2.57
+// IconPicker.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Enter never deletes an icon (D-062)
 // v0.2.57: A search field: by name, any case, anywhere in the name (the owner, D-050)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.40: Initial release (D-050)
@@ -305,6 +306,7 @@ DialogWindow {
         title: qsTr("Delete icon")
         transientParent: picker
         standardButtons: Dialog.Yes | Dialog.No
+        defaultButton: Dialog.No
         Label {
             text: qsTr("This icon is used by %n item(s). They will get their category's icon instead. Delete it?", "", deleteQuestion.uses)
             wrapMode: Text.Wrap

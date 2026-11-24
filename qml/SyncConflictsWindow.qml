@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.5.81
+// SyncConflictsWindow.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Every key of a list, Ctrl+A, ranges (D-062)
 // v0.5.81: The list as Chrono Mail's: a table whose columns are dragged, line icons, Retry sync, Keep here only, every button greyed and never hidden (D-061)
 // v0.5.78: The buttons "Use Vault" and "Use Import", or "Use This device" and "Use Other device"; the row tick boxes as clear as Check all (D-061)
 // v0.5.77: A conflict from an import has its own mark (D-060)
@@ -196,6 +197,9 @@ DialogWindow {
     onShown: {
         said = ""
         refresh()
+        list.forceActiveFocus()
+        if (list.currentIndex < 0 && rows.length > 0)
+            list.currentIndex = 0
     }
     onVisibleChanged: {
         if (!visible)
@@ -338,17 +342,61 @@ DialogWindow {
                 model: conflictsWindow.rows
                 currentIndex: -1
                 focus: true
-                keyNavigationEnabled: true
+                activeFocusOnTab: true
+                keyNavigationEnabled: false
+                highlightMoveDuration: 0
                 ScrollBar.vertical: ScrollBar {}
-                Keys.onSpacePressed: {
-                    const row = conflictsWindow.rows[currentIndex]
-                    if (row)
-                        conflictsWindow.tick(row.itemId, !conflictsWindow.ticked[row.itemId])
+                // Where a range of ticks begins.
+                property int anchorRow: 0
+                function tickRange(row) {
+                    const from = Math.max(0, Math.min(anchorRow, count - 1))
+                    const next = Object.assign({}, conflictsWindow.ticked)
+                    for (let one = Math.min(from, row); one <= Math.max(from, row); ++one)
+                        next[conflictsWindow.rows[one].itemId] = true
+                    conflictsWindow.ticked = next
                 }
-                Keys.onReturnPressed: {
-                    const row = conflictsWindow.rows[currentIndex]
-                    if (row)
-                        conflictWindow.showItem(row.itemId)
+                Keys.onPressed: function(event) {
+                    const modifiers = event.modifiers & ~Qt.KeypadModifier
+                    if (modifiers === Qt.ControlModifier && event.key === Qt.Key_A) {
+                        event.accepted = true
+                        conflictsWindow.setAll(true)
+                        return
+                    }
+                    const shift = modifiers === Qt.ShiftModifier
+                    if ((modifiers !== Qt.NoModifier && !shift) || count === 0)
+                        return
+                    const page = Math.max(1, Math.floor(height / Math.max(1, currentItem ? currentItem.height : 24)) - 1)
+                    const here = conflictsWindow.rows[currentIndex]
+                    let to = currentIndex
+                    switch (event.key) {
+                    case Qt.Key_Up: to = currentIndex - 1; break
+                    case Qt.Key_Down: to = currentIndex + 1; break
+                    case Qt.Key_PageUp: to = currentIndex - page; break
+                    case Qt.Key_PageDown: to = currentIndex + page; break
+                    case Qt.Key_Home: to = 0; break
+                    case Qt.Key_End: to = count - 1; break
+                    case Qt.Key_Space:
+                        event.accepted = true
+                        if (here)
+                            conflictsWindow.tick(here.itemId, !conflictsWindow.ticked[here.itemId])
+                        return
+                    case Qt.Key_Return:
+                    case Qt.Key_Enter:
+                        event.accepted = true
+                        if (here)
+                            conflictWindow.showItem(here.itemId)
+                        return
+                    default: return
+                    }
+                    event.accepted = true
+                    to = Math.max(0, Math.min(count - 1, to))
+                    if (shift) {
+                        tickRange(to)
+                    } else {
+                        anchorRow = to
+                    }
+                    currentIndex = to
+                    positionViewAtIndex(to, ListView.Contain)
                 }
                 delegate: Rectangle {
                     id: row
@@ -364,9 +412,16 @@ DialogWindow {
                     onDoubleClicked: conflictWindow.showItem(modelData.itemId)
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            list.currentIndex = row.index
+                        onClicked: function(mouse) {
                             list.forceActiveFocus()
+                            list.currentIndex = row.index
+                            if (mouse.modifiers & Qt.ShiftModifier) {
+                                list.tickRange(row.index)
+                                return
+                            }
+                            list.anchorRow = row.index
+                            if (mouse.modifiers & Qt.ControlModifier)
+                                conflictsWindow.tick(row.modelData.itemId, !conflictsWindow.ticked[row.modelData.itemId])
                         }
                         onDoubleClicked: row.doubleClicked()
                     }

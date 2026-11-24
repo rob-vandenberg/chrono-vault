@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_sync_conflicts.cpp 0.5.81
+// test_sync_conflicts.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: The program's own style; the free room at a button's sides
 // v0.5.81: Initial release (D-061)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -136,6 +137,7 @@ private slots:
     void initTestCase()
     {
         QStandardPaths::setTestModeEnabled(true);
+        applyStyle(); // the program's own, as at its start
         QCoreApplication::setOrganizationName(QStringLiteral("Chrono Vault Tests"));
         QCoreApplication::setApplicationName(QStringLiteral("test_sync_conflicts"));
     }
@@ -334,6 +336,12 @@ private slots:
         const auto button = [](QQuickWindow* in, const char* name) {
             return visualItems(in->contentItem(), QString::fromLatin1(name)).constFirst();
         };
+        // 5 pixels free between a button's edge and its text (the owner).
+        for (const char* name : {"useLeftButton", "keepHereButton", "invertSelectionButton"}) {
+        QVERIFY2(button(list, name)->property("leftPadding").toReal() >= 5 + 2, name);
+            QVERIFY2(button(list, name)->property("rightPadding").toReal() >= 5 + 2, name);
+            QVERIFY2(button(list, name)->width() >= button(list, name)->property("implicitWidth").toReal(), name);
+        }
         // Nothing ticked: every button greyed, none hidden.
         for (const char* name : {"useLeftButton", "useRightButton", "retryButton", "keepHereButton", "keepBothButton"}) {
             QVERIFY2(button(list, name)->isVisible() && !button(list, name)->isEnabled(), name);
@@ -349,7 +357,17 @@ private slots:
         QTRY_COMPARE(button(list, "conflictsHeader_1")->width(), name + 20);
         QCOMPARE(button(list, "conflictsHeader_2")->width(), fields - 20);
 
-        QVERIFY(QMetaObject::invokeMethod(button(list, "conflictRow_0"), "doubleClicked"));
+        // By keys (D-062): Ctrl+A ticks all, the number pad's Enter opens.
+        list->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), list);
+        QTRY_COMPARE(button(list, "conflictsList")->property("currentIndex").toInt(), 0);
+        button(list, "conflictsList")->forceActiveFocus();
+        QVERIFY(QMetaObject::invokeMethod(button(list, "invertSelectionButton"), "clicked"));
+        QTRY_VERIFY(!button(list, "retryButton")->isEnabled());
+        QTest::keyClick(list, Qt::Key_A, Qt::ControlModifier);
+        QTRY_VERIFY(button(list, "retryButton")->isEnabled());
+        QTest::keyClick(list, Qt::Key_End);
+        QTest::keyClick(list, Qt::Key_Enter, Qt::KeypadModifier);
         QTRY_VERIFY(single->isVisible());
         QVERIFY(single->width() >= 560);
         QQuickItem* apply = button(single, "conflictApplyButton");
@@ -379,7 +397,9 @@ private slots:
         QTRY_VERIFY(button(single, "conflictLeft_0")->isVisible());
         QVERIFY(button(single, "conflictLeft_0")->property("checked").toBool());
         click("conflictSplit_0");
-        QVERIFY(QMetaObject::invokeMethod(apply, "clicked"));
+        single->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), single);
+        QTest::keyClick(single, Qt::Key_Return); // Enter applies
         QTRY_VERIFY(!single->isVisible());
         QTRY_VERIFY(controller->isIdle());
         QCOMPARE(itemIn(here).fields.size(), 4);

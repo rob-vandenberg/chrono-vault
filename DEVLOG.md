@@ -694,3 +694,12 @@ the deletion's side in `src/core/item_differences.cpp` and `src/core/vault_merge
 `tests/integration/test_sync_conflicts.cpp`. Decisions in D-061.
 Three review rounds: round 1, Retry sync marked an unchanged item as modified; round 2, no answer when a WebDAV server's
 password had to be asked first; both fixed; round 3 clean.
+
+## 24 November 2026: version 0.5.82: what a person guesses is what happens
+
+The owner's changelist items 1-32, after his test of 0.5.81 and an agent that used the program as a person would (D-062).
+`qml/VaultPage.qml` (the list, several items, the sidebar's keys, the questions), `qml/DialogWindow.qml` (Esc, Enter),
+`Appearance.focusWindow`, `placeItems`/`deleteItems`, `art/crown.svg`, `icons/miscellaneous/laurel3-gold.svg`;
+`tests/integration/test_intuitive.cpp` drives it with mouse and keys. `test_sync_conflicts` now uses the program's style.
+Three review rounds: in round 1 the coder found Enter on Discard when a change could not be saved; round 2, the mark on
+an item just taken from a selection; both fixed with tests; round 3 clean.

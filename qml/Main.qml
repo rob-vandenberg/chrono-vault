@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.5.78
+// Main.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Delete, several items, the keyboard never nowhere; new and opened vaults from Settings (D-062)
 // v0.5.78: The menus' own colour; texts in dialogs wrap with the window (D-061)
 // v0.5.77: After an import, the Sync conflicts dialog when items differ (D-060)
 // v0.5.76: Tools > Sync Conflicts… and the Sync conflicts dialog (D-060)
@@ -176,7 +177,10 @@ ApplicationWindow {
         }
         return false
     }
-    onActiveFocusItemChanged: {
+    onActiveFocusItemChanged: keepFocus()
+    // Back from another window: never with the keyboard nowhere (D-062).
+    onActiveChanged: keepFocus()
+    function keepFocus() {
         if (!active || aMenuIsOpen())
             return
         if (activeFocusItem === null || activeFocusItem === contentItem || inMenuBar(activeFocusItem))
@@ -193,6 +197,7 @@ ApplicationWindow {
     // The item the Item menu acts on: the one shown, while the editor is not
     // open (D-039).
     readonly property bool itemFree: unlocked && vaultPage.chosenItemId !== "" && !vaultPage.editing
+    readonly property bool itemsFree: unlocked && vaultPage.selectedIds.length > 0 && !vaultPage.editing
     readonly property var chosenItem: itemFree && VaultController.revision >= 0
                                       ? VaultController.item(vaultPage.chosenItemId) : ({})
     readonly property bool hasSensitive: (chosenItem.fields || []).some(function(field) {
@@ -457,8 +462,7 @@ ApplicationWindow {
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "archiveAction"
                         text: qsTr("Archive")
-                        enabled: mainWindow.itemFree && mainWindow.chosenItem.archived !== true
-                                 && mainWindow.chosenItem.trashed !== true
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed && !vaultPage.allArchived
                         onTriggered: vaultPage.archiveChosen()
                     }
                     Action {
@@ -466,9 +470,9 @@ ApplicationWindow {
                         property string actionId: "moveToTrash"
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "moveToTrashAction"
-                        text: qsTr("Move to Trash")
-                        // Not for an item already in the Trash.
-                        enabled: mainWindow.itemFree && mainWindow.chosenItem.trashed !== true
+                        // Of an item in the Trash: deleting it for good (D-062).
+                        text: vaultPage.anyTrashed ? qsTr("Delete Permanently…") : qsTr("Move to Trash")
+                        enabled: mainWindow.itemsFree
                         onTriggered: vaultPage.deleteChosen()
                     }
                     MenuSeparator {}
@@ -702,17 +706,20 @@ ApplicationWindow {
 
     // A new or another vault: with a vault unlocked, an edit not saved yet is
     // asked about first (D-030).
-    function newVault() {
+    // In front of this window, or of another one that asked (Settings).
+    function newVault() { newVaultOver(null) }
+    function newVaultOver(over) {
         if (unlocked)
-            vaultPage.whenEditorFree(function() { welcomePage.newVault() })
+            vaultPage.whenEditorFree(function() { welcomePage.newVault(over) })
         else
-            welcomePage.newVault()
+            welcomePage.newVault(over)
     }
-    function openVault() {
+    function openVault() { openVaultOver(null) }
+    function openVaultOver(over) {
         if (unlocked)
-            vaultPage.whenEditorFree(function() { welcomePage.openVault() })
+            vaultPage.whenEditorFree(function() { welcomePage.openVault(over) })
         else
-            welcomePage.openVault()
+            welcomePage.openVault(over)
     }
 
     ImportWindow {
@@ -953,6 +960,9 @@ ApplicationWindow {
         keyedActions: mainWindow.keyedActions
         onChangeMasterPasswordRequested: mainWindow.changeMasterPassword()
         // A vault's menu in Settings > Vaults, its vault now unlocked (D-060).
+        // In front of the settings, which stay open (D-062).
+        onCreateVaultRequested: mainWindow.newVaultOver(settingsWindow)
+        onOpenVaultRequested: mainWindow.openVaultOver(settingsWindow)
         onImportRequested: vaultPage.whenEditorFree(function() { importWindow.start() })
         onExportRequested: vaultPage.whenEditorFree(function() { exportWindow.ask() })
     }

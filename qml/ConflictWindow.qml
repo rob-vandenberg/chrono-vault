@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.5.81
+// ConflictWindow.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: The normal scroll bar, Enter applies; the split button with 5 pixels free at its sides (D-062)
 // v0.5.81: As Chrono Mail's: every field, the choices in the second accent, a split, Retry sync, Keep here only and Keep both chosen and applied (D-061)
 // v0.5.78: The sides "Vault" and "Import", or "This device" and "Other device"; every kind of difference; the header's choices in line with the rows' (D-061)
 // v0.5.77: A conflict from an import reads "Imported" (D-060)
@@ -71,7 +72,6 @@ DialogWindow {
     readonly property int circleGap: Math.round(6 * Appearance.factor)
     // Where the text beside a circle begins.
     readonly property int textLeft: line + innerSide + circleSize + circleGap
-    readonly property int barRoom: Math.round(18 * Appearance.factor)
 
     readonly property var openChoices: rows.filter(function(row) { return split.indexOf(row.index) < 0 })
     readonly property bool ready: {
@@ -227,6 +227,7 @@ DialogWindow {
 
     title: qsTr("Sync conflict: %1").arg(conflict.name || "")
     standardButtons: Dialog.NoButton
+    defaultItem: applyButton
     minimumWidth: Math.max(Math.round(560 * Appearance.factor), contentLayout.implicitWidth + 2 * edge)
 
     onVisibleChanged: {
@@ -262,6 +263,7 @@ DialogWindow {
     ]
     rightButtons: [
         Button {
+            id: applyButton
             objectName: "conflictApplyButton"
             text: qsTr("Apply")
             enabled: conflictWindow.ready
@@ -281,7 +283,7 @@ DialogWindow {
 
     Shortcut {
         sequences: [StandardKey.Undo]
-        enabled: conflictWindow.visible
+        enabled: Appearance.focusWindow === conflictWindow
         onActivated: conflictWindow.joinLast()
     }
 
@@ -453,11 +455,22 @@ DialogWindow {
             contentWidth: availableWidth
             contentHeight: choices.implicitHeight
             clip: true
+            // The normal scroll bar (D-049), in room of its own beside the
+            // rows, so no outline lies under it.
+            rightPadding: fieldsBar.width + Math.round(6 * Appearance.factor)
+            ScrollBar.vertical: ScrollBar {
+                id: fieldsBar
+                objectName: "conflictScrollBar"
+                parent: fields
+                x: fields.mirrored ? 0 : fields.width - width
+                y: fields.topPadding
+                height: fields.availableHeight
+                orientation: Qt.Vertical
+            }
 
             GridLayout {
                 id: choices
-                // Clear of the scroll bar, so no outline lies under it.
-                width: fields.availableWidth - conflictWindow.barRoom
+                width: fields.availableWidth
                 columns: 4
                 columnSpacing: Math.round(10 * Appearance.factor)
                 rowSpacing: Math.round(4 * Appearance.factor)
@@ -561,8 +574,9 @@ DialogWindow {
                         Layout.column: 3
                         Layout.alignment: Qt.AlignTop
                         Layout.preferredHeight: lineHeightOfRow.height + 2 * (conflictWindow.line + conflictWindow.innerTop)
-                        Layout.preferredWidth: Layout.preferredHeight
+                        Layout.preferredWidth: implicitWidth
                         padding: 0
+                        horizontalPadding: 1 + Math.round(5 * Appearance.factor)
                         icon.source: "qrc:/icons/split.svg"
                         icon.width: Math.round(20 * Appearance.factor)
                         icon.height: Math.round(20 * Appearance.factor)

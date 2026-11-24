@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// FieldRow.qml 0.0.24
+// FieldRow.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: A double click copies, a right click opens the menu (D-062)
 // v0.0.24: A copy button for the one-time code; Item > Show Passwords (D-039)
 // v0.0.17: Initial release (D-033)
 
@@ -45,6 +46,17 @@ Item {
     implicitHeight: Math.max(details.rowHeight, valueText.implicitHeight + Math.round(30 * Appearance.factor))
 
     HoverHandler { id: hover }
+    readonly property string toCopy: kind === "totp" ? code : modelData.value
+    // A double click copies the value, a right click opens the "…" menu
+    // (D-062); a link opens with its own click.
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onDoubleTapped: if (valueText.hoveredLink === "") VaultController.copyToClipboard(row.toCopy)
+    }
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: rowMenu.popup()
+    }
     Rectangle {
         anchors.fill: parent
         anchors.margins: 1
@@ -147,7 +159,7 @@ Item {
             id: rowMenu
             Action {
                 text: qsTr("Copy")
-                onTriggered: VaultController.copyToClipboard(row.kind === "totp" ? row.code : row.modelData.value)
+                onTriggered: VaultController.copyToClipboard(row.toCopy)
             }
             MenuItem {
                 text: row.revealed ? qsTr("Hide") : qsTr("Show")

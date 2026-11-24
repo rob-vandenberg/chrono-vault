@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.81
+// vault_controller.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Several items at once; Delete moves to the Trash too (D-062)
 // v0.5.81: A source read for Import and for Retry sync alike (D-061)
 // v0.5.78: Merges told this device's id, its kept change as "mine"; an import notes every difference (D-061)
 // v0.5.77: An import never writes over an item the vault has: the same is passed over, a difference is a conflict (D-060)
@@ -1494,6 +1495,85 @@ void VaultController::moveToTrash(const QString& id, bool trashed)
 void VaultController::archiveItem(const QString& id, bool archived)
 {
     setItemPlace(id, &Item::archived, archived);
+}
+
+void VaultController::placeItems(const QStringList& ids, const QString& place, bool on)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    const bool toTrash = place == QLatin1String("trashed");
+    const bool toArchive = place == QLatin1String("archived");
+    bool Item::*member = toTrash ? &Item::trashed : toArchive ? &Item::archived : &Item::favourite;
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    int changed = 0;
+    QString title;
+    for (Item& one : contents.items) {
+        if (one.*member == on || !ids.contains(one.id.toString(QUuid::WithoutBraces))) {
+            continue;
+        }
+        one.*member = on;
+        if (toTrash || toArchive) {
+            one.modified = now;
+        }
+        title = one.title;
+        ++changed;
+    }
+    if (changed == 0) {
+        return;
+    }
+    contentsChanged();
+    saveInBackground(QString());
+    if (!toTrash && !toArchive) {
+        return; // the star shows it
+    }
+    if (changed == 1) {
+        say(toTrash ? (on ? tr("“%1” was moved to the Trash.").arg(title) : tr("“%1” was restored.").arg(title))
+                    : (on ? tr("“%1” was archived.").arg(title) : tr("“%1” is no longer archived.").arg(title)),
+            false);
+    } else {
+        say(toTrash ? (on ? tr("%n items were moved to the Trash.", nullptr, changed)
+                          : tr("%n items were restored.", nullptr, changed))
+                    : (on ? tr("%n items were archived.", nullptr, changed)
+                          : tr("%n items are no longer archived.", nullptr, changed)),
+            false);
+    }
+}
+
+void VaultController::deleteItems(const QStringList& ids)
+{
+    if (currentState != State::Unlocked) {
+        return;
+    }
+    QList<QUuid> gone;
+    QString title;
+    for (const Item& one : std::as_const(contents.items)) {
+        // Only what is in the Trash is ever deleted for good.
+        if (one.trashed && ids.contains(one.id.toString(QUuid::WithoutBraces))) {
+            gone.append(one.id);
+            title = one.title;
+        }
+    }
+    if (gone.isEmpty()) {
+        return;
+    }
+    removeForGood(gone, QDateTime::currentDateTimeUtc());
+    contentsChanged();
+    saveInBackground(QString());
+    say(gone.size() == 1 ? tr("“%1” was deleted permanently.").arg(title)
+                         : tr("%n items were deleted permanently.", nullptr, static_cast<int>(gone.size())),
+        false);
+}
+
+QStringList VaultController::trashedItems() const
+{
+    QStringList ids;
+    for (const Item& one : contents.items) {
+        if (one.trashed) {
+            ids.append(one.id.toString(QUuid::WithoutBraces));
+        }
+    }
+    return ids;
 }
 
 void VaultController::setItemPlace(const QString& id, bool Item::*place, bool on)
@@ -3231,7 +3311,7 @@ QStringList VaultController::defaultKeysOf(const QString& action) const
     static const QHash<QString, QStringList> defaults{
         {QStringLiteral("quit"), {QStringLiteral("Ctrl+Q")}},
         {QStringLiteral("archive"), {QStringLiteral("Shift+Backspace")}},
-        {QStringLiteral("moveToTrash"), {QStringLiteral("Backspace")}},
+        {QStringLiteral("moveToTrash"), {QStringLiteral("Backspace"), QStringLiteral("Del")}},
         {QStringLiteral("copyUsername"), {QStringLiteral("Shift+Ctrl+U")}},
         {QStringLiteral("copyEmail"), {QStringLiteral("Shift+Ctrl+E")}},
         {QStringLiteral("copyPassword"), {QStringLiteral("Shift+Ctrl+P")}},

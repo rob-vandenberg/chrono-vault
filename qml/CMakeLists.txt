@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.5.81
+# qml/CMakeLists.txt 0.5.82
 
 # --- Version history ----------------------------------------------------
+# v0.5.82: The crown (D-062)
 # v0.5.81: Retry sync's source and the Sync conflicts icons (D-061)
 # v0.4.72: crypt32 for Windows Hello's key (D-038 point 11)
 # v0.4.70: PIN unlock (D-059)
@@ -162,6 +163,7 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/star-filled.svg"
         "${PROJECT_SOURCE_DIR}/art/attachment.svg"
         "${PROJECT_SOURCE_DIR}/art/copy.svg"
+        "${PROJECT_SOURCE_DIR}/art/crown.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-both.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-import.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-deleted-there.svg"

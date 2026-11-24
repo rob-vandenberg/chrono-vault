@@ -23,9 +23,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.2.45
+// item_list_model.h 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
@@ -68,6 +69,9 @@ public:
     [[nodiscard]] Q_INVOKABLE int rowOf(const QString& id) const;
     // The id of the item in this row, or nothing.
     [[nodiscard]] Q_INVOKABLE QString idAt(int row) const;
+    // The next row after this one whose title starts with the text, going
+    // round; -1 when none does. With from kept, the row itself counts first.
+    [[nodiscard]] Q_INVOKABLE int rowStartingWith(const QString& text, int from, bool fromKept) const;
     // How many items a view of the left column holds ("" for Home,
     // "favourites", "category:<id>", "tag:<tag>", "archive", "trash"),
     // whatever the search (D-039).

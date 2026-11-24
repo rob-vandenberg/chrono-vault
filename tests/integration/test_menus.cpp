@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.5.76
+// test_menus.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Backspace asks first (D-062)
 // v0.5.76: Tools > Sync Conflicts… (D-060)
 // v0.3.60: Tools > Sync Now, greyed for a vault on this computer (D-057)
 // v0.2.56: Edit… and Reset or Delete on every category; Edit… on a right-click in the sidebar (D-056)
@@ -421,7 +422,13 @@ void TestMenus::shortcuts_stand_aside_while_a_text_field_is_typed_in()
     QTest::keyClick(quickWindow, Qt::Key_U, Qt::ShiftModifier | Qt::ControlModifier);
     QCOMPARE(QGuiApplication::clipboard()->text(), QStringLiteral("rob"));
 
+    // Asked first (D-062): No leaves it, Yes moves it.
     QTest::keyClick(quickWindow, Qt::Key_Backspace);
+    QObject* question = window->findChild<QObject*>(QStringLiteral("placeQuestion"));
+    QVERIFY(question);
+    QTRY_VERIFY(question->property("visible").toBool());
+    QVERIFY(!controller->item(id).value(QStringLiteral("trashed")).toBool());
+    QVERIFY(QMetaObject::invokeMethod(question, "accept"));
     QTRY_VERIFY(controller->item(id).value(QStringLiteral("trashed")).toBool());
 }
 

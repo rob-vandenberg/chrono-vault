@@ -48,9 +48,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.5.81
+// vault_controller.h 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Several items at once (D-062)
 // v0.5.81: Retry sync; every field of a conflict's item (D-061)
 // v0.5.78: Every difference a conflict; the sides' names; the person's own categories and templates (D-061)
 // v0.5.77: Import from another vault; an import's duplicates skipped or made conflicts (D-060)
@@ -507,6 +508,11 @@ public:
     // it (D-033).
     Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);
     Q_INVOKABLE void archiveItem(const QString& id, bool archived);
+    // Several items at once (D-062), in one save and one message: place is
+    // "trashed", "archived" or "favourite".
+    Q_INVOKABLE void placeItems(const QStringList& ids, const QString& place, bool on);
+    Q_INVOKABLE void deleteItems(const QStringList& ids);
+    [[nodiscard]] Q_INVOKABLE QStringList trashedItems() const;
     // Reads a picked picture as an item icon (D-018): the PNG in base64, or
     // empty when the file is not used, with a message saying why.
     [[nodiscard]] Q_INVOKABLE QString readItemIcon(const QUrl& file);

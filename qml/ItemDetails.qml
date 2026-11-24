@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.5.78
+// ItemDetails.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Trash, Restore and Archive through the page, asked first (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.76: A sync conflict settled in the Sync conflicts dialog, no longer on the item (D-060)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -80,6 +81,9 @@ Item {
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
 
     signal editRequested()
+    signal trashRequested()
+    signal restoreRequested()
+    signal archiveRequested()
     signal conflictRequested(string itemId)
 
     Connections {
@@ -153,11 +157,11 @@ Item {
                     Action {
                         text: itemDetails.item.archived ? qsTr("Unarchive") : qsTr("Archive")
                         enabled: !itemDetails.item.trashed
-                        onTriggered: VaultController.archiveItem(itemDetails.itemId, !itemDetails.item.archived)
+                        onTriggered: itemDetails.archiveRequested()
                     }
                     Action {
                         text: itemDetails.item.trashed ? qsTr("Restore") : qsTr("Move to Trash")
-                        onTriggered: VaultController.moveToTrash(itemDetails.itemId, !itemDetails.item.trashed)
+                        onTriggered: itemDetails.item.trashed ? itemDetails.restoreRequested() : itemDetails.trashRequested()
                     }
                 }
             }
@@ -194,14 +198,13 @@ Item {
                     Button {
                         objectName: "restoreButton"
                         text: itemDetails.item.trashed ? qsTr("Restore") : qsTr("Unarchive")
-                        onClicked: itemDetails.item.trashed ? VaultController.moveToTrash(itemDetails.itemId, false)
-                                                            : VaultController.archiveItem(itemDetails.itemId, false)
+                        onClicked: itemDetails.item.trashed ? itemDetails.restoreRequested() : itemDetails.archiveRequested()
                     }
                     Button {
                         objectName: "deleteForeverButton"
                         visible: itemDetails.item.trashed === true
                         text: qsTr("Delete Permanently…")
-                        onClicked: deleteForeverDialog.open()
+                        onClicked: itemDetails.trashRequested()
                     }
                 }
 
@@ -465,23 +468,6 @@ Item {
                 }
             }
         }
-    }
-
-    DialogWindow {
-        id: deleteForeverDialog
-        objectName: "deleteForeverDialog"
-        memoryName: "deleteForever"
-        title: qsTr("Delete this item permanently?")
-        standardButtons: Dialog.Yes | Dialog.No
-        ColumnLayout {
-            Label {
-                text: qsTr("“%1” is removed from the vault for good. This cannot be undone.").arg(itemDetails.item.title || "")
-                wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
-                Layout.fillWidth: true
-            }
-        }
-        onAccepted: VaultController.deleteItem(itemDetails.itemId)
     }
 
     // A web or email address as a link, its text escaped, never read as markup.

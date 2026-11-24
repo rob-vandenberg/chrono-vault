@@ -2,7 +2,9 @@
 
 ## Now
 
-**Version 0.5.81**: the Sync conflicts windows as Chrono Mail's (D-061): every field of the item, a split that keeps
+**Version 0.5.82**: what a person guesses is what happens (D-062): the list, sidebar, search, editor, dialogs and
+Sync conflicts by every key and mouse click; several items; Delete asked; Settings > Vaults with Create vault, Open
+vault and the primary's crown; 5 pixels free in every button. Before, **0.5.81**: the Sync conflicts windows as Chrono Mail's (D-061): every field of the item, a split that keeps
 both values, Retry sync, Keep here only, columns that are dragged; an item deleted here and held by an import simply
 imported. Before, **0.5.80**: the threads that talk to Windows Hello close down COM when they end; left open, measurements with a test program hung Explorer's file dialog on one Windows computer (D-055; the owner's test of Chrono Vault itself is due). Before, 0.5.79: Explorer's dialog gets its owner from Qt (did not fix it). Before, **0.5.78.3**: the export's file dialog opens over the Import window, which stays open, as Browse… does, to end the invisible dialog on Windows. Before, **0.5.78.2**: Next… for an export goes straight to the file dialog, and the log names its folder, to prove why Explorer's dialog sometimes stays invisible on Windows. Before, **0.5.78.1**: Import's file dialog in the --debug log, to find why an invisible window sometimes holds the keyboard after Next… on Windows. Before, **0.5.78**: the person decides every difference (D-061): an import makes every way an item differs a
 conflict (deleted fields either way, fields, tags, attachments and earlier values only the import holds, category,

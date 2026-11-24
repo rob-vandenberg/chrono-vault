@@ -36,6 +36,7 @@ art/*
 !art/star.svg
 !art/star-filled.svg
 !art/copy.svg
+!art/crown.svg
 !art/conflict-both.svg
 !art/conflict-import.svg
 !art/conflict-deleted-there.svg

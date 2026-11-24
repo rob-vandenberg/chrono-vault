@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.5.81
+# tests/integration/CMakeLists.txt 0.5.82
 
 # --- Version history ----------------------------------------------------
+# v0.5.82: test_intuitive (D-062)
 # v0.5.81: test_sync_conflicts (D-061)
 # v0.5.75: test_vault_menu (D-060)
 # v0.4.70: PIN unlock (D-059)
@@ -60,6 +61,11 @@ qt_add_executable(test_sync_conflicts test_sync_conflicts.cpp)
 target_link_libraries(test_sync_conflicts PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_sync_conflicts)
 chrono_vault_add_test(test_sync_conflicts)
+
+qt_add_executable(test_intuitive test_intuitive.cpp)
+target_link_libraries(test_intuitive PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_intuitive)
+chrono_vault_add_test(test_intuitive)
 
 qt_add_executable(test_pages test_pages.cpp)
 target_link_libraries(test_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)

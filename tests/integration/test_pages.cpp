@@ -35,9 +35,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.3.62
+// test_pages.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Move to Trash asked first (D-062)
 // v0.3.67: A change kept through a lock is asked about before another vault
 // v0.3.62: Save closes the editor on the saved item
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
@@ -387,7 +388,11 @@ void TestPages::the_main_window_has_one_bar_and_three_columns()
     // Item > Move to Trash: once in the Trash, the item is no longer shown
     // here, and the Trash holds it (D-033).
     QVERIFY(QMetaObject::invokeMethod(page, "deleteChosen"));
-    QVERIFY(!editor->property("visible").toBool()); // no editor, straight into the Trash
+    QVERIFY(!editor->property("visible").toBool()); // no editor; asked first (D-062)
+    QObject* question = page->findChild<QObject*>(QStringLiteral("placeQuestion"));
+    QVERIFY(question);
+    QTRY_VERIFY(question->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(question, "accept"));
     QTRY_VERIFY(controller->isIdle());
     QTRY_COMPARE(page->property("chosenItemId").toString(), QString());
     QVERIFY(!details->property("visible").toBool());

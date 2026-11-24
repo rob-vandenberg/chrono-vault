@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.5.78
+// DialogWindow.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Esc only of the active dialog; Enter presses the button, which has the keyboard when a question opens (D-062)
 // v0.5.78: Never narrower than its content can take (D-061)
 // v0.1.43: Esc also through the window's own keys, as Chrono Viewer's QDialog
 // v0.0.9: Opened quietly, without taking the keyboard; a window that cannot be closed for a while; buttons of its own at the right (D-024)
@@ -52,6 +53,40 @@ ApplicationWindow {
     // (as Download and Skip this update before Cancel).
     property alias rightButtons: rightArea.data
     property bool answered: false
+    // The button that Enter presses and that holds the keyboard when the
+    // window opens: the highlighted one, or what a window names itself (the
+    // safe one, when the other cannot be undone).
+    property int defaultButton: Dialog.NoButton
+    property Item defaultItem: null
+    readonly property Item enterTarget: {
+        if (defaultItem)
+            return defaultItem
+        for (let i = 0; i < rightArea.children.length; ++i) {
+            const own = rightArea.children[i]
+            if (own.highlighted === true && own.visible)
+                return own
+        }
+        const wanted = defaultButton !== Dialog.NoButton ? [defaultButton]
+                     : [Dialog.Ok, Dialog.Save, Dialog.Yes, Dialog.Close, Dialog.Cancel, Dialog.No] // never Discard
+        const all = buttonBox.standardButtons
+        for (const one of wanted) {
+            if ((all & one) && buttonBox.standardButton(one))
+                return buttonBox.standardButton(one)
+        }
+        return null
+    }
+    // A button, not a tick box or a choice.
+    function isButton(item) {
+        return item && typeof item.click === "function" && !item.indicator
+    }
+    function isTyping(item) {
+        return item && item.cursorPosition !== undefined
+    }
+    // Opened: the keyboard on its button, unless the window put it in a field.
+    function focusDefault() {
+        if (!isTyping(activeFocusItem) && enterTarget && enterTarget.enabled && enterTarget.visible)
+            enterTarget.forceActiveFocus(Qt.TabFocusReason)
+    }
 
     signal shown()
     signal accepted()
@@ -90,6 +125,7 @@ ApplicationWindow {
         show()
         raise()
         requestActivate()
+        focusDefault()
         shown()
     }
     function accept() {
@@ -144,8 +180,11 @@ ApplicationWindow {
         name: dialogWindow.memoryName
     }
 
+    // Only the active window's: a dialog made inside another has this key too,
+    // and two of them at once would make neither answer.
     Shortcut {
         sequences: [StandardKey.Cancel]
+        enabled: Appearance.focusWindow === dialogWindow
         onActivated: dialogWindow.reject()
     }
 
@@ -153,12 +192,24 @@ ApplicationWindow {
         id: layout
         anchors.fill: parent
         anchors.margins: dialogWindow.edge
+        focus: true
         // Esc also through the window's own keys, as Chrono Viewer's QDialog
         // takes it (D-052): it closes the dialog when the shortcut did not.
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape && event.modifiers === Qt.NoModifier) {
                 event.accepted = true
                 dialogWindow.reject()
+            } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && !event.isAutoRepeat
+                       && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.KeypadModifier)) {
+                // Enter presses the button that has the keyboard, else the
+                // window's own; a field that is typed in answers Enter itself.
+                const on = dialogWindow.activeFocusItem
+                const target = dialogWindow.isButton(on) ? on
+                             : dialogWindow.isTyping(on) ? null : dialogWindow.enterTarget
+                if (target && target.enabled && target.visible) {
+                    event.accepted = true
+                    target.click()
+                }
             }
         }
         spacing: Math.round(10 * Appearance.factor)

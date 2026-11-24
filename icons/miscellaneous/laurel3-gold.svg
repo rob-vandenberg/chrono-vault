@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a laurel wreath, three pairs of leaves a side, in gold. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="13" y2="22">
+      <stop offset="0" stop-color="#fff3b0"/>
+      <stop offset="0.25" stop-color="#e8c14a"/>
+      <stop offset="0.5" stop-color="#c8951c"/>
+      <stop offset="0.7" stop-color="#f3d774"/>
+      <stop offset="1" stop-color="#9a6b10"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path d="M13.6 21.4 Q11.8 20.2 10.26 18.39 A7.2 7.2 0 0 1 8.18 5.29" fill="none" stroke="#b07f18" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M8.40 17.64 C6.95 16.27 4.72 16.58 3.45 18.32 C5.14 19.65 7.37 19.34 8.40 17.64 Z M8.40 17.64 C9.44 16.08 8.73 14.33 6.81 13.75 C5.85 15.50 6.57 17.25 8.40 17.64 Z M5.05 13.26 C4.99 11.27 3.19 9.91 1.06 10.24 C1.32 12.38 3.11 13.74 5.05 13.26 Z M5.05 13.26 C6.88 12.90 7.61 11.15 6.67 9.39 C4.76 9.95 4.02 11.69 5.05 13.26 Z M5.64 8.02 C6.96 6.52 6.57 4.31 4.79 3.09 C3.52 4.84 3.90 7.05 5.64 8.02 Z M5.64 8.02 C7.24 9.00 8.96 8.23 9.47 6.30 C7.69 5.40 5.97 6.18 5.64 8.02 Z M7.97 5.43 C9.40 6.17 10.93 5.41 11.38 3.74 C9.78 3.08 8.25 3.84 7.97 5.43 Z" fill="url(#gold)" stroke="#7d560c" stroke-width="0.25" stroke-linejoin="round"/>
+  </g>
+  <g transform="matrix(-1 0 0 1 24 0)">
+    <path d="M13.6 21.4 Q11.8 20.2 10.26 18.39 A7.2 7.2 0 0 1 8.18 5.29" fill="none" stroke="#b07f18" stroke-width="1.1" stroke-linecap="round"/>
+    <path d="M8.40 17.64 C6.95 16.27 4.72 16.58 3.45 18.32 C5.14 19.65 7.37 19.34 8.40 17.64 Z M8.40 17.64 C9.44 16.08 8.73 14.33 6.81 13.75 C5.85 15.50 6.57 17.25 8.40 17.64 Z M5.05 13.26 C4.99 11.27 3.19 9.91 1.06 10.24 C1.32 12.38 3.11 13.74 5.05 13.26 Z M5.05 13.26 C6.88 12.90 7.61 11.15 6.67 9.39 C4.76 9.95 4.02 11.69 5.05 13.26 Z M5.64 8.02 C6.96 6.52 6.57 4.31 4.79 3.09 C3.52 4.84 3.90 7.05 5.64 8.02 Z M5.64 8.02 C7.24 9.00 8.96 8.23 9.47 6.30 C7.69 5.40 5.97 6.18 5.64 8.02 Z M7.97 5.43 C9.40 6.17 10.93 5.41 11.38 3.74 C9.78 3.08 8.25 3.84 7.97 5.43 Z" fill="url(#gold)" stroke="#7d560c" stroke-width="0.25" stroke-linejoin="round"/>
+  </g>
+</svg>

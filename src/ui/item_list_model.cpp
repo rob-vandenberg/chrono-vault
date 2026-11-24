@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.2.45
+// item_list_model.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
 // v0.0.20: Website icons for items without an icon of their own (D-036)
@@ -170,6 +171,19 @@ QString ItemListModel::idAt(int row) const
         return {};
     }
     return shownItems.at(row).id.toString(QUuid::WithoutBraces);
+}
+
+int ItemListModel::rowStartingWith(const QString& text, int from, bool fromKept) const
+{
+    const int count = static_cast<int>(shownItems.size());
+    const int start = std::max(from, -1) + (fromKept && from >= 0 ? 0 : 1);
+    for (int step = 0; step < count && !text.isEmpty(); ++step) {
+        const int row = (start + step) % count;
+        if (shownItems.at(row).title.startsWith(text, Qt::CaseInsensitive)) {
+            return row;
+        }
+    }
+    return -1;
 }
 
 int ItemListModel::countOf(const QString& filter) const

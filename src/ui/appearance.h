@@ -26,9 +26,10 @@
 class QEvent;
 
 // --- Version ------------------------------------------------------------
-// appearance.h 0.2.47
+// appearance.h 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: focusWindow (D-062)
 // v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.13: The size of a window's title bar and frame
 // v0.0.12: The free room of a window's screen, which a minimum gives way to
@@ -64,6 +65,9 @@ class Appearance : public QObject
     // The program's font now, for every window: Qt Quick's controls do not
     // take a changed program font by themselves.
     Q_PROPERTY(QFont font READ font NOTIFY fontChanged)
+    // The one window that has the keyboard. A window's own "active" is also
+    // true while a dialog of its has the keyboard (D-062).
+    Q_PROPERTY(QObject* focusWindow READ focusWindow NOTIFY focusWindowChanged)
 
 public:
     explicit Appearance(QObject* parent = nullptr);
@@ -79,6 +83,7 @@ public:
     [[nodiscard]] double fontPointSize() const;
     [[nodiscard]] static double factor();
     [[nodiscard]] static QFont font();
+    [[nodiscard]] static QObject* focusWindow();
 
     // Shows a theme and a scale at once, without keeping them.
     Q_INVOKABLE void show(int theme, int scale);
@@ -111,6 +116,7 @@ public:
 signals:
     void keptChanged();
     void fontChanged();
+    void focusWindowChanged();
     void paletteChanged();
     void factorChanged();
 

@@ -33,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.2.47
+// appearance.cpp 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: focusWindow (D-062)
 // v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.13: The size of a window's title bar and frame
@@ -75,6 +76,9 @@ Appearance::Appearance(QObject* parent) : QObject(parent)
         application->installEventFilter(this);
     }
     connect(UiScale::instance(), &UiScale::factorChanged, this, &Appearance::factorChanged);
+    if (auto* application = qobject_cast<QGuiApplication*>(QCoreApplication::instance())) {
+        connect(application, &QGuiApplication::focusWindowChanged, this, &Appearance::focusWindowChanged);
+    }
 }
 
 int Appearance::theme() const
@@ -125,6 +129,11 @@ double Appearance::fontPointSize() const
 double Appearance::factor()
 {
     return UiScale::instance()->factor();
+}
+
+QObject* Appearance::focusWindow()
+{
+    return QGuiApplication::focusWindow();
 }
 
 QFont Appearance::font()

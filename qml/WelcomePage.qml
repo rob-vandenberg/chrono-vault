@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.5.78
+// WelcomePage.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Its windows in front of the window that asked (D-062)
 // v0.5.78: Choose the master password: the saved password's tick box first; every text wraps with the window (D-061)
 // v0.3.66: As the unlock page, with only Open an existing vault… and Create a new vault…, big (the owner, D-058)
 // v0.3.65: The primary vault not found, with Look again (the owner, D-058)
@@ -45,8 +46,10 @@ Item {
 
     // File > New vault… and Open vault… (D-025).
     // Where the vault is kept is asked first (ref, D-057).
-    function newVault() { storageChoice.mode = "new"; storageChoice.open() }
-    function openVault() { storageChoice.mode = "open"; storageChoice.open() }
+    // In front of the window that asked, the main window unless told (D-062).
+    property var overWindow: null
+    function newVault(over) { overWindow = over || null; storageChoice.mode = "new"; storageChoice.open() }
+    function openVault(over) { overWindow = over || null; storageChoice.mode = "open"; storageChoice.open() }
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -104,6 +107,7 @@ Item {
     // Where the vault is kept: a tile per storage (ref, REQUIREMENTS.md 5.4.1).
     StorageWindow {
         id: storageChoice
+        transientParent: welcomePage.overWindow || welcomePage.Window.window
         onChosen: function(storage) {
             if (storage === "device") {
                 if (storageChoice.mode === "new") {
@@ -123,6 +127,7 @@ Item {
 
     WebDavWindow {
         id: webDavWindow
+        transientParent: welcomePage.overWindow || welcomePage.Window.window
         onNewVaultNamed: function(name) {
             newVaultDialog.webDavName = name
             newVaultDialog.open()
@@ -143,7 +148,7 @@ Item {
         id: createFileDialog
         property bool folderUsed: false
         memoryName: "WelcomePage.createFileDialog"
-        parentWindow: welcomePage
+        parentWindow: welcomePage.overWindow || welcomePage
         title: qsTr("Where should the new vault be kept?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "chronovault"
@@ -161,7 +166,7 @@ Item {
     FilePicker {
         id: openFileDialog
         memoryName: "WelcomePage.openFileDialog"
-        parentWindow: welcomePage
+        parentWindow: welcomePage.overWindow || welcomePage
         title: qsTr("Open a vault")
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("Chrono Vault vaults (*.chronovault)"), qsTr("All files (*)")]
@@ -171,6 +176,7 @@ Item {
     DialogWindow {
 
         id: newVaultDialog
+        transientParent: welcomePage.overWindow || welcomePage.Window.window
         objectName: "newVaultDialog"
 
         memoryName: "newVault"
@@ -300,7 +306,7 @@ Item {
     FilePicker {
         id: keyfileOpenDialog
         memoryName: "WelcomePage.keyfileOpenDialog"
-        parentWindow: welcomePage
+        parentWindow: welcomePage.overWindow || welcomePage
         title: qsTr("Choose a keyfile")
         fileMode: FileDialog.OpenFile
         onAccepted: newVaultDialog.keyfile = selectedFile
@@ -309,7 +315,7 @@ Item {
     FilePicker {
         id: keyfileSaveDialog
         memoryName: "WelcomePage.keyfileSaveDialog"
-        parentWindow: welcomePage
+        parentWindow: welcomePage.overWindow || welcomePage
         title: qsTr("Where should the new keyfile be kept?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "chronovaultkey"

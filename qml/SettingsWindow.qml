@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.5.78
+// SettingsWindow.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Vaults: Create vault and Open vault, the crown, no Restore defaults; its keys only while it has the keyboard (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.77: Vaults: Import… and Export… for any vault, unlocked first with its master password (D-060)
 // v0.5.75: Vaults: a menu per vault with Lock, Move…, Forget… and Disconnect…; vaults not found listed (D-060)
@@ -184,6 +185,9 @@ ApplicationWindow {
     // Security > Change the Master Password, opened by the main window.
     signal changeMasterPasswordRequested()
     // Import… and Export… of a vault's menu, once that vault is unlocked (D-060).
+    signal createVaultRequested()
+    signal openVaultRequested()
+    readonly property bool onVaults: topics.currentIndex === 5
     signal importRequested()
     signal exportRequested()
     property int clipboardClearSeconds: 0
@@ -407,7 +411,7 @@ ApplicationWindow {
     // closes only the list.
     Shortcut {
         sequences: [StandardKey.Cancel]
-        enabled: !frequencyBox.popup.visible && !catchingAKey
+        enabled: Appearance.focusWindow === settingsWindow && !frequencyBox.popup.visible && !catchingAKey
         onActivated: settingsWindow.close()
     }
     // OK is the default button: Enter keeps the changes, unless a button has
@@ -415,7 +419,7 @@ ApplicationWindow {
     // "Check for updates" is open (then Enter chooses in it).
     Shortcut {
         sequences: ["Return", "Enter"]
-        enabled: !frequencyBox.popup.visible && !catchingAKey
+        enabled: Appearance.focusWindow === settingsWindow && !frequencyBox.popup.visible && !catchingAKey
         onActivated: {
             const focused = settingsWindow.activeFocusItem
             if (focused instanceof Button)
@@ -1050,13 +1054,31 @@ ApplicationWindow {
                                     ColumnLayout {
                                         spacing: Math.round(2 * Appearance.factor)
                                         Layout.fillWidth: true
-                                        Label {
-                                            text: vaultRow.name
-                                            textFormat: Text.PlainText
-                                            font.bold: true
-                                            font.strikeout: !vaultRow.found
-                                            elide: Text.ElideRight
+                                        RowLayout {
+                                            spacing: Math.round(6 * Appearance.factor)
                                             Layout.fillWidth: true
+                                            Label {
+                                                text: vaultRow.name
+                                                textFormat: Text.PlainText
+                                                font.bold: true
+                                                font.strikeout: !vaultRow.found
+                                                elide: Text.ElideRight
+                                                Layout.fillWidth: !vaultRow.primary
+                                                Layout.maximumWidth: implicitWidth
+                                            }
+                                            // The primary vault: a gold crown after its name (D-062).
+                                            Image {
+                                                objectName: "primaryCrown_" + vaultRow.name
+                                                visible: vaultRow.primary
+                                                source: "qrc:/icons/crown.svg"
+                                                sourceSize: Qt.size(Math.round(18 * Appearance.factor), Math.round(18 * Appearance.factor))
+                                                Layout.preferredWidth: Math.round(18 * Appearance.factor)
+                                                Layout.preferredHeight: Math.round(18 * Appearance.factor)
+                                                HoverHandler { id: overCrown }
+                                                ToolTip.visible: overCrown.hovered
+                                                ToolTip.text: qsTr("Primary vault")
+                                            }
+                                            Item { Layout.fillWidth: true }
                                         }
                                         Label {
                                             text: vaultRow.place.onWebDav ? qsTr("WebDAV: %1").arg(vaultRow.place.address)
@@ -1563,8 +1585,26 @@ ApplicationWindow {
 
         // OK, Cancel and Restore defaults at the bottom right.
         RowLayout {
+            id: bottomRow
             Layout.fillWidth: true
             spacing: Math.round(6 * Appearance.factor)
+            // The Vaults page's own buttons, at the section's left edge (D-062).
+            Item {
+                visible: settingsWindow.onVaults
+                Layout.preferredWidth: Math.max(0, pageScroll.x - bottomRow.spacing)
+            }
+            Button {
+                objectName: "createVaultButton"
+                visible: settingsWindow.onVaults
+                text: qsTr("Create vault")
+                onClicked: settingsWindow.createVaultRequested()
+            }
+            Button {
+                objectName: "openVaultButton"
+                visible: settingsWindow.onVaults
+                text: qsTr("Open vault")
+                onClicked: settingsWindow.openVaultRequested()
+            }
             Label {
                 objectName: "problemLabel"
                 text: settingsWindow.problem
@@ -1588,6 +1628,8 @@ ApplicationWindow {
             }
             Button {
                 objectName: "restoreDefaultsButton"
+                // Nothing to put back on the Vaults page (D-062).
+                visible: !settingsWindow.onVaults
                 text: qsTr("Restore defaults")
                 onClicked: settingsWindow.restoreDefaults()
             }

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.5.78
+// ItemEditor.qml 0.5.82
 
 // --- Version history ----------------------------------------------------
+// v0.5.82: Edit puts the keyboard in the title, Esc cancels, Ctrl+S saves (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.3.62: Save closes the editor on the saved item (the owner)
 // v0.2.59: The labels and fields 50 to the left, as the view (the owner)
@@ -59,6 +60,14 @@ Item {
     property bool isNew: false
     property bool changed: false
     property string icon: ""   // the item's own icon, PNG in base64; empty for the category's
+
+    // Esc is Cancel, Ctrl+S is Save (D-062).
+    Keys.onEscapePressed: whenFree(close)
+    Shortcut {
+        sequences: [StandardKey.Save]
+        enabled: editor.itemId !== "" && editor.visible && Appearance.focusWindow === editor.Window.window && saveButton.enabled
+        onActivated: saveButton.clicked()
+    }
 
     property var afterAsking: null
     property var afterCancelling: null
@@ -96,7 +105,7 @@ Item {
         return kind === "password" || kind === "ccPin" || kind === "pin" || kind === "ccTxnpassword"
     }
 
-    signal closed()
+    signal closed(bool wasOpen)
     signal stored(string itemId)
 
     // Runs the action now, or, when there are changes not saved yet, after
@@ -145,11 +154,11 @@ Item {
         for (let attachment of map.attachments)
             attachmentsModel.append({ attachmentId: attachment.id, name: attachment.name, size: attachment.size })
         changed = false
-        if (isNewItem)
-            titleField.forceActiveFocus()
+        titleField.forceActiveFocus()
     }
 
     function close() {
+        const wasOpen = itemId !== ""
         itemId = ""
         fieldsModel.clear()
         tagsModel.clear()
@@ -158,7 +167,7 @@ Item {
         tagField.clear()
         titleField.clear()
         changed = false
-        closed()
+        closed(wasOpen)
     }
 
     function store() {
@@ -292,6 +301,7 @@ Item {
             }
             Item { Layout.fillWidth: true }
             Button {
+                id: saveButton
                 objectName: "saveButton"
                 text: qsTr("Save")
                 highlighted: true
