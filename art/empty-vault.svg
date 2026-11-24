@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Chrono Vault: an open, empty vault. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 130" width="150" height="130">
-  <path d="M24 14 H88 A6 6 0 0 1 94 20 V100 A6 6 0 0 1 88 106 H24 A6 6 0 0 1 18 100 V20 A6 6 0 0 1 24 14 Z M30 23 A3 3 0 0 0 27 26 V94 A3 3 0 0 0 30 97 H82 A3 3 0 0 0 85 94 V26 A3 3 0 0 0 82 23 Z" fill="#000000" fill-opacity="0.15" fill-rule="evenodd"/>
-  <path d="M94 18 L128 8 V112 L94 102 Z" fill="#000000" fill-opacity="0.15"/>
-  <g fill="none" stroke="#000000" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
-    <rect x="18" y="14" width="76" height="92" rx="6"/>
-    <rect x="27" y="23" width="58" height="74" rx="3"/>
-    <path d="M27 48 H85 M27 73 H85" stroke-opacity="0.6"/>
-    <path d="M94 18 L128 8 V112 L94 102 Z"/>
-    <ellipse cx="112" cy="60" rx="8" ry="14"/>
-    <ellipse cx="112" cy="60" rx="2" ry="3.5" fill="#000000"/>
-    <path d="M112 40 V46 M112 74 V80 M101 60 H104 M120 60 H123"/>
-    <path d="M30 106 V114 M82 106 V114"/>
+  <!-- The hinges at the left, as on the program's icon. -->
+  <g transform="translate(146 0) scale(-1 1)">
+    <path d="M24 14 H88 A6 6 0 0 1 94 20 V100 A6 6 0 0 1 88 106 H24 A6 6 0 0 1 18 100 V20 A6 6 0 0 1 24 14 Z M30 23 A3 3 0 0 0 27 26 V94 A3 3 0 0 0 30 97 H82 A3 3 0 0 0 85 94 V26 A3 3 0 0 0 82 23 Z" fill="#000000" fill-opacity="0.15" fill-rule="evenodd"/>
+    <path d="M94 18 L128 8 V112 L94 102 Z" fill="#000000" fill-opacity="0.15"/>
+    <g fill="none" stroke="#000000" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="18" y="14" width="76" height="92" rx="6"/>
+      <rect x="27" y="23" width="58" height="74" rx="3"/>
+      <path d="M27 48 H85 M27 73 H85" stroke-opacity="0.6"/>
+      <path d="M94 18 L128 8 V112 L94 102 Z"/>
+      <ellipse cx="112" cy="60" rx="8" ry="14"/>
+      <ellipse cx="112" cy="60" rx="2" ry="3.5" fill="#000000"/>
+      <path d="M112 40 V46 M112 74 V80 M101 60 H104 M120 60 H123"/>
+      <path d="M30 106 V114 M82 106 V114"/>
+    </g>
   </g>
 </svg>

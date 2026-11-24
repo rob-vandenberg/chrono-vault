@@ -711,3 +711,7 @@ marks), `qml/Main.qml` (the Item menu), `qml/CategoryMenu.qml`, `qml/EmptyList.q
 `qml/TagDialog.qml`, `qml/CustomizePage.qml`, `VaultController::setCategoryOf`, `art/empty-vault.svg`;
 `tests/integration/test_selecting.cpp` with the fixture it shares with `test_intuitive.cpp`.
 One review round of two, clean. The tests caught that a cut had removed Ctrl+F and the edit kept through a lock; restored.
+
+## 24 November 2026: version 0.5.84: the empty vault mirrored
+
+The owner: the hinges are at the left, as on the program's icon. `art/empty-vault.svg` alone; no reviewers.
