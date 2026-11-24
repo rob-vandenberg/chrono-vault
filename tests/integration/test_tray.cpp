@@ -18,6 +18,8 @@
 #include "app_setup.h"
 #include "autostart.h"
 #include "system_tray.h"
+#include "theme.h"
+#include "tray_icon.h"
 #include "updater.h"
 #include "vault_controller.h"
 
@@ -36,9 +38,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.5.82
+// test_tray.cpp 0.5.85
 
 // --- Version history ----------------------------------------------------
+// v0.5.85: The tray icon for a dark and a light tray (D-064)
 // v0.5.82: Esc cancels the editor (D-062)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Keep running in the tray is the last of the three (D-042)
@@ -66,6 +69,7 @@ private slots:
     void cleanupTestCase();
     void closing_the_window_hides_it_when_there_is_a_tray();
     void the_tray_menu_shows_locks_and_quits();
+    void the_icon_follows_the_trays_colour();
     void start_at_startup_writes_and_removes_its_entry();
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
@@ -167,6 +171,41 @@ void TestTray::the_tray_menu_shows_locks_and_quits()
     tray.quit();
     QTRY_COMPARE(quit.count(), 1);
     QVERIFY(!loaded.window->isVisible());
+}
+
+void TestTray::the_icon_follows_the_trays_colour()
+{
+    const QString plain = QStringLiteral(":/icons/chrono-vault-tray.svg");
+    const QString edged = QStringLiteral(":/icons/chrono-vault-tray-light.svg");
+    const auto done = qScopeGuard([]() { setTrayColourForTests(std::nullopt); });
+    for (const QString& file : {plain, edged}) {
+        QVERIFY(!QIcon(file).pixmap(16, 16).toImage().isNull());
+    }
+    setTrayColourForTests(TrayColour::Dark);
+    SystemTray tray(nullptr, nullptr);
+    QCOMPARE(tray.iconFile(), plain);
+    // Changed while running.
+    auto* watch = tray.findChild<TrayColourWatch*>();
+    QVERIFY(watch);
+    setTrayColourForTests(TrayColour::Light);
+    emit watch->changed();
+    QCOMPARE(tray.iconFile(), edged);
+    setTrayColourForTests(TrayColour::Unknown);
+    emit watch->changed();
+    QCOMPARE(tray.iconFile(), edged);
+    setTrayColourForTests(TrayColour::Dark);
+    emit watch->changed();
+    QCOMPARE(tray.iconFile(), plain);
+
+    // Chrono Vault's own theme changes nothing.
+    setTrayColourForTests(std::nullopt);
+    const Theme before = themeInUse();
+    const TrayColour system = trayColour();
+    applyTheme(Theme::Dark);
+    QCOMPARE(trayColour(), system);
+    applyTheme(Theme::Light);
+    QCOMPARE(trayColour(), system);
+    applyTheme(before);
 }
 
 void TestTray::start_at_startup_writes_and_removes_its_entry()

@@ -17,18 +17,20 @@
 
 #include "system_tray.h"
 
-#include "app_setup.h"
+#include "tray_icon.h"
 #include "vault_controller.h"
 
 #include <QAction>
+#include <QIcon>
 #include <QMenu>
 #include <QSystemTrayIcon>
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// system_tray.cpp 0.0.4
+// system_tray.cpp 0.5.85
 
 // --- Version history ----------------------------------------------------
+// v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
 // v0.0.4: Initial release
 
 namespace chrono_vault {
@@ -48,9 +50,10 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
         connect(controller, &VaultController::stateChanged, this, &SystemTray::updateLockAction);
     }
     updateLockAction();
+    connect(new TrayColourWatch(this), &TrayColourWatch::changed, this, &SystemTray::updateIcon);
 
     if (isAvailable()) {
-        icon = new QSystemTrayIcon(programIcon(), this);
+        icon = new QSystemTrayIcon(this);
         icon->setToolTip(tr("Chrono Vault %1").arg(controller ? controller->version() : QString()));
         icon->setContextMenu(menu);
         connect(icon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
@@ -58,6 +61,9 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
                 showWindow();
             }
         });
+    }
+    updateIcon();
+    if (icon) {
         icon->show();
     }
 }
@@ -65,6 +71,19 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
 SystemTray::~SystemTray()
 {
     delete menu;
+}
+
+// The vault that is seen on the tray as it is now.
+void SystemTray::updateIcon()
+{
+    const QString file = trayIconFile(trayColour());
+    if (file == shownIcon) {
+        return;
+    }
+    shownIcon = file;
+    if (icon) {
+        icon->setIcon(QIcon(file));
+    }
 }
 
 bool SystemTray::isAvailable()

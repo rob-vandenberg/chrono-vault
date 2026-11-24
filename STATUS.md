@@ -2,7 +2,7 @@
 
 ## Now
 
-**Version 0.5.84**: the empty vault's door opens to the left, as the program's icon. Before, **0.5.83**: the focused item apart from the selected ones, gray marks with a thin blue bar, every action in
+**Version 0.5.85**: a plain vault in the system tray, seen on dark and light trays (D-064). Before, **0.5.84**: the empty vault's door opens to the left, as the program's icon. Before, **0.5.83**: the focused item apart from the selected ones, gray marks with a thin blue bar, every action in
 the Item menu and the right-click menu, Change Category, the tags in Settings > Customize, an empty list's drawing, the
 vault's clickable counts (D-063). Before, **0.5.82**: what a person guesses is what happens (D-062): the list, sidebar, search, editor, dialogs and
 Sync conflicts by every key and mouse click; several items; Delete asked; Settings > Vaults with Create vault, Open

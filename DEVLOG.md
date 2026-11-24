@@ -715,3 +715,10 @@ One review round of two, clean. The tests caught that a cut had removed Ctrl+F a
 ## 24 November 2026: version 0.5.84: the empty vault mirrored
 
 The owner: the hinges are at the left, as on the program's icon. `art/empty-vault.svg` alone; no reviewers.
+
+## 25 November 2026: version 0.5.85: the tray icon
+
+The owner's changelist items 1-12 (D-064). `src/ui/tray_icon.*` reads the tray's colour and watches it,
+`src/ui/system_tray.*` shows the vault for it; `art/chrono-vault-tray.svg` (the owner's) and
+`art/chrono-vault-tray-light.svg`; `tests/integration/test_tray.cpp`.
+One review round of two: a stray line in `qml/CMakeLists.txt`, removed; nothing else.

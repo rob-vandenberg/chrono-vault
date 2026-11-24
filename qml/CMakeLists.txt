@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.5.83
+# qml/CMakeLists.txt 0.5.85
 
 # --- Version history ----------------------------------------------------
+# v0.5.85: The tray icons (D-064)
 # v0.5.83: CategoryMenu, EmptyList, TagDialog, VaultOverview; the empty vault (D-063)
 # v0.5.82: The crown (D-062)
 # v0.5.81: Retry sync's source and the Sync conflicts icons (D-061)
@@ -119,6 +120,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/single_instance.h
         ../src/ui/system_tray.cpp
         ../src/ui/system_tray.h
+        ../src/ui/tray_icon.cpp
+        ../src/ui/tray_icon.h
         ../src/ui/theme.cpp
         ../src/ui/theme.h
         ../src/ui/updater.cpp
@@ -145,6 +148,8 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
     BASE "${PROJECT_SOURCE_DIR}/art"
     FILES
         "${PROJECT_SOURCE_DIR}/art/chrono-vault.svg"
+        "${PROJECT_SOURCE_DIR}/art/chrono-vault-tray.svg"
+        "${PROJECT_SOURCE_DIR}/art/chrono-vault-tray-light.svg"
         "${PROJECT_SOURCE_DIR}/art/eye.svg"
         "${PROJECT_SOURCE_DIR}/art/eye-hidden.svg"
         "${PROJECT_SOURCE_DIR}/art/item-login.svg"
@@ -266,6 +271,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/item_list_model.cpp
     ../src/ui/single_instance.cpp
     ../src/ui/system_tray.cpp
+    ../src/ui/tray_icon.cpp
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
     ../src/ui/vault_controller_pin.cpp
