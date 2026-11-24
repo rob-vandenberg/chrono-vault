@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.78
+// ImportWindow.qml 0.5.78.1
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.1: Next… for an export in the --debug log (a debug version)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.5.77: From another vault or from an export; then conflicts to settle (D-060)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -80,6 +81,7 @@ DialogWindow {
         problem = ""
         if (source === "export") {
             hide()
+            FilePickers.logImportStep("Import window hidden", importWindow)
             exportDialog.open()
             return
         }
@@ -131,7 +133,9 @@ DialogWindow {
     // OK is Next… while choosing: the window stays open.
     onAccepted: {
         if (step === "choose") {
+            FilePickers.logImportStep("Next… clicked", importWindow)
             open()
+            FilePickers.logImportStep("Import window shown again", importWindow)
             next()
             return
         }

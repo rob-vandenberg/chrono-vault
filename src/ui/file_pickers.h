@@ -22,9 +22,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// file_pickers.h 0.3.64
+// file_pickers.h 0.5.78.1
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.1: logImportStep for the --debug log (a debug version)
 // v0.3.64: The default folder of a new vault, Documents/chrono-vault (D-058)
 // v0.2.51: Initial release, after Chrono Viewer's file pickers (D-055)
 
@@ -52,6 +53,11 @@ public:
     Q_INVOKABLE QUrl pick(const QString& memoryName, const QString& title, bool save, const QStringList& nameFilters,
                           const QString& defaultSuffix, const QUrl& selectedFile, const QUrl& folder,
                           QObject* window);
+
+    // For the --debug log only (debug version 0.5.78.1): a step of Import's
+    // Next… with the windows as they stand: Qt's active and keyboard window,
+    // whether `window` is visible, and on Windows the window in front.
+    Q_INVOKABLE void logImportStep(const QString& step, QObject* window);
 
     // Closes the dialog that is open, as Cancel does: the vault it was
     // asked for has locked (D-055).

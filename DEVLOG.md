@@ -643,3 +643,11 @@ texts following its width and its smallest width its content's, the menus' own c
 (new), `test_vault_merge`, `test_vault_contents`, `test_elsewhere`, `test_vault_menu`, `test_item_pages`. The test files
 `scratchpad/conflict-test-1.json` and `-2.json` gained items with 12 to 14 differences, a few, one, and none: 31
 conflicts in all.
+
+## 24 November 2026: debug version 0.5.78.1: Import's file dialog in the --debug log
+
+The owner's changelist items 1-8. On Windows, File > Import…, an export of the reference program, Next… sometimes leaves an invisible
+window holding the keyboard. The --debug log (`fingerprint.log`) now records each step of Next… (clicked, the Import
+window shown again, hidden, the file dialog opening with its owner, returned or cancelled) with Qt's active window and
+the window Windows has in front, and a second after the dialog opened every top-level window of Chrono Vault with its
+title, class, visibility, place and owner (`src/ui/file_pickers.cpp`, `qml/ImportWindow.qml`). Nothing else changes.
