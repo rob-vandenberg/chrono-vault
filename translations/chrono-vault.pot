@@ -1150,49 +1150,49 @@ msgctxt "IconSections|"
 msgid "Digits"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:56 ../qml/ImportWindow.qml:98
+#: ../qml/ImportWindow.qml:59 ../qml/ImportWindow.qml:117
 msgctxt "ImportWindow|"
 msgid "Import"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:98
+#: ../qml/ImportWindow.qml:106
 msgctxt "ImportWindow|"
 msgid "Next…"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:157
+#: ../qml/ImportWindow.qml:168
 #, qt-format
 msgctxt "ImportWindow|"
 msgid "Import into “%1” from:"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:163
+#: ../qml/ImportWindow.qml:174
 msgctxt "ImportWindow|"
 msgid "Another vault"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:191
+#: ../qml/ImportWindow.qml:202
 msgctxt "ImportWindow|"
 msgid "Choose the vault…"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:201
+#: ../qml/ImportWindow.qml:212
 msgctxt "ImportWindow|"
 msgid "Browse…"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:209
+#: ../qml/ImportWindow.qml:220
 msgctxt "ImportWindow|"
 msgid "The vault's master password"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:216
+#: ../qml/ImportWindow.qml:227
 #, qt-format
 msgctxt "ImportWindow|"
 msgid "An export of %1"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:233
+#: ../qml/ImportWindow.qml:244
 #, qt-format
 msgctxt "ImportWindow|"
 msgid ""
@@ -1201,28 +1201,28 @@ msgid ""
 "written over: when it differs, you choose afterwards."
 msgstr ""
 
-#: ../qml/ImportWindow.qml:257
+#: ../qml/ImportWindow.qml:267
 #, qt-format
 msgctxt "ImportWindow|"
 msgid "Choose the export of %1"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:259
+#: ../qml/ImportWindow.qml:269
 msgctxt "ImportWindow|"
 msgid "JSON exports (*.json)"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:259 ../qml/ImportWindow.qml:273
+#: ../qml/ImportWindow.qml:269 ../qml/ImportWindow.qml:283
 msgctxt "ImportWindow|"
 msgid "All files (*)"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:271
+#: ../qml/ImportWindow.qml:281
 msgctxt "ImportWindow|"
 msgid "Choose the vault to import"
 msgstr ""
 
-#: ../qml/ImportWindow.qml:273
+#: ../qml/ImportWindow.qml:283
 msgctxt "ImportWindow|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.78.2
+// ImportWindow.qml 0.5.78.3
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.3: Next… a button of its own: the window stays open and owns the export's file dialog, as Browse… (a debug version)
 // v0.5.78.2: Next… for an export goes straight to the file dialog, the window not shown again first (a debug version)
 // v0.5.78.1: Next… for an export in the --debug log (a debug version)
 // v0.5.78: Texts wrap with the window (D-061)
@@ -81,8 +82,10 @@ DialogWindow {
     function next() {
         problem = ""
         if (source === "export") {
-            hide()
-            FilePickers.logImportStep("Import window hidden", importWindow)
+            // The window stays open and the file dialog belongs to it, as
+            // Browse… does: a dialog opened over a window just hidden was
+            // sometimes never shown on Windows (0.5.78.1's log).
+            FilePickers.logImportStep("Import window stays open", importWindow)
             exportDialog.open()
             return
         }
@@ -93,20 +96,30 @@ DialogWindow {
         passwordField.clear()
     }
 
-    // Next… while choosing, Import on the summary; greyed while there is
-    // nothing to do. Set once the button exists; a binding made earlier never
-    // took hold.
+    // Next… while choosing: a button of its own, so the window never closes
+    // and opens again on the way to the file dialog. Import on the summary;
+    // greyed while there is nothing to do. Set once the button exists; a
+    // binding made earlier never took hold.
+    rightButtons: Button {
+        objectName: "importNextButton"
+        visible: importWindow.step === "choose"
+        text: qsTr("Next…")
+        highlighted: true
+        enabled: !importWindow.reading
+                 && (importWindow.source === "export"
+                     || (importWindow.vaultFile !== "" && passwordField.text !== ""))
+        onClicked: {
+            FilePickers.logImportStep("Next… clicked", importWindow)
+            importWindow.next()
+        }
+    }
     Component.onCompleted: {
-        importWindow.standardButton(Dialog.Ok).text = Qt.binding(function() {
-            return importWindow.step === "choose" ? qsTr("Next…") : qsTr("Import")
+        importWindow.standardButton(Dialog.Ok).text = qsTr("Import")
+        importWindow.standardButton(Dialog.Ok).visible = Qt.binding(function() {
+            return importWindow.step === "summary"
         })
         importWindow.standardButton(Dialog.Ok).enabled = Qt.binding(function() {
-            if (importWindow.reading)
-                return false
-            if (importWindow.step === "summary")
-                return importWindow.summary.ok === true
-            return importWindow.source === "export"
-                   || (importWindow.vaultFile !== "" && passwordField.text !== "")
+            return !importWindow.reading && importWindow.step === "summary" && importWindow.summary.ok === true
         })
     }
 
@@ -131,20 +144,8 @@ DialogWindow {
         }
     }
 
-    // OK is Next… while choosing: the window stays open.
+    // OK is Import, on the summary only.
     onAccepted: {
-        if (step === "choose") {
-            FilePickers.logImportStep("Next… clicked", importWindow)
-            // An export: straight to the file dialog, the window left hidden
-            // as the click left it; shown again only for another vault, whose
-            // password it asks.
-            if (source !== "export") {
-                open()
-                FilePickers.logImportStep("Import window shown again", importWindow)
-            }
-            next()
-            return
-        }
         // Only when this import made conflicts (D-060).
         if (VaultController.confirmImport() && VaultController.lastImportConflicts() > 0)
             conflictsToSettle()
@@ -261,9 +262,8 @@ DialogWindow {
         id: exportDialog
         memoryName: "ImportWindow.exportDialog"
         objectName: "exportDialog"
-        // This window is hidden while the chooser is open: it belongs to the
-        // main window, or it would not be shown.
-        parentWindow: importWindow.transientParent
+        // Over this window, which stays open, as Browse… is (0.5.78.3).
+        parentWindow: importWindow
         title: qsTr("Choose the export of %1").arg(importWindow.program)
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("JSON exports (*.json)"), qsTr("All files (*)")]

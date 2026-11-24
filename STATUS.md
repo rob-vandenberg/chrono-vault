@@ -2,7 +2,7 @@
 
 ## Now
 
-**Debug version 0.5.78.2**: Next… for an export goes straight to the file dialog, and the log names its folder, to prove why Explorer's dialog sometimes stays invisible on Windows. Before, **0.5.78.1**: Import's file dialog in the --debug log, to find why an invisible window sometimes holds the keyboard after Next… on Windows. Before, **0.5.78**: the person decides every difference (D-061): an import makes every way an item differs a
+**Debug version 0.5.78.3**: the export's file dialog opens over the Import window, which stays open, as Browse… does, to end the invisible dialog on Windows. Before, **0.5.78.2**: Next… for an export goes straight to the file dialog, and the log names its folder, to prove why Explorer's dialog sometimes stays invisible on Windows. Before, **0.5.78.1**: Import's file dialog in the --debug log, to find why an invisible window sometimes holds the keyboard after Next… on Windows. Before, **0.5.78**: the person decides every difference (D-061): an import makes every way an item differs a
 conflict (deleted fields either way, fields, tags, attachments and earlier values only the import holds, category,
 Trash, Archive, Favorite, Autosubmit, icon, an item deleted here for good), and a sync every two-sided difference, this
 device's value standing; the sides read "Vault" and "Import" or "This device" and "Other device", with "Use …"

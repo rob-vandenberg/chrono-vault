@@ -1178,18 +1178,18 @@
 <context>
     <name>ImportWindow</name>
     <message>
-        <location filename="../qml/ImportWindow.qml" line="+56"/>
-        <location line="+42"/>
+        <location filename="../qml/ImportWindow.qml" line="+59"/>
+        <location line="+58"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+0"/>
+        <location line="-11"/>
         <source>Next…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+59"/>
+        <location line="+62"/>
         <source>Import into “%1” from:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1224,7 +1224,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location line="+23"/>
         <source>Choose the export of %1</source>
         <translation type="unfinished"></translation>
     </message>

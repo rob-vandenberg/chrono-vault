@@ -659,3 +659,12 @@ window, active and in front, but hidden; 14 milliseconds before it opened, Next�
 Import window and hidden it again. Now Next… for an export goes straight to the file dialog, the Import window left
 hidden as the click left it (`qml/ImportWindow.qml`), and the log names the folder the dialog opens in
 (`src/ui/file_pickers.cpp`): a slow drive there would be the other possible cause.
+
+## 24 November 2026: debug version 0.5.78.3: the export's file dialog over the open Import window
+
+The owner's changelist items 1-5. 0.5.78.2's log still showed Explorer's dialog active but hidden, also without the
+show-and-hide before it and with a local folder; in every stuck run the window Qt held as active was the hidden Import
+window. Now Next… is a button of its own (`importNextButton`), so the Import window never closes on the way: it stays
+open and owns the export's file dialog, exactly as Browse… does, whose dialog never stuck. Cancel leaves the window
+open; OK reads Import, on the summary only (`qml/ImportWindow.qml`). `test_item_pages` checks the dialog belongs to the
+open Import window.

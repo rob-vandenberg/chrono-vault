@@ -41,9 +41,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.5.77
+// test_item_pages.cpp 0.5.78.3
 
 // --- Version history ----------------------------------------------------
+// v0.5.78.3: The export's chooser over the open import window
 // v0.5.77: Import… asks first where from (D-060)
 // v0.5.76: The item's conflict settled in the Sync conflicts dialog (D-060)
 // v0.2.51: The file dialogs answered as a person would (D-055)
@@ -352,25 +353,38 @@ void TestItemPages::the_import_window_offers_import_and_closes_at_a_lock()
     }
     QObject* importWindow = window->findChild<QObject*>(QStringLiteral("importWindow"));
     QVERIFY(importWindow);
-    // The chooser opens, and belongs to a window, or a desktop may not show
-    // it: the import window itself is still hidden then.
+    // The chooser opens over the import window, which stays open, as Browse…
+    // does (0.5.78.3): a dialog over a window just hidden was sometimes never
+    // shown on Windows.
     bool asked = false;
     bool belongs = false;
+    bool windowOpen = false;
     answerNextFileDialog([&](QFileDialog* dialog) {
         asked = true;
-        belongs = dialog->windowHandle() != nullptr && dialog->windowHandle()->transientParent() != nullptr;
+        belongs = dialog->windowHandle() != nullptr &&
+                  dialog->windowHandle()->transientParent() == qobject_cast<QWindow*>(importWindow);
+        windowOpen = importWindow->property("visible").toBool();
         dialog->reject();
     });
     // Import… asks first where from (D-060); an export opens the chooser.
     QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
     QTRY_VERIFY(importWindow->property("opened").toBool());
     importWindow->setProperty("source", QStringLiteral("export"));
-    QVERIFY(QMetaObject::invokeMethod(importWindow, "next"));
+    // Next… is a button of its own while choosing; OK (Import) is not shown.
+    const QList<QQuickItem*> nextButtons =
+        visualItems(qobject_cast<QQuickWindow*>(importWindow)->contentItem(), QStringLiteral("importNextButton"));
+    QCOMPARE(nextButtons.size(), 1);
+    QQuickItem* nextButton = nextButtons.constFirst();
+    QTRY_VERIFY(nextButton->isVisible() && nextButton->isEnabled());
+    QVERIFY(QMetaObject::invokeMethod(nextButton, "clicked"));
     QTRY_VERIFY(asked);
     QVERIFY(belongs);
+    QVERIFY(windowOpen);
+    QVERIFY(importWindow->property("visible").toBool()); // Cancel leaves the import window open
     importWindow->setProperty("reading", true);
     controller->readImport(QUrl::fromLocalFile(exportFile));
-    QTRY_VERIFY(importWindow->property("opened").toBool());
+    QTRY_COMPARE(importWindow->property("step").toString(), QStringLiteral("summary"));
+    QVERIFY(importWindow->property("opened").toBool());
     QVariant buttonValue;
     QVERIFY(QMetaObject::invokeMethod(importWindow, "standardButton", Q_RETURN_ARG(QVariant, buttonValue),
                                       Q_ARG(QVariant, 0x00000400))); // Dialog.Ok
