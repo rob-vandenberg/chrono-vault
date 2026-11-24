@@ -48,9 +48,11 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.3.62
+// vault_controller.h 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: The Sync conflicts dialog: conflicts, conflictOf, settleConflicts, settleConflict (D-060)
+// v0.5.75: The vault menu: lockVault, moveVaultTo, moveVaultToWebDav, forgetVault; Disconnect deletes nothing (D-060)
 // v0.4.70: PIN unlock (D-059)
 // v0.3.67: giveUpKeptChangesOnLeaving, leavingFor
 // v0.3.62: The WebDAV folder browser; a new WebDAV vault kept only after its first upload (D-057)
@@ -187,6 +189,8 @@ class VaultController : public QObject
     Q_PROPERTY(QStringList foundVaults READ foundVaults NOTIFY vaultsFoundChanged)
     Q_PROPERTY(QString missingVault READ missingVault NOTIFY vaultsFoundChanged)
     Q_PROPERTY(bool noVaultFound READ noVaultFound NOTIFY vaultsFoundChanged)
+    // The items of the vault shown with a conflict to settle (D-060).
+    Q_PROPERTY(int conflictCount READ conflictCount NOTIFY revisionChanged)
 
 public:
     enum class State { NoVault, Locked, Busy, Unlocked };
@@ -446,6 +450,21 @@ public:
     // field's history.
     Q_INVOKABLE void useOtherValue(const QString& itemId, int index);
     Q_INVOKABLE void dismissMergeNote(const QString& itemId, int index);
+    // The Sync conflicts dialog (D-060), in vault_controller_conflicts.cpp.
+    // Every item with a conflict: {itemId, what, name, fields, where, kind}
+    // with kind "both" (a value changed on two sides) or "deleted" (deleted
+    // on one side and changed on the other).
+    [[nodiscard]] int conflictCount() const;
+    [[nodiscard]] Q_INVOKABLE QVariantList conflicts() const;
+    // One item's conflict: {itemId, what, name, where, kind, rows: [{index,
+    // label, now, other, hidden}]}; an empty map when it has none.
+    [[nodiscard]] Q_INVOKABLE QVariantMap conflictOf(const QString& itemId) const;
+    // Settles these items whole: "now" keeps every value as it is, "other"
+    // takes every other value (an item deleted elsewhere goes to the Trash),
+    // "both" keeps the item and a copy of it with the other values.
+    Q_INVOKABLE void settleConflicts(const QStringList& itemIds, const QString& side);
+    // Settles one item per row of conflictOf: "now" or "other" for each.
+    Q_INVOKABLE void settleConflict(const QString& itemId, const QVariantList& choices);
     // Moves an item into the Trash or out of it, into the Archive or out of
     // it (D-033).
     Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);

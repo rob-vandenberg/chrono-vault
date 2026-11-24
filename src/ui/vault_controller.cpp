@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.3.65
+// vault_controller.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: A moved vault's settings carried to its new place; its saved password follows it (D-060)
 // v0.4.74: A finger's lost key turns the setting off (the owner, Q15)
 // v0.4.70: PIN unlock wired in: unlock, lock, the reminder, a changed key (D-059)
 // v0.3.67: A kept change given up only once another vault is opened; a vault added during a look counts as found

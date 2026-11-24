@@ -41,9 +41,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.2.51
+// test_item_pages.cpp 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: The item's conflict settled in the Sync conflicts dialog (D-060)
 // v0.2.51: The file dialogs answered as a person would (D-055)
 // v0.2.45: A merge note on the item and its mark in the list (D-054)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
@@ -591,12 +592,32 @@ void TestItemPages::a_merge_note_is_shown_on_the_item_and_in_the_list()
     QObject* page = window->findChild<QObject*>(QStringLiteral("vaultPage"));
     QVERIFY(QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id)));
     auto* root = qobject_cast<QQuickWindow*>(window)->contentItem();
-    QTRY_COMPARE(visualItems(root, QStringLiteral("mergeNote")).size(), 1);
+    QTRY_VERIFY(visualItems(root, QStringLiteral("mergeNote")).constFirst()->isVisible());
     QTRY_VERIFY(visualItems(root, QStringLiteral("mergedMark")).constFirst()->isVisible());
-    QQuickItem* use = visualItems(root, QStringLiteral("useOtherValueButton")).constFirst();
-    QVERIFY(use->isVisible());
-    QVERIFY(QMetaObject::invokeMethod(use, "clicked"));
-    QTRY_VERIFY(visualItems(root, QStringLiteral("mergeNote")).isEmpty());
+    // Settle… opens the item's conflict in the Sync conflicts dialog (D-060):
+    // nothing chosen beforehand, Apply once every row is chosen.
+    QQuickItem* settle = visualItems(root, QStringLiteral("settleConflictButton")).constFirst();
+    QVERIFY(settle->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(settle, "clicked"));
+    auto* conflict = qobject_cast<QQuickWindow*>(window->findChild<QObject*>(QStringLiteral("conflictWindow")));
+    QVERIFY(conflict);
+    QTRY_VERIFY(conflict->isVisible());
+    QQuickItem* apply = visualItems(conflict->contentItem(), QStringLiteral("conflictApplyButton")).constFirst();
+    QVERIFY(!apply->isEnabled());
+    // As a person clicks: the button toggles, then says it was clicked. The
+    // circles show the last choice only.
+    QQuickItem* nowChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictNow_0")).constFirst();
+    QQuickItem* otherChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictOther_0")).constFirst();
+    for (QQuickItem* choice : {nowChoice, otherChoice}) {
+        QVERIFY(QMetaObject::invokeMethod(choice, "toggle"));
+        QVERIFY(QMetaObject::invokeMethod(choice, "clicked"));
+    }
+    QTRY_VERIFY(otherChoice->property("checked").toBool());
+    QVERIFY(!nowChoice->property("checked").toBool());
+    QTRY_VERIFY(apply->isEnabled());
+    QVERIFY(QMetaObject::invokeMethod(apply, "clicked"));
+    QTRY_VERIFY(!conflict->isVisible());
+    QTRY_VERIFY(!visualItems(root, QStringLiteral("mergeNote")).constFirst()->isVisible());
     QTRY_VERIFY(controller->isIdle());
     QCOMPARE(controller->item(id).value(QStringLiteral("title")).toString(), QStringLiteral("My bank"));
 }

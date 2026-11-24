@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.2.51
+// ItemDetails.qml 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: A sync conflict settled in the Sync conflicts dialog, no longer on the item (D-060)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.2.46: The labels end 50 pixels further left (the owner)
 // v0.2.45: The notes a merge left, with Use the other value, Delete Permanently and OK or Keep (D-054)
@@ -78,6 +79,7 @@ Item {
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
 
     signal editRequested()
+    signal conflictRequested(string itemId)
 
     Connections {
         target: VaultController.items
@@ -202,54 +204,32 @@ Item {
                     }
                 }
 
-                // What a merge left to settle (D-054): a value changed on two
-                // devices, or the item deleted on one and changed on another.
-                Repeater {
-                    model: itemDetails.mergeNotes
-                    delegate: Rectangle {
-                        id: mergeNote
-                        objectName: "mergeNote"
-                        required property var modelData
-                        required property int index
-                        Layout.fillWidth: true
-                        implicitHeight: noteLayout.implicitHeight + 2 * Math.round(10 * Appearance.factor)
-                        radius: Math.round(6 * Appearance.factor)
-                        color: "transparent"
-                        border.color: "#d32f2f"
-                        border.width: Math.max(1, Math.round(Appearance.factor))
-                        RowLayout {
-                            id: noteLayout
-                            anchors.fill: parent
-                            anchors.margins: Math.round(10 * Appearance.factor)
-                            spacing: Math.round(8 * Appearance.factor)
-                            Label {
-                                Layout.fillWidth: true
-                                wrapMode: Text.Wrap
-                                textFormat: Text.PlainText
-                                text: mergeNote.modelData.kind === "deleted"
-                                      ? qsTr("Deleted on one device and changed on another, so it was kept.")
-                                      : qsTr("“%1” was changed on two devices. The newest change stands; the other was: %2")
-                                            .arg(mergeNote.modelData.label)
-                                            .arg(mergeNote.modelData.hidden && !itemDetails.revealAll
-                                                 ? "••••••••" : mergeNote.modelData.otherValue)
-                            }
-                            Button {
-                                objectName: "useOtherValueButton"
-                                visible: mergeNote.modelData.kind === "both"
-                                text: qsTr("Use the other value")
-                                onClicked: VaultController.useOtherValue(itemDetails.itemId, mergeNote.index)
-                            }
-                            Button {
-                                objectName: "deleteAgainButton"
-                                visible: mergeNote.modelData.kind === "deleted"
-                                text: qsTr("Delete Permanently…")
-                                onClicked: deleteForeverDialog.open()
-                            }
-                            Button {
-                                objectName: "dismissMergeNoteButton"
-                                text: mergeNote.modelData.kind === "deleted" ? qsTr("Keep") : qsTr("OK")
-                                onClicked: VaultController.dismissMergeNote(itemDetails.itemId, mergeNote.index)
-                            }
+                // What a merge left to settle (D-054), settled in the Sync
+                // conflicts dialog (D-060).
+                Rectangle {
+                    id: mergeNote
+                    objectName: "mergeNote"
+                    visible: itemDetails.mergeNotes.length > 0
+                    Layout.fillWidth: true
+                    implicitHeight: noteLayout.implicitHeight + 2 * Math.round(10 * Appearance.factor)
+                    radius: Math.round(6 * Appearance.factor)
+                    color: "transparent"
+                    border.color: "#d32f2f"
+                    border.width: Math.max(1, Math.round(Appearance.factor))
+                    RowLayout {
+                        id: noteLayout
+                        anchors.fill: parent
+                        anchors.margins: Math.round(10 * Appearance.factor)
+                        spacing: Math.round(8 * Appearance.factor)
+                        Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            text: qsTr("This item has a sync conflict.")
+                        }
+                        Button {
+                            objectName: "settleConflictButton"
+                            text: qsTr("Settle…")
+                            onClicked: itemDetails.conflictRequested(itemDetails.itemId)
                         }
                     }
                 }

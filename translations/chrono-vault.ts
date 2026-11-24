@@ -91,6 +91,79 @@
     </message>
 </context>
 <context>
+    <name>ConflictWindow</name>
+    <message>
+        <location filename="../qml/ConflictWindow.qml" line="+96"/>
+        <source>Sync conflict: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Keep both</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Apply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Keep</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Move to Trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>What:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Where:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Why:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Deleted on one side and changed on the other, so it was kept.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Changed on two sides. The newest value stands until you choose.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Show hidden values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Value now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Other value</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CustomizePage</name>
     <message>
         <location filename="../qml/CustomizePage.qml" line="+42"/>
@@ -1135,7 +1208,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+140"/>
+        <location filename="../qml/ItemDetails.qml" line="+142"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1183,37 +1256,11 @@
     </message>
     <message>
         <location line="+13"/>
-        <location line="+45"/>
         <source>Delete Permanently…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-15"/>
-        <source>Deleted on one device and changed on another, so it was kept.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>“%1” was changed on two devices. The newest change stands; the other was: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
-        <source>Use the other value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>Keep</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+0"/>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+74"/>
+        <location line="+102"/>
         <source>Note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1258,7 +1305,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+116"/>
+        <location line="-129"/>
+        <source>This item has a sync conflict.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Settle…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+241"/>
         <source>Delete this item permanently?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1567,7 +1624,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+65"/>
+        <location filename="../qml/Main.qml" line="+66"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1607,7 +1664,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+44"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1628,13 +1685,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-329"/>
-        <location line="+337"/>
+        <location line="-335"/>
+        <location line="+343"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-574"/>
+        <location line="-580"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1754,6 +1811,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+6"/>
+        <source>Sync Conflicts…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+9"/>
         <source>Clear Clipboard</source>
         <translation type="unfinished"></translation>
@@ -1779,12 +1841,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+115"/>
+        <location line="+122"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+143"/>
+        <location line="+144"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2067,12 +2129,12 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+884"/>
+        <location line="+885"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-884"/>
+        <location line="-885"/>
         <location line="+545"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2167,7 +2229,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+53"/>
         <source>Disconnect…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2197,7 +2259,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-669"/>
+        <location line="-670"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2303,7 +2365,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <source>Vault menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2383,15 +2445,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1143"/>
-        <location line="+1102"/>
+        <location line="-1144"/>
+        <location line="+1103"/>
         <location line="+47"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1149"/>
-        <location line="+1011"/>
+        <location line="-1150"/>
+        <location line="+1012"/>
         <location line="+97"/>
         <location line="+52"/>
         <source>Cancel</source>
@@ -2433,6 +2495,79 @@
     <message>
         <location line="-13"/>
         <source>This Device</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SyncConflictsWindow</name>
+    <message>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+101"/>
+        <source>Sync conflicts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+36"/>
+        <source>Check all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>What</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Fields</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Where</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Why</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+72"/>
+        <source>No conflicts to settle.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Use value now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Use other value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Keep both</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Invert selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Changed on two sides</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Deleted on one side and changed on the other (Use other value moves it to the Trash)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2777,7 +2912,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+235"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+236"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2840,7 +2975,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+429"/>
+        <location filename="../qml/VaultPage.qml" line="+432"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2860,8 +2995,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-330"/>
-        <location line="+338"/>
+        <location line="-332"/>
+        <location line="+340"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2937,7 +3072,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+179"/>
+        <location line="+180"/>
         <source>Rename tag</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2947,7 +3082,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-66"/>
+        <location line="-67"/>
         <source>No items yet.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3613,7 +3748,7 @@
         <location line="+1890"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+83"/>
-        <location line="+353"/>
+        <location line="+358"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <location line="+89"/>
         <source>Wait until your last change is saved, then try again.</source>
@@ -3715,21 +3850,25 @@
     </message>
     <message>
         <location line="-1005"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+54"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+3"/>
         <source>Subtitle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+3"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+3"/>
         <source>Website</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4062,7 +4201,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="-387"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="-392"/>
         <source>The move was stopped. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4112,12 +4251,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="+40"/>
         <source>The vault could not be written there: the folder cannot be written, or the disk is full. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+13"/>
         <source>The copy did not read back the same. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4129,7 +4268,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+80"/>
+        <location line="+83"/>
         <source>The copy on the server did not read back the same. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4179,7 +4318,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="-183"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="-186"/>
+        <location line="+69"/>
         <source>A vault with the name “%1” is already in that folder.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4206,6 +4346,11 @@
     <message>
         <location line="+11"/>
         <source>That is not the PIN.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+123"/>
+        <source>A field no longer in the item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

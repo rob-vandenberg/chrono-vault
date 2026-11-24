@@ -608,3 +608,15 @@ and only then deletes the original; the vault keeps its keyfile, PIN entry and c
 password saved in the primary follows it. `tests/integration/test_vault_menu.cpp` stops a move at every step. Review
 round 1 found two real faults: a move to WebDAV could replace a vault another device put there meanwhile (now
 `Overwrite: F`, with a test), and the local read-back ran on the window's thread (moved to the save thread).
+
+## 24 November 2026: version 0.5.76: the Sync conflicts dialog
+
+The owner's changelist items 9-12 and 18-22 (autonomous mode). Tools > Sync Conflicts… (`qml/SyncConflictsWindow.qml`)
+lists every item a merge left a conflict on, with What, Name, Fields, Where and Why and a legend; Check all, Invert
+selection, Use value now, Use other value and Keep both settle the ticked rows; a double click or Settle… on the item
+opens `qml/ConflictWindow.qml`, one row per value that differs, nothing chosen beforehand, Apply once every row is
+chosen. Built on D-054's notes (`src/ui/vault_controller_conflicts.cpp`); the sides read "Value now" and "Other value",
+since a conflict travels with the vault and the device a value came from cannot be told elsewhere. Tests in
+`test_elsewhere` (each way of settling, an item deleted elsewhere to the Trash) and `test_item_pages` (the dialog as a
+person clicks it). Review round 1 found one real fault: a click ticked a choice itself, so both sides of a row could
+show ticked; the controls now show only the window's choice.

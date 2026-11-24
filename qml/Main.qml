@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.3.60
+// Main.qml 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: Tools > Sync Conflicts… and the Sync conflicts dialog (D-060)
 // v0.3.60: Tools > Sync Now; the questions of a WebDAV sync: a certificate to trust, the server's password (D-057)
 // v0.2.50: While typing, only keys a text field uses stand aside; every other key is a command (the owner)
 // v0.2.46: The shortcuts only while the main window has the keyboard (P33); 5 pixels more above and below the top bar
@@ -553,6 +554,12 @@ ApplicationWindow {
                         onTriggered: VaultController.syncNow()
                     }
                     Action {
+                        objectName: "syncConflictsAction"
+                        text: qsTr("Sync Conflicts…")
+                        enabled: mainWindow.unlocked && VaultController.conflictCount > 0
+                        onTriggered: syncConflicts.open()
+                    }
+                    Action {
                         id: action_clearClipboard
                         property string actionId: "clearClipboard"
                         property string shownKeys: mainWindow.firstKey(actionId)
@@ -714,6 +721,13 @@ ApplicationWindow {
         objectName: "masterPasswordWindow"
     }
 
+    // Tools > Sync Conflicts… (D-060).
+    SyncConflictsWindow {
+        id: syncConflicts
+        transientParent: mainWindow
+    }
+    function showConflict(itemId) { syncConflicts.showItem(itemId) }
+
     // The generator on its own (Tools, the bar): its password is copied.
     GeneratorDialog {
         id: toolsGenerator
@@ -753,6 +767,7 @@ ApplicationWindow {
             id: vaultPage
             onNewVaultRequested: mainWindow.newVault()
             onOpenVaultRequested: mainWindow.openVault()
+            onConflictRequested: function(itemId) { mainWindow.showConflict(itemId) }
         }
     }
 

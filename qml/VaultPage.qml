@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.3.60
+// VaultPage.qml 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: The item's sync conflict to the Sync conflicts dialog (D-060)
 // v0.3.60: Under the vault's name: WebDAV for a vault kept there, and why its last sync failed (D-057)
 // v0.2.56: A right-click on a category offers Edit… (the owner, D-056)
 // v0.2.49: The sidebar snaps after 80 pixels of travel each way (the owner)
@@ -204,6 +205,8 @@ Item {
     // File > New vault… and Open vault…, handled by the start page's windows.
     signal newVaultRequested()
     signal openVaultRequested()
+    // The item's sync conflict, to be settled in the Sync conflicts dialog (D-060).
+    signal conflictRequested(string itemId)
 
     // Another of the person's vaults (D-030), after an edit not saved yet is
     // asked about.
@@ -800,6 +803,7 @@ Item {
                 itemId: vaultPage.chosenItemId
                 revealAll: vaultPage.revealAll
                 onEditRequested: vaultPage.editChosen()
+                onConflictRequested: function(itemId) { vaultPage.conflictRequested(itemId) }
             }
             ItemEditor {
                 id: editor

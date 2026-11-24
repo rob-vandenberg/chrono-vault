@@ -25,9 +25,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_elsewhere.cpp 0.2.45
+// test_elsewhere.cpp 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.76: A conflict settled as the Sync conflicts dialog chooses (D-060)
 // v0.2.45: A change here and one elsewhere merged, no longer a conflict copy (D-054)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.16: Initial release: a change made elsewhere to the vault file (D-032)
@@ -62,6 +63,22 @@ void retitleElsewhere(const QString& vaultFile, const QByteArray& password, cons
         if (item.title == from) {
             item.title = to;
             item.modified = QDateTime::currentDateTimeUtc().addSecs(60);
+        }
+    }
+    QCOMPARE(saveVaultFile(vaultFile, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
+}
+
+// Another device deletes the item with this title, a minute ago.
+void deleteElsewhere(const QString& vaultFile, const QByteArray& password, const QString& title)
+{
+    const OpenResult opened = openVaultFile(vaultFile, password);
+    ContentsResult read = contentsFromJson(opened.contents);
+    for (qsizetype index = 0; index < read.contents.items.size(); ++index) {
+        if (read.contents.items[index].title == title) {
+            read.contents.deletedItems.append(
+                DeletedItem{read.contents.items[index].id, QDateTime::currentDateTimeUtc().addSecs(-60)});
+            read.contents.items.removeAt(index);
+            break;
         }
     }
     QCOMPARE(saveVaultFile(vaultFile, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
@@ -114,6 +131,9 @@ private slots:
     void a_change_made_elsewhere_is_read_again();
     void a_change_here_and_one_elsewhere_are_both_kept();
     void the_same_text_changed_here_and_elsewhere_is_noted_and_can_be_swapped();
+    void a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses_data();
+    void a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses();
+    void an_item_deleted_elsewhere_goes_to_the_trash_with_use_other_value();
     void a_deletion_here_stays_after_a_merge();
     void a_change_kept_through_a_lock_never_goes_over_one_made_elsewhere();
     void a_vault_given_another_password_elsewhere_locks_and_says_so();
@@ -242,6 +262,79 @@ void TestElsewhere::the_same_text_changed_here_and_elsewhere_is_noted_and_can_be
     QCOMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("My bank")});
     QVERIFY(controller->mergeNotes(id).isEmpty());
     QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::MergedRole).toBool(), false);
+}
+
+void TestElsewhere::a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses_data()
+{
+    QTest::addColumn<QString>("way");
+    QTest::addColumn<QStringList>("titles");
+    QTest::newRow("value now") << QStringLiteral("now") << QStringList{QStringLiteral("The bank")};
+    QTest::newRow("other value") << QStringLiteral("other") << QStringList{QStringLiteral("My bank")};
+    QTest::newRow("keep both") << QStringLiteral("both") << QStringList{QStringLiteral("My bank"), QStringLiteral("The bank")};
+    QTest::newRow("per field") << QStringLiteral("field") << QStringList{QStringLiteral("My bank")};
+}
+
+void TestElsewhere::a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses()
+{
+    QFETCH(QString, way);
+    QFETCH(QStringList, titles);
+    auto controller = unlocked(vaultPath);
+    QVERIFY(controller);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Bank"));
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    const QString id = item.value(QStringLiteral("id")).toString();
+    retitleElsewhere(vaultPath, "pass", QStringLiteral("Bank"), QStringLiteral("The bank"));
+    QVariantMap mine = controller->item(id);
+    mine.insert(QStringLiteral("title"), QStringLiteral("My bank"));
+    QVERIFY(controller->saveItem(mine));
+    QTRY_VERIFY(controller->isIdle());
+    QTRY_COMPARE(controller->conflictCount(), 1);
+
+    // The row and the item's choices, as the dialog shows them (D-060).
+    const QVariantMap row = controller->conflicts().constFirst().toMap();
+    QCOMPARE(row.value(QStringLiteral("name")).toString(), QStringLiteral("The bank"));
+    QCOMPARE(row.value(QStringLiteral("fields")).toString(), QStringLiteral("Title"));
+    QCOMPARE(row.value(QStringLiteral("kind")).toString(), QStringLiteral("both"));
+    const QVariantList rows = controller->conflictOf(id).value(QStringLiteral("rows")).toList();
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].toMap().value(QStringLiteral("now")).toString(), QStringLiteral("The bank"));
+    QCOMPARE(rows[0].toMap().value(QStringLiteral("other")).toString(), QStringLiteral("My bank"));
+
+    if (way == QLatin1String("field")) {
+        controller->settleConflict(id, {QStringLiteral("other")});
+    } else {
+        controller->settleConflicts({id}, way);
+    }
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->conflictCount(), 0);
+    QStringList onDisk = titlesIn(vaultPath, "pass");
+    onDisk.sort();
+    QCOMPARE(onDisk, titles);
+}
+
+void TestElsewhere::an_item_deleted_elsewhere_goes_to_the_trash_with_use_other_value()
+{
+    auto controller = unlocked(vaultPath);
+    QVERIFY(controller);
+    QVariantMap item = controller->newLogin();
+    item.insert(QStringLiteral("title"), QStringLiteral("Bank"));
+    QVERIFY(controller->saveItem(item));
+    QTRY_VERIFY(controller->isIdle());
+    const QString id = item.value(QStringLiteral("id")).toString();
+    deleteElsewhere(vaultPath, "pass", QStringLiteral("Bank"));
+    QVariantMap mine = controller->item(id);
+    mine.insert(QStringLiteral("title"), QStringLiteral("My bank"));
+    QVERIFY(controller->saveItem(mine));
+    QTRY_VERIFY(controller->isIdle());
+    QTRY_COMPARE(controller->conflictCount(), 1);
+    QCOMPARE(controller->conflicts().constFirst().toMap().value(QStringLiteral("kind")).toString(),
+             QStringLiteral("deleted"));
+    controller->settleConflicts({id}, QStringLiteral("other"));
+    QTRY_VERIFY(controller->isIdle());
+    QCOMPARE(controller->conflictCount(), 0);
+    QVERIFY(controller->item(id).value(QStringLiteral("trashed")).toBool()); // in the Trash, never gone for good
 }
 
 void TestElsewhere::a_deletion_here_stays_after_a_merge()
