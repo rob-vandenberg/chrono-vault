@@ -23,9 +23,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_conflicts.cpp 0.5.76
+// vault_controller_conflicts.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: A conflict from an import: kind "imported" (D-060)
 // v0.5.76: Initial release: the Sync conflicts dialog's rows, and settling them (D-060)
 
 // The controller's part for the Sync conflicts dialog (D-060), after Chrono
@@ -116,10 +117,26 @@ void useOther(Item& item, const MergeNote& note, const QDateTime& now)
     }
 }
 
+// Every note's other value came from an import (D-060).
+bool isImported(const Item& item)
+{
+    return !item.mergeNotes.isEmpty() && std::all_of(item.mergeNotes.cbegin(), item.mergeNotes.cend(),
+                                                     [](const MergeNote& note) { return note.imported; });
+}
+
+QString kindOf(const Item& item);
+
 bool isDeletedElsewhere(const Item& item)
 {
     return std::any_of(item.mergeNotes.cbegin(), item.mergeNotes.cend(),
                        [](const MergeNote& note) { return note.kind == MergeNote::Kind::DeletedElsewhere; });
+}
+
+QString kindOf(const Item& item)
+{
+    return isDeletedElsewhere(item) ? QStringLiteral("deleted")
+           : isImported(item)       ? QStringLiteral("imported")
+                                    : QStringLiteral("both");
 }
 
 } // namespace
@@ -158,7 +175,7 @@ QVariantList VaultController::conflicts() const
             {QStringLiteral("name"), item.title},
             {QStringLiteral("fields"), labels.isEmpty() ? QStringLiteral("—") : labels.join(QStringLiteral(", "))},
             {QStringLiteral("where"), vaultName()},
-            {QStringLiteral("kind"), isDeletedElsewhere(item) ? QStringLiteral("deleted") : QStringLiteral("both")},
+            {QStringLiteral("kind"), kindOf(item)},
         });
     }
     return found;
@@ -194,7 +211,7 @@ QVariantMap VaultController::conflictOf(const QString& itemId) const
             {QStringLiteral("what"), this->item(itemId).value(QStringLiteral("templateName"))},
             {QStringLiteral("name"), item.title},
             {QStringLiteral("where"), vaultName()},
-            {QStringLiteral("kind"), isDeletedElsewhere(item) ? QStringLiteral("deleted") : QStringLiteral("both")},
+            {QStringLiteral("kind"), kindOf(item)},
             {QStringLiteral("rows"), rows},
         };
     }

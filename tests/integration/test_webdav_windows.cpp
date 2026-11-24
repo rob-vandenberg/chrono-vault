@@ -33,10 +33,11 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.5.75
+// test_webdav_windows.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
 // v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
+// v0.5.77: Import… and Export… in the vault menu (D-060)
 // v0.5.75: Settings > Vaults: the menu per vault, Disconnect without deleting, Lock (D-060)
 // v0.3.64: The unlock page's vault list and field
 // v0.3.63: One button Connect then Next…; Browse… and the WebDAV file dialog; the window's height
@@ -306,6 +307,8 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(shown(QStringLiteral("moveVault_Home")));
     QVERIFY(!shown(QStringLiteral("forgetVault_Home"))); // the primary
     QVERIFY(shown(QStringLiteral("disconnect_Home")));
+    QVERIFY(shown(QStringLiteral("importVault_Home")));
+    QVERIFY(shown(QStringLiteral("exportVault_Home")));
     QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("disconnect_Home")), "triggered"));
     QObject* disconnectWindow = settings->findChild<QObject*>(QStringLiteral("disconnectWindow"));
     QVERIFY(disconnectWindow);

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.5.76
+// Main.qml 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: After an import, the Sync conflicts dialog when items differ (D-060)
 // v0.5.76: Tools > Sync Conflicts… and the Sync conflicts dialog (D-060)
 // v0.3.60: Tools > Sync Now; the questions of a WebDAV sync: a certificate to trust, the server's password (D-057)
 // v0.2.50: While typing, only keys a text field uses stand aside; every other key is a command (the owner)
@@ -710,6 +711,9 @@ ApplicationWindow {
 
     ImportWindow {
         id: importWindow
+        transientParent: mainWindow
+        // What differs from the vault's, settled at once (the owner, D-060).
+        onConflictsToSettle: syncConflicts.open()
     }
 
     ExportWindow {
@@ -941,6 +945,9 @@ ApplicationWindow {
         id: settingsWindow
         keyedActions: mainWindow.keyedActions
         onChangeMasterPasswordRequested: mainWindow.changeMasterPassword()
+        // A vault's menu in Settings > Vaults, its vault now unlocked (D-060).
+        onImportRequested: vaultPage.whenEditorFree(function() { importWindow.start() })
+        onExportRequested: vaultPage.whenEditorFree(function() { exportWindow.ask() })
     }
 
     // About, with F1 (D-021), and the update's windows as in Chrono Mail (D-024).

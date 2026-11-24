@@ -121,6 +121,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/vault_controller_webdav.cpp
         ../src/ui/vault_controller_vaults.cpp
         ../src/ui/vault_controller_conflicts.cpp
+        ../src/ui/vault_controller_import.cpp
         ../src/ui/secret_store.h
         ../src/ui/webdav_client.cpp
         ../src/ui/webdav_client.h
@@ -254,6 +255,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/vault_controller_webdav.cpp
     ../src/ui/vault_controller_vaults.cpp
     ../src/ui/vault_controller_conflicts.cpp
+    ../src/ui/vault_controller_import.cpp
     ../src/ui/webdav_client.cpp
     ../src/ui/webdav_sync.cpp
     ../src/ui/window_memory.cpp

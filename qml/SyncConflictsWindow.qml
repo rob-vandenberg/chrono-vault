@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.5.76
+// SyncConflictsWindow.qml 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: A conflict from an import has its own mark (D-060)
 // v0.5.76: Initial release (D-060)
 
 // Sync conflicts (Tools > Sync conflicts…), after Chrono Mail's (D-060): one
@@ -118,10 +119,10 @@ DialogWindow {
         implicitWidth: Math.round(20 * Appearance.factor)
         implicitHeight: implicitWidth
         radius: width / 2
-        color: kind === "deleted" ? "#d32f2f" : "#ef6c00"
+        color: kind === "deleted" ? "#d32f2f" : kind === "imported" ? "#1976d2" : "#ef6c00"
         Label {
             anchors.centerIn: parent
-            text: parent.kind === "deleted" ? "−" : "≠"
+            text: parent.kind === "deleted" ? "−" : parent.kind === "imported" ? "↓" : "≠"
             color: "white"
             font.bold: true
         }
@@ -276,6 +277,11 @@ DialogWindow {
             Why { kind: "both" }
             Label { text: qsTr("Changed on two sides") }
             Item { Layout.preferredWidth: Math.round(16 * Appearance.factor) }
+            Why { kind: "imported" }
+            Label { text: qsTr("Differs from an import") }
+        }
+        RowLayout {
+            spacing: Math.round(6 * Appearance.factor)
             Why { kind: "deleted" }
             Label { text: qsTr("Deleted on one side and changed on the other (Use other value moves it to the Trash)") }
         }

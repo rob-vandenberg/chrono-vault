@@ -27,9 +27,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.2.56
+// vault_contents.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: A note's other value marked as imported, a key earlier versions pass over (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
 // v0.1.41: The contents format 6: the reference program's other field types (D-051)
@@ -278,6 +279,10 @@ QJsonObject itemToJson(const Item& item)
             if (!note.otherValue.isEmpty()) {
                 one.insert(QStringLiteral("other"), note.otherValue);
             }
+            if (note.imported) {
+                // A key an earlier version passes over (D-060).
+                one.insert(QStringLiteral("source"), QStringLiteral("import"));
+            }
             notes.append(one);
         }
         object.insert(QStringLiteral("mergeNotes"), notes);
@@ -449,6 +454,7 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
             }
             note.property = text(noteObject, "property");
             note.otherValue = text(noteObject, "other");
+            note.imported = text(noteObject, "source") == QLatin1String("import");
             if (note.property.size() > largestTextLength) {
                 return std::nullopt;
             }

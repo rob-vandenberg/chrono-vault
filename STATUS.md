@@ -2,7 +2,10 @@
 
 ## Now
 
-**Version 0.5.76**: the Sync conflicts dialog after Chrono Mail's (D-060): Tools > Sync Conflicts… lists every item
+**Version 0.5.77**: Import… and Export… (D-060): one Import window, from another vault (the list or Browse…, with its
+master password) or from an export; an item the vault has is passed over when the same and otherwise a conflict marked
+"Imported", settled in the Sync conflicts dialog after the import; Import… and Export… in every vault's menu, a vault
+not open unlocked first. Before, 0.5.76: the Sync conflicts dialog after Chrono Mail's (D-060): Tools > Sync Conflicts… lists every item
 with a conflict; the ticked rows settled with Use value now, Use other value or Keep both; a double click settles one
 item per field; an item deleted on one side and changed on the other kept or moved to the Trash; the item itself shows
 "This item has a sync conflict." with Settle… (in place of D-054's note). Before, 0.5.75: the vault menu in Settings > Vaults (D-060): a ⋮ per vault with only what can be done now: Lock,
@@ -21,7 +24,7 @@ versions. "Use the Esc key to exit the program" in Settings > General (D-048).
 
 ## Next task
 
-0.5.77, Import… and Export… (D-060, autonomous mode).
+As the owner chooses (D-060's changelist is done).
 
 ## Open questions
 

@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.2.56
+// vault_contents.h 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: MergeNote::imported (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
 // v0.1.41: The reference program's other field types (D-051)
@@ -122,6 +123,7 @@ struct MergeNote
     QString property;    // "title", "subtitle", "note" or "website" when fieldUid is 0
     QString otherValue;  // the value that did not stand
     QDateTime when;      // when the merge was made
+    bool imported = false; // the other value came from an import (D-060)
 
     friend bool operator==(const MergeNote&, const MergeNote&) = default;
 };

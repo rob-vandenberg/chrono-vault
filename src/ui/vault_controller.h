@@ -51,6 +51,7 @@
 // vault_controller.h 0.5.76
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: Import from another vault; an import's duplicates skipped or made conflicts (D-060)
 // v0.5.76: The Sync conflicts dialog: conflicts, conflictOf, settleConflicts, settleConflict (D-060)
 // v0.5.75: The vault menu: lockVault, moveVaultTo, moveVaultToWebDav, forgetVault; Disconnect deletes nothing (D-060)
 // v0.4.70: PIN unlock (D-059)
@@ -435,6 +436,18 @@ public:
     // the window's thread and answered by importRead with a summary; nothing
     // joins the vault until confirmImport.
     Q_INVOKABLE void readImport(const QUrl& file);
+    // Importing another of Chrono Vault's vaults (D-060): opened with its
+    // master password (and its keyfile, when one is remembered for it), off
+    // the window's thread; answered by importRead like readImport.
+    Q_INVOKABLE void readVaultImport(const QUrl& file, const QString& password);
+    // The new conflicts the last import made (D-060).
+    [[nodiscard]] Q_INVOKABLE int lastImportConflicts() const { return lastConflicts; }
+    // A vault's place as the file windows take it, and back.
+    [[nodiscard]] Q_INVOKABLE QUrl fileUrl(const QString& file) const { return QUrl::fromLocalFile(file); }
+    [[nodiscard]] Q_INVOKABLE QString localPath(const QUrl& file) const
+    {
+        return file.isLocalFile() ? file.toLocalFile() : file.toString();
+    }
     Q_INVOKABLE bool confirmImport();
     Q_INVOKABLE void cancelImport();
     [[nodiscard]] Q_INVOKABLE QString referenceName() const;
@@ -737,6 +750,12 @@ private:
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
+    // An imported item taken in (D-060), in vault_controller_import.cpp: an
+    // item the vault does not have is added; one it has is left as it is when
+    // the same, and otherwise keeps its values with a conflict per value that
+    // differs, its other value the imported one. True when it is a conflict.
+    bool takeImported(const Item& imported, const QDateTime& now, bool* added);
+
     // The vault menu (D-060), in vault_controller_vaults.cpp.
     // Why this vault cannot be moved now, or "".
     [[nodiscard]] QString moveProblem(const QString& vaultFile) const;
@@ -885,6 +904,7 @@ private:
     std::unique_ptr<WebDavClient> connection; // the folder shown in the WebDAV window
     std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;
+    int lastConflicts = 0;
     bool moveRunning = false;
     QString movingVault; // never unlocked while it is moved (OR-15)
     [[nodiscard]] bool refusedWhileMoving();

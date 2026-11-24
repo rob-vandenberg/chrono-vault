@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.5.76
+// ConflictWindow.qml 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: A conflict from an import reads "Imported" (D-060)
 // v0.5.76: Initial release (D-060)
 
 // One item's conflict, after Chrono Mail's (D-060): every value that differs
@@ -164,7 +165,9 @@ DialogWindow {
             Label {
                 text: conflictWindow.deletedElsewhere
                       ? qsTr("Deleted on one side and changed on the other, so it was kept.")
-                      : qsTr("Changed on two sides. The newest value stands until you choose.")
+                      : conflictWindow.conflict.kind === "imported"
+                        ? qsTr("The import holds other values. The vault's values stand until you choose.")
+                        : qsTr("Changed on two sides. The newest value stands until you choose.")
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -207,7 +210,7 @@ DialogWindow {
                 }
                 RadioButton {
                     objectName: "conflictAllOther"
-                    text: qsTr("Other value")
+                    text: conflictWindow.conflict.kind === "imported" ? qsTr("Imported") : qsTr("Other value")
                     font.bold: true
                     autoExclusive: false
                     // Shown as the window's choice only: a click never ticks it itself.

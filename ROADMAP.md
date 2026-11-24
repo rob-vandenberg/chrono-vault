@@ -49,7 +49,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
     attach files"; a click opens the file chooser, dropped files are added (the owner, 23 November 2026).
 16. The vault menu in Settings > Vaults (D-060, the owner, 24 November 2026): Lock, Move…, Forget…, Disconnect…
     (**done in 0.5.75**); the Sync conflicts dialog after Chrono Mail's, for syncs and imports (**done in 0.5.76**);
-    Import… from another vault or an export, and Export… of any vault (0.5.77). "Merge with…" became Import….
+    Import… from another vault or an export, and Export… of any vault (**done in 0.5.77**). "Merge with…" became Import….
 
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.

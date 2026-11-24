@@ -54,9 +54,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.75
+// vault_controller.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: An import never writes over an item the vault has: the same is passed over, a difference is a conflict (D-060)
 // v0.5.75: A moved vault's settings carried to its new place; its saved password follows it (D-060)
 // v0.4.74: A finger's lost key turns the setting off (the owner, Q15)
 // v0.4.70: PIN unlock wired in: unlock, lock, the reminder, a changed key (D-059)
@@ -1600,10 +1601,16 @@ bool VaultController::confirmImport()
     }
     ImportResult result = std::move(*pendingImport);
     pendingImport.reset();
+    // Only attachments the vault does not have yet are added (D-060).
     qsizetype added = 0;
     for (const Item& one : std::as_const(result.items)) {
+        const auto ours = std::find_if(contents.items.cbegin(), contents.items.cend(),
+                                       [&one](const Item& item) { return item.id == one.id; });
         for (const Attachment& attachment : one.attachments) {
-            added += attachment.data.size();
+            const bool had = ours != contents.items.cend() &&
+                             std::any_of(ours->attachments.cbegin(), ours->attachments.cend(),
+                                         [&attachment](const Attachment& kept) { return kept.id == attachment.id; });
+            added += had ? 0 : attachment.data.size();
         }
     }
     if (attachmentBytes() + added > largestAttachmentsTotal) {
@@ -1624,18 +1631,28 @@ bool VaultController::confirmImport()
             contents.templates.append(one);
         }
     }
-    for (Item item : std::as_const(result.items)) {
-        // Everything is imported (the owner): an item whose id the vault
-        // already has gets a new one, never written over another.
-        if (std::any_of(contents.items.cbegin(), contents.items.cend(),
-                        [&item](const Item& one) { return one.id == item.id; })) {
-            item.id = QUuid::createUuid();
+    // An item the vault already has is never written over: the same, it is
+    // passed over; otherwise its values stay and each value that differs is
+    // a conflict to settle (the owner, D-060).
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    int newItems = 0;
+    int conflicts = 0;
+    for (const Item& item : std::as_const(result.items)) {
+        bool isNew = false;
+        if (takeImported(item, now, &isNew)) {
+            ++conflicts;
         }
-        contents.items.append(item);
+        newItems += isNew ? 1 : 0;
     }
+    lastConflicts = conflicts;
     contentsChanged();
     saveInBackground(QString());
-    say(tr("%n item(s) imported.", nullptr, static_cast<int>(result.items.size())), false);
+    QString said = tr("%n item(s) imported.", nullptr, newItems);
+    if (conflicts > 0) {
+        said += QLatin1Char(' ') + tr("%n item(s) differ from the vault's: settle them in Sync Conflicts.", nullptr,
+                                      conflicts);
+    }
+    say(said, conflicts > 0);
     return true;
 }
 

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.5.75
+// SettingsWindow.qml 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: Vaults: Import… and Export… for any vault, unlocked first with its master password (D-060)
 // v0.5.75: Vaults: a menu per vault with Lock, Move…, Forget… and Disconnect…; vaults not found listed (D-060)
 // v0.4.70: Security in the owner's order; the PIN line (D-059)
 // v0.3.60: The Vaults topic: where each vault is kept, its last sync, Move to WebDAV… and Disconnect… (D-057)
@@ -181,6 +182,9 @@ ApplicationWindow {
     property int systemIdleMinutes: 10
     // Security > Change the Master Password, opened by the main window.
     signal changeMasterPasswordRequested()
+    // Import… and Export… of a vault's menu, once that vault is unlocked (D-060).
+    signal importRequested()
+    signal exportRequested()
     property int clipboardClearSeconds: 0
     property bool hideSensitive: true
     property bool showSubtitles: true
@@ -1030,6 +1034,8 @@ ApplicationWindow {
                                 readonly property bool canMove: found
                                 readonly property bool canForget: !primary
                                 readonly property bool canDisconnect: found && place.onWebDav === true
+                                readonly property bool canImport: found
+                                readonly property bool canExport: found
                                 Layout.fillWidth: true
                                 Connections {
                                     target: VaultController
@@ -1078,7 +1084,8 @@ ApplicationWindow {
                                         text: "⋮"
                                         font.pointSize: Appearance.fontPointSize * 1.5
                                         visible: vaultRow.canLock || vaultRow.canMove || vaultRow.canForget
-                                                 || vaultRow.canDisconnect
+                                                 || vaultRow.canDisconnect || vaultRow.canImport
+                                                 || vaultRow.canExport
                                         Accessible.name: qsTr("Vault menu")
                                         onClicked: vaultMenu.popup(this, 0, height)
                                         Menu {
@@ -1113,6 +1120,20 @@ ApplicationWindow {
                                                 }
                                             }
                                             MenuItem {
+                                                objectName: "importVault_" + vaultRow.name
+                                                text: qsTr("Import…")
+                                                visible: vaultRow.canImport
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: unlockFirst.ask(vaultRow.modelData, "import")
+                                            }
+                                            MenuItem {
+                                                objectName: "exportVault_" + vaultRow.name
+                                                text: qsTr("Export…")
+                                                visible: vaultRow.canExport
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: unlockFirst.ask(vaultRow.modelData, "export")
+                                            }
+                                            MenuItem {
                                                 objectName: "disconnect_" + vaultRow.name
                                                 text: qsTr("Disconnect…")
                                                 visible: vaultRow.canDisconnect
@@ -1124,6 +1145,108 @@ ApplicationWindow {
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                        // Import… and Export… work on the vault that is unlocked: another
+                        // vault is unlocked first with its master password (D-060).
+                        DialogWindow {
+                            id: unlockFirst
+                            objectName: "unlockFirstWindow"
+                            memoryName: "unlockFirst"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            property string action: ""
+                            property bool waiting: false
+                            property string problem: ""
+                            readonly property bool ready: VaultController.vaultPath === vaultFile
+                                                          && VaultController.state === VaultController.Unlocked
+                            function ask(file, what) {
+                                vaultFile = file
+                                action = what
+                                problem = ""
+                                waiting = false
+                                if (ready) {
+                                    go()
+                                    return
+                                }
+                                unlockFirstPassword.clear()
+                                open()
+                                unlockFirstPassword.forceActiveFocus()
+                            }
+                            function go() {
+                                waiting = false
+                                if (visible)
+                                    accept()
+                                if (action === "import")
+                                    settingsWindow.importRequested()
+                                else
+                                    settingsWindow.exportRequested()
+                            }
+                            function unlockNow() {
+                                if (unlockFirstPassword.text === "" || waiting)
+                                    return
+                                problem = ""
+                                waiting = true
+                                if (VaultController.vaultPath !== vaultFile)
+                                    VaultController.switchToVault(vaultFile)
+                                if (ready) {
+                                    go() // opened with the password saved in the primary
+                                    return
+                                }
+                                if (VaultController.vaultPath !== vaultFile) {
+                                    waiting = false
+                                    problem = VaultController.message
+                                    return
+                                }
+                                if (VaultController.state === VaultController.Locked)
+                                    VaultController.unlock(unlockFirstPassword.text)
+                                unlockFirstPassword.clear()
+                            }
+                            title: qsTr("Unlock the vault")
+                            standardButtons: Dialog.Cancel
+                            onRejected: { waiting = false; unlockFirstPassword.clear() }
+                            rightButtons: Button {
+                                objectName: "unlockFirstButton"
+                                text: qsTr("Unlock")
+                                enabled: !unlockFirst.waiting && unlockFirstPassword.text !== ""
+                                highlighted: true
+                                onClicked: unlockFirst.unlockNow()
+                            }
+                            Connections {
+                                target: VaultController
+                                function onStateChanged() {
+                                    if (!unlockFirst.waiting)
+                                        return
+                                    if (unlockFirst.ready) {
+                                        unlockFirst.go()
+                                    } else if (VaultController.state === VaultController.Locked) {
+                                        unlockFirst.waiting = false
+                                        unlockFirst.problem = VaultController.message
+                                    }
+                                }
+                            }
+                            ColumnLayout {
+                                spacing: Math.round(8 * Appearance.factor)
+                                Layout.preferredWidth: Math.round(400 * Appearance.factor)
+                                Label {
+                                    text: qsTr("Enter the master password of “%1”. It is then the vault shown.").arg(VaultController.vaultNameOf(unlockFirst.vaultFile))
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                PasswordField {
+                                    id: unlockFirstPassword
+                                    objectName: "unlockFirstPassword"
+                                    Layout.fillWidth: true
+                                    onAccepted: unlockFirst.unlockNow()
+                                }
+                                Label {
+                                    objectName: "unlockFirstProblem"
+                                    visible: unlockFirst.problem !== ""
+                                    text: unlockFirst.problem
+                                    color: "#e53e3e"
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
                                 }
                             }
                         }

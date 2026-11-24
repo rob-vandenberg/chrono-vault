@@ -620,3 +620,13 @@ since a conflict travels with the vault and the device a value came from cannot 
 `test_elsewhere` (each way of settling, an item deleted elsewhere to the Trash) and `test_item_pages` (the dialog as a
 person clicks it). Review round 1 found one real fault: a click ticked a choice itself, so both sides of a row could
 show ticked; the controls now show only the window's choice.
+
+## 24 November 2026: version 0.5.77: Import… and Export…
+
+The owner's changelist items 13-22 (autonomous mode). `qml/ImportWindow.qml` asks first where from: another vault
+(`readVaultImport`, `src/ui/vault_controller_import.cpp`) or an export; an imported item the vault has is passed over
+when the same, and otherwise each differing value becomes a conflict marked "Imported" (`MergeNote::imported`, the key
+"source" in the vault file, which earlier versions pass over), settled in the Sync conflicts dialog that opens after
+the import. Settings > Vaults' menu has Import… and Export…; a vault not open is unlocked first in a small window. The
+old rule of D-035 (an export imported twice gave every item twice) is replaced; `test_items` follows it.
+`test_vault_menu` imports from another vault.

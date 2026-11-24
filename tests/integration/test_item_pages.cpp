@@ -41,9 +41,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.5.76
+// test_item_pages.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: Import… asks first where from (D-060)
 // v0.5.76: The item's conflict settled in the Sync conflicts dialog (D-060)
 // v0.2.51: The file dialogs answered as a person would (D-055)
 // v0.2.45: A merge note on the item and its mark in the list (D-054)
@@ -360,7 +361,11 @@ void TestItemPages::the_import_window_offers_import_and_closes_at_a_lock()
         belongs = dialog->windowHandle() != nullptr && dialog->windowHandle()->transientParent() != nullptr;
         dialog->reject();
     });
+    // Import… asks first where from (D-060); an export opens the chooser.
     QVERIFY(QMetaObject::invokeMethod(importWindow, "start"));
+    QTRY_VERIFY(importWindow->property("opened").toBool());
+    importWindow->setProperty("source", QStringLiteral("export"));
+    QVERIFY(QMetaObject::invokeMethod(importWindow, "next"));
     QTRY_VERIFY(asked);
     QVERIFY(belongs);
     importWindow->setProperty("reading", true);

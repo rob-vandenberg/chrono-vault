@@ -24,9 +24,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.1.41
+// test_items.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: An export imported again passes over the same items (D-060)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.22: The vault exported, only with the master password (D-037)
@@ -284,12 +285,14 @@ void TestItems::an_export_is_imported_whole_and_never_over_an_item()
     QCOMPARE(titles(*controller), QStringList({"Card", "Mail"}));
     QVERIFY(!controller->confirmImport()); // nothing waiting any more
 
-    // Imported again: everything again, the second time under new ids.
+    // Imported again: the same items are passed over, nothing doubled and no
+    // conflict (the owner, D-060; until 0.5.77 they came again under new ids).
     controller->readImport(QUrl::fromLocalFile(exportFile));
     QTRY_COMPARE(read.size(), 2);
     QVERIFY(controller->confirmImport());
     lockAndUnlock(*controller);
-    QCOMPARE(titles(*controller), QStringList({"Card", "Card", "Mail", "Mail"}));
+    QCOMPARE(titles(*controller), QStringList({"Card", "Mail"}));
+    QCOMPARE(controller->conflictCount(), 0);
     QCOMPARE(controller->item(QStringLiteral("6f9619ff-8b86-d011-b42d-00c04fc96401")).value(QStringLiteral("title")).toString(),
              QStringLiteral("Mail"));
     int bankCategories = 0;
@@ -309,7 +312,7 @@ void TestItems::an_export_is_imported_whole_and_never_over_an_item()
     QVERIFY(!read.last().first().toMap().value(QStringLiteral("ok")).toBool());
     QVERIFY(controller->messageIsTrouble());
     QVERIFY(!controller->confirmImport());
-    QCOMPARE(controller->items()->rowCount(), 4);
+    QCOMPARE(controller->items()->rowCount(), 2);
 }
 
 void TestItems::the_vault_is_exported_only_with_its_master_password()

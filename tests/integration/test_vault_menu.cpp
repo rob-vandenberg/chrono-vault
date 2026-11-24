@@ -30,12 +30,14 @@
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QUuid>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_menu.cpp 0.5.75
+// test_vault_menu.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.77: Import from another vault (D-060)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
 
 using namespace chrono_vault;
@@ -401,6 +403,130 @@ private slots:
             }
         }
         QVERIFY(named);
+    }
+
+    void import_from_another_vault_adds_new_items_and_makes_differences_conflicts()
+    {
+        QTemporaryDir folder;
+        const QString here = folder.filePath(QStringLiteral("Here.chronovault"));
+        const QString other = folder.filePath(QStringLiteral("Other.chronovault"));
+        auto controller = device();
+        QVERIFY(madeWithItem(*controller, here)); // "Mine"
+        QVERIFY(addHere(*controller, QStringLiteral("Same")));
+        // The other vault began as a copy: the same items, the same ids.
+        QVERIFY(QFile::copy(here, other));
+        {
+            const OpenResult opened = openVaultFile(other, "pass");
+            ContentsResult read = contentsFromJson(opened.contents);
+            // An attachment and a tag only the other vault has.
+            for (Item& item : read.contents.items) {
+                if (item.title == QLatin1String("Same")) {
+                    Attachment attachment;
+                    attachment.id = QUuid::createUuid();
+                    attachment.name = QStringLiteral("scan.pdf");
+                    attachment.data = "pdf";
+                    item.attachments.append(attachment);
+                    item.tags.append(QStringLiteral("Work"));
+                }
+            }
+            Item theirs;
+            theirs.id = QUuid::createUuid();
+            theirs.title = QStringLiteral("Theirs");
+            read.contents.items.append(theirs);
+            QCOMPARE(saveVaultFile(other, contentsToJson(read.contents), opened.key), SaveStatus::Saved);
+        }
+        QString mineId;
+        for (int row = 0; row < controller->items()->rowCount(); ++row) {
+            const QModelIndex index = controller->items()->index(row);
+            if (controller->items()->data(index, ItemListModel::TitleRole).toString() == QStringLiteral("Mine")) {
+                mineId = controller->items()->data(index, ItemListModel::IdRole).toString();
+            }
+        }
+        QVariantMap mine = controller->item(mineId);
+        mine.insert(QStringLiteral("title"), QStringLiteral("Mine here"));
+        QVERIFY(controller->saveItem(mine));
+        QTRY_VERIFY(controller->isIdle());
+
+        // A wrong master password, and the vault itself, are refused.
+        QSignalSpy read(controller.get(), &VaultController::importRead);
+        controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("wrong"));
+        QVERIFY(read.wait(10000));
+        QVERIFY(!read.constLast().at(0).toMap().value(QStringLiteral("ok")).toBool());
+        controller->readVaultImport(QUrl::fromLocalFile(here), QStringLiteral("pass"));
+        QVERIFY(!read.constLast().at(0).toMap().value(QStringLiteral("ok")).toBool());
+
+        controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
+        QVERIFY(read.wait(10000));
+        QVERIFY(read.constLast().at(0).toMap().value(QStringLiteral("ok")).toBool());
+        QCOMPARE(read.constLast().at(0).toMap().value(QStringLiteral("items")).toInt(), 3);
+        QVERIFY(controller->confirmImport());
+        QCOMPARE(controller->lastImportConflicts(), 1);
+        QTRY_VERIFY(controller->isIdle());
+
+        // "Theirs" added, "Same" passed over, "Mine" kept as "Mine here" with
+        // the imported title to choose.
+        QStringList titles = titlesIn(here);
+        titles.sort();
+        QCOMPARE(titles, (QStringList{QStringLiteral("Mine here"), QStringLiteral("Same"), QStringLiteral("Theirs")}));
+        QCOMPARE(controller->conflictCount(), 1);
+        QCOMPARE(controller->conflicts().constFirst().toMap().value(QStringLiteral("kind")).toString(),
+                 QStringLiteral("imported"));
+        const QVariantList rows = controller->conflictOf(mineId).value(QStringLiteral("rows")).toList();
+        QCOMPARE(rows.size(), 1);
+        QCOMPARE(rows[0].toMap().value(QStringLiteral("other")).toString(), QStringLiteral("Mine"));
+        // What only the import held was added, with nothing to choose.
+        bool attached = false;
+        bool tagged = false;
+        {
+            const OpenResult opened = openVaultFile(here, "pass");
+            for (const Item& item : contentsFromJson(opened.contents).contents.items) {
+                if (item.title == QLatin1String("Same")) {
+                    attached = item.attachments.size() == 1;
+                    tagged = item.tags.contains(QStringLiteral("Work"));
+                }
+            }
+        }
+        QVERIFY(attached);
+        QVERIFY(tagged);
+        // Imported again: the conflict left is not counted as new.
+        controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
+        QVERIFY(read.wait(10000));
+        QVERIFY(controller->confirmImport());
+        QVERIFY(!controller->message().contains(QStringLiteral("differ")));
+        QCOMPARE(controller->lastImportConflicts(), 0); // the dialog does not open again
+        QTRY_VERIFY(controller->isIdle());
+        QCOMPARE(controller->conflictCount(), 1);
+        // Kept in the vault file as imported.
+        bool imported = false;
+        const OpenResult opened = openVaultFile(here, "pass");
+        for (const Item& item : contentsFromJson(opened.contents).contents.items) {
+            for (const MergeNote& note : item.mergeNotes) {
+                imported = imported || note.imported;
+            }
+        }
+        QVERIFY(imported);
+    }
+
+    void an_item_deleted_here_and_imported_again_stays()
+    {
+        QTemporaryDir folder;
+        const QString here = folder.filePath(QStringLiteral("Here.chronovault"));
+        const QString other = folder.filePath(QStringLiteral("Other.chronovault"));
+        auto controller = device();
+        QVERIFY(madeWithItem(*controller, here)); // "Mine"
+        QVERIFY(QFile::copy(here, other));
+        const QString id = controller->items()->data(controller->items()->index(0), ItemListModel::IdRole).toString();
+        controller->deleteItem(id); // for good
+        QTRY_VERIFY(controller->isIdle());
+        QSignalSpy read(controller.get(), &VaultController::importRead);
+        controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
+        QVERIFY(read.wait(10000));
+        QVERIFY(controller->confirmImport());
+        QTRY_VERIFY(controller->isIdle());
+        const OpenResult opened = openVaultFile(here, "pass");
+        const VaultContents contents = contentsFromJson(opened.contents).contents;
+        QCOMPARE(contents.items.size(), 1);
+        QVERIFY(contents.deletedItems.isEmpty()); // the deletion forgotten: no sync takes it away again
     }
 
     void forget_takes_a_vault_off_the_list_and_leaves_its_file()
