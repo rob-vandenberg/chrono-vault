@@ -78,6 +78,10 @@
 
 namespace chrono_vault {
 
+// The steps of a move, for tests that stop it at each to prove the original
+// is never lost (OR-15.4): the vault read, the copy written, the copy checked.
+enum class MoveStep { Read, Written, Verified };
+
 // A vault's key and keyfile fingerprint packed into one value, for the finger
 // (D-038) and the PIN (D-059).
 QByteArray quickSecretOf(const VaultKey& key, const QByteArray& keyfile);
@@ -499,10 +503,24 @@ public:
     Q_INVOKABLE void createWebDavVault(const QString& name, const QString& password, const QString& repeated,
                                        const QUrl& keyfile = QUrl(), bool savePassword = false);
     Q_INVOKABLE void openWebDavVault(const QString& fileName);
-    Q_INVOKABLE void moveToWebDav(const QString& vaultFile);
-    // Stops syncing a vault: it stays on this device; the server's copy is
-    // deleted only when asked.
-    Q_INVOKABLE void disconnectWebDav(const QString& vaultFile, bool deleteOnServer);
+    // Stops syncing a vault: it stays on this device as a vault of its own,
+    // and the server's copy stays too; nothing is deleted (the owner, D-060).
+    Q_INVOKABLE void disconnectWebDav(const QString& vaultFile);
+
+    // Settings > Vaults' menu (D-060). Lock locks the vault when it is the
+    // one unlocked.
+    Q_INVOKABLE void lockVault(const QString& vaultFile);
+    // Moves a vault to a new file on this device, or into the WebDAV folder
+    // connected now: locked first, copied, the copy read back and compared,
+    // and only then the original deleted (OR-15). moveDone answers.
+    Q_INVOKABLE void moveVaultTo(const QString& vaultFile, const QUrl& file);
+    Q_INVOKABLE void moveVaultToWebDav(const QString& vaultFile);
+    [[nodiscard]] bool moving() const { return moveRunning; }
+    // Takes a vault off the list; a WebDAV vault's working copy is deleted at
+    // once, a change not yet on the server with it (the owner, D-060). Never
+    // the primary.
+    Q_INVOKABLE void forgetVault(const QString& vaultFile);
+    void setMoveStepCheckForTests(std::function<bool(MoveStep)> check) { moveStepCheck = std::move(check); }
     // For Settings > Vaults: onWebDav, address, user, lastSynced (as words).
     [[nodiscard]] Q_INVOKABLE QVariantMap vaultPlace(const QString& vaultFile) const;
     // Tests: a stand-in for the system's store, and a sync stopped at a step.
@@ -587,6 +605,8 @@ signals:
     // not; certificate is the fingerprint to ask about, when that is why.
     void webDavConnected(bool ok, const QString& problem, const QStringList& vaultFiles, const QString& certificate);
     void webDavDone(bool ok, const QString& problem);
+    // The answer to moveVaultTo and moveVaultToWebDav (D-060).
+    void moveDone(bool ok, const QString& problem);
     // A new WebDAV vault that could not be made or put on the server; nothing was kept.
     void webDavCreateFailed(const QString& problem);
     // A folder of the server, listed, for the WebDAV file dialog: each entry a
@@ -697,6 +717,23 @@ private:
     void showWebDavFolder(const WebDavAccount& account, bool connecting);
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
+
+    // The vault menu (D-060), in vault_controller_vaults.cpp.
+    // Why this vault cannot be moved now, or "".
+    [[nodiscard]] QString moveProblem(const QString& vaultFile) const;
+    // The vault's bytes, from its file or, for a WebDAV vault, its server.
+    void readForMove(const QString& vaultFile, std::function<void(std::optional<QByteArray>, QString)> then);
+    // The copy is in place and checked: the original goes, and the list, the
+    // vault's settings and the vault shown follow the new place.
+    void finishMove(const QString& vaultFile, const QString& newPath);
+    void moveFailed(const QString& problem);
+    [[nodiscard]] bool moveGoesOn(MoveStep step) const { return !moveStepCheck || moveStepCheck(step); }
+    // A vault's own settings (keyfile, PIN, waits, fingerprint) carried to
+    // its new place, or dropped when to is empty.
+    void carryVaultSettings(const QString& from, const QString& to);
+    // A moved vault's password saved in the primary follows it at the
+    // primary's next unlock (D-060).
+    void followMovedVaults();
 
     State currentState = State::NoVault;
     QString path;
@@ -829,6 +866,10 @@ private:
     std::unique_ptr<WebDavClient> connection; // the folder shown in the WebDAV window
     std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;
+    bool moveRunning = false;
+    QString movingVault; // never unlocked while it is moved (OR-15)
+    [[nodiscard]] bool refusedWhileMoving();
+    std::function<bool(MoveStep)> moveStepCheck;
 };
 
 } // namespace chrono_vault

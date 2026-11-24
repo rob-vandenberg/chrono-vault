@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.3.63
+// StorageWindow.qml 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: "move": where a vault is moved to (D-060)
 // v0.3.63: Local at the top, Cloud below it (the owner)
 // v0.3.62: Initial release (D-057)
 
@@ -35,7 +36,7 @@ DialogWindow {
     objectName: "storageWindow"
     memoryName: "storage"
 
-    // "new" or "open".
+    // "new", "open" or "move".
     property string mode: "new"
 
     signal chosen(string storage) // "webdav" or "device"
@@ -88,7 +89,8 @@ DialogWindow {
         width: Math.round(420 * Appearance.factor)
 
         Label {
-            text: qsTr("Select where you already have or want to create your vault:")
+            text: storageWindow.mode === "move" ? qsTr("Select where the vault should move to:")
+                                                : qsTr("Select where you already have or want to create your vault:")
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }

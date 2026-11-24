@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_sync.cpp 0.3.62
+// test_webdav_sync.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: Disconnect deletes nothing; moving is tested in test_vault_menu (D-060)
 // v0.3.62: A failed first upload leaves nothing; the folder browser; leftovers; the same bytes (built apart)
 // v0.3.61: The first upload through a lock's placeholder that has no tag or size (pCloud)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057); its interruptions built apart
@@ -444,44 +445,27 @@ private slots:
         QVERIFY(!first->isPlainHttp(server.folder().toString()));
     }
 
-    void a_local_vault_moves_to_the_server_and_back()
+    void a_disconnected_vault_leaves_two_vaults_and_deletes_nothing()
     {
         WebDavTestServer server;
-        QTemporaryDir folder;
-        const QString local = folder.filePath(QStringLiteral("Home.chronovault"));
         auto first = device();
-        first->createVault(QUrl::fromLocalFile(local), QStringLiteral("pass"), QStringLiteral("pass"));
+        QVERIFY(connected(*first, server));
+        first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
         QTRY_VERIFY_WITH_TIMEOUT(first->state() == State::Unlocked, 10000);
-        QVERIFY(!first->onWebDav());
         QVERIFY(addHere(*first, QStringLiteral("Mine")));
-        QVERIFY(connected(*first, server));
-        first->moveToWebDav(local);
-        QTRY_VERIFY_WITH_TIMEOUT(server.files.contains(vaultName) && !server.fileData(vaultName).isEmpty(), 10000);
-        QVERIFY(first->onWebDav());
         QVERIFY(syncedNow(*first));
-        QCOMPARE(titlesOfData(server.fileData(vaultName)), QStringList{QStringLiteral("Mine")});
+        const QString workingCopy = first->vaultPath();
 
-        // Disconnected: kept on this device, still on the server.
+        // Disconnected: kept on this device, and still on the server (D-060).
         QSignalSpy done(first.get(), &VaultController::webDavDone);
-        first->disconnectWebDav(local, false);
+        first->disconnectWebDav(workingCopy);
         QVERIFY(!first->onWebDav());
-        QVERIFY(QFileInfo::exists(local));
-        QVERIFY(first->vaults().contains(local));
-        QVERIFY(server.files.contains(vaultName));
-
-        // Moved again and disconnected with the server's copy deleted.
-        QVERIFY(connected(*first, server, QStringLiteral("secret")));
-        server.files.remove(vaultName);
-        QVERIFY(connected(*first, server));
-        first->moveToWebDav(local);
-        QVERIFY(syncedNow(*first));
-        QVERIFY(server.files.contains(vaultName));
-        done.clear();
-        first->disconnectWebDav(local, true);
-        QVERIFY(done.wait(10000));
-        QVERIFY(done.constLast().at(0).toBool());
-        QVERIFY(!server.files.contains(vaultName));
-        QVERIFY(QFileInfo::exists(local));
+        QVERIFY(!done.isEmpty() && done.constLast().at(0).toBool());
+        QVERIFY(QFileInfo::exists(workingCopy));
+        QVERIFY(first->vaults().contains(workingCopy));
+        QCOMPARE(titlesOfData(server.fileData(vaultName)), QStringList{QStringLiteral("Mine")});
+        QVERIFY(addHere(*first, QStringLiteral("Only here")));
+        QCOMPARE(titlesOfData(server.fileData(vaultName)), QStringList{QStringLiteral("Mine")});
     }
 
     void a_master_password_changed_here_goes_to_the_server_data()

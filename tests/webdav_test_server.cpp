@@ -29,9 +29,10 @@
 #include <QUuid>
 
 // --- Version ------------------------------------------------------------
-// webdav_test_server.cpp 0.3.62
+// webdav_test_server.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: MOVE with Overwrite: F refused over a file there
 // v0.3.62: Subfolders and MKCOL, for the folder browser
 // v0.3.61: A lock's placeholder listed as pCloud lists it: no tag, no size
 // v0.3.60: Initial release (D-057)
@@ -290,6 +291,9 @@ void WebDavTestServer::answer(QTcpSocket* socket, const QByteArray& method, cons
         const QString destination = nameOf(headers.value("destination"), &destinationInFolder, &destinationIsFolder);
         if (!files.contains(name) || !destinationInFolder) {
             status = !files.contains(name) ? 404 : 409;
+        } else if (headers.value("overwrite") == "F" && files.contains(destination) &&
+                   !files[destination].data.isEmpty()) {
+            status = 412; // never over a file there (RFC 4918)
         } else if (files.contains(destination) && !files[destination].lockToken.isEmpty() &&
                    !headers.value("if").contains(files[destination].lockToken)) {
             status = 423;

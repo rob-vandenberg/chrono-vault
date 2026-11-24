@@ -95,6 +95,9 @@ namespace {
 const QString lastVaultKey = QStringLiteral("vault/lastPath");
 const QString vaultListKey = QStringLiteral("vaults/list");
 const QString keyfilesKey = QStringLiteral("vaults/keyfiles");
+// Vaults moved (old place to new) whose password saved in the primary still
+// names the old place, until the primary is next unlocked (D-060).
+const QString movedVaultsKey = QStringLiteral("vaults/moved");
 const QString autoLockKey = QStringLiteral("security/autoLockMinutes");
 const QString idleLockKey = QStringLiteral("security/idleLockOn");
 const QString lockClosedKey = QStringLiteral("security/lockWhenClosed");
@@ -910,10 +913,17 @@ void VaultController::moveClockForTests(qint64 seconds)
     updateWait();
 }
 
-QString VaultController::waitKey() const
+namespace {
+QString waitKeyOf(const QString& vaultFile)
 {
     return wrongAttemptsGroup +
-           QString::fromLatin1(QCryptographicHash::hash(path.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
+           QString::fromLatin1(QCryptographicHash::hash(vaultFile.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
+}
+} // namespace
+
+QString VaultController::waitKey() const
+{
+    return waitKeyOf(path);
 }
 
 void VaultController::wrongPasswordTyped()
@@ -976,6 +986,9 @@ void VaultController::unlock(const QString& password)
 
 void VaultController::startUnlock(const QByteArray& password, bool savedPassword)
 {
+    if (refusedWhileMoving()) {
+        return;
+    }
     setState(State::Busy);
     say(tr("Unlocking…"), false);
     QByteArray passwordBytes = password;
@@ -1058,6 +1071,9 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
 
 void VaultController::startOpenWithKey(const VaultKey& kept)
 {
+    if (refusedWhileMoving()) {
+        return;
+    }
     setState(State::Busy);
     say(tr("Unlocking…"), false);
     const QString vaultFile = path;
@@ -1155,6 +1171,9 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
         // After a lock, back to the vault that was shown (D-030).
         const QString back = returnTo;
         returnTo.clear();
+        if (back.isEmpty() || back == path || !vaultList.contains(back)) {
+            followMovedVaults(); // a moved vault's saved password follows it (D-060)
+        }
         if (!back.isEmpty() && back != path && vaultList.contains(back)) {
             switchToVault(back);
         }
@@ -2687,6 +2706,9 @@ void VaultController::rememberPrimary()
     crypto::wipe(primaryKeyfile);
     primaryKeyfile = QByteArray(keyfileSecret.constData(), keyfileSecret.size());
     savedPasswords.clear();
+    // A vault moved since the primary was last unlocked is found at its new
+    // place (D-060).
+    const QVariantMap moved = VaultsFile().value(movedVaultsKey).toMap();
     for (const Item& one : std::as_const(contents.items)) {
         QString vaultFile;
         QString password;
@@ -2698,7 +2720,7 @@ void VaultController::rememberPrimary()
             }
         }
         if (!vaultFile.isEmpty() && !password.isEmpty()) {
-            savedPasswords.insert(vaultFile, password);
+            savedPasswords.insert(moved.value(vaultFile, vaultFile).toString(), password);
         }
     }
 }
@@ -3692,6 +3714,87 @@ void VaultController::forgetUnlockedVault()
     }
     ++contentsRevision;
     emit revisionChanged();
+}
+
+void VaultController::carryVaultSettings(const QString& from, const QString& to)
+{
+    VaultsFile settings;
+    QVariantMap keyfiles = settings.value(keyfilesKey).toMap();
+    if (keyfiles.contains(from)) {
+        const QVariant keyfile = keyfiles.take(from);
+        if (!to.isEmpty()) {
+            keyfiles.insert(to, keyfile);
+        }
+        settings.setValue(keyfilesKey, keyfiles);
+    }
+    // The PIN's entry and the waits after wrong master passwords go with the
+    // vault: a move never starts the count again (D-041, D-059).
+    const QVariant pinEntry = settings.value(pinEntryKey(from));
+    settings.remove(pinEntryKey(from));
+    if (!to.isEmpty() && pinEntry.isValid()) {
+        settings.setValue(pinEntryKey(to), pinEntry);
+    }
+    if (pinLocked.contains(from)) {
+        const QByteArray sealed = pinLocked.take(from);
+        if (!to.isEmpty()) {
+            pinLocked.insert(to, sealed);
+        }
+    }
+    settings.beginGroup(waitKeyOf(from));
+    QVariantMap waits;
+    for (const QString& name : settings.childKeys()) {
+        waits.insert(name, settings.value(name));
+    }
+    settings.endGroup();
+    settings.remove(waitKeyOf(from));
+    if (!to.isEmpty()) {
+        for (auto entry = waits.cbegin(); entry != waits.cend(); ++entry) {
+            settings.setValue(waitKeyOf(to) + QLatin1Char('/') + entry.key(), entry.value());
+        }
+    }
+    // The finger's key is kept again at the vault's next master-password
+    // unlock (D-043).
+    if (quick && quick->has(from)) {
+        quick->remove(from);
+    }
+    if (to.isEmpty()) {
+        return;
+    }
+    QVariantMap moved = settings.value(movedVaultsKey).toMap();
+    for (auto entry = moved.begin(); entry != moved.end(); ++entry) {
+        if (entry.value().toString() == from) {
+            entry.value() = to;
+        }
+    }
+    moved.insert(from, to);
+    settings.setValue(movedVaultsKey, moved);
+    if (savedPasswords.contains(from)) {
+        savedPasswords.insert(to, savedPasswords.take(from));
+    }
+}
+
+void VaultController::followMovedVaults()
+{
+    VaultsFile settings;
+    const QVariantMap moved = settings.value(movedVaultsKey).toMap();
+    if (moved.isEmpty() || currentState != State::Unlocked || path != primaryVault()) {
+        return;
+    }
+    bool changed = false;
+    for (Item& one : contents.items) {
+        for (Field& field : one.fields) {
+            if (field.role == QLatin1String("vaultfile") && moved.contains(field.value)) {
+                field.value = moved.value(field.value).toString();
+                one.modified = QDateTime::currentDateTimeUtc();
+                changed = true;
+            }
+        }
+    }
+    settings.remove(movedVaultsKey);
+    if (changed) {
+        contentsChanged();
+        saveInBackground(QString());
+    }
 }
 
 } // namespace chrono_vault

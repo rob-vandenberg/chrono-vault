@@ -33,10 +33,11 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.3.64
+// test_webdav_windows.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
 // v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
+// v0.5.75: Settings > Vaults: the menu per vault, Disconnect without deleting, Lock (D-060)
 // v0.3.64: The unlock page's vault list and field
 // v0.3.63: One button Connect then Next…; Browse… and the WebDAV file dialog; the window's height
 // v0.3.62: The Select Storage tiles, the server list, the folder browser, the unlock page's address
@@ -271,28 +272,57 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QObject* syncNow = window->findChild<QObject*>(QStringLiteral("syncNowAction"));
     QVERIFY(syncNow && syncNow->property("enabled").toBool());
 
-    // Settings > Vaults: kept on WebDAV, last synchronized; Disconnect… keeps
-    // it here.
+    // Settings > Vaults: kept on WebDAV, last synchronized; its menu shows
+    // only what can be done now; Disconnect… keeps it here and deletes
+    // nothing (D-060).
     QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
     QVERIFY(settings);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 5);
-    QQuickItem* disconnect = inWindow(settings, QStringLiteral("disconnect_Home"));
-    QTRY_VERIFY(disconnect && disconnect->isVisible());
-    click(disconnect);
-    QObject* disconnectWindow = window->findChild<QObject*>(QStringLiteral("disconnectWindow"));
-    if (!disconnectWindow) {
-        disconnectWindow = settings->findChild<QObject*>(QStringLiteral("disconnectWindow"));
-    }
+    QTRY_VERIFY(inWindow(settings, QStringLiteral("vaultMenuButton_Home")));
+    const auto entryOf = [settings](const QString& name) -> QObject* {
+        QQuickItem* button = inWindow(settings, QStringLiteral("vaultMenuButton_Home"));
+        QObject* menu = button ? button->findChild<QObject*>(QStringLiteral("vaultMenu_Home")) : nullptr;
+        return menu ? menu->findChild<QObject*>(name) : nullptr;
+    };
+    // An entry is looked at with the menu open, as a person sees it.
+    const auto shown = [settings](const QString& name) {
+        QQuickItem* button = inWindow(settings, QStringLiteral("vaultMenuButton_Home"));
+        QObject* menu = button ? button->findChild<QObject*>(QStringLiteral("vaultMenu_Home")) : nullptr;
+        QObject* entry = menu ? menu->findChild<QObject*>(name) : nullptr;
+        if (!menu || !entry) {
+            return false;
+        }
+        if (!menu->property("opened").toBool()) {
+            (void)QMetaObject::invokeMethod(inWindow(settings, QStringLiteral("vaultMenuButton_Home")), "clicked");
+            (void)QTest::qWaitFor([menu]() { return menu->property("opened").toBool(); }, 5000);
+        }
+        const bool visible = entry->property("visible").toBool();
+        (void)QMetaObject::invokeMethod(menu, "close");
+        (void)QTest::qWaitFor([menu]() { return !menu->property("visible").toBool(); }, 5000);
+        return visible;
+    };
+    QVERIFY(shown(QStringLiteral("lockVault_Home")));
+    QVERIFY(shown(QStringLiteral("moveVault_Home")));
+    QVERIFY(!shown(QStringLiteral("forgetVault_Home"))); // the primary
+    QVERIFY(shown(QStringLiteral("disconnect_Home")));
+    QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("disconnect_Home")), "triggered"));
+    QObject* disconnectWindow = settings->findChild<QObject*>(QStringLiteral("disconnectWindow"));
     QVERIFY(disconnectWindow);
     QTRY_VERIFY(disconnectWindow->property("visible").toBool());
+    QVERIFY(!settings->findChild<QObject*>(QStringLiteral("alsoDeleteBox")));
     click(inWindow(disconnectWindow, QStringLiteral("disconnectButton")));
     QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);
     QTRY_VERIFY(!disconnectWindow->property("visible").toBool());
     QVERIFY(server.files.contains(QStringLiteral("Work vaults/Home.chronovault")));
-    QQuickItem* move = inWindow(settings, QStringLiteral("moveToWebDav_Home"));
-    QTRY_VERIFY(move && move->isVisible());
+    QTRY_VERIFY(!shown(QStringLiteral("disconnect_Home")));
+    QVERIFY(shown(QStringLiteral("moveVault_Home")));
     QTRY_COMPARE(place->property("text").toString(), QStringLiteral("Local file"));
+
+    // Lock from the menu; then Lock is no longer offered.
+    QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("lockVault_Home")), "triggered"));
+    QTRY_COMPARE(controller->state(), State::Locked);
+    QTRY_VERIFY(!shown(QStringLiteral("lockVault_Home")));
     click(settings->findChild<QObject*>(QStringLiteral("cancelButton")));
 
     QString warningText;

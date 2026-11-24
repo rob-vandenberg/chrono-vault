@@ -30,9 +30,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.h 0.3.63
+// webdav_client.h 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: A move that never replaces a file already there (D-060)
 // v0.3.63: A file's time of change, for the file dialog (D-057)
 // v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.60: Initial release (D-057)
@@ -112,7 +113,9 @@ public:
     void put(const QString& name, const QByteArray& data, Done done);
     // Moves one file of the folder over another; with a lock's token, the
     // move is made under that lock.
-    void move(const QString& from, const QString& to, const QByteArray& lockToken, Done done);
+    // With overwrite false, a file already at "to" is never replaced: the
+    // server answers 412 (D-060).
+    void move(const QString& from, const QString& to, const QByteArray& lockToken, Done done, bool overwrite = true);
     void remove(const QString& name, Done done);
     // A new folder in the folder (MKCOL).
     void makeFolder(const QString& name, Done done);

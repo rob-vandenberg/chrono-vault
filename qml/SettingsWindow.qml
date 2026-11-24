@@ -17,12 +17,14 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.3.60
+// SettingsWindow.qml 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: Vaults: a menu per vault with Lock, Move…, Forget… and Disconnect…; vaults not found listed (D-060)
 // v0.4.70: Security in the owner's order; the PIN line (D-059)
 // v0.3.60: The Vaults topic: where each vault is kept, its last sync, Move to WebDAV… and Disconnect… (D-057)
 // v0.2.53: Windows Hello: no popup on Windows, a red line at the bottom left while it is open (the owner)
@@ -1000,10 +1002,14 @@ ApplicationWindow {
                         }
                     }
                     // Vaults (ref, D-057): where each vault is kept and when it
-                    // was last synchronized; Move to WebDAV… and Disconnect….
+                    // was last synchronized; a menu per vault with only what can
+                    // be done to it now (the owner, D-060).
                     ColumnLayout {
+                        id: vaultsPage
                         objectName: "vaultsPage"
                         spacing: Math.round(8 * Appearance.factor)
+                        // Vaults not found are listed so they can be forgotten.
+                        onVisibleChanged: if (visible) VaultController.checkVaults()
                         Label {
                             text: qsTr("Vaults")
                             font.pointSize: Appearance.fontPointSize * 1.4
@@ -1015,6 +1021,15 @@ ApplicationWindow {
                                 required property string modelData
                                 // Read again whenever the vaults or their syncs change.
                                 property var place: VaultController.vaultPlace(modelData)
+                                readonly property string name: VaultController.vaultNameOf(modelData)
+                                readonly property bool found: VaultController.foundVaults.indexOf(modelData) >= 0
+                                readonly property bool primary: VaultController.primaryVault === modelData
+                                readonly property bool unlocked: VaultController.vaultPath === modelData
+                                                                 && VaultController.state === VaultController.Unlocked
+                                readonly property bool canLock: unlocked
+                                readonly property bool canMove: found
+                                readonly property bool canForget: !primary
+                                readonly property bool canDisconnect: found && place.onWebDav === true
                                 Layout.fillWidth: true
                                 Connections {
                                     target: VaultController
@@ -1029,9 +1044,10 @@ ApplicationWindow {
                                         spacing: Math.round(2 * Appearance.factor)
                                         Layout.fillWidth: true
                                         Label {
-                                            text: VaultController.vaultNameOf(vaultRow.modelData)
+                                            text: vaultRow.name
                                             textFormat: Text.PlainText
                                             font.bold: true
+                                            font.strikeout: !vaultRow.found
                                             elide: Text.ElideRight
                                             Layout.fillWidth: true
                                         }
@@ -1044,31 +1060,146 @@ ApplicationWindow {
                                             Layout.fillWidth: true
                                         }
                                         Label {
-                                            visible: vaultRow.place.onWebDav === true
+                                            visible: vaultRow.found && vaultRow.place.onWebDav === true
                                             text: qsTr("Last synchronized: %1").arg(vaultRow.place.lastSynced || "")
                                             opacity: 0.7
                                             Layout.fillWidth: true
                                         }
-                                    }
-                                    Button {
-                                        objectName: "moveToWebDav_" + VaultController.vaultNameOf(vaultRow.modelData)
-                                        visible: !vaultRow.place.onWebDav
-                                        text: qsTr("Move to WebDAV…")
-                                        onClicked: {
-                                            moveWindow.mode = "move"
-                                            moveWindow.moveVault = vaultRow.modelData
-                                            moveWindow.open()
+                                        Label {
+                                            objectName: "notFound_" + vaultRow.name
+                                            visible: !vaultRow.found
+                                            text: qsTr("Not found")
+                                            color: "#e53e3e"
+                                            Layout.fillWidth: true
                                         }
                                     }
-                                    Button {
-                                        objectName: "disconnect_" + VaultController.vaultNameOf(vaultRow.modelData)
-                                        visible: vaultRow.place.onWebDav === true
-                                        text: qsTr("Disconnect…")
-                                        onClicked: {
-                                            disconnectWindow.vaultFile = vaultRow.modelData
-                                            disconnectWindow.open()
+                                    ToolButton {
+                                        objectName: "vaultMenuButton_" + vaultRow.name
+                                        text: "⋮"
+                                        font.pointSize: Appearance.fontPointSize * 1.5
+                                        visible: vaultRow.canLock || vaultRow.canMove || vaultRow.canForget
+                                                 || vaultRow.canDisconnect
+                                        Accessible.name: qsTr("Vault menu")
+                                        onClicked: vaultMenu.popup(this, 0, height)
+                                        Menu {
+                                            id: vaultMenu
+                                            objectName: "vaultMenu_" + vaultRow.name
+                                            MenuItem {
+                                                objectName: "lockVault_" + vaultRow.name
+                                                text: qsTr("Lock")
+                                                visible: vaultRow.canLock
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: VaultController.lockVault(vaultRow.modelData)
+                                            }
+                                            MenuItem {
+                                                objectName: "moveVault_" + vaultRow.name
+                                                text: qsTr("Move…")
+                                                visible: vaultRow.canMove
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    moveChoice.vaultFile = vaultRow.modelData
+                                                    moveChoice.open()
+                                                }
+                                            }
+                                            MenuItem {
+                                                objectName: "forgetVault_" + vaultRow.name
+                                                text: qsTr("Forget…")
+                                                visible: vaultRow.canForget
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    forgetWindow.vaultFile = vaultRow.modelData
+                                                    forgetWindow.onWebDav = vaultRow.place.onWebDav === true
+                                                    forgetWindow.open()
+                                                }
+                                            }
+                                            MenuItem {
+                                                objectName: "disconnect_" + vaultRow.name
+                                                text: qsTr("Disconnect…")
+                                                visible: vaultRow.canDisconnect
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    disconnectWindow.vaultFile = vaultRow.modelData
+                                                    disconnectWindow.open()
+                                                }
+                                            }
                                         }
                                     }
+                                }
+                            }
+                        }
+                        // Move…: where to, then the file here or the WebDAV folder (D-060).
+                        StorageWindow {
+                            id: moveChoice
+                            objectName: "moveStorageWindow"
+                            transientParent: settingsWindow
+                            mode: "move"
+                            property string vaultFile: ""
+                            onChosen: function(storage) {
+                                if (storage === "device") {
+                                    movePicker.vaultFile = moveChoice.vaultFile
+                                    movePicker.open()
+                                } else {
+                                    moveWindow.mode = "move"
+                                    moveWindow.moveVault = moveChoice.vaultFile
+                                    moveWindow.open()
+                                }
+                            }
+                        }
+                        FilePicker {
+                            id: movePicker
+                            property string vaultFile: ""
+                            memoryName: "SettingsWindow.movePicker"
+                            parentWindow: settingsWindow
+                            title: qsTr("Where should the vault be moved to?")
+                            fileMode: FileDialog.SaveFile
+                            defaultSuffix: "chronovault"
+                            nameFilters: [qsTr("Chrono Vault vaults (*.chronovault)")]
+                            onAccepted: {
+                                moveStatus.problem = ""
+                                moveStatus.busy = true
+                                moveStatus.vaultFile = movePicker.vaultFile
+                                moveStatus.open()
+                                VaultController.moveVaultTo(movePicker.vaultFile, selectedFile)
+                            }
+                        }
+                        DialogWindow {
+                            id: moveStatus
+                            objectName: "moveStatusWindow"
+                            memoryName: "moveVault"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            property bool busy: false
+                            property string problem: ""
+                            title: qsTr("Move the vault")
+                            standardButtons: Dialog.Close
+                            Connections {
+                                target: VaultController
+                                function onMoveDone(ok, problem) {
+                                    if (!moveStatus.busy)
+                                        return
+                                    moveStatus.busy = false
+                                    if (ok)
+                                        moveStatus.accept()
+                                    else
+                                        moveStatus.problem = problem
+                                }
+                            }
+                            ColumnLayout {
+                                spacing: Math.round(8 * Appearance.factor)
+                                width: Math.round(400 * Appearance.factor)
+                                Label {
+                                    visible: moveStatus.busy
+                                    text: qsTr("Moving “%1”…").arg(VaultController.vaultNameOf(moveStatus.vaultFile))
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
+                                }
+                                Label {
+                                    objectName: "moveProblem"
+                                    visible: moveStatus.problem !== ""
+                                    text: moveStatus.problem
+                                    color: "#e53e3e"
+                                    wrapMode: Text.Wrap
+                                    Layout.fillWidth: true
                                 }
                             }
                         }
@@ -1078,61 +1209,50 @@ ApplicationWindow {
                             transientParent: settingsWindow
                         }
                         DialogWindow {
+                            id: forgetWindow
+                            objectName: "forgetWindow"
+                            memoryName: "forgetVault"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            property bool onWebDav: false
+                            title: qsTr("Forget the vault")
+                            standardButtons: Dialog.Cancel
+                            rightButtons: Button {
+                                objectName: "forgetButton"
+                                text: qsTr("Forget")
+                                onClicked: {
+                                    VaultController.forgetVault(forgetWindow.vaultFile)
+                                    forgetWindow.accept()
+                                }
+                            }
+                            Label {
+                                width: Math.round(400 * Appearance.factor)
+                                text: forgetWindow.onWebDav
+                                      ? qsTr("“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
+                                      : qsTr("“%1” is taken off the list of vaults. Its file stays where it is.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
+                                wrapMode: Text.Wrap
+                            }
+                        }
+                        DialogWindow {
                             id: disconnectWindow
                             objectName: "disconnectWindow"
                             memoryName: "disconnectWebDav"
                             transientParent: settingsWindow
                             property string vaultFile: ""
-                            property bool busy: false
-                            property string problem: ""
                             title: qsTr("Disconnect from WebDAV")
                             standardButtons: Dialog.Cancel
-                            onShown: {
-                                busy = false
-                                problem = ""
-                                alsoDelete.checked = false
-                            }
                             rightButtons: Button {
                                 objectName: "disconnectButton"
                                 text: qsTr("Disconnect")
-                                enabled: !disconnectWindow.busy
                                 onClicked: {
-                                    disconnectWindow.busy = true
-                                    VaultController.disconnectWebDav(disconnectWindow.vaultFile, alsoDelete.checked)
+                                    VaultController.disconnectWebDav(disconnectWindow.vaultFile)
+                                    disconnectWindow.accept()
                                 }
                             }
-                            Connections {
-                                target: VaultController
-                                function onWebDavDone(ok, problem) {
-                                    if (!disconnectWindow.busy)
-                                        return
-                                    disconnectWindow.busy = false
-                                    if (ok)
-                                        disconnectWindow.accept()
-                                    else
-                                        disconnectWindow.problem = problem
-                                }
-                            }
-                            ColumnLayout {
-                                spacing: Math.round(8 * Appearance.factor)
+                            Label {
                                 width: Math.round(400 * Appearance.factor)
-                                Label {
-                                    text: qsTr("“%1” stops synchronizing and stays on this computer as a vault of its own.").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                }
-                                CheckBox {
-                                    id: alsoDelete
-                                    objectName: "alsoDeleteBox"
-                                    text: qsTr("Also delete the vault on the server")
-                                }
-                                Label {
-                                    visible: disconnectWindow.problem !== ""
-                                    text: disconnectWindow.problem
-                                    color: "#e53e3e"
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                }
+                                text: qsTr("“%1” stops synchronizing. From then on there are two separate vaults: the one on this computer and the one on the server. Nothing is deleted.").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
+                                wrapMode: Text.Wrap
                             }
                         }
                     }

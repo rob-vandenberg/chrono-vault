@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavWindow.qml 0.3.63
+// WebDavWindow.qml 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: Move is the vault menu's: the vault leaves its old place once its copy is checked (D-060)
 // v0.3.67: Leaving the file dialog without a new choice goes back to the folder of the choice shown
 // v0.3.63: One button: Connect, then Open, Next… or Move; the vault or folder chosen with Browse… in a file dialog of
 //          its own; the window as tall as its content (the owner, D-057)
@@ -119,7 +120,7 @@ DialogWindow {
             VaultController.openWebDavVault(chosenFile)
         } else {
             waitingFor = "act"
-            VaultController.moveToWebDav(moveVault)
+            VaultController.moveVaultToWebDav(moveVault)
         }
     }
 
@@ -178,6 +179,18 @@ DialogWindow {
             webDavWindow.vaultFiles = files
             webDavWindow.waitingFor = ""
         }
+        // A move answers on its own (D-060).
+        function onMoveDone(ok, problem) {
+            if (webDavWindow.mode !== "move" || webDavWindow.waitingFor !== "act")
+                return
+            webDavWindow.waitingFor = ""
+            if (ok) {
+                passwordField.clear()
+                webDavWindow.accept()
+            } else {
+                webDavWindow.problem = problem
+            }
+        }
         function onWebDavDone(ok, problem) {
             if (webDavWindow.waitingFor === "")
                 return
@@ -197,7 +210,7 @@ DialogWindow {
 
         Label {
             visible: webDavWindow.mode === "move"
-            text: qsTr("“%1” goes to the WebDAV folder you choose and stays on this computer as well.").arg(VaultController.vaultNameOf(webDavWindow.moveVault))
+            text: qsTr("“%1” moves to the WebDAV folder you choose. Where it is now, it is deleted once its copy there is checked.").arg(VaultController.vaultNameOf(webDavWindow.moveVault))
             wrapMode: Text.Wrap
             Layout.preferredWidth: webDavWindow.columnWidth
         }

@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.3.62
+# tests/integration/CMakeLists.txt 0.5.75
 
 # --- Version history ----------------------------------------------------
+# v0.5.75: test_vault_menu (D-060)
 # v0.4.70: PIN unlock (D-059)
 # v0.3.62: test_webdav_create (D-057)
 # v0.3.60: The WebDAV sync and windows tests, with our own test server (D-057)
@@ -193,3 +194,10 @@ target_link_libraries(test_webdav_windows PRIVATE
     chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Network Qt6::Test)
 chrono_vault_strict_warnings(test_webdav_windows)
 chrono_vault_add_test(test_webdav_windows)
+
+# The vault menu: Lock, Move… and Forget… (D-060).
+qt_add_executable(test_vault_menu test_vault_menu.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+target_include_directories(test_vault_menu PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_vault_menu PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::Test)
+chrono_vault_strict_warnings(test_vault_menu)
+chrono_vault_add_test(test_vault_menu)

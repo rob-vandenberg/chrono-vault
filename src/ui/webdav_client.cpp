@@ -30,9 +30,10 @@
 #include <QXmlStreamReader>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.cpp 0.3.63
+// webdav_client.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: A move that never replaces a file already there (D-060)
 // v0.3.63: A file's time of change, for the file dialog (D-057)
 // v0.3.62: Making a folder, for the folder browser (D-057)
 // v0.3.61: Every request and its answer in the --debug log, never a password or a vault's bytes (D-057)
@@ -350,10 +351,11 @@ void WebDavClient::put(const QString& name, const QByteArray& data, Done done)
     whenDone(reply, [done = std::move(done)](WebDavReply answer, QNetworkReply*) { done(answer); });
 }
 
-void WebDavClient::move(const QString& from, const QString& to, const QByteArray& lockToken, Done done)
+void WebDavClient::move(const QString& from, const QString& to, const QByteArray& lockToken, Done done, bool overwrite)
 {
     const QUrl target = addressOf(to);
-    QList<std::pair<QByteArray, QByteArray>> headers{{"Destination", target.toEncoded()}, {"Overwrite", "T"}};
+    QList<std::pair<QByteArray, QByteArray>> headers{{"Destination", target.toEncoded()},
+                                                     {"Overwrite", overwrite ? "T" : "F"}};
     if (!lockToken.isEmpty()) {
         headers.append({"If", "<" + target.toEncoded() + "> (" + lockToken + ")"});
     }

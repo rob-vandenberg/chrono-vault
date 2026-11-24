@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.3.63
+// vault_controller_webdav.cpp 0.5.75
 
 // --- Version history ----------------------------------------------------
+// v0.5.75: Disconnect deletes nothing; moving to a server is the vault menu's Move (D-060)
 // v0.3.63: A folder's entries with their size and time of change, for the file dialog (D-057)
 // v0.3.62: The folder browser and New folder; an address read as typed; a non-WebDAV server said in words (D-057)
 // v0.3.60: Initial release: a vault kept on a WebDAV server (D-057)
@@ -626,83 +627,27 @@ void VaultController::openWebDavVault(const QString& fileName)
     });
 }
 
-void VaultController::moveToWebDav(const QString& vaultFile)
-{
-    if (!connection) {
-        emit webDavDone(false, tr("Connect to the WebDAV folder first."));
-        return;
-    }
-    if (webDavPlaceOf(vaultFile)) {
-        emit webDavDone(false, tr("That vault is already kept on a WebDAV server."));
-        return;
-    }
-    const QString fileName = QFileInfo(vaultFile).completeBaseName() + vaultSuffix;
-    if (connectedFiles.contains(fileName, Qt::CaseInsensitive)) {
-        emit webDavDone(false, tr("A vault with the name “%1” is already in that folder.").arg(fileName));
-        return;
-    }
-    WebDavPlace place;
-    place.id = newWebDavId();
-    place.folder = connection->account().folder;
-    place.fileName = fileName;
-    place.user = connection->account().user;
-    place.trustedCertificate = connection->account().trustedCertificate;
-    // The vault's own file becomes its working copy; its first sync puts it
-    // on the server (REQUIREMENTS.md 5.4.4).
-    rememberWebDavPlace(vaultFile, place);
-    keepWebDavPassword(place, connection->account().password);
-    emit vaultsChanged();
-    emit webDavDone(true, QString());
-    if (vaultFile == path && currentState == State::Unlocked) {
-        startWebDav();
-    }
-}
-
-void VaultController::disconnectWebDav(const QString& vaultFile, bool deleteOnServer)
+void VaultController::disconnectWebDav(const QString& vaultFile)
 {
     const auto place = webDavPlaceOf(vaultFile);
     if (!place) {
         return;
     }
-    const auto forget = [this, vaultFile, place = *place]() {
-        if (vaultFile == path) {
-            stopWebDav();
-        }
-        forgetWebDavPlace(vaultFile);
-        QFile::remove(webDavBasePath(place.id));
-        webDavPasswords.remove(place.id);
-        if (const std::shared_ptr<SecretStore> store = secrets) {
-            const QString name = place.secretName();
-            (void)QtConcurrent::run([store, name]() { (void)store->remove(name); });
-        }
-        emit vaultsChanged();
-        emit syncChanged();
-        emit webDavDone(true, QString());
-    };
-    if (!deleteOnServer) {
-        forget(); // the server's copy stays (ref)
-        return;
+    // Two vaults from now on: this device's and the server's; nothing is
+    // deleted (the owner, D-060).
+    if (vaultFile == path) {
+        stopWebDav();
     }
-    QPointer<VaultController> self(this);
-    withWebDavPassword(*place, [self, place = *place, forget](std::optional<QString> password) {
-        if (!self) {
-            return;
-        }
-        auto* client = new WebDavClient(
-            WebDavAccount{place.folder, place.user, password.value_or(QString()), place.trustedCertificate}, self);
-        client->remove(place.fileName, [self, client, forget](const WebDavReply& answer) {
-            client->deleteLater();
-            if (!self) {
-                return;
-            }
-            if (!answer.ok() && answer.error != WebDavError::NotFound) {
-                // Still synced: nothing is half done.
-                emit self->webDavDone(false, connectProblem(answer));
-                return;
-            }
-            forget();
-        });
-    });
+    forgetWebDavPlace(vaultFile);
+    QFile::remove(webDavBasePath(place->id));
+    webDavPasswords.remove(place->id);
+    if (const std::shared_ptr<SecretStore> store = secrets) {
+        const QString name = place->secretName();
+        (void)QtConcurrent::run([store, name]() { (void)store->remove(name); });
+    }
+    emit vaultsChanged();
+    emit syncChanged();
+    emit webDavDone(true, QString());
 }
 
 QVariantMap VaultController::vaultPlace(const QString& vaultFile) const

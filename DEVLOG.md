@@ -598,3 +598,13 @@ when Windows reports it shown (`src/ui/quick_unlock_windows.cpp`, the owner's ex
 key turns the setting off (Q15 A; `test_quick_unlock`). Two review rounds: round 1 found that a cancelled
 turn-on's late answer could stop the next request's listening (now only the request still asking stops it); round 2
 clean.
+
+## 24 November 2026: version 0.5.75: the vault menu
+
+The owner's changelist items 1-8 and 18-22 (autonomous mode). Settings > Vaults has a ⋮ per vault with Lock, Move…,
+Forget… and Disconnect…, each only where it can be done; vaults not found are listed (`qml/SettingsWindow.qml`,
+`src/ui/vault_controller_vaults.cpp`, D-060). A move locks the vault, copies it, reads the copy back and compares it,
+and only then deletes the original; the vault keeps its keyfile, PIN entry and count of wrong passwords, and its
+password saved in the primary follows it. `tests/integration/test_vault_menu.cpp` stops a move at every step. Review
+round 1 found two real faults: a move to WebDAV could replace a vault another device put there meanwhile (now
+`Overwrite: F`, with a test), and the local read-back ran on the window's thread (moved to the save thread).

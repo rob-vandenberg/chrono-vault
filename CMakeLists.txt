@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.4.74 LANGUAGES CXX)
+project(chrono-vault VERSION 0.5.75 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
 # CMakeLists.txt 0.2.51
 
 # --- Version history ----------------------------------------------------
+# v0.5.75: Version 0.5.75
 # v0.4.74: Version 0.4.74
 # v0.4.73: Version 0.4.73
 # v0.4.72.1: Debug version: Windows Hello's window in the --debug log
