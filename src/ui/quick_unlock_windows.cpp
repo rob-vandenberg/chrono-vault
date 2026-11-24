@@ -43,9 +43,10 @@
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.4.72.1
+// quick_unlock_windows.cpp 0.4.73
 
 // --- Version history ----------------------------------------------------
+// v0.4.73: Windows Hello always given the window that asks (the owner)
 // v0.4.72.1: Debug lines: the window Windows Hello is given, the one in front, the call used (the owner)
 // v0.4.72: Windows Hello asked over Chrono Vault's window on every Windows; the key kept with DPAPI (the owner, B)
 // v0.2.53: Windows Hello opens over Chrono Vault where Windows can (the owner)
@@ -121,10 +122,20 @@ struct Pending
     }
 };
 
-// The Chrono Vault window that has the keyboard now, on the window's thread.
+// The Chrono Vault window that asks, on the window's thread: the one with the
+// keyboard, else the main window that is shown (no window has the keyboard
+// right at a start, 0.4.72.1's log), so Windows Hello always has an owner.
 quintptr ownerWindow()
 {
     const QWindow* window = QGuiApplication::focusWindow();
+    if (window == nullptr) {
+        for (QWindow* shown : QGuiApplication::topLevelWindows()) {
+            if (shown->isVisible() && shown->transientParent() == nullptr) {
+                window = shown;
+                break;
+            }
+        }
+    }
     return window != nullptr ? static_cast<quintptr>(window->winId()) : 0;
 }
 

@@ -33,6 +33,8 @@
 // test_reader.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.4.73: The finger asked only once the window is active
+// v0.4.73: The width compared to within a pixel, as the layout rounds
 // v0.4.72: Unlock with Windows Hello as wide as its text, centred
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Initial release (D-042)
@@ -321,12 +323,37 @@ void TestReader::the_unlock_page_asks_whenever_it_is_on_screen()
     showMainWindow(window, false, false);
     QTRY_COMPARE(reader->asked, 2);
     controller->stopQuickUnlock();
+    // Another window active: not asked until this one is active again, so
+    // Windows lets Windows Hello come on top (the owner, 0.4.73).
+    {
+        QWindow other;
+        other.resize(100, 100);
+        other.show();
+        other.requestActivate();
+        QTRY_VERIFY(!window->isActive());
+        const int before = reader->asked;
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        controller->lock();
+        QTest::qWait(50); // nothing may be asked meanwhile
+        QCOMPARE(reader->asked, before);
+        window->requestActivate();
+        QTRY_COMPARE(reader->asked, before + 1);
+        controller->stopQuickUnlock();
+        // Cancelled, then active again (as when Windows Hello's window closes):
+        // not asked again until the page is shown anew.
+        other.requestActivate();
+        QTRY_VERIFY(!window->isActive());
+        window->requestActivate();
+        QTRY_VERIFY(window->isActive());
+        QCOMPARE(reader->asked, before + 1);
+    }
     // The button is as wide as its text, centred under the field (the owner, 0.4.72).
     auto* button = window->findChild<QQuickItem*>(QStringLiteral("quickUnlockButton"));
     auto* field = window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"));
     QVERIFY(button && field);
     QTRY_VERIFY(button->isVisible());
-    QCOMPARE(button->width(), button->implicitWidth());
+    QVERIFY(qAbs(button->width() - button->implicitWidth()) < 1); // the layout rounds to whole pixels
     QVERIFY(button->width() < field->width());
     const auto middleOf = [](QQuickItem* item) { return item->mapToScene(QPointF(item->width() / 2, 0)).x(); };
     QTRY_VERIFY(qAbs(middleOf(button) - middleOf(field)) <= 1);

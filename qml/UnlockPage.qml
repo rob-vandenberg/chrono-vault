@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.4.73: The finger asked only once the window is active (the owner)
 // v0.4.72: Unlock with Windows Hello as wide as its text, centred (the owner)
 // v0.4.71: With the PIN only the logo, "Enter the PIN to unlock", the field and the link (the owner)
 // v0.4.70: The PIN, with Use master password instead (D-059)
@@ -87,14 +88,27 @@ Item {
     // fingerprint on, unless the yearly reminder is due (D-038, D-042): at a
     // start once the window shows, after a lock, for another vault, back from
     // the tray. Never while the window is hidden.
+    // Only once the window is active, so Windows lets Windows Hello come on
+    // top (the owner, 0.4.73).
+    // Asked once each time the page is shown: a cancelled Windows Hello hands
+    // the window its activation back, which must not ask again (0.4.73).
+    property bool fingerAsked: false
     function askFinger() {
-        if (visible && Window.window && Window.window.visible && VaultController.state === VaultController.Locked
+        if (fingerAsked)
+            return
+        if (visible && Window.window && Window.window.visible && Window.window.active
+                && VaultController.state === VaultController.Locked
                 && VaultController.quickUnlockOn && !VaultController.reminderDue)
+        {
+            fingerAsked = true
             VaultController.unlockWithQuickUnlock()
+        }
     }
     onVisibleChanged: {
-        if (!visible)
+        if (!visible) {
+            fingerAsked = false
             return
+        }
         passwordField.forceActiveFocus()
         askFinger()
     }
@@ -105,20 +119,28 @@ Item {
         function onVaultPathChanged() {
             passwordField.clear()
             unlockPage.masterInstead = false
+            unlockPage.fingerAsked = false
             unlockPage.askFinger()
         }
     }
     Connections {
         target: unlockPage.Window.window
-        function onVisibleChanged() { unlockPage.askFinger() }
+        function onVisibleChanged() {
+            if (!unlockPage.Window.window.visible)
+                unlockPage.fingerAsked = false // hidden into the tray: asked again when shown
+            unlockPage.askFinger()
+        }
+        function onActiveChanged() { unlockPage.askFinger() }
     }
 
     // After a try that did not open the vault, typing goes on in the field.
     Connections {
         target: VaultController
         function onStateChanged() {
-            if (VaultController.state === VaultController.Unlocked)
+            if (VaultController.state === VaultController.Unlocked) {
                 unlockPage.masterInstead = false // the next lock offers the PIN again
+                unlockPage.fingerAsked = false
+            }
             if (VaultController.state === VaultController.Locked && unlockPage.visible)
                 passwordField.forceActiveFocus()
         }

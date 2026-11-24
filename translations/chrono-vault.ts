@@ -1964,7 +1964,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+204"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+243"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1979,7 +1979,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+61"/>
         <source>Unlock Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2520,7 +2520,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+363"/>
+        <location filename="../qml/UnlockPage.qml" line="+368"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>

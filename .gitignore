@@ -45,6 +45,7 @@ art/*
 gitpush.sh
 build-release.sh
 build-release.bat
+build-debug-release.bat
 push-to-development.sh
 
 # Built things: made from what is committed, so never committed themselves

@@ -582,3 +582,10 @@ found every text translatable; `test_every_string_translatable` now also checks 
 The owner: in 0.4.72 Windows Hello still opens under Chrono Vault on his Windows 10. The debug version (no tests, no
 reviewers, the owner's rule) writes to the `--debug` log at every Windows Hello request the window it is given, Qt's
 focus window, the window in front and whose it is, the call used, and the answer (`src/ui/quick_unlock_windows.cpp`).
+
+## 24 November 2026: version 0.4.73: Windows Hello asked by the active window
+
+The owner's changelist items 1-9, from 0.4.72.1's log ("owner 0x0, Qt focus window: none, in front: another program"):
+Windows Hello always gets the window that asks (`src/ui/quick_unlock_windows.cpp`), and the unlock page asks only once its
+window is active (`qml/UnlockPage.qml`); `test_reader` checks both the active rule and, within a pixel, the button width. Two review rounds: round 1 found that a cancelled Hello
+would be asked again at once (the window active again); now asked once per showing of the page; round 2 clean.
