@@ -51,7 +51,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
     (**done in 0.5.75**); the Sync conflicts dialog after Chrono Mail's, for syncs and imports (**done in 0.5.76**);
     Import… from another vault or an export, and Export… of any vault (**done in 0.5.77**). "Merge with…" became Import….
 17. The person decides every difference an import or a sync meets (D-061, the owner, 24 November 2026): **done in
-    0.5.78**.
+    0.5.78**; the windows as Chrono Mail's, with Retry sync and Keep here only: **done in 0.5.81**.
 
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.

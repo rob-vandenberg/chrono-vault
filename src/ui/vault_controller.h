@@ -48,9 +48,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.5.78
+// vault_controller.h 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Retry sync; every field of a conflict's item (D-061)
 // v0.5.78: Every difference a conflict; the sides' names; the person's own categories and templates (D-061)
 // v0.5.77: Import from another vault; an import's duplicates skipped or made conflicts (D-060)
 // v0.5.76: The Sync conflicts dialog: conflicts, conflictOf, settleConflicts, settleConflict (D-060)
@@ -467,25 +468,41 @@ public:
     // The Sync conflicts dialog (D-060), in vault_controller_conflicts.cpp.
     // Every item, and every category or template of the person's own (its id
     // "vault:…"), with a conflict: {itemId, what, name, fields, where, kind,
-    // source, ofVault} with kind "both" (differs on two devices), "imported"
-    // (differs from an import) or "deleted" (deleted on one side and changed
-    // on the other); source "both", "imported" or "mixed" (D-061).
+    // source, ofVault, canRetry, canKeepHere, canKeepBoth, found} with kind
+    // "both" (differs on two devices), "imported" (differs from an import),
+    // "deletedThere" (deleted on the other device, changed here) or
+    // "deletedHere" (the other way round); source "both", "imported" or
+    // "mixed" (D-061).
     [[nodiscard]] int conflictCount() const;
     [[nodiscard]] Q_INVOKABLE QVariantList conflicts() const;
     // One conflict: {itemId, what, name, where, kind, source, ofVault,
-    // leftName, rightName, rows: [{index, label, left, right, hidden}]}, the
-    // left side the vault or this device, the right the import or the other
-    // device; an empty map when it has none.
+    // leftName, rightName, canRetry, canKeepHere, canKeepBoth, found, rows:
+    // [{index, label, left, right, leftHidden, rightHidden, differs, canSplit,
+    // first, second}], allRows}, the left side the vault or this device, the
+    // right the import or the other device; rows what is to be chosen,
+    // allRows every field of the item in its order; an empty map when it has
+    // none.
     [[nodiscard]] Q_INVOKABLE QVariantMap conflictOf(const QString& itemId) const;
     // The two sides' names for a source of conflictOf.
     [[nodiscard]] Q_INVOKABLE QVariantMap sideNames(const QString& source) const;
     // Settles these whole: "left" takes every left value, "right" every
     // right one (an item deleted elsewhere goes to the Trash), "both" keeps
     // the item and a copy of it with the other values. "now" and "other" are
-    // the value standing and the other value.
+    // the value standing and the other value; "keep" (Keep here only) keeps
+    // an item the other device deleted.
     Q_INVOKABLE void settleConflicts(const QStringList& itemIds, const QString& side);
-    // Settles one per row of conflictOf: "left" or "right" for each.
+    // Settles one per row of conflictOf: "left", "right" or "both" for each.
     Q_INVOKABLE void settleConflict(const QString& itemId, const QVariantList& choices);
+    // Retry sync (D-061), in vault_controller_retry.cpp: each of these read
+    // again from where its other values came from, and compared afresh;
+    // answered by retried, or by retryPasswordNeeded for a vault whose key is
+    // not at hand, which retryFromVault then reads.
+    Q_INVOKABLE void retryConflicts(const QStringList& itemIds);
+    Q_INVOKABLE void retryFromVault(const QString& source, const QStringList& itemIds, const QString& password);
+    // What a window keeps of its own beside its place and size, such as the
+    // widths of its columns.
+    [[nodiscard]] Q_INVOKABLE QString windowValue(const QString& name) const;
+    Q_INVOKABLE void keepWindowValue(const QString& name, const QString& value);
     // Moves an item into the Trash or out of it, into the Archive or out of
     // it (D-033).
     Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);
@@ -614,6 +631,10 @@ signals:
     void masterPasswordChanged(bool ok);
     // {ok, items, categories, templates, attachments, message}
     void importRead(const QVariantMap& summary);
+    void retried(const QString& text, bool trouble);
+    // problem: why it is asked again, or empty.
+    void retryPasswordNeeded(const QString& source, const QString& vaultName, const QStringList& itemIds,
+                             const QString& problem);
     void exportDone(bool ok);
     void autoLockMinutesChanged();
     void systemIdleAvailableChanged();
@@ -764,8 +785,28 @@ private:
     // otherwise keeps its values with a conflict per difference, its other
     // value the imported one. True when it is a new conflict.
     bool takeImported(const Item& imported, const QDateTime& now, bool* added);
+    // A source read off the window's thread: another vault, with its password
+    // or a key kept for it, or an export.
+    struct SourceRead
+    {
+        ImportResult result;
+        QString why;                // why it could not be read, or empty
+        bool passwordNeeded = false; // the password or the key was not the vault's
+        VaultKey key;
+    };
+    [[nodiscard]] static SourceRead readVaultSource(const QString& file, QByteArray password,
+                                                    const std::optional<VaultKey>& kept, const QString& keyfile,
+                                                    const VaultContents& snapshot);
+    [[nodiscard]] static SourceRead readExportSource(const QString& file, const VaultContents& snapshot);
+    void keepSourceKey(const QString& file, const VaultKey& sourceKey);
+    void retryFrom(const QString& source, const QStringList& itemIds, const QString& password);
+    void retryRead(const QString& source, const QStringList& itemIds, const SourceRead& read);
+    void retryShared();
     // The Sync conflicts dialog's helpers (D-061), in vault_controller_conflicts.cpp.
     [[nodiscard]] QVariantMap conflictRow(const Item& item, const MergeNote& note) const;
+    [[nodiscard]] QVariantList conflictFields(const Item& item, const QVariantList& choices,
+                                              const QString& deletedSide) const;
+    [[nodiscard]] QVariantMap conflictWays(const QString& kind, const QList<MergeNote>& notes, bool ofVault) const;
     bool settleNote(Item& item, const MergeNote& note, bool takeOther, const QDateTime& now);
     void removeForGood(const QList<QUuid>& ids, const QDateTime& now);
 
@@ -875,6 +916,9 @@ private:
     QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
     QString returnTo;                      // the vault shown before the lock
     std::optional<ImportResult> pendingImport; // read, waiting for the person's OK
+    QString pendingSource; // where it came from, as a MergeNote's source
+    QHash<QString, QByteArray> sourceKeys; // an imported vault's key, sealed, until the lock (D-061)
+    bool retryWaiting = false; // Retry sync waits for a sync to end
     std::shared_ptr<Stamps> stamps = std::make_shared<Stamps>();
     QFileSystemWatcher watcher;
     bool checkPending = false;

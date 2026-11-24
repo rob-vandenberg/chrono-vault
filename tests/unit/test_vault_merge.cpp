@@ -19,9 +19,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_merge.cpp 0.5.78
+// test_vault_merge.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Which side deleted an item; an item brought back (D-061)
 // v0.5.78: This device's value stands; every two-sided difference noted, the person's own categories and templates too (D-061)
 // v0.2.56: fieldOf returns on every path (Microsoft's compiler); the changes to built-in categories merged (D-056)
 // v0.2.45: Initial release (D-054)
@@ -244,6 +245,34 @@ private slots:
         const MergeResult reversed = mergeContents(&base, theirs, mine, now, here);
         QCOMPARE(reversed.contents.items.size(), 1);
         QCOMPARE(reversed.itemsBack, 1);
+        // Which side deleted it is said (D-061).
+        QCOMPARE(merged.contents.items[0].mergeNotes[0].device, here);
+        QVERIFY(merged.contents.items[0].mergeNotes[0].property.isEmpty());
+        QCOMPARE(reversed.contents.items[0].mergeNotes[0].property, QStringLiteral("deletedOn"));
+    }
+
+    // Keep here only, or an import, brought back what both sides had agreed
+    // was deleted: the other device takes it without asking (D-061).
+    void an_item_brought_back_on_one_side_is_taken()
+    {
+        VaultContents base;
+        const Item item = login(QStringLiteral("Bank"));
+        base.deletedItems = {DeletedItem{item.id, t0}};
+        VaultContents mine = base;
+        mine.items = {login(QStringLiteral("Other"))}; // changed here meanwhile
+        VaultContents theirs;
+        theirs.items = {item};
+        theirs.items[0].modified = t0.addDays(1);
+        for (const bool reversed : {false, true}) {
+            const MergeResult merged = reversed ? mergeContents(&base, theirs, mine, now, here)
+                                                : mergeContents(&base, mine, theirs, now, here);
+            QCOMPARE(merged.contents.items.size(), 2);
+            QCOMPARE(merged.itemsBack, 0);
+            QVERIFY(merged.contents.deletedItems.isEmpty());
+            for (const Item& one : merged.contents.items) {
+                QVERIFY(one.mergeNotes.isEmpty());
+            }
+        }
     }
 
     void tags_added_and_removed_on_both_sides_are_combined()

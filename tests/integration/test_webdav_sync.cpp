@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_sync.cpp 0.5.75
+// test_webdav_sync.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Retry sync of a WebDAV vault (D-061)
 // v0.5.75: Disconnect deletes nothing; moving is tested in test_vault_menu (D-060)
 // v0.3.62: A failed first upload leaves nothing; the folder browser; leftovers; the same bytes (built apart)
 // v0.3.61: The first upload through a lock's placeholder that has no tag or size (pCloud)
@@ -300,6 +301,29 @@ private slots:
         QVERIFY(first->syncProblem().isEmpty());
     }
 #else
+    // Retry sync of a WebDAV vault synchronizes it, and says how that went (D-061).
+    void retry_sync_answers_with_the_sync_it_asked_for()
+    {
+        WebDavTestServer server;
+        auto first = device();
+        QVERIFY(connected(*first, server));
+        first->createWebDavVault(QStringLiteral("Home"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_VERIFY_WITH_TIMEOUT(first->state() == State::Unlocked, 10000);
+        QVERIFY(syncedNow(*first));
+        QSignalSpy retried(first.get(), &VaultController::retried);
+        first->retryConflicts({QStringLiteral("vault:category:own")});
+        QVERIFY(retried.wait(10000));
+        QVERIFY(!retried.constLast().at(1).toBool());
+        server.password = QStringLiteral("another"); // refused from now on
+        first->retryConflicts({QStringLiteral("vault:category:own")});
+        QVERIFY(retried.wait(10000));
+        QVERIFY(retried.constLast().at(1).toBool());
+        // The server's password is asked now: answered at once.
+        first->retryConflicts({QStringLiteral("vault:category:own")});
+        QCOMPARE(retried.size(), 3);
+        QVERIFY(retried.constLast().at(1).toBool());
+    }
+
     void a_new_vault_goes_to_the_server()
     {
         WebDavTestServer server;

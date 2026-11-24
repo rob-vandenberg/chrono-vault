@@ -23,9 +23,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_differences.cpp 0.5.78
+// item_differences.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Keeping both values of a field; a field only the other side has placed as there (D-061)
 // v0.5.78: Initial release (D-061)
 
 namespace chrono_vault {
@@ -35,7 +36,8 @@ namespace {
 bool sameNote(const MergeNote& one, const MergeNote& other)
 {
     return one.kind == other.kind && one.fieldUid == other.fieldUid && one.property == other.property &&
-           one.subject == other.subject && one.otherValue == other.otherValue && one.otherData == other.otherData &&
+           (one.property == QLatin1String("present") || one.subject == other.subject) &&
+           one.otherValue == other.otherValue && one.otherData == other.otherData &&
            one.otherWhen == other.otherWhen;
 }
 
@@ -63,21 +65,27 @@ QString flagText(bool on)
 
 bool addNote(QList<MergeNote>& notes, const MergeNote& note)
 {
-    if (std::any_of(notes.cbegin(), notes.cend(), [&note](const MergeNote& one) { return sameNote(one, note); })) {
-        return false;
+    for (MergeNote& one : notes) {
+        if (sameNote(one, note)) {
+            if (!note.source.isEmpty()) {
+                one.source = note.source; // the source it was found in last
+            }
+            return false;
+        }
     }
     notes.append(note);
     return true;
 }
 
 NotedDifferences noteDifferences(Item& ours, const Item& theirs, const QDateTime& now, bool imported,
-                                 const QString& device)
+                                 const QString& device, const QString& source)
 {
     NotedDifferences result;
     MergeNote blank;
     blank.when = now;
     blank.imported = imported;
     blank.device = device;
+    blank.source = source;
     const auto note = [&](qint64 fieldUid, const QString& property, const QString& other, const QString& subject = {},
                           const QByteArray& data = {}, const QDateTime& otherWhen = {}) {
         MergeNote one = blank;
@@ -128,26 +136,33 @@ NotedDifferences noteDifferences(Item& ours, const Item& theirs, const QDateTime
                  attachment.data);
         }
     }
+    qint64 previous = 0; // the field before it there, which is on ours by now
     for (const Field& field : theirs.fields) {
         if (field.uid == 0) {
             continue;
         }
+        const qint64 before = previous;
         const auto mine = std::find_if(ours.fields.begin(), ours.fields.end(),
                                        [&field](const Field& one) { return one.uid == field.uid; });
         if (mine == ours.fields.end()) {
             if (field.deleted) {
                 continue; // deleted there, never here: the same
             }
+            previous = field.uid;
             // Only theirs has it: kept here as deleted until the person
-            // chooses, so its name and kind are at hand (OR-15).
+            // chooses, so its name and kind are at hand (OR-15), and where
+            // theirs has it: after the field before it there (D-061).
             Field kept = field;
             kept.deleted = true;
             kept.history.clear();
-            ours.fields.append(kept);
+            const auto after = std::find_if(ours.fields.cbegin(), ours.fields.cend(),
+                                            [before](const Field& one) { return one.uid == before; });
+            ours.fields.insert(before == 0 || after == ours.fields.cend() ? 0 : after - ours.fields.cbegin() + 1, kept);
             result.changed = true;
-            note(field.uid, QStringLiteral("present"), field.value);
+            note(field.uid, QStringLiteral("present"), field.value, QStringLiteral("never"));
             continue;
         }
+        previous = field.uid;
         if (mine->deleted != field.deleted) {
             if (mine->deleted) {
                 note(field.uid, QStringLiteral("present"), field.value);
@@ -258,6 +273,41 @@ void useOtherSide(Item& item, const MergeNote& note, const QDateTime& now)
         const QUuid id = QUuid::fromString(note.subject);
         item.attachments.removeIf([&id](const Attachment& one) { return one.id == id; });
     }
+}
+
+bool canKeepBoth(const Item& item, const MergeNote& note)
+{
+    if (note.kind != MergeNote::Kind::ChangedOnBoth || note.fieldUid == 0 || !note.property.isEmpty() ||
+        note.otherValue.isEmpty()) {
+        return false;
+    }
+    return std::any_of(item.fields.cbegin(), item.fields.cend(), [&note](const Field& field) {
+        return field.uid == note.fieldUid && !field.deleted && !field.value.isEmpty() &&
+               (field.kind == FieldKind::Email || field.kind == FieldKind::Phone ||
+                field.kind == FieldKind::WebAddress);
+    });
+}
+
+bool keepBothValues(Item& item, const MergeNote& note, const QDateTime& now)
+{
+    if (!canKeepBoth(item, note)) {
+        return false;
+    }
+    for (qsizetype at = 0; at < item.fields.size(); ++at) {
+        const Field& original = item.fields.at(at);
+        if (original.uid != note.fieldUid) {
+            continue;
+        }
+        // Its name kept as a name of its own: an item has one field a role.
+        Field second = makeField(QString(), original.isCustom() ? original.label : roleName(original.role),
+                                 original.kind, note.otherValue);
+        second.sensitive = original.sensitive;
+        second.changed = now;
+        item.fields.insert(at + 1, second);
+        giveFieldsIds(item);
+        return true;
+    }
+    return false;
 }
 
 void useOtherSide(VaultContents& contents, const MergeNote& note)

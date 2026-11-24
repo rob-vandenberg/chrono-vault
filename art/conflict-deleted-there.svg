@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: deleted on the other device. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path d="M9.5 19 C5.5 18.7 3 17.6 3 16.2 V5 C3 3.6 6 2.5 10 2.5 C14 2.5 17 3.6 17 5 V9.5 M17 5 C17 6.4 14 7.5 10 7.5 C6 7.5 3 6.4 3 5 M3 10.6 C3 11.8 5.6 13 9.8 13" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M17.5 11.5 a6 6 0 1 1 0 12 a6 6 0 1 1 0 -12 Z M14 16.6 V18.4 H21 V16.6 Z" fill="#000000" fill-rule="evenodd"/>
+</svg>

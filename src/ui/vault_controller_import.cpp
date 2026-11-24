@@ -28,9 +28,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_import.cpp 0.5.78
+// vault_controller_import.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: A source read for Import and for Retry sync alike; an item deleted for good here simply imported (D-061)
 // v0.5.78: Every difference a conflict; an item deleted for good here comes back with a conflict (D-061)
 // v0.5.77: Initial release: importing another vault; an import's duplicates skipped or made conflicts (D-060)
 
@@ -40,6 +41,72 @@
 // differs waits in the Sync conflicts dialog for the person (OR-15, D-061).
 
 namespace chrono_vault {
+
+VaultController::SourceRead VaultController::readVaultSource(const QString& file, QByteArray password,
+                                                             const std::optional<VaultKey>& kept,
+                                                             const QString& keyfile, const VaultContents& snapshot)
+{
+    std::optional<QByteArray> fingerprint = QByteArray();
+    if (!kept && !keyfile.isEmpty()) {
+        fingerprint = keyfileFingerprint(keyfile);
+    }
+    OpenResult opened;
+    if (kept) {
+        opened = openVaultFileWithKey(file, *kept);
+    } else if (fingerprint) {
+        opened = openVaultFile(file, password, *fingerprint);
+    }
+    crypto::wipe(password);
+    SourceRead found;
+    ImportResult& result = found.result;
+    QString& why = found.why;
+    if (!fingerprint) {
+        why = tr("The vault's keyfile could not be read.");
+    } else if (opened.status == OpenStatus::WrongPasswordOrDamaged) {
+        why = tr("That is not the vault's master password, or the vault is damaged.");
+        found.passwordNeeded = true;
+    } else if (opened.status == OpenStatus::KeyChanged) {
+        why = tr("That vault was given another master password.");
+        found.passwordNeeded = true;
+    } else if (opened.status == OpenStatus::KeyfileNeeded) {
+        why = tr("That vault needs its keyfile. Open it once in Chrono Vault with its keyfile, then import it.");
+    } else if (opened.status == OpenStatus::NewerFormat) {
+        why = tr("That vault was made by a newer Chrono Vault. Nothing was imported.");
+    } else if (opened.status != OpenStatus::Opened) {
+        why = tr("That file could not be opened as a vault.");
+    } else {
+        ContentsResult read = contentsFromJson(opened.contents);
+        crypto::wipe(opened.contents);
+        if (read.status != ContentsStatus::Read) {
+            why = tr("That vault was made by a newer Chrono Vault, or is damaged. Nothing was imported.");
+        } else {
+            result.status = ImportStatus::Read;
+            for (const Item& item : std::as_const(read.contents.items)) {
+                result.items.append(item);
+                result.attachmentCount += static_cast<int>(item.attachments.size());
+            }
+            // The categories and templates of its own, those this vault
+            // does not have as they are: new ones are added, ones that
+            // differ wait for the person (D-061).
+            for (const Category& category : std::as_const(read.contents.categories)) {
+                if (!snapshot.categories.contains(category)) {
+                    result.categories.append(category);
+                }
+            }
+            for (const Template& one : std::as_const(read.contents.templates)) {
+                if (!snapshot.templates.contains(one)) {
+                    result.templates.append(one);
+                }
+            }
+        }
+    }
+    if (why.isEmpty()) {
+        found.key = opened.key;
+        found.key.key.detach();
+    }
+    opened.key.wipe();
+    return found;
+}
 
 void VaultController::readVaultImport(const QUrl& file, const QString& password)
 {
@@ -61,60 +128,20 @@ void VaultController::readVaultImport(const QUrl& file, const QString& password)
     say(tr("Reading the vault…"), false);
     // Deriving the key is slow: off the window's thread (OR-5).
     (void)QtConcurrent::run(&unlockPool, [self, source, passwordBytes, keyfileFile, snapshot, session]() mutable {
-        std::optional<QByteArray> fingerprint = QByteArray();
-        if (!keyfileFile.isEmpty()) {
-            fingerprint = keyfileFingerprint(keyfileFile);
-        }
-        OpenResult opened;
-        if (fingerprint) {
-            opened = openVaultFile(source, passwordBytes, *fingerprint);
-        }
-        crypto::wipe(passwordBytes);
-        ImportResult result;
-        QString why;
-        if (!fingerprint) {
-            why = tr("The vault's keyfile could not be read.");
-        } else if (opened.status == OpenStatus::WrongPasswordOrDamaged) {
-            why = tr("That is not the vault's master password, or the vault is damaged.");
-        } else if (opened.status == OpenStatus::KeyfileNeeded) {
-            why = tr("That vault needs its keyfile. Open it once in Chrono Vault with its keyfile, then import it.");
-        } else if (opened.status == OpenStatus::NewerFormat) {
-            why = tr("That vault was made by a newer Chrono Vault. Nothing was imported.");
-        } else if (opened.status != OpenStatus::Opened) {
-            why = tr("That file could not be opened as a vault.");
-        } else {
-            ContentsResult read = contentsFromJson(opened.contents);
-            crypto::wipe(opened.contents);
-            if (read.status != ContentsStatus::Read) {
-                why = tr("That vault was made by a newer Chrono Vault, or is damaged. Nothing was imported.");
-            } else {
-                result.status = ImportStatus::Read;
-                for (const Item& item : std::as_const(read.contents.items)) {
-                    result.items.append(item);
-                    result.attachmentCount += static_cast<int>(item.attachments.size());
-                }
-                // The categories and templates of its own, those this vault
-                // does not have as they are: new ones are added, ones that
-                // differ wait for the person (D-061).
-                for (const Category& category : std::as_const(read.contents.categories)) {
-                    if (!snapshot.categories.contains(category)) {
-                        result.categories.append(category);
-                    }
-                }
-                for (const Template& one : std::as_const(read.contents.templates)) {
-                    if (!snapshot.templates.contains(one)) {
-                        result.templates.append(one);
-                    }
-                }
-            }
-        }
-        opened.key.wipe();
+        SourceRead read = readVaultSource(source, std::move(passwordBytes), std::nullopt, keyfileFile, snapshot);
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, why, session]() mutable {
+            [self, read, source, session]() mutable {
+                const QString why = read.why;
+                ImportResult result = std::move(read.result);
                 if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
+                    read.key.wipe();
                     return;
                 }
+                if (why.isEmpty()) {
+                    self->keepSourceKey(source, read.key);
+                }
+                read.key.wipe();
                 QVariantMap summary{{QStringLiteral("ok"), why.isEmpty()}};
                 if (!why.isEmpty()) {
                     summary.insert(QStringLiteral("message"), why);
@@ -127,6 +154,7 @@ void VaultController::readVaultImport(const QUrl& file, const QString& password)
                 summary.insert(QStringLiteral("templates"), static_cast<int>(result.templates.size()));
                 summary.insert(QStringLiteral("attachments"), result.attachmentCount);
                 self->pendingImport = std::move(result);
+                self->pendingSource = QStringLiteral("vault:") + source;
                 self->say(QString(), false);
                 emit self->importRead(summary);
             },
@@ -148,22 +176,17 @@ bool VaultController::takeImported(const Item& imported, const QDateTime& now, b
             *added = true;
             return false;
         }
-        // Deleted here for good, held by the import: the person chooses.
-        // Until then it is kept, counted as changed now, so a sync with a
-        // device that still holds the deletion keeps it and asks, never drops
-        // it silently (OR-15, D-061).
+        // Deleted here for good, held by the import: imported as any item the
+        // vault does not have (the owner). Counted as changed now, so no sync
+        // with a device that still holds the deletion drops it (OR-15).
         item.modified = now;
         item.mergeNotes.clear();
-        MergeNote note;
-        note.property = QStringLiteral("deletedHere");
-        note.when = now;
-        note.imported = true;
-        item.mergeNotes.append(note);
         contents.items.append(item);
-        return true;
+        *added = true;
+        return false;
     }
     // Ours stands; every way the import differs is noted (D-061).
-    const NotedDifferences noted = noteDifferences(*ours, imported, now, true, QString());
+    const NotedDifferences noted = noteDifferences(*ours, imported, now, true, QString(), pendingSource);
     if (noted.changed) {
         ours->modified = now;
     }

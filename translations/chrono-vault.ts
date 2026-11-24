@@ -27,7 +27,7 @@
 <context>
     <name>Attachment</name>
     <message>
-        <location filename="../src/core/item_differences.cpp" line="+47"/>
+        <location filename="../src/core/item_differences.cpp" line="+49"/>
         <source>%1 (earlier)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -101,67 +101,89 @@
 <context>
     <name>ConflictWindow</name>
     <message>
-        <location filename="../qml/ConflictWindow.qml" line="+102"/>
+        <location filename="../qml/ConflictWindow.qml" line="+228"/>
         <source>Sync conflict: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+12"/>
+        <source>Retry sync</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+6"/>
+        <source>Keep here only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <location line="+318"/>
+        <location line="+2"/>
         <source>Keep both</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="-306"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
-        <source>Keep</source>
+        <location line="+7"/>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
-        <source>Move to Trash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+30"/>
-        <source>What:</source>
+        <location line="+144"/>
+        <source>What</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Where:</source>
+        <source>Where</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Why:</source>
+        <source>Why</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Deleted on one side and changed on the other, so it was kept.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>The import holds other values. The vault&apos;s values stand until you choose.</source>
+        <source>Deleted on the other device, changed here</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Changed on two devices. Nothing is decided until you choose.</source>
+        <source>Deleted here, changed on the other device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+1"/>
+        <source>Differs from an import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Changed on two devices, and differs from an import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Changed on two devices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Show hidden values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+26"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -294,7 +316,7 @@
 <context>
     <name>Field</name>
     <message>
-        <location filename="../src/core/vault_contents.cpp" line="+554"/>
+        <location filename="../src/core/vault_contents.cpp" line="+561"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1178,8 +1200,8 @@
 <context>
     <name>ImportWindow</name>
     <message>
-        <location filename="../qml/ImportWindow.qml" line="+59"/>
-        <location line="+58"/>
+        <location filename="../qml/ImportWindow.qml" line="+60"/>
+        <location line="+57"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2071,7 +2093,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+311"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+337"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2571,63 +2593,85 @@
 <context>
     <name>SyncConflictsWindow</name>
     <message>
-        <location filename="../qml/SyncConflictsWindow.qml" line="+125"/>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+190"/>
         <source>Sync conflicts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+67"/>
         <source>Check all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="-180"/>
         <source>What</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="-11"/>
+        <source>Deleted on the other device, changed here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+1"/>
+        <source>Deleted here, changed on the other device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+0"/>
         <source>Fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+0"/>
         <source>Where</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+6"/>
+        <location line="+241"/>
         <source>Why</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+73"/>
+        <location line="+89"/>
         <source>No conflicts to settle.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+10"/>
         <location line="+6"/>
         <source>Use %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+6"/>
+        <location line="+74"/>
+        <source>Retry sync</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-65"/>
+        <source>Keep here only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+94"/>
+        <source>The master password of “%1”, to read it again:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-473"/>
         <source>Changed on two devices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
-        <source>Deleted on one device and changed on the other (Use Other device moves it to the Trash)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-25"/>
+        <location line="+385"/>
         <source>Keep both</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2637,7 +2681,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="-388"/>
         <source>Differs from an import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2983,7 +3027,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+239"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+240"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3785,26 +3829,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2228"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+478"/>
+        <location line="+2214"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+494"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2224"/>
-        <location line="+2229"/>
+        <location line="-2210"/>
+        <location line="+2215"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2132"/>
-        <location line="+2032"/>
+        <location line="-2118"/>
+        <location line="+2018"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2121"/>
+        <location line="-2107"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3816,7 +3860,7 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+1910"/>
+        <location line="+1896"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+83"/>
         <location line="+358"/>
@@ -3826,7 +3870,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2193"/>
+        <location line="-2179"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -3842,7 +3886,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+995"/>
+        <location line="+981"/>
         <source>%1 can no longer open this vault, so it was turned off. Unlock with the master password, then turn it on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3862,7 +3906,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1773"/>
+        <location line="-1759"/>
         <location line="+85"/>
         <location filename="../src/ui/vault_controller_pin.cpp" line="+228"/>
         <source>Unlocking…</source>
@@ -3915,31 +3959,35 @@
     </message>
     <message>
         <location line="+75"/>
-        <location line="+1083"/>
+        <location line="+1069"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1025"/>
-        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+177"/>
+        <location line="-1011"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+211"/>
+        <location line="+123"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+1"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="-122"/>
+        <location line="+123"/>
         <source>Subtitle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+1"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="-122"/>
+        <location line="+132"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <location filename="../src/ui/vault_controller_conflicts.cpp" line="+1"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="-131"/>
+        <location line="+132"/>
         <source>Website</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3949,17 +3997,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location filename="../src/ui/vault_controller_retry.cpp" line="+83"/>
         <source>The file could not be read.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+1"/>
         <source>The file is too large to be an export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+1"/>
         <source>This file is not an export of %1.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3969,7 +4017,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+68"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-421"/>
+        <source>Not synchronized: the server&apos;s password is needed. The conflict stays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>“%1” could not be read. The conflict stays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Nothing changed in “%1” since: the conflict stays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>“%1” was read again. A conflict still listed is the same there.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+67"/>
+        <source>The file is not there.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>“%1” could not be read: %2 The conflict stays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+74"/>
+        <source>Read again from “%1”.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+2"/>
+        <source>%n item(s) no longer differ.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+3"/>
+        <source>%n item(s) still differ.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>No longer there, so left as it was: %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>The attachments of this vault together may hold at most %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller.cpp" line="+35"/>
         <source>Nothing was imported: choose the export again.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4209,7 +4317,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-459"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-53"/>
         <source>The server cannot be reached. Check the address and the network.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4254,17 +4362,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+137"/>
+        <location line="+142"/>
+        <location line="+32"/>
         <source>Not synchronized: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="-12"/>
         <source>The vault was given another master password on another device. Unlock it with that one. Your version is kept as “%1”.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+50"/>
+        <location line="+11"/>
+        <source>The vault was synchronized. A conflict still listed is the same there.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The conflict stays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+47"/>
         <source>That is not a web address.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4427,7 +4546,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_conflicts.cpp" line="-43"/>
+        <location filename="../src/ui/vault_controller_conflicts.cpp" line="-176"/>
         <source>(not on the item)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4442,7 +4561,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+2"/>
+        <location line="+140"/>
+        <source>(deleted)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-133"/>
         <source>A field no longer in the item</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4470,26 +4595,28 @@
         <location line="+1"/>
         <location line="+49"/>
         <location line="+3"/>
+        <location line="+99"/>
         <source>%1 (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-37"/>
-        <location line="+183"/>
+        <location line="-136"/>
+        <location line="+126"/>
+        <location line="+180"/>
         <location line="+13"/>
         <location line="+16"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-208"/>
-        <location line="+157"/>
+        <location line="-331"/>
+        <location line="+280"/>
         <location line="+51"/>
         <source>Template</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-201"/>
+        <location line="-324"/>
         <source>In the Trash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4532,16 +4659,18 @@
     </message>
     <message>
         <location line="+2"/>
+        <location line="+101"/>
         <source>Tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="-97"/>
+        <location line="+104"/>
         <source>Attachment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="-97"/>
         <source>The item</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4556,7 +4685,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+5"/>
+        <source>(empty)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+115"/>
         <source>Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4586,7 +4720,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+118"/>
+        <location line="+134"/>
         <location line="+35"/>
         <source>Fields</source>
         <translation type="unfinished"></translation>
@@ -4597,7 +4731,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_import.cpp" line="+52"/>
+        <location filename="../src/ui/vault_controller_import.cpp" line="+119"/>
         <source>That is the vault the items would go into. Choose another vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4607,7 +4741,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="-64"/>
         <source>The vault&apos;s keyfile could not be read.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4617,7 +4751,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
+        <source>That vault was given another master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>That vault needs its keyfile. Open it once in Chrono Vault with its keyfile, then import it.</source>
         <translation type="unfinished"></translation>
     </message>

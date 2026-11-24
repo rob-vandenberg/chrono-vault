@@ -25,9 +25,10 @@
 #include <tuple>
 
 // --- Version ------------------------------------------------------------
-// vault_merge.cpp 0.5.78
+// vault_merge.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Which side deleted an item; an item brought back on one side is taken (D-061)
 // v0.5.78: Every two-sided difference kept for the person to settle, this device's value standing (D-061)
 // v0.2.56: The changes to built-in categories merged as the person's own categories (D-056)
 // v0.2.45: Initial release (D-054)
@@ -494,8 +495,14 @@ MergeResult mergeContents(const VaultContents* base, const VaultContents& mine, 
 
     // An item on one side only: new there, or deleted on the other. Deleted
     // and changed after that: kept, with a note (the owner, Q8).
-    const auto onOneSide = [&](const Item& item, const VaultContents& other) {
+    const auto onOneSide = [&](const Item& item, const VaultContents& other, bool ours) {
         const Item* before = itemWith(baseItems, item.id);
+        if (base != nullptr && before == nullptr && deletionOf(base->deletedItems, item.id) != nullptr) {
+            // Deleted in what both agreed on, and brought back since on this
+            // one side (kept by the person, or imported): taken (D-061).
+            result.items.append(item);
+            return;
+        }
         const DeletedItem* deletion = deletionOf(other.deletedItems, item.id);
         bool deletedThere = false;
         bool changedSince = false;
@@ -521,6 +528,11 @@ MergeResult mergeContents(const VaultContents* base, const VaultContents& mine, 
             MergeNote note;
             note.kind = MergeNote::Kind::DeletedElsewhere;
             note.when = now;
+            // Which side deleted it, for the windows to say (D-061).
+            note.device = device;
+            if (!ours) {
+                note.property = QStringLiteral("deletedOn");
+            }
             kept.mergeNotes.append(note);
         }
         ++merged.itemsBack;
@@ -535,12 +547,12 @@ MergeResult mergeContents(const VaultContents* base, const VaultContents& mine, 
                 ++merged.itemsChangedOnBoth;
             }
         } else {
-            onOneSide(item, theirs);
+            onOneSide(item, theirs, true);
         }
     }
     for (const Item& item : theirs.items) {
         if (itemWith(&mine.items, item.id) == nullptr) {
-            onOneSide(item, mine);
+            onOneSide(item, mine, false);
         }
     }
 

@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.5.78
+// vault_contents.h 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: MergeNote::source, and what its subject and property say of a field never there and of a deletion (D-061)
 // v0.5.78: The contents format 9: every difference a merge or an import meets kept for the person to settle (D-061)
 // v0.5.77: MergeNote::imported (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
@@ -143,6 +144,13 @@ struct MergeNote
     QByteArray otherData;  // an icon, an attachment's content or a template (D-061)
     QDateTime otherWhen;   // an earlier value's time (D-061)
     QString device;        // the device whose value stands; empty for an import (D-061)
+    // Of a "present" note: subject "never" when this side never had the
+    // field, so it reads "(not on the item)" and not "(deleted)". Of an item
+    // deleted on one side: property "" with the device that changed it, or
+    // "deletedOn" with the device that deleted it; no device in an older one.
+    // Where an import's value came from, so Retry sync can read it again:
+    // "export:" or "vault:" and the file. Not part of what differs.
+    QString source;
 
     friend bool operator==(const MergeNote&, const MergeNote&) = default;
 };

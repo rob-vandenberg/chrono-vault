@@ -18,22 +18,22 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.5.78
+// SyncConflictsWindow.qml 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: The list as Chrono Mail's: a table whose columns are dragged, line icons, Retry sync, Keep here only, every button greyed and never hidden (D-061)
 // v0.5.78: The buttons "Use Vault" and "Use Import", or "Use This device" and "Use Other device"; the row tick boxes as clear as Check all (D-061)
 // v0.5.77: A conflict from an import has its own mark (D-060)
 // v0.5.76: Initial release (D-060)
 
-// Sync conflicts (Tools > Sync conflicts…), after Chrono Mail's (D-060): one
-// row per item with a conflict, with What, Name, Fields, Where and Why; the
-// ticked rows settled whole with Use Vault or Use Import (an import), Use
-// This device or Use Other device (a sync), or Keep both, or one by one with
-// a double click (D-061). Nothing asks during a sync: a conflict
-// waits here until the person settles it.
+// Sync conflicts (Tools > Sync conflicts…), as Chrono Mail's (D-060, D-061):
+// one row per item with a conflict, with What, Name, Fields, Where and Why;
+// the ticked rows settled whole, or one by one with a double click. Nothing
+// asks during a sync: a conflict waits here until the person settles it.
 DialogWindow {
     id: conflictsWindow
     objectName: "syncConflictsWindow"
@@ -43,45 +43,110 @@ DialogWindow {
     property var rows: []
     // The ticked rows, by item id.
     property var ticked: ({})
-    readonly property int tickedCount: {
-        let count = 0
-        for (let i = 0; i < rows.length; ++i) {
-            if (ticked[rows[i].itemId])
-                ++count
-        }
-        return count
-    }
-    // Keep both makes a copy of an item: not for one deleted elsewhere, nor
-    // for a category or template.
-    readonly property bool anyUncopyable: {
-        for (let i = 0; i < rows.length; ++i) {
-            if (ticked[rows[i].itemId] && (rows[i].kind === "deleted" || rows[i].ofVault))
-                return true
-        }
-        return false
+    readonly property var tickedRows: rows.filter(function(row) { return ticked[row.itemId] === true })
+    readonly property int tickedCount: tickedRows.length
+    function everyTicked(can) {
+        return tickedCount > 0 && tickedRows.every(function(row) { return row[can] === true })
     }
     // The sides' names of the ticked rows (D-061): an import's, a sync's, or
     // both when the ticked rows hold both.
     readonly property var sides: {
         let imported = false
         let synced = false
-        for (let i = 0; i < rows.length; ++i) {
-            if (!ticked[rows[i].itemId])
-                continue
-            if (rows[i].source === "imported")
+        for (let i = 0; i < tickedRows.length; ++i) {
+            if (tickedRows[i].source !== "both")
                 imported = true
-            else if (rows[i].source === "both")
+            if (tickedRows[i].source !== "imported")
                 synced = true
-            else {
-                imported = true
-                synced = true
-            }
         }
         return VaultController.sideNames(imported && synced ? "mixed" : imported ? "imported" : "both")
     }
-    readonly property int whatWidth: Math.round(110 * Appearance.factor)
-    readonly property int whyWidth: Math.round(44 * Appearance.factor)
-    readonly property int tickWidth: Math.round(32 * Appearance.factor)
+    readonly property var whyWords: ({
+        "both": qsTr("Changed on two devices"),
+        "deletedThere": qsTr("Deleted on the other device, changed here"),
+        "deletedHere": qsTr("Deleted here, changed on the other device"),
+        "imported": qsTr("Differs from an import")
+    })
+    // Retry sync's answer, under the buttons.
+    property string said: ""
+    property bool saidTrouble: false
+
+    // The columns: What, Name, Fields and Where together always the free
+    // width, each its share of it; What its widest text until it is dragged;
+    // none narrower than its header. The tick box and Why keep their width.
+    readonly property var columnNames: [qsTr("What"), qsTr("Name"), qsTr("Fields"), qsTr("Where")]
+    property var shares: [0.12, 0.38, 0.2, 0.3]
+    property bool whatDragged: false
+    property var columnWidths: [80, 200, 120, 160]
+    readonly property int cellPad: Math.round(6 * Appearance.factor)
+    readonly property int tickWidth: Math.round(34 * Appearance.factor)
+    readonly property int whyWidth: Math.ceil(metrics.advanceWidth(qsTr("Why"))) + Math.round(28 * Appearance.factor)
+    readonly property int barRoom: list.contentHeight > list.height ? Math.round(16 * Appearance.factor) : 0
+    readonly property int freeWidth: Math.max(0, table.width - tickWidth - whyWidth - barRoom)
+    onFreeWidthChanged: fitColumns()
+    function smallestOf(column) {
+        return Math.ceil(metrics.advanceWidth(columnNames[column])) + 2 * cellPad + 4
+    }
+    function fitColumns() {
+        if (freeWidth <= 0)
+            return
+        const smallest = [0, 1, 2, 3].map(smallestOf)
+        const widths = [0, 0, 0, 0]
+        let rest = [0, 1, 2, 3]
+        let room = freeWidth
+        if (!whatDragged) {
+            let what = smallest[0]
+            for (let i = 0; i < rows.length; ++i)
+                what = Math.max(what, Math.ceil(metrics.advanceWidth(rows[i].what || "")) + 2 * cellPad + 2)
+            widths[0] = Math.max(smallest[0], Math.min(what, freeWidth - smallest[1] - smallest[2] - smallest[3]))
+            rest = [1, 2, 3]
+            room -= widths[0]
+        }
+        let total = 0
+        for (const column of rest)
+            total += shares[column]
+        for (const column of rest)
+            widths[column] = Math.max(smallest[column], Math.floor(room * shares[column] / total))
+        let over = widths[0] + widths[1] + widths[2] + widths[3] - freeWidth
+        let widest = rest[0]
+        for (const column of rest) {
+            if (widths[column] > widths[widest])
+                widest = column
+        }
+        widths[widest] = Math.max(smallest[widest], widths[widest] - over)
+        columnWidths = widths
+    }
+    // A border dragged: its column grows by what the one at its right gives.
+    function dragBorder(column, by) {
+        if (column > 2)
+            return
+        const widths = columnWidths.slice()
+        const grown = Math.max(smallestOf(column) - widths[column],
+                               Math.min(by, widths[column + 1] - smallestOf(column + 1)))
+        widths[column] += grown
+        widths[column + 1] -= grown
+        if (column === 0)
+            whatDragged = true
+        columnWidths = widths
+        const total = widths[0] + widths[1] + widths[2] + widths[3]
+        shares = widths.map(function(width) { return width / total })
+    }
+    function keepColumns() {
+        VaultController.keepWindowValue("syncConflicts/columns",
+                                        shares.map(function(share) { return share.toFixed(4) }).join(",")
+                                        + "," + (whatDragged ? "1" : "0"))
+    }
+    function readColumns() {
+        const parts = VaultController.windowValue("syncConflicts/columns").split(",")
+        if (parts.length !== 5)
+            return
+        const read = parts.slice(0, 4).map(parseFloat)
+        const total = read[0] + read[1] + read[2] + read[3]
+        if (read.every(function(share) { return share > 0 && share < 1 }) && Math.abs(total - 1) < 0.01) {
+            shares = read
+            whatDragged = parts[4] === "1"
+        }
+    }
 
     function refresh() {
         rows = VaultController.conflicts()
@@ -91,6 +156,7 @@ DialogWindow {
                 kept[rows[i].itemId] = true
         }
         ticked = kept
+        fitColumns()
     }
     function tick(id, on) {
         const next = Object.assign({}, ticked)
@@ -108,13 +174,12 @@ DialogWindow {
         }
         ticked = next
     }
+    function tickedIds() {
+        return tickedRows.map(function(row) { return row.itemId })
+    }
     function settle(side) {
-        const ids = []
-        for (let i = 0; i < rows.length; ++i) {
-            if (ticked[rows[i].itemId])
-                ids.push(rows[i].itemId)
-        }
-        VaultController.settleConflicts(ids, side)
+        said = ""
+        VaultController.settleConflicts(tickedIds(), side)
     }
     function showItem(id) {
         refresh()
@@ -124,10 +189,18 @@ DialogWindow {
 
     title: qsTr("Sync conflicts")
     standardButtons: Dialog.Close
-    width: Math.round(820 * Appearance.factor)
-    height: Math.round(460 * Appearance.factor)
+    width: Math.round(1000 * Appearance.factor)
+    height: Math.round(520 * Appearance.factor)
 
-    onShown: refresh()
+    Component.onCompleted: readColumns()
+    onShown: {
+        said = ""
+        refresh()
+    }
+    onVisibleChanged: {
+        if (!visible)
+            keepColumns()
+    }
     Connections {
         target: VaultController
         function onRevisionChanged() { conflictsWindow.refresh() }
@@ -135,20 +208,43 @@ DialogWindow {
             if (VaultController.state !== VaultController.Unlocked)
                 conflictsWindow.reject()
         }
+        function onRetried(text, trouble) {
+            conflictsWindow.said = text
+            conflictsWindow.saidTrouble = trouble
+        }
+        function onRetryPasswordNeeded(source, vaultName, itemIds, problem) {
+            retryPassword.ask(source, vaultName, itemIds, problem)
+        }
     }
 
-    component Why: Rectangle {
+    FontMetrics { id: metrics; font: conflictsWindow.font }
+
+    component Why: IconLabel {
         property string kind: "both"
-        implicitWidth: Math.round(20 * Appearance.factor)
-        implicitHeight: implicitWidth
-        radius: width / 2
-        color: kind === "deleted" ? "#d32f2f" : kind === "imported" ? "#1976d2" : "#ef6c00"
-        Label {
-            anchors.centerIn: parent
-            text: parent.kind === "deleted" ? "−" : parent.kind === "imported" ? "↓" : "≠"
-            color: "white"
-            font.bold: true
-        }
+        display: AbstractButton.IconOnly
+        icon.source: "qrc:/icons/conflict-" + (kind === "deletedThere" ? "deleted-there"
+                                               : kind === "deletedHere" ? "deleted-here"
+                                               : kind === "imported" ? "import" : "both") + ".svg"
+        icon.width: Math.round(18 * Appearance.factor)
+        icon.height: Math.round(18 * Appearance.factor)
+        icon.color: conflictsWindow.palette.text
+    }
+    component Line: Rectangle {
+        width: 1
+        color: conflictsWindow.palette.mid
+    }
+    // A cell's text; cut off, it shows whole on hovering.
+    component CellText: Label {
+        id: cellText
+        textFormat: Text.PlainText
+        elide: Text.ElideRight
+        verticalAlignment: Text.AlignVCenter
+        leftPadding: conflictsWindow.cellPad
+        rightPadding: conflictsWindow.cellPad
+        HoverHandler { id: over }
+        ToolTip.visible: over.hovered && truncated
+        ToolTip.text: text
+        ToolTip.delay: 500
     }
 
     ColumnLayout {
@@ -166,106 +262,160 @@ DialogWindow {
             onClicked: conflictsWindow.setAll(!checked)
         }
 
-        Frame {
+        Rectangle {
+            id: table
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: Math.round(160 * Appearance.factor)
-            padding: 0
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
-                // The header.
-                RowLayout {
-                    spacing: Math.round(6 * Appearance.factor)
-                    Layout.fillWidth: true
-                    Layout.margins: Math.round(4 * Appearance.factor)
-                    Item { Layout.preferredWidth: conflictsWindow.tickWidth }
-                    Label { text: qsTr("What"); font.bold: true; Layout.preferredWidth: conflictsWindow.whatWidth }
-                    Label { text: qsTr("Name"); font.bold: true; Layout.fillWidth: true; Layout.preferredWidth: 3 }
-                    Label { text: qsTr("Fields"); font.bold: true; Layout.fillWidth: true; Layout.preferredWidth: 2 }
-                    Label { text: qsTr("Where"); font.bold: true; Layout.fillWidth: true; Layout.preferredWidth: 2 }
-                    Label {
-                        text: qsTr("Why")
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.preferredWidth: conflictsWindow.whyWidth
+            color: conflictsWindow.palette.base
+
+            // The header bar.
+            Rectangle {
+                id: header
+                width: parent.width
+                height: metrics.height + Math.round(8 * Appearance.factor)
+                color: conflictsWindow.palette.button
+                Row {
+                    height: parent.height
+                    Item {
+                        width: conflictsWindow.tickWidth
+                        height: parent.height
+                        Line { anchors.right: parent.right; height: parent.height }
                     }
-                }
-                ListView {
-                    id: list
-                    objectName: "conflictsList"
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    model: conflictsWindow.rows
-                    ScrollBar.vertical: ScrollBar {}
-                    delegate: ItemDelegate {
-                        id: row
-                        required property var modelData
-                        required property int index
-                        objectName: "conflictRow_" + index
-                        width: list.width
-                        highlighted: conflictsWindow.ticked[modelData.itemId] === true
-                        onDoubleClicked: conflictWindow.showItem(modelData.itemId)
-                        contentItem: RowLayout {
-                            spacing: Math.round(6 * Appearance.factor)
-                            TickBox {
-                                objectName: "conflictTick_" + row.index
-                                checkable: false
-                                checked: conflictsWindow.ticked[row.modelData.itemId] === true
-                                onClicked: conflictsWindow.tick(row.modelData.itemId, !checked)
-                                Layout.preferredWidth: conflictsWindow.tickWidth
-                            }
+                    Repeater {
+                        model: 4
+                        delegate: Item {
+                            id: headerCell
+                            required property int index
+                            objectName: "conflictsHeader_" + index
+                            width: conflictsWindow.columnWidths[index]
+                            height: header.height
                             Label {
-                                text: row.modelData.what
-                                textFormat: Text.PlainText
+                                anchors.fill: parent
+                                leftPadding: conflictsWindow.cellPad
+                                verticalAlignment: Text.AlignVCenter
                                 elide: Text.ElideRight
-                                Layout.preferredWidth: conflictsWindow.whatWidth
+                                text: conflictsWindow.columnNames[headerCell.index]
                             }
-                            Label {
-                                text: row.modelData.name
-                                textFormat: Text.PlainText
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 3
-                            }
-                            Label {
-                                text: row.modelData.fields
-                                textFormat: Text.PlainText
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 2
-                            }
-                            Label {
-                                text: row.modelData.where
-                                textFormat: Text.PlainText
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 2
-                            }
-                            Item {
-                                Layout.preferredWidth: conflictsWindow.whyWidth
-                                implicitHeight: whyMark.implicitHeight
-                                Why {
-                                    id: whyMark
-                                    anchors.centerIn: parent
-                                    kind: row.modelData.kind
+                            Line { anchors.right: parent.right; height: parent.height }
+                            MouseArea {
+                                property real from: 0
+                                anchors.right: parent.right
+                                anchors.rightMargin: -Math.round(4 * Appearance.factor)
+                                width: Math.round(8 * Appearance.factor)
+                                height: parent.height
+                                enabled: headerCell.index < 3
+                                z: 1
+                                cursorShape: enabled ? Qt.SplitHCursor : Qt.ArrowCursor
+                                preventStealing: true
+                                onPressed: function(mouse) { from = mapToItem(header, mouse.x, 0).x }
+                                onPositionChanged: function(mouse) {
+                                    const at = mapToItem(header, mouse.x, 0).x
+                                    const before = conflictsWindow.columnWidths[headerCell.index]
+                                    conflictsWindow.dragBorder(headerCell.index, Math.round(at - from))
+                                    from += conflictsWindow.columnWidths[headerCell.index] - before
                                 }
                             }
                         }
                     }
+                    Label {
+                        width: conflictsWindow.whyWidth
+                        height: parent.height
+                        text: qsTr("Why")
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
-                Label {
-                    visible: conflictsWindow.rows.length === 0
-                    text: qsTr("No conflicts to settle.")
-                    opacity: 0.7
-                    Layout.margins: Math.round(8 * Appearance.factor)
+            }
+            ListView {
+                id: list
+                objectName: "conflictsList"
+                anchors.top: header.bottom
+                anchors.bottom: parent.bottom
+                width: parent.width
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                model: conflictsWindow.rows
+                currentIndex: -1
+                focus: true
+                keyNavigationEnabled: true
+                ScrollBar.vertical: ScrollBar {}
+                Keys.onSpacePressed: {
+                    const row = conflictsWindow.rows[currentIndex]
+                    if (row)
+                        conflictsWindow.tick(row.itemId, !conflictsWindow.ticked[row.itemId])
                 }
+                Keys.onReturnPressed: {
+                    const row = conflictsWindow.rows[currentIndex]
+                    if (row)
+                        conflictWindow.showItem(row.itemId)
+                }
+                delegate: Rectangle {
+                    id: row
+                    required property var modelData
+                    required property int index
+                    readonly property bool selected: ListView.isCurrentItem
+                    readonly property color ink: selected ? conflictsWindow.palette.highlightedText : conflictsWindow.palette.text
+                    objectName: "conflictRow_" + index
+                    width: list.width
+                    height: metrics.height + Math.round(8 * Appearance.factor)
+                    color: selected ? conflictsWindow.palette.highlight : "transparent"
+                    signal doubleClicked()
+                    onDoubleClicked: conflictWindow.showItem(modelData.itemId)
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            list.currentIndex = row.index
+                            list.forceActiveFocus()
+                        }
+                        onDoubleClicked: row.doubleClicked()
+                    }
+                    Row {
+                        height: parent.height
+                        Item {
+                            width: conflictsWindow.tickWidth
+                            height: parent.height
+                            TickBox {
+                                objectName: "conflictTick_" + row.index
+                                anchors.centerIn: parent
+                                padding: 0
+                                focusPolicy: Qt.NoFocus
+                                checkable: false
+                                checked: conflictsWindow.ticked[row.modelData.itemId] === true
+                                onClicked: conflictsWindow.tick(row.modelData.itemId, !checked)
+                            }
+                        }
+                        CellText { width: conflictsWindow.columnWidths[0]; height: row.height; color: row.ink; text: row.modelData.what }
+                        CellText { width: conflictsWindow.columnWidths[1]; height: row.height; color: row.ink; text: row.modelData.name }
+                        CellText { width: conflictsWindow.columnWidths[2]; height: row.height; color: row.ink; text: row.modelData.fields }
+                        CellText { width: conflictsWindow.columnWidths[3]; height: row.height; color: row.ink; text: row.modelData.where }
+                        Item {
+                            width: conflictsWindow.whyWidth
+                            height: parent.height
+                            Why {
+                                anchors.centerIn: parent
+                                kind: row.modelData.kind
+                                icon.color: row.ink
+                            }
+                            HoverHandler { id: overWhy }
+                            ToolTip.visible: overWhy.hovered
+                            ToolTip.text: conflictsWindow.whyWords[row.modelData.kind] || ""
+                            ToolTip.delay: 500
+                        }
+                    }
+                }
+            }
+            Label {
+                visible: conflictsWindow.rows.length === 0
+                anchors.top: header.bottom
+                anchors.left: parent.left
+                anchors.margins: Math.round(8 * Appearance.factor)
+                text: qsTr("No conflicts to settle.")
+                opacity: 0.7
             }
         }
 
-        // The ticked rows, settled whole.
+        // The ticked rows, settled whole. Greyed, never hidden.
         RowLayout {
             spacing: Math.round(6 * Appearance.factor)
             Button {
@@ -281,9 +431,24 @@ DialogWindow {
                 onClicked: conflictsWindow.settle("right")
             }
             Button {
+                objectName: "retryButton"
+                text: qsTr("Retry sync")
+                enabled: conflictsWindow.everyTicked("canRetry")
+                onClicked: {
+                    conflictsWindow.said = ""
+                    VaultController.retryConflicts(conflictsWindow.tickedIds())
+                }
+            }
+            Button {
+                objectName: "keepHereButton"
+                text: qsTr("Keep here only")
+                enabled: conflictsWindow.everyTicked("canKeepHere")
+                onClicked: conflictsWindow.settle("keep")
+            }
+            Button {
                 objectName: "keepBothButton"
                 text: qsTr("Keep both")
-                enabled: conflictsWindow.tickedCount > 0 && !conflictsWindow.anyUncopyable
+                enabled: conflictsWindow.everyTicked("canKeepBoth")
                 onClicked: conflictsWindow.settle("both")
             }
             Button {
@@ -293,23 +458,25 @@ DialogWindow {
                 onClicked: conflictsWindow.setAll(null)
             }
         }
-
-        // What the Why marks mean.
-        RowLayout {
-            spacing: Math.round(6 * Appearance.factor)
-            Why { kind: "both" }
-            Label { text: qsTr("Changed on two devices") }
-            Item { Layout.preferredWidth: Math.round(16 * Appearance.factor) }
-            Why { kind: "imported" }
-            Label { text: qsTr("Differs from an import") }
+        Label {
+            objectName: "conflictsSaid"
+            visible: text !== ""
+            text: conflictsWindow.said
+            color: conflictsWindow.saidTrouble ? "#e53e3e" : conflictsWindow.palette.windowText
+            textFormat: Text.PlainText
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
         }
-        RowLayout {
-            spacing: Math.round(6 * Appearance.factor)
-            Why { kind: "deleted" }
-            Label {
-                text: qsTr("Deleted on one device and changed on the other (Use Other device moves it to the Trash)")
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
+
+        // What the Why icons mean, in the same words as their hover texts.
+        Repeater {
+            model: ["both", "deletedThere", "deletedHere", "imported"]
+            delegate: RowLayout {
+                id: legend
+                required property string modelData
+                spacing: Math.round(6 * Appearance.factor)
+                Why { kind: legend.modelData; icon.color: conflictsWindow.palette.windowText }
+                Label { text: conflictsWindow.whyWords[legend.modelData] }
             }
         }
     }
@@ -317,5 +484,79 @@ DialogWindow {
     ConflictWindow {
         id: conflictWindow
         transientParent: conflictsWindow
+    }
+
+    // Retry sync from a vault whose key is not at hand: its master password.
+    DialogWindow {
+        id: retryPassword
+        objectName: "retryPasswordWindow"
+        memoryName: "retryPassword"
+        transientParent: conflictsWindow
+        // Those still to be asked; the first is the one shown.
+        property var waiting: []
+        function ask(source, vaultName, itemIds, problem) {
+            waiting = waiting.concat([{ source: source, name: vaultName, ids: itemIds, problem: problem }])
+            if (!visible)
+                showFirst()
+        }
+        function showFirst() {
+            retryField.clear()
+            if (waiting.length > 0) {
+                open()
+                retryField.forceActiveFocus()
+            }
+        }
+        title: qsTr("Retry sync")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        Component.onCompleted: standardButton(Dialog.Ok).enabled = Qt.binding(function() { return retryField.text !== "" })
+        Connections {
+            target: VaultController
+            function onLocking() {
+                retryPassword.waiting = []
+                if (retryPassword.visible)
+                    retryPassword.reject()
+            }
+        }
+        onAccepted: {
+            const one = waiting[0]
+            const password = retryField.text
+            waiting = waiting.slice(1)
+            if (one)
+                VaultController.retryFromVault(one.source, one.ids, password)
+            Qt.callLater(showFirst)
+        }
+        onRejected: {
+            waiting = waiting.slice(1)
+            Qt.callLater(showFirst)
+        }
+        ColumnLayout {
+            spacing: Math.round(8 * Appearance.factor)
+            Layout.preferredWidth: Math.round(380 * Appearance.factor)
+            Layout.fillWidth: true
+            Label {
+                text: retryPassword.waiting.length > 0
+                      ? qsTr("The master password of “%1”, to read it again:").arg(retryPassword.waiting[0].name) : ""
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            PasswordField {
+                id: retryField
+                objectName: "retryPasswordField"
+                Layout.fillWidth: true
+                onAccepted: {
+                    if (text !== "")
+                        retryPassword.accept()
+                }
+            }
+            Label {
+                objectName: "retryPasswordProblem"
+                visible: text !== ""
+                text: retryPassword.waiting.length > 0 ? retryPassword.waiting[0].problem : ""
+                color: "#e53e3e"
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+        }
     }
 }

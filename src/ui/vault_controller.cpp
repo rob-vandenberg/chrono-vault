@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.78
+// vault_controller.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: A source read for Import and for Retry sync alike (D-061)
 // v0.5.78: Merges told this device's id, its kept change as "mine"; an import notes every difference (D-061)
 // v0.5.77: An import never writes over an item the vault has: the same is passed over, a difference is a conflict (D-060)
 // v0.5.75: A moved vault's settings carried to its new place; its saved password follows it (D-060)
@@ -1532,32 +1533,17 @@ void VaultController::readImport(const QUrl& file)
     QPointer<VaultController> self(this);
     say(tr("Reading the export…"), false);
     (void)QtConcurrent::run(&filePool, [self, source, snapshot, session]() {
-        ImportResult result;
-        QFile input(source);
-        if (!input.open(QIODevice::ReadOnly)) {
-            result.status = ImportStatus::NotTheFormat;
-        } else if (input.size() > largestImportBytes) {
-            result.status = ImportStatus::TooLarge;
-        } else {
-            QByteArray json = input.read(largestImportBytes + 1);
-            result = readReferenceExport(json, snapshot);
-            crypto::wipe(json);
-        }
-        const bool readable = input.isOpen();
+        SourceRead read = readExportSource(source, snapshot);
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, session, readable]() mutable {
+            [self, read, source, session]() mutable {
+                ImportResult result = std::move(read.result);
                 if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
                     return;
                 }
                 QVariantMap summary{{QStringLiteral("ok"), result.status == ImportStatus::Read}};
                 if (result.status != ImportStatus::Read) {
-                    const QString why = !readable ? tr("The file could not be read.")
-                                        : result.status == ImportStatus::TooLarge
-                                            ? tr("The file is too large to be an export.")
-                                        : result.status == ImportStatus::NotTheFormat
-                                            ? tr("This file is not an export of %1.").arg(referenceProgramName())
-                                            : tr("The export is damaged. Nothing was imported.");
+                    const QString why = read.why;
                     summary.insert(QStringLiteral("message"), why);
                     self->say(why, true);
                     emit self->importRead(summary);
@@ -1568,6 +1554,7 @@ void VaultController::readImport(const QUrl& file)
                 summary.insert(QStringLiteral("templates"), static_cast<int>(result.templates.size()));
                 summary.insert(QStringLiteral("attachments"), result.attachmentCount);
                 self->pendingImport = std::move(result);
+                self->pendingSource = QStringLiteral("export:") + source;
                 self->say(QString(), false);
                 emit self->importRead(summary);
             },
@@ -3722,6 +3709,8 @@ void VaultController::forgetUnlockedVault()
     }
     contents = {};
     base = {};
+    sourceKeys.clear();
+    retryWaiting = false;
     pendingAttachments.clear();
     pendingImport.reset();
     // Website icons are kept in memory only, and only while unlocked (D-036).

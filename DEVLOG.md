@@ -685,3 +685,12 @@ that fails separated it: the check for Windows Hello made at every start, also w
 run; with its thread closing COM down, or kept alive, it did not (D-055 has the figures and what is not known).
 `HelloThread` in `src/ui/quick_unlock_windows.cpp` closes COM down on all three threads; a request is let go of on every
 way out.
+
+## 24 November 2026: version 0.5.81: the Sync conflicts windows as Chrono Mail's
+
+The owner's changelist items 1-29 (23 struck), in autonomous mode. `qml/ConflictWindow.qml` and
+`qml/SyncConflictsWindow.qml` rebuilt; Retry sync in `src/ui/vault_controller_retry.cpp`; splits, placing a field and
+the deletion's side in `src/core/item_differences.cpp` and `src/core/vault_merge.cpp`; six line icons in `art/`;
+`tests/integration/test_sync_conflicts.cpp`. Decisions in D-061.
+Three review rounds: round 1, Retry sync marked an unchanged item as modified; round 2, no answer when a WebDAV server's
+password had to be asked first; both fixed; round 3 clean.

@@ -25,9 +25,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_elsewhere.cpp 0.5.78
+// test_elsewhere.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: What an item deleted elsewhere shows (D-061)
 // v0.5.78: This device's value stands; the sides left and right (D-061)
 // v0.5.76: A conflict settled as the Sync conflicts dialog chooses (D-060)
 // v0.2.45: A change here and one elsewhere merged, no longer a conflict copy (D-054)
@@ -336,8 +337,20 @@ void TestElsewhere::an_item_deleted_elsewhere_goes_to_the_trash_with_use_other_v
     QTRY_VERIFY(controller->isIdle());
     QTRY_COMPARE(controller->conflictCount(), 1);
     QCOMPARE(controller->conflicts().constFirst().toMap().value(QStringLiteral("kind")).toString(),
-             QStringLiteral("deleted"));
-    controller->settleConflicts({id}, QStringLiteral("other"));
+             QStringLiteral("deletedThere"));
+    // Every field of what remains, "(deleted)" on the other side, and nothing
+    // to choose per field (D-061).
+    const QVariantMap conflict = controller->conflictOf(id);
+    QVERIFY(conflict.value(QStringLiteral("rows")).toList().isEmpty());
+    const QVariantMap first = conflict.value(QStringLiteral("allRows")).toList().constFirst().toMap();
+    QCOMPARE(first.value(QStringLiteral("left")).toString(), QStringLiteral("My bank"));
+    QCOMPARE(first.value(QStringLiteral("right")).toString(), QStringLiteral("(deleted)"));
+    QVERIFY(conflict.value(QStringLiteral("canKeepHere")).toBool());
+    QVERIFY(!conflict.value(QStringLiteral("canKeepBoth")).toBool());
+    // Keep both is no way to settle it: nothing changes.
+    controller->settleConflicts({id}, QStringLiteral("both"));
+    QCOMPARE(controller->conflictCount(), 1);
+    controller->settleConflicts({id}, QStringLiteral("right"));
     QTRY_VERIFY(controller->isIdle());
     QCOMPARE(controller->conflictCount(), 0);
     QVERIFY(controller->item(id).value(QStringLiteral("trashed")).toBool()); // in the Trash, never gone for good

@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_menu.cpp 0.5.78
+// test_vault_menu.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: An item deleted here is simply imported again (D-061)
 // v0.5.78: An import's every difference waits for the person, an item deleted here too (D-061)
 // v0.5.77: Import from another vault (D-060)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
@@ -523,17 +524,9 @@ private slots:
         QVERIFY(imported);
     }
 
-    // Deleted here for good, held by the import: the person chooses (D-061).
-    // Kept until then, its deletion forgotten, so no sync takes it away; the
-    // vault's side deletes it for good again, the import's keeps it.
-    void an_item_deleted_here_and_imported_again_waits_for_the_person_data()
-    {
-        QTest::addColumn<QString>("side");
-        QTest::addColumn<int>("items");
-        QTest::newRow("vault") << QStringLiteral("left") << 0;
-        QTest::newRow("import") << QStringLiteral("right") << 1;
-    }
-    void an_item_deleted_here_and_imported_again_waits_for_the_person()
+    // Deleted here for good, held by the import: imported as any item the
+    // vault does not have, its deletion forgotten (the owner, D-061).
+    void an_item_deleted_here_is_simply_imported_again()
     {
         QTemporaryDir folder;
         const QString here = folder.filePath(QStringLiteral("Here.chronovault"));
@@ -548,26 +541,13 @@ private slots:
         controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
         QVERIFY(read.wait(10000));
         QVERIFY(controller->confirmImport());
-        QCOMPARE(controller->lastImportConflicts(), 1);
-        QTRY_VERIFY(controller->isIdle());
-        {
-            const OpenResult opened = openVaultFile(here, "pass");
-            const VaultContents contents = contentsFromJson(opened.contents).contents;
-            QCOMPARE(contents.items.size(), 1);
-            QVERIFY(contents.deletedItems.isEmpty()); // the deletion forgotten meanwhile
-        }
-        const QVariantList rows = controller->conflictOf(id).value(QStringLiteral("rows")).toList();
-        QCOMPARE(rows.size(), 1);
-        QCOMPARE(rows[0].toMap().value(QStringLiteral("left")).toString(), QStringLiteral("Deleted for good"));
-        QFETCH(QString, side);
-        QFETCH(int, items);
-        controller->settleConflict(id, {side});
+        QCOMPARE(controller->lastImportConflicts(), 0);
+        QCOMPARE(controller->conflictCount(), 0);
         QTRY_VERIFY(controller->isIdle());
         const OpenResult opened = openVaultFile(here, "pass");
         const VaultContents contents = contentsFromJson(opened.contents).contents;
-        QCOMPARE(contents.items.size(), items);
-        QCOMPARE(contents.deletedItems.size(), 1 - items);
-        QCOMPARE(controller->conflictCount(), 0);
+        QCOMPARE(contents.items.size(), 1);
+        QVERIFY(contents.deletedItems.isEmpty());
     }
 
     void forget_takes_a_vault_off_the_list_and_leaves_its_file()

@@ -26,11 +26,13 @@
 #include <QUuid>
 
 #include <algorithm>
+#include <functional>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_conflicts.cpp 0.5.78
+// vault_controller_conflicts.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Every field of the item; which side deleted it; a split keeps both values; Keep here only, and what Retry sync can read (D-061)
 // v0.5.78: Every kind of difference as a row; the sides "Vault" and "Import", or "This device" and "Other device"; the person's own categories and templates (D-061)
 // v0.5.77: A conflict from an import: kind "imported" (D-060)
 // v0.5.76: Initial release: the Sync conflicts dialog's rows, and settling them (D-060)
@@ -98,10 +100,20 @@ bool takesOther(const MergeNote& note, const QString& side, const QString& devic
     return swappedHere(note, device) ? !right : right;
 }
 
-bool isDeletedElsewhere(const Item& item)
+// The item was deleted on one side and changed on the other: "there" when
+// the other device deleted it, "here" when this one did, "" when neither. A
+// note of before 0.5.81 does not say which; it was kept as changed here.
+QString deletedOn(const QList<MergeNote>& notes, const QString& device)
 {
-    return std::any_of(item.mergeNotes.cbegin(), item.mergeNotes.cend(),
-                       [](const MergeNote& note) { return note.kind == MergeNote::Kind::DeletedElsewhere; });
+    for (const MergeNote& note : notes) {
+        if (note.kind != MergeNote::Kind::DeletedElsewhere) {
+            continue;
+        }
+        const bool mine = note.device.isEmpty() || note.device == device;
+        const bool byThatDevice = note.property == QLatin1String("deletedOn");
+        return mine == byThatDevice && !note.device.isEmpty() ? QStringLiteral("here") : QStringLiteral("there");
+    }
+    return QString();
 }
 
 // "imported": every note from an import; "both": none; "mixed": some.
@@ -113,13 +125,34 @@ QString sourceOf(const QList<MergeNote>& notes)
                                     : QStringLiteral("mixed");
 }
 
-QString kindOf(const Item& item)
+QString kindOf(const Item& item, const QString& device)
 {
-    if (isDeletedElsewhere(item)) {
-        return QStringLiteral("deleted");
+    const QString deleted = deletedOn(item.mergeNotes, device);
+    if (!deleted.isEmpty()) {
+        return deleted == QLatin1String("here") ? QStringLiteral("deletedHere") : QStringLiteral("deletedThere");
     }
     return sourceOf(item.mergeNotes) == QLatin1String("imported") ? QStringLiteral("imported")
                                                                   : QStringLiteral("both");
+}
+
+// Retry sync can read this item again: from the shared vault, or from where
+// every imported value came from.
+bool canRetry(const QList<MergeNote>& notes)
+{
+    return std::all_of(notes.cbegin(), notes.cend(),
+                       [](const MergeNote& one) { return !one.imported || !one.source.isEmpty(); });
+}
+
+// When a conflict was found: its oldest note.
+QString foundText(const QList<MergeNote>& notes)
+{
+    QDateTime oldest;
+    for (const MergeNote& note : notes) {
+        if (note.when.isValid() && (!oldest.isValid() || note.when < oldest)) {
+            oldest = note.when;
+        }
+    }
+    return oldest.isValid() ? oldest.toLocalTime().toString(QStringLiteral("yyyy-MM-dd HH:mm")) : QString();
 }
 
 // A vault note's group in the list: "vault:<property>:<subject>".
@@ -137,6 +170,7 @@ QVariantMap VaultController::conflictRow(const Item& item, const MergeNote& note
     const QString notOn = tr("(not on the item)");
     const auto yesNo = [this](bool on) { return on ? tr("Yes") : tr("No"); };
     const QString& property = note.property;
+    const QString deleted = tr("(deleted)");
     QString label;
     QString standing;
     QString other;
@@ -151,11 +185,11 @@ QVariantMap VaultController::conflictRow(const Item& item, const MergeNote& note
             standing = value;
             other = note.otherValue;
         } else if (property == QLatin1String("present")) {
-            standing = notOn;
+            standing = note.subject == QLatin1String("never") ? notOn : deleted;
             other = note.otherValue;
         } else if (property == QLatin1String("absent")) {
             standing = value;
-            other = notOn;
+            other = deleted;
         } else if (property == QLatin1String("label")) {
             label = tr("Name of “%1”").arg(name);
             standing = field != nullptr ? field->label : QString();
@@ -227,10 +261,117 @@ QVariantMap VaultController::conflictRow(const Item& item, const MergeNote& note
         standing = tr("Deleted for good");
         other = tr("Kept");
     }
+    // A word about a value is never shown as dots.
+    const auto said = [&](QString& value) {
+        if (value.isEmpty()) {
+            value = tr("(empty)");
+            return true;
+        }
+        return property == QLatin1String("present") || property == QLatin1String("absent")
+                   ? value == notOn || value == deleted
+                   : false;
+    };
+    const bool history = property == QLatin1String("history") && note.fieldUid != 0;
+    const bool standingSaid = said(standing) || history;
+    const bool otherSaid = said(other);
     return {{QStringLiteral("label"), label},
             {QStringLiteral("standing"), standing},
             {QStringLiteral("other"), other},
-            {QStringLiteral("hidden"), hidden}};
+            {QStringLiteral("hidden"), hidden},
+            {QStringLiteral("standingHidden"), hidden && !standingSaid},
+            {QStringLiteral("otherHidden"), hidden && !otherSaid}};
+}
+
+// Every field of an item in its order, a conflict's rows where their field
+// stands (D-061): the same on both sides plain, a difference to be chosen. An
+// empty field the same on both sides is left out, as the item itself shows it.
+QVariantList VaultController::conflictFields(const Item& item, const QVariantList& choices,
+                                             const QString& deletedSide) const
+{
+    QVariantList shown;
+    QList<int> taken;
+    const auto differing = [&](const std::function<bool(const MergeNote&)>& about) {
+        bool value = false;
+        for (const QVariant& choice : choices) {
+            const QVariantMap row = choice.toMap();
+            const int index = row.value(QStringLiteral("index")).toInt();
+            const MergeNote& note = item.mergeNotes.at(index);
+            if (taken.contains(index) || !about(note)) {
+                continue;
+            }
+            taken.append(index);
+            shown.append(row);
+            value = value || note.fieldUid == 0 || note.property.isEmpty() ||
+                    note.property == QLatin1String("present") || note.property == QLatin1String("absent");
+        }
+        return value;
+    };
+    const auto same = [&](const QString& label, const QString& value, bool hidden) {
+        if (value.isEmpty()) {
+            return;
+        }
+        const QString gone = tr("(deleted)");
+        const bool leftGone = deletedSide == QLatin1String("here");
+        const bool rightGone = deletedSide == QLatin1String("there");
+        shown.append(QVariantMap{
+            {QStringLiteral("index"), -1},
+            {QStringLiteral("label"), label},
+            {QStringLiteral("left"), leftGone ? gone : value},
+            {QStringLiteral("right"), rightGone ? gone : value},
+            {QStringLiteral("leftHidden"), hidden && !leftGone},
+            {QStringLiteral("rightHidden"), hidden && !rightGone},
+            {QStringLiteral("differs"), false},
+            {QStringLiteral("canSplit"), false},
+        });
+    };
+    const auto property = [&](const char* name, const QString& label, const QString& value) {
+        if (!differing([name](const MergeNote& note) {
+                return note.fieldUid == 0 && note.property == QLatin1String(name);
+            })) {
+            same(label, value, false);
+        }
+    };
+    property("title", tr("Title"), item.title);
+    property("subtitle", tr("Subtitle"), item.subtitle);
+    for (const Field& field : item.fields) {
+        const bool itsValue = field.uid != 0 && differing([&field](const MergeNote& note) {
+            return note.fieldUid == field.uid;
+        });
+        if (itsValue || field.deleted || field.kind == FieldKind::Section || field.kind == FieldKind::Hidden) {
+            continue;
+        }
+        same(nameOfField(field), field.value, field.isHidden());
+    }
+    property("note", tr("Notes"), item.note);
+    property("website", tr("Website"), item.website);
+    property("category", tr("Category"), categoryName(item.categoryId, contents));
+    (void)differing([](const MergeNote& note) { return note.property == QLatin1String("template"); });
+    for (const QString& tag : item.tags) {
+        same(tr("Tag"), tag, false);
+    }
+    for (const Attachment& one : item.attachments) {
+        const QString id = one.id.toString(QUuid::WithoutBraces);
+        if (!differing([&id](const MergeNote& note) {
+                return note.fieldUid == 0 && note.subject == id && note.property.startsWith(QLatin1String("attachment"));
+            })) {
+            same(tr("Attachment"), tr("%1 (%2)").arg(one.name, sizeText(one.data.size())), false);
+        }
+    }
+    (void)differing([](const MergeNote&) { return true; }); // whatever is left
+    return shown;
+}
+
+// What a window offers for a conflict, and when it was found.
+QVariantMap VaultController::conflictWays(const QString& kind, const QList<MergeNote>& notes, bool ofVault) const
+{
+    const bool deleted = kind.startsWith(QLatin1String("deleted"));
+    const bool imported = std::any_of(notes.cbegin(), notes.cend(), [](const MergeNote& one) { return one.imported; });
+    return {
+        {QStringLiteral("canRetry"), canRetry(notes) && !(ofVault && imported)},
+        {QStringLiteral("canKeepHere"), kind == QLatin1String("deletedThere")},
+        {QStringLiteral("canKeepBoth"), !deleted && !ofVault},
+        {QStringLiteral("found"), foundText(notes)},
+    };
 }
 
 // The two sides' names (D-061): an import's "Vault" and "Import", a sync's
@@ -268,6 +409,7 @@ QVariantList VaultController::conflicts() const
     if (currentState != State::Unlocked) {
         return found;
     }
+    const QString device = thisDeviceId();
     for (const Item& item : contents.items) {
         if (item.mergeNotes.isEmpty()) {
             continue;
@@ -281,16 +423,19 @@ QVariantList VaultController::conflicts() const
                 labels.append(label);
             }
         }
-        found.append(QVariantMap{
+        const QString kind = kindOf(item, device);
+        QVariantMap one{
             {QStringLiteral("itemId"), id},
             {QStringLiteral("what"), this->item(id).value(QStringLiteral("templateName"))},
             {QStringLiteral("name"), item.title},
             {QStringLiteral("fields"), labels.isEmpty() ? QStringLiteral("—") : labels.join(QStringLiteral(", "))},
             {QStringLiteral("where"), vaultName()},
-            {QStringLiteral("kind"), kindOf(item)},
+            {QStringLiteral("kind"), kind},
             {QStringLiteral("source"), sourceOf(item.mergeNotes)},
             {QStringLiteral("ofVault"), false},
-        });
+        };
+        one.insert(conflictWays(kind, item.mergeNotes, false));
+        found.append(one);
     }
     // The person's own categories and templates that differ.
     QStringList groups;
@@ -310,6 +455,9 @@ QVariantList VaultController::conflicts() const
             {QStringLiteral("kind"), shown.value(QStringLiteral("kind"))},
             {QStringLiteral("source"), shown.value(QStringLiteral("source"))},
             {QStringLiteral("ofVault"), true},
+            {QStringLiteral("canRetry"), shown.value(QStringLiteral("canRetry"))},
+            {QStringLiteral("canKeepHere"), false},
+            {QStringLiteral("canKeepBoth"), false},
         });
     }
     return found;
@@ -329,6 +477,15 @@ QVariantMap VaultController::conflictOf(const QString& itemId) const
             {QStringLiteral("left"), shown.value(swapped ? QStringLiteral("other") : QStringLiteral("standing"))},
             {QStringLiteral("right"), shown.value(swapped ? QStringLiteral("standing") : QStringLiteral("other"))},
             {QStringLiteral("hidden"), shown.value(QStringLiteral("hidden"))},
+            {QStringLiteral("leftHidden"),
+             shown.value(swapped ? QStringLiteral("otherHidden") : QStringLiteral("standingHidden"))},
+            {QStringLiteral("rightHidden"),
+             shown.value(swapped ? QStringLiteral("standingHidden") : QStringLiteral("otherHidden"))},
+            {QStringLiteral("differs"), true},
+            {QStringLiteral("canSplit"), false},
+            // Both values, in the order a split keeps them.
+            {QStringLiteral("first"), shown.value(QStringLiteral("standing"))},
+            {QStringLiteral("second"), shown.value(QStringLiteral("other"))},
         };
     };
     if (itemId.startsWith(vaultPrefix)) {
@@ -392,7 +549,7 @@ QVariantMap VaultController::conflictOf(const QString& itemId) const
         }
         const QString source = sourceOf(notes);
         QVariantMap names = sideNames(source);
-        return {
+        QVariantMap whole{
             {QStringLiteral("itemId"), itemId},
             {QStringLiteral("what"), what},
             {QStringLiteral("name"), name},
@@ -404,7 +561,10 @@ QVariantMap VaultController::conflictOf(const QString& itemId) const
             {QStringLiteral("leftName"), names.value(QStringLiteral("left"))},
             {QStringLiteral("rightName"), names.value(QStringLiteral("right"))},
             {QStringLiteral("rows"), rows},
+            {QStringLiteral("allRows"), rows},
         };
+        whole.insert(conflictWays(QStringLiteral("both"), notes, true));
+        return whole;
     }
     for (const Item& item : contents.items) {
         if (item.id.toString(QUuid::WithoutBraces) != itemId || item.mergeNotes.isEmpty()) {
@@ -416,22 +576,32 @@ QVariantMap VaultController::conflictOf(const QString& itemId) const
             if (note.kind != MergeNote::Kind::ChangedOnBoth) {
                 continue;
             }
-            rows.append(rowFor(static_cast<int>(index), conflictRow(item, note), note));
+            QVariantMap row = rowFor(static_cast<int>(index), conflictRow(item, note), note);
+            row.insert(QStringLiteral("canSplit"), canKeepBoth(item, note));
+            rows.append(row);
         }
+        const QString deletedSide = deletedOn(item.mergeNotes, device);
+        if (!deletedSide.isEmpty()) {
+            rows.clear(); // a whole side is chosen
+        }
+        const QString kind = kindOf(item, device);
         const QString source = sourceOf(item.mergeNotes);
         const QVariantMap names = sideNames(source);
-        return {
+        QVariantMap whole{
             {QStringLiteral("itemId"), itemId},
             {QStringLiteral("what"), this->item(itemId).value(QStringLiteral("templateName"))},
             {QStringLiteral("name"), item.title},
             {QStringLiteral("where"), vaultName()},
-            {QStringLiteral("kind"), kindOf(item)},
+            {QStringLiteral("kind"), kind},
             {QStringLiteral("source"), source},
             {QStringLiteral("ofVault"), false},
             {QStringLiteral("leftName"), names.value(QStringLiteral("left"))},
             {QStringLiteral("rightName"), names.value(QStringLiteral("right"))},
             {QStringLiteral("rows"), rows},
+            {QStringLiteral("allRows"), conflictFields(item, rows, deletedSide)},
         };
+        whole.insert(conflictWays(kind, item.mergeNotes, false));
+        return whole;
     }
     return {};
 }
@@ -464,7 +634,7 @@ void VaultController::settleConflicts(const QStringList& itemIds, const QString&
     // The person's own categories and templates.
     QList<MergeNote> keptVaultNotes;
     for (const MergeNote& note : std::as_const(contents.vaultNotes)) {
-        if (!itemIds.contains(groupOf(note)) || side == QLatin1String("both")) {
+        if (!itemIds.contains(groupOf(note)) || side == QLatin1String("both") || side == QLatin1String("keep")) {
             keptVaultNotes.append(note);
             continue;
         }
@@ -478,19 +648,29 @@ void VaultController::settleConflicts(const QStringList& itemIds, const QString&
         if (item.mergeNotes.isEmpty() || !itemIds.contains(item.id.toString(QUuid::WithoutBraces))) {
             continue;
         }
-        const QList<MergeNote> notes = std::exchange(item.mergeNotes, {});
-        changed = true;
-        if (isDeletedElsewhere(item) || std::any_of(notes.cbegin(), notes.cend(), [](const MergeNote& note) {
-                return note.kind == MergeNote::Kind::DeletedElsewhere;
-            })) {
-            // Deleted on the other side: into the Trash, never for good, so
-            // it can still be restored.
-            if (side == QLatin1String("other") || side == QLatin1String("right")) {
-                item.trashed = true;
-                item.modified = now;
+        const QString deletedSide = deletedOn(item.mergeNotes, device);
+        if (!deletedSide.isEmpty()) {
+            if (side == QLatin1String("both") ||
+                (side == QLatin1String("keep") && deletedSide != QLatin1String("there"))) {
+                continue; // not a way to settle this one
             }
+            // The deletion taken: into the Trash, never for good, so it can
+            // still be restored. Kept: counted as changed now, so the next
+            // sync puts it back on the other device.
+            const bool deletion = side == QLatin1String("other") ||
+                                  side == (deletedSide == QLatin1String("there") ? QLatin1String("right")
+                                                                                 : QLatin1String("left"));
+            item.mergeNotes.clear();
+            item.trashed = item.trashed || deletion;
+            item.modified = now;
+            changed = true;
             continue;
         }
+        if (side == QLatin1String("keep")) {
+            continue;
+        }
+        const QList<MergeNote> notes = std::exchange(item.mergeNotes, {});
+        changed = true;
         if (side == QLatin1String("both")) {
             // Kept as two: this one as it is, and a copy with the other values.
             Item copy = item;
@@ -550,6 +730,7 @@ void VaultController::settleConflict(const QString& itemId, const QVariantList& 
             continue;
         }
         QList<MergeNote> left;
+        QList<MergeNote> keptBoth;
         bool gone = false;
         for (qsizetype index = 0; index < item.mergeNotes.size(); ++index) {
             const MergeNote& note = item.mergeNotes.at(index);
@@ -558,7 +739,22 @@ void VaultController::settleConflict(const QString& itemId, const QVariantList& 
                 left.append(note); // not chosen: it stays to be settled
                 continue;
             }
+            if (choice == QLatin1String("both")) {
+                if (canKeepBoth(item, note)) {
+                    keptBoth.append(note); // after the rest, so a name chosen here is its name too
+                } else {
+                    left.append(note);
+                }
+                continue;
+            }
             gone = settleNote(item, note, takesOther(note, choice, device), now) || gone;
+        }
+        for (const MergeNote& note : std::as_const(keptBoth)) {
+            if (keepBothValues(item, note, now)) {
+                item.modified = now;
+            } else {
+                left.append(note);
+            }
         }
         item.mergeNotes = left;
         if (gone) {

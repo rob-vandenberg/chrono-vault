@@ -27,9 +27,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.cpp 0.5.77
+// vault_contents.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Where an import's value came from (D-061)
 // v0.5.78: The contents format 9: every difference kept for the person to settle, a note's device, the vault's own notes (D-061)
 // v0.5.77: A note's other value marked as imported, a key earlier versions pass over (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
@@ -127,6 +128,9 @@ QJsonArray notesToJson(const QList<MergeNote>& notes)
         }
         if (!note.device.isEmpty()) {
             one.insert(QStringLiteral("device"), note.device);
+        }
+        if (!note.source.isEmpty()) {
+            one.insert(QStringLiteral("from"), note.source);
         }
         array.append(one);
     }
@@ -355,7 +359,10 @@ std::optional<MergeNote> noteFromJson(const QJsonObject& noteObject, int format)
     }
     note.subject = text(noteObject, "subject");
     note.device = text(noteObject, "device");
-    if (note.subject.size() > largestTextLength || note.device.size() > largestTextLength) {
+    // An older Chrono Vault leaves this key out when it saves: only Retry
+    // sync is lost then, so the format stays 9 (D-061).
+    note.source = text(noteObject, "from");
+    if (note.source.size() > largestTextLength || note.subject.size() > largestTextLength || note.device.size() > largestTextLength) {
         return std::nullopt;
     }
     if (noteObject.contains(QStringLiteral("otherData"))) {

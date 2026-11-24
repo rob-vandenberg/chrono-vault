@@ -20,9 +20,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_item_differences.cpp 0.5.78
+// test_item_differences.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Where a field is placed, and both values kept (D-061)
 // v0.5.78: Initial release (D-061)
 
 // Every way an imported item can differ from the vault's becomes a note for
@@ -259,6 +260,62 @@ private slots:
         useOtherSide(ours, note, now);
         QVERIFY(!fieldOf(ours, 4).deleted);
         QCOMPARE(fieldOf(ours, 4).value, QStringLiteral("1111"));
+    }
+
+    // Placed where the other side has it, and told from one deleted here.
+    void a_field_only_the_other_side_has_is_placed_as_there()
+    {
+        Item ours = bank();
+        Item theirs = ours;
+        Field extra = makeField(QString(), QStringLiteral("Between"), FieldKind::Text, QStringLiteral("new"));
+        extra.uid = 4;
+        theirs.fields.insert(1, extra);
+        Field first = makeField(QString(), QStringLiteral("First"), FieldKind::Text, QStringLiteral("top"));
+        first.uid = 5;
+        theirs.fields.insert(0, first);
+        QVERIFY(noteDifferences(ours, theirs, now, true, QString()).newConflict);
+        QList<qint64> order;
+        for (const Field& field : std::as_const(ours.fields)) {
+            order.append(field.uid);
+        }
+        QCOMPARE(order, (QList<qint64>{5, 1, 4, 2, 3}));
+        for (const MergeNote& note : std::as_const(ours.mergeNotes)) {
+            QCOMPARE(note.subject, QStringLiteral("never"));
+        }
+        // Imported again: no second note, though the field stands here as deleted now.
+        QVERIFY(!noteDifferences(ours, theirs, now, true, QString(), QStringLiteral("export:/b")).newConflict);
+        QCOMPARE(ours.mergeNotes.size(), 2);
+        QCOMPARE(ours.mergeNotes[0].source, QStringLiteral("export:/b"));
+    }
+
+    void both_values_of_a_field_are_kept_next_to_each_other()
+    {
+        Item ours = bank();
+        Field mail = makeField(QStringLiteral("email"), QString(), FieldKind::Email, QStringLiteral("a@example.com"));
+        mail.uid = 4;
+        mail.sensitive = true;
+        ours.fields.insert(1, mail);
+        Item theirs = ours;
+        fieldOf(theirs, 4).value = QStringLiteral("b@example.com");
+        fieldOf(theirs, 1).value = QStringLiteral("other");
+        QVERIFY(noteDifferences(ours, theirs, now, true, QString()).newConflict);
+        for (const MergeNote& note : std::as_const(ours.mergeNotes)) {
+            QCOMPARE(canKeepBoth(ours, note), note.fieldUid == 4); // never a user name
+            if (note.fieldUid == 4) {
+                QVERIFY(keepBothValues(ours, note, now));
+            }
+        }
+        QCOMPARE(ours.fields.size(), 5);
+        QCOMPARE(ours.fields[1].value, QStringLiteral("a@example.com"));
+        QCOMPARE(ours.fields[2].value, QStringLiteral("b@example.com"));
+        QCOMPARE(ours.fields[2].label, roleName(QStringLiteral("email")));
+        QCOMPARE(ours.fields[2].kind, FieldKind::Email);
+        QVERIFY(ours.fields[2].sensitive);
+        QVERIFY(ours.fields[2].uid != 0);
+        // Only when both sides hold a value.
+        MergeNote empty;
+        empty.fieldUid = 4;
+        QVERIFY(!canKeepBoth(ours, empty));
     }
 
     void the_same_difference_is_noted_once()

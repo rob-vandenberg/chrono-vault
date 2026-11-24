@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.5.75
+// vault_controller_webdav.cpp 0.5.81
 
 // --- Version history ----------------------------------------------------
+// v0.5.81: Retry sync answered by the sync it asked for (D-061)
 // v0.5.75: Disconnect deletes nothing; moving to a server is the vault menu's Move (D-060)
 // v0.3.63: A folder's entries with their size and time of change, for the file dialog (D-057)
 // v0.3.62: The folder browser and New folder; an address read as typed; a non-WebDAV server said in words (D-057)
@@ -126,6 +127,11 @@ void VaultController::startWebDav()
             // Not in the system's store: asked of the person, kept in
             // memory only (D-057).
             self->passwordNeeded = true;
+            if (self->retryWaiting) {
+                self->retryWaiting = false;
+                emit self->retried(
+                    tr("Not synchronized: the server's password is needed. The conflict stays."), true);
+            }
             emit self->syncChanged();
             return;
         }
@@ -261,6 +267,16 @@ void VaultController::syncFinished(SyncOutcome outcome, const QByteArray& certif
                 .arg(QFileInfo(conflictCopy).completeBaseName()),
             true);
         return;
+    }
+    if (retryWaiting) {
+        // Retry sync asked for this one (D-061); what another device settled
+        // arrives with it.
+        retryWaiting = false;
+        emit retried(outcome == SyncOutcome::Synced
+                         ? tr("The vault was synchronized. A conflict still listed is the same there.")
+                         : tr("Not synchronized: %1").arg(syncOutcomeText(outcome)) + QLatin1Char(' ') +
+                               tr("The conflict stays."),
+                     outcome != SyncOutcome::Synced);
     }
     emit syncChanged();
 }

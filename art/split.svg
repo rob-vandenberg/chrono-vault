@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: keep both values. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path d="M3 6 H17" fill="none" stroke="#000000" stroke-width="1.6"/>
+  <path d="M9.5 8 V17 H17" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="1.6 1.6"/>
+  <path d="M16.5 4 L21 6 L16.5 8 Z M16.5 15 L21 17 L16.5 19 Z" fill="#000000"/>
+</svg>

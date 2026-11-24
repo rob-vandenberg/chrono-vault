@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.3.66
+# qml/CMakeLists.txt 0.5.81
 
 # --- Version history ----------------------------------------------------
+# v0.5.81: Retry sync's source and the Sync conflicts icons (D-061)
 # v0.4.72: crypt32 for Windows Hello's key (D-038 point 11)
 # v0.4.70: PIN unlock (D-059)
 # v0.3.63: WebDavFileDialog.qml and the folder icon (D-057)
@@ -123,6 +124,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/vault_controller_vaults.cpp
         ../src/ui/vault_controller_conflicts.cpp
         ../src/ui/vault_controller_import.cpp
+        ../src/ui/vault_controller_retry.cpp
         ../src/ui/secret_store.h
         ../src/ui/webdav_client.cpp
         ../src/ui/webdav_client.h
@@ -160,6 +162,12 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/star-filled.svg"
         "${PROJECT_SOURCE_DIR}/art/attachment.svg"
         "${PROJECT_SOURCE_DIR}/art/copy.svg"
+        "${PROJECT_SOURCE_DIR}/art/conflict-both.svg"
+        "${PROJECT_SOURCE_DIR}/art/conflict-import.svg"
+        "${PROJECT_SOURCE_DIR}/art/conflict-deleted-there.svg"
+        "${PROJECT_SOURCE_DIR}/art/conflict-deleted-here.svg"
+        "${PROJECT_SOURCE_DIR}/art/split.svg"
+        "${PROJECT_SOURCE_DIR}/art/keep-both.svg"
         "${PROJECT_SOURCE_DIR}/art/sidebar.svg"
         "${PROJECT_SOURCE_DIR}/art/archive.svg"
         "${PROJECT_SOURCE_DIR}/art/trash.svg"
@@ -257,6 +265,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/vault_controller_vaults.cpp
     ../src/ui/vault_controller_conflicts.cpp
     ../src/ui/vault_controller_import.cpp
+    ../src/ui/vault_controller_retry.cpp
     ../src/ui/webdav_client.cpp
     ../src/ui/webdav_sync.cpp
     ../src/ui/window_memory.cpp
