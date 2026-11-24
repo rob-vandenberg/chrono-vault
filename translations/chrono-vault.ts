@@ -1964,7 +1964,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+243"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+311"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1979,7 +1979,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+63"/>
         <source>Unlock Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2520,7 +2520,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+368"/>
+        <location filename="../qml/UnlockPage.qml" line="+385"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2717,7 +2717,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+231"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+232"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3574,7 +3574,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1751"/>
+        <location line="+959"/>
+        <source>%1 can no longer open this vault, so it was turned off. Unlock with the master password, then turn it on again in Settings &gt; Security.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+792"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3755,12 +3760,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
-        <source>%1 can no longer open this vault. Use the master password, then turn it on again in Settings &gt; Security.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+91"/>
+        <location line="+98"/>
         <source>Waiting for your %1…</source>
         <translation type="unfinished"></translation>
     </message>

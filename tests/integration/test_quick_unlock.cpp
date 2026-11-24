@@ -30,6 +30,7 @@
 // test_quick_unlock.cpp 0.0.39
 
 // --- Version history ----------------------------------------------------
+// v0.4.74: A lost key turns the setting off
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
@@ -202,6 +203,9 @@ void TestQuickUnlock::a_lost_key_turns_it_off_and_says_so()
     QCOMPARE(controller->state(), State::Locked);
     QVERIFY(controller->messageIsTrouble());
     QVERIFY(!controller->quickUnlockOn());
+    // The setting itself is off, as the message says (the owner, 0.4.74).
+    QVERIFY(!controller->quickUnlockEnabled());
+    QVERIFY(controller->message().contains(QStringLiteral("so it was turned off")));
 }
 
 void TestQuickUnlock::a_new_master_password_is_kept_for_the_finger()

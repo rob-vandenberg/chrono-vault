@@ -589,3 +589,12 @@ The owner's changelist items 1-9, from 0.4.72.1's log ("owner 0x0, Qt focus wind
 Windows Hello always gets the window that asks (`src/ui/quick_unlock_windows.cpp`), and the unlock page asks only once its
 window is active (`qml/UnlockPage.qml`); `test_reader` checks both the active rule and, within a pixel, the button width. Two review rounds: round 1 found that a cancelled Hello
 would be asked again at once (the window active again); now asked once per showing of the page; round 2 clean.
+
+## 24 November 2026: version 0.4.74: Windows Hello brought to the front
+
+The owner's changelist items 1-10. 0.4.73's log: owner given, our window in front, the call with an owner, Hello still
+behind. Now, as Chromium, Bitwarden and KeePassXC do but without a timer, Windows' Hello window is brought to the front
+when Windows reports it shown (`src/ui/quick_unlock_windows.cpp`, the owner's exception to G-3, D-038 point 12). A lost
+key turns the setting off (Q15 A; `test_quick_unlock`). Two review rounds: round 1 found that a cancelled
+turn-on's late answer could stop the next request's listening (now only the request still asking stops it); round 2
+clean.

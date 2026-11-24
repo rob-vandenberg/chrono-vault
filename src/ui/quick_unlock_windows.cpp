@@ -43,9 +43,10 @@
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.4.73
+// quick_unlock_windows.cpp 0.4.74
 
 // --- Version history ----------------------------------------------------
+// v0.4.74: Windows Hello's own window brought to the front when Windows shows it (the owner)
 // v0.4.73: Windows Hello always given the window that asks (the owner)
 // v0.4.72.1: Debug lines: the window Windows Hello is given, the one in front, the call used (the owner)
 // v0.4.72: Windows Hello asked over Chrono Vault's window on every Windows; the key kept with DPAPI (the owner, B)
@@ -144,6 +145,73 @@ QString titleOf(HWND window)
     wchar_t text[256] = {};
     GetWindowTextW(window, text, 256);
     return QString::fromWCharArray(text);
+}
+
+// Windows 10 puts Windows Hello's own window (class "Credential Dialog Xaml
+// Host", made by CredentialUIBroker.exe) behind Chrono Vault even with an
+// owner, and offers no call to change that. So, only while Chrono Vault itself
+// asks, Windows reports each window that is shown, and that one window is
+// brought to the front: no timer, no looking again (the owner's exception to
+// G-3, 0.4.74; D-038 point 12).
+HWINEVENTHOOK helloHook = nullptr;
+
+bool isHelloWindow(HWND window)
+{
+    wchar_t className[64] = {};
+    if (GetClassNameW(window, className, 64) == 0 || lstrcmpiW(className, L"Credential Dialog Xaml Host") != 0) {
+        return false;
+    }
+    DWORD processId = 0;
+    GetWindowThreadProcessId(window, &processId);
+    const HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
+    if (process == nullptr) {
+        return false;
+    }
+    wchar_t image[MAX_PATH] = {};
+    DWORD size = MAX_PATH;
+    const bool named = QueryFullProcessImageNameW(process, 0, image, &size) != 0;
+    CloseHandle(process);
+    if (!named) {
+        return false;
+    }
+    const wchar_t* name = image;
+    for (const wchar_t* at = image; *at != L'\0'; ++at) {
+        if (*at == L'\\') {
+            name = at + 1;
+        }
+    }
+    return lstrcmpiW(name, L"CredentialUIBroker.exe") == 0;
+}
+
+void CALLBACK helloShown(HWINEVENTHOOK, DWORD, HWND window, LONG object, LONG child, DWORD, DWORD)
+{
+    if (window == nullptr || object != OBJID_WINDOW || child != CHILDID_SELF || !isHelloWindow(window)) {
+        return;
+    }
+    const bool front = SetForegroundWindow(window) != 0;
+    fingerLog(QStringLiteral("hello window 0x%1 shown, brought to the front: %2")
+                  .arg(reinterpret_cast<quintptr>(window), 0, 16)
+                  .arg(front ? QStringLiteral("yes") : QStringLiteral("no")));
+}
+
+// On the window's thread, whose messages carry the reports.
+void startBringingForward()
+{
+    if (helloHook == nullptr) {
+        helloHook = SetWinEventHook(EVENT_OBJECT_SHOW, EVENT_OBJECT_SHOW, nullptr, helloShown, 0, 0,
+                                    WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+        if (helloHook == nullptr) {
+            fingerLog(QStringLiteral("hello: Windows did not agree to report shown windows"));
+        }
+    }
+}
+
+void stopBringingForward()
+{
+    if (helloHook != nullptr) {
+        UnhookWinEvent(helloHook);
+        helloHook = nullptr;
+    }
 }
 
 // For the --debug log (0.4.72.1): which window Windows Hello is given, which
@@ -256,6 +324,7 @@ public:
         const quintptr window = ownerWindow();
         const QString message = QCoreApplication::translate("QuickUnlock", "Turn on Windows Hello for Chrono Vault");
         logRequest("turning on", window);
+        startBringingForward();
         emit fingerReady(); // Windows Hello shows its own window now
         std::thread([self, vault, secret, window, message, pending]() {
             const Result answer = verify(window, message, *pending);
@@ -274,7 +343,12 @@ public:
                                                          : Result::Done;
             QMetaObject::invokeMethod(
                 qApp,
-                [self, vault, sealed, result, answer]() {
+                [self, vault, sealed, result, answer, pending]() {
+                    // Only the request still asking stops the listening: a
+                    // cancelled one's late answer leaves the next one's alone.
+                    if (self && self->asking == pending) {
+                        stopBringingForward();
+                    }
                     fingerLog(QStringLiteral("hello turning on: answered %1, kept: %2")
                                   .arg(static_cast<int>(answer))
                                   .arg(sealed.isEmpty() ? QStringLiteral("no") : QStringLiteral("yes")));
@@ -317,6 +391,7 @@ public:
         const quintptr window = ownerWindow();
         const QString message = QCoreApplication::translate("QuickUnlock", "Unlock Chrono Vault");
         logRequest("unlocking", window);
+        startBringingForward();
         emit fingerReady(); // Windows Hello shows its own window now
         std::thread([self, sealed, window, message, pending]() {
             Result result = verify(window, message, *pending);
@@ -337,7 +412,10 @@ public:
             }
             QMetaObject::invokeMethod(
                 qApp,
-                [self, result, secret]() {
+                [self, result, secret, pending]() {
+                    if (self && self->asking == pending) {
+                        stopBringingForward();
+                    }
                     fingerLog(QStringLiteral("hello unlocking: answered %1").arg(static_cast<int>(result)));
                     if (self) {
                         emit self->retrieved(result, secret);
@@ -351,6 +429,7 @@ public:
     // with its master password meanwhile.
     void cancel() override
     {
+        stopBringingForward();
         if (const auto pending = std::exchange(asking, nullptr)) {
             pending->stop();
         }
@@ -390,6 +469,9 @@ private:
     }
 
     std::shared_ptr<Pending> asking; // the check now asking for the person
+
+public:
+    ~WindowsQuickUnlock() override { stopBringingForward(); }
 };
 
 } // namespace

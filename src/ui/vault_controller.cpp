@@ -57,6 +57,7 @@
 // vault_controller.cpp 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.4.74: A finger's lost key turns the setting off (the owner, Q15)
 // v0.4.70: PIN unlock wired in: unlock, lock, the reminder, a changed key (D-059)
 // v0.3.67: A kept change given up only once another vault is opened; a vault added during a look counts as found
 // v0.3.65: Which vaults are found, checked in the background and again now and then (the owner, D-058)
@@ -1784,11 +1785,11 @@ void VaultController::connectQuickUnlock()
                 true);
             break;
         default:
-            // Its key is gone (fingerprints changed, or the keyring emptied).
-            quick->remove(path);
-            emit quickUnlockChanged();
-            say(tr("%1 can no longer open this vault. Use the master password, then turn it on again in Settings > "
-                   "Security.")
+            // Its key is gone (fingerprints changed, or the keyring emptied):
+            // turned off, as unticking does, so the setting says so (the owner, Q15).
+            setQuickUnlock(false);
+            say(tr("%1 can no longer open this vault, so it was turned off. Unlock with the master password, then "
+                   "turn it on again in Settings > Security.")
                     .arg(sentenceStart(quickUnlockName())),
                 true);
             break;
