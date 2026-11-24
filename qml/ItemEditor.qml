@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.3.62
+// ItemEditor.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.3.62: Save closes the editor on the saved item (the owner)
 // v0.2.59: The labels and fields 50 to the left, as the view (the owner)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -707,6 +708,7 @@ Item {
             columnSpacing: Math.round(24 * Appearance.factor)
             rowSpacing: Math.round(12 * Appearance.factor)
             Layout.preferredWidth: Math.round(420 * Appearance.factor)
+            Layout.fillWidth: true
             Label { text: fieldOptions.isSection ? qsTr("Section Name") : qsTr("Field Name") }
             TextField {
                 id: nameField
@@ -797,6 +799,7 @@ Item {
                 text: qsTr("The file you added is still being read. Try again in a moment.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
         }
     }
@@ -812,6 +815,7 @@ Item {
                 text: qsTr("“%1” has changes that are not saved yet.").arg(titleField.text)
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
         }
         onAccepted: {

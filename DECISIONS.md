@@ -69,3 +69,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-058](decisions/D-058.md) | The unlock page with a vault selector; a lock keeps the vault used last; new local vaults in Documents/chrono-vault |
 | [D-059](decisions/D-059.md) | PIN unlock: only while Chrono Vault runs, the PIN's key on disk only sealed with each vault's own key |
 | [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed |
+| [D-061](decisions/D-061.md) | The person decides every difference an import or a sync meets; the sides Vault/Import and This device/Other device |

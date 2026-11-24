@@ -41,6 +41,8 @@ qt_add_library(chrono_vault_core STATIC
     release_check.cpp
     release_check.h
     totp.cpp
+    item_differences.cpp
+    item_differences.h
     vault_merge.cpp
     vault_merge.h
     totp.h

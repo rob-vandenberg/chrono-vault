@@ -25,9 +25,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_elsewhere.cpp 0.5.76
+// test_elsewhere.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: This device's value stands; the sides left and right (D-061)
 // v0.5.76: A conflict settled as the Sync conflicts dialog chooses (D-060)
 // v0.2.45: A change here and one elsewhere merged, no longer a conflict copy (D-054)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -242,24 +243,25 @@ void TestElsewhere::the_same_text_changed_here_and_elsewhere_is_noted_and_can_be
     QTRY_VERIFY(controller->isIdle());
     const QString id = item.value(QStringLiteral("id")).toString();
 
-    // Elsewhere "The bank", a minute later than "My bank" here.
+    // Elsewhere "The bank", a minute later than "My bank" here: this
+    // device's stands all the same, the other waits for the person (D-061).
     retitleElsewhere(vaultPath, "pass", QStringLiteral("Bank"), QStringLiteral("The bank"));
     QVariantMap mine = controller->item(id);
     mine.insert(QStringLiteral("title"), QStringLiteral("My bank"));
     QVERIFY(controller->saveItem(mine));
 
-    QTRY_COMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("The bank")});
+    QTRY_COMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("My bank")});
     QTRY_VERIFY(controller->isIdle());
     QVERIFY(controller->messageIsTrouble());
     QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::MergedRole).toBool(), true);
     const QVariantList notes = controller->mergeNotes(id);
     QCOMPARE(notes.size(), 1);
-    QCOMPARE(notes[0].toMap().value(QStringLiteral("otherValue")).toString(), QStringLiteral("My bank"));
+    QCOMPARE(notes[0].toMap().value(QStringLiteral("otherValue")).toString(), QStringLiteral("The bank"));
 
     // "Use the other value" puts it in place, and the note goes.
     controller->useOtherValue(id, 0);
     QTRY_VERIFY(controller->isIdle());
-    QCOMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("My bank")});
+    QCOMPARE(titlesIn(vaultPath, "pass"), QStringList{QStringLiteral("The bank")});
     QVERIFY(controller->mergeNotes(id).isEmpty());
     QCOMPARE(controller->items()->data(controller->items()->index(0), ItemListModel::MergedRole).toBool(), false);
 }
@@ -268,10 +270,10 @@ void TestElsewhere::a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses_d
 {
     QTest::addColumn<QString>("way");
     QTest::addColumn<QStringList>("titles");
-    QTest::newRow("value now") << QStringLiteral("now") << QStringList{QStringLiteral("The bank")};
-    QTest::newRow("other value") << QStringLiteral("other") << QStringList{QStringLiteral("My bank")};
+    QTest::newRow("this device") << QStringLiteral("left") << QStringList{QStringLiteral("My bank")};
+    QTest::newRow("other device") << QStringLiteral("right") << QStringList{QStringLiteral("The bank")};
     QTest::newRow("keep both") << QStringLiteral("both") << QStringList{QStringLiteral("My bank"), QStringLiteral("The bank")};
-    QTest::newRow("per field") << QStringLiteral("field") << QStringList{QStringLiteral("My bank")};
+    QTest::newRow("per field") << QStringLiteral("field") << QStringList{QStringLiteral("The bank")};
 }
 
 void TestElsewhere::a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses()
@@ -292,18 +294,22 @@ void TestElsewhere::a_conflict_is_settled_as_the_sync_conflicts_dialog_chooses()
     QTRY_VERIFY(controller->isIdle());
     QTRY_COMPARE(controller->conflictCount(), 1);
 
-    // The row and the item's choices, as the dialog shows them (D-060).
+    // The row and the item's choices, as the dialog shows them (D-060):
+    // this device's on the left, the other device's on the right (D-061).
     const QVariantMap row = controller->conflicts().constFirst().toMap();
-    QCOMPARE(row.value(QStringLiteral("name")).toString(), QStringLiteral("The bank"));
+    QCOMPARE(row.value(QStringLiteral("name")).toString(), QStringLiteral("My bank"));
     QCOMPARE(row.value(QStringLiteral("fields")).toString(), QStringLiteral("Title"));
     QCOMPARE(row.value(QStringLiteral("kind")).toString(), QStringLiteral("both"));
-    const QVariantList rows = controller->conflictOf(id).value(QStringLiteral("rows")).toList();
+    const QVariantMap conflict = controller->conflictOf(id);
+    QCOMPARE(conflict.value(QStringLiteral("leftName")).toString(), QStringLiteral("This device"));
+    QCOMPARE(conflict.value(QStringLiteral("rightName")).toString(), QStringLiteral("Other device"));
+    const QVariantList rows = conflict.value(QStringLiteral("rows")).toList();
     QCOMPARE(rows.size(), 1);
-    QCOMPARE(rows[0].toMap().value(QStringLiteral("now")).toString(), QStringLiteral("The bank"));
-    QCOMPARE(rows[0].toMap().value(QStringLiteral("other")).toString(), QStringLiteral("My bank"));
+    QCOMPARE(rows[0].toMap().value(QStringLiteral("left")).toString(), QStringLiteral("My bank"));
+    QCOMPARE(rows[0].toMap().value(QStringLiteral("right")).toString(), QStringLiteral("The bank"));
 
     if (way == QLatin1String("field")) {
-        controller->settleConflict(id, {QStringLiteral("other")});
+        controller->settleConflict(id, {QStringLiteral("right")});
     } else {
         controller->settleConflicts({id}, way);
     }

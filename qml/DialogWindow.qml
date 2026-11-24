@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.1.43
+// DialogWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Never narrower than its content can take (D-061)
 // v0.1.43: Esc also through the window's own keys, as Chrono Viewer's QDialog
 // v0.0.9: Opened quietly, without taking the keyboard; a window that cannot be closed for a while; buttons of its own at the right (D-024)
 // v0.0.8: A narrow edge, as the settings window's; a place for the dialog's own buttons at the bottom left
@@ -118,7 +119,10 @@ ApplicationWindow {
     readonly property int edge: Math.round(10 * Appearance.factor)
     width: Math.max(Math.round(400 * Appearance.factor), layout.implicitWidth + 2 * edge)
     height: Math.max(Math.round(160 * Appearance.factor), layout.implicitHeight + 2 * edge)
-    minimumWidth: Math.min(layout.implicitWidth + 2 * edge, Math.round(320 * Appearance.factor))
+    // Never narrower than its content can take, so nothing is cut off or
+    // pushed outside: texts wrap within their reading width, and the window
+    // only grows wider (D-061).
+    minimumWidth: layout.implicitWidth + 2 * edge
     minimumHeight: layout.implicitHeight + 2 * edge
     color: palette.window
 

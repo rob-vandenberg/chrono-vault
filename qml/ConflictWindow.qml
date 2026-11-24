@@ -21,14 +21,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.5.77
+// ConflictWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The sides "Vault" and "Import", or "This device" and "Other device"; every kind of difference; the header's choices in line with the rows' (D-061)
 // v0.5.77: A conflict from an import reads "Imported" (D-060)
 // v0.5.76: Initial release (D-060)
 
-// One item's conflict, after Chrono Mail's (D-060): every value that differs
-// with the value now and the other value, outlined, a choice in front of each;
+// One item's conflict, after Chrono Mail's (D-060): every difference with
+// its two sides, the vault and the import or this device and the other
+// device (D-061), outlined, a choice in front of each;
 // the header's choices take one side for every row. Nothing is chosen
 // beforehand: Apply waits until every row is chosen. Keep both keeps the item
 // and a copy with the other values. An item deleted on one side and changed
@@ -42,9 +44,12 @@ DialogWindow {
     property var conflict: ({})
     readonly property var rows: conflict.rows || []
     readonly property bool deletedElsewhere: conflict.kind === "deleted"
-    // Each row's choice by its index: "now" or "other".
+    readonly property bool ofVault: conflict.ofVault === true
+    // Each row's choice by its index: "left" or "right".
     property var chosen: ({})
     property bool reveal: false
+    // How far a row's choice stands in from its cell: the outline's padding.
+    readonly property int cellInset: Math.round(2 * Appearance.factor)
     readonly property bool allChosen: {
         for (let i = 0; i < rows.length; ++i) {
             if (chosen[rows[i].index] === undefined)
@@ -99,7 +104,7 @@ DialogWindow {
 
     leftButtons: Button {
         objectName: "conflictKeepBothButton"
-        visible: !conflictWindow.deletedElsewhere
+        visible: !conflictWindow.deletedElsewhere && !conflictWindow.ofVault
         text: qsTr("Keep both")
         onClicked: {
             VaultController.settleConflicts([conflictWindow.itemId], "both")
@@ -167,7 +172,7 @@ DialogWindow {
                       ? qsTr("Deleted on one side and changed on the other, so it was kept.")
                       : conflictWindow.conflict.kind === "imported"
                         ? qsTr("The import holds other values. The vault's values stand until you choose.")
-                        : qsTr("Changed on two sides. The newest value stands until you choose.")
+                        : qsTr("Changed on two devices. Nothing is decided until you choose.")
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -197,27 +202,31 @@ DialogWindow {
                 rowSpacing: Math.round(6 * Appearance.factor)
 
                 Label { text: qsTr("Field"); font.bold: true }
+                // The header's choices stand where the rows' do: inside the
+                // rows' outline and its padding.
                 RadioButton {
-                    objectName: "conflictAllNow"
-                    text: qsTr("Value now")
+                    objectName: "conflictAllLeft"
+                    text: conflictWindow.conflict.leftName || ""
                     font.bold: true
                     autoExclusive: false
                     // Shown as the window's choice only: a click never ticks it itself.
                     checkable: false
-                    checked: conflictWindow.allAre("now")
-                    onClicked: conflictWindow.chooseAll("now")
+                    checked: conflictWindow.allAre("left")
+                    onClicked: conflictWindow.chooseAll("left")
                     Layout.fillWidth: true
+                    Layout.leftMargin: conflictWindow.cellInset
                 }
                 RadioButton {
-                    objectName: "conflictAllOther"
-                    text: conflictWindow.conflict.kind === "imported" ? qsTr("Imported") : qsTr("Other value")
+                    objectName: "conflictAllRight"
+                    text: conflictWindow.conflict.rightName || ""
                     font.bold: true
                     autoExclusive: false
                     // Shown as the window's choice only: a click never ticks it itself.
                     checkable: false
-                    checked: conflictWindow.allAre("other")
-                    onClicked: conflictWindow.chooseAll("other")
+                    checked: conflictWindow.allAre("right")
+                    onClicked: conflictWindow.chooseAll("right")
                     Layout.fillWidth: true
+                    Layout.leftMargin: conflictWindow.cellInset
                 }
 
                 Repeater {
@@ -235,14 +244,14 @@ DialogWindow {
                 Repeater {
                     model: conflictWindow.rows
                     delegate: Frame {
-                        id: nowCell
+                        id: leftCell
                         required property var modelData
                         required property int index
                         Layout.row: index + 1
                         Layout.column: 1
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        padding: Math.round(2 * Appearance.factor)
+                        padding: conflictWindow.cellInset
                         background: Rectangle {
                             color: "transparent"
                             radius: Math.round(4 * Appearance.factor)
@@ -250,28 +259,28 @@ DialogWindow {
                             border.color: conflictWindow.palette.highlight
                         }
                         RadioButton {
-                            objectName: "conflictNow_" + nowCell.index
+                            objectName: "conflictLeft_" + leftCell.index
                             width: parent.width
                             autoExclusive: false
                             // Shown as the window's choice only: a click never ticks it itself.
                             checkable: false
-                            text: conflictWindow.shown_(nowCell.modelData.now, nowCell.modelData.hidden)
-                            checked: conflictWindow.chosen[nowCell.modelData.index] === "now"
-                            onClicked: conflictWindow.choose(nowCell.modelData.index, "now")
+                            text: conflictWindow.shown_(leftCell.modelData.left, leftCell.modelData.hidden)
+                            checked: conflictWindow.chosen[leftCell.modelData.index] === "left"
+                            onClicked: conflictWindow.choose(leftCell.modelData.index, "left")
                         }
                     }
                 }
                 Repeater {
                     model: conflictWindow.rows
                     delegate: Frame {
-                        id: otherCell
+                        id: rightCell
                         required property var modelData
                         required property int index
                         Layout.row: index + 1
                         Layout.column: 2
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        padding: Math.round(2 * Appearance.factor)
+                        padding: conflictWindow.cellInset
                         background: Rectangle {
                             color: "transparent"
                             radius: Math.round(4 * Appearance.factor)
@@ -279,14 +288,14 @@ DialogWindow {
                             border.color: conflictWindow.palette.highlight
                         }
                         RadioButton {
-                            objectName: "conflictOther_" + otherCell.index
+                            objectName: "conflictRight_" + rightCell.index
                             width: parent.width
                             autoExclusive: false
                             // Shown as the window's choice only: a click never ticks it itself.
                             checkable: false
-                            text: conflictWindow.shown_(otherCell.modelData.other, otherCell.modelData.hidden)
-                            checked: conflictWindow.chosen[otherCell.modelData.index] === "other"
-                            onClicked: conflictWindow.choose(otherCell.modelData.index, "other")
+                            text: conflictWindow.shown_(rightCell.modelData.right, rightCell.modelData.hidden)
+                            checked: conflictWindow.chosen[rightCell.modelData.index] === "right"
+                            onClicked: conflictWindow.choose(rightCell.modelData.index, "right")
                         }
                     }
                 }

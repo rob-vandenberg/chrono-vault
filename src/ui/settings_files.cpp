@@ -20,11 +20,13 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
+#include <QUuid>
 
 // --- Version ------------------------------------------------------------
-// settings_files.cpp 0.0.38
+// settings_files.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: This device's own id (D-061)
 // v0.0.38: Initial release (D-026)
 
 namespace chrono_vault {
@@ -51,6 +53,17 @@ bool deleteSettingsFile()
 {
     const QString file = SettingsFile().fileName();
     return !QFile::exists(file) || QFile::remove(file);
+}
+
+QString thisDeviceId()
+{
+    VaultsFile vaults;
+    QString id = vaults.value(QStringLiteral("device/id")).toString();
+    if (id.isEmpty()) {
+        id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        vaults.setValue(QStringLiteral("device/id"), id);
+    }
+    return id;
 }
 
 } // namespace chrono_vault

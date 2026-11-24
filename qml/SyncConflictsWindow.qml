@@ -21,16 +21,18 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.5.77
+// SyncConflictsWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The buttons "Use Vault" and "Use Import", or "Use This device" and "Use Other device"; the row tick boxes as clear as Check all (D-061)
 // v0.5.77: A conflict from an import has its own mark (D-060)
 // v0.5.76: Initial release (D-060)
 
 // Sync conflicts (Tools > Sync conflicts…), after Chrono Mail's (D-060): one
 // row per item with a conflict, with What, Name, Fields, Where and Why; the
-// ticked rows settled whole with Use value now, Use other value or Keep both,
-// or one by one with a double click. Nothing asks during a sync: a conflict
+// ticked rows settled whole with Use Vault or Use Import (an import), Use
+// This device or Use Other device (a sync), or Keep both, or one by one with
+// a double click (D-061). Nothing asks during a sync: a conflict
 // waits here until the person settles it.
 DialogWindow {
     id: conflictsWindow
@@ -49,12 +51,33 @@ DialogWindow {
         }
         return count
     }
-    readonly property bool anyDeleted: {
+    // Keep both makes a copy of an item: not for one deleted elsewhere, nor
+    // for a category or template.
+    readonly property bool anyUncopyable: {
         for (let i = 0; i < rows.length; ++i) {
-            if (ticked[rows[i].itemId] && rows[i].kind === "deleted")
+            if (ticked[rows[i].itemId] && (rows[i].kind === "deleted" || rows[i].ofVault))
                 return true
         }
         return false
+    }
+    // The sides' names of the ticked rows (D-061): an import's, a sync's, or
+    // both when the ticked rows hold both.
+    readonly property var sides: {
+        let imported = false
+        let synced = false
+        for (let i = 0; i < rows.length; ++i) {
+            if (!ticked[rows[i].itemId])
+                continue
+            if (rows[i].source === "imported")
+                imported = true
+            else if (rows[i].source === "both")
+                synced = true
+            else {
+                imported = true
+                synced = true
+            }
+        }
+        return VaultController.sideNames(imported && synced ? "mixed" : imported ? "imported" : "both")
     }
     readonly property int whatWidth: Math.round(110 * Appearance.factor)
     readonly property int whyWidth: Math.round(44 * Appearance.factor)
@@ -133,7 +156,7 @@ DialogWindow {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        CheckBox {
+        TickBox {
             objectName: "conflictsCheckAll"
             text: qsTr("Check all")
             enabled: conflictsWindow.rows.length > 0
@@ -187,7 +210,7 @@ DialogWindow {
                         onDoubleClicked: conflictWindow.showItem(modelData.itemId)
                         contentItem: RowLayout {
                             spacing: Math.round(6 * Appearance.factor)
-                            CheckBox {
+                            TickBox {
                                 objectName: "conflictTick_" + row.index
                                 checkable: false
                                 checked: conflictsWindow.ticked[row.modelData.itemId] === true
@@ -246,21 +269,21 @@ DialogWindow {
         RowLayout {
             spacing: Math.round(6 * Appearance.factor)
             Button {
-                objectName: "useValueNowButton"
-                text: qsTr("Use value now")
+                objectName: "useLeftButton"
+                text: qsTr("Use %1").arg(conflictsWindow.sides.left)
                 enabled: conflictsWindow.tickedCount > 0
-                onClicked: conflictsWindow.settle("now")
+                onClicked: conflictsWindow.settle("left")
             }
             Button {
-                objectName: "useOtherValueButton"
-                text: qsTr("Use other value")
+                objectName: "useRightButton"
+                text: qsTr("Use %1").arg(conflictsWindow.sides.right)
                 enabled: conflictsWindow.tickedCount > 0
-                onClicked: conflictsWindow.settle("other")
+                onClicked: conflictsWindow.settle("right")
             }
             Button {
                 objectName: "keepBothButton"
                 text: qsTr("Keep both")
-                enabled: conflictsWindow.tickedCount > 0 && !conflictsWindow.anyDeleted
+                enabled: conflictsWindow.tickedCount > 0 && !conflictsWindow.anyUncopyable
                 onClicked: conflictsWindow.settle("both")
             }
             Button {
@@ -275,7 +298,7 @@ DialogWindow {
         RowLayout {
             spacing: Math.round(6 * Appearance.factor)
             Why { kind: "both" }
-            Label { text: qsTr("Changed on two sides") }
+            Label { text: qsTr("Changed on two devices") }
             Item { Layout.preferredWidth: Math.round(16 * Appearance.factor) }
             Why { kind: "imported" }
             Label { text: qsTr("Differs from an import") }
@@ -283,7 +306,11 @@ DialogWindow {
         RowLayout {
             spacing: Math.round(6 * Appearance.factor)
             Why { kind: "deleted" }
-            Label { text: qsTr("Deleted on one side and changed on the other (Use other value moves it to the Trash)") }
+            Label {
+                text: qsTr("Deleted on one device and changed on the other (Use Other device moves it to the Trash)")
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
         }
     }
 

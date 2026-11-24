@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.5.77
+// Main.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The menus' own colour; texts in dialogs wrap with the window (D-061)
 // v0.5.77: After an import, the Sync conflicts dialog when items differ (D-060)
 // v0.5.76: Tools > Sync Conflicts… and the Sync conflicts dialog (D-060)
 // v0.3.60: Tools > Sync Now; the questions of a WebDAV sync: a certificate to trust, the server's password (D-057)
@@ -249,6 +250,11 @@ ApplicationWindow {
     // right, and as wide as its widest entry (D-039).
     component MainMenu: Menu {
         delegate: MenuItem {}
+        // A colour of its own, apart from the sidebar's (Base) and the
+        // window's: the style draws a menu in Base, so Base is the buttons'
+        // colour here, a step lighter than both in the dark theme and a step
+        // darker in the light one (the owner).
+        palette.base: mainWindow.palette.button
         width: {
             let widest = implicitWidth
             for (let index = 0; index < count; ++index) {
@@ -890,6 +896,7 @@ ApplicationWindow {
                       : qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you quit now, it is lost.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(380 * Appearance.factor)
+                Layout.fillWidth: true
             }
         }
         // Retry or Cancel abandon the Quit: an update armed by it is not set

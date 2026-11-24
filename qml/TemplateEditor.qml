@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplateEditor.qml 0.0.14
+// TemplateEditor.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Its content follows the window's width (D-061)
 // v0.0.14: Initial release (D-027)
 
 // A template of the person's own (D-027): its name, its category, and its
@@ -96,6 +97,7 @@ DialogWindow {
     ColumnLayout {
         spacing: Math.round(8 * Appearance.factor)
         Layout.preferredWidth: Math.round(520 * Appearance.factor)
+        Layout.fillWidth: true
 
         GridLayout {
             columns: 2

@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_menu.cpp 0.5.77
+// test_vault_menu.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: An import's every difference waits for the person, an item deleted here too (D-061)
 // v0.5.77: Import from another vault (D-060)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
 
@@ -460,34 +461,44 @@ private slots:
         QVERIFY(read.constLast().at(0).toMap().value(QStringLiteral("ok")).toBool());
         QCOMPARE(read.constLast().at(0).toMap().value(QStringLiteral("items")).toInt(), 3);
         QVERIFY(controller->confirmImport());
-        QCOMPARE(controller->lastImportConflicts(), 1);
+        QCOMPARE(controller->lastImportConflicts(), 2);
         QTRY_VERIFY(controller->isIdle());
 
-        // "Theirs" added, "Same" passed over, "Mine" kept as "Mine here" with
-        // the imported title to choose.
+        // "Theirs" added; "Mine" kept as "Mine here" with the imported title
+        // to choose; "Same" kept as it is, the import's attachment and tag
+        // waiting for the person (D-061).
         QStringList titles = titlesIn(here);
         titles.sort();
         QCOMPARE(titles, (QStringList{QStringLiteral("Mine here"), QStringLiteral("Same"), QStringLiteral("Theirs")}));
-        QCOMPARE(controller->conflictCount(), 1);
+        QCOMPARE(controller->conflictCount(), 2);
         QCOMPARE(controller->conflicts().constFirst().toMap().value(QStringLiteral("kind")).toString(),
                  QStringLiteral("imported"));
-        const QVariantList rows = controller->conflictOf(mineId).value(QStringLiteral("rows")).toList();
+        const QVariantMap conflict = controller->conflictOf(mineId);
+        QCOMPARE(conflict.value(QStringLiteral("leftName")).toString(), QStringLiteral("Vault"));
+        QCOMPARE(conflict.value(QStringLiteral("rightName")).toString(), QStringLiteral("Import"));
+        const QVariantList rows = conflict.value(QStringLiteral("rows")).toList();
         QCOMPARE(rows.size(), 1);
-        QCOMPARE(rows[0].toMap().value(QStringLiteral("other")).toString(), QStringLiteral("Mine"));
-        // What only the import held was added, with nothing to choose.
-        bool attached = false;
-        bool tagged = false;
-        {
+        QCOMPARE(rows[0].toMap().value(QStringLiteral("left")).toString(), QStringLiteral("Mine here"));
+        QCOMPARE(rows[0].toMap().value(QStringLiteral("right")).toString(), QStringLiteral("Mine"));
+        QString sameId;
+        for (const QVariant& one : controller->conflicts()) {
+            if (one.toMap().value(QStringLiteral("name")).toString() == QLatin1String("Same")) {
+                sameId = one.toMap().value(QStringLiteral("itemId")).toString();
+                QCOMPARE(one.toMap().value(QStringLiteral("fields")).toString(), QStringLiteral("Tag, Attachment"));
+            }
+        }
+        QVERIFY(!sameId.isEmpty());
+        const auto sameOnDisk = [&here]() {
             const OpenResult opened = openVaultFile(here, "pass");
             for (const Item& item : contentsFromJson(opened.contents).contents.items) {
                 if (item.title == QLatin1String("Same")) {
-                    attached = item.attachments.size() == 1;
-                    tagged = item.tags.contains(QStringLiteral("Work"));
+                    return item;
                 }
             }
-        }
-        QVERIFY(attached);
-        QVERIFY(tagged);
+            return Item();
+        };
+        QVERIFY(sameOnDisk().attachments.isEmpty());
+        QVERIFY(sameOnDisk().tags.isEmpty());
         // Imported again: the conflict left is not counted as new.
         controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
         QVERIFY(read.wait(10000));
@@ -495,7 +506,12 @@ private slots:
         QVERIFY(!controller->message().contains(QStringLiteral("differ")));
         QCOMPARE(controller->lastImportConflicts(), 0); // the dialog does not open again
         QTRY_VERIFY(controller->isIdle());
-        QCOMPARE(controller->conflictCount(), 1);
+        QCOMPARE(controller->conflictCount(), 2);
+        // The import's side taken for "Same": its attachment and tag added.
+        controller->settleConflicts({sameId}, QStringLiteral("right"));
+        QTRY_VERIFY(controller->isIdle());
+        QCOMPARE(sameOnDisk().attachments.size(), 1);
+        QCOMPARE(sameOnDisk().tags, QStringList{QStringLiteral("Work")});
         // Kept in the vault file as imported.
         bool imported = false;
         const OpenResult opened = openVaultFile(here, "pass");
@@ -507,7 +523,17 @@ private slots:
         QVERIFY(imported);
     }
 
-    void an_item_deleted_here_and_imported_again_stays()
+    // Deleted here for good, held by the import: the person chooses (D-061).
+    // Kept until then, its deletion forgotten, so no sync takes it away; the
+    // vault's side deletes it for good again, the import's keeps it.
+    void an_item_deleted_here_and_imported_again_waits_for_the_person_data()
+    {
+        QTest::addColumn<QString>("side");
+        QTest::addColumn<int>("items");
+        QTest::newRow("vault") << QStringLiteral("left") << 0;
+        QTest::newRow("import") << QStringLiteral("right") << 1;
+    }
+    void an_item_deleted_here_and_imported_again_waits_for_the_person()
     {
         QTemporaryDir folder;
         const QString here = folder.filePath(QStringLiteral("Here.chronovault"));
@@ -522,11 +548,26 @@ private slots:
         controller->readVaultImport(QUrl::fromLocalFile(other), QStringLiteral("pass"));
         QVERIFY(read.wait(10000));
         QVERIFY(controller->confirmImport());
+        QCOMPARE(controller->lastImportConflicts(), 1);
+        QTRY_VERIFY(controller->isIdle());
+        {
+            const OpenResult opened = openVaultFile(here, "pass");
+            const VaultContents contents = contentsFromJson(opened.contents).contents;
+            QCOMPARE(contents.items.size(), 1);
+            QVERIFY(contents.deletedItems.isEmpty()); // the deletion forgotten meanwhile
+        }
+        const QVariantList rows = controller->conflictOf(id).value(QStringLiteral("rows")).toList();
+        QCOMPARE(rows.size(), 1);
+        QCOMPARE(rows[0].toMap().value(QStringLiteral("left")).toString(), QStringLiteral("Deleted for good"));
+        QFETCH(QString, side);
+        QFETCH(int, items);
+        controller->settleConflict(id, {side});
         QTRY_VERIFY(controller->isIdle());
         const OpenResult opened = openVaultFile(here, "pass");
         const VaultContents contents = contentsFromJson(opened.contents).contents;
-        QCOMPARE(contents.items.size(), 1);
-        QVERIFY(contents.deletedItems.isEmpty()); // the deletion forgotten: no sync takes it away again
+        QCOMPARE(contents.items.size(), items);
+        QCOMPARE(contents.deletedItems.size(), 1 - items);
+        QCOMPARE(controller->conflictCount(), 0);
     }
 
     void forget_takes_a_vault_off_the_list_and_leaves_its_file()

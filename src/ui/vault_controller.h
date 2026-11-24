@@ -48,9 +48,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.5.76
+// vault_controller.h 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Every difference a conflict; the sides' names; the person's own categories and templates (D-061)
 // v0.5.77: Import from another vault; an import's duplicates skipped or made conflicts (D-060)
 // v0.5.76: The Sync conflicts dialog: conflicts, conflictOf, settleConflicts, settleConflict (D-060)
 // v0.5.75: The vault menu: lockVault, moveVaultTo, moveVaultToWebDav, forgetVault; Disconnect deletes nothing (D-060)
@@ -464,19 +465,26 @@ public:
     Q_INVOKABLE void useOtherValue(const QString& itemId, int index);
     Q_INVOKABLE void dismissMergeNote(const QString& itemId, int index);
     // The Sync conflicts dialog (D-060), in vault_controller_conflicts.cpp.
-    // Every item with a conflict: {itemId, what, name, fields, where, kind}
-    // with kind "both" (a value changed on two sides) or "deleted" (deleted
-    // on one side and changed on the other).
+    // Every item, and every category or template of the person's own (its id
+    // "vault:…"), with a conflict: {itemId, what, name, fields, where, kind,
+    // source, ofVault} with kind "both" (differs on two devices), "imported"
+    // (differs from an import) or "deleted" (deleted on one side and changed
+    // on the other); source "both", "imported" or "mixed" (D-061).
     [[nodiscard]] int conflictCount() const;
     [[nodiscard]] Q_INVOKABLE QVariantList conflicts() const;
-    // One item's conflict: {itemId, what, name, where, kind, rows: [{index,
-    // label, now, other, hidden}]}; an empty map when it has none.
+    // One conflict: {itemId, what, name, where, kind, source, ofVault,
+    // leftName, rightName, rows: [{index, label, left, right, hidden}]}, the
+    // left side the vault or this device, the right the import or the other
+    // device; an empty map when it has none.
     [[nodiscard]] Q_INVOKABLE QVariantMap conflictOf(const QString& itemId) const;
-    // Settles these items whole: "now" keeps every value as it is, "other"
-    // takes every other value (an item deleted elsewhere goes to the Trash),
-    // "both" keeps the item and a copy of it with the other values.
+    // The two sides' names for a source of conflictOf.
+    [[nodiscard]] Q_INVOKABLE QVariantMap sideNames(const QString& source) const;
+    // Settles these whole: "left" takes every left value, "right" every
+    // right one (an item deleted elsewhere goes to the Trash), "both" keeps
+    // the item and a copy of it with the other values. "now" and "other" are
+    // the value standing and the other value.
     Q_INVOKABLE void settleConflicts(const QStringList& itemIds, const QString& side);
-    // Settles one item per row of conflictOf: "now" or "other" for each.
+    // Settles one per row of conflictOf: "left" or "right" for each.
     Q_INVOKABLE void settleConflict(const QString& itemId, const QVariantList& choices);
     // Moves an item into the Trash or out of it, into the Archive or out of
     // it (D-033).
@@ -750,11 +758,16 @@ private:
     // The password saved in the primary for this vault, changed with it.
     void updateSavedPassword(const QString& vaultFile, const QString& password);
 
-    // An imported item taken in (D-060), in vault_controller_import.cpp: an
-    // item the vault does not have is added; one it has is left as it is when
-    // the same, and otherwise keeps its values with a conflict per value that
-    // differs, its other value the imported one. True when it is a conflict.
+    // An imported item taken in (D-060, D-061), in vault_controller_import.cpp:
+    // an item the vault does not have is added; one it deleted for good comes
+    // back with a conflict; one it has is left as it is when the same, and
+    // otherwise keeps its values with a conflict per difference, its other
+    // value the imported one. True when it is a new conflict.
     bool takeImported(const Item& imported, const QDateTime& now, bool* added);
+    // The Sync conflicts dialog's helpers (D-061), in vault_controller_conflicts.cpp.
+    [[nodiscard]] QVariantMap conflictRow(const Item& item, const MergeNote& note) const;
+    bool settleNote(Item& item, const MergeNote& note, bool takeOther, const QDateTime& now);
+    void removeForGood(const QList<QUuid>& ids, const QDateTime& now);
 
     // The vault menu (D-060), in vault_controller_vaults.cpp.
     // Why this vault cannot be moved now, or "".

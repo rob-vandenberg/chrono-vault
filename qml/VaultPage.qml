@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.5.76
+// VaultPage.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.76: The item's sync conflict to the Sync conflicts dialog (D-060)
 // v0.3.60: Under the vault's name: WebDAV for a vault kept there, and why its last sync failed (D-057)
 // v0.2.56: A right-click on a category offers Edit… (the owner, D-056)
@@ -852,6 +853,7 @@ Item {
                 text: qsTr("A slash nests a tag under another, as in “Work/Servers”.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
             TextField {
                 id: tagName

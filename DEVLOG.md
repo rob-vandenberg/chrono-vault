@@ -630,3 +630,16 @@ when the same, and otherwise each differing value becomes a conflict marked "Imp
 the import. Settings > Vaults' menu has Import… and Export…; a vault not open is unlocked first in a small window. The
 old rule of D-035 (an export imported twice gave every item twice) is replaced; `test_items` follows it.
 `test_vault_menu` imports from another vault.
+
+## 24 November 2026: version 0.5.78: the person decides
+
+The owner's changelist items 1-18 (autonomous mode), D-061. `src/core/item_differences.cpp` notes every way an
+imported item differs, and puts a chosen side in place; `src/core/vault_merge.cpp` notes every two-sided difference of
+a sync with this device's value standing (a device id in chrono-vault.conf), and the person's own categories and
+templates in the vault's own notes. Contents format 9. `src/ui/vault_controller_conflicts.cpp` gives every kind of
+difference a row with its two sides, "Vault"/"Import" or "This device"/"Other device". The windows: P53's alignment,
+`qml/TickBox.qml` for clear tick boxes, the master password window's tick boxes swapped and wrapping, every dialog's
+texts following its width and its smallest width its content's, the menus' own colour. Tests: `test_item_differences`
+(new), `test_vault_merge`, `test_vault_contents`, `test_elsewhere`, `test_vault_menu`, `test_item_pages`. The test files
+`scratchpad/conflict-test-1.json` and `-2.json` gained items with 12 to 14 differences, a few, one, and none: 31
+conflicts in all.

@@ -20,9 +20,10 @@
 #include <QSettings>
 
 // --- Version ------------------------------------------------------------
-// settings_files.h 0.0.38
+// settings_files.h 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: This device's own id (D-061)
 // v0.0.38: Initial release (D-026)
 
 namespace chrono_vault {
@@ -52,5 +53,9 @@ public:
 // --reset on the command line: chrono-vault.ini is deleted before anything
 // reads it (D-026). Returns false when it is there and could not be deleted.
 bool deleteSettingsFile();
+
+// This device's own id, made once and kept in chrono-vault.conf, so a sync
+// conflict can say which value is this device's (D-061).
+[[nodiscard]] QString thisDeviceId();
 
 } // namespace chrono_vault

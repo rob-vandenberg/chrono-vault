@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GeneratorDialog.qml 0.0.4
+// GeneratorDialog.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Its content follows the window's width (D-061)
 // v0.0.4: The password in Noto Sans Mono
 // v0.0.3: Initial release
 
@@ -58,6 +59,7 @@ DialogWindow {
             font.family: "Noto Sans Mono"
             selectByMouse: true
             Layout.preferredWidth: Math.round(420 * Appearance.factor)
+            Layout.fillWidth: true
         }
         RowLayout {
             Label { text: qsTr("Length: %1").arg(lengthSlider.value) }

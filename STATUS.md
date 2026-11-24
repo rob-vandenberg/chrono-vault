@@ -2,7 +2,14 @@
 
 ## Now
 
-**Version 0.5.77**: Import… and Export… (D-060): one Import window, from another vault (the list or Browse…, with its
+**Version 0.5.78**: the person decides every difference (D-061): an import makes every way an item differs a
+conflict (deleted fields either way, fields, tags, attachments and earlier values only the import holds, category,
+Trash, Archive, Favorite, Autosubmit, icon, an item deleted here for good), and a sync every two-sided difference, this
+device's value standing; the sides read "Vault" and "Import" or "This device" and "Other device", with "Use …"
+buttons; the conflict window's header choices in line with the rows' (P53); clear tick boxes in the Sync conflicts
+list; Choose the master password with the saved password's tick box first; dialog texts wrap with the window and no
+dialog narrower than its content; the menus in a colour of their own. Contents format 9: older versions refuse such a
+vault as newer. Before, 0.5.77: Import… and Export… (D-060): one Import window, from another vault (the list or Browse…, with its
 master password) or from an export; an item the vault has is passed over when the same and otherwise a conflict marked
 "Imported", settled in the Sync conflicts dialog after the import; Import… and Export… in every vault's menu, a vault
 not open unlocked first. Before, 0.5.76: the Sync conflicts dialog after Chrono Mail's (D-060): Tools > Sync Conflicts… lists every item
@@ -24,7 +31,8 @@ versions. "Use the Esc key to exit the program" in Settings > General (D-048).
 
 ## Next task
 
-As the owner chooses (D-060's changelist is done).
+As the owner chooses (the 0.5.78 changelist is done). Open: Chrono Mail's dialog details the owner showed (every field
+shown, Found, orange outlines, a table look, line icons, a split icon that keeps both values), to be asked.
 
 ## Open questions
 

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.77
+// ImportWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts wrap with the window (D-061)
 // v0.5.77: From another vault or from an export; then conflicts to settle (D-060)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
@@ -146,6 +147,7 @@ DialogWindow {
     ColumnLayout {
         spacing: Math.round(10 * Appearance.factor)
         Layout.preferredWidth: Math.round(460 * Appearance.factor)
+        Layout.fillWidth: true
 
         ColumnLayout {
             visible: importWindow.step === "choose"

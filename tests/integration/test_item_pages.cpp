@@ -611,8 +611,15 @@ void TestItemPages::a_merge_note_is_shown_on_the_item_and_in_the_list()
     QVERIFY(!apply->isEnabled());
     // As a person clicks: the button toggles, then says it was clicked. The
     // circles show the last choice only.
-    QQuickItem* nowChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictNow_0")).constFirst();
-    QQuickItem* otherChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictOther_0")).constFirst();
+    // This device's on the left, the other device's on the right (D-061).
+    QQuickItem* nowChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictLeft_0")).constFirst();
+    QQuickItem* otherChoice = visualItems(conflict->contentItem(), QStringLiteral("conflictRight_0")).constFirst();
+    QCOMPARE(nowChoice->property("text").toString(), QStringLiteral("My bank"));
+    QCOMPARE(otherChoice->property("text").toString(), QStringLiteral("The bank"));
+    // The header's choices stand in line with the rows' (P53).
+    QQuickItem* allLeft = visualItems(conflict->contentItem(), QStringLiteral("conflictAllLeft")).constFirst();
+    QCOMPARE(allLeft->property("text").toString(), QStringLiteral("This device"));
+    QTRY_COMPARE(allLeft->mapToScene(QPointF(0, 0)).x(), nowChoice->mapToScene(QPointF(0, 0)).x());
     for (QQuickItem* choice : {nowChoice, otherChoice}) {
         QVERIFY(QMetaObject::invokeMethod(choice, "toggle"));
         QVERIFY(QMetaObject::invokeMethod(choice, "clicked"));
@@ -624,7 +631,7 @@ void TestItemPages::a_merge_note_is_shown_on_the_item_and_in_the_list()
     QTRY_VERIFY(!conflict->isVisible());
     QTRY_VERIFY(!visualItems(root, QStringLiteral("mergeNote")).constFirst()->isVisible());
     QTRY_VERIFY(controller->isIdle());
-    QCOMPARE(controller->item(id).value(QStringLiteral("title")).toString(), QStringLiteral("My bank"));
+    QCOMPARE(controller->item(id).value(QStringLiteral("title")).toString(), QStringLiteral("The bank"));
 }
 
 QTEST_MAIN(TestItemPages)

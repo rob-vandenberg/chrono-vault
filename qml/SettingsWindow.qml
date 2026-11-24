@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.5.77
+// SettingsWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.77: Vaults: Import… and Export… for any vault, unlocked first with its master password (D-060)
 // v0.5.75: Vaults: a menu per vault with Lock, Move…, Forget… and Disconnect…; vaults not found listed (D-060)
 // v0.4.70: Security in the owner's order; the PIN line (D-059)
@@ -1229,6 +1230,7 @@ ApplicationWindow {
                             ColumnLayout {
                                 spacing: Math.round(8 * Appearance.factor)
                                 Layout.preferredWidth: Math.round(400 * Appearance.factor)
+                                Layout.fillWidth: true
                                 Label {
                                     text: qsTr("Enter the master password of “%1”. It is then the vault shown.").arg(VaultController.vaultNameOf(unlockFirst.vaultFile))
                                     wrapMode: Text.Wrap

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.3.66
+// UnlockPage.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.4.73: The finger asked only once the window is active (the owner)
 // v0.4.72: Unlock with Windows Hello as wide as its text, centred (the owner)
 // v0.4.71: With the PIN only the logo, "Enter the PIN to unlock", the field and the link (the owner)
@@ -456,6 +457,7 @@ Item {
                 text: qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(380 * Appearance.factor)
+                Layout.fillWidth: true
             }
         }
         onDiscarded: {

@@ -27,9 +27,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// vault_contents.h 0.5.77
+// vault_contents.h 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The contents format 9: every difference a merge or an import meets kept for the person to settle (D-061)
 // v0.5.77: MergeNote::imported (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
@@ -119,11 +120,29 @@ struct MergeNote
 {
     enum class Kind { ChangedOnBoth, DeletedElsewhere };
     Kind kind = Kind::ChangedOnBoth;
-    qint64 fieldUid = 0; // the field; 0 for one of the item's own texts
-    QString property;    // "title", "subtitle", "note" or "website" when fieldUid is 0
+    qint64 fieldUid = 0; // the field; 0 for the item itself
+    // What differs (D-061). Of a field: "" its value, "present" (the field is
+    // not on the item here; the other side has it, with otherValue),
+    // "absent" (the other side does not have it), "label", "hidden" ("1" or
+    // "0"), "history" (an earlier value only the other side holds, from
+    // otherWhen). Of the item: "title", "subtitle", "note", "website",
+    // "category", "template", "trashed", "archived", "favourite",
+    // "autoSubmit" ("1" or "0"), "icon" (otherData), "tag" (a tag only the
+    // other side holds), "attachment" (subject: its id; otherValue its name,
+    // otherData its content), "attachmentAbsent" (subject: its id; the other
+    // side does not have it), "deletedHere" (the item was deleted for good
+    // here and the other side still holds it). Of the vault (in
+    // VaultContents::vaultNotes): "category", "builtInCategory" (subject: its
+    // id; otherValue its name, otherData its icon) and "template" (subject:
+    // its id; otherData the other template, as templateToJson makes it).
+    QString property;
     QString otherValue;  // the value that did not stand
     QDateTime when;      // when the merge was made
     bool imported = false; // the other value came from an import (D-060)
+    QString subject;       // what a note of an attachment or of the vault is about (D-061)
+    QByteArray otherData;  // an icon, an attachment's content or a template (D-061)
+    QDateTime otherWhen;   // an earlier value's time (D-061)
+    QString device;        // the device whose value stands; empty for an import (D-061)
 
     friend bool operator==(const MergeNote&, const MergeNote&) = default;
 };
@@ -198,6 +217,7 @@ struct VaultContents
     QList<QByteArray> customIcons;
     QList<DeletedItem> deletedItems; // format 7 (D-054)
     QList<Category> builtInCategoryChanges; // format 8: the built-in ones as the person changed them (D-056)
+    QList<MergeNote> vaultNotes; // format 9: the person's own categories and templates that differ (D-061)
 
     friend bool operator==(const VaultContents&, const VaultContents&) = default;
 };
@@ -243,6 +263,10 @@ void giveFieldsIds(Item& item);
 [[nodiscard]] QString normalizedTag(const QString& tag);
 
 [[nodiscard]] QByteArray contentsToJson(const VaultContents& contents);
+
+// A template on its own, as a vault note keeps the other side's (D-061).
+[[nodiscard]] QByteArray templateToJson(const Template& one);
+[[nodiscard]] std::optional<Template> templateFromJson(const QByteArray& json);
 
 [[nodiscard]] ContentsResult contentsFromJson(const QByteArray& json);
 

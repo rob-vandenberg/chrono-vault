@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.5.76
+// ItemDetails.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.76: A sync conflict settled in the Sync conflicts dialog, no longer on the item (D-060)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.2.46: The labels end 50 pixels further left (the owner)
@@ -440,6 +441,7 @@ Item {
         ColumnLayout {
             spacing: Math.round(6 * Appearance.factor)
             Layout.preferredWidth: Math.round(460 * Appearance.factor)
+            Layout.fillWidth: true
             Repeater {
                 model: historyWindow.field.history || []
                 delegate: RowLayout {
@@ -476,6 +478,7 @@ Item {
                 text: qsTr("“%1” is removed from the vault for good. This cannot be undone.").arg(itemDetails.item.title || "")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
         }
         onAccepted: VaultController.deleteItem(itemDetails.itemId)

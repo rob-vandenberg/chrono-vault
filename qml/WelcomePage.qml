@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.3.66
+// WelcomePage.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Choose the master password: the saved password's tick box first; every text wraps with the window (D-061)
 // v0.3.66: As the unlock page, with only Open an existing vault… and Create a new vault…, big (the owner, D-058)
 // v0.3.65: The primary vault not found, with Look again (the owner, D-058)
 // v0.3.64: A new vault of this device by default in Documents/chrono-vault; the primary vault explained (D-058)
@@ -220,6 +221,7 @@ Item {
                 text: qsTr("This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.")
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
             PasswordField {
                 id: firstPassword
@@ -239,6 +241,23 @@ Item {
                 text: qsTr("The two passwords are not the same yet.")
                 font.bold: true
             }
+            // First the saved password, then the keyfile (the owner).
+            CheckBox {
+                id: saveInPrimary
+                objectName: "saveInPrimaryBox"
+                visible: newVaultDialog.offerSave
+                // What the primary vault is for, said where it matters (the owner, D-058).
+                // Its text wraps with the window, as every text does (the owner).
+                Layout.fillWidth: true
+                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                contentItem: Label {
+                    leftPadding: saveInPrimary.indicator.width + saveInPrimary.spacing
+                    text: saveInPrimary.text
+                    wrapMode: Text.Wrap
+                    verticalAlignment: Text.AlignVCenter
+                }
+                text: qsTr("Keep this vault's password in your primary vault “%1”, so unlocking “%1” also opens this one").arg(VaultController.vaultNameOf(VaultController.primaryVault))
+            }
             // A keyfile beside the password (D-031).
             CheckBox {
                 id: useKeyfile
@@ -253,6 +272,7 @@ Item {
                     font.bold: true
                     wrapMode: Text.Wrap
                     Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                    Layout.fillWidth: true
                 }
                 Label {
                     objectName: "chosenKeyfileLabel"
@@ -261,6 +281,7 @@ Item {
                     elide: Text.ElideMiddle
                     opacity: 0.8
                     Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                    Layout.fillWidth: true
                 }
                 RowLayout {
                     Button {
@@ -272,13 +293,6 @@ Item {
                         onClicked: keyfileSaveDialog.open()
                     }
                 }
-            }
-            CheckBox {
-                id: saveInPrimary
-                objectName: "saveInPrimaryBox"
-                visible: newVaultDialog.offerSave
-                // What the primary vault is for, said where it matters (the owner, D-058).
-                text: qsTr("Keep this vault's password in your primary vault “%1”, so unlocking “%1” also opens this one").arg(VaultController.vaultNameOf(VaultController.primaryVault))
             }
         }
     }

@@ -30,6 +30,7 @@
 // vault_contents.cpp 0.5.77
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The contents format 9: every difference kept for the person to settle, a note's device, the vault's own notes (D-061)
 // v0.5.77: A note's other value marked as imported, a key earlier versions pass over (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
 // v0.2.45: The contents format 7: notes a merge leaves on an item, items deleted for good (D-054)
@@ -54,7 +55,7 @@ namespace {
 // format 7 merging (D-054); format 8 a category's icon and the changes to
 // built-in categories (D-056).
 // Older formats are read.
-constexpr int contentsFormat = 8;
+constexpr int contentsFormat = 9;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -90,6 +91,46 @@ bool isString(const QJsonObject& object, const char* key)
 QString text(const QJsonObject& object, const char* key)
 {
     return object.value(QLatin1String(key)).toString();
+}
+
+// What a merge or an import left for the person to settle (D-054, D-061).
+QJsonArray notesToJson(const QList<MergeNote>& notes)
+{
+    QJsonArray array;
+    for (const MergeNote& note : notes) {
+        QJsonObject one{
+            {QStringLiteral("kind"), note.kind == MergeNote::Kind::DeletedElsewhere ? QStringLiteral("deleted")
+                                                                                     : QStringLiteral("both")},
+            {QStringLiteral("when"), note.when.toString(Qt::ISODateWithMs)},
+        };
+        if (note.fieldUid != 0) {
+            one.insert(QStringLiteral("field"), QString::number(note.fieldUid));
+        }
+        if (!note.property.isEmpty()) {
+            one.insert(QStringLiteral("property"), note.property);
+        }
+        if (!note.otherValue.isEmpty()) {
+            one.insert(QStringLiteral("other"), note.otherValue);
+        }
+        if (note.imported) {
+            one.insert(QStringLiteral("source"), QStringLiteral("import"));
+        }
+        // Format 9 (D-061).
+        if (!note.subject.isEmpty()) {
+            one.insert(QStringLiteral("subject"), note.subject);
+        }
+        if (!note.otherData.isEmpty()) {
+            one.insert(QStringLiteral("otherData"), QString::fromLatin1(note.otherData.toBase64()));
+        }
+        if (note.otherWhen.isValid()) {
+            one.insert(QStringLiteral("otherWhen"), note.otherWhen.toString(Qt::ISODateWithMs));
+        }
+        if (!note.device.isEmpty()) {
+            one.insert(QStringLiteral("device"), note.device);
+        }
+        array.append(one);
+    }
+    return array;
 }
 
 QJsonArray fieldsToJson(const QList<Field>& fields)
@@ -263,29 +304,7 @@ QJsonObject itemToJson(const Item& item)
         }
     }
     if (!item.mergeNotes.isEmpty()) {
-        QJsonArray notes;
-        for (const MergeNote& note : item.mergeNotes) {
-            QJsonObject one{
-                {QStringLiteral("kind"), note.kind == MergeNote::Kind::DeletedElsewhere ? QStringLiteral("deleted")
-                                                                                         : QStringLiteral("both")},
-                {QStringLiteral("when"), note.when.toString(Qt::ISODateWithMs)},
-            };
-            if (note.fieldUid != 0) {
-                one.insert(QStringLiteral("field"), QString::number(note.fieldUid));
-            }
-            if (!note.property.isEmpty()) {
-                one.insert(QStringLiteral("property"), note.property);
-            }
-            if (!note.otherValue.isEmpty()) {
-                one.insert(QStringLiteral("other"), note.otherValue);
-            }
-            if (note.imported) {
-                // A key an earlier version passes over (D-060).
-                one.insert(QStringLiteral("source"), QStringLiteral("import"));
-            }
-            notes.append(one);
-        }
-        object.insert(QStringLiteral("mergeNotes"), notes);
+        object.insert(QStringLiteral("mergeNotes"), notesToJson(item.mergeNotes));
     }
     if (!item.attachments.isEmpty()) {
         QJsonArray attachments;
@@ -299,6 +318,57 @@ QJsonObject itemToJson(const Item& item)
         object.insert(QStringLiteral("attachments"), attachments);
     }
     return object;
+}
+
+// A note back; nothing when it is damaged. The keys of format 9 only from
+// format 9 on (D-061).
+std::optional<MergeNote> noteFromJson(const QJsonObject& noteObject, int format)
+{
+    if (!isString(noteObject, "kind") || !isString(noteObject, "when")) {
+        return std::nullopt;
+    }
+    MergeNote note;
+    const QString kind = text(noteObject, "kind");
+    if (kind == QLatin1String("deleted")) {
+        note.kind = MergeNote::Kind::DeletedElsewhere;
+    } else if (kind != QLatin1String("both")) {
+        return std::nullopt;
+    }
+    note.when = QDateTime::fromString(text(noteObject, "when"), Qt::ISODateWithMs);
+    if (noteObject.contains(QStringLiteral("field"))) {
+        bool number = false;
+        note.fieldUid = text(noteObject, "field").toLongLong(&number);
+        if (!number) {
+            return std::nullopt;
+        }
+    }
+    note.property = text(noteObject, "property");
+    note.otherValue = text(noteObject, "other");
+    note.imported = text(noteObject, "source") == QLatin1String("import");
+    if (note.property.size() > largestTextLength) {
+        return std::nullopt;
+    }
+    for (const char* key : {"subject", "otherData", "otherWhen", "device"}) {
+        if (noteObject.contains(QLatin1String(key)) && (format < 9 || !isString(noteObject, key))) {
+            return std::nullopt;
+        }
+    }
+    note.subject = text(noteObject, "subject");
+    note.device = text(noteObject, "device");
+    if (note.subject.size() > largestTextLength || note.device.size() > largestTextLength) {
+        return std::nullopt;
+    }
+    if (noteObject.contains(QStringLiteral("otherData"))) {
+        const auto data = bytesFromBase64(noteObject.value(QStringLiteral("otherData")), largestAttachmentBytes * 2);
+        if (!data) {
+            return std::nullopt;
+        }
+        note.otherData = *data;
+    }
+    if (noteObject.contains(QStringLiteral("otherWhen"))) {
+        note.otherWhen = QDateTime::fromString(text(noteObject, "otherWhen"), Qt::ISODateWithMs);
+    }
+    return note;
 }
 
 std::optional<Item> itemFromJson(const QJsonValue& value, int format)
@@ -437,28 +507,11 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
             if (!noteValue.isObject() || !isString(noteObject, "kind") || !isString(noteObject, "when")) {
                 return std::nullopt;
             }
-            MergeNote note;
-            const QString kind = text(noteObject, "kind");
-            if (kind == QLatin1String("deleted")) {
-                note.kind = MergeNote::Kind::DeletedElsewhere;
-            } else if (kind != QLatin1String("both")) {
+            const auto note = noteFromJson(noteObject, format);
+            if (!note) {
                 return std::nullopt;
             }
-            note.when = QDateTime::fromString(text(noteObject, "when"), Qt::ISODateWithMs);
-            if (noteObject.contains(QStringLiteral("field"))) {
-                bool number = false;
-                note.fieldUid = text(noteObject, "field").toLongLong(&number);
-                if (!number) {
-                    return std::nullopt;
-                }
-            }
-            note.property = text(noteObject, "property");
-            note.otherValue = text(noteObject, "other");
-            note.imported = text(noteObject, "source") == QLatin1String("import");
-            if (note.property.size() > largestTextLength) {
-                return std::nullopt;
-            }
-            item.mergeNotes.append(note);
+            item.mergeNotes.append(*note);
         }
     }
     return item;
@@ -651,7 +704,40 @@ QByteArray contentsToJson(const VaultContents& contents)
         }
         root.insert(QStringLiteral("deletedItems"), deleted);
     }
+    if (!contents.vaultNotes.isEmpty()) {
+        root.insert(QStringLiteral("vaultNotes"), notesToJson(contents.vaultNotes));
+    }
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
+}
+
+QByteArray templateToJson(const Template& one)
+{
+    return QJsonDocument(QJsonObject{
+                             {QStringLiteral("id"), one.id},
+                             {QStringLiteral("category"), one.categoryId},
+                             {QStringLiteral("name"), one.name},
+                             {QStringLiteral("fields"), fieldsToJson(one.fields)},
+                         })
+        .toJson(QJsonDocument::Compact);
+}
+
+std::optional<Template> templateFromJson(const QByteArray& json)
+{
+    QJsonParseError parseError{};
+    const QJsonDocument document = QJsonDocument::fromJson(json, &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+        return std::nullopt;
+    }
+    const QJsonObject object = document.object();
+    if (!isString(object, "id") || !isString(object, "category") || !isString(object, "name") ||
+        text(object, "id").isEmpty() || text(object, "id").size() > largestTextLength) {
+        return std::nullopt;
+    }
+    const auto fields = fieldsFromJson(object.value(QStringLiteral("fields")));
+    if (!fields) {
+        return std::nullopt;
+    }
+    return Template{text(object, "id"), text(object, "category"), text(object, "name"), *fields, false};
 }
 
 ContentsResult contentsFromJson(const QByteArray& json)
@@ -781,6 +867,21 @@ ContentsResult contentsFromJson(const QByteArray& json)
                 return result;
             }
             contents.deletedItems.append(one);
+        }
+    }
+    // Format 9 (D-061): what differs in the person's own categories and
+    // templates, waiting for the person.
+    if (root.contains(QStringLiteral("vaultNotes"))) {
+        const QJsonValue notes = root.value(QStringLiteral("vaultNotes"));
+        if (format < 9 || !notes.isArray() || notes.toArray().size() > largestListCount) {
+            return result;
+        }
+        for (const QJsonValue& value : notes.toArray()) {
+            const auto note = value.isObject() ? noteFromJson(value.toObject(), format) : std::nullopt;
+            if (!note) {
+                return result;
+            }
+            contents.vaultNotes.append(*note);
         }
     }
     if (format < 5) {

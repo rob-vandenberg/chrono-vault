@@ -46,6 +46,7 @@
 #include <QInputDevice>
 #include <QMimeData>
 #include <QPointer>
+#include "item_differences.h"
 #include "settings_files.h"
 #include <QVariantList>
 #include <QtConcurrent/QtConcurrentRun>
@@ -54,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.77
+// vault_controller.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Merges told this device's id, its kept change as "mine"; an import notes every difference (D-061)
 // v0.5.77: An import never writes over an item the vault has: the same is passed over, a difference is a conflict (D-060)
 // v0.5.75: A moved vault's settings carried to its new place; its saved password follows it (D-060)
 // v0.4.74: A finger's lost key turns the setting off (the owner, Q15)
@@ -1460,25 +1462,7 @@ void VaultController::useOtherValue(const QString& itemId, int index)
         }
         const MergeNote note = item.mergeNotes.takeAt(index);
         const QDateTime now = QDateTime::currentDateTimeUtc();
-        if (note.fieldUid != 0) {
-            for (Field& field : item.fields) {
-                if (field.uid == note.fieldUid && field.value != note.otherValue) {
-                    if (!field.value.isEmpty()) {
-                        field.history.append(FieldChange{field.value, field.changed.isValid() ? field.changed : now});
-                    }
-                    field.value = note.otherValue;
-                    field.changed = now;
-                }
-            }
-        } else if (note.property == QLatin1String("title")) {
-            item.title = note.otherValue;
-        } else if (note.property == QLatin1String("subtitle")) {
-            item.subtitle = note.otherValue;
-        } else if (note.property == QLatin1String("note")) {
-            item.note = note.otherValue;
-        } else if (note.property == QLatin1String("website")) {
-            item.website = note.otherValue;
-        }
+        useOtherSide(item, note, now);
         item.modified = now;
         contentsChanged();
         saveInBackground(itemId);
@@ -1601,7 +1585,8 @@ bool VaultController::confirmImport()
     }
     ImportResult result = std::move(*pendingImport);
     pendingImport.reset();
-    // Only attachments the vault does not have yet are added (D-060).
+    // Only attachments the vault does not have as they are add to it: new,
+    // or kept with a conflict until the person chooses (D-060, D-061).
     qsizetype added = 0;
     for (const Item& one : std::as_const(result.items)) {
         const auto ours = std::find_if(contents.items.cbegin(), contents.items.cend(),
@@ -1609,7 +1594,7 @@ bool VaultController::confirmImport()
         for (const Attachment& attachment : one.attachments) {
             const bool had = ours != contents.items.cend() &&
                              std::any_of(ours->attachments.cbegin(), ours->attachments.cend(),
-                                         [&attachment](const Attachment& kept) { return kept.id == attachment.id; });
+                                         [&attachment](const Attachment& kept) { return kept == attachment; });
             added += had ? 0 : attachment.data.size();
         }
     }
@@ -1619,24 +1604,45 @@ bool VaultController::confirmImport()
             true);
         return false;
     }
-    for (const Category& category : std::as_const(result.categories)) {
-        if (std::none_of(contents.categories.cbegin(), contents.categories.cend(),
-                         [&category](const Category& one) { return one.id == category.id; })) {
-            contents.categories.append(category);
-        }
-    }
-    for (const Template& one : std::as_const(result.templates)) {
-        if (std::none_of(contents.templates.cbegin(), contents.templates.cend(),
-                         [&one](const Template& other) { return other.id == one.id; })) {
-            contents.templates.append(one);
-        }
-    }
-    // An item the vault already has is never written over: the same, it is
-    // passed over; otherwise its values stay and each value that differs is
-    // a conflict to settle (the owner, D-060).
+    // A category or template of the import's own: added when the vault does
+    // not have it; one it has that differs waits for the person (D-061).
     const QDateTime now = QDateTime::currentDateTimeUtc();
     int newItems = 0;
     int conflicts = 0;
+    const auto vaultNote = [&](const QString& property, const QString& subject, const QString& other,
+                               const QByteArray& data) {
+        MergeNote note;
+        note.property = property;
+        note.subject = subject;
+        note.otherValue = other;
+        note.otherData = data;
+        note.when = now;
+        note.imported = true;
+        if (addNote(contents.vaultNotes, note)) {
+            ++conflicts;
+        }
+    };
+    for (const Category& category : std::as_const(result.categories)) {
+        const auto mine = std::find_if(contents.categories.cbegin(), contents.categories.cend(),
+                                       [&category](const Category& one) { return one.id == category.id; });
+        if (mine == contents.categories.cend()) {
+            contents.categories.append(category);
+        } else if (!(*mine == category)) {
+            vaultNote(QStringLiteral("category"), category.id, category.name, category.icon);
+        }
+    }
+    for (const Template& one : std::as_const(result.templates)) {
+        const auto mine = std::find_if(contents.templates.cbegin(), contents.templates.cend(),
+                                       [&one](const Template& other) { return other.id == one.id; });
+        if (mine == contents.templates.cend()) {
+            contents.templates.append(one);
+        } else if (!(*mine == one)) {
+            vaultNote(QStringLiteral("template"), one.id, QString(), templateToJson(one));
+        }
+    }
+    // An item the vault already has is never written over: the same, it is
+    // passed over; otherwise its values stay and every difference is a
+    // conflict for the person to settle (the owner, D-060, D-061).
     for (const Item& item : std::as_const(result.items)) {
         bool isNew = false;
         if (takeImported(item, now, &isNew)) {
@@ -3576,7 +3582,7 @@ void VaultController::mergeWithOther(const QString& vaultFile, const VaultConten
     // Saves queued before this are passed over: the save below holds them.
     ++stamps->epoch;
     stamps->set(vaultFile, theirStamp);
-    const MergeResult merged = mergeContents(&base, contents, theirs, QDateTime::currentDateTimeUtc());
+    const MergeResult merged = mergeContents(&base, contents, theirs, QDateTime::currentDateTimeUtc(), thisDeviceId());
     base = theirs;
     contents = merged.contents;
     contentsChanged();
@@ -3691,8 +3697,10 @@ void VaultController::takeBackUnsaved()
         }
     }
     unsavedBaseSealed.clear();
-    const MergeResult merged =
-        mergeContents(keptBase ? &*keptBase : nullptr, read.contents, contents, QDateTime::currentDateTimeUtc());
+    // This device's kept change is "mine": its values stand where both
+    // changed, and the other device's wait for the person (D-061).
+    const MergeResult merged = mergeContents(keptBase ? &*keptBase : nullptr, contents, read.contents,
+                                             QDateTime::currentDateTimeUtc(), thisDeviceId());
     contents = merged.contents;
     contentsChanged();
     mergeSaid = mergeText(merged);

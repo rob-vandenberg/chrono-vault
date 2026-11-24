@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.2.51
+// MasterPasswordWindow.qml 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Texts wrap with the window (D-061)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
 // v0.0.21: The keyfile choosers belong to this window, so they show
@@ -108,6 +109,7 @@ DialogWindow {
                 font.bold: true
                 wrapMode: Text.Wrap
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
             Label {
                 text: passwordWindow.keyfile.toString() === "" ? qsTr("No keyfile chosen yet.")
@@ -115,6 +117,7 @@ DialogWindow {
                 elide: Text.ElideMiddle
                 opacity: 0.8
                 Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.fillWidth: true
             }
             RowLayout {
                 Button {

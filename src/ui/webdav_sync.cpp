@@ -35,9 +35,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// webdav_sync.cpp 0.3.62
+// webdav_sync.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: The merge told this device's id (D-061)
 // v0.3.62: Its own leftover upload removed first; the server's bytes equal to the base are no change (D-057)
 // v0.3.61: A lock's empty placeholder is no version (pCloud); every step in the --debug log (D-057)
 // v0.3.60: Initial release (D-057)
@@ -310,7 +311,8 @@ void WebDavSync::downloaded(const WebDavReply& answer)
     VaultKey useKey = key;
     useKey.key = QByteArray(key.key.constData(), key.key.size());
     (void)QtConcurrent::run(pool, [self, workingCopy = copy, base = webDavBasePath(where.id), their = theirs,
-                                   missing = remoteMissing, synced = where.syncedStamp, useKey]() mutable {
+                                   missing = remoteMissing, synced = where.syncedStamp, useKey,
+                                   device = thisDeviceId()]() mutable {
         Prepared ready;
         const auto finishWith = [&](SyncOutcome outcome) {
             ready.outcome = outcome;
@@ -419,7 +421,7 @@ void WebDavSync::downloaded(const WebDavReply& answer)
         const MergeResult merged = unchangedHere ? MergeResult{*theirContents, 0, 0}
                                                  : mergeContents(baseContents ? &*baseContents : nullptr,
                                                                  *mineContents, *theirContents,
-                                                                 QDateTime::currentDateTimeUtc());
+                                                                 QDateTime::currentDateTimeUtc(), device);
         const bool sameAsTheirs = unchangedHere || sameContents(merged.contents, *theirContents);
         QByteArray mergedJson = contentsToJson(merged.contents);
         if (sameAsTheirs) {

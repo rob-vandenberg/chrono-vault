@@ -18,6 +18,8 @@
 
 #include "vault_controller.h"
 
+#include "item_differences.h"
+
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QPointer>
@@ -26,15 +28,16 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_import.cpp 0.5.77
+// vault_controller_import.cpp 0.5.78
 
 // --- Version history ----------------------------------------------------
+// v0.5.78: Every difference a conflict; an item deleted for good here comes back with a conflict (D-061)
 // v0.5.77: Initial release: importing another vault; an import's duplicates skipped or made conflicts (D-060)
 
 // The controller's part for Import… (D-060): another vault read with its
 // master password, and every imported item taken in so that nothing is
-// written over: an item the vault has keeps its values, and what differs
-// waits in the Sync conflicts dialog (OR-15).
+// written over: an item the vault has keeps its values, and every way it
+// differs waits in the Sync conflicts dialog for the person (OR-15, D-061).
 
 namespace chrono_vault {
 
@@ -90,17 +93,16 @@ void VaultController::readVaultImport(const QUrl& file, const QString& password)
                     result.items.append(item);
                     result.attachmentCount += static_cast<int>(item.attachments.size());
                 }
-                // The categories and templates of its own the items need,
-                // those this vault does not have yet.
+                // The categories and templates of its own, those this vault
+                // does not have as they are: new ones are added, ones that
+                // differ wait for the person (D-061).
                 for (const Category& category : std::as_const(read.contents.categories)) {
-                    if (std::none_of(snapshot.categories.cbegin(), snapshot.categories.cend(),
-                                     [&category](const Category& one) { return one.id == category.id; })) {
+                    if (!snapshot.categories.contains(category)) {
                         result.categories.append(category);
                     }
                 }
                 for (const Template& one : std::as_const(read.contents.templates)) {
-                    if (std::none_of(snapshot.templates.cbegin(), snapshot.templates.cend(),
-                                     [&one](const Template& other) { return other.id == one.id; })) {
+                    if (!snapshot.templates.contains(one)) {
                         result.templates.append(one);
                     }
                 }
@@ -139,87 +141,33 @@ bool VaultController::takeImported(const Item& imported, const QDateTime& now, b
                                    [&imported](const Item& one) { return one.id == imported.id; });
     if (ours == contents.items.end()) {
         Item item = imported;
-        // An item this vault deleted for good comes back: its deletion is
-        // forgotten, and it counts as changed now, so a sync with a device
-        // that still holds the deletion keeps it and asks, never drops it
-        // silently (OR-15).
         const qsizetype removed = contents.deletedItems.removeIf(
             [&item](const DeletedItem& deletion) { return deletion.id == item.id; });
-        if (removed > 0) {
-            item.modified = now;
+        if (removed == 0) {
+            contents.items.append(item);
+            *added = true;
+            return false;
         }
-        contents.items.append(item);
-        *added = true;
-        return false;
-    }
-    Item& item = *ours;
-    bool changed = false;
-    bool conflict = false;
-    const auto differs = [&](qint64 fieldUid, const QString& property, const QString& theirs) {
-        const MergeNote note{MergeNote::Kind::ChangedOnBoth, fieldUid, property, theirs, now, true};
-        const bool noted = std::any_of(item.mergeNotes.cbegin(), item.mergeNotes.cend(), [&](const MergeNote& one) {
-            return one.fieldUid == fieldUid && one.property == property && one.otherValue == theirs;
-        });
-        if (!noted) {
-            item.mergeNotes.append(note);
-            changed = true;
-            conflict = true; // a new conflict; one left from an earlier import is not counted again
-        }
-    };
-    const auto text = [&](QString Item::*member, const char* name) {
-        if (item.*member != imported.*member) {
-            differs(0, QString::fromLatin1(name), imported.*member);
-        }
-    };
-    text(&Item::title, "title");
-    text(&Item::subtitle, "subtitle");
-    text(&Item::note, "note");
-    text(&Item::website, "website");
-    for (const Field& field : imported.fields) {
-        if (field.deleted) {
-            continue;
-        }
-        const auto mine = std::find_if(item.fields.cbegin(), item.fields.cend(),
-                                       [&field](const Field& one) { return one.uid == field.uid; });
-        if (mine == item.fields.cend()) {
-            item.fields.append(field); // a field only the import has: nothing to choose between
-            changed = true;
-        } else {
-            if (mine->value != field.value) {
-                differs(field.uid, QString(), field.value);
-            }
-            // Earlier values only the import holds join the field's history.
-            Field& kept = item.fields[std::distance(item.fields.cbegin(), mine)];
-            for (const FieldChange& change : field.history) {
-                if (!kept.history.contains(change)) {
-                    kept.history.append(change);
-                    changed = true;
-                }
-            }
-            std::sort(kept.history.begin(), kept.history.end(),
-                      [](const FieldChange& a, const FieldChange& b) { return a.changed < b.changed; });
-        }
-    }
-    // What only the import holds is added: nothing to choose between. A
-    // different category, Trash or Archive stays as the vault has it, as a
-    // sync settles them (D-054 point 4).
-    for (const QString& tag : imported.tags) {
-        if (!item.tags.contains(tag)) {
-            item.tags.append(tag);
-            changed = true;
-        }
-    }
-    for (const Attachment& attachment : imported.attachments) {
-        if (std::none_of(item.attachments.cbegin(), item.attachments.cend(),
-                         [&attachment](const Attachment& one) { return one.id == attachment.id; })) {
-            item.attachments.append(attachment);
-            changed = true;
-        }
-    }
-    if (changed) {
+        // Deleted here for good, held by the import: the person chooses.
+        // Until then it is kept, counted as changed now, so a sync with a
+        // device that still holds the deletion keeps it and asks, never drops
+        // it silently (OR-15, D-061).
         item.modified = now;
+        item.mergeNotes.clear();
+        MergeNote note;
+        note.property = QStringLiteral("deletedHere");
+        note.when = now;
+        note.imported = true;
+        item.mergeNotes.append(note);
+        contents.items.append(item);
+        return true;
     }
-    return conflict;
+    // Ours stands; every way the import differs is noted (D-061).
+    const NotedDifferences noted = noteDifferences(*ours, imported, now, true, QString());
+    if (noted.changed) {
+        ours->modified = now;
+    }
+    return noted.newConflict;
 }
 
 } // namespace chrono_vault

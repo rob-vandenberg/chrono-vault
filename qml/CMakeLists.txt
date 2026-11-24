@@ -78,6 +78,7 @@ qt_add_qml_module(chrono_vault_ui
         WebDavWindow.qml
         StorageWindow.qml
         SyncConflictsWindow.qml
+        TickBox.qml
         ConflictWindow.qml
         BigButton.qml
         WebDavFileDialog.qml
