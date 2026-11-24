@@ -57,6 +57,7 @@
 // vault_controller.cpp 0.3.65
 
 // --- Version history ----------------------------------------------------
+// v0.4.70: PIN unlock wired in: unlock, lock, the reminder, a changed key (D-059)
 // v0.3.67: A kept change given up only once another vault is opened; a vault added during a look counts as found
 // v0.3.65: Which vaults are found, checked in the background and again now and then (the owner, D-058)
 // v0.3.64: A lock keeps the vault used last on the unlock page (the owner, D-058)
@@ -120,6 +121,8 @@ constexpr int defaultReminder = 2; // Quarter (the owner, D-049)
 
 // The vault's key whole, and its keyfile's fingerprint, as kept for the
 // finger (D-038).
+} // namespace
+
 QByteArray quickSecretOf(const VaultKey& key, const QByteArray& keyfile)
 {
     QByteArray secret;
@@ -142,6 +145,9 @@ std::optional<std::pair<VaultKey, QByteArray>> quickSecretFrom(const QByteArray&
     }
     return std::pair{key, keyfile};
 }
+
+namespace {
+
 constexpr bool defaultWebsiteIcons = false;
 constexpr qint64 largestWebsiteIconBytes = 512 * 1024;
 constexpr bool defaultHideSensitive = true;
@@ -1059,9 +1065,10 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
     // Whether this attempt is the finger's goes with the attempt itself, so a
     // later one never takes it over.
     const bool byFinger = std::exchange(openingByFinger, false);
+    const bool byPin = std::exchange(openingByPin, false);
     QPointer<VaultController> self(this);
     // On the save thread: after any write to this vault still running.
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint, byFinger]() mutable {
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint, byFinger, byPin]() mutable {
         OpenResult result = openVaultFileWithKey(vaultFile, kept);
         ContentsResult read;
         if (result.status == OpenStatus::Opened) {
@@ -1070,9 +1077,22 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
         }
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, read, attempt, fingerprint, byFinger]() mutable {
+            [self, result, read, attempt, fingerprint, byFinger, byPin]() mutable {
                 if (!self || attempt != self->unlockAttempt) {
                     result.key.wipe();
+                    return;
+                }
+                if (byPin && result.status == OpenStatus::KeyChanged) {
+                    // The key kept for the PIN no longer fits: the master
+                    // password was changed on another computer (D-059).
+                    result.key.wipe();
+                    self->pinLocked.remove(self->path);
+                    VaultsFile().remove(self->pinEntryKey(self->path));
+                    self->setState(State::Locked);
+                    emit self->pinChanged();
+                    self->say(tr("The master password of this vault was changed on another computer. Type it; the "
+                                 "PIN opens the vault again after that."),
+                              true);
                     return;
                 }
                 if (byFinger && result.status == OpenStatus::KeyChanged) {
@@ -1126,6 +1146,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     takeBackUnsaved();
     contentsChanged();
     setState(State::Unlocked);
+    keepForPin(); // the PIN opens it again after a lock (D-059)
     fetchWebsiteIcons(); // now that it counts as unlocked (D-036)
     startWebDav();       // every unlock syncs a vault kept on a server (D-057)
     if (path == primaryVault()) {
@@ -1148,6 +1169,7 @@ void VaultController::lock()
     keepUnsavedWhileLocked();
     forgetUnlockedVault();
     forgetPrimary();
+    forgetPinKey(); // from now on only the PIN opens it again (D-059)
     // Locking locks every vault; the unlock page shows the vault used last,
     // whose own master password opens it (the owner, 0.3.64; until then the
     // primary came back, D-030 point 5).
@@ -1159,6 +1181,7 @@ void VaultController::closeVault()
 {
     forgetUnlockedVault();
     forgetPrimary();
+    forgetPinKey();
     returnTo.clear();
     ++unlockAttempt;
     // The window has asked the person before this (OR-15).
@@ -1866,6 +1889,7 @@ void VaultController::recordMasterPassword()
     times.insert(path, QDateTime::currentDateTimeUtc());
     settings.setValue(lastPasswordKey, times);
     emit quickUnlockChanged();
+    emit pinChanged();
 }
 
 void VaultController::recordMasterPasswordIfNone()
@@ -1877,7 +1901,8 @@ void VaultController::recordMasterPasswordIfNone()
 
 bool VaultController::reminderDue() const
 {
-    if (reminderEvery >= reminderNever || !quickUnlockOn()) {
+    // Due only where a finger or the PIN would otherwise open it (D-059).
+    if (reminderEvery >= reminderNever || (!quickUnlockOn() && !pinCanOpen())) {
         return false;
     }
     const QDateTime last = VaultsFile().value(lastPasswordKey).toMap().value(path).toDateTime();
@@ -1901,6 +1926,7 @@ void VaultController::setMasterPasswordReminder(int every)
         reminderEvery = every;
         SettingsFile().setValue(reminderKey, every);
         emit quickUnlockChanged();
+        emit pinChanged();
     }
 }
 
@@ -3001,6 +3027,7 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                         self->updateSavedPassword(self->path, newPassword);
                     }
                     self->recordMasterPassword(); // just typed: the reminder waits a year
+                    self->keepForPin();           // the PIN's key sealed with the new key (D-059)
                     if (self->quickUnlockOn()) {
                         // The finger's key follows the new master password (D-038);
                         // Windows Hello asks once more for that, and says so.
@@ -3320,6 +3347,7 @@ void VaultController::setState(State state)
         }
         restartAutoLock();
         emit stateChanged();
+        emit pinChanged();
         if (state == State::Locked) {
             QTimer::singleShot(0, this, &VaultController::checkVaults); // which vaults are there now
         }
@@ -3353,6 +3381,7 @@ void VaultController::setPath(const QString& newPath)
         updateWait(); // the wait of this vault, if one is running (D-041)
         emit vaultPathChanged();
         emit quickUnlockChanged();
+        emit pinChanged();
         emit keyfileChanged();
     }
 }

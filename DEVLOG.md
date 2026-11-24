@@ -552,3 +552,12 @@ New folder left a bogus Back step; a look at which vaults exist, still running, 
 test: it depends on timing, OR-11). Not real: no Unlock button (the owner's design), flicker of the not-found line
 (no signal while looking), `#` and `?` in folder names (checked: the address comes back the same). Round 5 found
 nothing real. The 12 related tests pass.
+
+## 24 November 2026: version 0.4.70: PIN unlock
+
+The owner's changelist items 1-19 (Proceed; x.y = 0.4 at the owner's word): Settings > Security in the owner's order
+with the PIN line, the unlock page's PIN field with "Use master password instead", the PIN only while Chrono Vault
+runs, wrong PINs in the master password's waits (D-059). `src/ui/vault_controller_pin.cpp` (new), the controller,
+`qml/SettingsWindow.qml`, `qml/UnlockPage.qml`, `qml/PasswordField.qml` (the eye only where allowed);
+`tests/integration/test_pin_unlock.cpp` (new). Pictures of both pages checked. One review round, nothing real; two of
+its remarks taken (a PIN entry that no longer fits also leaves memory; an empty PIN is no attempt). Related tests pass.

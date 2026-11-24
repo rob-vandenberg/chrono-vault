@@ -23,6 +23,7 @@ import QtQuick.Layouts
 // SettingsWindow.qml 0.3.60
 
 // --- Version history ----------------------------------------------------
+// v0.4.70: Security in the owner's order; the PIN line (D-059)
 // v0.3.60: The Vaults topic: where each vault is kept, its last sync, Move to WebDAV… and Disconnect… (D-057)
 // v0.2.53: Windows Hello: no popup on Windows, a red line at the bottom left while it is open (the owner)
 // v0.2.52: The reminder text "again, once every"; Change right after its text; the clipboard field 40 narrower (the owner)
@@ -183,6 +184,10 @@ ApplicationWindow {
     property bool showSubtitles: true
     property bool useWebsiteIcons: false
     property int masterPasswordReminder: 2
+    // A PIN wanted; OK keeps it only with a PIN set or one long enough typed.
+    property bool pinWanted: false
+    readonly property bool pinAcceptable: !pinWanted
+        || (pinField.text === "" ? VaultController.pinSet : pinField.text.length >= VaultController.pinShortest)
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -206,6 +211,9 @@ ApplicationWindow {
         showSubtitles = VaultController.showSubtitles
         useWebsiteIcons = VaultController.useWebsiteIcons
         masterPasswordReminder = VaultController.masterPasswordReminder
+        pinWanted = VaultController.pinSet
+        pinField.clear()
+        pinField.revealed = false
         loadKeys()
     }
 
@@ -227,8 +235,15 @@ ApplicationWindow {
 
     // OK: every topic's changes are kept, whichever topic is shown.
     function accept() {
+        if (!pinAcceptable)
+            return
         // A number still being typed counts.
         okButton.forceActiveFocus()
+        if (pinWanted && pinField.text !== "")
+            VaultController.setPin(pinField.text)
+        else if (!pinWanted && VaultController.pinSet)
+            VaultController.setPin("")
+        pinField.clear()
         if (Appearance.theme !== theme || Appearance.scale !== scale)
             Appearance.keep(theme, scale)
         if (VaultController.keepInTray !== keepInTray)
@@ -786,12 +801,38 @@ ApplicationWindow {
                                 }
                             }
                         }
-                        CheckBox {
-                            objectName: "hideSensitiveBox"
-                            text: qsTr("Hide sensitive fields: show them as dots until asked")
-                            checked: settingsWindow.hideSensitive
-                            onToggled: settingsWindow.hideSensitive = checked
+                        // PIN unlock, after the locking, before the finger (the
+                        // owner's design, D-059); kept with OK.
+                        RowLayout {
+                            Layout.fillWidth: true
                             Layout.topMargin: Math.round(8 * Appearance.factor)
+                            CheckBox {
+                                id: pinBox
+                                objectName: "pinBox"
+                                text: qsTr("Use a PIN code to quickly unlock without having to enter the Master Password every time")
+                                checked: settingsWindow.pinWanted
+                                onToggled: settingsWindow.pinWanted = checked
+                                Layout.fillWidth: true
+                                // Room before the field, so the text breaks as the owner's design.
+                                Layout.rightMargin: Math.round(40 * Appearance.factor)
+                                contentItem: Label {
+                                    text: pinBox.text
+                                    wrapMode: Text.Wrap
+                                    leftPadding: pinBox.indicator.width + pinBox.spacing
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                            }
+                            PasswordField {
+                                id: pinField
+                                objectName: "pinField"
+                                // Dots while a PIN is set; the PIN itself is never kept.
+                                placeholderText: VaultController.pinSet ? "••••••••••••" : ""
+                                // The eye only while a new PIN is typed (the owner).
+                                eyeAllowed: text !== ""
+                                enabled: pinBox.checked && !VaultController.pinBusy
+                                Layout.preferredWidth: Math.round(140 * Appearance.factor)
+                                Layout.alignment: Qt.AlignVCenter
+                            }
                         }
                         // One line, for all vaults (the owner, D-043): ticked, it
                         // asks for one touch in a popup, at once, not with OK.
@@ -810,6 +851,13 @@ ApplicationWindow {
                                     return VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
                                 })
                             }
+                        }
+                        CheckBox {
+                            objectName: "hideSensitiveBox"
+                            text: qsTr("Hide sensitive fields: show them as dots until asked")
+                            checked: settingsWindow.hideSensitive
+                            onToggled: settingsWindow.hideSensitive = checked
+                            Layout.topMargin: Math.round(8 * Appearance.factor)
                         }
                         Item { Layout.fillHeight: true }
                     }
@@ -1303,6 +1351,7 @@ ApplicationWindow {
                 objectName: "okButton"
                 text: qsTr("OK")
                 highlighted: true
+                enabled: settingsWindow.pinAcceptable
                 icon.source: "qrc:/icons/ok.svg"
                 icon.width: Math.round(16 * Appearance.factor)
                 icon.height: Math.round(16 * Appearance.factor)

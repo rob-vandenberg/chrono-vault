@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.4.70: The PIN, with Use master password instead (D-059)
 // v0.3.67: A change kept through a lock is asked about before another vault; the password field cleared when the vault changes
 // v0.3.66: Open another vault… in the list, Create a new vault… below, each straight to Select Storage; the place under
 //          each vault; the list always below the field (the owner, D-058)
@@ -67,8 +68,16 @@ Item {
         }
     }
 
+    // The PIN when it can open the vault shown, unless the person chose the
+    // master password (D-059).
+    property bool masterInstead: false
+    readonly property bool usePin: VaultController.pinUnlockReady && !masterInstead
+
     function unlockNow() {
-        VaultController.unlock(passwordField.text)
+        if (usePin)
+            VaultController.unlockWithPin(passwordField.text)
+        else
+            VaultController.unlock(passwordField.text)
         passwordField.clear()
     }
 
@@ -93,6 +102,7 @@ Item {
         // A password typed for one vault is never tried on another.
         function onVaultPathChanged() {
             passwordField.clear()
+            unlockPage.masterInstead = false
             unlockPage.askFinger()
         }
     }
@@ -105,6 +115,8 @@ Item {
     Connections {
         target: VaultController
         function onStateChanged() {
+            if (VaultController.state === VaultController.Unlocked)
+                unlockPage.masterInstead = false // the next lock offers the PIN again
             if (VaultController.state === VaultController.Locked && unlockPage.visible)
                 passwordField.forceActiveFocus()
         }
@@ -298,7 +310,7 @@ Item {
             PasswordField {
                 id: passwordField
                 objectName: "masterPasswordField"
-                placeholderText: qsTr("Master Password")
+                placeholderText: unlockPage.usePin ? qsTr("PIN") : qsTr("Master Password")
                 font.pointSize: Appearance.fontPointSize * 1.4
                 // The placeholder in the normal font, the password in the monospaced one.
                 font.family: text === "" ? Appearance.font.family : "Noto Sans Mono"
@@ -315,6 +327,18 @@ Item {
                 enabled: VaultController.unlockWaitSeconds === 0
                 onAccepted: unlockPage.unlockNow()
                 onEnabledChanged: if (enabled && unlockPage.visible) forceActiveFocus()
+            }
+        }
+        Button {
+            objectName: "useMasterPasswordButton"
+            visible: unlockPage.usePin
+            text: qsTr("Use master password instead")
+            flat: true
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: {
+                unlockPage.masterInstead = true
+                passwordField.clear()
+                passwordField.forceActiveFocus()
             }
         }
         BigButton {

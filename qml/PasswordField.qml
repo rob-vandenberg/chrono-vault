@@ -22,6 +22,7 @@ import QtQuick.Controls
 // PasswordField.qml 0.0.4
 
 // --- Version history ----------------------------------------------------
+// v0.4.70: eyeAllowed: the eye only where it may be shown (D-059)
 // v0.0.4: Initial release
 
 // A field for a password, with an eye inside it that shows or hides what
@@ -30,13 +31,16 @@ TextField {
     id: passwordField
 
     property bool revealed: false
+    // Where the eye may be shown at all (the PIN: only while one is typed).
+    property bool eyeAllowed: true
 
     echoMode: revealed ? TextInput.Normal : TextInput.Password
     font.family: "Noto Sans Mono"
-    rightPadding: eyeButton.width + Math.round(6 * Appearance.factor)
+    rightPadding: (eyeButton.visible ? eyeButton.width : 0) + Math.round(6 * Appearance.factor)
 
     ToolButton {
         id: eyeButton
+        visible: passwordField.eyeAllowed
         anchors.right: parent.right
         anchors.rightMargin: Math.round(2 * Appearance.factor)
         anchors.verticalCenter: parent.verticalCenter

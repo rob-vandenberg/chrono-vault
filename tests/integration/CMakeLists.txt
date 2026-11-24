@@ -19,6 +19,7 @@
 # tests/integration/CMakeLists.txt 0.3.62
 
 # --- Version history ----------------------------------------------------
+# v0.4.70: PIN unlock (D-059)
 # v0.3.62: test_webdav_create (D-057)
 # v0.3.60: The WebDAV sync and windows tests, with our own test server (D-057)
 # v0.0.40: test_icon_picker (D-050)
@@ -137,6 +138,11 @@ qt_add_executable(test_unlock_waits test_unlock_waits.cpp)
 target_link_libraries(test_unlock_waits PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_unlock_waits)
 chrono_vault_add_test(test_unlock_waits)
+
+qt_add_executable(test_pin_unlock test_pin_unlock.cpp)
+target_link_libraries(test_pin_unlock PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_pin_unlock)
+chrono_vault_add_test(test_pin_unlock)
 
 qt_add_executable(test_reader test_reader.cpp)
 target_link_libraries(test_reader PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)

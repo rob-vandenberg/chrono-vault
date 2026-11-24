@@ -1910,7 +1910,7 @@
 <context>
     <name>PasswordField</name>
     <message>
-        <location filename="../qml/PasswordField.qml" line="+51"/>
+        <location filename="../qml/PasswordField.qml" line="+55"/>
         <source>Hide the password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1982,8 +1982,8 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+224"/>
-        <location line="+370"/>
+        <location filename="../qml/SettingsWindow.qml" line="+232"/>
+        <location line="+377"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2005,12 +2005,12 @@
     </message>
     <message>
         <location line="-196"/>
-        <location line="+369"/>
+        <location line="+402"/>
         <source>Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-369"/>
+        <location line="-402"/>
         <location line="+64"/>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -2057,18 +2057,18 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+734"/>
+        <location line="+767"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-734"/>
-        <location line="+508"/>
+        <location line="-767"/>
+        <location line="+541"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-353"/>
+        <location line="-386"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2100,14 +2100,14 @@
     <message>
         <location line="+0"/>
         <location line="+44"/>
-        <location line="+161"/>
+        <location line="+194"/>
         <location line="+3"/>
         <location line="+6"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-207"/>
+        <location line="-240"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2137,7 +2137,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+266"/>
+        <location line="+72"/>
+        <source>Use a PIN code to quickly unlock without having to enter the Master Password every time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+227"/>
         <source>WebDAV: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2197,7 +2202,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-519"/>
+        <location line="-552"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2217,7 +2222,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+152"/>
+        <location line="+185"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2227,7 +2232,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-116"/>
+        <location line="-149"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2253,12 +2258,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+60"/>
         <source>Hide sensitive fields: show them as dots until asked</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="-15"/>
         <source>Use Windows Hello to unlock vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2268,7 +2273,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+56"/>
+        <location line="+63"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2313,17 +2318,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-993"/>
-        <location line="+952"/>
+        <location line="-1026"/>
+        <location line="+985"/>
         <location line="+47"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-999"/>
-        <location line="+861"/>
+        <location line="-1032"/>
+        <location line="+894"/>
         <location line="+97"/>
-        <location line="+51"/>
+        <location line="+52"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2505,7 +2510,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+330"/>
+        <location filename="../qml/UnlockPage.qml" line="+354"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2525,7 +2530,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-221"/>
+        <location line="-233"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2565,7 +2570,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+0"/>
+        <source>PIN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Use master password instead</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Create a new vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2687,7 +2702,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+225"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+231"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3489,26 +3504,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2169"/>
+        <location line="+2189"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+477"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2165"/>
-        <location line="+2170"/>
+        <location line="-2185"/>
+        <location line="+2190"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2073"/>
-        <location line="+1973"/>
+        <location line="-2093"/>
+        <location line="+1993"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2062"/>
+        <location line="-2082"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3520,7 +3535,7 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+1851"/>
+        <location line="+1871"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <location line="+89"/>
@@ -3528,7 +3543,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2134"/>
+        <location line="-2154"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -3544,7 +3559,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1731"/>
+        <location line="+1751"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3559,8 +3574,9 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1724"/>
+        <location line="-1744"/>
         <location line="+82"/>
+        <location filename="../src/ui/vault_controller_pin.cpp" line="+223"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3580,7 +3596,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+51"/>
+        <source>The master password of this vault was changed on another computer. Type it; the PIN opens the vault again after that.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
         <source>The master password of this vault was changed on another computer. Type it, then turn %1 on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3590,7 +3611,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+155"/>
+        <location line="+158"/>
         <source>Untitled note</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3606,12 +3627,12 @@
     </message>
     <message>
         <location line="+75"/>
-        <location line="+1060"/>
+        <location line="+1063"/>
         <source>The attachments of this vault together may hold at most %1. Remove an attachment first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1002"/>
+        <location line="-1005"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3729,7 +3750,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+154"/>
+        <location line="+157"/>
         <location line="+84"/>
         <source>Give the category a name.</source>
         <translation type="unfinished"></translation>
@@ -3823,7 +3844,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+68"/>
         <source>The master password was changed. %1 keeps the new one; it may ask you once.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3865,7 +3886,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+235"/>
+        <location line="+237"/>
         <source>“%1” was changed elsewhere. Your version was kept as “%2”; the vault now shows the other version.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4008,6 +4029,26 @@
     <message>
         <location line="+75"/>
         <source>Not yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_pin.cpp" line="-87"/>
+        <source>The PIN could not be set: not enough memory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+83"/>
+        <source>The PIN could not be read. Type the master password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>The PIN could not be checked: not enough memory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>That is not the PIN.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

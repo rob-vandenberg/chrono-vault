@@ -19,6 +19,7 @@
 # qml/CMakeLists.txt 0.3.66
 
 # --- Version history ----------------------------------------------------
+# v0.4.70: PIN unlock (D-059)
 # v0.3.63: WebDavFileDialog.qml and the folder icon (D-057)
 # v0.3.62: StorageWindow.qml and the two storage icons (D-057)
 # v0.3.60: WebDAV: the client, the sync, the system store for its password, its windows (D-057)
@@ -113,6 +114,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/updater.h
         ../src/ui/vault_controller.cpp
         ../src/ui/vault_controller.h
+        ../src/ui/vault_controller_pin.cpp
         ../src/ui/vault_controller_webdav.cpp
         ../src/ui/secret_store.h
         ../src/ui/webdav_client.cpp
@@ -243,6 +245,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/system_tray.cpp
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
+    ../src/ui/vault_controller_pin.cpp
     ../src/ui/vault_controller_webdav.cpp
     ../src/ui/webdav_client.cpp
     ../src/ui/webdav_sync.cpp

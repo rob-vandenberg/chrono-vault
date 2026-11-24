@@ -44,11 +44,14 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <utility>
 
 // --- Version ------------------------------------------------------------
 // vault_controller.h 0.3.62
 
 // --- Version history ----------------------------------------------------
+// v0.4.70: PIN unlock (D-059)
 // v0.3.67: giveUpKeptChangesOnLeaving, leavingFor
 // v0.3.62: The WebDAV folder browser; a new WebDAV vault kept only after its first upload (D-057)
 // v0.3.60: A vault kept on a WebDAV server: its working copy synced, connecting, creating, opening, moving and
@@ -74,6 +77,12 @@
 // v0.0.3: Initial release
 
 namespace chrono_vault {
+
+// A vault's key and keyfile fingerprint packed into one value, for the finger
+// (D-038) and the PIN (D-059).
+QByteArray quickSecretOf(const VaultKey& key, const QByteArray& keyfile);
+std::optional<std::pair<VaultKey, QByteArray>> quickSecretFrom(const QByteArray& secret);
+
 
 // What the windows call. It holds the unlocked vault, does every slow step
 // (deriving the key, reading and writing the file) off the window's thread
@@ -149,6 +158,11 @@ class VaultController : public QObject
     Q_PROPERTY(bool quickUnlockTrouble READ quickUnlockTrouble NOTIFY quickUnlockChanged)
     Q_PROPERTY(QString quickUnlockName READ quickUnlockName CONSTANT)
     Q_PROPERTY(bool reminderDue READ reminderDue NOTIFY quickUnlockChanged)
+    // PIN unlock (D-059): set, being set, and able to open the vault shown.
+    Q_PROPERTY(bool pinSet READ pinSet NOTIFY pinChanged)
+    Q_PROPERTY(bool pinBusy READ pinBusy NOTIFY pinChanged)
+    Q_PROPERTY(bool pinUnlockReady READ pinUnlockReady NOTIFY pinChanged)
+    Q_PROPERTY(int pinShortest READ pinShortest CONSTANT)
     // How often the master password is asked though a finger would do:
     // 0 Day, 1 Month, 2 Quarter (the default), 3 Year, 4 Never (D-049).
     Q_PROPERTY(int masterPasswordReminder READ masterPasswordReminder WRITE setMasterPasswordReminder NOTIFY
@@ -274,6 +288,15 @@ public:
     void setMasterPasswordReminder(int every);
     Q_INVOKABLE void setQuickUnlock(bool on);
     Q_INVOKABLE void unlockWithQuickUnlock();
+    // A PIN of at least pinMinimumLength characters sets or changes it; an
+    // empty one removes it and all that was kept for it (D-059).
+    Q_INVOKABLE void setPin(const QString& pin);
+    Q_INVOKABLE void unlockWithPin(const QString& pin);
+    [[nodiscard]] bool pinSet() const;
+    [[nodiscard]] bool pinBusy() const { return settingPin; }
+    [[nodiscard]] bool pinUnlockReady() const;
+    static constexpr int pinMinimumLength = 4;
+    [[nodiscard]] static int pinShortest() { return pinMinimumLength; }
     [[nodiscard]] bool quickUnlockBusy() const { return settingUp; }
     [[nodiscard]] QString quickUnlockMessage() const { return setupMessage; }
     [[nodiscard]] bool quickUnlockTrouble() const { return setupTrouble; }
@@ -544,6 +567,7 @@ signals:
     void shortcutsChanged();
     void useWebsiteIconsChanged();
     void quickUnlockChanged();
+    void pinChanged();
     void keepInTrayChanged();
     void startAtStartupChanged();
     void startMinimizedChanged();
@@ -618,6 +642,12 @@ private:
                         const QByteArray& written, const QString& keyfileFile, State before,
                         const QString& savedPassword);
     void connectQuickUnlock();
+    // The PIN's key kept for the vault unlocked now, on disk sealed with the
+    // vault's own key and in memory its key sealed with the PIN's (D-059).
+    void keepForPin();
+    void forgetPinKey();
+    [[nodiscard]] QString pinEntryKey(const QString& vaultFile) const;
+    [[nodiscard]] bool pinCanOpen() const;
     void recordMasterPassword();
     void recordMasterPasswordIfNone();
     // Asks each website not asked yet for its icon (D-036).
@@ -747,6 +777,10 @@ private:
     QStringList vaultList;
     bool needKeyfile = false;
     QByteArray keyfileSecret;              // the unlocked vault's keyfile fingerprint
+    QByteArray pinKey;                     // made from the PIN; held only while a vault is unlocked (D-059)
+    QHash<QString, QByteArray> pinLocked;  // each vault's key sealed with the PIN's, this run only
+    bool settingPin = false;
+    bool openingByPin = false;
     VaultKey primaryKey;                   // kept while unlocked (D-030)
     QByteArray primaryKeyfile;             // the primary's keyfile fingerprint, with its key
     std::optional<CreatedVault> createdVault; // see CreatedVault
