@@ -561,3 +561,9 @@ runs, wrong PINs in the master password's waits (D-059). `src/ui/vault_controlle
 `qml/SettingsWindow.qml`, `qml/UnlockPage.qml`, `qml/PasswordField.qml` (the eye only where allowed);
 `tests/integration/test_pin_unlock.cpp` (new). Pictures of both pages checked. One review round, nothing real; two of
 its remarks taken (a PIN entry that no longer fits also leaves memory; an empty PIN is no attempt). Related tests pass.
+
+## 24 November 2026: version 0.4.71: the PIN page
+
+The owner's changelist items 1-10: with the PIN the unlock page shows only the logo, "Enter the PIN to unlock", the field
+and "Use master password instead" (`qml/UnlockPage.qml`, D-059 point 6); `test_pin_unlock` checks both forms. Pictures
+of both checked.

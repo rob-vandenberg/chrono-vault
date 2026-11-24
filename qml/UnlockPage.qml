@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.4.71: With the PIN only the logo, "Enter the PIN to unlock", the field and the link (the owner)
 // v0.4.70: The PIN, with Use master password instead (D-059)
 // v0.3.67: A change kept through a lock is asked about before another vault; the password field cleared when the vault changes
 // v0.3.66: Open another vault… in the list, Create a new vault… below, each straight to Select Storage; the place under
@@ -134,13 +135,18 @@ Item {
             Layout.preferredHeight: Math.round(160 * Appearance.factor)
             Layout.alignment: Qt.AlignHCenter
         }
+        // With the PIN: only the logo, the line, the field and the link
+        // (the owner, D-059).
         Label {
+            objectName: "welcomeLine"
+            visible: !unlockPage.usePin
             text: qsTr("Welcome to Chrono Vault")
             font.pointSize: Appearance.fontPointSize * 2.2
             Layout.alignment: Qt.AlignHCenter
         }
         Label {
-            text: qsTr("Enter the Master Password to unlock")
+            objectName: "unlockLine"
+            text: unlockPage.usePin ? qsTr("Enter the PIN to unlock") : qsTr("Enter the Master Password to unlock")
             font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
@@ -154,6 +160,7 @@ Item {
         ComboBox {
             id: vaultBox
             objectName: "unlockVaultBox"
+            visible: !unlockPage.usePin
             readonly property string other: "\u0001other"
             // Only the vaults found; the one used last also when it is not,
             // struck through (the owner, 0.3.65).
@@ -343,6 +350,7 @@ Item {
         }
         BigButton {
             objectName: "createNewButton"
+            visible: !unlockPage.usePin
             text: qsTr("Create a new vault…")
             Layout.fillWidth: true
             Layout.topMargin: Math.round(12 * Appearance.factor)

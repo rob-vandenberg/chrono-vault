@@ -19,6 +19,7 @@
 // test_pin_unlock.cpp 0.4.70
 
 // --- Version history ----------------------------------------------------
+// v0.4.71: The PIN page shows only the logo, its line, the field and the link
 // v0.4.70: Initial release (D-059)
 
 #include "app_setup.h"
@@ -318,9 +319,24 @@ void TestPinUnlock::the_settings_and_the_unlock_page_offer_the_pin()
     QVERIFY(field && instead);
     QTRY_COMPARE(field->property("placeholderText").toString(), QStringLiteral("PIN"));
     QVERIFY(instead->isVisible());
+    // Only the logo, the line, the field and the link (the owner, 0.4.71).
+    auto* line = window->findChild<QQuickItem*>(QStringLiteral("unlockLine"));
+    auto* welcome = window->findChild<QQuickItem*>(QStringLiteral("welcomeLine"));
+    auto* vaultBox = window->findChild<QQuickItem*>(QStringLiteral("unlockVaultBox"));
+    QQuickItem* createNew = nullptr;
+    for (QQuickItem* one : window->findChildren<QQuickItem*>(QStringLiteral("createNewButton"))) {
+        if (one->parentItem() == vaultBox->parentItem()) {
+            createNew = one;
+        }
+    }
+    QVERIFY(line && welcome && vaultBox && createNew);
+    QCOMPARE(line->property("text").toString(), QStringLiteral("Enter the PIN to unlock"));
+    QVERIFY(!welcome->isVisible() && !vaultBox->isVisible() && !createNew->isVisible());
     QVERIFY(QMetaObject::invokeMethod(instead, "clicked"));
     QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Master Password"));
     QVERIFY(!instead->isVisible());
+    QCOMPARE(line->property("text").toString(), QStringLiteral("Enter the Master Password to unlock"));
+    QVERIFY(welcome->isVisible() && vaultBox->isVisible() && createNew->isVisible());
     controller->unlock(QStringLiteral("right"));
     QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
     controller->lock();

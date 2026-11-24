@@ -2510,7 +2510,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+354"/>
+        <location filename="../qml/UnlockPage.qml" line="+362"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2530,22 +2530,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-233"/>
+        <location line="-236"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+152"/>
+        <location line="+154"/>
         <source>last used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-147"/>
+        <location line="-148"/>
         <source>Enter the Master Password to unlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+0"/>
+        <source>Enter the PIN to unlock</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
         <source>this computer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2580,7 +2585,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+12"/>
         <source>Create a new vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3576,7 +3581,7 @@
     <message>
         <location line="-1744"/>
         <location line="+82"/>
-        <location filename="../src/ui/vault_controller_pin.cpp" line="+223"/>
+        <location filename="../src/ui/vault_controller_pin.cpp" line="+228"/>
         <source>Unlocking…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4032,12 +4037,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_pin.cpp" line="-87"/>
+        <location filename="../src/ui/vault_controller_pin.cpp" line="-92"/>
         <source>The PIN could not be set: not enough memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+83"/>
+        <location line="+88"/>
         <source>The PIN could not be read. Type the master password.</source>
         <translation type="unfinished"></translation>
     </message>
