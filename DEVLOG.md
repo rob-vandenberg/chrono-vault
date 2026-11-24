@@ -567,3 +567,12 @@ its remarks taken (a PIN entry that no longer fits also leaves memory; an empty 
 The owner's changelist items 1-10: with the PIN the unlock page shows only the logo, "Enter the PIN to unlock", the field
 and "Use master password instead" (`qml/UnlockPage.qml`, D-059 point 6); `test_pin_unlock` checks both forms. Pictures
 of both checked.
+
+## 24 November 2026: version 0.4.72: Windows Hello on top
+
+The owner's changelist items 1-14. The cause, from Microsoft's documentation: the calls that give a key credential's
+window an owner exist only from Windows 11 build 26100; the owner's Windows 10 (build 19045) fell back to calls without
+one. Now `IUserConsentVerifierInterop::RequestVerificationForWindowAsync` with Chrono Vault's window, the vault's key under
+DPAPI (`src/ui/quick_unlock_windows.cpp`, D-038 point 11); compiled on the twin, the owner tests it. "Unlock with
+Windows Hello" as wide as its text (`qml/UnlockPage.qml`, checked in `test_reader`). The translation check of the owner
+found every text translatable; `test_every_string_translatable` now also checks choices, continuation lines and lists.

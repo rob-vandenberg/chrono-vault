@@ -24,6 +24,7 @@ import QtQuick.Layouts
 // UnlockPage.qml 0.3.66
 
 // --- Version history ----------------------------------------------------
+// v0.4.72: Unlock with Windows Hello as wide as its text, centred (the owner)
 // v0.4.71: With the PIN only the logo, "Enter the PIN to unlock", the field and the link (the owner)
 // v0.4.70: The PIN, with Use master password instead (D-059)
 // v0.3.67: A change kept through a lock is asked about before another vault; the password field cleared when the vault changes
@@ -385,7 +386,8 @@ Item {
             visible: VaultController.quickUnlockOn && !VaultController.reminderDue
             text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
             flat: true
-            Layout.fillWidth: true
+            // As wide as its text, like Use master password instead (the owner).
+            Layout.alignment: Qt.AlignHCenter
             onClicked: VaultController.unlockWithQuickUnlock()
         }
         // Now and then the master password, so it is not forgotten, as often

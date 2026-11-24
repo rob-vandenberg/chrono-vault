@@ -1964,13 +1964,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/quick_unlock_windows.cpp" line="+221"/>
+        <location filename="../src/ui/quick_unlock_windows.cpp" line="+204"/>
         <source>Windows Hello</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Confirm it is you in the Windows Hello window…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Turn on Windows Hello for Chrono Vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+57"/>
+        <source>Unlock Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2510,7 +2520,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+362"/>
+        <location filename="../qml/UnlockPage.qml" line="+363"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2595,7 +2605,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <source>Please type your master password: Chrono Vault asks for it once a day, so that you do not forget it.</source>
         <translation type="unfinished"></translation>
     </message>

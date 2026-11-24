@@ -1930,14 +1930,24 @@ msgctxt "QuickUnlock|"
 msgid "The fingerprint reader reported an error."
 msgstr ""
 
-#: ../src/ui/quick_unlock_windows.cpp:221
+#: ../src/ui/quick_unlock_windows.cpp:204
 msgctxt "QuickUnlock|"
 msgid "Windows Hello"
 msgstr ""
 
-#: ../src/ui/quick_unlock_windows.cpp:224
+#: ../src/ui/quick_unlock_windows.cpp:207
 msgctxt "QuickUnlock|"
 msgid "Confirm it is you in the Windows Hello window…"
+msgstr ""
+
+#: ../src/ui/quick_unlock_windows.cpp:218
+msgctxt "QuickUnlock|"
+msgid "Turn on Windows Hello for Chrono Vault"
+msgstr ""
+
+#: ../src/ui/quick_unlock_windows.cpp:275
+msgctxt "QuickUnlock|"
+msgid "Unlock Chrono Vault"
 msgstr ""
 
 #: ../src/ui/quick_unlock.cpp:74
@@ -2466,145 +2476,145 @@ msgctxt "TemplateEditor|"
 msgid "New field"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:362
+#: ../qml/UnlockPage.qml:363
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:373
+#: ../qml/UnlockPage.qml:374
 msgctxt "UnlockPage|"
 msgid "This vault needs its keyfile."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:374
+#: ../qml/UnlockPage.qml:375
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:379
+#: ../qml/UnlockPage.qml:380
 msgctxt "UnlockPage|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:143
+#: ../qml/UnlockPage.qml:144
 msgctxt "UnlockPage|"
 msgid "Welcome to Chrono Vault"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:297
+#: ../qml/UnlockPage.qml:298
 msgctxt "UnlockPage|"
 msgid "last used"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:149
+#: ../qml/UnlockPage.qml:150
 msgctxt "UnlockPage|"
 msgid "Enter the Master Password to unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:149
+#: ../qml/UnlockPage.qml:150
 msgctxt "UnlockPage|"
 msgid "Enter the PIN to unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:178
+#: ../qml/UnlockPage.qml:179
 msgctxt "UnlockPage|"
 msgid "this computer"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:180
+#: ../qml/UnlockPage.qml:181
 msgctxt "UnlockPage|"
 msgid "pCloud"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:277
+#: ../qml/UnlockPage.qml:278
 msgctxt "UnlockPage|"
 msgid "Open another vault…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:297
+#: ../qml/UnlockPage.qml:298
 msgctxt "UnlockPage|"
 msgid "not found"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:320
+#: ../qml/UnlockPage.qml:321
 msgctxt "UnlockPage|"
 msgid "Master Password"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:320
+#: ../qml/UnlockPage.qml:321
 msgctxt "UnlockPage|"
 msgid "PIN"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:342
+#: ../qml/UnlockPage.qml:343
 msgctxt "UnlockPage|"
 msgid "Use master password instead"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:354
+#: ../qml/UnlockPage.qml:355
 msgctxt "UnlockPage|"
 msgid "Create a new vault…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:386
+#: ../qml/UnlockPage.qml:387
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Unlock with %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:396
+#: ../qml/UnlockPage.qml:398
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a day, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:397
+#: ../qml/UnlockPage.qml:399
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a month, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:398
+#: ../qml/UnlockPage.qml:400
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a quarter, "
 "so that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:399
+#: ../qml/UnlockPage.qml:401
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a year, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:408
+#: ../qml/UnlockPage.qml:410
 msgctxt "UnlockPage|"
 msgid "Not now"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:415
+#: ../qml/UnlockPage.qml:417
 msgctxt "UnlockPage|"
 msgid "A change could not be saved before the vault locked. Unlock to save it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:428
+#: ../qml/UnlockPage.qml:430
 msgctxt "UnlockPage|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:432
+#: ../qml/UnlockPage.qml:434
 msgctxt "UnlockPage|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you open another vault now, the change is lost."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:452
+#: ../qml/UnlockPage.qml:454
 msgctxt "UnlockPage|"
 msgid "Choose the vault's keyfile"
 msgstr ""

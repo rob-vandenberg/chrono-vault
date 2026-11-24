@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
+#include <QQuickItem>
 #include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -32,6 +33,7 @@
 // test_reader.cpp 0.0.38
 
 // --- Version history ----------------------------------------------------
+// v0.4.72: Unlock with Windows Hello as wide as its text, centred
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.27: Initial release (D-042)
 
@@ -319,6 +321,15 @@ void TestReader::the_unlock_page_asks_whenever_it_is_on_screen()
     showMainWindow(window, false, false);
     QTRY_COMPARE(reader->asked, 2);
     controller->stopQuickUnlock();
+    // The button is as wide as its text, centred under the field (the owner, 0.4.72).
+    auto* button = window->findChild<QQuickItem*>(QStringLiteral("quickUnlockButton"));
+    auto* field = window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"));
+    QVERIFY(button && field);
+    QTRY_VERIFY(button->isVisible());
+    QCOMPARE(button->width(), button->implicitWidth());
+    QVERIFY(button->width() < field->width());
+    const auto middleOf = [](QQuickItem* item) { return item->mapToScene(QPointF(item->width() / 2, 0)).x(); };
+    QTRY_VERIFY(qAbs(middleOf(button) - middleOf(field)) <= 1);
 
     // The reminder says how often it asks, as Settings > Security says (D-049).
     {

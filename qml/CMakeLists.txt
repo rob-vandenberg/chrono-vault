@@ -19,6 +19,7 @@
 # qml/CMakeLists.txt 0.3.66
 
 # --- Version history ----------------------------------------------------
+# v0.4.72: crypt32 for Windows Hello's key (D-038 point 11)
 # v0.4.70: PIN unlock (D-059)
 # v0.3.63: WebDavFileDialog.qml and the folder icon (D-057)
 # v0.3.62: StorageWindow.qml and the two storage icons (D-057)
@@ -212,7 +213,7 @@ if(LINUX)
     target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_linux.cpp)
 elseif(WIN32)
     target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_windows.cpp)
-    target_link_libraries(chrono_vault_ui PRIVATE windowsapp)
+    target_link_libraries(chrono_vault_ui PRIVATE windowsapp crypt32)
     set_source_files_properties(../src/ui/quick_unlock_windows.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
 else()
     target_sources(chrono_vault_ui PRIVATE ../src/ui/quick_unlock_none.cpp)

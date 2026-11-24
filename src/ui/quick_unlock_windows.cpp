@@ -17,64 +17,74 @@
 #include "quick_unlock.h"
 
 #include "crypto.h"
+#include "settings_files.h"
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QGuiApplication>
 #include <QPointer>
 #include <QWindow>
-#include "settings_files.h"
-
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Foundation.Metadata.h>
-#include <winrt/Windows.Security.Credentials.h>
-#include <winrt/Windows.Security.Cryptography.h>
-#include <winrt/Windows.Storage.Streams.h>
-#include <winrt/Windows.UI.h>
 
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #include <windows.h>
+#include <dpapi.h>
+#include <userconsentverifierinterop.h>
+
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Security.Credentials.h>
+#include <winrt/Windows.Security.Credentials.UI.h>
 
 #include <future>
 #include <memory>
-#include <optional>
 #include <mutex>
+#include <optional>
 #include <thread>
 
 // --- Version ------------------------------------------------------------
-// quick_unlock_windows.cpp 0.2.53
+// quick_unlock_windows.cpp 0.4.72
 
 // --- Version history ----------------------------------------------------
+// v0.4.72: Windows Hello asked over Chrono Vault's window on every Windows; the key kept with DPAPI (the owner, B)
 // v0.2.53: Windows Hello opens over Chrono Vault where Windows can (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.23: Initial release (D-038)
 
-// Windows Hello (D-038): a key credential per vault, made and used only after
-// the person's fingerprint, face or PIN. It signs a random challenge kept in
-// the settings; the SHA-256 of that signature is the key that seals the
-// vault's key. Without Windows Hello there is no signature, and nothing to
-// open the seal with.
+// Windows Hello (D-038 point 11, the owner's choice B): the person's
+// fingerprint, face or PIN is asked through the call that takes Chrono
+// Vault's window, so Windows shows it on top on every Windows version. Once
+// Windows Hello says it is them, the vault's key is opened with Windows' own
+// protection for this Windows account (DPAPI), as on Linux the keyring gives
+// it after the finger (Q39).
 
 namespace chrono_vault {
 
 namespace {
 
 namespace credentials = winrt::Windows::Security::Credentials;
-namespace cryptography = winrt::Windows::Security::Cryptography;
+namespace consent = winrt::Windows::Security::Credentials::UI;
 
-const QByteArray sealLabel = QByteArrayLiteral("chrono-vault quick unlock");
-
-QString credentialName(const QString& vault)
+QString vaultId(const QString& vault)
 {
-    return QStringLiteral("Chrono Vault ") +
-           QString::fromLatin1(QCryptographicHash::hash(vault.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
+    return QString::fromLatin1(QCryptographicHash::hash(vault.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
 }
 
 QString settingsKey(const QString& vault)
 {
-    return QStringLiteral("quickUnlock/windows/") + credentialName(vault).section(QLatin1Char(' '), -1);
+    return QStringLiteral("quickUnlock/windowsUser/") + vaultId(vault);
+}
+
+// Where versions before 0.4.72 kept a key signed by a Windows Hello
+// credential; removed with that credential when the vault forgets its key.
+QString oldSettingsKey(const QString& vault)
+{
+    return QStringLiteral("quickUnlock/windows/") + vaultId(vault);
+}
+
+QString oldCredentialName(const QString& vault)
+{
+    return QStringLiteral("Chrono Vault ") + vaultId(vault);
 }
 
 // The Windows Hello request a check is waiting for, so that it can be
@@ -110,39 +120,6 @@ struct Pending
     }
 };
 
-// Windows Hello opens over this window where Windows can say so: the calls
-// that take an owner window and the function that names one are asked for
-// while running, so an older Windows keeps the calls without one.
-std::optional<winrt::Windows::UI::WindowId> ownerOf(quintptr window)
-{
-    if (window == 0) {
-        return std::nullopt;
-    }
-    using Metadata = winrt::Windows::Foundation::Metadata::ApiInformation;
-    try {
-        if (!Metadata::IsMethodPresent(L"Windows.Security.Credentials.KeyCredentialManager",
-                                       L"RequestCreateForWindowAsync") ||
-            !Metadata::IsMethodPresent(L"Windows.Security.Credentials.KeyCredential", L"RequestSignForWindowAsync")) {
-            return std::nullopt;
-        }
-    } catch (const winrt::hresult_error&) {
-        return std::nullopt;
-    }
-    using Naming = HRESULT(WINAPI*)(HWND, winrt::Windows::UI::WindowId*);
-    static const Naming naming = []() -> Naming {
-        const HMODULE library = LoadLibraryExW(L"ext-ms-win-windowing-external-l1-1-0.dll", nullptr,
-                                               LOAD_LIBRARY_SEARCH_SYSTEM32);
-        return library != nullptr
-                   ? reinterpret_cast<Naming>(reinterpret_cast<void*>(GetProcAddress(library, "GetWindowIdFromWindow")))
-                   : nullptr;
-    }();
-    winrt::Windows::UI::WindowId id{};
-    if (naming == nullptr || FAILED(naming(reinterpret_cast<HWND>(window), &id))) {
-        return std::nullopt;
-    }
-    return id;
-}
-
 // The Chrono Vault window that has the keyboard now, on the window's thread.
 quintptr ownerWindow()
 {
@@ -150,56 +127,62 @@ quintptr ownerWindow()
     return window != nullptr ? static_cast<quintptr>(window->winId()) : 0;
 }
 
-struct Signed
-{
-    QuickUnlock::Result result = QuickUnlock::Result::Failed;
-    QByteArray key; // SHA-256 of the signature
-};
-
-// Runs on a thread of its own: WinRT's waiting calls may not run on the
-// window's thread.
-Signed sign(const QString& vault, const QByteArray& challenge, bool create, quintptr window, Pending& pending)
+// Asks Windows Hello whether it is the person, over the given window. Runs on
+// a thread of its own: WinRT's waiting calls may not run on the window's
+// thread.
+QuickUnlock::Result verify(quintptr window, const QString& message, Pending& pending)
 {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
-    Signed answer;
     try {
-        const std::optional<winrt::Windows::UI::WindowId> owner = ownerOf(window);
-        const winrt::hstring name(credentialName(vault).toStdWString());
-        const credentials::KeyCredentialRetrievalResult found =
-            !create  ? pending.wait(credentials::KeyCredentialManager::OpenAsync(name))
-            : owner ? pending.wait(credentials::KeyCredentialManager::RequestCreateForWindowAsync(
-                          *owner, name, credentials::KeyCredentialCreationOption::ReplaceExisting))
-                    : pending.wait(credentials::KeyCredentialManager::RequestCreateAsync(
-                          name, credentials::KeyCredentialCreationOption::ReplaceExisting));
-        switch (found.Status()) {
-        case credentials::KeyCredentialStatus::Success: break;
-        case credentials::KeyCredentialStatus::UserCanceled: answer.result = QuickUnlock::Result::Cancelled; return answer;
-        case credentials::KeyCredentialStatus::NotFound: answer.result = QuickUnlock::Result::NoKey; return answer;
-        default: answer.result = QuickUnlock::Result::Failed; return answer;
+        const winrt::hstring text(message.toStdWString());
+        winrt::Windows::Foundation::IAsyncOperation<consent::UserConsentVerificationResult> asking{nullptr};
+        if (window != 0) {
+            const auto interop = winrt::get_activation_factory<consent::UserConsentVerifier, IUserConsentVerifierInterop>();
+            winrt::check_hresult(interop->RequestVerificationForWindowAsync(
+                reinterpret_cast<HWND>(window), static_cast<HSTRING>(winrt::get_abi(text)),
+                winrt::guid_of<decltype(asking)>(), winrt::put_abi(asking)));
+        } else {
+            asking = consent::UserConsentVerifier::RequestVerificationAsync(text);
         }
-        const auto buffer = cryptography::CryptographicBuffer::CreateFromByteArray(winrt::array_view<uint8_t const>(
-            reinterpret_cast<const uint8_t*>(challenge.constData()),
-            reinterpret_cast<const uint8_t*>(challenge.constData()) + challenge.size()));
-        const credentials::KeyCredentialOperationResult signedChallenge =
-            owner ? pending.wait(found.Credential().RequestSignForWindowAsync(*owner, buffer))
-                  : pending.wait(found.Credential().RequestSignAsync(buffer));
-        if (signedChallenge.Status() == credentials::KeyCredentialStatus::UserCanceled) {
-            answer.result = QuickUnlock::Result::Cancelled;
-            return answer;
+        switch (pending.wait(asking)) {
+        case consent::UserConsentVerificationResult::Verified: return QuickUnlock::Result::Done;
+        case consent::UserConsentVerificationResult::Canceled: return QuickUnlock::Result::Cancelled;
+        case consent::UserConsentVerificationResult::RetriesExhausted: return QuickUnlock::Result::Failed;
+        case consent::UserConsentVerificationResult::DeviceNotPresent:
+        case consent::UserConsentVerificationResult::NotConfiguredForUser:
+        case consent::UserConsentVerificationResult::DisabledByPolicy:
+        case consent::UserConsentVerificationResult::DeviceBusy: return QuickUnlock::Result::Unavailable;
         }
-        if (signedChallenge.Status() != credentials::KeyCredentialStatus::Success) {
-            return answer;
-        }
-        winrt::com_array<uint8_t> signature;
-        cryptography::CryptographicBuffer::CopyToByteArray(signedChallenge.Result(), signature);
-        answer.key = QCryptographicHash::hash(
-            QByteArray(reinterpret_cast<const char*>(signature.data()), static_cast<qsizetype>(signature.size())),
-            QCryptographicHash::Sha256);
-        answer.result = QuickUnlock::Result::Done;
+        return QuickUnlock::Result::Failed;
     } catch (const winrt::hresult_error&) {
-        answer.result = QuickUnlock::Result::Unavailable;
+        return QuickUnlock::Result::Unavailable;
     }
-    return answer;
+}
+
+// Windows' protection for this Windows account (DPAPI); empty when it fails.
+QByteArray protect(const QByteArray& secret)
+{
+    DATA_BLOB in{static_cast<DWORD>(secret.size()), reinterpret_cast<BYTE*>(const_cast<char*>(secret.constData()))};
+    DATA_BLOB out{};
+    if (!CryptProtectData(&in, L"Chrono Vault", nullptr, nullptr, nullptr, CRYPTPROTECT_UI_FORBIDDEN, &out)) {
+        return {};
+    }
+    QByteArray sealed(reinterpret_cast<const char*>(out.pbData), static_cast<qsizetype>(out.cbData));
+    LocalFree(out.pbData);
+    return sealed;
+}
+
+std::optional<QByteArray> unprotect(const QByteArray& sealed)
+{
+    DATA_BLOB in{static_cast<DWORD>(sealed.size()), reinterpret_cast<BYTE*>(const_cast<char*>(sealed.constData()))};
+    DATA_BLOB out{};
+    if (!CryptUnprotectData(&in, nullptr, nullptr, nullptr, nullptr, CRYPTPROTECT_UI_FORBIDDEN, &out)) {
+        return std::nullopt;
+    }
+    QByteArray secret(reinterpret_cast<const char*>(out.pbData), static_cast<qsizetype>(out.cbData));
+    SecureZeroMemory(out.pbData, out.cbData);
+    LocalFree(out.pbData);
+    return secret;
 }
 
 class WindowsQuickUnlock : public QuickUnlock
@@ -210,7 +193,8 @@ public:
         return std::async(std::launch::async, []() {
                    winrt::init_apartment(winrt::apartment_type::multi_threaded);
                    try {
-                       return credentials::KeyCredentialManager::IsSupportedAsync().get();
+                       return consent::UserConsentVerifier::CheckAvailabilityAsync().get() ==
+                              consent::UserConsentVerifierAvailability::Available;
                    } catch (const winrt::hresult_error&) {
                        return false;
                    }
@@ -226,78 +210,86 @@ public:
 
     void store(const QString& vault, const QByteArray& secret) override
     {
-        const QByteArray challenge = crypto::randomBytes(32);
         QPointer<WindowsQuickUnlock> self(this);
         // Its Cancel stops it too (D-042); a stopped one answers Cancelled.
         cancel();
         auto pending = std::make_shared<Pending>();
         asking = pending;
         const quintptr window = ownerWindow();
+        const QString message = QCoreApplication::translate("QuickUnlock", "Turn on Windows Hello for Chrono Vault");
         emit fingerReady(); // Windows Hello shows its own window now
-        std::thread([self, vault, secret, challenge, window, pending]() {
-            const Signed answer = sign(vault, challenge, true, window, *pending);
+        std::thread([self, vault, secret, window, message, pending]() {
+            const Result answer = verify(window, message, *pending);
             bool stopped = false;
             {
                 const std::lock_guard<std::mutex> guard(pending->lock);
                 stopped = pending->stopped;
             }
             QByteArray sealed;
-            if (answer.result == Result::Done && !stopped) {
-                sealed = crypto::seal(answer.key, secret, sealLabel);
+            if (answer == Result::Done && !stopped) {
+                sealed = protect(secret);
             }
-            const Result result = stopped                         ? Result::Cancelled
-                                  : answer.result != Result::Done ? answer.result
-                                  : sealed.isEmpty()              ? Result::NotKept
-                                                                  : Result::Done;
+            const Result result = stopped                ? Result::Cancelled
+                                  : answer != Result::Done ? answer
+                                  : sealed.isEmpty()     ? Result::NotKept
+                                                         : Result::Done;
             QMetaObject::invokeMethod(
                 qApp,
-                [self, vault, challenge, sealed, result]() {
+                [self, vault, sealed, result]() {
                     if (!self) {
                         return;
                     }
                     if (!sealed.isEmpty()) {
-                        VaultsFile().setValue(settingsKey(vault),
-                                             QStringList{QString::fromLatin1(challenge.toBase64()),
-                                                         QString::fromLatin1(sealed.toBase64())});
+                        self->keep(vault, sealed);
                     }
-                    self->remember(vault, !sealed.isEmpty());
                     emit self->stored(result);
                 },
                 Qt::QueuedConnection);
         }).detach();
     }
 
+    // After a master password change, while unlocked with it: kept again
+    // without asking Windows Hello once more.
+    void replace(const QString& vault, const QByteArray& secret) override
+    {
+        const QByteArray sealed = protect(secret);
+        if (!sealed.isEmpty()) {
+            keep(vault, sealed);
+        }
+        const Result result = sealed.isEmpty() ? Result::NotKept : Result::Done;
+        QMetaObject::invokeMethod(this, [this, result]() { emit stored(result); }, Qt::QueuedConnection);
+    }
+
     void retrieve(const QString& vault) override
     {
-        const QStringList kept = VaultsFile().value(settingsKey(vault)).toStringList();
-        if (kept.size() != 2) {
+        const QByteArray sealed = QByteArray::fromBase64(VaultsFile().value(settingsKey(vault)).toString().toLatin1());
+        if (sealed.isEmpty()) {
+            // Nothing, or only a key kept the way before 0.4.72: turned on again.
             emit retrieved(Result::NoKey, {});
             return;
         }
-        const QByteArray challenge = QByteArray::fromBase64(kept.at(0).toLatin1());
-        const QByteArray sealed = QByteArray::fromBase64(kept.at(1).toLatin1());
         QPointer<WindowsQuickUnlock> self(this);
         cancel();
         auto pending = std::make_shared<Pending>();
         asking = pending;
         const quintptr window = ownerWindow();
+        const QString message = QCoreApplication::translate("QuickUnlock", "Unlock Chrono Vault");
         emit fingerReady(); // Windows Hello shows its own window now
-        std::thread([self, vault, challenge, sealed, window, pending]() {
-            const Signed answer = sign(vault, challenge, false, window, *pending);
+        std::thread([self, sealed, window, message, pending]() {
+            Result result = verify(window, message, *pending);
             {
                 const std::lock_guard<std::mutex> guard(pending->lock);
                 if (pending->stopped) {
                     return; // stopped: nobody waits for its answer
                 }
             }
-            Result result = answer.result;
             QByteArray secret;
             if (result == Result::Done) {
-                const auto opened = crypto::open(answer.key, sealed, sealLabel);
+                const std::optional<QByteArray> opened = unprotect(sealed);
                 if (opened) {
                     secret = *opened;
                 } else {
-                    result = Result::NoKey; // Windows Hello was set up again: its key is another
+                    result = Result::NoKey; // another Windows account, or its protection reset
                 }
             }
             QMetaObject::invokeMethod(
@@ -323,17 +315,36 @@ public:
     void remove(const QString& vault) override
     {
         VaultsFile().remove(settingsKey(vault));
+        forgetOldKey(vault);
         remember(vault, false);
+    }
+
+private:
+    void keep(const QString& vault, const QByteArray& sealed)
+    {
+        VaultsFile().setValue(settingsKey(vault), QString::fromLatin1(sealed.toBase64()));
+        forgetOldKey(vault);
+        remember(vault, true);
+    }
+
+    // A key kept the way before 0.4.72 goes, with its Windows Hello credential.
+    static void forgetOldKey(const QString& vault)
+    {
+        VaultsFile settings;
+        if (!settings.contains(oldSettingsKey(vault))) {
+            return;
+        }
+        settings.remove(oldSettingsKey(vault));
         std::thread([vault]() {
             winrt::init_apartment(winrt::apartment_type::multi_threaded);
             try {
-                credentials::KeyCredentialManager::DeleteAsync(winrt::hstring(credentialName(vault).toStdWString())).get();
+                credentials::KeyCredentialManager::DeleteAsync(winrt::hstring(oldCredentialName(vault).toStdWString()))
+                    .get();
             } catch (const winrt::hresult_error&) {
             }
         }).detach();
     }
 
-private:
     std::shared_ptr<Pending> asking; // the check now asking for the person
 };
 
