@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.106
+// test_vault_rows.cpp 0.7.108
 
 // --- Version history ----------------------------------------------------
+// v0.7.108: Open a vault and its list; the crown in the start-up page's list (D-077)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.104: A click on the eye
@@ -64,6 +65,94 @@ class TestVaultRows : public IntuitiveFixture
     }
 
 private slots:
+    // Open a vault: your vaults on top, the storage locations below; the crown in
+    // the start-up page's list (D-077).
+    void open_a_vault_lists_the_known_vaults()
+    {
+        const QString first = controller->vaultPath();
+        const QString second = folder.filePath(QStringLiteral("listed.chronovault"));
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"), QUrl(), true);
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+        controller->switchToVault(first);
+        QTRY_VERIFY(controller->vaultPath() == first && controller->state() == State::Unlocked);
+        auto* storage = window->findChild<QQuickWindow*>(QStringLiteral("storageWindow"));
+        QVERIFY(storage);
+        const auto opens = [&]() {
+            QVERIFY(QMetaObject::invokeMethod(window, "openVault"));
+            QTRY_VERIFY(storage->isVisible());
+        };
+        opens();
+        QCOMPARE(storage->title(), QStringLiteral("Open a vault"));
+        QQuickItem* list = seen(storage->contentItem(), QStringLiteral("knownVaults"));
+        QVERIFY(list && list->isVisible());
+        QCOMPARE(list->property("count").toInt(), controller->vaults().size() - 1); // not the open one
+        QVERIFY(seen(storage->contentItem(), QStringLiteral("openDeviceTile")));
+        QQuickItem* ok = seen(storage->contentItem(), QStringLiteral("openChosenButton"));
+        QVERIFY(ok && !ok->isEnabled());
+        // Taller: the room goes to the list, the tiles keep theirs.
+        storage->grabWindow();
+        const qreal listHigh = list->height();
+        const qreal tileHigh = seen(storage->contentItem(), QStringLiteral("openDeviceTile"))->height();
+        storage->setHeight(storage->height() + 200);
+        QTRY_VERIFY(list->height() > listHigh + 150);
+        QCOMPARE(seen(storage->contentItem(), QStringLiteral("openDeviceTile"))->height(), tileHigh);
+        // A Closed one: a double click opens it at once.
+        QQuickItem* row = nullptr;
+        QTRY_VERIFY((row = seen(storage->contentItem(), QStringLiteral("knownVault_listed"))));
+        storage->grabWindow();
+        QTest::mouseDClick(storage, Qt::LeftButton, {}, row->mapToScene(QPointF(row->width() / 2, row->height() / 2)).toPoint());
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+        QTRY_VERIFY(!storage->isVisible());
+
+        // A Locked one: chosen with Enter, asked in the standard dialog.
+        controller->switchToVault(first);
+        QTRY_VERIFY(controller->vaultPath() == first && controller->state() == State::Unlocked);
+        controller->lockVault(second);
+        QTRY_COMPARE(controller->vaultStateOf(second), 0);
+        opens();
+        storage->setProperty("selected", second);
+        QVERIFY(ok->isEnabled());
+        storage->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), storage);
+        list->forceActiveFocus();
+        QTRY_VERIFY(list->hasActiveFocus());
+        QTest::keyClick(storage, Qt::Key_Return);
+        auto* ask = window->findChild<QQuickWindow*>(QStringLiteral("openKnownAsk"));
+        QTRY_VERIFY(ask && ask->isVisible());
+        QCOMPARE(controller->vaultPath(), first); // open until the other one opens
+        ask->findChild<QObject*>(QStringLiteral("askField"))->setProperty("text", QStringLiteral("two"));
+        QMetaObject::invokeMethod(ask, "go");
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+        QTRY_VERIFY(!ask->isVisible());
+
+        // Not found: listed, struck through, not chosen.
+        QVERIFY(QFile::rename(first, first + QStringLiteral(".away")));
+        controller->checkVaults();
+        QTRY_VERIFY(controller->foundVaults().indexOf(first) < 0);
+        opens();
+        storage->setProperty("selected", first);
+        QVERIFY(!ok->isEnabled());
+        QMetaObject::invokeMethod(storage, "reject");
+        QTRY_VERIFY(!storage->isVisible());
+        QVERIFY(QFile::rename(first + QStringLiteral(".away"), first));
+        controller->checkVaults();
+        QTRY_VERIFY(controller->foundVaults().indexOf(first) >= 0);
+
+        // The start-up page: the crown at the primary; its own "Open another
+        // vault…" opens the window without the list.
+        controller->lock();
+        QTRY_VERIFY(controller->state() == State::Locked && controller->vaultPath() == first);
+        QQuickItem* box = part("unlockVaultBox");
+        QVERIFY(box);
+        QTRY_VERIFY(seen(box, QStringLiteral("boxCrown")) && seen(box, QStringLiteral("boxCrown"))->isVisible());
+        const int other = box->property("count").toInt() - 1;
+        QVERIFY(QMetaObject::invokeMethod(box, "activated", Q_ARG(int, other)));
+        QTRY_VERIFY(storage->isVisible());
+        QVERIFY(!list->isVisible());
+        QMetaObject::invokeMethod(storage, "reject");
+        QTRY_VERIFY(!storage->isVisible());
+    }
+
     // A menu is as wide as its longest entry, 120 at least, and closes when
     // another window takes the keyboard; a choice box's list too (D-072).
     void a_menu_fits_its_entries_and_closes_with_its_window()

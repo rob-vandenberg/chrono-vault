@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultBox.qml 0.6.106
+// VaultBox.qml 0.7.108
 
 // --- Version history ----------------------------------------------------
+// v0.7.108: The primary's crown in the list and the field (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
@@ -73,8 +74,19 @@ ComboBox {
             opacity: 1
             textFormat: Text.PlainText
             elide: Text.ElideRight
+            Layout.maximumWidth: implicitWidth
             Layout.fillWidth: true
         }
+        // The primary's crown (the owner, D-077).
+        Image {
+            objectName: "boxCrown"
+            visible: vaultBox.otherName === "" && vaultBox.shown !== "" && vaultBox.shown === VaultController.primaryVault
+            source: "qrc:/icons/crown.svg"
+            sourceSize: Qt.size(Math.round(18 * Appearance.factor), Math.round(18 * Appearance.factor))
+            Layout.preferredWidth: Math.round(18 * Appearance.factor)
+            Layout.preferredHeight: Math.round(18 * Appearance.factor)
+        }
+        Item { Layout.fillWidth: true }
     }
     // Rounded, as the owner's design.
     background: Rectangle {
@@ -154,6 +166,9 @@ ComboBox {
             ExactColumn {
                 gap: 0
                 Layout.fillWidth: true
+                ExactRow {
+                    gap: 6 * Appearance.factor
+                    Layout.fillWidth: true
                 Label {
                     text: vaultRow.isOther ? qsTr("Open another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
                     textFormat: Text.PlainText
@@ -161,7 +176,18 @@ ComboBox {
                     font.strikeout: vaultRow.missing
                     opacity: vaultRow.missing ? 0.45 : vaultRow.isOther ? 0.8 : 1
                     elide: Text.ElideRight
+                    Layout.maximumWidth: implicitWidth
                     Layout.fillWidth: true
+                }
+                Image {
+                    objectName: "rowCrown"
+                    visible: !vaultRow.isOther && vaultRow.modelData === VaultController.primaryVault
+                    source: "qrc:/icons/crown.svg"
+                    sourceSize: Qt.size(Math.round(18 * Appearance.factor), Math.round(18 * Appearance.factor))
+                    Layout.preferredWidth: Math.round(18 * Appearance.factor)
+                    Layout.preferredHeight: Math.round(18 * Appearance.factor)
+                }
+                Item { Layout.fillWidth: true }
                 }
                 // Where it is kept, so two vaults of one name are told apart.
                 Label {

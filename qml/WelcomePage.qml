@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.6.105
+// WelcomePage.qml 0.7.108
 
 // --- Version history ----------------------------------------------------
+// v0.7.108: Open a vault lists the known vaults (D-077)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
@@ -52,7 +53,14 @@ Item {
     // In front of the window that asked, the main window unless told (D-062).
     property var overWindow: null
     function newVault(over) { overWindow = over || null; storageChoice.mode = "new"; storageChoice.open() }
-    function openVault(over) { overWindow = over || null; storageChoice.mode = "open"; storageChoice.open() }
+    // withVaults false where the vaults are listed already (the start-up page's list, D-077).
+    function openVault(over, withVaults) {
+        overWindow = over || null
+        storageChoice.mode = "open"
+        storageChoice.withVaults = withVaults !== false
+        storageChoice.open()
+    }
+    signal knownVaultChosen(string vaultFile)
 
     ExactColumn {
         anchors.centerIn: parent
@@ -111,6 +119,7 @@ Item {
     StorageWindow {
         id: storageChoice
         transientParent: welcomePage.overWindow || welcomePage.Window.window
+        onVaultChosen: function(vaultFile) { welcomePage.knownVaultChosen(vaultFile) }
         onChosen: function(storage) {
             if (storage === "device") {
                 if (storageChoice.mode === "new") {

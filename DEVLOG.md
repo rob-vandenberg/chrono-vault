@@ -838,3 +838,8 @@ The owner's changelist items 1-12 (D-075). `src/ui/vault_controller*.cpp`, `src/
 The owner's changelist items 1-12 (D-076); the version 0.7 his. `src/ui/vault_controller_pin.cpp` anew,
 `src/ui/vault_controller*.cpp`, `qml/AskWindow.qml`, `qml/UnlockPage.qml`, `qml/SettingsWindow.qml`; `test_pin_unlock`
 anew, `test_quick_unlock`.
+
+## 26 November 2026: version 0.7.108: Open a vault
+
+The owner's changelist items 1-13 (D-077). `qml/StorageWindow.qml`, `qml/WelcomePage.qml`, `qml/Main.qml`,
+`qml/VaultBox.qml`; `test_vault_rows`.

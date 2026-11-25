@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.106
+// Main.qml 0.7.108
 
 // --- Version history ----------------------------------------------------
+// v0.7.108: Open a vault: a known vault opened as in Settings > Vaults (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
@@ -779,6 +780,59 @@ ApplicationWindow {
             welcomePage.openVault(over)
     }
 
+    AskWindow {
+        id: openKnownAsk
+        objectName: "openKnownAsk"
+        // In front of the window Open a vault was opened over (Settings), else the main window.
+        transientParent: welcomePage.overWindow || mainWindow
+        withList: true
+        mayRemember: true
+        function ready(file) {
+            return VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked
+        }
+        function ask(file) {
+            if (ready(file))
+                return
+            if (VaultController.opensAtOnce(file)) {
+                if (visible)
+                    reject()
+                VaultController.switchToVault(file)
+            } else {
+                askVault(file)
+            }
+        }
+        onPicked: function(file) { ask(file) }
+        // Right: opened with it; the window stays until it is open, or says why not.
+        property string opened: ""
+        onRight: function(file) {
+            opened = file
+            if (!VaultController.openProven(remembers))
+                opened = ""
+            else if (ready(file))
+                finish()
+        }
+        function finish() {
+            opened = ""
+            if (visible)
+                accept()
+        }
+        Connections {
+            target: VaultController
+            enabled: openKnownAsk.opened !== ""
+            function onStateChanged() {
+                if (openKnownAsk.ready(openKnownAsk.opened))
+                    openKnownAsk.finish()
+            }
+            function onMessageChanged() {
+                if (openKnownAsk.opened !== "" && VaultController.state === VaultController.Locked
+                        && VaultController.message !== "") {
+                    openKnownAsk.problem = VaultController.message
+                    openKnownAsk.opened = ""
+                }
+            }
+        }
+    }
+
     ImportWindow {
         id: importWindow
         transientParent: mainWindow
@@ -831,10 +885,15 @@ ApplicationWindow {
         currentIndex: VaultController.state === VaultController.Unlocked ? 2
                       : (VaultController.vaultPath === "" ? 0 : 1)
 
-        WelcomePage { id: welcomePage }
+        WelcomePage {
+            id: welcomePage
+            // A known vault from Open a vault: a Closed one at once, a Locked one in
+            // the standard dialog, as Open in Settings > Vaults (D-077).
+            onKnownVaultChosen: function(vaultFile) { openKnownAsk.ask(vaultFile) }
+        }
         UnlockPage {
             id: unlockPage
-            onOpenRequested: welcomePage.openVault()
+            onOpenRequested: welcomePage.openVault(null, false) // its own list has them (D-077)
             onCreateRequested: welcomePage.newVault()
         }
         VaultPage {

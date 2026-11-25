@@ -54,6 +54,8 @@ kept passwords, in memory); `closeOpenVault` and `lockVault` (`src/ui/vault_cont
 `returnTo` is the vault that opens by itself once the primary is unlocked after a lock (`goBackThroughPrimary`).
 **The screen lock (D-076)**, `src/ui/vault_controller_pin.cpp`: `sealSession` puts what is open away under the vault logged in
 with, sealed with its key and its PIN's; `takeBackSession` and `openTakenBack` give it back. A PIN per vault in `pins/`.
+**Open a vault (D-077)**: `qml/StorageWindow.qml` in its "open" mode lists the known vaults; a chosen one goes to
+`openKnownAsk` in `qml/Main.qml`, the standard dialog as Settings > Vaults uses it.
 
 ## 6. WebDAV storage (D-057)
 
