@@ -21,9 +21,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// EmptyList.qml 0.5.83
+// EmptyList.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The lists of the audit (D-065)
 // v0.5.83: Initial release (D-063)
 
 // What a list without items shows: an open, empty vault and why; a search
@@ -31,11 +32,16 @@ import QtQuick.Layouts
 ColumnLayout {
     id: emptyList
     property var categories: []
+    signal settingsRequested()
     spacing: Math.round(4 * Appearance.factor)
 
     readonly property string filter: VaultController.filter
     readonly property bool searching: VaultController.searchText !== ""
     readonly property bool forNewItems: filter === "" || filter.startsWith("category:")
+    // A list of the audit that needs the online checks, and how they stand
+    // (D-065); empty for any other.
+    readonly property string onlineState: filter === "audit:leaked" ? VaultController.audit.leakState
+                                          : filter === "audit:breached" ? VaultController.audit.breachState : ""
     readonly property string headline: {
         if (searching)
             return qsTr("Nothing found for “%1”").arg(VaultController.searchText)
@@ -47,6 +53,22 @@ ColumnLayout {
             return qsTr("The Archive is empty")
         if (filter === "trash")
             return qsTr("The Trash is empty")
+        if (onlineState === "off" && !VaultController.checkLeaks)
+            return qsTr("The check for leaked passwords and breached websites is off")
+        if (onlineState === "failed")
+            return qsTr("Not checked: Have I Been Pwned could not be reached")
+        if (onlineState !== "" && onlineState !== "done" || filter.startsWith("audit:") && !VaultController.audit.ready)
+            return qsTr("Checking…")
+        if (filter === "audit:leaked")
+            return qsTr("No leaked passwords")
+        if (filter === "audit:reused")
+            return qsTr("No reused passwords")
+        if (filter === "audit:weak")
+            return qsTr("No weak passwords")
+        if (filter === "audit:old")
+            return qsTr("No old passwords")
+        if (filter === "audit:breached")
+            return qsTr("No breached websites")
         if (filter.startsWith("tag:"))
             return qsTr("No items with the tag “%1”").arg(filter.slice(4))
         const id = filter.slice("category:".length)
@@ -56,7 +78,7 @@ ColumnLayout {
 
     IconImage {
         objectName: "emptyVault"
-        visible: !emptyList.searching
+        visible: !emptyList.searching && !emptyList.filter.startsWith("audit:")
         source: "qrc:/icons/empty-vault.svg"
         color: advice.palette.text
         opacity: 0.6
@@ -83,5 +105,19 @@ ColumnLayout {
         wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
         Layout.fillWidth: true
+    }
+    Button {
+        objectName: "emptyAuditButton"
+        visible: !emptyList.searching && (emptyList.onlineState === "failed"
+                                          || (emptyList.onlineState === "off" && !VaultController.checkLeaks))
+        text: emptyList.onlineState === "failed" ? qsTr("Check now") : qsTr("Settings…")
+        onClicked: emptyList.onlineState === "failed" ? VaultController.checkLeaksNow() : emptyList.settingsRequested()
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: Math.round(8 * Appearance.factor)
+    }
+    AuditSource {
+        visible: !emptyList.searching && emptyList.onlineState === "done"
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: Math.round(8 * Appearance.factor)
     }
 }

@@ -18,7 +18,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | 9a | Importing the reference program's export | Everything an item of the reference program holds, the editor, the importer, website icons (the owner, 22 November 2026: before merging) | 3 to 4 weeks | done in 0.0.20: the item (0.0.17), the editor (0.0.18), the importer (0.0.19), website icons (0.0.20) |
 | 10 | Merging | Merge changes from two devices; what cannot be merged is shown to the person to settle (D-005, OR-15) | 1 to 1.5 months | done in 0.2.45 (D-054) |
 | 11 | Storage: WebDAV | Qt Network, a working copy here, synced and merged (D-057) | 2 to 3 weeks | done (0.3.60) |
-| 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | not started |
+| 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | done in 0.6.86 (D-065) |
 | 13 | Importers | CSV first, then the formats the owner chooses, each tested with random damaged input (OR-3, OR-4) | about 1 week per format | not started |
 | 14 | Storage: pCloud | Technique decided by the owner when this step is reached (D-005) | 2 to 3 weeks | not started |
 | 15 | Storage: Google Drive | Technique decided by the owner when this step is reached (D-005) | 2 to 3 weeks | not started |
@@ -34,7 +34,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
 1. PIN unlock: done in 0.4.70 (D-059).
 2. Backup and Restore (File; greyed until built).
 3. Print.
-4. Audit in sidebar, with Show Old Passwords (with step 12).
+4. Audit in sidebar, with old passwords: done in 0.6.86 (D-065).
 5. Previous Group and Next Group (Ctrl+Up, Ctrl+Down).
 6. Duplicate (Ctrl+D), Change Category, Add to Vault.
 7. Sync Now (Ctrl+J), with the storages.
@@ -42,7 +42,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
 9. Clear Recent Items.
 10. App language and data location.
 11. A dark tray icon.
-12. The compromised-password check (with step 12).
+12. The compromised-password check: done in 0.6.86 (D-065).
 13. Proxy settings, logs, Erase Everything.
 14. ~~A keyboard shortcut editor that looks and works as Chrono Viewer's.~~ Done in 0.0.35 (D-045).
 15. An "Attachments" box always below Tags in the editor, as the reference program's: "Drag and drop or click here / to

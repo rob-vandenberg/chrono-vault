@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.5.83
+// Main.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: View > Audit; an item left out of the audit (D-065)
 // v0.5.83: The Item menu holds every action on the selected items (D-063)
 // v0.5.82: Delete, several items, the keyboard never nowhere; new and opened vaults from Settings (D-062)
 // v0.5.78: The menus' own colour; texts in dialogs wrap with the window (D-061)
@@ -119,7 +120,7 @@ ApplicationWindow {
     readonly property var keyedActions: [
         action_newVault, action_openVault, action_changeMasterPassword, action_import, action_export,
         action_preferences, action_quit, action_showItemCounts, action_hideSidebar, action_sidebar,
-        action_hideSensitive, action_showCategories, action_showTags, action_showOthers, action_archive,
+        action_hideSensitive, action_showCategories, action_showTags, action_showAudit, action_showOthers, action_archive,
         action_moveToTrash, action_copyUsername, action_copyEmail, action_copyPassword, action_showPasswords,
         action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_syncNow, action_clearClipboard,
         action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
@@ -445,6 +446,19 @@ ApplicationWindow {
                         }
                     }
                     Action {
+                        id: action_showAudit
+                        property string actionId: "showAudit"
+                        property string shownKeys: mainWindow.firstKey(actionId)
+                        objectName: "showAuditAction"
+                        text: qsTr("Audit")
+                        checkable: true
+                        checked: VaultController.showAudit
+                        onToggled: {
+                            VaultController.showAudit = checked
+                            checked = Qt.binding(function() { return VaultController.showAudit })
+                        }
+                    }
+                    Action {
                         id: action_showOthers
                         property string actionId: "showOthers"
                         property string shownKeys: mainWindow.firstKey(actionId)
@@ -483,6 +497,12 @@ ApplicationWindow {
                         palette.base: mainWindow.palette.button
                         enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
                         onChosen: function(categoryId) { vaultPage.changeCategory(categoryId) }
+                    }
+                    Action {
+                        objectName: "auditAction"
+                        text: vaultPage.allExcluded ? qsTr("Include in Audit") : qsTr("Exclude from Audit")
+                        enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
+                        onTriggered: vaultPage.excludeChosen()
                     }
                     Action {
                         id: action_moveToTrash
@@ -820,6 +840,7 @@ ApplicationWindow {
             onOpenVaultRequested: mainWindow.openVault()
             onConflictRequested: function(itemId) { mainWindow.showConflict(itemId) }
             onCustomizeRequested: settingsWindow.showCustomize()
+            onLeakSettingRequested: settingsWindow.showSecurity()
         }
     }
 

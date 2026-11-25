@@ -31,6 +31,7 @@
 
 // --- Version history ----------------------------------------------------
 // v0.5.81: Where an import's value came from (D-061)
+// v0.6.86: The contents format 10: an item left out of the audit (D-065)
 // v0.5.78: The contents format 9: every difference kept for the person to settle, a note's device, the vault's own notes (D-061)
 // v0.5.77: A note's other value marked as imported, a key earlier versions pass over (D-060)
 // v0.2.56: The contents format 8: a category's icon, the changes to built-in categories (D-056)
@@ -54,9 +55,10 @@ namespace {
 // what the reference program's items hold (D-033); format 5 the vault's own
 // icons (D-050); format 6 the reference program's other field types (D-051);
 // format 7 merging (D-054); format 8 a category's icon and the changes to
-// built-in categories (D-056).
+// built-in categories (D-056); format 9 what merges leave (D-061); format 10 an
+// item left out of the audit (D-065).
 // Older formats are read.
-constexpr int contentsFormat = 9;
+constexpr int contentsFormat = 10;
 constexpr int oldestContentsFormat = 1;
 constexpr qsizetype largestIconBytes = 256 * 1024;
 constexpr qsizetype largestItemCount = 100000;
@@ -302,7 +304,7 @@ QJsonObject itemToJson(const Item& item)
     insertText("note", item.note);
     insertText("website", item.website);
     for (const auto& [key, on] : {std::pair{"trashed", item.trashed}, std::pair{"archived", item.archived},
-                                  std::pair{"autoSubmit", item.autoSubmit}}) {
+                                  std::pair{"autoSubmit", item.autoSubmit}, std::pair{"noAudit", item.noAudit}}) {
         if (on) {
             object.insert(QLatin1String(key), true);
         }
@@ -462,11 +464,11 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
             item.website = given;
         }
     }
-    for (const char* key : {"trashed", "archived", "autoSubmit"}) {
+    for (const char* key : {"trashed", "archived", "autoSubmit", "noAudit"}) {
         if (!object.contains(QLatin1String(key))) {
             continue;
         }
-        if (format < 4 || !object.value(QLatin1String(key)).isBool()) {
+        if (format < (qstrcmp(key, "noAudit") == 0 ? 10 : 4) || !object.value(QLatin1String(key)).isBool()) {
             return std::nullopt;
         }
         const bool on = object.value(QLatin1String(key)).toBool();
@@ -474,6 +476,8 @@ std::optional<Item> itemFromJson(const QJsonValue& value, int format)
             item.trashed = on;
         } else if (qstrcmp(key, "archived") == 0) {
             item.archived = on;
+        } else if (qstrcmp(key, "noAudit") == 0) {
+            item.noAudit = on;
         } else {
             item.autoSubmit = on;
         }

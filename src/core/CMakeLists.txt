@@ -28,6 +28,8 @@
 
 # The vault core: plain C++ with Qt Core only, no window code (D-012).
 qt_add_library(chrono_vault_core STATIC
+    audit.cpp
+    audit.h
     crypto.cpp
     crypto.h
     json_export.cpp
@@ -36,6 +38,8 @@ qt_add_library(chrono_vault_core STATIC
     json_import.h
     password_generator.cpp
     password_generator.h
+    password_strength.cpp
+    password_strength.h
     templates.cpp
     templates.h
     release_check.cpp

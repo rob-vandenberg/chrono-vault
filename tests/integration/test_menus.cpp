@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.5.83
+// test_menus.cpp 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: View > Audit, Exclude from Audit (D-065)
 // v0.5.83: The Item menu on the selected items (D-063)
 // v0.5.82: Backspace asks first (D-062)
 // v0.5.76: Tools > Sync Conflicts… (D-060)
@@ -231,9 +232,10 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
                                           "Restore", "---", "Import", "Export", "---", "Preferences", "---",
                                           "Quit [Ctrl+Q]"}));
     QCOMPARE(menuEntries(1), QStringList({"&View", "Show Item Counts", "Hide Sidebar", "Hide Sensitive", "---",
-                                          "Categories", "Tags", "Others"}));
+                                          "Categories", "Tags", "Audit", "Others"}));
     QCOMPARE(menuEntries(2),
              QStringList({"&Item", "Add to Favorites", "Archive [Shift+Backspace]", "Change Category",
+                          "Exclude from Audit",
                           "Move to Trash [Backspace]", "Restore", "Delete Permanently… [Backspace]", "---",
                           "Copy Username [Shift+Ctrl+U]", "Copy E-mail [Shift+Ctrl+E]", "Copy Password [Shift+Ctrl+P]",
                           "Show Passwords [Shift+Ctrl+H]", "Copy URL [Shift+Ctrl+R]", "Copy OTP [Shift+Ctrl+T]",

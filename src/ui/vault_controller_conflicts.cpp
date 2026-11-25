@@ -228,14 +228,17 @@ QVariantMap VaultController::conflictRow(const Item& item, const MergeNote& note
         standing = mine ? templateName(*mine) : item.templateId;
         other = theirs ? templateName(*theirs) : note.otherValue;
     } else if (property == QLatin1String("trashed") || property == QLatin1String("archived") ||
-               property == QLatin1String("favourite") || property == QLatin1String("autoSubmit")) {
+               property == QLatin1String("favourite") || property == QLatin1String("autoSubmit") ||
+               property == QLatin1String("noAudit")) {
         label = property == QLatin1String("trashed")     ? tr("In the Trash")
                 : property == QLatin1String("archived")  ? tr("In the Archive")
                 : property == QLatin1String("favourite") ? tr("Favorite")
+                : property == QLatin1String("noAudit")   ? tr("Excluded from Audit")
                                                          : tr("Autosubmit Login");
         const bool on = property == QLatin1String("trashed")     ? item.trashed
                         : property == QLatin1String("archived")  ? item.archived
                         : property == QLatin1String("favourite") ? item.favourite
+                        : property == QLatin1String("noAudit")   ? item.noAudit
                                                                  : item.autoSubmit;
         standing = yesNo(on);
         other = yesNo(note.otherValue == QLatin1String("1"));

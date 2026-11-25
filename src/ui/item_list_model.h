@@ -20,12 +20,15 @@
 #include "vault_contents.h"
 
 #include <QAbstractListModel>
+#include <QSet>
+#include <QUuid>
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.5.82
+// item_list_model.h 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The lists of the audit (D-065)
 // v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
@@ -62,6 +65,9 @@ public:
     void setFilter(const QString& filter);
     // Website icons by host, as "data:" addresses ready to show, for an item
     // without its own (D-036); only the icons are redrawn, the list stays.
+    // The audit's lists ("leaked", "reused", …) and, for "reused", the group of
+    // each item (D-065); only a list of the audit shown now is made again.
+    void setAudit(const QHash<QString, QSet<QUuid>>& lists, const QHash<QUuid, int>& groups);
     void setWebsiteIcons(const QHash<QString, QString>& icons);
     void clear();
 
@@ -80,13 +86,15 @@ public:
 private:
     void rebuild();
 
-    [[nodiscard]] static bool passesFilter(const Item& item, const QString& filter);
+    [[nodiscard]] bool passesFilter(const Item& item, const QString& filter) const;
 
     VaultContents allContents;
     QList<Item> shownItems;
     QString search;
     QString chosen;
     QHash<QString, QString> websiteIcons;
+    QHash<QString, QSet<QUuid>> auditLists;
+    QHash<QUuid, int> auditGroups;
 };
 
 } // namespace chrono_vault

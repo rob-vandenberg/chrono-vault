@@ -249,6 +249,8 @@ void useOtherSide(Item& item, const MergeNote& note, const QDateTime& now)
         item.favourite = on;
     } else if (property == QLatin1String("autoSubmit")) {
         item.autoSubmit = on;
+    } else if (property == QLatin1String("noAudit")) {
+        item.noAudit = on;
     } else if (property == QLatin1String("icon")) {
         item.icon = note.otherData;
     } else if (property == QLatin1String("tag")) {

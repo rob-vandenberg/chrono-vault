@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.5.83
+// VaultPage.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The audit: its group in the sidebar, its lists, an item left out of it (D-065)
 // v0.5.83: The focused item apart from the selected ones; gray marks with a blue bar; Change Category; the empty
 //          list's graphic; the vault's counts at the right (D-063)
 // v0.5.82: The list by mouse and keys as a person guesses, several items, Delete asked, the sidebar's keys, Ctrl+F (D-062)
@@ -94,6 +95,7 @@ Item {
         function onViewChanged() {
             const filter = VaultController.filter
             if ((!VaultController.showCategories && filter.startsWith("category:"))
+                    || (!VaultController.showAudit && filter.startsWith("audit:"))
                     || (!VaultController.showTags && filter.startsWith("tag:"))
                     || (!VaultController.showOthers && (filter === "archive" || filter === "trash")))
                 vaultPage.choose("")
@@ -181,7 +183,7 @@ Item {
         // takes its room when no number is shown.
         property string countFilter: ""
         property bool counted: false
-        readonly property int itemCount: counted && VaultController.revision >= 0
+        readonly property int itemCount: counted && VaultController.revision >= 0 && VaultController.audit
                                          ? VaultController.items.countOf(countFilter) : 0
         readonly property bool countShown: counted && VaultController.showItemCounts && !vaultPage.collapsed
                                            && itemCount > 0
@@ -263,6 +265,8 @@ Item {
     signal openVaultRequested()
     // Settings > Customize, from the counts (D-063).
     signal customizeRequested()
+    // Settings > Security, for the check for leaked passwords (D-065).
+    signal leakSettingRequested()
     // The item's sync conflict, to be settled in the Sync conflicts dialog (D-060).
     signal conflictRequested(string itemId)
 
@@ -352,6 +356,8 @@ Item {
     readonly property bool anyTrashed: chosenItems.some(function(one) { return one.trashed === true })
     readonly property bool allArchived: chosenItems.length > 0
                                         && chosenItems.every(function(one) { return one.archived === true })
+    readonly property bool allExcluded: chosenItems.length > 0
+                                        && chosenItems.every(function(one) { return one.noAudit === true })
     readonly property bool allFavourite: chosenItems.length > 0
                                          && chosenItems.every(function(one) { return one.favourite === true })
     function isTrashed(id) {
@@ -409,6 +415,24 @@ Item {
         const on = !allFavourite
         whenClosed(function() {
             actOn(ids, function(all) { VaultController.placeItems(all, "favourite", on) })
+        })
+    }
+    // Out of the audit, or into it again (D-065).
+    function excludeChosen() {
+        const ids = selectedIds.slice()
+        const on = !allExcluded
+        whenClosed(function() {
+            actOn(ids, function(all) { VaultController.placeItems(all, "noAudit", on) })
+        })
+    }
+    // Another item, also when the list does not hold it: then with every item.
+    function showAnywhere(id) {
+        editor.whenFree(function() {
+            editor.close()
+            VaultController.searchText = ""
+            if (VaultController.items.rowOf(id) < 0)
+                VaultController.filter = ""
+            showItem(id)
         })
     }
     function changeCategory(categoryId) {
@@ -870,6 +894,70 @@ Item {
                         }
                     }
 
+                    // What the audit found (D-065).
+                    GroupHeading {
+                        visible: VaultController.showAudit
+                        title: qsTr("Audit")
+                        key: "audit"
+                        folded: VaultController.auditFolded
+                        onFoldToggled: VaultController.auditFolded = !VaultController.auditFolded
+                    }
+                    SideEntry {
+                        objectName: "audit_leaked"
+                        visible: VaultController.showAudit && !VaultController.auditFolded
+                        text: qsTr("Leaked")
+                        icon.source: "qrc:/icons/audit-leaked.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        chosen: VaultController.filter === "audit:leaked"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("audit:leaked")
+                        counted: true; countFilter: "audit:leaked"
+                    }
+                    SideEntry {
+                        objectName: "audit_reused"
+                        visible: VaultController.showAudit && !VaultController.auditFolded
+                        text: qsTr("Reused")
+                        icon.source: "qrc:/icons/audit-reused.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        chosen: VaultController.filter === "audit:reused"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("audit:reused")
+                        counted: true; countFilter: "audit:reused"
+                    }
+                    SideEntry {
+                        objectName: "audit_weak"
+                        visible: VaultController.showAudit && !VaultController.auditFolded
+                        text: qsTr("Weak")
+                        icon.source: "qrc:/icons/audit-weak.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        chosen: VaultController.filter === "audit:weak"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("audit:weak")
+                        counted: true; countFilter: "audit:weak"
+                    }
+                    SideEntry {
+                        objectName: "audit_old"
+                        visible: VaultController.showAudit && !VaultController.auditFolded
+                        text: qsTr("Old")
+                        icon.source: "qrc:/icons/audit-old.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        chosen: VaultController.filter === "audit:old"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("audit:old")
+                        counted: true; countFilter: "audit:old"
+                    }
+                    SideEntry {
+                        objectName: "audit_breached"
+                        visible: VaultController.showAudit && !VaultController.auditFolded
+                        text: qsTr("Breached websites")
+                        icon.source: "qrc:/icons/audit-breached.svg"
+                        icon.color: vaultPage.palette.buttonText
+                        chosen: VaultController.filter === "audit:breached"
+                        Layout.fillWidth: true
+                        onClicked: vaultPage.choose("audit:breached")
+                        counted: true; countFilter: "audit:breached"
+                    }
+
                     // The Archive and the Trash (D-033).
                     GroupHeading {
                         visible: VaultController.showOthers
@@ -1160,6 +1248,7 @@ Item {
                     width: parent.width - Math.round(24 * Appearance.factor)
                     visible: itemList.count === 0
                     categories: vaultColumn.categoryList
+                    onSettingsRequested: vaultPage.leakSettingRequested()
                 }
             }
         }
@@ -1173,6 +1262,7 @@ Item {
                 objectName: "vaultOverview"
                 onFilterChosen: function(filter) { vaultPage.choose(filter) }
                 onCustomizeRequested: vaultPage.customizeRequested()
+                onLeakSettingRequested: vaultPage.leakSettingRequested()
             }
             ItemDetails {
                 itemId: vaultPage.chosenItemId
@@ -1182,6 +1272,7 @@ Item {
                 onRestoreRequested: vaultPage.restoreItems([vaultPage.chosenItemId])
                 onArchiveRequested: vaultPage.archiveItems([vaultPage.chosenItemId])
                 onConflictRequested: function(itemId) { vaultPage.conflictRequested(itemId) }
+                onItemRequested: function(itemId) { vaultPage.showAnywhere(itemId) }
             }
             ItemEditor {
                 id: editor
@@ -1251,6 +1342,13 @@ Item {
         CategoryMenu {
             objectName: "listMenuCategory"
             onChosen: function(categoryId) { vaultPage.changeCategory(categoryId) }
+        }
+        MenuItem {
+            objectName: "listMenuAudit"
+            text: vaultPage.allExcluded ? qsTr("Include in Audit") : qsTr("Exclude from Audit")
+            visible: !vaultPage.anyTrashed
+            height: visible ? implicitHeight : 0
+            onTriggered: vaultPage.excludeChosen()
         }
         MenuItem {
             objectName: "listMenuTrash"

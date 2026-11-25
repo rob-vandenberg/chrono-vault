@@ -722,3 +722,11 @@ The owner's changelist items 1-12 (D-064). `src/ui/tray_icon.*` reads the tray's
 `src/ui/system_tray.*` shows the vault for it; `art/chrono-vault-tray.svg` (the owner's) and
 `art/chrono-vault-tray-light.svg`; `tests/integration/test_tray.cpp`.
 One review round of two: a stray line in `qml/CMakeLists.txt`, removed; nothing else.
+
+## 25 November 2026: version 0.6.86: Audit
+
+The owner's changelist items 1-11, in autonomous mode (D-065). `src/core/password_strength.*`, `src/core/audit.*`,
+`src/ui/vault_controller_audit.cpp`, `src/ui/item_list_model.*`; `qml/VaultOverview.qml`, `qml/AuditSource.qml`,
+`qml/EmptyList.qml`, `qml/FieldRow.qml`, `qml/VaultPage.qml`, `qml/Main.qml`, `qml/SettingsWindow.qml`; contents format 10;
+`tests/unit/test_audit.cpp`, `tests/integration/test_audit_windows.cpp` (a server of our own, never the internet).
+One review round of two, clean.

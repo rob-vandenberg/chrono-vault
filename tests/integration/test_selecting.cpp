@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_selecting.cpp 0.5.83
+// test_selecting.cpp 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The audit above the counts (D-065)
 // v0.5.83: Initial release (D-063)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -188,7 +189,7 @@ private slots:
         QTRY_VERIFY(menu->property("opened").toBool());
         QCOMPARE(chosen().size(), 2);
         QCOMPARE(offered(), (QStringList{QStringLiteral("Add to Favorites"), QStringLiteral("Archive"),
-                                         QStringLiteral("Change Category"), QStringLiteral("Move to Trash")}));
+                                         QStringLiteral("Change Category"), QStringLiteral("Exclude from Audit"), QStringLiteral("Move to Trash")}));
         QMetaObject::invokeMethod(menu, "close");
         QTRY_VERIFY(!menu->property("visible").toBool());
         controller->placeItems({idAt(0)}, QStringLiteral("trashed"), true);
@@ -205,6 +206,8 @@ private slots:
 
     void an_item_not_in_the_list_is_not_selected_and_the_counts_show()
     {
+        window->resize(1000, 900); // the counts stand under the audit
+        QTRY_COMPARE(window->height(), 900);
         QVERIFY(part("vaultOverview"));
         click(row(1));
         QTRY_VERIFY(!part("vaultOverview"));
@@ -246,6 +249,8 @@ private slots:
 
     void tags_are_renamed_and_removed_in_customize()
     {
+        window->resize(1000, 900); // the counts stand under the audit
+        QTRY_COMPARE(window->height(), 900);
         QVariantMap one = controller->item(idAt(0));
         one.insert(QStringLiteral("tags"), QStringList{QStringLiteral("Work")});
         QVERIFY(controller->saveItem(one));

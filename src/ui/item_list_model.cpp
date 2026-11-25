@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.5.82
+// item_list_model.cpp 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The lists of the audit (D-065)
 // v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
 // v0.1.41: idAt (D-051)
@@ -90,6 +91,14 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
     case InitialRole: {
         // The heading the item stands under: its first letter, or # for a
         // title that starts with anything else (D-025).
+        // Under "reused": the items with one password together (D-065).
+        if (chosen == QLatin1String("audit:reused")) {
+            const int group = auditGroups.value(item.id);
+            const auto count = std::count_if(shownItems.cbegin(), shownItems.cend(), [this, group](const Item& one) {
+                return auditGroups.value(one.id) == group;
+            });
+            return tr("%1. The same password in %n item(s)", nullptr, static_cast<int>(count)).arg(group);
+        }
         const QString title = item.title.trimmed();
         if (title.isEmpty() || !title.at(0).isLetter()) {
             return QStringLiteral("#");
@@ -131,6 +140,18 @@ void ItemListModel::setWebsiteIcons(const QHash<QString, QString>& icons)
     }
 }
 
+void ItemListModel::setAudit(const QHash<QString, QSet<QUuid>>& lists, const QHash<QUuid, int>& groups)
+{
+    if (auditLists == lists && auditGroups == groups) {
+        return;
+    }
+    auditLists = lists;
+    auditGroups = groups;
+    if (chosen.startsWith(QLatin1String("audit:"))) {
+        rebuild();
+    }
+}
+
 void ItemListModel::setFilter(const QString& filter)
 {
     if (chosen != filter) {
@@ -152,6 +173,8 @@ void ItemListModel::clear()
     allContents = {};
     search.clear();
     chosen.clear();
+    auditLists.clear();
+    auditGroups.clear();
     rebuild();
 }
 
@@ -189,10 +212,10 @@ int ItemListModel::rowStartingWith(const QString& text, int from, bool fromKept)
 int ItemListModel::countOf(const QString& filter) const
 {
     return static_cast<int>(std::count_if(allContents.items.cbegin(), allContents.items.cend(),
-                                          [&filter](const Item& item) { return passesFilter(item, filter); }));
+                                          [this, &filter](const Item& item) { return passesFilter(item, filter); }));
 }
 
-bool ItemListModel::passesFilter(const Item& item, const QString& chosen)
+bool ItemListModel::passesFilter(const Item& item, const QString& chosen) const
 {
     // The Trash and the Archive show only their own items; every other
     // view leaves them out (D-033).
@@ -213,6 +236,9 @@ bool ItemListModel::passesFilter(const Item& item, const QString& chosen)
     }
     if (chosen == QLatin1String("favourites")) {
         return item.favourite;
+    }
+    if (chosen.startsWith(QLatin1String("audit:"))) {
+        return auditLists.value(chosen.mid(6)).contains(item.id);
     }
     if (chosen.startsWith(QLatin1String("category:"))) {
         return item.categoryId == chosen.mid(9);
@@ -246,7 +272,10 @@ void ItemListModel::rebuild()
     collator.setCaseSensitivity(Qt::CaseInsensitive);
     collator.setNumericMode(true);
     std::stable_sort(shownItems.begin(), shownItems.end(),
-                     [&collator](const Item& left, const Item& right) {
+                     [this, &collator](const Item& left, const Item& right) {
+                         if (chosen == QLatin1String("audit:reused") && auditGroups.value(left.id) != auditGroups.value(right.id)) {
+                             return auditGroups.value(left.id) < auditGroups.value(right.id);
+                         }
                          return collator.compare(left.title, right.title) < 0;
                      });
     endResetModel();

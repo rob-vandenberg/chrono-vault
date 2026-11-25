@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.5.83
+// vault_controller.cpp 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once; Delete moves to the Trash too (D-062)
 // v0.5.81: A source read for Import and for Retry sync alike (D-061)
@@ -124,6 +125,7 @@ constexpr bool defaultStartAtStartup = false;
 const QString clipboardKey = QStringLiteral("clipboard/clearSeconds");
 const QString hideSensitiveKey = QStringLiteral("view/hideSensitive");
 const QString showSubtitlesKey = QStringLiteral("view/showSubtitles");
+const QString checkLeaksKey = QStringLiteral("audit/checkLeaks");
 const QString websiteIconsKey = QStringLiteral("view/websiteIcons");
 const QString reminderKey = QStringLiteral("security/masterPasswordReminderEvery");
 const QString lastPasswordKey = QStringLiteral("security/lastMasterPassword");
@@ -279,6 +281,7 @@ QVariantMap toMap(const Item& item, const VaultContents& contents)
         {QStringLiteral("subtitle"), item.subtitle},
         {QStringLiteral("note"), item.note},
         {QStringLiteral("trashed"), item.trashed},
+        {QStringLiteral("noAudit"), item.noAudit},
         {QStringLiteral("archived"), item.archived},
         {QStringLiteral("autoSubmit"), item.autoSubmit},
         {QStringLiteral("website"), item.website},
@@ -378,6 +381,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     {
         hideSecrets = settings.value(hideSensitiveKey, defaultHideSensitive).toBool();
         subtitlesShown = settings.value(showSubtitlesKey, defaultShowSubtitles).toBool();
+        leakChecks = settings.value(checkLeaksKey, false).toBool();
         websiteIconsOn = settings.value(websiteIconsKey, defaultWebsiteIcons).toBool();
         reminderEvery = std::clamp(settings.value(reminderKey, defaultReminder).toInt(), 0, reminderNever);
         lockMinutes = std::clamp(settings.value(autoLockKey, defaultAutoLockMinutes).toInt(), 0, 240);
@@ -1319,6 +1323,7 @@ bool VaultController::saveItem(const QVariantMap& map)
     if (existing != contents.items.end()) {
         changed.trashed = existing->trashed;
         changed.archived = existing->archived;
+        changed.noAudit = existing->noAudit;
         changed.mergeNotes = existing->mergeNotes;
     }
     // Each field keeps its earlier values: a changed value goes into its
@@ -1505,7 +1510,8 @@ void VaultController::placeItems(const QStringList& ids, const QString& place, b
     }
     const bool toTrash = place == QLatin1String("trashed");
     const bool toArchive = place == QLatin1String("archived");
-    bool Item::*member = toTrash ? &Item::trashed : toArchive ? &Item::archived : &Item::favourite;
+    bool Item::*member = toTrash ? &Item::trashed : toArchive ? &Item::archived
+                                : place == QLatin1String("noAudit") ? &Item::noAudit : &Item::favourite;
     const QDateTime now = QDateTime::currentDateTimeUtc();
     int changed = 0;
     QString title;
@@ -1526,6 +1532,12 @@ void VaultController::placeItems(const QStringList& ids, const QString& place, b
     contentsChanged();
     saveInBackground(QString());
     if (!toTrash && !toArchive) {
+        if (place == QLatin1String("noAudit")) {
+            say(changed == 1 ? (on ? tr("“%1” is left out of the Audit.").arg(title) : tr("“%1” is in the Audit again.").arg(title))
+                             : (on ? tr("%n items are left out of the Audit.", nullptr, changed)
+                                   : tr("%n items are in the Audit again.", nullptr, changed)),
+                false);
+        }
         return; // the star shows it
     }
     if (changed == 1) {
@@ -2626,6 +2638,7 @@ void VaultController::contentsChanged()
     ++contentsRevision;
     emit revisionChanged();
     fetchWebsiteIcons();
+    startAudit();
 }
 
 void VaultController::watch()
@@ -3454,6 +3467,7 @@ QVariantMap VaultController::settingsDefaults() const
         {QStringLiteral("hideSensitive"), defaultHideSensitive},
         {QStringLiteral("showSubtitles"), defaultShowSubtitles},
         {QStringLiteral("useWebsiteIcons"), defaultWebsiteIcons},
+        {QStringLiteral("checkLeaks"), false},
         {QStringLiteral("masterPasswordReminder"), defaultReminder},
     };
 }
@@ -3494,6 +3508,9 @@ void VaultController::setState(State state)
         restartAutoLock();
         emit stateChanged();
         emit pinChanged();
+        if (state == State::Unlocked) {
+            startAudit();
+        }
         if (state == State::Locked) {
             QTimer::singleShot(0, this, &VaultController::checkVaults); // which vaults are there now
         }
@@ -3830,6 +3847,7 @@ void VaultController::forgetUnlockedVault()
     iconsAsked.clear();
     listModel.setWebsiteIcons({});
     ++vaultSession;
+    forgetAudit();
     listModel.clear();
     if (!search.isEmpty()) {
         search.clear();

@@ -19,6 +19,7 @@
 
 #include <atomic>
 
+#include "audit.h"
 #include "item_list_model.h"
 #include "json_import.h"
 #include "quick_unlock.h"
@@ -48,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.5.83
+// vault_controller.h 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once (D-062)
 // v0.5.81: Retry sync; every field of a conflict's item (D-061)
@@ -158,6 +160,14 @@ class VaultController : public QObject
     Q_PROPERTY(bool tagsFolded READ tagsFolded WRITE setTagsFolded NOTIFY viewChanged)
     Q_PROPERTY(bool othersFolded READ othersFolded WRITE setOthersFolded NOTIFY viewChanged)
     Q_PROPERTY(bool touchScreen READ touchScreen CONSTANT)
+    // The audit (D-065): for each list its number ("leaked", "reused", "weak",
+    // "old", "breached"), "passwords" looked at, "score" (-1 for none),
+    // "ready", and the state of the two online checks, "leakState" and
+    // "breachState": "off", "checking", "done" or "failed".
+    Q_PROPERTY(QVariantMap audit READ audit NOTIFY auditChanged)
+    Q_PROPERTY(bool checkLeaks READ checkLeaks WRITE setCheckLeaks NOTIFY auditChanged)
+    Q_PROPERTY(bool showAudit READ showAudit WRITE setShowAudit NOTIFY viewChanged)
+    Q_PROPERTY(bool auditFolded READ auditFolded WRITE setAuditFolded NOTIFY viewChanged)
     Q_PROPERTY(bool useWebsiteIcons READ useWebsiteIcons WRITE setUseWebsiteIcons NOTIFY useWebsiteIconsChanged)
     Q_PROPERTY(bool quickUnlockAvailable READ quickUnlockAvailable NOTIFY quickUnlockChanged)
     Q_PROPERTY(bool quickUnlockOn READ quickUnlockOn NOTIFY quickUnlockChanged)
@@ -337,6 +347,23 @@ public:
     void setShowCategories(bool on) { setViewOption(QStringLiteral("showCategories"), on); }
     [[nodiscard]] bool showTags() const { return viewOption(QStringLiteral("showTags"), true); }
     void setShowTags(bool on) { setViewOption(QStringLiteral("showTags"), on); }
+    [[nodiscard]] bool showAudit() const { return viewOption(QStringLiteral("showAudit"), true); }
+    void setShowAudit(bool on) { setViewOption(QStringLiteral("showAudit"), on); }
+    [[nodiscard]] bool auditFolded() const { return viewOption(QStringLiteral("auditFolded"), false); }
+    void setAuditFolded(bool on) { setViewOption(QStringLiteral("auditFolded"), on); }
+    [[nodiscard]] QVariantMap audit() const;
+    [[nodiscard]] bool checkLeaks() const { return leakChecks; }
+    void setCheckLeaks(bool on);
+    // The online checks that failed, once more.
+    Q_INVOKABLE void checkLeaksNow();
+    // What the audit says of one password: [{kind, text, address, items:
+    // [{id, title}]}].
+    [[nodiscard]] Q_INVOKABLE QVariantList auditRemarks(const QString& itemId, qint64 fieldUid) const;
+    void setAuditAddressesForTests(std::function<QUrl(const QByteArray&)> range, const QUrl& breaches)
+    {
+        rangeAddress = std::move(range);
+        breachesAddress = breaches;
+    }
     [[nodiscard]] bool showOthers() const { return viewOption(QStringLiteral("showOthers"), true); }
     void setShowOthers(bool on) { setViewOption(QStringLiteral("showOthers"), on); }
     [[nodiscard]] bool sidebarCollapsed() const { return viewOption(QStringLiteral("sidebarCollapsed"), false); }
@@ -510,7 +537,7 @@ public:
     Q_INVOKABLE void moveToTrash(const QString& id, bool trashed);
     Q_INVOKABLE void archiveItem(const QString& id, bool archived);
     // Several items at once (D-062), in one save and one message: place is
-    // "trashed", "archived" or "favourite".
+    // "trashed", "archived", "favourite" or "noAudit".
     Q_INVOKABLE void placeItems(const QStringList& ids, const QString& place, bool on);
     // Their category alone: the fields and the template stay (D-063).
     Q_INVOKABLE void setCategoryOf(const QStringList& ids, const QString& categoryId);
@@ -654,6 +681,7 @@ signals:
     void viewChanged();
     void shortcutsChanged();
     void useWebsiteIconsChanged();
+    void auditChanged();
     void quickUnlockChanged();
     void pinChanged();
     void keepInTrayChanged();
@@ -887,6 +915,30 @@ private:
     bool setupTrouble = false;
     void tellSetup(const QString& text, bool isTrouble);
     bool openingByFinger = false;   // the vault is being opened with the key kept for the finger
+    // The audit, in vault_controller_audit.cpp (D-065). Found again after every
+    // change; what the online checks said lives only while unlocked.
+    void startAudit();
+    void showAudited();
+    void askLeaks();
+    void askNextLeak();
+    void askBreaches();
+    void forgetAudit();
+    void stopOnlineChecks();
+    QList<AuditedPassword> audited;
+    bool auditReady = false;
+    bool auditRunning = false;
+    bool auditAgain = false;
+    bool leakChecks = false;
+    QString leakState = QStringLiteral("off");
+    QString breachState = QStringLiteral("off");
+    QHash<QByteArray, int> leakCounts; // by whole hash; 0 is not leaked
+    QList<QByteArray> leakQueue;       // first five digits still to be asked
+    int leaksAsked = 0;                // on their way
+    quint64 onlineRound = 0;           // an answer of an earlier one is dropped
+    QList<Breach> breachList;
+    QNetworkAccessManager auditNetwork;
+    std::function<QUrl(const QByteArray&)> rangeAddress;
+    QUrl breachesAddress;
     QNetworkAccessManager iconNetwork;
     QHash<QString, QString> websiteIcons; // host: "data:" address of its PNG, in memory only
     QSet<QString> iconsAsked;

@@ -445,6 +445,7 @@ Item mergeItem(const Item* base, const Item& mine, const Item& theirs, const QDa
     flag(&Item::trashed, "trashed");
     flag(&Item::archived, "archived");
     flag(&Item::autoSubmit, "autoSubmit");
+    flag(&Item::noAudit, "noAudit");
     bool iconConflict = false;
     result.icon = pick(&base->icon, mine.icon, theirs.icon, &iconConflict);
     if (iconConflict) {

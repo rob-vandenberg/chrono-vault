@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// FieldRow.qml 0.5.82
+// FieldRow.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: What the audit says under a password (D-065)
 // v0.5.82: A double click copies, a right click opens the menu (D-062)
 // v0.0.24: A copy button for the one-time code; Item > Show Passwords (D-039)
 // v0.0.17: Initial release (D-033)
@@ -43,7 +44,11 @@ Item {
     readonly property string code: { details.tick; return kind === "totp" ? VaultController.oneTimeCode(modelData.value) : "" }
     readonly property int secondsLeft: { details.tick; return kind === "totp" ? VaultController.oneTimeCodeSecondsLeft(modelData.value) : 0 }
     width: parent ? parent.width : 0
-    implicitHeight: Math.max(details.rowHeight, valueText.implicitHeight + Math.round(30 * Appearance.factor))
+    // What the audit says of a password (D-065).
+    readonly property var remarks: kind === "password" && VaultController.audit
+                                   ? VaultController.auditRemarks(details.itemId, modelData.uid || 0) : []
+    readonly property int remarksHeight: remarks.length > 0 ? remarkColumn.implicitHeight + Math.round(4 * Appearance.factor) : 0
+    implicitHeight: Math.max(details.rowHeight, valueText.implicitHeight + remarksHeight + Math.round(30 * Appearance.factor))
 
     HoverHandler { id: hover }
     readonly property string toCopy: kind === "totp" ? code : modelData.value
@@ -85,6 +90,7 @@ Item {
         x: details.labelWidth + Math.round(24 * Appearance.factor)
         width: parent.width - x - Math.round(90 * Appearance.factor)
         anchors.verticalCenter: row.kind === "multiline" ? undefined : parent.verticalCenter
+        anchors.verticalCenterOffset: -row.remarksHeight / 2
         y: row.kind === "multiline" ? Math.round(15 * Appearance.factor) : 0
         text: row.isSecret ? "••••••••"
               : row.kind === "totp" ? (row.code.length === 6 ? row.code.slice(0, 3) + " " + row.code.slice(3) : row.code)
@@ -99,6 +105,53 @@ Item {
         HoverHandler {
             enabled: valueText.textFormat === Text.RichText
             cursorShape: Qt.PointingHandCursor
+        }
+    }
+    Column {
+        id: remarkColumn
+        objectName: "auditRemarks"
+        visible: row.remarks.length > 0
+        x: valueText.x
+        width: valueText.width
+        anchors.top: valueText.bottom
+        anchors.topMargin: Math.round(4 * Appearance.factor)
+        spacing: Math.round(2 * Appearance.factor)
+        Repeater {
+            model: row.remarks
+            delegate: Label {
+                id: remark
+                required property var modelData
+                readonly property bool opens: modelData.kind === "reused"
+                width: remarkColumn.width
+                readonly property string address: "items"
+                text: opens ? details.link(address, modelData.text) : modelData.text
+                textFormat: opens ? Text.RichText : Text.PlainText
+                color: details.palette.window.hslLightness < 0.5 ? "#ff6b6b" : "#c62828"
+                linkColor: color
+                wrapMode: Text.Wrap
+                onLinkActivated: sameMenu.popup()
+                HoverHandler {
+                    enabled: remark.opens
+                    cursorShape: Qt.PointingHandCursor
+                }
+                // The other items with this password.
+                Menu {
+                    id: sameMenu
+                    Instantiator {
+                        model: remark.modelData.items || []
+                        delegate: MenuItem {
+                            required property var modelData
+                            text: modelData.title
+                            onTriggered: details.itemRequested(modelData.id)
+                        }
+                        onObjectAdded: function(index, object) { sameMenu.insertItem(index, object) }
+                        onObjectRemoved: function(index, object) { sameMenu.removeItem(object) }
+                    }
+                }
+            }
+        }
+        AuditSource {
+            visible: row.remarks.some(function(one) { return one.kind === "leaked" || one.kind === "breached" })
         }
     }
     // The one-time code copied with one click, left of its ring (D-039).

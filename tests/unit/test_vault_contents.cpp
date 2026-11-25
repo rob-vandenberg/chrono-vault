@@ -177,7 +177,7 @@ void TestVaultContents::an_empty_vault_comes_back_empty()
 
 void TestVaultContents::a_newer_format_is_refused()
 {
-    QCOMPARE(contentsFromJson(R"({"format":10,"items":[]})").status, ContentsStatus::NewerFormat);
+    QCOMPARE(contentsFromJson(R"({"format":11,"items":[]})").status, ContentsStatus::NewerFormat);
     // A note's keys of format 9 (D-061) in a vault of an older format: damaged.
     QCOMPARE(contentsFromJson(R"({"format":9,"items":[],"vaultNotes":[{"kind":"both","when":"","subject":"own"}]})").status,
              ContentsStatus::Read);
@@ -205,7 +205,7 @@ void TestVaultContents::the_vaults_own_icons_are_kept()
     second.id = QUuid::createUuid();
     older.items = {first, second};
     QByteArray json = contentsToJson(older);
-    json.replace("\"format\":9", "\"format\":4");
+    json.replace("\"format\":10", "\"format\":4");
     const ContentsResult read = contentsFromJson(json);
     QCOMPARE(read.status, ContentsStatus::Read);
     QCOMPARE(read.contents.customIcons, QList<QByteArray>{first.icon});

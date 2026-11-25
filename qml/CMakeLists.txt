@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.5.85
+# qml/CMakeLists.txt 0.6.86
 
 # --- Version history ----------------------------------------------------
+# v0.6.86: The audit (D-065)
 # v0.5.85: The tray icons (D-064)
 # v0.5.83: CategoryMenu, EmptyList, TagDialog, VaultOverview; the empty vault (D-063)
 # v0.5.82: The crown (D-062)
@@ -57,6 +58,7 @@ qt_add_qml_module(chrono_vault_ui
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault"
     QML_FILES
         AboutWindow.qml
+        AuditSource.qml
         ExportWindow.qml
         FieldRow.qml
         FilePicker.qml
@@ -128,6 +130,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/updater.h
         ../src/ui/vault_controller.cpp
         ../src/ui/vault_controller.h
+        ../src/ui/vault_controller_audit.cpp
         ../src/ui/vault_controller_pin.cpp
         ../src/ui/vault_controller_webdav.cpp
         ../src/ui/vault_controller_vaults.cpp
@@ -175,6 +178,11 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/copy.svg"
         "${PROJECT_SOURCE_DIR}/art/crown.svg"
         "${PROJECT_SOURCE_DIR}/art/empty-vault.svg"
+        "${PROJECT_SOURCE_DIR}/art/audit-leaked.svg"
+        "${PROJECT_SOURCE_DIR}/art/audit-reused.svg"
+        "${PROJECT_SOURCE_DIR}/art/audit-weak.svg"
+        "${PROJECT_SOURCE_DIR}/art/audit-old.svg"
+        "${PROJECT_SOURCE_DIR}/art/audit-breached.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-both.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-import.svg"
         "${PROJECT_SOURCE_DIR}/art/conflict-deleted-there.svg"
@@ -274,6 +282,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/tray_icon.cpp
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
+    ../src/ui/vault_controller_audit.cpp
     ../src/ui/vault_controller_pin.cpp
     ../src/ui/vault_controller_webdav.cpp
     ../src/ui/vault_controller_vaults.cpp

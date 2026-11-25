@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.5.82
+// ItemDetails.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: What the audit says under a password (D-065)
 // v0.5.82: Trash, Restore and Archive through the page, asked first (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.5.76: A sync conflict settled in the Sync conflicts dialog, no longer on the item (D-060)
@@ -85,6 +86,7 @@ Item {
     signal restoreRequested()
     signal archiveRequested()
     signal conflictRequested(string itemId)
+    signal itemRequested(string itemId)
 
     Connections {
         target: VaultController.items

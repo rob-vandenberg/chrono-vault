@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.5.83
+// SettingsWindow.qml 0.6.86
 
 // --- Version history ----------------------------------------------------
+// v0.6.86: The check for leaked passwords (Security) (D-065)
 // v0.5.83: showCustomize (D-063)
 // v0.5.82: Vaults: Create vault and Open vault, the crown, no Restore defaults; its keys only while it has the keyboard (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
@@ -92,6 +93,12 @@ ApplicationWindow {
         show()
         raise()
         requestActivate()
+    }
+
+    // From the audit (D-065).
+    function showSecurity() {
+        showWindow()
+        topics.currentIndex = 1
     }
 
     // From the vault's counts (D-063).
@@ -201,6 +208,7 @@ ApplicationWindow {
     property bool hideSensitive: true
     property bool showSubtitles: true
     property bool useWebsiteIcons: false
+    property bool checkLeaks: false
     property int masterPasswordReminder: 2
     // A PIN wanted; OK keeps it only with a PIN set or one long enough typed.
     property bool pinWanted: false
@@ -228,6 +236,7 @@ ApplicationWindow {
         hideSensitive = VaultController.hideSensitive
         showSubtitles = VaultController.showSubtitles
         useWebsiteIcons = VaultController.useWebsiteIcons
+        checkLeaks = VaultController.checkLeaks
         masterPasswordReminder = VaultController.masterPasswordReminder
         pinWanted = VaultController.pinSet
         pinField.clear()
@@ -294,6 +303,8 @@ ApplicationWindow {
             VaultController.showSubtitles = showSubtitles
         if (VaultController.useWebsiteIcons !== useWebsiteIcons)
             VaultController.useWebsiteIcons = useWebsiteIcons
+        if (VaultController.checkLeaks !== checkLeaks)
+            VaultController.checkLeaks = checkLeaks
         if (VaultController.masterPasswordReminder !== masterPasswordReminder)
             VaultController.masterPasswordReminder = masterPasswordReminder
         keepKeys()
@@ -381,6 +392,7 @@ ApplicationWindow {
             systemIdleLockOn = defaults.systemIdleLockOn
             systemIdleMinutes = defaults.systemIdleMinutes
             hideSensitive = defaults.hideSensitive
+            checkLeaks = defaults.checkLeaks
             masterPasswordReminder = defaults.masterPasswordReminder
             break
         case 2:
@@ -876,6 +888,20 @@ ApplicationWindow {
                             checked: settingsWindow.hideSensitive
                             onToggled: settingsWindow.hideSensitive = checked
                             Layout.topMargin: Math.round(8 * Appearance.factor)
+                        }
+                        CheckBox {
+                            objectName: "checkLeaksBox"
+                            text: qsTr("Check for leaked passwords and breached websites")
+                            checked: settingsWindow.checkLeaks
+                            onToggled: settingsWindow.checkLeaks = checked
+                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                        }
+                        Label {
+                            text: qsTr("With Have I Been Pwned. Of each password only the first 5 characters of its hash are sent, never the password itself. The list of breached websites is fetched whole.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.7
+                            leftPadding: Math.round(28 * Appearance.factor)
+                            Layout.fillWidth: true
                         }
                         Item { Layout.fillHeight: true }
                     }
