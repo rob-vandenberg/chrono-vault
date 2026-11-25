@@ -826,3 +826,9 @@ Since 0.6.92 the typed text lay over the eye of a password field. `qml/PasswordF
 
 The owner's changelist items 1-9 (D-074). `src/ui/vault_controller*.cpp`, `qml/Padlock.qml`, `qml/AskWindow.qml`,
 `qml/SettingsWindow.qml`, `qml/WelcomePage.qml`, the owner's padlocks in `art/`; `test_vault_rows`.
+
+## 25 November 2026: version 0.6.106: Close and Lock per vault
+
+The owner's changelist items 1-12 (D-075). `src/ui/vault_controller*.cpp`, `src/ui/system_tray.cpp`, `qml/UnlockPage.qml`,
+`qml/SettingsWindow.qml`, `qml/VaultBox.qml`, `qml/Main.qml`; `test_vaults`, `test_vault_rows`, `test_vault_menu`,
+`test_webdav_windows`.

@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_menu.cpp 0.5.81
+// test_vault_menu.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.5.81: An item deleted here is simply imported again (D-061)
 // v0.5.78: An import's every difference waits for the person, an item deleted here too (D-061)
 // v0.5.77: Import from another vault (D-060)
@@ -173,8 +174,14 @@ private slots:
         QVERIFY(madeWithItem(*controller, folder.filePath(QStringLiteral("Home.chronovault"))));
         controller->lockVault(folder.filePath(QStringLiteral("Other.chronovault")));
         QCOMPARE(controller->state(), State::Unlocked);
+        // The primary, open: Close, then Lock (D-075).
         controller->lockVault(controller->vaultPath());
+        QCOMPARE(controller->state(), State::Unlocked);
+        controller->closeOpenVault(controller->vaultPath());
         QCOMPARE(controller->state(), State::Locked);
+        QVERIFY(controller->keyStoreOpen());
+        controller->lockVault(controller->vaultPath());
+        QVERIFY(!controller->keyStoreOpen());
     }
 
     void a_vault_moves_to_another_file_here()

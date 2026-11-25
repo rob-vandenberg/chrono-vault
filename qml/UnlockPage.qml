@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.6.103
+// UnlockPage.qml 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.90: The list of vaults on the background of every pop-up (D-067)
@@ -61,8 +62,16 @@ Item {
     signal createRequested()
     // The keyboard back to the master password, after a menu (D-052).
     function focusPassword() {
-        passwordField.forceActiveFocus()
+        if (closed)
+            openButton.forceActiveFocus()
+        else
+            passwordField.forceActiveFocus()
     }
+    // Closed: the vault shown opens without a password (D-075).
+    readonly property bool closed: VaultController.keptRevision >= 0 && VaultController.vaults.length >= 0
+                                   && VaultController.state === VaultController.Locked
+                                   && VaultController.vaultStateOf(VaultController.vaultPath) === 1
+    onClosedChanged: if (visible && VaultController.state === VaultController.Locked) focusPassword()
 
     // To another vault, or to open or create one: a change kept through a
     // lock is asked about first, as it would be lost (OR-15).
@@ -79,13 +88,13 @@ Item {
     // The PIN when it can open the vault shown, unless the person chose the
     // master password (D-059).
     property bool masterInstead: false
-    readonly property bool usePin: VaultController.pinUnlockReady && !masterInstead
+    readonly property bool usePin: VaultController.pinUnlockReady && !masterInstead && !closed
 
     function unlockNow() {
         if (usePin)
             VaultController.unlockWithPin(passwordField.text)
         else
-            VaultController.unlock(passwordField.text)
+            VaultController.unlock(passwordField.text, rememberBox.visible && rememberBox.checked)
         passwordField.clear()
     }
 
@@ -99,7 +108,7 @@ Item {
     // the window its activation back, which must not ask again (0.4.73).
     property bool fingerAsked: false
     function askFinger() {
-        if (fingerAsked)
+        if (fingerAsked || closed)
             return
         if (visible && Window.window && Window.window.visible && Window.window.active
                 && VaultController.state === VaultController.Locked
@@ -114,7 +123,8 @@ Item {
             fingerAsked = false
             return
         }
-        passwordField.forceActiveFocus()
+        rememberBox.read()
+        focusPassword()
         askFinger()
     }
     Component.onCompleted: askFinger()
@@ -123,6 +133,7 @@ Item {
         // A password typed for one vault is never tried on another.
         function onVaultPathChanged() {
             passwordField.clear()
+            rememberBox.read()
             unlockPage.masterInstead = false
             unlockPage.fingerAsked = false
             unlockPage.askFinger()
@@ -147,7 +158,7 @@ Item {
                 unlockPage.fingerAsked = false
             }
             if (VaultController.state === VaultController.Locked && unlockPage.visible)
-                passwordField.forceActiveFocus()
+                unlockPage.focusPassword()
         }
     }
 
@@ -174,7 +185,15 @@ Item {
         }
         Label {
             objectName: "unlockLine"
-            text: unlockPage.usePin ? qsTr("Enter the PIN to unlock") : qsTr("Enter the Master Password to unlock")
+            visible: !unlockPage.closed
+            // Asked for its kept passwords only, the primary says where it leads (D-075).
+            readonly property string back: VaultController.vaultNameOf(VaultController.returnVault)
+            readonly property bool goesBack: VaultController.returnVault !== ""
+            textFormat: Text.PlainText
+            text: goesBack ? (unlockPage.usePin ? qsTr("Enter the PIN of “%1” to return to “%2”")
+                                                : qsTr("Enter the Master Password of “%1” to return to “%2”"))
+                             .arg(VaultController.vaultName).arg(back)
+                  : unlockPage.usePin ? qsTr("Enter the PIN to unlock") : qsTr("Enter the Master Password to unlock")
             font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
@@ -205,13 +224,26 @@ Item {
                 currentIndex = Qt.binding(function() { return vaultBox.listed.indexOf(VaultController.vaultPath) })
                 if (chosen === other)
                     unlockPage.leaveForAnother(function() { unlockPage.openRequested() })
+                else if (chosen !== VaultController.vaultPath && VaultController.keepsChangesOf(chosen))
+                    VaultController.switchToVault(chosen) // unlocking it saves its change
                 else if (chosen !== VaultController.vaultPath)
                     unlockPage.leaveForAnother(function() { VaultController.switchToVault(chosen) })
-                passwordField.forceActiveFocus()
+                unlockPage.focusPassword()
             }
         }
 
+        BigButton {
+            id: openButton
+            objectName: "openClosedButton"
+            visible: unlockPage.closed
+            text: qsTr("Open")
+            Layout.fillWidth: true
+            onClicked: VaultController.switchToVault(VaultController.vaultPath)
+            Keys.onReturnPressed: clicked()
+            Keys.onEnterPressed: clicked()
+        }
         ExactRow {
+            visible: !unlockPage.closed
             gap: 0
             Layout.fillWidth: true
             BigPasswordField {
@@ -225,6 +257,17 @@ Item {
                 onAccepted: unlockPage.unlockNow()
                 onEnabledChanged: if (enabled && unlockPage.visible) forceActiveFocus()
             }
+        }
+        // As the standard dialog's: kept in the primary, so only while its
+        // key store is open (the owner, D-075).
+        CheckBox {
+            id: rememberBox
+            objectName: "unlockRemember"
+            visible: VaultController.keyStoreOpen && !unlockPage.closed && !unlockPage.usePin
+                     && VaultController.vaultPath !== VaultController.primaryVault
+            text: qsTr("Remember my credentials")
+            function read() { checked = VaultController.remembersFor(VaultController.vaultPath) }
+            onToggled: VaultController.setRemembersFor(VaultController.vaultPath, checked)
         }
         Button {
             objectName: "useMasterPasswordButton"
@@ -248,7 +291,7 @@ Item {
         }
         Label {
             objectName: "unlockWaitText"
-            visible: VaultController.unlockWaitSeconds > 0
+            visible: VaultController.unlockWaitSeconds > 0 && !unlockPage.closed
             text: qsTr("Try again in %1").arg(Math.floor(VaultController.unlockWaitSeconds / 60) + ":"
                                               + String(VaultController.unlockWaitSeconds % 60).padStart(2, "0"))
             Layout.fillWidth: true
@@ -256,7 +299,7 @@ Item {
         }
         // The keyfile, when this vault needs one (D-031).
         ExactRow {
-            visible: VaultController.keyfileNeeded
+            visible: VaultController.keyfileNeeded && !unlockPage.closed
             Layout.fillWidth: true
             Label {
                 objectName: "unlockKeyfileLabel"
@@ -272,7 +315,7 @@ Item {
         }
         Button {
             objectName: "quickUnlockButton"
-            visible: VaultController.quickUnlockOn && !VaultController.reminderDue
+            visible: VaultController.quickUnlockOn && !VaultController.reminderDue && !unlockPage.closed
             text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
             flat: true
             // As wide as its text, like Use master password instead (the owner).
@@ -283,7 +326,7 @@ Item {
         // as Settings > Security says (D-049).
         Label {
             objectName: "reminderText"
-            visible: VaultController.reminderDue
+            visible: VaultController.reminderDue && !unlockPage.closed
             text: [qsTr("Please type your master password: Chrono Vault asks for it once a day, so that you do not forget it."),
                    qsTr("Please type your master password: Chrono Vault asks for it once a month, so that you do not forget it."),
                    qsTr("Please type your master password: Chrono Vault asks for it once a quarter, so that you do not forget it."),
@@ -295,7 +338,7 @@ Item {
         }
         Button {
             objectName: "notNowButton"
-            visible: VaultController.reminderDue
+            visible: VaultController.reminderDue && !unlockPage.closed
             text: qsTr("Not now")
             flat: true
             Layout.alignment: Qt.AlignHCenter

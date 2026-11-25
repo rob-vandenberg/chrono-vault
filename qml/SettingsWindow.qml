@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.105
+// SettingsWindow.qml 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
@@ -225,6 +226,11 @@ ApplicationWindow {
     // Open of a vault's menu, once an edit has been asked about (D-071): at once
     // with the password kept in the primary, else its master password is asked.
     signal openKnownRequested(string vaultFile)
+    signal closeVaultRequested(string vaultFile)
+    Connections {
+        target: VaultController
+        function onVaultMenuProblem(text) { settingsWindow.problem = text }
+    }
     function openKnown(vaultFile) {
         problem = ""
         unlockFirst.ask(vaultFile, "open")
@@ -1041,7 +1047,14 @@ ApplicationWindow {
                                 readonly property bool primary: VaultController.primaryVault === modelData
                                 readonly property bool unlocked: VaultController.vaultPath === modelData
                                                                  && VaultController.state === VaultController.Unlocked
-                                readonly property bool canLock: unlocked
+                                // Opens without a password (D-075).
+                                readonly property bool kept: VaultController.keptRevision >= 0 && VaultController.vaults.length >= 0
+                                                             && VaultController.isKept(modelData)
+                                readonly property bool closed: VaultController.keptRevision >= 0 && !unlocked
+                                                               && VaultController.vaults.length >= 0
+                                                               && VaultController.vaultStateOf(modelData) === 1
+                                readonly property bool canClose: unlocked && kept
+                                readonly property bool canLock: unlocked ? !kept : closed
                                 readonly property bool canOpen: found && !unlocked
                                 readonly property bool canMove: found
                                 readonly property bool canForget: !primary
@@ -1127,7 +1140,7 @@ ApplicationWindow {
                                         objectName: "vaultMenuButton_" + vaultRow.name
                                         dots: true
                                         menuOpen: vaultMenu.visible
-                                        visible: vaultRow.canLock || vaultRow.canOpen || vaultRow.canMove || vaultRow.canForget
+                                        visible: vaultRow.canClose || vaultRow.canLock || vaultRow.canOpen || vaultRow.canMove || vaultRow.canForget
                                                  || vaultRow.canDisconnect || vaultRow.canImport
                                                  || vaultRow.canExport
                                         Accessible.name: qsTr("Vault menu")
@@ -1135,7 +1148,7 @@ ApplicationWindow {
                                         Menu {
                                             id: vaultMenu
                                             objectName: "vaultMenu_" + vaultRow.name
-                                            // Open or Lock, by the vault's state (the owner, D-071).
+                                            // Open, Close and Lock, by the vault's state (the owner, D-071, D-075).
                                             MenuItem {
                                                 objectName: "openVault_" + vaultRow.name
                                                 text: qsTr("Open")
@@ -1144,11 +1157,24 @@ ApplicationWindow {
                                                 onTriggered: settingsWindow.openKnownRequested(vaultRow.modelData)
                                             }
                                             MenuItem {
+                                                objectName: "closeVault_" + vaultRow.name
+                                                text: qsTr("Close")
+                                                visible: vaultRow.canClose
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    settingsWindow.problem = ""
+                                                    settingsWindow.closeVaultRequested(vaultRow.modelData)
+                                                }
+                                            }
+                                            MenuItem {
                                                 objectName: "lockVault_" + vaultRow.name
                                                 text: qsTr("Lock")
                                                 visible: vaultRow.canLock
                                                 height: visible ? implicitHeight : 0
-                                                onTriggered: VaultController.lockVault(vaultRow.modelData)
+                                                onTriggered: {
+                                                    settingsWindow.problem = ""
+                                                    VaultController.lockVault(vaultRow.modelData)
+                                                }
                                             }
                                             MenuItem {
                                                 objectName: "primaryVault_" + vaultRow.name

@@ -26,9 +26,10 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// system_tray.cpp 0.6.96
+// system_tray.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Lock while the key store is open (D-075)
 // v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
 // v0.0.4: Initial release
@@ -48,6 +49,7 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
     connect(leave, &QAction::triggered, this, &SystemTray::quit);
     if (controller) {
         connect(controller, &VaultController::stateChanged, this, &SystemTray::updateLockAction);
+        connect(controller, &VaultController::keptChanged, this, &SystemTray::updateLockAction);
     }
     updateLockAction();
 
@@ -107,7 +109,7 @@ void SystemTray::quit()
 
 void SystemTray::updateLockAction()
 {
-    lock->setEnabled(controller && controller->state() == VaultController::State::Unlocked);
+    lock->setEnabled(controller && (controller->state() == VaultController::State::Unlocked || controller->keyStoreOpen()));
 }
 
 } // namespace chrono_vault

@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.6.105
+// vault_controller.h 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -455,7 +456,7 @@ public:
     // False, and says why, when a new vault cannot be made at this place:
     // asked right after the place is chosen, before any password is typed.
     Q_INVOKABLE bool canCreateAt(const QUrl& file);
-    Q_INVOKABLE void unlock(const QString& password);
+    Q_INVOKABLE void unlock(const QString& password, bool remember = false);
     Q_INVOKABLE void lock();
     // Back to the start, to create or choose another vault.
     Q_INVOKABLE void closeVault();
@@ -654,6 +655,20 @@ public:
     // Settings > Vaults' menu (D-060). Lock locks the vault when it is the
     // one unlocked.
     Q_INVOKABLE void lockVault(const QString& vaultFile);
+    // Closes the open vault only; the key store stays open (D-075).
+    Q_INVOKABLE void closeOpenVault(const QString& vaultFile);
+    // The primary, or a vault whose password is kept in it.
+    [[nodiscard]] Q_INVOKABLE bool isKept(const QString& vaultFile) const;
+    // Whether a change kept through a lock is this vault's.
+    [[nodiscard]] Q_INVOKABLE bool keepsChangesOf(const QString& vaultFile) const;
+    // The kept passwords can be used: the primary was opened and not locked since.
+    Q_PROPERTY(bool keyStoreOpen READ keyStoreOpen NOTIFY keptChanged)
+    [[nodiscard]] bool keyStoreOpen() const { return primaryKey.isValid(); }
+    // After a lock: the vault that comes back once the primary shown is unlocked.
+    Q_PROPERTY(QString returnVault READ returnVault NOTIFY returnChanged)
+    [[nodiscard]] QString returnVault() const { return returnTo; }
+    Q_PROPERTY(QString lastUsedVault READ lastUsedVault NOTIFY vaultPathChanged)
+    [[nodiscard]] QString lastUsedVault() const { return lastUsed; }
     // Moves a vault to a new file on this device, or into the WebDAV folder
     // connected now: locked first, copied, the copy read back and compared,
     // and only then the original deleted (OR-15). moveDone answers.
@@ -728,6 +743,9 @@ signals:
     void unlockWaitChanged();
     void askChanged();
     void keptChanged();
+    void returnChanged();
+    // Close or Lock of a vault's menu could not be done; the reason.
+    void vaultMenuProblem(const QString& text);
     void proven(const QString& vaultFile);
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
@@ -781,7 +799,7 @@ private:
     };
     void setState(State state);
     void say(const QString& text, bool isTrouble);
-    void setPath(const QString& newPath);
+    void setPath(const QString& newPath, bool used = true);
     void saveInBackground(const QString& itemId);
     void restartAutoLock();
     void forgetUnlockedVault();
@@ -801,12 +819,17 @@ private:
     [[nodiscard]] QString keyfileOf(const QString& vaultFile) const;
     // Unlocks the vault shown with a password, or with a key kept from
     // before; both off the window's thread (OR-5).
-    void startUnlock(const QByteArray& password, bool savedPassword = false);
+    void startUnlock(const QByteArray& password, bool savedPassword = false, bool remember = false);
     void startOpenWithKey(const VaultKey& kept);
     void unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile);
     // The primary's key and the passwords saved in it, kept while unlocked.
     void rememberPrimary();
     void forgetPrimary();
+    void lockEverything();
+    void leaveOpenVault();
+    void goBackThroughPrimary();
+    void dropSavedPassword(const QString& vaultFile);
+    [[nodiscard]] bool canRememberHere() const;
     void showCreated(CreatedVault created);
     // The end of creating a vault: in the list, its password perhaps in the
     // primary, shown (D-030); a WebDAV vault only after its first upload (D-057).
@@ -1064,7 +1087,9 @@ private:
     QByteArray primaryKeyfile;             // the primary's keyfile fingerprint, with its key
     std::optional<CreatedVault> createdVault; // see CreatedVault
     QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
-    QString returnTo;                      // the vault shown before the lock
+    QString returnTo;                      // the vault shown before the lock, reached through the primary
+    QString lastUsed;
+    bool onlyKeyStore = false;             // the primary is opened for its kept passwords only
     std::optional<ImportResult> pendingImport; // read, waiting for the person's OK
     QString pendingSource; // where it came from, as a MergeNote's source
     QHash<QString, QByteArray> sourceKeys; // an imported vault's key, sealed, until the lock (D-061)

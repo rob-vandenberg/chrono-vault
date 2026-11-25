@@ -26,80 +26,80 @@ msgctxt "AboutWindow|"
 msgid "Check for update"
 msgstr ""
 
-#: ../qml/AskWindow.qml:49
+#: ../qml/AskWindow.qml:50
 msgctxt "AskWindow|"
 msgid "Enter the Master Password to unlock"
 msgstr ""
 
-#: ../qml/AskWindow.qml:50
+#: ../qml/AskWindow.qml:51
 msgctxt "AskWindow|"
 msgid "Master Password"
 msgstr ""
 
-#: ../qml/AskWindow.qml:51
+#: ../qml/AskWindow.qml:52
 msgctxt "AskWindow|"
 msgid "Unlock"
 msgstr ""
 
-#: ../qml/AskWindow.qml:111
+#: ../qml/AskWindow.qml:112
 msgctxt "AskWindow|"
 msgid "Unlock the vault"
 msgstr ""
 
-#: ../qml/AskWindow.qml:147
+#: ../qml/AskWindow.qml:148
 msgctxt "AskWindow|"
 msgid "Enter the PIN to unlock"
 msgstr ""
 
-#: ../qml/AskWindow.qml:177
+#: ../qml/AskWindow.qml:178
 msgctxt "AskWindow|"
 msgid "PIN"
 msgstr ""
 
-#: ../qml/AskWindow.qml:192
+#: ../qml/AskWindow.qml:193
 msgctxt "AskWindow|"
 msgid "Your primary vault is locked. Open it first."
 msgstr ""
 
-#: ../qml/AskWindow.qml:199
+#: ../qml/AskWindow.qml:200
 msgctxt "AskWindow|"
 msgid "Remember my credentials"
 msgstr ""
 
-#: ../qml/AskWindow.qml:206
+#: ../qml/AskWindow.qml:207
 msgctxt "AskWindow|"
 msgid "Use master password instead"
 msgstr ""
 
-#: ../qml/AskWindow.qml:218
+#: ../qml/AskWindow.qml:219
 #, qt-format
 msgctxt "AskWindow|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/AskWindow.qml:229
+#: ../qml/AskWindow.qml:230
 msgctxt "AskWindow|"
 msgid "This vault needs its keyfile."
 msgstr ""
 
-#: ../qml/AskWindow.qml:230
+#: ../qml/AskWindow.qml:231
 #, qt-format
 msgctxt "AskWindow|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/AskWindow.qml:235
+#: ../qml/AskWindow.qml:236
 msgctxt "AskWindow|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/AskWindow.qml:242
+#: ../qml/AskWindow.qml:243
 #, qt-format
 msgctxt "AskWindow|"
 msgid "Unlock with %1"
 msgstr ""
 
-#: ../qml/AskWindow.qml:263
+#: ../qml/AskWindow.qml:264
 msgctxt "AskWindow|"
 msgid "Choose the vault's keyfile"
 msgstr ""
@@ -1787,325 +1787,325 @@ msgctxt "ItemIcons|"
 msgid "Choose a JPG, PNG, BMP, ICO or SVG picture."
 msgstr ""
 
-#: ../qml/Main.qml:83
+#: ../qml/Main.qml:84
 #, qt-format
 msgctxt "Main|"
 msgid "%1 – Chrono Vault %2"
 msgstr ""
 
-#: ../qml/Main.qml:84
+#: ../qml/Main.qml:85
 #, qt-format
 msgctxt "Main|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/Main.qml:304
+#: ../qml/Main.qml:307
 msgctxt "Main|"
 msgid "&File"
 msgstr ""
 
-#: ../qml/Main.qml:377
+#: ../qml/Main.qml:380
 msgctxt "Main|"
 msgid "Quit"
 msgstr ""
 
-#: ../qml/Main.qml:383
+#: ../qml/Main.qml:386
 msgctxt "Main|"
 msgid "&View"
 msgstr ""
 
-#: ../qml/Main.qml:479
+#: ../qml/Main.qml:482
 msgctxt "Main|"
 msgid "&Item"
 msgstr ""
 
-#: ../qml/Main.qml:515
+#: ../qml/Main.qml:518
 msgctxt "Main|"
 msgid "Move to Trash"
 msgstr ""
 
-#: ../qml/Main.qml:603
+#: ../qml/Main.qml:606
 msgctxt "Main|"
 msgid "&Tools"
 msgstr ""
 
-#: ../qml/Main.qml:646
+#: ../qml/Main.qml:649
 msgctxt "Main|"
 msgid "&Help"
 msgstr ""
 
-#: ../qml/Main.qml:685
+#: ../qml/Main.qml:688
 msgctxt "Main|"
 msgid "New Item"
 msgstr ""
 
-#: ../qml/Main.qml:632 ../qml/Main.qml:736
+#: ../qml/Main.qml:635 ../qml/Main.qml:739
 msgctxt "Main|"
 msgid "Generate Password"
 msgstr ""
 
-#: ../qml/Main.qml:748
+#: ../qml/Main.qml:751
 msgctxt "Main|"
 msgid "Lock the vault"
 msgstr ""
 
-#: ../qml/Main.qml:128
+#: ../qml/Main.qml:131
 msgctxt "Main|"
 msgid "Collapse or expand the sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:309
+#: ../qml/Main.qml:312
 msgctxt "Main|"
 msgid "New vault"
 msgstr ""
 
-#: ../qml/Main.qml:317
+#: ../qml/Main.qml:320
 msgctxt "Main|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/Main.qml:334
+#: ../qml/Main.qml:337
 msgctxt "Main|"
 msgid "Change Master Password"
 msgstr ""
 
-#: ../qml/Main.qml:344
+#: ../qml/Main.qml:347
 msgctxt "Main|"
 msgid "Backup"
 msgstr ""
 
-#: ../qml/Main.qml:351 ../qml/Main.qml:521
+#: ../qml/Main.qml:354 ../qml/Main.qml:524
 msgctxt "Main|"
 msgid "Restore"
 msgstr ""
 
-#: ../qml/Main.qml:359
+#: ../qml/Main.qml:362
 msgctxt "Main|"
 msgid "Import"
 msgstr ""
 
-#: ../qml/Main.qml:367
+#: ../qml/Main.qml:370
 msgctxt "Main|"
 msgid "Export"
 msgstr ""
 
-#: ../qml/Main.qml:389
+#: ../qml/Main.qml:392
 msgctxt "Main|"
 msgid "Show Item Counts"
 msgstr ""
 
-#: ../qml/Main.qml:402
+#: ../qml/Main.qml:405
 msgctxt "Main|"
 msgid "Hide Sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:415
+#: ../qml/Main.qml:418
 msgctxt "Main|"
 msgid "Hide Sensitive"
 msgstr ""
 
-#: ../qml/Main.qml:429
+#: ../qml/Main.qml:432
 msgctxt "Main|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/Main.qml:442
+#: ../qml/Main.qml:445
 msgctxt "Main|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/Main.qml:455
+#: ../qml/Main.qml:458
 msgctxt "Main|"
 msgid "Audit"
 msgstr ""
 
-#: ../qml/Main.qml:468
+#: ../qml/Main.qml:471
 msgctxt "Main|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/Main.qml:484
+#: ../qml/Main.qml:487
 msgctxt "Main|"
 msgid "Remove from Favorites"
 msgstr ""
 
-#: ../qml/Main.qml:484
+#: ../qml/Main.qml:487
 msgctxt "Main|"
 msgid "Add to Favorites"
 msgstr ""
 
-#: ../qml/Main.qml:493
+#: ../qml/Main.qml:496
 msgctxt "Main|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/Main.qml:493
+#: ../qml/Main.qml:496
 msgctxt "Main|"
 msgid "Unarchive"
 msgstr ""
 
-#: ../qml/Main.qml:504
+#: ../qml/Main.qml:507
 msgctxt "Main|"
 msgid "Include in Audit"
 msgstr ""
 
-#: ../qml/Main.qml:504
+#: ../qml/Main.qml:507
 msgctxt "Main|"
 msgid "Exclude from Audit"
 msgstr ""
 
-#: ../qml/Main.qml:529
+#: ../qml/Main.qml:532
 msgctxt "Main|"
 msgid "Delete Permanently…"
 msgstr ""
 
-#: ../qml/Main.qml:539
+#: ../qml/Main.qml:542
 msgctxt "Main|"
 msgid "Copy Username"
 msgstr ""
 
-#: ../qml/Main.qml:548
+#: ../qml/Main.qml:551
 msgctxt "Main|"
 msgid "Copy E-mail"
 msgstr ""
 
-#: ../qml/Main.qml:557
+#: ../qml/Main.qml:560
 msgctxt "Main|"
 msgid "Copy Password"
 msgstr ""
 
-#: ../qml/Main.qml:566
+#: ../qml/Main.qml:569
 msgctxt "Main|"
 msgid "Show Passwords"
 msgstr ""
 
-#: ../qml/Main.qml:576
+#: ../qml/Main.qml:579
 msgctxt "Main|"
 msgid "Copy URL"
 msgstr ""
 
-#: ../qml/Main.qml:585
+#: ../qml/Main.qml:588
 msgctxt "Main|"
 msgid "Copy OTP"
 msgstr ""
 
-#: ../qml/Main.qml:596
+#: ../qml/Main.qml:599
 msgctxt "Main|"
 msgid "Launch URL"
 msgstr ""
 
-#: ../qml/Main.qml:1130
+#: ../qml/Main.qml:1139
 msgctxt "Main|"
 msgid "Enter the password of the WebDAV server"
 msgstr ""
 
-#: ../qml/Main.qml:1131
+#: ../qml/Main.qml:1140
 msgctxt "Main|"
 msgid "Password"
 msgstr ""
 
-#: ../qml/Main.qml:1132
+#: ../qml/Main.qml:1141
 msgctxt "Main|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/Main.qml:326
+#: ../qml/Main.qml:329
 msgctxt "Main|"
 msgid "Lock vault"
 msgstr ""
 
-#: ../qml/Main.qml:609
+#: ../qml/Main.qml:612
 msgctxt "Main|"
 msgid "Sync Now"
 msgstr ""
 
-#: ../qml/Main.qml:615
+#: ../qml/Main.qml:618
 msgctxt "Main|"
 msgid "Sync Conflicts…"
 msgstr ""
 
-#: ../qml/Main.qml:624
+#: ../qml/Main.qml:627
 msgctxt "Main|"
 msgid "Clear Clipboard"
 msgstr ""
 
-#: ../qml/Main.qml:640 ../qml/Main.qml:756
+#: ../qml/Main.qml:643 ../qml/Main.qml:759
 msgctxt "Main|"
 msgid "Options"
 msgstr ""
 
-#: ../qml/Main.qml:651
+#: ../qml/Main.qml:654
 msgctxt "Main|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/Main.qml:662
+#: ../qml/Main.qml:665
 msgctxt "Main|"
 msgid "Support website"
 msgstr ""
 
-#: ../qml/Main.qml:670
+#: ../qml/Main.qml:673
 msgctxt "Main|"
 msgid "Keyboard shortcuts…"
 msgstr ""
 
-#: ../qml/Main.qml:677
+#: ../qml/Main.qml:680
 msgctxt "Main|"
 msgid "About"
 msgstr ""
 
-#: ../qml/Main.qml:805
+#: ../qml/Main.qml:808
 msgctxt "Main|"
 msgid "Copy"
 msgstr ""
 
-#: ../qml/Main.qml:952
+#: ../qml/Main.qml:955
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:959
+#: ../qml/Main.qml:962
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:960
+#: ../qml/Main.qml:963
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:1001
+#: ../qml/Main.qml:1004
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:1008
+#: ../qml/Main.qml:1011
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
 
-#: ../qml/Main.qml:1103
+#: ../qml/Main.qml:1112
 msgctxt "Main|"
 msgid "Trust this certificate?"
 msgstr ""
 
-#: ../qml/Main.qml:1105
+#: ../qml/Main.qml:1114
 msgctxt "Main|"
 msgid "Trust it"
 msgstr ""
 
-#: ../qml/Main.qml:1112
+#: ../qml/Main.qml:1121
 msgctxt "Main|"
 msgid ""
 "The WebDAV server's certificate is not trusted by this system. Trust it only "
 "when it is your server's. Its SHA-256 fingerprint:"
 msgstr ""
 
-#: ../qml/Main.qml:1129
+#: ../qml/Main.qml:1138
 msgctxt "Main|"
 msgid "WebDAV password"
 msgstr ""
@@ -2183,17 +2183,17 @@ msgctxt "MasterPasswordWindow|"
 msgid "Chrono Vault keyfiles (*.chronovaultkey)"
 msgstr ""
 
-#: ../qml/Padlock.qml:45
+#: ../qml/Padlock.qml:46
 msgctxt "Padlock|"
 msgid "Open"
 msgstr ""
 
-#: ../qml/Padlock.qml:45
+#: ../qml/Padlock.qml:46
 msgctxt "Padlock|"
 msgid "Locked"
 msgstr ""
 
-#: ../qml/Padlock.qml:45
+#: ../qml/Padlock.qml:46
 msgctxt "Padlock|"
 msgid "Closed"
 msgstr ""
@@ -2273,175 +2273,175 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:319 ../qml/SettingsWindow.qml:698
+#: ../qml/SettingsWindow.qml:326 ../qml/SettingsWindow.qml:705
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:376
+#: ../qml/SettingsWindow.qml:383
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:554 ../qml/SettingsWindow.qml:801
+#: ../qml/SettingsWindow.qml:561 ../qml/SettingsWindow.qml:808
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:554 ../qml/SettingsWindow.qml:618
+#: ../qml/SettingsWindow.qml:561 ../qml/SettingsWindow.qml:625
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:621
+#: ../qml/SettingsWindow.qml:628
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:628
+#: ../qml/SettingsWindow.qml:635
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:634
+#: ../qml/SettingsWindow.qml:641
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:640
+#: ../qml/SettingsWindow.qml:647
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:653
+#: ../qml/SettingsWindow.qml:660
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:717
+#: ../qml/SettingsWindow.qml:724
 msgctxt "SettingsWindow|"
 msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:705
+#: ../qml/SettingsWindow.qml:712
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:555 ../qml/SettingsWindow.qml:1612
+#: ../qml/SettingsWindow.qml:562 ../qml/SettingsWindow.qml:1639
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:554 ../qml/SettingsWindow.qml:1028
+#: ../qml/SettingsWindow.qml:561 ../qml/SettingsWindow.qml:1035
 msgctxt "SettingsWindow|"
 msgid "Vaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:711
+#: ../qml/SettingsWindow.qml:718
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:724
+#: ../qml/SettingsWindow.qml:731
 msgctxt "SettingsWindow|"
 msgid "Use the Esc key to exit the program"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:779
+#: ../qml/SettingsWindow.qml:786
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:783
+#: ../qml/SettingsWindow.qml:790
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:783
+#: ../qml/SettingsWindow.qml:790
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:783
+#: ../qml/SettingsWindow.qml:790
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:762 ../qml/SettingsWindow.qml:765
-#: ../qml/SettingsWindow.qml:771 ../qml/SettingsWindow.qml:783
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:769 ../qml/SettingsWindow.qml:772
+#: ../qml/SettingsWindow.qml:778 ../qml/SettingsWindow.qml:790
+#: ../qml/SettingsWindow.qml:834
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:471
+#: ../qml/SettingsWindow.qml:478
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault - Settings"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:554
+#: ../qml/SettingsWindow.qml:561
 msgctxt "SettingsWindow|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:554
+#: ../qml/SettingsWindow.qml:561
 msgctxt "SettingsWindow|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:555
+#: ../qml/SettingsWindow.qml:562
 msgctxt "SettingsWindow|"
 msgid "Templates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:790
+#: ../qml/SettingsWindow.qml:797
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:810
+#: ../qml/SettingsWindow.qml:817
 msgctxt "SettingsWindow|"
 msgid "Change the Master Password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:814
+#: ../qml/SettingsWindow.qml:821
 msgctxt "SettingsWindow|"
 msgid "Change"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:823
+#: ../qml/SettingsWindow.qml:830
 msgctxt "SettingsWindow|"
 msgid "Ask for the master password again, once every"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:871
+#: ../qml/SettingsWindow.qml:878
 msgctxt "SettingsWindow|"
 msgid "Autolock when"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:879
+#: ../qml/SettingsWindow.qml:886
 msgctxt "SettingsWindow|"
 msgid "Main window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:951
+#: ../qml/SettingsWindow.qml:958
 msgctxt "SettingsWindow|"
 msgid ""
 "Use a PIN code to quickly unlock without having to enter the Master Password "
 "every time"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1003
+#: ../qml/SettingsWindow.qml:1010
 msgctxt "SettingsWindow|"
 msgid "Check for leaked passwords and breached websites"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1009
+#: ../qml/SettingsWindow.qml:1016
 msgctxt "SettingsWindow|"
 msgid ""
 "With Have I Been Pwned. Of each password only the first 5 characters of its "
@@ -2449,60 +2449,65 @@ msgid ""
 "fetched whole."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1089
+#: ../qml/SettingsWindow.qml:1103
 msgctxt "SettingsWindow|"
 msgid "Primary vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1140
+#: ../qml/SettingsWindow.qml:1154
 msgctxt "SettingsWindow|"
 msgid "Open"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1104
+#: ../qml/SettingsWindow.qml:1118
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "WebDAV: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1105
+#: ../qml/SettingsWindow.qml:1119
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "This computer: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1113
+#: ../qml/SettingsWindow.qml:1127
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Last synchronized: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1154 ../qml/SettingsWindow.qml:1283
+#: ../qml/SettingsWindow.qml:1161
+msgctxt "SettingsWindow|"
+msgid "Close"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:1181 ../qml/SettingsWindow.qml:1310
 msgctxt "SettingsWindow|"
 msgid "Make primary vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1185
+#: ../qml/SettingsWindow.qml:1212
 msgctxt "SettingsWindow|"
 msgid "Import…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1192
+#: ../qml/SettingsWindow.qml:1219
 msgctxt "SettingsWindow|"
 msgid "Export…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1199
+#: ../qml/SettingsWindow.qml:1226
 msgctxt "SettingsWindow|"
 msgid "Disconnect…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1287
+#: ../qml/SettingsWindow.qml:1314
 msgctxt "SettingsWindow|"
 msgid "Make primary"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1295
+#: ../qml/SettingsWindow.qml:1322
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid ""
@@ -2510,44 +2515,44 @@ msgid ""
 "moved: what is remembered in “%2” stays there."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1402
+#: ../qml/SettingsWindow.qml:1429
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault remembers every vault you have opened. If you no longer use a "
 "vault, you can tell Chrono Vault to forget it."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1404
+#: ../qml/SettingsWindow.qml:1431
 msgctxt "SettingsWindow|"
 msgid ""
 "The vault in the remote location is not deleted, but the local copy on this "
 "computer is, together with any changes that are not synced yet."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1405
+#: ../qml/SettingsWindow.qml:1432
 msgctxt "SettingsWindow|"
 msgid ""
 "Nothing is deleted, only the name of the vault is removed from the list of "
 "vaults."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1406
+#: ../qml/SettingsWindow.qml:1433
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Are you sure you want Chrono Vault to forget “%1”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1416
+#: ../qml/SettingsWindow.qml:1443
 msgctxt "SettingsWindow|"
 msgid "Disconnect from WebDAV"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1420
+#: ../qml/SettingsWindow.qml:1447
 msgctxt "SettingsWindow|"
 msgid "Disconnect"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1429
+#: ../qml/SettingsWindow.qml:1456
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault keeps a local copy of every vault that is stored in a remote "
@@ -2555,7 +2560,7 @@ msgid ""
 "automatically once your connection is restored."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1430
+#: ../qml/SettingsWindow.qml:1457
 msgctxt "SettingsWindow|"
 msgid ""
 "Disconnecting from the remote vault makes the local copy a separate "
@@ -2564,110 +2569,110 @@ msgid ""
 "cannot be undone."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1431
+#: ../qml/SettingsWindow.qml:1458
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Are you sure you want to disconnect “%1” from the remote vault?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1534
+#: ../qml/SettingsWindow.qml:1561
 msgctxt "SettingsWindow|"
 msgid "Press the new key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1573
+#: ../qml/SettingsWindow.qml:1600
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Press a key for “%1”"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1618
+#: ../qml/SettingsWindow.qml:1645
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:834
 msgctxt "SettingsWindow|"
 msgid "Day"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:834
 msgctxt "SettingsWindow|"
 msgid "Month"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:834
 msgctxt "SettingsWindow|"
 msgid "Quarter"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:834
 msgctxt "SettingsWindow|"
 msgid "Year"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:753
+#: ../qml/SettingsWindow.qml:760
 msgctxt "SettingsWindow|"
 msgid "Clear the clipboard after"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:782
 msgctxt "SettingsWindow|"
 msgid "seconds"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:885
+#: ../qml/SettingsWindow.qml:892
 msgctxt "SettingsWindow|"
 msgid "System sleeps"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:893
+#: ../qml/SettingsWindow.qml:900
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault is idle for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:909 ../qml/SettingsWindow.qml:931
+#: ../qml/SettingsWindow.qml:916 ../qml/SettingsWindow.qml:938
 msgctxt "SettingsWindow|"
 msgid "Minutes"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:915
+#: ../qml/SettingsWindow.qml:922
 msgctxt "SettingsWindow|"
 msgid "System inactive for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:936
+#: ../qml/SettingsWindow.qml:943
 msgctxt "SettingsWindow|"
 msgid "This desktop does not tell how long the system has been inactive."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:996
+#: ../qml/SettingsWindow.qml:1003
 msgctxt "SettingsWindow|"
 msgid "Hide sensitive fields: show them as dots until asked"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:981
+#: ../qml/SettingsWindow.qml:988
 msgctxt "SettingsWindow|"
 msgid "Use Windows Hello to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:982
+#: ../qml/SettingsWindow.qml:989
 msgctxt "SettingsWindow|"
 msgid "Use fingerprint to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:730
+#: ../qml/SettingsWindow.qml:737
 msgctxt "SettingsWindow|"
 msgid "Show subtitles in the item list"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:736
+#: ../qml/SettingsWindow.qml:743
 msgctxt "SettingsWindow|"
 msgid "Use website icons"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:742
+#: ../qml/SettingsWindow.qml:749
 msgctxt "SettingsWindow|"
 msgid ""
 "Each website in your vault is asked for its own icon, which that website can "
@@ -2675,110 +2680,110 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1453
+#: ../qml/SettingsWindow.qml:1480
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1457
+#: ../qml/SettingsWindow.qml:1484
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1491
+#: ../qml/SettingsWindow.qml:1518
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1120
+#: ../qml/SettingsWindow.qml:1134
 msgctxt "SettingsWindow|"
 msgid "Not found"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1132
+#: ../qml/SettingsWindow.qml:1146
 msgctxt "SettingsWindow|"
 msgid "Vault menu"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1147
+#: ../qml/SettingsWindow.qml:1171
 msgctxt "SettingsWindow|"
 msgid "Lock"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1164
+#: ../qml/SettingsWindow.qml:1191
 msgctxt "SettingsWindow|"
 msgid "Move…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1174
+#: ../qml/SettingsWindow.qml:1201
 msgctxt "SettingsWindow|"
 msgid "Forget…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1324
+#: ../qml/SettingsWindow.qml:1351
 msgctxt "SettingsWindow|"
 msgid "Where should the vault be moved to?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1327
+#: ../qml/SettingsWindow.qml:1354
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1344
+#: ../qml/SettingsWindow.qml:1371
 msgctxt "SettingsWindow|"
 msgid "Move the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1363
+#: ../qml/SettingsWindow.qml:1390
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Moving “%1”…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1389
+#: ../qml/SettingsWindow.qml:1416
 msgctxt "SettingsWindow|"
 msgid "Forget the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1393
+#: ../qml/SettingsWindow.qml:1420
 msgctxt "SettingsWindow|"
 msgid "Forget"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1667
+#: ../qml/SettingsWindow.qml:1694
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1710
+#: ../qml/SettingsWindow.qml:1737
 msgctxt "SettingsWindow|"
 msgid "Create vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1716
+#: ../qml/SettingsWindow.qml:1743
 msgctxt "SettingsWindow|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1729
+#: ../qml/SettingsWindow.qml:1756
 msgctxt "SettingsWindow|"
 msgid "Waiting for Windows Hello fingerprint..."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1744
+#: ../qml/SettingsWindow.qml:1771
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:409 ../qml/SettingsWindow.qml:1683
-#: ../qml/SettingsWindow.qml:1750
+#: ../qml/SettingsWindow.qml:416 ../qml/SettingsWindow.qml:1710
+#: ../qml/SettingsWindow.qml:1777
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:409 ../qml/SettingsWindow.qml:1592
-#: ../qml/SettingsWindow.qml:1689 ../qml/SettingsWindow.qml:1761
+#: ../qml/SettingsWindow.qml:416 ../qml/SettingsWindow.qml:1619
+#: ../qml/SettingsWindow.qml:1716 ../qml/SettingsWindow.qml:1788
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -3150,120 +3155,142 @@ msgctxt "TextMenu|"
 msgid "Select All"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:252
+#: ../qml/UnlockPage.qml:295
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:263
+#: ../qml/UnlockPage.qml:306
 msgctxt "UnlockPage|"
 msgid "This vault needs its keyfile."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:264
+#: ../qml/UnlockPage.qml:307
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:269
+#: ../qml/UnlockPage.qml:312
 msgctxt "UnlockPage|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:171
+#: ../qml/UnlockPage.qml:182
 msgctxt "UnlockPage|"
 msgid "Welcome to Chrono Vault"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:177
+#: ../qml/UnlockPage.qml:193
+#, qt-format
+msgctxt "UnlockPage|"
+msgid "Enter the PIN of “%1” to return to “%2”"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:194
+#, qt-format
+msgctxt "UnlockPage|"
+msgid "Enter the Master Password of “%1” to return to “%2”"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:196
 msgctxt "UnlockPage|"
 msgid "Enter the Master Password to unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:177
+#: ../qml/UnlockPage.qml:196
 msgctxt "UnlockPage|"
 msgid "Enter the PIN to unlock"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:220
+#: ../qml/UnlockPage.qml:239
+msgctxt "UnlockPage|"
+msgid "Open"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:252
 msgctxt "UnlockPage|"
 msgid "Master Password"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:220
+#: ../qml/UnlockPage.qml:252
 msgctxt "UnlockPage|"
 msgid "PIN"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:232
+#: ../qml/UnlockPage.qml:268
+msgctxt "UnlockPage|"
+msgid "Remember my credentials"
+msgstr ""
+
+#: ../qml/UnlockPage.qml:275
 msgctxt "UnlockPage|"
 msgid "Use master password instead"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:244
+#: ../qml/UnlockPage.qml:287
 msgctxt "UnlockPage|"
 msgid "Create a new vault…"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:276
+#: ../qml/UnlockPage.qml:319
 #, qt-format
 msgctxt "UnlockPage|"
 msgid "Unlock with %1"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:287
+#: ../qml/UnlockPage.qml:330
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a day, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:288
+#: ../qml/UnlockPage.qml:331
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a month, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:289
+#: ../qml/UnlockPage.qml:332
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a quarter, "
 "so that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:290
+#: ../qml/UnlockPage.qml:333
 msgctxt "UnlockPage|"
 msgid ""
 "Please type your master password: Chrono Vault asks for it once a year, so "
 "that you do not forget it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:299
+#: ../qml/UnlockPage.qml:342
 msgctxt "UnlockPage|"
 msgid "Not now"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:306
+#: ../qml/UnlockPage.qml:349
 msgctxt "UnlockPage|"
 msgid "A change could not be saved before the vault locked. Unlock to save it."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:319
+#: ../qml/UnlockPage.qml:362
 msgctxt "UnlockPage|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/UnlockPage.qml:324
+#: ../qml/UnlockPage.qml:367
 msgctxt "UnlockPage|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you open another vault now, the change is lost."
 msgstr ""
 
-#: ../qml/UnlockPage.qml:345
+#: ../qml/UnlockPage.qml:388
 msgctxt "UnlockPage|"
 msgid "Choose the vault's keyfile"
 msgstr ""
@@ -3329,90 +3356,90 @@ msgctxt "UpdatedWindow|"
 msgid "Restart"
 msgstr ""
 
-#: ../qml/VaultBox.qml:52
+#: ../qml/VaultBox.qml:54
 msgctxt "VaultBox|"
 msgid "this computer"
 msgstr ""
 
-#: ../qml/VaultBox.qml:54
+#: ../qml/VaultBox.qml:56
 msgctxt "VaultBox|"
 msgid "pCloud"
 msgstr ""
 
-#: ../qml/VaultBox.qml:156
+#: ../qml/VaultBox.qml:158
 msgctxt "VaultBox|"
 msgid "Open another vault…"
 msgstr ""
 
-#: ../qml/VaultBox.qml:185
+#: ../qml/VaultBox.qml:187
 msgctxt "VaultBox|"
 msgid "not found"
 msgstr ""
 
-#: ../qml/VaultBox.qml:185
+#: ../qml/VaultBox.qml:187
 msgctxt "VaultBox|"
 msgid "last used"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:248
+#: ../src/ui/vault_controller.cpp:250
 msgctxt "VaultController|"
 msgid "Field"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:256
+#: ../src/ui/vault_controller.cpp:258
 msgctxt "VaultController|"
 msgid "Section"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:550
+#: ../src/ui/vault_controller.cpp:561
 msgctxt "VaultController|"
 msgid "The vault file is no longer where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:552
+#: ../src/ui/vault_controller.cpp:563
 msgctxt "VaultController|"
 msgid "The vault file could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:554
+#: ../src/ui/vault_controller.cpp:565
 msgctxt "VaultController|"
 msgid "This file is not a Chrono Vault vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:556
+#: ../src/ui/vault_controller.cpp:567
 msgctxt "VaultController|"
 msgid ""
 "This vault was made by a newer Chrono Vault. Update Chrono Vault to open it."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:559
+#: ../src/ui/vault_controller.cpp:570
 msgctxt "VaultController|"
 msgid "That password does not open this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:561
+#: ../src/ui/vault_controller.cpp:572
 msgctxt "VaultController|"
 msgid "This file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:563
+#: ../src/ui/vault_controller.cpp:574
 msgctxt "VaultController|"
 msgid "This vault now has another master password. Unlock it with that one."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:566
+#: ../src/ui/vault_controller.cpp:577
 msgctxt "VaultController|"
 msgid "This vault also needs its keyfile. Choose it below, then unlock."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:326
+#: ../src/ui/vault_controller.cpp:328
 msgctxt "VaultController|"
 msgid ""
 "Your change could not be saved: the folder cannot be written to, or the disk "
 "is full. The vault on disk is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:332
+#: ../src/ui/vault_controller.cpp:334
 msgctxt "VaultController|"
 msgid "Your change could not be saved. The vault on disk is unchanged."
 msgstr ""
@@ -4035,128 +4062,128 @@ msgctxt "WebDavWindow|"
 msgid "Trust this certificate and connect"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:70
+#: ../qml/WelcomePage.qml:71
 msgctxt "WelcomePage|"
 msgid "Welcome to Chrono Vault"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:82
+#: ../qml/WelcomePage.qml:83
 #, qt-format
 msgctxt "WelcomePage|"
 msgid "Your primary vault “%1” was not found."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:89 ../qml/WelcomePage.qml:91
+#: ../qml/WelcomePage.qml:90 ../qml/WelcomePage.qml:92
 msgctxt "WelcomePage|"
 msgid "Look again"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:97
+#: ../qml/WelcomePage.qml:98
 msgctxt "WelcomePage|"
 msgid "Open an existing vault…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:103
+#: ../qml/WelcomePage.qml:104
 msgctxt "WelcomePage|"
 msgid "Create a new vault…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:154
+#: ../qml/WelcomePage.qml:155
 msgctxt "WelcomePage|"
 msgid "Where should the new vault be kept?"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:157 ../qml/WelcomePage.qml:174
+#: ../qml/WelcomePage.qml:158 ../qml/WelcomePage.qml:175
 msgctxt "WelcomePage|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:172
+#: ../qml/WelcomePage.qml:173
 msgctxt "WelcomePage|"
 msgid "Open a vault"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:174
+#: ../qml/WelcomePage.qml:175
 msgctxt "WelcomePage|"
 msgid "All files (*)"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:196
+#: ../qml/WelcomePage.qml:197
 msgctxt "WelcomePage|"
 msgid "Choose the master password"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:229
+#: ../qml/WelcomePage.qml:230
 msgctxt "WelcomePage|"
 msgid ""
 "This password opens the vault. Nobody can open it without it, not even you, "
 "so choose one you will remember."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:237
+#: ../qml/WelcomePage.qml:238
 msgctxt "WelcomePage|"
 msgid "Master password"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:243
+#: ../qml/WelcomePage.qml:244
 msgctxt "WelcomePage|"
 msgid "The same password again"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:249
+#: ../qml/WelcomePage.qml:250
 msgctxt "WelcomePage|"
 msgid "The two passwords are not the same yet."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:267
+#: ../qml/WelcomePage.qml:268
 msgctxt "WelcomePage|"
 msgid "Remember my credentials"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:273
+#: ../qml/WelcomePage.qml:274
 msgctxt "WelcomePage|"
 msgid "Also lock the vault with a keyfile"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:279
+#: ../qml/WelcomePage.qml:280
 msgctxt "WelcomePage|"
 msgid ""
 "Without its keyfile the vault cannot be opened, not even with the right "
 "password. Keep a copy of the keyfile somewhere safe, apart from the vault."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:287
+#: ../qml/WelcomePage.qml:288
 msgctxt "WelcomePage|"
 msgid "No keyfile chosen yet."
 msgstr ""
 
-#: ../qml/WelcomePage.qml:288
+#: ../qml/WelcomePage.qml:289
 #, qt-format
 msgctxt "WelcomePage|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:296
+#: ../qml/WelcomePage.qml:297
 msgctxt "WelcomePage|"
 msgid "Choose a keyfile…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:300
+#: ../qml/WelcomePage.qml:301
 msgctxt "WelcomePage|"
 msgid "Make a new keyfile…"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:312
+#: ../qml/WelcomePage.qml:313
 msgctxt "WelcomePage|"
 msgid "Choose a keyfile"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:321
+#: ../qml/WelcomePage.qml:322
 msgctxt "WelcomePage|"
 msgid "Where should the new keyfile be kept?"
 msgstr ""
 
-#: ../qml/WelcomePage.qml:324
+#: ../qml/WelcomePage.qml:325
 msgctxt "WelcomePage|"
 msgid "Chrono Vault keyfiles (*.chronovaultkey)"
 msgstr ""
@@ -4208,22 +4235,22 @@ msgctxt "chrono_vault::Licences|"
 msgid "Microsoft Visual C++ runtime, redistributed under Microsoft's terms"
 msgstr ""
 
-#: ../src/ui/system_tray.cpp:42
+#: ../src/ui/system_tray.cpp:43
 msgctxt "chrono_vault::SystemTray|"
 msgid "Show Chrono Vault"
 msgstr ""
 
-#: ../src/ui/system_tray.cpp:43
+#: ../src/ui/system_tray.cpp:44
 msgctxt "chrono_vault::SystemTray|"
 msgid "Lock"
 msgstr ""
 
-#: ../src/ui/system_tray.cpp:45
+#: ../src/ui/system_tray.cpp:46
 msgctxt "chrono_vault::SystemTray|"
 msgid "Quit"
 msgstr ""
 
-#: ../src/ui/system_tray.cpp:56
+#: ../src/ui/system_tray.cpp:58
 #, qt-format
 msgctxt "chrono_vault::SystemTray|"
 msgid "Chrono Vault %1"
@@ -4380,68 +4407,70 @@ msgid ""
 "Chrono Vault %1 is installed and runs the next time you start Chrono Vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:771
+#: ../src/ui/vault_controller.cpp:781
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose where to keep the new vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:775 ../src/ui/vault_controller.cpp:3154
+#: ../src/ui/vault_controller.cpp:785 ../src/ui/vault_controller.cpp:3305
 #: ../src/ui/vault_controller_webdav.cpp:494
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:779 ../src/ui/vault_controller.cpp:3159
+#: ../src/ui/vault_controller.cpp:789 ../src/ui/vault_controller.cpp:3310
 #: ../src/ui/vault_controller_webdav.cpp:498
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:876 ../src/ui/vault_controller.cpp:3123
+#: ../src/ui/vault_controller.cpp:886 ../src/ui/vault_controller.cpp:3274
 msgctxt "chrono_vault::VaultController|"
 msgid "A file with that name already exists. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:787
+#: ../src/ui/vault_controller.cpp:797
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:728
+#: ../src/ui/vault_controller.cpp:738
 msgctxt "chrono_vault::VaultController|"
 msgid "The setting to start at startup could not be saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:765 ../src/ui/vault_controller.cpp:889
-#: ../src/ui/vault_controller.cpp:2950 ../src/ui/vault_controller.cpp:3164
-#: ../src/ui/vault_controller_ask.cpp:403
-#: ../src/ui/vault_controller_vaults.cpp:83
-#: ../src/ui/vault_controller_vaults.cpp:444
+#: ../src/ui/vault_controller.cpp:775 ../src/ui/vault_controller.cpp:899
+#: ../src/ui/vault_controller.cpp:3006 ../src/ui/vault_controller.cpp:3315
+#: ../src/ui/vault_controller_ask.cpp:404
+#: ../src/ui/vault_controller_vaults.cpp:93
+#: ../src/ui/vault_controller_vaults.cpp:105
+#: ../src/ui/vault_controller_vaults.cpp:146
+#: ../src/ui/vault_controller_vaults.cpp:514
 #: ../src/ui/vault_controller_webdav.cpp:502
 #: ../src/ui/vault_controller_webdav.cpp:591
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until your last change is saved, then try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:820 ../src/ui/vault_controller_webdav.cpp:554
+#: ../src/ui/vault_controller.cpp:830 ../src/ui/vault_controller_webdav.cpp:554
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. The vault was not created."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:828
+#: ../src/ui/vault_controller.cpp:838
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The new vault could not be created: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:853 ../src/ui/vault_controller.cpp:3068
+#: ../src/ui/vault_controller.cpp:863 ../src/ui/vault_controller.cpp:3219
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 vault"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1978
+#: ../src/ui/vault_controller.cpp:2033
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4449,32 +4478,32 @@ msgid ""
 "master password, then turn it on again in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2776
+#: ../src/ui/vault_controller.cpp:2831
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere and now has another master password. Unlock "
 "it with that one."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2786
+#: ../src/ui/vault_controller.cpp:2841
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault was changed elsewhere, but that version cannot be read yet. Your "
 "vault stays open."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2927
+#: ../src/ui/vault_controller.cpp:2982
 msgctxt "chrono_vault::VaultController|"
 msgid "Your new vault is ready."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1021 ../src/ui/vault_controller.cpp:1107
-#: ../src/ui/vault_controller_pin.cpp:246
+#: ../src/ui/vault_controller.cpp:1031 ../src/ui/vault_controller.cpp:1122
+#: ../src/ui/vault_controller_pin.cpp:247
 msgctxt "chrono_vault::VaultController|"
 msgid "Unlocking…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1056
+#: ../src/ui/vault_controller.cpp:1067
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4482,24 +4511,24 @@ msgid ""
 "master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1064 ../src/ui/vault_controller_ask.cpp:193
+#: ../src/ui/vault_controller.cpp:1075 ../src/ui/vault_controller_ask.cpp:194
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. Choose it again below."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1085
+#: ../src/ui/vault_controller.cpp:1096
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault opened, but what it holds is damaged. It was not changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1140
+#: ../src/ui/vault_controller.cpp:1155
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password of this vault was changed on another computer. Type it; "
 "the PIN opens the vault again after that."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1152
+#: ../src/ui/vault_controller.cpp:1167
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4507,29 +4536,29 @@ msgid ""
 "then turn %1 on again in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1164
+#: ../src/ui/vault_controller.cpp:1179
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This vault was changed elsewhere since it was opened. Unlock it with its "
 "master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1331
+#: ../src/ui/vault_controller.cpp:1386
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled note"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1332
+#: ../src/ui/vault_controller.cpp:1387
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled login"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1333
+#: ../src/ui/vault_controller.cpp:1388
 msgctxt "chrono_vault::VaultController|"
 msgid "Untitled item"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1409 ../src/ui/vault_controller.cpp:2608
+#: ../src/ui/vault_controller.cpp:1464 ../src/ui/vault_controller.cpp:2663
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4537,139 +4566,139 @@ msgid ""
 "attachment first."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1467
+#: ../src/ui/vault_controller.cpp:1522
 #: ../src/ui/vault_controller_conflicts.cpp:211
 #: ../src/ui/vault_controller_conflicts.cpp:337
 msgctxt "chrono_vault::VaultController|"
 msgid "Title"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1469
+#: ../src/ui/vault_controller.cpp:1524
 #: ../src/ui/vault_controller_conflicts.cpp:212
 #: ../src/ui/vault_controller_conflicts.cpp:338
 msgctxt "chrono_vault::VaultController|"
 msgid "Subtitle"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1471
+#: ../src/ui/vault_controller.cpp:1526
 #: ../src/ui/vault_controller_conflicts.cpp:213
 #: ../src/ui/vault_controller_conflicts.cpp:348
 msgctxt "chrono_vault::VaultController|"
 msgid "Notes"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1473
+#: ../src/ui/vault_controller.cpp:1528
 #: ../src/ui/vault_controller_conflicts.cpp:214
 #: ../src/ui/vault_controller_conflicts.cpp:349
 msgctxt "chrono_vault::VaultController|"
 msgid "Website"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1561
+#: ../src/ui/vault_controller.cpp:1616
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is left out of the Audit."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1561
+#: ../src/ui/vault_controller.cpp:1616
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is in the Audit again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1562
+#: ../src/ui/vault_controller.cpp:1617
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items are left out of the Audit."
 msgid_plural "%n items are left out of the Audit."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1563
+#: ../src/ui/vault_controller.cpp:1618
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items are in the Audit again."
 msgid_plural "%n items are in the Audit again."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1569
+#: ../src/ui/vault_controller.cpp:1624
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was moved to the Trash."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1569
+#: ../src/ui/vault_controller.cpp:1624
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was restored."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1570
+#: ../src/ui/vault_controller.cpp:1625
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was archived."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1570
+#: ../src/ui/vault_controller.cpp:1625
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is no longer archived."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1573
+#: ../src/ui/vault_controller.cpp:1628
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items were moved to the Trash."
 msgid_plural "%n items were moved to the Trash."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1574
+#: ../src/ui/vault_controller.cpp:1629
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items were restored."
 msgid_plural "%n items were restored."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1575
+#: ../src/ui/vault_controller.cpp:1630
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items were archived."
 msgid_plural "%n items were archived."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1576
+#: ../src/ui/vault_controller.cpp:1631
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items are no longer archived."
 msgid_plural "%n items are no longer archived."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1607
+#: ../src/ui/vault_controller.cpp:1662
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is now in %2."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1608
+#: ../src/ui/vault_controller.cpp:1663
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items are now in %1."
 msgid_plural "%n items are now in %1."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1632
+#: ../src/ui/vault_controller.cpp:1687
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was deleted permanently."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1633
+#: ../src/ui/vault_controller.cpp:1688
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n items were deleted permanently."
 msgid_plural "%n items were deleted permanently."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1683
+#: ../src/ui/vault_controller.cpp:1738
 msgctxt "chrono_vault::VaultController|"
 msgid "Reading the export…"
 msgstr ""
@@ -4762,12 +4791,12 @@ msgctxt "chrono_vault::VaultController|"
 msgid "The attachments of this vault together may hold at most %1."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1718
+#: ../src/ui/vault_controller.cpp:1773
 msgctxt "chrono_vault::VaultController|"
 msgid "Nothing was imported: choose the export again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1738
+#: ../src/ui/vault_controller.cpp:1793
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4775,14 +4804,14 @@ msgid ""
 "imported."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1792
+#: ../src/ui/vault_controller.cpp:1847
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n item(s) imported."
 msgid_plural "%n item(s) imported."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1794
+#: ../src/ui/vault_controller.cpp:1849
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n item(s) differ from the vault's: settle them in Sync Conflicts."
@@ -4790,13 +4819,13 @@ msgid_plural ""
 "%n item(s) differ from the vault's: settle them in Sync Conflicts."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:1895 ../src/ui/vault_controller.cpp:1897
-#: ../src/ui/vault_controller.cpp:1899
+#: ../src/ui/vault_controller.cpp:1950 ../src/ui/vault_controller.cpp:1952
+#: ../src/ui/vault_controller.cpp:1954
 msgctxt "chrono_vault::VaultController|"
 msgid "Not recognized. Try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1911
+#: ../src/ui/vault_controller.cpp:1966
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4804,24 +4833,24 @@ msgid ""
 "in Settings > Security."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1929
+#: ../src/ui/vault_controller.cpp:1984
 msgctxt "chrono_vault::VaultController|"
 msgid "That finger was not recognized."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1931
+#: ../src/ui/vault_controller.cpp:1986
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "The %1 is not available now."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1939
+#: ../src/ui/vault_controller.cpp:1994
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 could not be turned on for this vault."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1945
+#: ../src/ui/vault_controller.cpp:2000
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4829,81 +4858,81 @@ msgid ""
 "hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1966 ../src/ui/vault_controller_ask.cpp:310
+#: ../src/ui/vault_controller.cpp:2021 ../src/ui/vault_controller_ask.cpp:311
 msgctxt "chrono_vault::VaultController|"
 msgid "That finger was not recognized. Try again, or use the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1970 ../src/ui/vault_controller_ask.cpp:314
+#: ../src/ui/vault_controller.cpp:2025 ../src/ui/vault_controller_ask.cpp:315
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 is not available now. Use the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:1971 ../src/ui/vault_controller_ask.cpp:315
+#: ../src/ui/vault_controller.cpp:2026 ../src/ui/vault_controller_ask.cpp:316
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%1 Use the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2069 ../src/ui/vault_controller_ask.cpp:292
+#: ../src/ui/vault_controller.cpp:2124 ../src/ui/vault_controller_ask.cpp:293
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Waiting for your %1…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2231 ../src/ui/vault_controller.cpp:2315
+#: ../src/ui/vault_controller.cpp:2286 ../src/ui/vault_controller.cpp:2370
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the category a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2236 ../src/ui/vault_controller.cpp:2242
-#: ../src/ui/vault_controller.cpp:2320 ../src/ui/vault_controller.cpp:2326
+#: ../src/ui/vault_controller.cpp:2291 ../src/ui/vault_controller.cpp:2297
+#: ../src/ui/vault_controller.cpp:2375 ../src/ui/vault_controller.cpp:2381
 msgctxt "chrono_vault::VaultController|"
 msgid "There is already a category with that name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2270
+#: ../src/ui/vault_controller.cpp:2325
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This category still holds items or templates. Move or delete them first."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2386
+#: ../src/ui/vault_controller.cpp:2441
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the template a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2439
+#: ../src/ui/vault_controller.cpp:2494
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copy of %1"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2497
+#: ../src/ui/vault_controller.cpp:2552
 msgctxt "chrono_vault::VaultController|"
 msgid "Give the tag a name."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2592
+#: ../src/ui/vault_controller.cpp:2647
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” is larger than %2, the most an attachment may hold."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2599
+#: ../src/ui/vault_controller.cpp:2654
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2653
+#: ../src/ui/vault_controller.cpp:2708
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "“%1” was saved."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2655
+#: ../src/ui/vault_controller.cpp:2710
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4911,18 +4940,26 @@ msgid ""
 "full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:2724
+#: ../src/ui/vault_controller.cpp:2779
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was changed elsewhere and was read again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3103
+#: ../src/ui/vault_controller.cpp:3144
+#, qt-format
+msgctxt "chrono_vault::VaultController|"
+msgid ""
+"The password of “%1” could not be removed from “%2”, so it is not locked. "
+"Try again."
+msgstr ""
+
+#: ../src/ui/vault_controller.cpp:3254
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Your credentials could not be remembered in “%1”."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3106
+#: ../src/ui/vault_controller.cpp:3257
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4930,25 +4967,25 @@ msgid ""
 "changed. Change it there by hand."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3137
+#: ../src/ui/vault_controller.cpp:3288
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The keyfile could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:359
+#: ../src/ui/vault_controller_ask.cpp:360
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password of this vault was changed on another computer. Type it."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:446
+#: ../src/ui/vault_controller_ask.cpp:447
 msgctxt "chrono_vault::VaultController|"
 msgid "Exporting…"
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:462
+#: ../src/ui/vault_controller_ask.cpp:463
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -4956,65 +4993,65 @@ msgid ""
 "delete it when done."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:465
+#: ../src/ui/vault_controller_ask.cpp:466
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The export could not be written: the folder cannot be written to, or the "
 "disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3179
+#: ../src/ui/vault_controller.cpp:3330
 msgctxt "chrono_vault::VaultController|"
 msgid "Changing the master password…"
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3247
+#: ../src/ui/vault_controller.cpp:3398
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password was changed. %1 keeps the new one; it may ask you once."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3253
+#: ../src/ui/vault_controller.cpp:3404
 msgctxt "chrono_vault::VaultController|"
 msgid "The master password was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3258
+#: ../src/ui/vault_controller.cpp:3409
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the current master password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3261
+#: ../src/ui/vault_controller.cpp:3412
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. Nothing was changed."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3265
+#: ../src/ui/vault_controller.cpp:3416
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The master password could not be changed: the folder cannot be written to, "
 "or the disk is full. The vault is unchanged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3398
+#: ../src/ui/vault_controller.cpp:3549
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied. The clipboard is cleared in %n second(s)."
 msgid_plural "Copied. The clipboard is cleared in %n second(s)."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:3401
+#: ../src/ui/vault_controller.cpp:3552
 msgctxt "chrono_vault::VaultController|"
 msgid "Copied."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3480
+#: ../src/ui/vault_controller.cpp:3631
 msgctxt "chrono_vault::VaultController|"
 msgid "The clipboard is cleared."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3721
+#: ../src/ui/vault_controller.cpp:3877
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5022,7 +5059,7 @@ msgid ""
 "shows the other version."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3733
+#: ../src/ui/vault_controller.cpp:3889
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5030,12 +5067,12 @@ msgid ""
 "Open it from the list of vaults with its own password."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3765
+#: ../src/ui/vault_controller.cpp:3921
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was changed elsewhere; both versions were merged."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:3767
+#: ../src/ui/vault_controller.cpp:3923
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5046,7 +5083,7 @@ msgid_plural ""
 "the other is kept in the item."
 msgstr[0] ""
 
-#: ../src/ui/vault_controller.cpp:3773
+#: ../src/ui/vault_controller.cpp:3929
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "%n item(s) deleted on one device and changed on the other were kept."
@@ -5146,97 +5183,97 @@ msgid ""
 "Choose a name without / \\ : * ? \" < > |, not starting or ending with a dot."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:49
+#: ../src/ui/vault_controller_vaults.cpp:51
 msgctxt "chrono_vault::VaultController|"
 msgid "The move was stopped. The vault stays where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:399
-#: ../src/ui/vault_controller_vaults.cpp:60
+#: ../src/ui/vault_controller_ask.cpp:400
+#: ../src/ui/vault_controller_vaults.cpp:62
 msgctxt "chrono_vault::VaultController|"
 msgid "This vault is being moved. Unlock it once the move is done."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:74
+#: ../src/ui/vault_controller_vaults.cpp:137
 msgctxt "chrono_vault::VaultController|"
 msgid "Another vault is being moved. Wait until that is done."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:77
+#: ../src/ui/vault_controller_vaults.cpp:140
 msgctxt "chrono_vault::VaultController|"
 msgid "That vault cannot be found."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:80
+#: ../src/ui/vault_controller_vaults.cpp:143
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until the vault is open, then try again."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:86
+#: ../src/ui/vault_controller_vaults.cpp:149
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This vault holds a change kept from before it was locked. Unlock it so the "
 "change is saved, then move it."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:90
+#: ../src/ui/vault_controller_vaults.cpp:153
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This vault has changes that are not on the server yet. Unlock it so it "
 "synchronizes, then move it."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:108
+#: ../src/ui/vault_controller_vaults.cpp:171
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The server's password is not known on this device. Unlock the vault once so "
 "it is asked, then move it."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:139
+#: ../src/ui/vault_controller_vaults.cpp:202
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault could not be read."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:152
+#: ../src/ui/vault_controller_vaults.cpp:215
 msgctxt "chrono_vault::VaultController|"
 msgid "A file with that name is already there. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:192
+#: ../src/ui/vault_controller_vaults.cpp:256
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault could not be written there: the folder cannot be written, or the "
 "disk is full. The vault stays where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:205
+#: ../src/ui/vault_controller_vaults.cpp:269
 msgctxt "chrono_vault::VaultController|"
 msgid "The copy did not read back the same. The vault stays where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:224
+#: ../src/ui/vault_controller_vaults.cpp:288
 #: ../src/ui/vault_controller_webdav.cpp:474
 #: ../src/ui/vault_controller_webdav.cpp:587
 msgctxt "chrono_vault::VaultController|"
 msgid "Connect to the WebDAV folder first."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:307
+#: ../src/ui/vault_controller_vaults.cpp:372
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The copy on the server did not read back the same. The vault stays where it "
 "was."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:333
+#: ../src/ui/vault_controller_vaults.cpp:398
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "This device cannot write the vault's working copy, or the disk is full. The "
 "vault stays where it was."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:390
+#: ../src/ui/vault_controller_vaults.cpp:460
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5244,7 +5281,7 @@ msgid ""
 "yourself."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:405
+#: ../src/ui/vault_controller_vaults.cpp:475
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5252,7 +5289,7 @@ msgid ""
 "(%1): %2. Delete it there yourself."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:416
+#: ../src/ui/vault_controller_vaults.cpp:486
 msgctxt "chrono_vault::VaultController|"
 msgid "the server's password is not known"
 msgstr ""
@@ -5286,8 +5323,8 @@ msgid ""
 "That file is not a Chrono Vault vault, or this device cannot write its copy."
 msgstr ""
 
-#: ../src/ui/vault_controller_vaults.cpp:227
-#: ../src/ui/vault_controller_vaults.cpp:296
+#: ../src/ui/vault_controller_vaults.cpp:291
+#: ../src/ui/vault_controller_vaults.cpp:361
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "A vault with the name “%1” is already in that folder."
@@ -5298,25 +5335,25 @@ msgctxt "chrono_vault::VaultController|"
 msgid "Not yet"
 msgstr ""
 
-#: ../src/ui/vault_controller_pin.cpp:137
+#: ../src/ui/vault_controller_pin.cpp:138
 msgctxt "chrono_vault::VaultController|"
 msgid "The PIN could not be set: not enough memory."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:225
-#: ../src/ui/vault_controller_pin.cpp:242
+#: ../src/ui/vault_controller_ask.cpp:226
+#: ../src/ui/vault_controller_pin.cpp:243
 msgctxt "chrono_vault::VaultController|"
 msgid "The PIN could not be read. Type the master password."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:274
-#: ../src/ui/vault_controller_pin.cpp:276
+#: ../src/ui/vault_controller_ask.cpp:275
+#: ../src/ui/vault_controller_pin.cpp:277
 msgctxt "chrono_vault::VaultController|"
 msgid "The PIN could not be checked: not enough memory."
 msgstr ""
 
-#: ../src/ui/vault_controller_ask.cpp:273
-#: ../src/ui/vault_controller_pin.cpp:287
+#: ../src/ui/vault_controller_ask.cpp:274
+#: ../src/ui/vault_controller_pin.cpp:288
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not the PIN."
 msgstr ""

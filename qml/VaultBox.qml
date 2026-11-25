@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultBox.qml 0.6.105
+// VaultBox.qml 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
@@ -182,7 +183,7 @@ ComboBox {
                 Layout.preferredHeight: Math.round(18 * Appearance.factor)
             }
             Label {
-                visible: !vaultRow.isOther && (vaultRow.missing || (vaultBox.withLastUsed && vaultRow.modelData === vaultBox.shown))
+                visible: !vaultRow.isOther && (vaultRow.missing || (vaultBox.withLastUsed && vaultRow.modelData === VaultController.lastUsedVault))
                 text: vaultRow.missing ? qsTr("not found") : qsTr("last used")
                 opacity: 0.7
             }

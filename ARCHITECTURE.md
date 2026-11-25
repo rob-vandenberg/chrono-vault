@@ -49,6 +49,10 @@ The version lives only in the `project(...)` line of `CMakeLists.txt` (CPP-2); t
 save thread when the vault file's stamp changed, merges on the window's thread, and saves the result with the usual
 atomic, verified save.
 
+**Open, Closed, Locked (D-075).** `VaultController::lock` locks the open vault and the key store (the primary's key and the
+kept passwords, in memory); `closeOpenVault` and `lockVault` (`src/ui/vault_controller_vaults.cpp`) work on one vault.
+`returnTo` is the vault that opens by itself once the primary is unlocked after a lock (`goBackThroughPrimary`).
+
 ## 6. WebDAV storage (D-057)
 
 `src/ui/webdav_client.*` makes the WebDAV requests with Qt Network. `src/ui/webdav_sync.*` syncs one vault's working

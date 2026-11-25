@@ -83,3 +83,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-072](decisions/D-072.md) | Menus as wide as their longest entry, 120 at least; they close with their window |
 | [D-073](decisions/D-073.md) | One standard dialog for a master password, a PIN or a finger |
 | [D-074](decisions/D-074.md) | Another primary vault; Remember my credentials; Open, Closed, Locked |
+| [D-075](decisions/D-075.md) | Close and Lock per vault; the start-up page begins with the primary; the way back after a lock |

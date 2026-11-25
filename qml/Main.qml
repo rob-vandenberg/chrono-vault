@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.103
+// Main.qml 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
@@ -86,6 +87,8 @@ ApplicationWindow {
     readonly property bool busy: VaultController.state === VaultController.Busy
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
+    // Also with no vault open, while others open without a password (D-075).
+    readonly property bool lockable: unlocked || (VaultController.keyStoreOpen && VaultController.state !== VaultController.Busy)
 
     // A text field has the keyboard: the menus' shortcuts stand aside, so
     // Backspace deletes a letter, never the item (D-039).
@@ -324,7 +327,7 @@ ApplicationWindow {
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "lockAction"
                         text: qsTr("Lock vault")
-                        enabled: mainWindow.unlocked
+                        enabled: mainWindow.lockable
                         onTriggered: VaultController.lock()
                     }
                     Action {
@@ -742,7 +745,7 @@ ApplicationWindow {
                 objectName: "lockButton"
                 icon.source: "qrc:/icons/lock.svg"
                 icon.color: mainWindow.palette.buttonText
-                enabled: mainWindow.unlocked
+                enabled: mainWindow.lockable
                 onClicked: VaultController.lock()
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Lock the vault")
@@ -1027,10 +1030,16 @@ ApplicationWindow {
                     vaultPage.closeEditor()
                     settingsWindow.openKnown(vaultFile)
                 })
-            else if (vaultFile === VaultController.vaultPath)
+            else if (vaultFile === VaultController.vaultPath || VaultController.keepsChangesOf(vaultFile))
                 settingsWindow.openKnown(vaultFile)
             else
                 unlockPage.leaveForAnother(function() { settingsWindow.openKnown(vaultFile) })
+        }
+        onCloseVaultRequested: function(vaultFile) {
+            vaultPage.whenEditorFree(function() {
+                vaultPage.closeEditor()
+                VaultController.closeOpenVault(vaultFile)
+            })
         }
         onImportRequested: vaultPage.whenEditorFree(function() { importWindow.start() })
         onExportRequested: vaultPage.whenEditorFree(function() { exportWindow.ask() })

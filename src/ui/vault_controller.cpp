@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.6.105
+// vault_controller.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -454,11 +455,18 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         vaultList = {last};
         vaults.setValue(vaultListKey, vaultList);
     }
-    if (!last.isEmpty() && QFileInfo::exists(last)) {
-        setPath(last);
+    lastUsed = last;
+    // The primary first; when it is not found, the vault used last (D-075).
+    const QString primary = primaryVault();
+    if (!primary.isEmpty() && QFileInfo::exists(primary)) {
+        setPath(primary, false);
         currentState = State::Locked;
-    } else if (!last.isEmpty()) {
-        missingLast = last; // listed struck through until it is found (D-058)
+    } else {
+        missingLast = primary; // listed struck through until it is found (D-058)
+        if (!last.isEmpty() && last != primary && QFileInfo::exists(last)) {
+            setPath(last);
+            currentState = State::Locked;
+        }
     }
     // Which vaults are found, in the background (the owner, 0.3.65).
     vaultRetry.setSingleShot(true);
@@ -532,8 +540,10 @@ void VaultController::vaultsChecked(const QStringList& checked, QStringList foun
             missingLast = shown;
         }
         const QString primary = primaryVault();
-        const QString chosen = found.contains(primary) ? primary : found.constFirst();
-        setPath(chosen);
+        const QString chosen = found.contains(primary)    ? primary
+                               : found.contains(lastUsed) ? lastUsed
+                                                          : found.constFirst();
+        setPath(chosen, false);
         setState(State::Locked);
     }
     if (!found.isEmpty()) {
@@ -641,7 +651,7 @@ void VaultController::setSystemIdleMinutes(int minutes)
 
 void VaultController::mainWindowClosed()
 {
-    if (lockClosed && currentState == State::Unlocked) {
+    if (lockClosed) {
         lock();
     }
 }
@@ -656,7 +666,7 @@ void VaultController::checkSystemIdle()
 void VaultController::connectSystemActivity()
 {
     connect(activity.get(), &SystemActivity::sleeping, this, [this]() {
-        if (lockSleep && currentState == State::Unlocked) {
+        if (lockSleep) {
             lock();
         }
     });
@@ -666,8 +676,7 @@ void VaultController::connectSystemActivity()
             emit systemIdleAvailableChanged();
         }
         const qint64 sinceUnlock = (QDateTime::currentMSecsSinceEpoch() - unlockedAtMs) / 1000;
-        if (systemIdleLock && std::min(seconds, sinceUnlock) >= qint64(systemMinutes) * 60 &&
-            currentState == State::Unlocked) {
+        if (systemIdleLock && std::min(seconds, sinceUnlock) >= qint64(systemMinutes) * 60) {
             lock();
         }
     });
@@ -998,7 +1007,7 @@ void VaultController::updateWait()
     }
 }
 
-void VaultController::unlock(const QString& password)
+void VaultController::unlock(const QString& password, bool remember)
 {
     if (currentState != State::Locked || path.isEmpty()) {
         return;
@@ -1009,11 +1018,11 @@ void VaultController::unlock(const QString& password)
         return;
     }
     QByteArray passwordBytes = password.toUtf8();
-    startUnlock(passwordBytes);
+    startUnlock(passwordBytes, false, remember && canRememberHere());
     crypto::wipe(passwordBytes);
 }
 
-void VaultController::startUnlock(const QByteArray& password, bool savedPassword)
+void VaultController::startUnlock(const QByteArray& password, bool savedPassword, bool remember)
 {
     if (refusedWhileMoving()) {
         return;
@@ -1024,9 +1033,10 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
     const QString vaultFile = path;
     const QString keyfileFile = keyfileOf(path);
     const quint64 attempt = ++unlockAttempt;
+    const QString words = remember ? QString::fromUtf8(password) : QString();
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&unlockPool, [self, vaultFile, passwordBytes, attempt, keyfileFile,
-                                          savedPassword]() mutable {
+    (void)QtConcurrent::run(&unlockPool, [self, vaultFile, passwordBytes, attempt, keyfileFile, savedPassword,
+                                          words]() mutable {
         std::optional<QByteArray> fingerprint = QByteArray();
         if (!keyfileFile.isEmpty()) {
             fingerprint = keyfileFingerprint(keyfileFile);
@@ -1043,7 +1053,7 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
         }
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, read, attempt, fingerprint, savedPassword]() mutable {
+            [self, result, read, attempt, fingerprint, savedPassword, words]() mutable {
                 if (!self || attempt != self->unlockAttempt) {
                     result.key.wipe();
                     return;
@@ -1094,6 +1104,10 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                 }
                 self->unlocked(result.key, read.contents, *fingerprint);
                 self->keepForThisVault(); // its key for the finger, when that is on (D-043)
+                // "Remember my credentials", once the password was right (D-074).
+                if (!words.isEmpty() && self->primaryKey.isValid() && self->path != self->primaryVault()) {
+                    self->updateSavedPassword(self->path, words, true);
+                }
             },
             Qt::QueuedConnection);
     });
@@ -1196,6 +1210,10 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
         needKeyfile = false;
         emit keyfileChanged();
     }
+    if (path == primaryVault() && !returnTo.isEmpty() && returnTo != path && vaultList.contains(returnTo)) {
+        goBackThroughPrimary();
+        return;
+    }
     say(QString(), false);
     takeBackUnsaved();
     contentsChanged();
@@ -1205,33 +1223,69 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     startWebDav();       // every unlock syncs a vault kept on a server (D-057)
     if (path == primaryVault()) {
         rememberPrimary();
-        // After a lock, back to the vault that was shown (D-030).
-        const QString back = returnTo;
-        returnTo.clear();
-        if (back.isEmpty() || back == path || !vaultList.contains(back)) {
-            followMovedVaults(); // a moved vault's saved password follows it (D-060)
-        }
-        if (!back.isEmpty() && back != path && vaultList.contains(back)) {
-            switchToVault(back);
-        }
+        followMovedVaults(); // a moved vault's saved password follows it (D-060)
     }
+}
+
+void VaultController::goBackThroughPrimary()
+{
+    // After a lock: the primary's password was asked for its kept passwords
+    // only; its items are never shown (D-075).
+    const QString back = returnTo;
+    onlyKeyStore = true;
+    rememberPrimary();
+    keepForPin();
+    onlyKeyStore = false;
+    forgetUnlockedVault();
+    ++unlockAttempt;
+    leavingFor(back);
+    setPath(back);
+    emit keyfileChanged();
+    if (savedPasswords.contains(back)) {
+        QByteArray password = savedPasswords.value(back).toUtf8();
+        startUnlock(password, true);
+        crypto::wipe(password);
+        return;
+    }
+    // Not kept any more, changed on another device: it asks its own password.
+    say(QString(), false);
+    setState(State::Locked);
 }
 
 void VaultController::lock()
 {
     if (currentState != State::Unlocked) {
+        // No vault is open: the key store alone (D-075).
+        if (currentState != State::Busy && primaryKey.isValid()) {
+            forgetPrimary();
+            forgetPinKey();
+            say(QString(), false);
+        }
         return;
     }
+    // Opened out of the primary: the primary's password is asked, and it goes
+    // back to the vault shown; any other vault asks its own (D-075).
+    const QString shown = path;
+    const QString primary = primaryVault();
+    const bool throughPrimary = shown != primary && primaryKey.isValid() && savedPasswords.contains(shown) &&
+                                foundList.contains(primary);
+    lockEverything();
+    if (throughPrimary) {
+        setPath(primary, false);
+        returnTo = shown;
+        emit returnChanged();
+    }
+    setState(State::Locked);
+}
+
+void VaultController::lockEverything()
+{
     emit locking();
     keepUnsavedWhileLocked();
     forgetUnlockedVault();
     forgetPrimary();
     forgetPinKey(); // from now on only the PIN opens it again (D-059)
-    // Locking locks every vault; the unlock page shows the vault used last,
-    // whose own master password opens it (the owner, 0.3.64; until then the
-    // primary came back, D-030 point 5).
     say(QString(), false);
-    setState(State::Locked);
 }
 
 void VaultController::closeVault()
@@ -2877,7 +2931,7 @@ QString VaultController::vaultNameOf(const QString& vaultFile) const
 
 void VaultController::rememberPrimary()
 {
-    if (currentState != State::Unlocked || path != primaryVault()) {
+    if ((currentState != State::Unlocked && !onlyKeyStore) || path != primaryVault()) {
         return;
     }
     primaryKey.wipe();
@@ -2936,7 +2990,8 @@ void VaultController::showCreated(CreatedVault created)
 
 bool VaultController::opensAtOnce(const QString& vaultFile) const
 {
-    if (vaultFile.isEmpty() || vaultFile == path) {
+    // The one shown too, when it was closed (D-075).
+    if (vaultFile.isEmpty() || (vaultFile == path && currentState != State::Locked)) {
         return false;
     }
     return (vaultFile == primaryVault() && primaryKey.isValid()) || savedPasswords.contains(vaultFile);
@@ -2944,7 +2999,7 @@ bool VaultController::opensAtOnce(const QString& vaultFile) const
 
 void VaultController::switchToVault(const QString& vaultFile)
 {
-    if (vaultFile.isEmpty() || vaultFile == path || currentState == State::Busy) {
+    if (vaultFile.isEmpty() || currentState == State::Busy || (vaultFile == path && !opensAtOnce(vaultFile))) {
         return;
     }
     if (currentState == State::Unlocked && (dirty || savesRunning > 0)) {
@@ -2987,6 +3042,7 @@ void VaultController::tellKept()
 {
     ++keptCount;
     emit keptChanged();
+    restartAutoLock(); // it also locks the key store (D-075)
     emit askChanged();
 }
 
@@ -3012,6 +3068,100 @@ int VaultController::vaultStateOf(const QString& vaultFile) const
     }
     const bool kept = (vaultFile == primaryVault() && primaryKey.isValid()) || savedPasswords.contains(vaultFile);
     return kept ? 1 : 0;
+}
+
+bool VaultController::isKept(const QString& vaultFile) const
+{
+    return vaultFile == primaryVault() || savedPasswords.contains(vaultFile);
+}
+
+bool VaultController::canRememberHere() const
+{
+    return currentState == State::Locked && primaryKey.isValid() && path != primaryVault() && vaultStateOf(path) == 0;
+}
+
+void VaultController::dropSavedPassword(const QString& vaultFile)
+{
+    // As updateSavedPassword: read with the kept key, changed and written as
+    // safely as every save, off the window's thread (OR-5, OR-15).
+    const QString primary = primaryVault();
+    const bool shown = currentState == State::Unlocked && path == primary;
+    VaultKey kept = primaryKey;
+    kept.key = QByteArray(primaryKey.key.constData(), primaryKey.key.size());
+    const QVariantMap moved = VaultsFile().value(movedVaultsKey).toMap();
+    const auto empty = [vaultFile, moved](VaultContents& in) {
+        bool changed = false;
+        for (Item& one : in.items) {
+            const bool names = std::any_of(one.fields.cbegin(), one.fields.cend(), [&](const Field& f) {
+                return f.role == QLatin1String("vaultfile") && moved.value(f.value, f.value).toString() == vaultFile;
+            });
+            if (!names) {
+                continue;
+            }
+            for (Field& field : one.fields) {
+                if (field.role == QLatin1String("password") && !field.value.isEmpty()) {
+                    field.value.clear();
+                    one.modified = QDateTime::currentDateTimeUtc();
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    };
+    QPointer<VaultController> self(this);
+    const std::shared_ptr<Stamps> box = stamps;
+    (void)QtConcurrent::run(&savePool, [self, kept, primary, vaultFile, box, shown, empty]() mutable {
+        bool dropped = false;
+        OpenResult opened = openVaultFileWithKey(primary, kept);
+        // Shown and changed elsewhere a moment ago: read again first, so that
+        // change is never written over (OR-15).
+        const bool same = !shown || opened.stamp == box->get(primary);
+        if (opened.status == OpenStatus::Opened && same) {
+            ContentsResult read = contentsFromJson(opened.contents);
+            if (read.status == ContentsStatus::Read) {
+                dropped = true;
+                if (empty(read.contents)) {
+                    QByteArray json = contentsToJson(read.contents);
+                    QByteArray written;
+                    dropped = saveVaultFile(primary, json, opened.key, {}, &written) == SaveStatus::Saved;
+                    if (dropped) {
+                        box->set(primary, written);
+                    }
+                    crypto::wipe(json);
+                }
+            }
+        }
+        crypto::wipe(opened.contents);
+        opened.key.wipe();
+        kept.wipe();
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, primary, dropped, empty]() {
+                if (!self) {
+                    return;
+                }
+                if (!dropped) {
+                    emit self->vaultMenuProblem(tr("The password of “%1” could not be removed from “%2”, so it is not "
+                                                   "locked. Try again.")
+                                                    .arg(QFileInfo(vaultFile).completeBaseName(),
+                                                         QFileInfo(primary).completeBaseName()));
+                    return;
+                }
+                self->savedPasswords.remove(vaultFile);
+                if (self->currentState == State::Unlocked && self->path == primary) {
+                    (void)empty(self->base);
+                    if (empty(self->contents)) {
+                        self->contentsChanged();
+                    }
+                    if (self->dirty || self->savesRunning > 0) {
+                        self->saveInBackground(QString()); // changed meanwhile: without it too
+                    }
+                    emit self->saved(QString()); // a primary on a server is synced
+                }
+                self->tellKept();
+            },
+            Qt::QueuedConnection);
+    });
 }
 
 void VaultController::makePrimary(const QString& vaultFile)
@@ -3585,12 +3735,17 @@ void VaultController::say(const QString& text, bool isTrouble)
     }
 }
 
-void VaultController::setPath(const QString& newPath)
+void VaultController::setPath(const QString& newPath, bool used)
 {
     if (path != newPath) {
+        if (!returnTo.isEmpty()) {
+            returnTo.clear(); // another vault is picked
+            emit returnChanged();
+        }
         stopQuickUnlock(); // a finger asked for another vault is no longer the question
         path = newPath;
-        if (!path.isEmpty()) {
+        if (!path.isEmpty() && used) {
+            lastUsed = path;
             VaultsFile().setValue(lastVaultKey, path);
         }
         needKeyfile = false;
@@ -3778,13 +3933,14 @@ QString VaultController::mergeText(const MergeResult& merged)
 
 void VaultController::restartAutoLock()
 {
-    if (currentState == State::Unlocked && idleLock && lockMinutes > 0) {
+    const bool something = currentState == State::Unlocked || primaryKey.isValid();
+    if (something && idleLock && lockMinutes > 0) {
         autoLockTimer.start(lockMinutes * 60 * 1000);
     } else {
         autoLockTimer.stop();
     }
     // The system's inactive time is asked only while it can lock something.
-    if (currentState == State::Unlocked && systemIdleLock) {
+    if (something && systemIdleLock) {
         if (!systemIdleTimer.isActive()) {
             systemIdleTimer.start();
         }

@@ -26,9 +26,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vaults.cpp 0.3.64
+// test_vaults.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.3.64: A lock keeps the vault used last; its own password opens it (D-058)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.15: Initial release: several vaults, the keyfile, changing the master password (D-030, D-031)
@@ -67,6 +68,11 @@ private slots:
     void a_second_vault_is_opened_with_its_password_saved_in_the_primary();
     void a_lock_locks_every_vault_and_the_primary_unlocks_them_again();
     void vaults_not_found_are_hidden_and_looked_for_again();
+    void close_and_lock_work_on_one_vault();
+    void a_lock_without_an_open_vault_locks_the_key_store();
+    void a_password_that_cannot_be_removed_leaves_the_vault_closed();
+    void a_start_and_a_missing_primary_show_the_right_vault();
+    void a_password_typed_on_the_start_up_page_is_remembered();
     void a_vault_whose_password_is_not_saved_asks_for_it();
     void the_one_vault_of_an_older_version_becomes_the_primary();
     void a_vault_with_a_keyfile_needs_it_and_remembers_it();
@@ -170,10 +176,34 @@ void TestVaults::a_lock_locks_every_vault_and_the_primary_unlocks_them_again()
 
     vaults->lock();
     QCOMPARE(vaults->state(), State::Locked);
-    // The vault used last stays, with its own password (the owner, 0.3.64).
+    // Opened out of the primary: the primary's password, and back in Work,
+    // the primary's items never shown (D-075).
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    QCOMPARE(vaults->returnVault(), file("Work"));
+    bool primaryShown = false;
+    const auto watching = connect(vaults.get(), &VaultController::stateChanged, this, [&]() {
+        primaryShown = primaryShown || (vaults->state() == State::Unlocked && vaults->vaultPath() == file("Home"));
+    });
+    vaults->unlock(QStringLiteral("home pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    disconnect(watching);
+    QVERIFY(!primaryShown);
     QCOMPARE(vaults->vaultPath(), file("Work"));
+    QCOMPARE(vaults->items()->rowCount(), 1);
+    QVERIFY(vaults->returnVault().isEmpty() && vaults->keyStoreOpen());
+    // Work picked instead: its own password; from then on it is asked again,
+    // since the primary was skipped.
+    vaults->lock();
+    vaults->switchToVault(file("Work"));
+    QVERIFY(vaults->returnVault().isEmpty());
     vaults->unlock(QStringLiteral("home pass"));
     QTRY_COMPARE(vaults->state(), State::Locked); // the primary's password is not Work's
+    vaults->unlock(QStringLiteral("work pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    QVERIFY(!vaults->keyStoreOpen());
+    vaults->lock();
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+    QVERIFY(vaults->returnVault().isEmpty());
     vaults->unlock(QStringLiteral("work pass"));
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     QCOMPARE(vaults->vaultPath(), file("Work"));
@@ -196,8 +226,9 @@ void TestVaults::vaults_not_found_are_hidden_and_looked_for_again()
     create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
     create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
     vaults->lock();
-    QCOMPARE(vaults->vaultPath(), file("Work"));
-    // The vault used last is gone (its drive not connected): the primary is
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    vaults->switchToVault(file("Work"));
+    // The vault chosen is gone (its drive not connected): the primary is
     // chosen, the last used kept to be shown struck through.
     QVERIFY(QFile::rename(file("Work"), file("Work") + QStringLiteral(".away")));
     vaults->checkVaults();
@@ -218,6 +249,141 @@ void TestVaults::vaults_not_found_are_hidden_and_looked_for_again()
     QTRY_COMPARE(vaults->vaultPath(), file("Work"));
     QVERIFY(!vaults->noVaultFound());
     QCOMPARE(vaults->missingVault(), QString());
+}
+
+void TestVaults::close_and_lock_work_on_one_vault()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    // Close: only the open vault; the page begins with the primary, Closed.
+    vaults->lockVault(file("Work")); // as a door: closed first
+    QCOMPARE(vaults->state(), State::Unlocked);
+    vaults->closeOpenVault(file("Work"));
+    QCOMPARE(vaults->state(), State::Locked);
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    QCOMPARE(vaults->vaultStateOf(file("Work")), 1);
+    QCOMPARE(vaults->vaultStateOf(file("Home")), 1);
+    QVERIFY(vaults->keyStoreOpen());
+    vaults->switchToVault(file("Home")); // opens without a password
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+
+    // Lock on a Closed one, the primary open: its password leaves the primary,
+    // here and on the disk; the item stays.
+    const QString savedId = vaults->items()->data(vaults->items()->index(0), ItemListModel::IdRole).toString();
+    vaults->lockVault(file("Work"));
+    QTRY_COMPARE(vaults->vaultStateOf(file("Work")), 0);
+    QCOMPARE(fieldOf(vaults->item(savedId), QStringLiteral("password")), QString());
+    QCOMPARE(fieldOf(vaults->item(savedId), QStringLiteral("vaultfile")), file("Work"));
+    QVERIFY(vaults->saveItem(vaults->newLogin())); // a later save does not bring it back
+    QTRY_VERIFY(vaults->isIdle());
+    vaults->lock();
+    vaults->unlock(QStringLiteral("home pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->items()->rowCount(), 2);
+    QCOMPARE(vaults->vaultStateOf(file("Work")), 0);
+
+    // An open vault without a kept password: Lock locks only that one, and a
+    // lock of everything asks its own password.
+    vaults->switchToVault(file("Work"));
+    vaults->unlock(QStringLiteral("work pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    vaults->lockVault(file("Work"));
+    QCOMPARE(vaults->state(), State::Locked);
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    QCOMPARE(vaults->vaultStateOf(file("Home")), 1);
+    vaults->switchToVault(file("Work"));
+    vaults->unlock(QStringLiteral("work pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    // Lock on the Closed primary: an open vault stays open.
+    vaults->lockVault(file("Home"));
+    QCOMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+    QCOMPARE(vaults->vaultStateOf(file("Home")), 0);
+    vaults->lock();
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+}
+
+void TestVaults::a_lock_without_an_open_vault_locks_the_key_store()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    vaults->closeOpenVault(file("Work"));
+    QVERIFY(vaults->keyStoreOpen());
+    vaults->lock();
+    QVERIFY(!vaults->keyStoreOpen());
+    QCOMPARE(vaults->vaultStateOf(file("Work")), 0);
+    QCOMPARE(vaults->vaultStateOf(file("Home")), 0);
+    // Nothing was deleted.
+    vaults->unlock(QStringLiteral("home pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultStateOf(file("Work")), 1);
+    // Autolock as the window closes, with no vault open.
+    vaults->closeOpenVault(file("Home"));
+    vaults->setLockWhenClosed(true);
+    vaults->mainWindowClosed();
+    QVERIFY(!vaults->keyStoreOpen());
+}
+
+void TestVaults::a_password_that_cannot_be_removed_leaves_the_vault_closed()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    vaults->closeOpenVault(file("Work"));
+    QSignalSpy problem(vaults.get(), &VaultController::vaultMenuProblem);
+    QVERIFY(QFile::rename(file("Home"), file("Home") + QStringLiteral(".away")));
+    vaults->lockVault(file("Work"));
+    QTRY_COMPARE(problem.size(), 1);
+    QCOMPARE(vaults->vaultStateOf(file("Work")), 1);
+    QVERIFY(QFile::rename(file("Home") + QStringLiteral(".away"), file("Home")));
+    vaults->lockVault(file("Work"));
+    QTRY_COMPARE(vaults->vaultStateOf(file("Work")), 0);
+    QCOMPARE(problem.size(), 1);
+}
+
+void TestVaults::a_start_and_a_missing_primary_show_the_right_vault()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    create(*vaults, QStringLiteral("Last"), QStringLiteral("last pass"));
+    vaults.reset();
+    auto again = controller();
+    QCOMPARE(again->vaultPath(), file("Home"));
+    QCOMPARE(again->lastUsedVault(), file("Last"));
+    QVERIFY(again->returnVault().isEmpty());
+    again.reset();
+    QVERIFY(QFile::rename(file("Home"), file("Home") + QStringLiteral(".away")));
+    auto without = controller();
+    QCOMPARE(without->vaultPath(), file("Last"));
+    without->unlock(QStringLiteral("last pass"));
+    QTRY_COMPARE(without->state(), State::Unlocked);
+    without->lock();
+    QCOMPARE(without->vaultPath(), file("Last"));
+}
+
+void TestVaults::a_password_typed_on_the_start_up_page_is_remembered()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"));
+    vaults->switchToVault(file("Home"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    vaults->closeOpenVault(file("Home"));
+    vaults->switchToVault(file("Work"));
+    QCOMPARE(vaults->state(), State::Locked);
+    vaults->unlock(QStringLiteral("wrong"), true);
+    QTRY_COMPARE(vaults->state(), State::Locked);
+    vaults->unlock(QStringLiteral("work pass"), true);
+    QTRY_VERIFY(vaults->state() == State::Unlocked && vaults->isKept(file("Work")));
+    // Remembered: a lock asks the primary's password, and comes back (Q253).
+    vaults->lock();
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    vaults->unlock(QStringLiteral("home pass"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Work"));
 }
 
 void TestVaults::a_vault_whose_password_is_not_saved_asks_for_it()
@@ -392,8 +558,7 @@ void TestVaults::a_changed_password_is_changed_in_the_primary_too()
     vaults->lock();
     vaults.reset();
     auto again = controller();
-    QCOMPARE(again->vaultPath(), file("Work")); // the vault used last (0.3.64)
-    again->switchToVault(file("Home"));
+    QCOMPARE(again->lastUsedVault(), file("Work"));
     QCOMPARE(again->vaultPath(), file("Home"));
     again->unlock(QStringLiteral("home pass"));
     QTRY_COMPARE(again->state(), State::Unlocked);

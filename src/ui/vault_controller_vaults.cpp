@@ -27,9 +27,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_vaults.cpp 0.6.105
+// vault_controller_vaults.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
 
@@ -64,9 +65,70 @@ bool VaultController::refusedWhileMoving()
 
 void VaultController::lockVault(const QString& vaultFile)
 {
-    if (vaultFile == path && currentState == State::Unlocked) {
-        lock();
+    if (currentState == State::Busy) {
+        return;
     }
+    const QString primary = primaryVault();
+    if (vaultFile == path && currentState == State::Unlocked) {
+        // An open vault that opens without a password is closed first, as a door.
+        if (!isKept(vaultFile)) {
+            leaveOpenVault();
+        }
+        return;
+    }
+    if (!primaryKey.isValid()) {
+        return; // it is locked already
+    }
+    if (vaultFile == primary) {
+        forgetPrimary(); // its key store; nothing is deleted, an open vault stays open
+        if (currentState != State::Unlocked) {
+            forgetPinKey();
+        }
+        return;
+    }
+    if (!savedPasswords.contains(vaultFile)) {
+        return;
+    }
+    if (currentState == State::Unlocked && path == primary && (dirty || savesRunning > 0)) {
+        emit vaultMenuProblem(tr("Wait until your last change is saved, then try again."));
+        return;
+    }
+    dropSavedPassword(vaultFile);
+}
+
+void VaultController::closeOpenVault(const QString& vaultFile)
+{
+    if (vaultFile != path || currentState != State::Unlocked) {
+        return;
+    }
+    if (dirty || savesRunning > 0) {
+        emit vaultMenuProblem(tr("Wait until your last change is saved, then try again."));
+        return;
+    }
+    if (path == primaryVault()) {
+        rememberPrimary();
+    }
+    leaveOpenVault();
+}
+
+void VaultController::leaveOpenVault()
+{
+    // Only the vault that is open: the key store stays as it is (D-075).
+    emit locking();
+    keepUnsavedWhileLocked();
+    forgetUnlockedVault();
+    forgetPinKey();
+    const QString primary = primaryVault();
+    if (primaryKey.isValid() && foundList.contains(primary)) {
+        setPath(primary, false); // the start-up page begins with the primary
+    }
+    say(QString(), false);
+    setState(State::Locked);
+}
+
+bool VaultController::keepsChangesOf(const QString& vaultFile) const
+{
+    return !unsavedSealed.isEmpty() && unsavedPath == vaultFile;
 }
 
 QString VaultController::moveProblem(const QString& vaultFile) const
@@ -159,7 +221,8 @@ void VaultController::moveVaultTo(const QString& vaultFile, const QUrl& file)
     moveRunning = true;
     movingVault = vaultFile;
     if (vaultFile == path && currentState == State::Unlocked) {
-        lock(); // nothing changes while it is copied (the owner)
+        lockEverything(); // nothing changes while it is copied (the owner)
+        setState(State::Locked);
     }
     QPointer<VaultController> self(this);
     readForMove(vaultFile, [self, vaultFile, target](std::optional<QByteArray> data, const QString& readProblem) {
@@ -234,7 +297,8 @@ void VaultController::moveVaultToWebDav(const QString& vaultFile)
     moveRunning = true;
     movingVault = vaultFile;
     if (vaultFile == path && currentState == State::Unlocked) {
-        lock();
+        lockEverything();
+        setState(State::Locked);
     }
     const WebDavAccount account = connection->account();
     QPointer<VaultController> self(this);
@@ -370,6 +434,11 @@ void VaultController::finishMove(const QString& vaultFile, const QString& newPat
     carryVaultSettings(vaultFile, newPath);
     if (returnTo == vaultFile) {
         returnTo = newPath;
+        emit returnChanged();
+    }
+    if (lastUsed == vaultFile) {
+        lastUsed = newPath;
+        VaultsFile().setValue(QStringLiteral("vault/lastPath"), newPath);
     }
     if (path == vaultFile) {
         setPath(newPath);
@@ -446,7 +515,8 @@ void VaultController::forgetVault(const QString& vaultFile)
         return;
     }
     if (vaultFile == path && currentState == State::Unlocked) {
-        lock();
+        lockEverything();
+        setState(State::Locked);
     }
     if (vaultFile == unsavedPath) {
         discardKeptChanges();
@@ -475,6 +545,7 @@ void VaultController::forgetVault(const QString& vaultFile)
     }
     if (returnTo == vaultFile) {
         returnTo.clear();
+        emit returnChanged();
     }
     if (path == vaultFile) {
         // Back to the primary's unlock page (taken in autonomous mode, Q39).

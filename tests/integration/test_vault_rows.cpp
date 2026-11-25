@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.105
+// test_vault_rows.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.104: A click on the eye
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -158,6 +159,16 @@ private slots:
         controller->switchToVault(first);
         QTRY_VERIFY(is(first) && controller->vaultStateOf(second) == 1);
         QVERIFY(controller->opensAtOnce(second));
+        // A lock there: the page says which password, and where it leads (D-075).
+        controller->switchToVault(second);
+        QTRY_VERIFY(is(second) && controller->isIdle());
+        controller->lock();
+        QTRY_COMPARE(part("unlockLine")->property("text").toString(),
+                     QStringLiteral("Enter the Master Password of “%1” to return to “mine”").arg(controller->vaultNameOf(first)));
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_VERIFY(is(second));
+        controller->switchToVault(first);
+        QTRY_VERIFY(is(first));
         controller->lock();
         controller->unlock(QStringLiteral("pass"));
         QTRY_VERIFY(is(first));
@@ -263,7 +274,9 @@ private slots:
         QTest::mouseClick(settings(), Qt::RightButton, {}, lock->mapToScene(QPointF(40, 8)).toPoint());
         QTRY_VERIFY(menu->property("opened").toBool());
         QVERIFY(entry(QStringLiteral("openVault_"), first)->property("height").toDouble() > 0);
-        QCOMPARE(entry(QStringLiteral("lockVault_"), first)->property("height").toDouble(), 0.0);
+        // The primary is Closed: Open and Lock, no Close (D-075).
+        QVERIFY(entry(QStringLiteral("lockVault_"), first)->property("height").toDouble() > 0);
+        QCOMPARE(entry(QStringLiteral("closeVault_"), first)->property("height").toDouble(), 0.0);
         QMetaObject::invokeMethod(menu, "close");
         QTRY_VERIFY(!menu->property("visible").toBool());
         // The open vault's has Lock.
@@ -271,6 +284,7 @@ private slots:
         QTRY_VERIFY(entry(QString(), second)->property("opened").toBool());
         QVERIFY(entry(QStringLiteral("lockVault_"), second)->property("height").toDouble() > 0);
         QCOMPARE(entry(QStringLiteral("openVault_"), second)->property("height").toDouble(), 0.0);
+        QCOMPARE(entry(QStringLiteral("closeVault_"), second)->property("height").toDouble(), 0.0);
         QMetaObject::invokeMethod(entry(QString(), second), "close");
         QTRY_VERIFY(!entry(QString(), second)->property("visible").toBool());
 
@@ -278,9 +292,28 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), first), "triggered"));
         QTRY_VERIFY(opened(first));
         QVERIFY(!opened(second));
-        // Lock, from the same menu.
+        // Close: the start-up page with Open in the field's place, no tick box
+        // for the primary; then Lock, from the same menu: the field again.
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first) && !opened(second));
+        QTRY_VERIFY(part("openClosedButton") && part("openClosedButton")->isVisible());
+        QVERIFY(!part("masterPasswordField") || !part("masterPasswordField")->isVisible());
+        QVERIFY(window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
+        QVERIFY(QMetaObject::invokeMethod(part("openClosedButton"), "clicked"));
+        QTRY_VERIFY(opened(first));
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first));
+        // A Locked vault picked while the key store is open has the tick box.
+        controller->switchToVault(controller->vaults().constLast());
+        QTRY_VERIFY(part("unlockRemember") && part("unlockRemember")->isVisible());
+        controller->switchToVault(controller->primaryVault());
+        QTRY_VERIFY(opened(first));
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first));
         QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("lockVault_"), first), "triggered"));
         QTRY_VERIFY(!opened(first) && !opened(second));
+        QTRY_VERIFY(part("masterPasswordField") && part("masterPasswordField")->isVisible());
+        QVERIFY(!window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
         // Open asks the master password; a wrong one is said, the right one opens it.
         QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), second), "triggered"));
         QQuickWindow* ask = settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"));

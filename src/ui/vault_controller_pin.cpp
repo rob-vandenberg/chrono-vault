@@ -34,9 +34,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_pin.cpp 0.6.103
+// vault_controller_pin.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: The primary opened for its key store only (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.70: Initial release (D-059)
 
@@ -169,7 +170,7 @@ void VaultController::setPin(const QString& pin)
 
 void VaultController::keepForPin()
 {
-    if (currentState != State::Unlocked || !key.isValid() || !pinSet()) {
+    if ((currentState != State::Unlocked && !onlyKeyStore) || !key.isValid() || !pinSet()) {
         return;
     }
     VaultsFile settings;

@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.6.88
+// test_webdav_windows.cpp 0.6.106
 
 // --- Version history ----------------------------------------------------
+// v0.6.106: Close and Lock per vault (D-075)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
 // v0.5.77: Import… and Export… in the vault menu (D-060)
@@ -304,7 +305,8 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
         (void)QTest::qWaitFor([menu]() { return !menu->property("visible").toBool(); }, 5000);
         return visible;
     };
-    QVERIFY(shown(QStringLiteral("lockVault_Home")));
+    QVERIFY(shown(QStringLiteral("closeVault_Home")));
+    QVERIFY(!shown(QStringLiteral("lockVault_Home")));
     QVERIFY(shown(QStringLiteral("moveVault_Home")));
     QVERIFY(!shown(QStringLiteral("forgetVault_Home"))); // the primary
     QVERIFY(shown(QStringLiteral("disconnect_Home")));
@@ -323,7 +325,10 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(shown(QStringLiteral("moveVault_Home")));
     QTRY_COMPARE(place->property("text").toString(), QStringLiteral("Local file"));
 
-    // Lock from the menu; then Lock is no longer offered.
+    // Close from the menu, then Lock; then Lock is no longer offered.
+    QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("closeVault_Home")), "triggered"));
+    QTRY_COMPARE(controller->state(), State::Locked);
+    QTRY_VERIFY(shown(QStringLiteral("lockVault_Home")));
     QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("lockVault_Home")), "triggered"));
     QTRY_COMPARE(controller->state(), State::Locked);
     QTRY_VERIFY(!shown(QStringLiteral("lockVault_Home")));
