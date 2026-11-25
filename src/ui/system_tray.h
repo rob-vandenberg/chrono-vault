@@ -26,9 +26,10 @@ class QSystemTrayIcon;
 class QWindow;
 
 // --- Version ------------------------------------------------------------
-// system_tray.h 0.5.85
+// system_tray.h 0.6.96
 
 // --- Version history ----------------------------------------------------
+// v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
 // v0.0.4: Initial release
 
@@ -53,17 +54,15 @@ public:
     void lockVault();
     void quit();
 
-    [[nodiscard]] QString iconFile() const { return shownIcon; }
+    [[nodiscard]] static QString iconFile() { return QStringLiteral(":/icons/chrono-vault-tray.svg"); }
     [[nodiscard]] QAction* lockAction() const { return lock; }
 
 private:
     void updateLockAction();
-    void updateIcon();
 
     QPointer<VaultController> controller;
     QPointer<QWindow> window;
     QSystemTrayIcon* icon = nullptr;
-    QString shownIcon;
     QMenu* menu = nullptr;
     QAction* show = nullptr;
     QAction* lock = nullptr;

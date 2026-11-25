@@ -19,6 +19,7 @@
 # qml/CMakeLists.txt 0.6.88
 
 # --- Version history ----------------------------------------------------
+# v0.6.96: One tray icon, the owner's, on every tray (D-064)
 # v0.6.88: The settings' pages Categories, Tags and Templates (D-066)
 # v0.6.86: The audit (D-065)
 # v0.5.85: The tray icons (D-064)
@@ -125,8 +126,6 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/single_instance.h
         ../src/ui/system_tray.cpp
         ../src/ui/system_tray.h
-        ../src/ui/tray_icon.cpp
-        ../src/ui/tray_icon.h
         ../src/ui/theme.cpp
         ../src/ui/theme.h
         ../src/ui/updater.cpp
@@ -155,7 +154,6 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
     FILES
         "${PROJECT_SOURCE_DIR}/art/chrono-vault.svg"
         "${PROJECT_SOURCE_DIR}/art/chrono-vault-tray.svg"
-        "${PROJECT_SOURCE_DIR}/art/chrono-vault-tray-light.svg"
         "${PROJECT_SOURCE_DIR}/art/eye.svg"
         "${PROJECT_SOURCE_DIR}/art/eye-hidden.svg"
         "${PROJECT_SOURCE_DIR}/art/item-login.svg"
@@ -282,7 +280,6 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/item_list_model.cpp
     ../src/ui/single_instance.cpp
     ../src/ui/system_tray.cpp
-    ../src/ui/tray_icon.cpp
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
     ../src/ui/vault_controller_audit.cpp

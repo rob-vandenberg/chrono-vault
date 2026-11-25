@@ -12,7 +12,6 @@ chrono-vault.sh
 art/*
 !art/chrono-vault.svg
 !art/chrono-vault-tray.svg
-!art/chrono-vault-tray-light.svg
 !art/storage-webdav.svg
 !art/storage-device.svg
 !art/folder.svg

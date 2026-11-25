@@ -17,7 +17,6 @@
 
 #include "system_tray.h"
 
-#include "tray_icon.h"
 #include "vault_controller.h"
 
 #include <QAction>
@@ -27,9 +26,10 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// system_tray.cpp 0.5.85
+// system_tray.cpp 0.6.96
 
 // --- Version history ----------------------------------------------------
+// v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
 // v0.0.4: Initial release
 
@@ -50,7 +50,6 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
         connect(controller, &VaultController::stateChanged, this, &SystemTray::updateLockAction);
     }
     updateLockAction();
-    connect(new TrayColourWatch(this), &TrayColourWatch::changed, this, &SystemTray::updateIcon);
 
     if (isAvailable()) {
         icon = new QSystemTrayIcon(this);
@@ -62,7 +61,9 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
             }
         });
     }
-    updateIcon();
+    if (icon) {
+        icon->setIcon(QIcon(iconFile()));
+    }
     if (icon) {
         icon->show();
     }
@@ -71,19 +72,6 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
 SystemTray::~SystemTray()
 {
     delete menu;
-}
-
-// The vault that is seen on the tray as it is now.
-void SystemTray::updateIcon()
-{
-    const QString file = trayIconFile(trayColour());
-    if (file == shownIcon) {
-        return;
-    }
-    shownIcon = file;
-    if (icon) {
-        icon->setIcon(QIcon(file));
-    }
 }
 
 bool SystemTray::isAvailable()

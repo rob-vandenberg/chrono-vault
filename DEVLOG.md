@@ -778,3 +778,8 @@ The owner's changelist items 1-9 (D-070). `src/ui/window_memory.*`, `src/ui/file
 
 The owner's changelist items 1-10: `src/ui/program_scale.h`, `qml/Main.qml`, `qml/SettingsWindow.qml`,
 `qml/MasterPasswordWindow.qml`; `test_appearance`, `test_menus`. No reviewers.
+
+## 25 November 2026: version 0.6.96: the tray icon
+
+The owner's own `art/chrono-vault-tray.svg` on every tray (D-064); `src/ui/tray_icon.*` and the edged icon are gone.
+`test_tray`. No reviewers.
