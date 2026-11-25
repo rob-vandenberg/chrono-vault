@@ -24,6 +24,7 @@ art/*
 !art/plus.svg
 !art/generate.svg
 !art/lock.svg
+!art/lock-open.svg
 !art/settings.svg
 !art/home.svg
 !art/edit.svg

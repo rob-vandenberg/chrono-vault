@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.6.92
+// WelcomePage.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Its windows in front of the window that asked (D-062)
 // v0.5.78: Choose the master password: the saved password's tick box first; every text wraps with the window (D-061)
@@ -82,7 +83,7 @@ Item {
                 textFormat: Text.PlainText
                 color: "#e53e3e"
             }
-            ToolButton {
+            PictureButton {
                 objectName: "retryVaultsButton"
                 text: "↻"
                 Accessible.name: qsTr("Look again")

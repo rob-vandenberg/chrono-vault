@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.6.94
+// ConflictWindow.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: The normal scroll bar, Enter applies; the split button with 5 pixels free at its sides (D-062)
@@ -568,7 +569,7 @@ DialogWindow {
                 }
                 Repeater {
                     model: conflictWindow.allRows
-                    delegate: ToolButton {
+                    delegate: PictureButton {
                         required property var modelData
                         required property int index
                         objectName: "conflictSplit_" + modelData.index
@@ -577,10 +578,6 @@ DialogWindow {
                         Layout.row: index + 1
                         Layout.column: 3
                         Layout.alignment: Qt.AlignTop
-                        Layout.preferredHeight: lineHeightOfRow.height * Appearance.factor + 2 * (conflictWindow.line + conflictWindow.innerTop)
-                        Layout.preferredWidth: implicitWidth
-                        padding: 0
-                        horizontalPadding: 1 + 5 * Appearance.factor
                         icon.source: "qrc:/icons/split.svg"
                         icon.width: Math.round(20 * Appearance.factor)
                         icon.height: Math.round(20 * Appearance.factor)
@@ -594,5 +591,4 @@ DialogWindow {
             }
         }
     }
-    FontMetrics { id: lineHeightOfRow; font: conflictWindow.font }
 }

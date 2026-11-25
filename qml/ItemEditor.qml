@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.6.92
+// ItemEditor.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Edit puts the keyboard in the title, Esc cancels, Ctrl+S saves (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
@@ -530,9 +531,10 @@ Item {
                                     onClicked: generator.openFor(fieldRow.index)
                                 }
                                 // Field Options, in blue, under the mouse.
-                                ToolButton {
+                                PictureButton {
                                     objectName: "fieldOptionsButton"
-                                    text: "…"
+                                    dots: true
+                                    menuOpen: fieldOptions.visible && fieldOptions.fieldIndex === fieldRow.index
                                     palette.buttonText: editor.palette.highlight
                                     opacity: fieldRow.active ? 1 : 0
                                     Layout.alignment: fieldRow.model.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter

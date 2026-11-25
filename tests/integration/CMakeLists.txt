@@ -19,6 +19,7 @@
 # tests/integration/CMakeLists.txt 0.6.92
 
 # --- Version history ----------------------------------------------------
+# v0.6.100: test_vault_rows (D-071)
 # v0.6.92: test_exact_scaling (D-069)
 # v0.6.91: test_dialog_keys (D-068)
 # v0.6.86: test_audit_windows (D-065)
@@ -85,6 +86,11 @@ qt_add_executable(test_exact_scaling test_exact_scaling.cpp intuitive_fixture.h)
 target_link_libraries(test_exact_scaling PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_exact_scaling)
 chrono_vault_add_test(test_exact_scaling)
+
+qt_add_executable(test_vault_rows test_vault_rows.cpp intuitive_fixture.h)
+target_link_libraries(test_vault_rows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_vault_rows)
+chrono_vault_add_test(test_vault_rows)
 
 qt_add_executable(test_audit_windows test_audit_windows.cpp intuitive_fixture.h)
 target_link_libraries(test_audit_windows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Network Qt6::Qml Qt6::Quick Qt6::Test)

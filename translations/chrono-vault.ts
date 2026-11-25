@@ -193,13 +193,13 @@
     </message>
     <message>
         <location line="+6"/>
-        <location line="+331"/>
+        <location line="+327"/>
         <location line="+2"/>
         <source>Keep both</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-318"/>
+        <location line="-314"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
@@ -567,7 +567,7 @@
     <name>FieldRow</name>
     <message>
         <location filename="../qml/FieldRow.qml" line="+169"/>
-        <location line="+46"/>
+        <location line="+47"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1377,7 +1377,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+21"/>
         <location line="+42"/>
         <source>Unarchive</source>
         <translation type="unfinished"></translation>
@@ -1493,7 +1493,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+187"/>
+        <location line="+188"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1523,7 +1523,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-328"/>
+        <location line="-329"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1566,17 +1566,17 @@
     <message>
         <location line="+48"/>
         <location line="+42"/>
-        <location line="+403"/>
+        <location line="+404"/>
         <source>Section</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-377"/>
+        <location line="-378"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+464"/>
+        <location line="+465"/>
         <source>Add an attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1596,7 +1596,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-721"/>
+        <location line="-722"/>
         <source>Numeric</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1677,12 +1677,12 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+399"/>
+        <location line="+400"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-325"/>
+        <location line="-326"/>
         <source>Change the icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1697,7 +1697,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+21"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2055,7 +2055,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+83"/>
+        <location line="+95"/>
         <source>Trust this certificate?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2238,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+272"/>
+        <location filename="../qml/SettingsWindow.qml" line="+288"/>
         <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2297,12 +2297,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1038"/>
+        <location line="+1069"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1039"/>
+        <location line="-1070"/>
         <location line="+474"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2412,8 +2412,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+80"/>
         <source>Primary vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <location line="+41"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-41"/>
+        <source>Locked</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2432,7 +2443,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+54"/>
+        <location line="+62"/>
         <source>Import…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2447,7 +2458,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+68"/>
+        <location line="+71"/>
         <source>Unlock the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2522,7 +2533,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-772"/>
+        <location line="-803"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2608,7 +2619,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+692"/>
+        <location line="+723"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2623,7 +2634,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-367"/>
+        <location line="-378"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2633,7 +2644,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+15"/>
         <source>Lock</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2648,7 +2659,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+164"/>
+        <location line="+167"/>
         <source>Where should the vault be moved to?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2703,15 +2714,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1316"/>
-        <location line="+1255"/>
+        <location line="-1347"/>
+        <location line="+1286"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1322"/>
-        <location line="+1164"/>
+        <location line="-1353"/>
+        <location line="+1195"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -3463,7 +3474,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+737"/>
+        <location filename="../qml/VaultPage.qml" line="+741"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3483,8 +3494,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-577"/>
-        <location line="+585"/>
+        <location line="-581"/>
+        <location line="+589"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4318,26 +4329,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2333"/>
+        <location line="+2341"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+494"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2329"/>
-        <location line="+2334"/>
+        <location line="-2337"/>
+        <location line="+2342"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2237"/>
-        <location line="+2137"/>
+        <location line="-2245"/>
+        <location line="+2145"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2226"/>
+        <location line="-2234"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4349,7 +4360,7 @@
     <message>
         <location line="+37"/>
         <location line="+124"/>
-        <location line="+2015"/>
+        <location line="+2023"/>
         <location line="+214"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+83"/>
         <location line="+358"/>
@@ -4359,7 +4370,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2298"/>
+        <location line="-2306"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -4796,7 +4807,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+303"/>
+        <location line="+311"/>
         <source>The master password was changed, but the copy saved in “%1” could not be changed. Change it there by hand.</source>
         <translation type="unfinished"></translation>
     </message>

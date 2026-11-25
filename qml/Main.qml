@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.97
+// Main.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
@@ -743,7 +744,7 @@ ApplicationWindow {
                 icon.color: mainWindow.palette.buttonText
                 onClicked: toolsGenerator.open()
             }
-            ToolButton {
+            PictureButton {
                 objectName: "lockButton"
                 icon.source: "qrc:/icons/lock.svg"
                 icon.color: mainWindow.palette.buttonText
@@ -752,7 +753,7 @@ ApplicationWindow {
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Lock the vault")
             }
-            ToolButton {
+            PictureButton {
                 objectName: "preferencesButton"
                 icon.source: "qrc:/icons/settings.svg"
                 icon.color: mainWindow.palette.buttonText
@@ -1025,6 +1026,18 @@ ApplicationWindow {
         // In front of the settings, which stay open (D-062).
         onCreateVaultRequested: mainWindow.newVaultOver(settingsWindow)
         onOpenVaultRequested: mainWindow.openVaultOver(settingsWindow)
+        // As another vault chosen in the sidebar, or on the unlock page.
+        onOpenKnownRequested: function(vaultFile) {
+            if (mainWindow.unlocked)
+                vaultPage.whenEditorFree(function() {
+                    vaultPage.closeEditor()
+                    settingsWindow.openKnown(vaultFile)
+                })
+            else if (vaultFile === VaultController.vaultPath)
+                settingsWindow.openKnown(vaultFile)
+            else
+                unlockPage.leaveForAnother(function() { settingsWindow.openKnown(vaultFile) })
+        }
         onImportRequested: vaultPage.whenEditorFree(function() { importWindow.start() })
         onExportRequested: vaultPage.whenEditorFree(function() { exportWindow.ask() })
     }

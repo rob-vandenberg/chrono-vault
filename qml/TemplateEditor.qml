@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplateEditor.qml 0.6.92
+// TemplateEditor.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
 // v0.0.14: Initial release (D-027)
@@ -161,17 +162,17 @@ DialogWindow {
                                 fieldsModel.setProperty(fieldRow.index, "kind", templateEditor.kinds[chosen].kind)
                             }
                         }
-                        ToolButton {
+                        PictureButton {
                             text: "↑"
                             enabled: fieldRow.index > 0
                             onClicked: templateEditor.moveField(fieldRow.index, -1)
                         }
-                        ToolButton {
+                        PictureButton {
                             text: "↓"
                             enabled: fieldRow.index < fieldsModel.count - 1
                             onClicked: templateEditor.moveField(fieldRow.index, 1)
                         }
-                        ToolButton {
+                        PictureButton {
                             text: "×"
                             onClicked: fieldsModel.remove(fieldRow.index)
                             ToolTip.visible: hovered

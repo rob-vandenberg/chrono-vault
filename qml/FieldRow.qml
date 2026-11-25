@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// FieldRow.qml 0.6.92
+// FieldRow.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.86: What the audit says under a password (D-065)
 // v0.5.82: A double click copies, a right click opens the menu (D-062)
@@ -156,7 +157,7 @@ Item {
         }
     }
     // The one-time code copied with one click, left of its ring (D-039).
-    ToolButton {
+    PictureButton {
         objectName: "copyCodeButton"
         visible: row.kind === "totp" && row.code !== ""
         icon.source: "qrc:/icons/copy.svg"
@@ -201,10 +202,11 @@ Item {
             font.pointSize: Appearance.fontPointSize * 0.7
         }
     }
-    ToolButton {
+    PictureButton {
         id: menuButton
         objectName: "rowMenuButton"
-        text: "…"
+        dots: true
+        menuOpen: rowMenu.visible
         anchors.right: parent.right
         anchors.rightMargin: 8 * Appearance.factor
         anchors.verticalCenter: parent.verticalCenter

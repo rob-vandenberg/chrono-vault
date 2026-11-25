@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.6.86
+// vault_controller.h 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once (D-062)
@@ -385,6 +386,8 @@ public:
     // Whether a new vault's password can be saved in the primary vault now.
     [[nodiscard]] Q_INVOKABLE bool canSaveInPrimary() const;
     [[nodiscard]] Q_INVOKABLE QString vaultNameOf(const QString& vaultFile) const;
+    // Whether switching to this vault opens it without asking its password.
+    [[nodiscard]] Q_INVOKABLE bool opensAtOnce(const QString& vaultFile) const;
     // Shows another of the person's vaults: the primary opened with the key
     // kept from this session, one whose password is saved in the primary
     // opened with it, any other locked (D-030).

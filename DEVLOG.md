@@ -796,3 +796,9 @@ The owner's, one for a vault on this computer and one for a remote one. `qml/Set
 ## 25 November 2026: version 0.6.99: the "?" of a key in use
 
 Scaled once (D-069). `qml/SettingsWindow.qml`, one value; no test and no reviewers, at the owner's Proceed.
+
+## 25 November 2026: version 0.6.100: padlocks, Open in a vault's menu, round picture buttons
+
+The owner's changelist items 1-12 (D-071). `qml/PictureButton.qml`, `qml/SettingsWindow.qml`, `art/lock-open.svg`;
+`tests/integration/test_vault_rows.cpp`. Found by the test and fixed: the window that asks a master password for Import, Export
+(and now Open) waited for ever when the right password followed a wrong one.

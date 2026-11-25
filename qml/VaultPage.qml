@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.6.92
+// VaultPage.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: The audit: its group in the sidebar, its lists, an item left out of it (D-065)
@@ -281,6 +282,10 @@ Item {
             chosenItemId = ""
             VaultController.switchToVault(vaultFile)
         })
+    }
+
+    function closeEditor() {
+        editor.close()
     }
 
     // What the list is narrowed to (D-027, D-028); asks first about an edit
@@ -689,7 +694,7 @@ Item {
                     gap: 2 * Appearance.factor
 
                     // Collapses the sidebar to its icons, or expands it (D-042).
-                    ToolButton {
+                    PictureButton {
                         objectName: "sidebarToggle"
                         icon.source: "qrc:/icons/sidebar.svg"
                         icon.color: vaultPage.palette.buttonText

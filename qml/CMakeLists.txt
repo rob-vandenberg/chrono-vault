@@ -19,6 +19,7 @@
 # qml/CMakeLists.txt 0.6.88
 
 # --- Version history ----------------------------------------------------
+# v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 # v0.6.96: One tray icon, the owner's, on every tray (D-064)
 # v0.6.88: The settings' pages Categories, Tags and Templates (D-066)
 # v0.6.86: The audit (D-065)
@@ -92,6 +93,7 @@ qt_add_qml_module(chrono_vault_ui
         WebDavWindow.qml
         StorageWindow.qml
         SyncConflictsWindow.qml
+        PictureButton.qml
         TickBox.qml
         ConflictWindow.qml
         BigButton.qml
@@ -163,6 +165,7 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/plus.svg"
         "${PROJECT_SOURCE_DIR}/art/generate.svg"
         "${PROJECT_SOURCE_DIR}/art/lock.svg"
+        "${PROJECT_SOURCE_DIR}/art/lock-open.svg"
         "${PROJECT_SOURCE_DIR}/art/settings.svg"
         "${PROJECT_SOURCE_DIR}/art/home.svg"
         "${PROJECT_SOURCE_DIR}/art/edit.svg"

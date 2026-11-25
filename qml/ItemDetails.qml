@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.6.92
+// ItemDetails.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.86: What the audit says under a password (D-065)
 // v0.5.82: Trash, Restore and Archive through the page, asked first (D-062)
@@ -131,7 +132,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
             }
-            ToolButton {
+            PictureButton {
                 objectName: "editButton"
                 visible: !itemDetails.item.trashed
                 icon.source: "qrc:/icons/edit.svg"
@@ -141,7 +142,7 @@ Item {
                 ToolTip.text: qsTr("Edit")
                 Layout.alignment: Qt.AlignTop
             }
-            ToolButton {
+            PictureButton {
                 objectName: "favouriteButton"
                 icon.source: itemDetails.item.favourite ? "qrc:/icons/star-filled.svg" : "qrc:/icons/star.svg"
                 icon.color: itemDetails.palette.buttonText
@@ -150,9 +151,10 @@ Item {
                 ToolTip.text: itemDetails.item.favourite ? qsTr("Remove from Favorites") : qsTr("Add to Favorites")
                 Layout.alignment: Qt.AlignTop
             }
-            ToolButton {
+            PictureButton {
                 objectName: "itemMenuButton"
-                text: "…"
+                dots: true
+                menuOpen: itemMenu.visible
                 onClicked: itemMenu.popup(this, 0, height)
                 Layout.alignment: Qt.AlignTop
                 Menu {

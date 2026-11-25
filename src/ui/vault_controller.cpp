@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.6.86
+// vault_controller.cpp 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
 // v0.5.82: Several items at once; Delete moves to the Trash too (D-062)
@@ -2886,6 +2887,14 @@ void VaultController::showCreated(CreatedVault created)
     if (primaryVault() == created.path) {
         rememberPrimary();
     }
+}
+
+bool VaultController::opensAtOnce(const QString& vaultFile) const
+{
+    if (vaultFile.isEmpty() || vaultFile == path) {
+        return false;
+    }
+    return (vaultFile == primaryVault() && primaryKey.isValid()) || savedPasswords.contains(vaultFile);
 }
 
 void VaultController::switchToVault(const QString& vaultFile)

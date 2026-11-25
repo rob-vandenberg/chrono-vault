@@ -17,13 +17,15 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.99
+// SettingsWindow.qml 0.6.100
 
 // --- Version history ----------------------------------------------------
+// v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.99: The "?" of a key in use is scaled once (D-069)
 // v0.6.98: The texts of Forget (the owner)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
@@ -218,6 +220,19 @@ ApplicationWindow {
     // What Restore defaults would change is on this topic (D-022, D-066).
     readonly property bool restorable: topics.currentIndex < 2 || topics.currentIndex === 6
     signal importRequested()
+    // Open of a vault's menu, once an edit has been asked about (D-071): at once
+    // with the password kept in the primary, else its master password is asked.
+    signal openKnownRequested(string vaultFile)
+    function openKnown(vaultFile) {
+        problem = ""
+        if (!VaultController.opensAtOnce(vaultFile)) {
+            unlockFirst.ask(vaultFile, "open")
+            return
+        }
+        VaultController.switchToVault(vaultFile)
+        if (VaultController.vaultPath !== vaultFile)
+            problem = VaultController.message
+    }
     signal exportRequested()
     property int clipboardClearSeconds: 0
     property bool hideSensitive: true
@@ -996,12 +1011,17 @@ ApplicationWindow {
                                 readonly property bool unlocked: VaultController.vaultPath === modelData
                                                                  && VaultController.state === VaultController.Unlocked
                                 readonly property bool canLock: unlocked
+                                readonly property bool canOpen: found && !unlocked
                                 readonly property bool canMove: found
                                 readonly property bool canForget: !primary
                                 readonly property bool canDisconnect: found && place.onWebDav === true
                                 readonly property bool canImport: found
                                 readonly property bool canExport: found
                                 Layout.fillWidth: true
+                                TapHandler {
+                                    acceptedButtons: Qt.RightButton
+                                    onTapped: vaultMenu.popup()
+                                }
                                 Connections {
                                     target: VaultController
                                     function onSyncChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
@@ -1023,7 +1043,7 @@ ApplicationWindow {
                                                 font.bold: true
                                                 font.strikeout: !vaultRow.found
                                                 elide: Text.ElideRight
-                                                Layout.fillWidth: !vaultRow.primary
+                                                Layout.fillWidth: true
                                                 Layout.maximumWidth: implicitWidth
                                             }
                                             // The primary vault: a gold crown after its name (D-062).
@@ -1037,6 +1057,21 @@ ApplicationWindow {
                                                 HoverHandler { id: overCrown }
                                                 ToolTip.visible: overCrown.hovered
                                                 ToolTip.text: qsTr("Primary vault")
+                                            }
+                                            // Open or locked, seen by shape and color (the owner, D-071).
+                                            ColorImage {
+                                                objectName: "padlock_" + vaultRow.name
+                                                readonly property bool open: vaultRow.unlocked
+                                                visible: vaultRow.found
+                                                source: open ? "qrc:/icons/lock-open.svg" : "qrc:/icons/lock.svg"
+                                                color: open ? (settingsWindow.palette.window.hslLightness < 0.5 ? "#66bb6a" : "#2e7d32")
+                                                            : Qt.tint(settingsWindow.palette.window, Qt.alpha(settingsWindow.palette.windowText, 0.6))
+                                                sourceSize: Qt.size(Math.round((open ? 22.5 : 18) * Appearance.factor), Math.round(18 * Appearance.factor))
+                                                Layout.preferredWidth: Math.round((open ? 22.5 : 18) * Appearance.factor)
+                                                Layout.preferredHeight: Math.round(18 * Appearance.factor)
+                                                HoverHandler { id: overPadlock }
+                                                ToolTip.visible: overPadlock.hovered
+                                                ToolTip.text: open ? qsTr("Open") : qsTr("Locked")
                                             }
                                             Item { Layout.fillWidth: true }
                                         }
@@ -1062,11 +1097,11 @@ ApplicationWindow {
                                             Layout.fillWidth: true
                                         }
                                     }
-                                    ToolButton {
+                                    PictureButton {
                                         objectName: "vaultMenuButton_" + vaultRow.name
-                                        text: "⋮"
-                                        font.pointSize: Appearance.fontPointSize * 1.5
-                                        visible: vaultRow.canLock || vaultRow.canMove || vaultRow.canForget
+                                        dots: true
+                                        menuOpen: vaultMenu.visible
+                                        visible: vaultRow.canLock || vaultRow.canOpen || vaultRow.canMove || vaultRow.canForget
                                                  || vaultRow.canDisconnect || vaultRow.canImport
                                                  || vaultRow.canExport
                                         Accessible.name: qsTr("Vault menu")
@@ -1074,6 +1109,14 @@ ApplicationWindow {
                                         Menu {
                                             id: vaultMenu
                                             objectName: "vaultMenu_" + vaultRow.name
+                                            // Open or Lock, by the vault's state (the owner, D-071).
+                                            MenuItem {
+                                                objectName: "openVault_" + vaultRow.name
+                                                text: qsTr("Open")
+                                                visible: vaultRow.canOpen
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: settingsWindow.openKnownRequested(vaultRow.modelData)
+                                            }
                                             MenuItem {
                                                 objectName: "lockVault_" + vaultRow.name
                                                 text: qsTr("Lock")
@@ -1142,14 +1185,17 @@ ApplicationWindow {
                             property string action: ""
                             property bool waiting: false
                             property string problem: ""
-                            readonly property bool ready: VaultController.vaultPath === vaultFile
-                                                          && VaultController.state === VaultController.Unlocked
+                            // Asked each time, not a binding: at a change of state a binding may not
+                            // have followed yet, and the window would wait for ever.
+                            function ready() {
+                                return VaultController.vaultPath === vaultFile && VaultController.state === VaultController.Unlocked
+                            }
                             function ask(file, what) {
                                 vaultFile = file
                                 action = what
                                 problem = ""
                                 waiting = false
-                                if (ready) {
+                                if (ready()) {
                                     go()
                                     return
                                 }
@@ -1163,7 +1209,7 @@ ApplicationWindow {
                                     accept()
                                 if (action === "import")
                                     settingsWindow.importRequested()
-                                else
+                                else if (action === "export")
                                     settingsWindow.exportRequested()
                             }
                             function unlockNow() {
@@ -1173,7 +1219,7 @@ ApplicationWindow {
                                 waiting = true
                                 if (VaultController.vaultPath !== vaultFile)
                                     VaultController.switchToVault(vaultFile)
-                                if (ready) {
+                                if (ready()) {
                                     go() // opened with the password saved in the primary
                                     return
                                 }
@@ -1201,7 +1247,7 @@ ApplicationWindow {
                                 function onStateChanged() {
                                     if (!unlockFirst.waiting)
                                         return
-                                    if (unlockFirst.ready) {
+                                    if (unlockFirst.ready()) {
                                         unlockFirst.go()
                                     } else if (VaultController.state === VaultController.Locked) {
                                         unlockFirst.waiting = false
