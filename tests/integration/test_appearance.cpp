@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.6.89
+// test_appearance.cpp 0.6.91
 
 // --- Version history ----------------------------------------------------
+// v0.6.91: The settings window at 720 by 640 inside (D-068)
 // v0.6.89: The settings window at 720 by 625 inside (D-066)
 // v0.2.55: The font is 10 points whatever the system's size (the owner, D-017)
 // v0.2.54: The font is 11 points whatever the system's size (the owner, D-017)
@@ -307,11 +308,11 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(settings);
     auto* window = qobject_cast<QWindow*>(settings);
     QVERIFY(window);
-    // Opens at 720 by 625 inside and is never smaller (the owner).
+    // Opens at 720 by 640 inside and is never smaller (the owner).
     QCOMPARE(window->width(), 720);
-    QCOMPARE(window->height(), 625);
+    QCOMPARE(window->height(), 640);
     QCOMPARE(window->minimumWidth(), 720);
-    QCOMPARE(window->minimumHeight(), 625);
+    QCOMPARE(window->minimumHeight(), 640);
 
     // At 400% the size is larger than the screen: it gives way to the
     // screen's free room (the owner).
@@ -320,11 +321,11 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(window->minimumHeight() <= room.height());
     QVERIFY(window->minimumWidth() <= room.width());
     applyProgramScale(100);
-    QCOMPARE(window->minimumHeight(), 625);
+    QCOMPARE(window->minimumHeight(), 640);
     // The title bar and frame leave the inside as it is (D-066).
     settings->setProperty("frame", QSizeF(8, 40));
     QCOMPARE(window->minimumWidth(), 720);
-    QCOMPARE(window->minimumHeight(), 625);
+    QCOMPARE(window->minimumHeight(), 640);
     settings->setProperty("frame", QSizeF(0, 0));
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());

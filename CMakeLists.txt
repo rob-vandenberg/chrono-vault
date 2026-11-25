@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.6.90 LANGUAGES CXX)
+project(chrono-vault VERSION 0.6.91 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.6.90
+# CMakeLists.txt 0.6.91
 
 # --- Version history ----------------------------------------------------
+# v0.6.91: Version 0.6.91; Qt 6.9 or newer (D-068)
 # v0.6.90: Version 0.6.90
 # v0.6.89: Version 0.6.89
 # v0.6.88: Version 0.6.88
@@ -123,7 +124,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(CHRONO_VAULT_BUILD_TESTS "Build the tests (a release build leaves them out)" ON)
 option(CHRONO_VAULT_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Widgets Svg Network Qml Quick QuickControls2 Concurrent Test LinguistTools)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Widgets Svg Network Qml Quick QuickControls2 Concurrent Test LinguistTools)
 qt_standard_project_setup(REQUIRES 6.8)
 find_package(OpenSSL 3.2 REQUIRED COMPONENTS Crypto)
 if(LINUX)

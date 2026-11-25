@@ -1202,17 +1202,17 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+40"/>
+        <location filename="../qml/IconPicker.qml" line="+41"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="+150"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+119"/>
         <source>Custom Icons</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+72"/>
+        <location filename="../qml/Main.qml" line="+73"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1778,7 +1778,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+231"/>
+        <location line="+226"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1798,7 +1798,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+37"/>
+        <location line="+36"/>
         <source>Move to Trash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1829,18 +1829,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-382"/>
-        <location line="+390"/>
+        <location line="-381"/>
+        <location line="+389"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-640"/>
+        <location line="-634"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+192"/>
+        <location line="+187"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1861,12 +1861,12 @@
     </message>
     <message>
         <location line="+7"/>
-        <location line="+179"/>
+        <location line="+178"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-171"/>
+        <location line="-170"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1931,7 +1931,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+11"/>
         <source>Include in Audit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2234,7 +2234,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+266"/>
+        <location filename="../qml/SettingsWindow.qml" line="+268"/>
         <location line="+376"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2251,12 +2251,12 @@
     </message>
     <message>
         <location line="+81"/>
-        <location line="+241"/>
+        <location line="+245"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-241"/>
+        <location line="-245"/>
         <location line="+64"/>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -2298,18 +2298,18 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+1026"/>
+        <location line="+1030"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1027"/>
-        <location line="+468"/>
+        <location line="-1031"/>
+        <location line="+472"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-312"/>
+        <location line="-316"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2319,7 +2319,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+50"/>
+        <location line="+54"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2339,16 +2339,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-20"/>
+        <location line="-21"/>
         <location line="+3"/>
         <location line="+6"/>
-        <location line="+11"/>
+        <location line="+12"/>
         <location line="+44"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-267"/>
+        <location line="-271"/>
         <source>Categories</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2363,7 +2363,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+233"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2503,7 +2503,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-73"/>
+        <location line="-74"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2513,7 +2513,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+109"/>
+        <location line="+110"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2554,7 +2554,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-247"/>
+        <location line="-251"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2569,7 +2569,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+682"/>
+        <location line="+686"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2679,15 +2679,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1302"/>
-        <location line="+1241"/>
+        <location line="-1306"/>
+        <location line="+1245"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1308"/>
-        <location line="+1150"/>
+        <location line="-1312"/>
+        <location line="+1154"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -3066,9 +3066,32 @@
     </message>
 </context>
 <context>
+    <name>TextMenu</name>
+    <message>
+        <location filename="../style/TextMenu.qml" line="+27"/>
+        <source>Cut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Paste</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Select All</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+387"/>
+        <location filename="../qml/UnlockPage.qml" line="+388"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>

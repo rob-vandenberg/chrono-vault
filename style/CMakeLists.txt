@@ -43,6 +43,7 @@ qt_add_qml_module(chrono_vault_style
         Switch.qml
         TextArea.qml
         TextField.qml
+        TextMenu.qml
         ToolButton.qml
         ToolTip.qml
     SOURCES

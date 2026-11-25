@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.5.82
+// IconPicker.qml 0.6.91
 
 // --- Version history ----------------------------------------------------
+// v0.6.91: Opens in Search; the icons by keyboard (D-068)
 // v0.5.82: Enter never deletes an icon (D-062)
 // v0.2.57: A search field: by name, any case, anywhere in the name (the owner, D-050)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -68,9 +69,13 @@ DialogWindow {
     // carries it gets its category's icon too.
     signal iconDeleted(string icon)
 
+    onShown: searchField.forceActiveFocus(Qt.TabFocusReason)
+    onSearchTextChanged: grid.outlined = null
+
     function start(categoryIcon) {
         defaultSource = categoryIcon
         chosen = ""
+        grid.outlined = null
         searchField.text = ""
         reload()
         open()
@@ -104,6 +109,18 @@ DialogWindow {
         property url source
         property string tip
         property string customIcon: ""
+        readonly property bool iconTile: true
+        // Where the keys are; the blue check is what OK takes.
+        Rectangle {
+            objectName: "tileOutline"
+            visible: grid.activeFocus && grid.outlined === tile
+            anchors.fill: parent
+            anchors.margins: -Math.round(3 * Appearance.factor)
+            color: "transparent"
+            radius: Math.round(6 * Appearance.factor)
+            border.width: Math.max(2, Math.round(2 * Appearance.factor))
+            border.color: picker.palette.highlight
+        }
         width: picker.tileSize
         height: picker.tileSize
         Image {
@@ -193,8 +210,110 @@ DialogWindow {
             orientation: Qt.Vertical
         }
 
+        // The icons by keyboard (the owner, D-068): Tab comes here from Search
+        // and outlines the first one; the keys move the outline, over the
+        // headings; Enter takes that icon.
         ColumnLayout {
-            width: scroll.availableWidth
+            id: grid
+            objectName: "iconGrid"
+            activeFocusOnTab: true
+            property Item outlined: null
+            onActiveFocusChanged: if (activeFocus && !outlined) outline(tiles()[0])
+            function tiles() {
+                const found = []
+                const walk = function(item) {
+                    for (const child of item.children) {
+                        if (!child.visible)
+                            continue
+                        if (child.iconTile === true)
+                            found.push(child)
+                        else
+                            walk(child)
+                    }
+                }
+                walk(grid)
+                return found
+            }
+            function placeOf(tile) {
+                return tile.mapToItem(grid, 0, 0)
+            }
+            function outline(tile) {
+                outlined = tile || null
+                if (!outlined)
+                    return
+                // In view, the first row with its heading.
+                const view = scroll.contentItem
+                const margin = Math.round(6 * Appearance.factor)
+                const top = placeOf(outlined).y - margin
+                const bottom = top + outlined.height + 2 * margin
+                if (outlined === tiles()[0])
+                    view.contentY = 0
+                else if (top < view.contentY)
+                    view.contentY = top
+                else if (bottom > view.contentY + view.height)
+                    view.contentY = bottom - view.height
+            }
+            // The icon nearest below or above, at least this far away.
+            function beside(tile, down, least) {
+                const from = placeOf(tile)
+                let best = null
+                let bestAt = null
+                for (const one of tiles()) {
+                    const at = placeOf(one)
+                    const away = down ? at.y - from.y : from.y - at.y
+                    if (away < least)
+                        continue
+                    const bestAway = bestAt ? (down ? bestAt.y - from.y : from.y - bestAt.y) : Infinity
+                    if (away < bestAway - 1
+                            || (Math.abs(away - bestAway) <= 1 && Math.abs(at.x - from.x) < Math.abs(bestAt.x - from.x))) {
+                        best = one
+                        bestAt = at
+                    }
+                }
+                return best
+            }
+            Keys.onPressed: function(event) {
+                if ((event.modifiers & ~Qt.KeypadModifier) !== Qt.NoModifier)
+                    return
+                const all = tiles()
+                const at = all.indexOf(outlined)
+                if (all.length === 0)
+                    return
+                // The outlined one is gone (an icon deleted): the first again.
+                if (at < 0) {
+                    if ([Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home,
+                         Qt.Key_End, Qt.Key_Return, Qt.Key_Enter].indexOf(event.key) >= 0) {
+                        event.accepted = true
+                        outline(all[0])
+                    }
+                    return
+                }
+                const page = Math.max(1, scroll.contentItem.height - 2 * outlined.height)
+                let to = null
+                switch (event.key) {
+                case Qt.Key_Left: to = all[Math.max(0, at - 1)]; break
+                case Qt.Key_Right: to = all[Math.min(all.length - 1, at + 1)]; break
+                case Qt.Key_Up: to = beside(outlined, false, 1); break
+                case Qt.Key_Down: to = beside(outlined, true, 1); break
+                case Qt.Key_PageUp: to = beside(outlined, false, page) || all[0]; break
+                case Qt.Key_PageDown: to = beside(outlined, true, page) || all[all.length - 1]; break
+                case Qt.Key_Home: to = all[0]; break
+                case Qt.Key_End: to = all[all.length - 1]; break
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                    event.accepted = true
+                    picker.chosen = outlined.key
+                    picker.accept()
+                    return
+                default: return
+                }
+                event.accepted = true
+                if (to)
+                    outline(to)
+            }
+            // Room for the outline of the first column.
+            x: Math.round(4 * Appearance.factor)
+            width: scroll.availableWidth - x
             spacing: Math.round(8 * Appearance.factor)
 
             // The vault's own icons have no names: not shown while searching.

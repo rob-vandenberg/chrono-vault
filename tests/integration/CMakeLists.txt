@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.6.86
+# tests/integration/CMakeLists.txt 0.6.91
 
 # --- Version history ----------------------------------------------------
+# v0.6.91: test_dialog_keys (D-068)
 # v0.6.86: test_audit_windows (D-065)
 # v0.5.83: test_selecting (D-063)
 # v0.5.82: test_intuitive (D-062)
@@ -73,6 +74,11 @@ qt_add_executable(test_selecting test_selecting.cpp intuitive_fixture.h)
 target_link_libraries(test_selecting PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_selecting)
 chrono_vault_add_test(test_selecting)
+
+qt_add_executable(test_dialog_keys test_dialog_keys.cpp intuitive_fixture.h)
+target_link_libraries(test_dialog_keys PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_dialog_keys)
+chrono_vault_add_test(test_dialog_keys)
 
 qt_add_executable(test_audit_windows test_audit_windows.cpp intuitive_fixture.h)
 target_link_libraries(test_audit_windows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Network Qt6::Qml Qt6::Quick Qt6::Test)

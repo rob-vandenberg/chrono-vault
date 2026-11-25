@@ -750,3 +750,10 @@ The owner: 720 by 625 inside, opened and at least. `qml/SettingsWindow.qml`, `te
 The owner's changelist items 1-9 (D-067). `style/Menu.qml`, `style/ComboBox.qml`, `style/PopupPanel.qml`, `qml/Main.qml`,
 `qml/UnlockPage.qml`; `tests/integration/test_selecting.cpp` checks every pop-up in both themes, switched while running.
 One review round of two, nothing real.
+
+## 25 November 2026: version 0.6.91: the keyboard in dialogs, the text fields' menu
+
+The owner's changelist items 1-13 (D-068). `qml/IconPicker.qml`, `style/TextMenu.qml`, `style/TextField.qml`,
+`style/TextArea.qml`, `qml/SettingsWindow.qml`; `tests/integration/test_dialog_keys.cpp`. The style's texts are translated too.
+Review round 1: the keys did nothing after the outlined icon was deleted; fixed with a test.
+Round 2: the outline cut off in the first column, fixed and looked at; nothing else.

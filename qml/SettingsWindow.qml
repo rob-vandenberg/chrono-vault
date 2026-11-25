@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.89
+// SettingsWindow.qml 0.6.91
 
 // --- Version history ----------------------------------------------------
+// v0.6.91: More room for the last two lines of General; 720 by 640 inside (D-068)
 // v0.6.89: 720 by 625 inside, opened and at least (the owner, D-066)
 // v0.6.88: The topics Categories, Tags and Templates; Customize and Clipboard gone (D-066)
 // v0.6.86: The check for leaked passwords (Security) (D-065)
@@ -418,10 +419,10 @@ ApplicationWindow {
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
     width: Math.min(Math.round(720 * Appearance.factor), Appearance.screenRoom(this).width - frame.width)
-    height: Math.min(Math.round(625 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
+    height: Math.min(Math.round(640 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
     // Never smaller than it opens (the owner).
     minimumWidth: Math.min(Math.round(720 * Appearance.factor), Appearance.screenRoom(this).width - frame.width)
-    minimumHeight: Math.min(Math.round(625 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
+    minimumHeight: Math.min(Math.round(640 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
     visible: false
     color: palette.window
 
@@ -692,6 +693,8 @@ ApplicationWindow {
                         }
                         // One line; 0 shows as "Never" (D-049).
                         RowLayout {
+                            // As far apart as the tick boxes, this line and the next (the owner).
+                            Layout.topMargin: Math.round(9 * Appearance.factor)
                             Label { text: qsTr("Clear the clipboard after") }
                             SpinBox {
                                 objectName: "clipboardBox"
@@ -717,6 +720,7 @@ ApplicationWindow {
                             Label { text: qsTr("seconds") }
                         }
                         RowLayout {
+                            Layout.topMargin: Math.round(5 * Appearance.factor)
                             Label { text: qsTr("Check for updates") }
                             ComboBox {
                                 id: frequencyBox

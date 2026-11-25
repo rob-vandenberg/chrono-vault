@@ -42,7 +42,7 @@ add_custom_target(update_translations
             -DOUT=${PROJECT_BINARY_DIR}/icon_headings/icon_headings.cpp
             -P ${PROJECT_SOURCE_DIR}/cmake/IconHeadings.cmake
     COMMAND Qt6::lupdate -silent -locations relative -extensions cpp,h,qml
-            "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/qml" "${PROJECT_BINARY_DIR}/icon_headings"
+            "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/qml" "${PROJECT_SOURCE_DIR}/style" "${PROJECT_BINARY_DIR}/icon_headings"
             -ts "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.ts"
     COMMAND Qt6::lconvert -i "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.ts"
             -o "${CHRONO_VAULT_TRANSLATIONS_DIR}/chrono-vault.pot" -of pot
