@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.6.91
+// test_appearance.cpp 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.91: The settings window at 720 by 640 inside (D-068)
 // v0.6.89: The settings window at 720 by 625 inside (D-066)
 // v0.2.55: The font is 10 points whatever the system's size (the owner, D-017)
@@ -260,7 +261,7 @@ void TestAppearance::at_twice_the_scale_text_icons_boxes_and_margins_all_double(
     QCOMPARE(programScaleHeldToItsLimits(112), 110);
     QCOMPARE(programScaleHeldToItsLimits(113), 115);
     QCOMPARE(programScaleHeldToItsLimits(49), 50);
-    QCOMPARE(programScaleHeldToItsLimits(401), 400);
+    QCOMPARE(programScaleHeldToItsLimits(201), 200);
 
     QQmlApplicationEngine engine;
     engine.loadFromModule("ChronoVault", "Main");
@@ -314,9 +315,9 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QCOMPARE(window->minimumWidth(), 720);
     QCOMPARE(window->minimumHeight(), 640);
 
-    // At 400% the size is larger than the screen: it gives way to the
+    // At 200% the size is larger than the screen: it gives way to the
     // screen's free room (the owner).
-    applyProgramScale(400);
+    applyProgramScale(200);
     const QSize room = QGuiApplication::primaryScreen()->availableGeometry().size();
     QVERIFY(window->minimumHeight() <= room.height());
     QVERIFY(window->minimumWidth() <= room.width());
@@ -329,6 +330,11 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     settings->setProperty("frame", QSizeF(0, 0));
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());
+    QCOMPARE(window->title(), QStringLiteral("Chrono Vault - Settings"));
+    // Change Master Password as the owner measured it.
+    auto* password = engine.rootObjects().constFirst()->findChild<QQuickWindow*>(QStringLiteral("masterPasswordWindow"));
+    QVERIFY(password);
+    QCOMPARE(password->size(), QSize(445, 210));
     // With a tray General fits without a scroll bar.
     engine.singletonInstance<VaultController*>("ChronoVault", "VaultController")->setTrayAvailable(true);
     auto* box = settings->findChild<QQuickItem*>(QStringLiteral("clipboardBox"));
@@ -346,8 +352,8 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(slider && marks && row && percent);
     // Steps of 5%.
     QCOMPARE(slider->property("stepSize").toDouble(), 5.0);
-    // 15 marks, every 25% from 50% to 400%, above the slider.
-    QCOMPARE(marks->property("count").toInt(), 15);
+    // 7 marks, every 25% from 50% to 200%, above the slider.
+    QCOMPARE(marks->property("count").toInt(), 7);
     QQuickItem* mark = nullptr;
     QVERIFY(QMetaObject::invokeMethod(marks, "itemAt", Q_RETURN_ARG(QQuickItem*, mark), Q_ARG(int, 0)));
     QVERIFY(mark);

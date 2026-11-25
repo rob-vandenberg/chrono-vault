@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.6.92
+// MasterPasswordWindow.qml 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -37,6 +38,9 @@ import QtQuick.Layouts
 DialogWindow {
     id: passwordWindow
     memoryName: "masterPassword"
+    // As the owner measured it.
+    firstWidth: 445 * Appearance.factor
+    firstHeight: 210 * Appearance.factor
     title: qsTr("Change master password or keyfile")
     standardButtons: Dialog.Ok | Dialog.Cancel
 

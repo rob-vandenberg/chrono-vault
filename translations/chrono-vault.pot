@@ -5,23 +5,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Qt-Contexts: true\n"
 
-#: ../qml/AboutWindow.qml:61
+#: ../qml/AboutWindow.qml:62
 msgctxt "AboutWindow|"
 msgid "About Chrono Vault"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:89
+#: ../qml/AboutWindow.qml:90
 #, qt-format
 msgctxt "AboutWindow|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:112
+#: ../qml/AboutWindow.qml:113
 msgctxt "AboutWindow|"
 msgid "Copyright © 2026 Rob Vandenberg"
 msgstr ""
 
-#: ../qml/AboutWindow.qml:186
+#: ../qml/AboutWindow.qml:187
 msgctxt "AboutWindow|"
 msgid "Check for update"
 msgstr ""
@@ -162,89 +162,89 @@ msgctxt "CategoryMenu|"
 msgid "Change Category"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:229
+#: ../qml/ConflictWindow.qml:232
 #, qt-format
 msgctxt "ConflictWindow|"
 msgid "Sync conflict: %1"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:242
+#: ../qml/ConflictWindow.qml:245
 msgctxt "ConflictWindow|"
 msgid "Retry sync"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:248
+#: ../qml/ConflictWindow.qml:251
 msgctxt "ConflictWindow|"
 msgid "Keep here only"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:254 ../qml/ConflictWindow.qml:585
-#: ../qml/ConflictWindow.qml:587
+#: ../qml/ConflictWindow.qml:257 ../qml/ConflictWindow.qml:588
+#: ../qml/ConflictWindow.qml:590
 msgctxt "ConflictWindow|"
 msgid "Keep both"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:269
+#: ../qml/ConflictWindow.qml:272
 msgctxt "ConflictWindow|"
 msgid "Apply"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:276
+#: ../qml/ConflictWindow.qml:279
 msgctxt "ConflictWindow|"
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:420
+#: ../qml/ConflictWindow.qml:423
 msgctxt "ConflictWindow|"
 msgid "What"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:422
+#: ../qml/ConflictWindow.qml:425
 msgctxt "ConflictWindow|"
 msgid "Where"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:424
+#: ../qml/ConflictWindow.qml:427
 msgctxt "ConflictWindow|"
 msgid "Why"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:427
+#: ../qml/ConflictWindow.qml:430
 msgctxt "ConflictWindow|"
 msgid "Deleted on the other device, changed here"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:428
+#: ../qml/ConflictWindow.qml:431
 msgctxt "ConflictWindow|"
 msgid "Deleted here, changed on the other device"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:429
+#: ../qml/ConflictWindow.qml:432
 msgctxt "ConflictWindow|"
 msgid "Differs from an import"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:431
+#: ../qml/ConflictWindow.qml:434
 msgctxt "ConflictWindow|"
 msgid "Changed on two devices, and differs from an import"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:432
+#: ../qml/ConflictWindow.qml:435
 msgctxt "ConflictWindow|"
 msgid "Changed on two devices"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:436
+#: ../qml/ConflictWindow.qml:439
 msgctxt "ConflictWindow|"
 msgid "Found"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:443
+#: ../qml/ConflictWindow.qml:446
 msgctxt "ConflictWindow|"
 msgid "Show hidden values"
 msgstr ""
 
-#: ../qml/ConflictWindow.qml:480
+#: ../qml/ConflictWindow.qml:483
 msgctxt "ConflictWindow|"
 msgid "Field"
 msgstr ""
@@ -1173,42 +1173,42 @@ msgctxt "IconNames|"
 msgid "9"
 msgstr ""
 
-#: ../qml/IconPicker.qml:42
+#: ../qml/IconPicker.qml:43
 msgctxt "IconPicker|"
 msgid "Choose Icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:192
+#: ../qml/IconPicker.qml:193
 msgctxt "IconPicker|"
 msgid "Search"
 msgstr ""
 
-#: ../qml/IconPicker.qml:322
+#: ../qml/IconPicker.qml:323
 msgctxt "IconPicker|"
 msgid "Custom Icons"
 msgstr ""
 
-#: ../qml/IconPicker.qml:334
+#: ../qml/IconPicker.qml:335
 msgctxt "IconPicker|"
 msgid "Default icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:376 ../qml/IconPicker.qml:409
+#: ../qml/IconPicker.qml:377 ../qml/IconPicker.qml:410
 msgctxt "IconPicker|"
 msgid "Add Custom Icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:384 ../qml/IconPicker.qml:426
+#: ../qml/IconPicker.qml:385 ../qml/IconPicker.qml:427
 msgctxt "IconPicker|"
 msgid "Delete icon"
 msgstr ""
 
-#: ../qml/IconPicker.qml:411
+#: ../qml/IconPicker.qml:412
 msgctxt "IconPicker|"
 msgid "Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)"
 msgstr ""
 
-#: ../qml/IconPicker.qml:431
+#: ../qml/IconPicker.qml:432
 #, qt-format
 msgctxt "IconPicker|"
 msgid ""
@@ -1724,389 +1724,394 @@ msgctxt "ItemIcons|"
 msgid "Choose a JPG, PNG, BMP, ICO or SVG picture."
 msgstr ""
 
-#: ../qml/Main.qml:74
+#: ../qml/Main.qml:77
 #, qt-format
 msgctxt "Main|"
 msgid "%1 – Chrono Vault %2"
 msgstr ""
 
-#: ../qml/Main.qml:75
+#: ../qml/Main.qml:78
 #, qt-format
 msgctxt "Main|"
 msgid "Chrono Vault %1"
 msgstr ""
 
-#: ../qml/Main.qml:301
+#: ../qml/Main.qml:307
 msgctxt "Main|"
 msgid "&File"
 msgstr ""
 
-#: ../qml/Main.qml:373
+#: ../qml/Main.qml:380
 msgctxt "Main|"
 msgid "Quit"
 msgstr ""
 
-#: ../qml/Main.qml:379
+#: ../qml/Main.qml:386
 msgctxt "Main|"
 msgid "&View"
 msgstr ""
 
-#: ../qml/Main.qml:475
+#: ../qml/Main.qml:482
 msgctxt "Main|"
 msgid "&Item"
 msgstr ""
 
-#: ../qml/Main.qml:511
+#: ../qml/Main.qml:518
 msgctxt "Main|"
 msgid "Move to Trash"
 msgstr ""
 
-#: ../qml/Main.qml:599
+#: ../qml/Main.qml:606
 msgctxt "Main|"
 msgid "&Tools"
 msgstr ""
 
-#: ../qml/Main.qml:643
+#: ../qml/Main.qml:649
 msgctxt "Main|"
 msgid "&Help"
 msgstr ""
 
-#: ../qml/Main.qml:682
+#: ../qml/Main.qml:688
 msgctxt "Main|"
 msgid "New Item"
 msgstr ""
 
-#: ../qml/Main.qml:637 ../qml/Main.qml:733
+#: ../qml/Main.qml:635 ../qml/Main.qml:739
 msgctxt "Main|"
 msgid "Generate Password"
 msgstr ""
 
-#: ../qml/Main.qml:745
+#: ../qml/Main.qml:751
 msgctxt "Main|"
 msgid "Lock the vault"
 msgstr ""
 
-#: ../qml/Main.qml:364 ../qml/Main.qml:753
+#: ../qml/Main.qml:759
 msgctxt "Main|"
 msgid "Preferences"
 msgstr ""
 
-#: ../qml/Main.qml:119
+#: ../qml/Main.qml:122
 msgctxt "Main|"
 msgid "Collapse or expand the sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:306
+#: ../qml/Main.qml:312
 msgctxt "Main|"
 msgid "New vault"
 msgstr ""
 
-#: ../qml/Main.qml:314
+#: ../qml/Main.qml:320
 msgctxt "Main|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/Main.qml:322
+#: ../qml/Main.qml:337
 msgctxt "Main|"
 msgid "Change Master Password"
 msgstr ""
 
-#: ../qml/Main.qml:332
+#: ../qml/Main.qml:347
 msgctxt "Main|"
 msgid "Backup"
 msgstr ""
 
-#: ../qml/Main.qml:339 ../qml/Main.qml:517
+#: ../qml/Main.qml:354 ../qml/Main.qml:524
 msgctxt "Main|"
 msgid "Restore"
 msgstr ""
 
-#: ../qml/Main.qml:347
+#: ../qml/Main.qml:362
 msgctxt "Main|"
 msgid "Import"
 msgstr ""
 
-#: ../qml/Main.qml:355
+#: ../qml/Main.qml:370
 msgctxt "Main|"
 msgid "Export"
 msgstr ""
 
-#: ../qml/Main.qml:385
+#: ../qml/Main.qml:392
 msgctxt "Main|"
 msgid "Show Item Counts"
 msgstr ""
 
-#: ../qml/Main.qml:398
+#: ../qml/Main.qml:405
 msgctxt "Main|"
 msgid "Hide Sidebar"
 msgstr ""
 
-#: ../qml/Main.qml:411
+#: ../qml/Main.qml:418
 msgctxt "Main|"
 msgid "Hide Sensitive"
 msgstr ""
 
-#: ../qml/Main.qml:425
+#: ../qml/Main.qml:432
 msgctxt "Main|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/Main.qml:438
+#: ../qml/Main.qml:445
 msgctxt "Main|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/Main.qml:451
+#: ../qml/Main.qml:458
 msgctxt "Main|"
 msgid "Audit"
 msgstr ""
 
-#: ../qml/Main.qml:464
+#: ../qml/Main.qml:471
 msgctxt "Main|"
 msgid "Others"
 msgstr ""
 
-#: ../qml/Main.qml:480
+#: ../qml/Main.qml:487
 msgctxt "Main|"
 msgid "Remove from Favorites"
 msgstr ""
 
-#: ../qml/Main.qml:480
+#: ../qml/Main.qml:487
 msgctxt "Main|"
 msgid "Add to Favorites"
 msgstr ""
 
-#: ../qml/Main.qml:489
+#: ../qml/Main.qml:496
 msgctxt "Main|"
 msgid "Archive"
 msgstr ""
 
-#: ../qml/Main.qml:489
+#: ../qml/Main.qml:496
 msgctxt "Main|"
 msgid "Unarchive"
 msgstr ""
 
-#: ../qml/Main.qml:500
+#: ../qml/Main.qml:507
 msgctxt "Main|"
 msgid "Include in Audit"
 msgstr ""
 
-#: ../qml/Main.qml:500
+#: ../qml/Main.qml:507
 msgctxt "Main|"
 msgid "Exclude from Audit"
 msgstr ""
 
-#: ../qml/Main.qml:525
+#: ../qml/Main.qml:532
 msgctxt "Main|"
 msgid "Delete Permanently…"
 msgstr ""
 
-#: ../qml/Main.qml:535
+#: ../qml/Main.qml:542
 msgctxt "Main|"
 msgid "Copy Username"
 msgstr ""
 
-#: ../qml/Main.qml:544
+#: ../qml/Main.qml:551
 msgctxt "Main|"
 msgid "Copy E-mail"
 msgstr ""
 
-#: ../qml/Main.qml:553
+#: ../qml/Main.qml:560
 msgctxt "Main|"
 msgid "Copy Password"
 msgstr ""
 
-#: ../qml/Main.qml:562
+#: ../qml/Main.qml:569
 msgctxt "Main|"
 msgid "Show Passwords"
 msgstr ""
 
-#: ../qml/Main.qml:572
+#: ../qml/Main.qml:579
 msgctxt "Main|"
 msgid "Copy URL"
 msgstr ""
 
-#: ../qml/Main.qml:581
+#: ../qml/Main.qml:588
 msgctxt "Main|"
 msgid "Copy OTP"
 msgstr ""
 
-#: ../qml/Main.qml:592
+#: ../qml/Main.qml:599
 msgctxt "Main|"
 msgid "Launch URL"
 msgstr ""
 
-#: ../qml/Main.qml:605
+#: ../qml/Main.qml:329
 msgctxt "Main|"
 msgid "Lock vault"
 msgstr ""
 
-#: ../qml/Main.qml:614
+#: ../qml/Main.qml:612
 msgctxt "Main|"
 msgid "Sync Now"
 msgstr ""
 
-#: ../qml/Main.qml:620
+#: ../qml/Main.qml:618
 msgctxt "Main|"
 msgid "Sync Conflicts…"
 msgstr ""
 
-#: ../qml/Main.qml:629
+#: ../qml/Main.qml:627
 msgctxt "Main|"
 msgid "Clear Clipboard"
 msgstr ""
 
-#: ../qml/Main.qml:648
+#: ../qml/Main.qml:643
+msgctxt "Main|"
+msgid "Options"
+msgstr ""
+
+#: ../qml/Main.qml:654
 msgctxt "Main|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/Main.qml:659
+#: ../qml/Main.qml:665
 msgctxt "Main|"
 msgid "Support website"
 msgstr ""
 
-#: ../qml/Main.qml:667
+#: ../qml/Main.qml:673
 msgctxt "Main|"
 msgid "Keyboard shortcuts…"
 msgstr ""
 
-#: ../qml/Main.qml:674
+#: ../qml/Main.qml:680
 msgctxt "Main|"
 msgid "About"
 msgstr ""
 
-#: ../qml/Main.qml:802
+#: ../qml/Main.qml:808
 msgctxt "Main|"
 msgid "Copy"
 msgstr ""
 
-#: ../qml/Main.qml:949
+#: ../qml/Main.qml:955
 msgctxt "Main|"
 msgid "A change is not saved"
 msgstr ""
 
-#: ../qml/Main.qml:956
+#: ../qml/Main.qml:962
 msgctxt "Main|"
 msgid ""
 "Your last change could not be saved. If you quit now, it is lost. The vault "
 "on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:957
+#: ../qml/Main.qml:963
 msgctxt "Main|"
 msgid ""
 "This vault holds a change that could not be saved yet; unlocking it saves "
 "it. If you quit now, it is lost."
 msgstr ""
 
-#: ../qml/Main.qml:998
+#: ../qml/Main.qml:1004
 msgctxt "Main|"
 msgid "A change is not saved yet. The vault on disk is unchanged."
 msgstr ""
 
-#: ../qml/Main.qml:1005
+#: ../qml/Main.qml:1011
 msgctxt "Main|"
 msgid "Try saving again"
 msgstr ""
 
-#: ../qml/Main.qml:1086
+#: ../qml/Main.qml:1094
 msgctxt "Main|"
 msgid "Trust this certificate?"
 msgstr ""
 
-#: ../qml/Main.qml:1088
+#: ../qml/Main.qml:1096
 msgctxt "Main|"
 msgid "Trust it"
 msgstr ""
 
-#: ../qml/Main.qml:1095
+#: ../qml/Main.qml:1103
 msgctxt "Main|"
 msgid ""
 "The WebDAV server's certificate is not trusted by this system. Trust it only "
 "when it is your server's. Its SHA-256 fingerprint:"
 msgstr ""
 
-#: ../qml/Main.qml:1113
+#: ../qml/Main.qml:1121
 msgctxt "Main|"
 msgid "WebDAV password"
 msgstr ""
 
-#: ../qml/Main.qml:1125
+#: ../qml/Main.qml:1133
 #, qt-format
 msgctxt "Main|"
 msgid "Type the password of the WebDAV server where “%1” is kept."
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:40
+#: ../qml/MasterPasswordWindow.qml:43
 msgctxt "MasterPasswordWindow|"
 msgid "Change master password or keyfile"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:79
+#: ../qml/MasterPasswordWindow.qml:82
 msgctxt "MasterPasswordWindow|"
 msgid "Current master password"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:86
+#: ../qml/MasterPasswordWindow.qml:89
 msgctxt "MasterPasswordWindow|"
 msgid "New master password"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:92
+#: ../qml/MasterPasswordWindow.qml:95
 msgctxt "MasterPasswordWindow|"
 msgid "The same password again"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:98
+#: ../qml/MasterPasswordWindow.qml:101
 msgctxt "MasterPasswordWindow|"
 msgid "The two passwords are not the same yet."
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:104
+#: ../qml/MasterPasswordWindow.qml:107
 msgctxt "MasterPasswordWindow|"
 msgid "Also lock the vault with a keyfile"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:109
+#: ../qml/MasterPasswordWindow.qml:112
 msgctxt "MasterPasswordWindow|"
 msgid ""
 "Without its keyfile the vault cannot be opened, not even with the right "
 "password. Keep a copy of the keyfile somewhere safe, apart from the vault."
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:116
+#: ../qml/MasterPasswordWindow.qml:119
 msgctxt "MasterPasswordWindow|"
 msgid "No keyfile chosen yet."
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:117
+#: ../qml/MasterPasswordWindow.qml:120
 #, qt-format
 msgctxt "MasterPasswordWindow|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:125
+#: ../qml/MasterPasswordWindow.qml:128
 msgctxt "MasterPasswordWindow|"
 msgid "Choose a keyfile…"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:129
+#: ../qml/MasterPasswordWindow.qml:132
 msgctxt "MasterPasswordWindow|"
 msgid "Make a new keyfile…"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:140
+#: ../qml/MasterPasswordWindow.qml:143
 msgctxt "MasterPasswordWindow|"
 msgid "Choose a keyfile"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:148
+#: ../qml/MasterPasswordWindow.qml:151
 msgctxt "MasterPasswordWindow|"
 msgid "Where should the new keyfile be kept?"
 msgstr ""
 
-#: ../qml/MasterPasswordWindow.qml:151
+#: ../qml/MasterPasswordWindow.qml:154
 msgctxt "MasterPasswordWindow|"
 msgid "Chrono Vault keyfiles (*.chronovaultkey)"
 msgstr ""
@@ -2186,176 +2191,175 @@ msgctxt "QuickUnlock|"
 msgid "The key could not be kept for this vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:269 ../qml/SettingsWindow.qml:646
+#: ../qml/SettingsWindow.qml:270 ../qml/SettingsWindow.qml:649
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1%"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:326
+#: ../qml/SettingsWindow.qml:327
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault could not be set to start at startup. The other settings are "
 "kept."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:421
-#, qt-format
-msgctxt "SettingsWindow|"
-msgid "Settings – Chrono Vault %1"
-msgstr ""
-
-#: ../qml/SettingsWindow.qml:502 ../qml/SettingsWindow.qml:749
+#: ../qml/SettingsWindow.qml:505 ../qml/SettingsWindow.qml:752
 msgctxt "SettingsWindow|"
 msgid "Security"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:502 ../qml/SettingsWindow.qml:566
+#: ../qml/SettingsWindow.qml:505 ../qml/SettingsWindow.qml:569
 msgctxt "SettingsWindow|"
 msgid "General"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:569
+#: ../qml/SettingsWindow.qml:572
 msgctxt "SettingsWindow|"
 msgid "Theme"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:576
+#: ../qml/SettingsWindow.qml:579
 msgctxt "SettingsWindow|"
 msgid "Light"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:582
+#: ../qml/SettingsWindow.qml:585
 msgctxt "SettingsWindow|"
 msgid "Dark"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:588
+#: ../qml/SettingsWindow.qml:591
 msgctxt "SettingsWindow|"
 msgid "Follow the system"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:601
+#: ../qml/SettingsWindow.qml:604
 msgctxt "SettingsWindow|"
 msgid "UI scaling"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:665
+#: ../qml/SettingsWindow.qml:668
 msgctxt "SettingsWindow|"
 msgid "Keep Chrono Vault running in the system tray"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:653
+#: ../qml/SettingsWindow.qml:656
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:503 ../qml/SettingsWindow.qml:1535
+#: ../qml/SettingsWindow.qml:506 ../qml/SettingsWindow.qml:1538
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:502 ../qml/SettingsWindow.qml:976
+#: ../qml/SettingsWindow.qml:505 ../qml/SettingsWindow.qml:979
 msgctxt "SettingsWindow|"
 msgid "Vaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:659
+#: ../qml/SettingsWindow.qml:662
 msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault minimized"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:672
+#: ../qml/SettingsWindow.qml:675
 msgctxt "SettingsWindow|"
 msgid "Use the Esc key to exit the program"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:727
+#: ../qml/SettingsWindow.qml:730
 msgctxt "SettingsWindow|"
 msgid "Check for updates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:731
+#: ../qml/SettingsWindow.qml:734
 msgctxt "SettingsWindow|"
 msgid "Daily"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:731
+#: ../qml/SettingsWindow.qml:734
 msgctxt "SettingsWindow|"
 msgid "Weekly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:731
+#: ../qml/SettingsWindow.qml:734
 msgctxt "SettingsWindow|"
 msgid "Monthly"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:710 ../qml/SettingsWindow.qml:713
-#: ../qml/SettingsWindow.qml:719 ../qml/SettingsWindow.qml:731
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:713 ../qml/SettingsWindow.qml:716
+#: ../qml/SettingsWindow.qml:722 ../qml/SettingsWindow.qml:734
+#: ../qml/SettingsWindow.qml:778
 msgctxt "SettingsWindow|"
 msgid "Never"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:502
+#: ../qml/SettingsWindow.qml:422
+msgctxt "SettingsWindow|"
+msgid "Chrono Vault - Settings"
+msgstr ""
+
+#: ../qml/SettingsWindow.qml:505
 msgctxt "SettingsWindow|"
 msgid "Categories"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:502
+#: ../qml/SettingsWindow.qml:505
 msgctxt "SettingsWindow|"
 msgid "Tags"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:503
+#: ../qml/SettingsWindow.qml:506
 msgctxt "SettingsWindow|"
 msgid "Templates"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:738
+#: ../qml/SettingsWindow.qml:741
 msgctxt "SettingsWindow|"
 msgid ""
 "This desktop has no system tray, so closing the window ends Chrono Vault."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:758
+#: ../qml/SettingsWindow.qml:761
 msgctxt "SettingsWindow|"
 msgid "Change the Master Password"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:762
+#: ../qml/SettingsWindow.qml:765
 msgctxt "SettingsWindow|"
 msgid "Change"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:771
+#: ../qml/SettingsWindow.qml:774
 msgctxt "SettingsWindow|"
 msgid "Ask for the master password again, once every"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:819
+#: ../qml/SettingsWindow.qml:822
 msgctxt "SettingsWindow|"
 msgid "Autolock when"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:827
+#: ../qml/SettingsWindow.qml:830
 msgctxt "SettingsWindow|"
 msgid "Main window is closed"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:899
+#: ../qml/SettingsWindow.qml:902
 msgctxt "SettingsWindow|"
 msgid ""
 "Use a PIN code to quickly unlock without having to enter the Master Password "
 "every time"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:951
+#: ../qml/SettingsWindow.qml:954
 msgctxt "SettingsWindow|"
 msgid "Check for leaked passwords and breached websites"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:957
+#: ../qml/SettingsWindow.qml:960
 msgctxt "SettingsWindow|"
 msgid ""
 "With Have I Been Pwned. Of each password only the first 5 characters of its "
@@ -2363,168 +2367,168 @@ msgid ""
 "fetched whole."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1032
+#: ../qml/SettingsWindow.qml:1035
 msgctxt "SettingsWindow|"
 msgid "Primary vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1037
+#: ../qml/SettingsWindow.qml:1040
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "WebDAV: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1038
+#: ../qml/SettingsWindow.qml:1041
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "This computer: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1046
+#: ../qml/SettingsWindow.qml:1049
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Last synchronized: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1100
+#: ../qml/SettingsWindow.qml:1103
 msgctxt "SettingsWindow|"
 msgid "Import…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1107
+#: ../qml/SettingsWindow.qml:1110
 msgctxt "SettingsWindow|"
 msgid "Export…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1114
+#: ../qml/SettingsWindow.qml:1117
 msgctxt "SettingsWindow|"
 msgid "Disconnect…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1182
+#: ../qml/SettingsWindow.qml:1185
 msgctxt "SettingsWindow|"
 msgid "Unlock the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1187
+#: ../qml/SettingsWindow.qml:1190
 msgctxt "SettingsWindow|"
 msgid "Unlock"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1210
+#: ../qml/SettingsWindow.qml:1213
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Enter the master password of “%1”. It is then the vault shown."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1342
+#: ../qml/SettingsWindow.qml:1345
 msgctxt "SettingsWindow|"
 msgid "Disconnect from WebDAV"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1346
+#: ../qml/SettingsWindow.qml:1349
 msgctxt "SettingsWindow|"
 msgid "Disconnect"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1457
+#: ../qml/SettingsWindow.qml:1460
 msgctxt "SettingsWindow|"
 msgid "Press the new key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1496
+#: ../qml/SettingsWindow.qml:1499
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Press a key for “%1”"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1541
+#: ../qml/SettingsWindow.qml:1544
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:778
 msgctxt "SettingsWindow|"
 msgid "Day"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:778
 msgctxt "SettingsWindow|"
 msgid "Month"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:778
 msgctxt "SettingsWindow|"
 msgid "Quarter"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:775
+#: ../qml/SettingsWindow.qml:778
 msgctxt "SettingsWindow|"
 msgid "Year"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:701
+#: ../qml/SettingsWindow.qml:704
 msgctxt "SettingsWindow|"
 msgid "Clear the clipboard after"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:723
+#: ../qml/SettingsWindow.qml:726
 msgctxt "SettingsWindow|"
 msgid "seconds"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:833
+#: ../qml/SettingsWindow.qml:836
 msgctxt "SettingsWindow|"
 msgid "System sleeps"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:841
+#: ../qml/SettingsWindow.qml:844
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault is idle for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:857 ../qml/SettingsWindow.qml:879
+#: ../qml/SettingsWindow.qml:860 ../qml/SettingsWindow.qml:882
 msgctxt "SettingsWindow|"
 msgid "Minutes"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:863
+#: ../qml/SettingsWindow.qml:866
 msgctxt "SettingsWindow|"
 msgid "System inactive for"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:884
+#: ../qml/SettingsWindow.qml:887
 msgctxt "SettingsWindow|"
 msgid "This desktop does not tell how long the system has been inactive."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:944
+#: ../qml/SettingsWindow.qml:947
 msgctxt "SettingsWindow|"
 msgid "Hide sensitive fields: show them as dots until asked"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:929
+#: ../qml/SettingsWindow.qml:932
 msgctxt "SettingsWindow|"
 msgid "Use Windows Hello to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:930
+#: ../qml/SettingsWindow.qml:933
 msgctxt "SettingsWindow|"
 msgid "Use fingerprint to unlock vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:678
+#: ../qml/SettingsWindow.qml:681
 msgctxt "SettingsWindow|"
 msgid "Show subtitles in the item list"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:684
+#: ../qml/SettingsWindow.qml:687
 msgctxt "SettingsWindow|"
 msgid "Use website icons"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:690
+#: ../qml/SettingsWindow.qml:693
 msgctxt "SettingsWindow|"
 msgid ""
 "Each website in your vault is asked for its own icon, which that website can "
@@ -2532,78 +2536,78 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1376
+#: ../qml/SettingsWindow.qml:1379
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1380
+#: ../qml/SettingsWindow.qml:1383
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1414
+#: ../qml/SettingsWindow.qml:1417
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1053
+#: ../qml/SettingsWindow.qml:1056
 msgctxt "SettingsWindow|"
 msgid "Not found"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1065
+#: ../qml/SettingsWindow.qml:1068
 msgctxt "SettingsWindow|"
 msgid "Vault menu"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1072
+#: ../qml/SettingsWindow.qml:1075
 msgctxt "SettingsWindow|"
 msgid "Lock"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1079
+#: ../qml/SettingsWindow.qml:1082
 msgctxt "SettingsWindow|"
 msgid "Move…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1089
+#: ../qml/SettingsWindow.qml:1092
 msgctxt "SettingsWindow|"
 msgid "Forget…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1253
+#: ../qml/SettingsWindow.qml:1256
 msgctxt "SettingsWindow|"
 msgid "Where should the vault be moved to?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1256
+#: ../qml/SettingsWindow.qml:1259
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1273
+#: ../qml/SettingsWindow.qml:1276
 msgctxt "SettingsWindow|"
 msgid "Move the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1292
+#: ../qml/SettingsWindow.qml:1295
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Moving “%1”…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1318
+#: ../qml/SettingsWindow.qml:1321
 msgctxt "SettingsWindow|"
 msgid "Forget the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1322
+#: ../qml/SettingsWindow.qml:1325
 msgctxt "SettingsWindow|"
 msgid "Forget"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1331
+#: ../qml/SettingsWindow.qml:1334
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid ""
@@ -2612,13 +2616,13 @@ msgid ""
 "stays."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1332
+#: ../qml/SettingsWindow.qml:1335
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "“%1” is taken off the list of vaults. Its file stays where it is."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1354
+#: ../qml/SettingsWindow.qml:1357
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid ""
@@ -2626,39 +2630,39 @@ msgid ""
 "one on this computer and the one on the server. Nothing is deleted."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1590
+#: ../qml/SettingsWindow.qml:1593
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1633
+#: ../qml/SettingsWindow.qml:1636
 msgctxt "SettingsWindow|"
 msgid "Create vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1639
+#: ../qml/SettingsWindow.qml:1642
 msgctxt "SettingsWindow|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1652
+#: ../qml/SettingsWindow.qml:1655
 msgctxt "SettingsWindow|"
 msgid "Waiting for Windows Hello fingerprint..."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1667
+#: ../qml/SettingsWindow.qml:1670
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:359 ../qml/SettingsWindow.qml:1606
-#: ../qml/SettingsWindow.qml:1673
+#: ../qml/SettingsWindow.qml:360 ../qml/SettingsWindow.qml:1609
+#: ../qml/SettingsWindow.qml:1676
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:359 ../qml/SettingsWindow.qml:1515
-#: ../qml/SettingsWindow.qml:1612 ../qml/SettingsWindow.qml:1684
+#: ../qml/SettingsWindow.qml:360 ../qml/SettingsWindow.qml:1518
+#: ../qml/SettingsWindow.qml:1615 ../qml/SettingsWindow.qml:1687
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -2698,94 +2702,94 @@ msgctxt "StorageWindow|"
 msgid "This Device"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:192
+#: ../qml/SyncConflictsWindow.qml:193
 msgctxt "SyncConflictsWindow|"
 msgid "Sync conflicts"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:262
+#: ../qml/SyncConflictsWindow.qml:263
 msgctxt "SyncConflictsWindow|"
 msgid "Check all"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:79
+#: ../qml/SyncConflictsWindow.qml:80
 msgctxt "SyncConflictsWindow|"
 msgid "What"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:68
+#: ../qml/SyncConflictsWindow.qml:69
 msgctxt "SyncConflictsWindow|"
 msgid "Deleted on the other device, changed here"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:69
+#: ../qml/SyncConflictsWindow.qml:70
 msgctxt "SyncConflictsWindow|"
 msgid "Deleted here, changed on the other device"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:79
+#: ../qml/SyncConflictsWindow.qml:80
 msgctxt "SyncConflictsWindow|"
 msgid "Name"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:79
+#: ../qml/SyncConflictsWindow.qml:80
 msgctxt "SyncConflictsWindow|"
 msgid "Fields"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:79
+#: ../qml/SyncConflictsWindow.qml:80
 msgctxt "SyncConflictsWindow|"
 msgid "Where"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:85 ../qml/SyncConflictsWindow.qml:329
+#: ../qml/SyncConflictsWindow.qml:86 ../qml/SyncConflictsWindow.qml:330
 msgctxt "SyncConflictsWindow|"
 msgid "Why"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:469
+#: ../qml/SyncConflictsWindow.qml:470
 msgctxt "SyncConflictsWindow|"
 msgid "No conflicts to settle."
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:479 ../qml/SyncConflictsWindow.qml:485
+#: ../qml/SyncConflictsWindow.qml:480 ../qml/SyncConflictsWindow.qml:486
 #, qt-format
 msgctxt "SyncConflictsWindow|"
 msgid "Use %1"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:491 ../qml/SyncConflictsWindow.qml:565
+#: ../qml/SyncConflictsWindow.qml:492 ../qml/SyncConflictsWindow.qml:566
 msgctxt "SyncConflictsWindow|"
 msgid "Retry sync"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:500
+#: ../qml/SyncConflictsWindow.qml:501
 msgctxt "SyncConflictsWindow|"
 msgid "Keep here only"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:594
+#: ../qml/SyncConflictsWindow.qml:595
 #, qt-format
 msgctxt "SyncConflictsWindow|"
 msgid "The master password of “%1”, to read it again:"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:67
+#: ../qml/SyncConflictsWindow.qml:68
 msgctxt "SyncConflictsWindow|"
 msgid "Changed on two devices"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:506
+#: ../qml/SyncConflictsWindow.qml:507
 msgctxt "SyncConflictsWindow|"
 msgid "Keep both"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:512
+#: ../qml/SyncConflictsWindow.qml:513
 msgctxt "SyncConflictsWindow|"
 msgid "Invert selection"
 msgstr ""
 
-#: ../qml/SyncConflictsWindow.qml:70
+#: ../qml/SyncConflictsWindow.qml:71
 msgctxt "SyncConflictsWindow|"
 msgid "Differs from an import"
 msgstr ""

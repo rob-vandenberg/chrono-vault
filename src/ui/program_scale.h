@@ -19,9 +19,10 @@
 #include <QFont>
 
 // --- Version ------------------------------------------------------------
-// program_scale.h 0.6.92
+// program_scale.h 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.92: The font at 100% for the windows (D-069)
 // v0.0.11: A mark every 25% (the owner)
 // v0.0.10: In steps of 5%; every size follows the factor (D-023)
@@ -33,7 +34,7 @@ namespace chrono_vault {
 // desktop itself uses (D-023): 100% follows the desktop, so a desktop that
 // already scales by 150% is not scaled twice.
 inline constexpr int smallestProgramScale = 50;
-inline constexpr int largestProgramScale = 400;
+inline constexpr int largestProgramScale = 200;
 // The marks above the slider, every 25% (the owner); the slider moves in steps of 5% between them.
 inline constexpr int programScaleMarkEvery = 25;
 inline constexpr int programScaleToBeginWith = 100;

@@ -4,7 +4,7 @@
 <context>
     <name>AboutWindow</name>
     <message>
-        <location filename="../qml/AboutWindow.qml" line="+61"/>
+        <location filename="../qml/AboutWindow.qml" line="+62"/>
         <source>About Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -177,7 +177,7 @@
 <context>
     <name>ConflictWindow</name>
     <message>
-        <location filename="../qml/ConflictWindow.qml" line="+229"/>
+        <location filename="../qml/ConflictWindow.qml" line="+232"/>
         <source>Sync conflict: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1202,7 +1202,7 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+42"/>
+        <location filename="../qml/IconPicker.qml" line="+43"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+74"/>
+        <location filename="../qml/Main.qml" line="+77"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1778,12 +1778,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+226"/>
+        <location line="+229"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+72"/>
+        <location line="+73"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1808,7 +1808,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location line="+43"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1818,8 +1818,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-45"/>
-        <location line="+96"/>
+        <location line="-53"/>
+        <location line="+104"/>
         <source>Generate Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1829,18 +1829,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-381"/>
-        <location line="+389"/>
+        <location line="+8"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-634"/>
+        <location line="-637"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+187"/>
+        <location line="+190"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1850,7 +1849,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+17"/>
         <source>Change Master Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1861,12 +1860,12 @@
     </message>
     <message>
         <location line="+7"/>
-        <location line="+178"/>
+        <location line="+170"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-170"/>
+        <location line="-162"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1876,7 +1875,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location line="+22"/>
         <source>Show Item Counts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1981,12 +1980,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="-270"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+283"/>
         <source>Sync Now</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2001,7 +2000,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+16"/>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2051,7 +2055,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+81"/>
+        <location line="+83"/>
         <source>Trust this certificate?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2079,7 +2083,7 @@
 <context>
     <name>MasterPasswordWindow</name>
     <message>
-        <location filename="../qml/MasterPasswordWindow.qml" line="+40"/>
+        <location filename="../qml/MasterPasswordWindow.qml" line="+43"/>
         <source>Change master password or keyfile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2234,23 +2238,18 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+269"/>
-        <location line="+377"/>
+        <location filename="../qml/SettingsWindow.qml" line="+270"/>
+        <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-320"/>
+        <location line="-322"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+95"/>
-        <source>Settings – Chrono Vault %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+81"/>
+        <location line="+178"/>
         <location line="+247"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
@@ -2348,7 +2347,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-273"/>
+        <location line="-356"/>
+        <source>Chrono Vault - Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+83"/>
         <source>Categories</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2679,15 +2683,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1308"/>
-        <location line="+1247"/>
+        <location line="-1310"/>
+        <location line="+1249"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1314"/>
-        <location line="+1156"/>
+        <location line="-1316"/>
+        <location line="+1158"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -2735,7 +2739,7 @@
 <context>
     <name>SyncConflictsWindow</name>
     <message>
-        <location filename="../qml/SyncConflictsWindow.qml" line="+192"/>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+193"/>
         <source>Sync conflicts</source>
         <translation type="unfinished"></translation>
     </message>

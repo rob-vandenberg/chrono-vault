@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.6.88
+// test_menus.cpp 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.6.86: View > Audit, Exclude from Audit (D-065)
 // v0.5.83: The Item menu on the selected items (D-063)
@@ -229,8 +230,8 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
     // The keyboard is in the list after an unlock, not in a hidden page.
     QCOMPARE(qobject_cast<QQuickWindow*>(window)->activeFocusItem(),
              window->findChild<QQuickItem*>(QStringLiteral("itemList")));
-    QCOMPARE(menuEntries(0), QStringList({"&File", "New vault", "Open vault", "Change Master Password", "---", "Backup",
-                                          "Restore", "---", "Import", "Export", "---", "Preferences", "---",
+    QCOMPARE(menuEntries(0), QStringList({"&File", "New vault", "Open vault", "Lock vault [Ctrl+L]", "Change Master Password", "---", "Backup",
+                                          "Restore", "---", "Import", "Export", "---",
                                           "Quit [Ctrl+Q]"}));
     QCOMPARE(menuEntries(1), QStringList({"&View", "Show Item Counts", "Hide Sidebar", "Hide Sensitive", "---",
                                           "Categories", "Tags", "Audit", "Others"}));
@@ -241,8 +242,8 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
                           "Copy Username [Shift+Ctrl+U]", "Copy E-mail [Shift+Ctrl+E]", "Copy Password [Shift+Ctrl+P]",
                           "Show Passwords [Shift+Ctrl+H]", "Copy URL [Shift+Ctrl+R]", "Copy OTP [Shift+Ctrl+T]",
                           "Launch URL [Shift+Ctrl+L]"}));
-    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Lock vault [Ctrl+L]", "Sync Now [Ctrl+J]", "Sync Conflicts…",
-                                          "Clear Clipboard [Shift+Ctrl+B]", "Generate Password [Ctrl+G]"}));
+    QCOMPARE(menuEntries(3), QStringList({"&Tools", "Sync Now [Ctrl+J]", "Sync Conflicts…",
+                                          "Clear Clipboard [Shift+Ctrl+B]", "Generate Password [Ctrl+G]", "---", "Options"}));
     // Sync Now only for a vault kept on a WebDAV server (D-057).
     QObject* syncNow = window->findChild<QObject*>(QStringLiteral("syncNowAction"));
     QVERIFY(syncNow);
@@ -252,7 +253,7 @@ void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
     // Backup and Restore are not built yet: greyed.
     QObject* file = window->findChild<QObject*>(QStringLiteral("fileMenu"));
     QVERIFY(file);
-    for (int index : {4, 5}) {
+    for (int index : {5, 6}) {
         QQuickItem* entry = nullptr;
         QMetaObject::invokeMethod(file, "itemAt", Q_RETURN_ARG(QQuickItem*, entry), Q_ARG(int, index));
         QVERIFY(!entry->isEnabled());

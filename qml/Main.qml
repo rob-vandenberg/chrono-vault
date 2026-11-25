@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.94
+// Main.qml 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.93: A start on a locked vault has the keyboard in its field (D-068)
 // v0.6.92: Exact sizes (D-069)
@@ -124,12 +125,12 @@ ApplicationWindow {
         onTriggered: vaultPage.setCollapsed(!vaultPage.collapsed)
     }
     readonly property var keyedActions: [
-        action_newVault, action_openVault, action_changeMasterPassword, action_import, action_export,
-        action_preferences, action_quit, action_showItemCounts, action_hideSidebar, action_sidebar,
+        action_newVault, action_openVault, action_lock, action_changeMasterPassword, action_import, action_export,
+        action_quit, action_showItemCounts, action_hideSidebar, action_sidebar,
         action_hideSensitive, action_showCategories, action_showTags, action_showAudit, action_showOthers, action_archive,
         action_moveToTrash, action_copyUsername, action_copyEmail, action_copyPassword, action_showPasswords,
-        action_copyUrl, action_copyOtp, action_launchUrl, action_lock, action_syncNow, action_clearClipboard,
-        action_generatePassword, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
+        action_copyUrl, action_copyOtp, action_launchUrl, action_syncNow, action_clearClipboard,
+        action_generatePassword, action_preferences, action_checkUpdates, action_supportWebsite, action_shortcuts, action_about
     ]
     // One shortcut per action, from its keys as they are now. Keys a text
     // field uses stand aside while one is typed in, and all of them, Quit too, while the
@@ -322,6 +323,15 @@ ApplicationWindow {
                         onTriggered: mainWindow.openVault()
                     }
                     Action {
+                        id: action_lock
+                        property string actionId: "lock"
+                        property string shownKeys: mainWindow.firstKey(actionId)
+                        objectName: "lockAction"
+                        text: qsTr("Lock vault")
+                        enabled: mainWindow.unlocked
+                        onTriggered: VaultController.lock()
+                    }
+                    Action {
                         id: action_changeMasterPassword
                         property string actionId: "changeMasterPassword"
                         property string shownKeys: mainWindow.firstKey(actionId)
@@ -361,14 +371,6 @@ ApplicationWindow {
                         text: qsTr("Export")
                         enabled: mainWindow.unlocked
                         onTriggered: vaultPage.whenEditorFree(function() { exportWindow.ask() })
-                    }
-                    MenuSeparator {}
-                    Action {
-                        id: action_preferences
-                        property string actionId: "preferences"
-                        property string shownKeys: mainWindow.firstKey(actionId)
-                        text: qsTr("Preferences")
-                        onTriggered: settingsWindow.showWindow()
                     }
                     MenuSeparator {}
                     Action {
@@ -604,15 +606,6 @@ ApplicationWindow {
                     objectName: "toolsMenu"
                     title: qsTr("&Tools")
                     Action {
-                        id: action_lock
-                        property string actionId: "lock"
-                        property string shownKeys: mainWindow.firstKey(actionId)
-                        objectName: "lockAction"
-                        text: qsTr("Lock vault")
-                        enabled: mainWindow.unlocked
-                        onTriggered: VaultController.lock()
-                    }
-                    Action {
                         id: action_syncNow
                         property string actionId: "syncNow"
                         property string shownKeys: mainWindow.firstKey(actionId)
@@ -642,6 +635,14 @@ ApplicationWindow {
                         objectName: "generatePasswordAction"
                         text: qsTr("Generate Password")
                         onTriggered: toolsGenerator.open()
+                    }
+                    MenuSeparator {}
+                    Action {
+                        id: action_preferences
+                        property string actionId: "preferences"
+                        property string shownKeys: mainWindow.firstKey(actionId)
+                        text: qsTr("Options")
+                        onTriggered: settingsWindow.showWindow()
                     }
                 }
                 MainMenu {

@@ -773,3 +773,8 @@ No reviewers, at the owner's word (no more cost than needed).
 
 The owner's changelist items 1-9 (D-070). `src/ui/window_memory.*`, `src/ui/file_pickers.cpp`, the windows in `qml/`;
 `tests/integration/test_exact_scaling.cpp`, `test_file_pickers.cpp`.
+
+## 25 November 2026: version 0.6.95: the scaling to 200%, two menu entries moved
+
+The owner's changelist items 1-10: `src/ui/program_scale.h`, `qml/Main.qml`, `qml/SettingsWindow.qml`,
+`qml/MasterPasswordWindow.qml`; `test_appearance`, `test_menus`. No reviewers.

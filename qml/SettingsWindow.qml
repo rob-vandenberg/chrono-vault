@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.94
+// SettingsWindow.qml 0.6.95
 
 // --- Version history ----------------------------------------------------
+// v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.91: More room for the last two lines of General; 720 by 640 inside (D-068)
@@ -419,7 +420,7 @@ ApplicationWindow {
         }
     }
 
-    title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
+    title: qsTr("Chrono Vault - Settings")
     // It scales along with the UI scaling, from the size the person gave it (D-070).
     width: settingsMemory.wide(minimumWidth, minimumWidth, settingsMemory.own)
     height: settingsMemory.high(minimumHeight, minimumHeight, settingsMemory.own)
