@@ -821,3 +821,8 @@ The owner's changelist items 1-13 (D-073). `src/ui/vault_controller_ask.cpp`, `q
 ## 25 November 2026: version 0.6.104: the eye
 
 Since 0.6.92 the typed text lay over the eye of a password field. `qml/PasswordField.qml`; `test_vault_rows`. No reviewers.
+
+## 25 November 2026: version 0.6.105: another primary vault
+
+The owner's changelist items 1-9 (D-074). `src/ui/vault_controller*.cpp`, `qml/Padlock.qml`, `qml/AskWindow.qml`,
+`qml/SettingsWindow.qml`, `qml/WelcomePage.qml`, the owner's padlocks in `art/`; `test_vault_rows`.

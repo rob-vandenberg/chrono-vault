@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.6.103
+// AskWindow.qml 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
 // The one dialog that asks a master password, a PIN or a server's password, in
@@ -43,6 +44,9 @@ DialogWindow {
     property string problem: ""
     property bool withList: false
     property bool pinAllowed: false
+    // "Remember my credentials" (the owner, D-074).
+    property bool mayRemember: false
+    readonly property bool remembers: rememberBox.wanted && rememberBox.enabled && rememberBox.checked
     property string heading: qsTr("Enter the Master Password to unlock")
     property string hint: qsTr("Master Password")
     property string okText: qsTr("Unlock")
@@ -65,6 +69,7 @@ DialogWindow {
         vaultFile = file
         field.clear()
         VaultController.askFor(file)
+        rememberBox.checked = VaultController.askRememberPossible && VaultController.remembersFor(file)
         if (!visible)
             open()
         field.forceActiveFocus()
@@ -176,6 +181,25 @@ DialogWindow {
             Layout.fillWidth: true
             onAccepted: askWindow.go()
             onEnabledChanged: if (enabled && askWindow.visible) forceActiveFocus()
+        }
+        Item {
+            visible: rememberBox.wanted
+            implicitWidth: rememberBox.implicitWidth
+            implicitHeight: rememberBox.implicitHeight
+            Layout.preferredHeight: implicitHeight
+            HoverHandler { id: overRemember }
+            // Gray, it says why.
+            ToolTip.visible: overRemember.hovered && !rememberBox.enabled
+            ToolTip.text: qsTr("Your primary vault is locked. Open it first.")
+            CheckBox {
+                id: rememberBox
+                objectName: "askRemember"
+                readonly property bool wanted: askWindow.mayRemember && askWindow.proving && !askWindow.usePin
+                                               && VaultController.askRememberShown
+                enabled: VaultController.askRememberPossible
+                text: qsTr("Remember my credentials")
+                onToggled: VaultController.setRemembersFor(askWindow.vaultFile, checked)
+            }
         }
         Button {
             objectName: "askMasterInstead"

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a locked lock. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+  <title>lock-locked.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M7 7.5 C7 4.739 9.239 2.5 12 2.5 C14.761 2.5 17 4.739 17 7.5 L17 9.5 L17.5 9.5 C18.88 9.5 20 10.62 20 12 L20 19 C20 20.38 18.88 21.5 17.5 21.5 L6.5 21.5 C5.12 21.5 4 20.38 4 19 L4 12 C4 10.62 5.12 9.5 6.5 9.5 L7 9.5 Z M12 4.5 C10.343 4.5 9 5.843 9 7.5 L9 9.5 L15 9.5 L15 7.5 C15 5.843 13.657 4.5 12 4.5 Z M12 13.5 C10.895 13.5 10 14.395 10 15.5 C10 16.605 10.895 17.5 12 17.5 C13.105 17.5 14 16.605 14 15.5 C14 14.395 13.105 13.5 12 13.5 Z" fill="#000000"/>
+  </g>
+</svg>

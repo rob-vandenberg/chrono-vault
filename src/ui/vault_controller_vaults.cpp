@@ -27,9 +27,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_vaults.cpp 0.5.75
+// vault_controller_vaults.cpp 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
 
 // The controller's part for the menu of each vault in Settings > Vaults
@@ -355,6 +356,9 @@ void VaultController::finishMove(const QString& vaultFile, const QString& newPat
     const qsizetype index = vaultList.indexOf(vaultFile);
     if (index >= 0) {
         vaultList[index] = newPath;
+        if (VaultsFile().value(QStringLiteral("vaults/primary")).toString() == vaultFile) {
+            VaultsFile().setValue(QStringLiteral("vaults/primary"), newPath);
+        }
     } else {
         vaultList.append(newPath);
     }

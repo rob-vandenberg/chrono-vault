@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Chrono Vault: an open lock. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 24" width="30" height="24">
-  <rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="none" stroke="#000000" stroke-width="2"/>
-  <path d="M16 10.5 V7.5 A4 4 0 0 1 24 7.5 V10" fill="none" stroke="#000000" stroke-width="2"/>
-  <circle cx="12" cy="15.5" r="1.5" fill="#000000"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="24" viewBox="0 0 30 24">
+  <title>lock-open.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M15 7.5 C15 4.739 17.239 2.5 20 2.5 C22.761 2.5 25 4.739 25 7.5 L25 10 C25 10.552 24.552 11 24 11 C23.448 11 23 10.552 23 10 L23 7.5 C23 5.843 21.657 4.5 20 4.5 C18.343 4.5 17 5.843 17 7.5 L17 9.5 L17.5 9.5 C18.881 9.5 20 10.619 20 12 L20 19 C20 20.381 18.881 21.5 17.5 21.5 L6.5 21.5 C5.119 21.5 4 20.381 4 19 L4 12 C4 10.619 5.119 9.5 6.5 9.5 L15 9.5 Z M6.5 11.5 C6.224 11.5 6 11.724 6 12 L6 19 C6 19.276 6.224 19.5 6.5 19.5 L17.5 19.5 C17.776 19.5 18 19.276 18 19 L18 12 C18 11.724 17.776 11.5 17.5 11.5 L16 11.5 Z" fill="#000000"/>
+    <circle cx="12" cy="15.5" r="2" fill="#000000"/>
+  </g>
 </svg>

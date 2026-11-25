@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.6.100
+// WelcomePage.qml 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Its windows in front of the window that asked (D-062)
@@ -264,7 +265,7 @@ Item {
                     wrapMode: Text.Wrap
                     verticalAlignment: Text.AlignVCenter
                 }
-                text: qsTr("Keep this vault's password in your primary vault “%1”, so unlocking “%1” also opens this one").arg(VaultController.vaultNameOf(VaultController.primaryVault))
+                text: qsTr("Remember my credentials")
             }
             // A keyfile beside the password (D-031).
             CheckBox {

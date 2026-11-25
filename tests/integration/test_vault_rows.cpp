@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.104
+// test_vault_rows.cpp 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.104: A click on the eye
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
@@ -100,6 +101,92 @@ private slots:
         QTRY_VERIFY(list->property("opened").toBool());
         other.requestActivate();
         QTRY_VERIFY(!list->property("visible").toBool());
+    }
+
+    // Another vault the primary: only the crown moves; "Remember my credentials"
+    // keeps a typed password in the primary; Open, Closed and Locked (D-074).
+    void another_primary_and_remembered_credentials()
+    {
+        const QString first = controller->vaultPath();
+        const QString second = folder.filePath(QStringLiteral("mine.chronovault"));
+        const auto is = [this](const QString& vault) { return controller->vaultPath() == vault && controller->state() == State::Unlocked; };
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+        QTRY_VERIFY(is(second) && controller->isIdle());
+        QCOMPARE(controller->primaryVault(), first);
+        // Its key kept, its own password not: Closed and Open; the primary left is Closed.
+        QCOMPARE(controller->vaultStateOf(second), 2);
+        QCOMPARE(controller->vaultStateOf(first), 1);
+        controller->lock();
+        QCOMPARE(controller->vaultStateOf(second), 0);
+        QCOMPARE(controller->vaultStateOf(first), 0);
+
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        auto* ask = settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"));
+        auto* box = ask->findChild<QQuickItem*>(QStringLiteral("askRemember"));
+        const auto opens = [&](const QString& vault, const QString& password) {
+            QVERIFY(QMetaObject::invokeMethod(ask, "askVault", Q_ARG(QVariant, vault)));
+            ask->findChild<QObject*>(QStringLiteral("askField"))->setProperty("text", password);
+            QMetaObject::invokeMethod(ask, "go");
+        };
+        // Everything locked: gray and not ticked; nothing is kept.
+        opens(second, QStringLiteral("two"));
+        QVERIFY(box->property("wanted").toBool() && !box->isEnabled() && !box->property("checked").toBool());
+        QTRY_VERIFY(is(second));
+        QCOMPARE(controller->vaultStateOf(second), 2);
+        // The primary: no box.
+        opens(first, QStringLiteral("pass"));
+        QVERIFY(!box->property("wanted").toBool());
+        QTRY_VERIFY(is(first));
+        QCOMPARE(controller->vaultStateOf(second), 0);
+        // Open: ticked, taken away, and that is remembered.
+        QVERIFY(QMetaObject::invokeMethod(ask, "askVault", Q_ARG(QVariant, second)));
+        QVERIFY(box->isEnabled() && box->property("checked").toBool());
+        QMetaObject::invokeMethod(box, "toggle");
+        QMetaObject::invokeMethod(box, "toggled");
+        QMetaObject::invokeMethod(ask, "reject");
+        QVERIFY(!controller->remembersFor(second));
+        opens(second, QStringLiteral("two"));
+        QVERIFY(!box->property("checked").toBool());
+        QTRY_VERIFY(is(second) && controller->isIdle());
+        controller->switchToVault(first);
+        QTRY_VERIFY(is(first));
+        QCOMPARE(controller->vaultStateOf(second), 0); // not kept
+        // Ticked: kept in the primary, once, and Closed from then on.
+        controller->setRemembersFor(second, true);
+        opens(second, QStringLiteral("two"));
+        QTRY_VERIFY(is(second));
+        controller->switchToVault(first);
+        QTRY_VERIFY(is(first) && controller->vaultStateOf(second) == 1);
+        QVERIFY(controller->opensAtOnce(second));
+        controller->lock();
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_VERIFY(is(first));
+        QCOMPARE(controller->vaultStateOf(second), 1); // out of the primary's own file
+
+        // The crown moves; nothing else. The old primary's keeping is its own.
+        QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("primaryWindow")), "open");
+        settings()->findChild<QObject*>(QStringLiteral("primaryWindow"))->setProperty("vaultFile", second);
+        QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("makePrimaryButton")), "clicked");
+        QCOMPARE(controller->primaryVault(), second);
+        QCOMPARE(controller->vaultStateOf(second), 0);
+        controller->lock();
+        opens(second, QStringLiteral("two"));
+        QTRY_VERIFY(is(second));
+        QCOMPARE(controller->vaultStateOf(first), 0); // the new one knows nothing yet
+        opens(first, QStringLiteral("pass"));
+        QVERIFY(box->property("checked").toBool());
+        QTRY_VERIFY(is(first));
+        QTRY_VERIFY(controller->vaultStateOf(second) == 1);
+        controller->switchToVault(second);
+        QTRY_VERIFY(is(second) && controller->vaultStateOf(first) == 1);
+        // Back: what the first kept before is used again, without asking.
+        controller->makePrimary(first);
+        controller->lock();
+        controller->switchToVault(first);
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_VERIFY(is(first));
+        QCOMPARE(controller->vaultStateOf(second), 1);
+        QMetaObject::invokeMethod(settings(), "close");
     }
 
     // The eye lies over the typed text: a click shows the password, another hides it.

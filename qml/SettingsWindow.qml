@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.103
+// SettingsWindow.qml 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -1091,7 +1092,7 @@ ApplicationWindow {
                                             // Open or locked, seen by shape and color (the owner, D-071).
                                             Padlock {
                                                 objectName: "padlock_" + vaultRow.name
-                                                open: vaultRow.unlocked
+                                                vaultFile: vaultRow.modelData
                                                 paper: settingsWindow.palette.window
                                                 ink: settingsWindow.palette.windowText
                                                 visible: vaultRow.found
@@ -1150,6 +1151,16 @@ ApplicationWindow {
                                                 onTriggered: VaultController.lockVault(vaultRow.modelData)
                                             }
                                             MenuItem {
+                                                objectName: "primaryVault_" + vaultRow.name
+                                                text: qsTr("Make primary vault")
+                                                visible: vaultRow.found && !vaultRow.primary
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    primaryWindow.vaultFile = vaultRow.modelData
+                                                    primaryWindow.open()
+                                                }
+                                            }
+                                            MenuItem {
                                                 objectName: "moveVault_" + vaultRow.name
                                                 text: qsTr("Move…")
                                                 visible: vaultRow.canMove
@@ -1206,6 +1217,7 @@ ApplicationWindow {
                             objectName: "unlockFirstWindow"
                             transientParent: settingsWindow
                             withList: true
+                            mayRemember: true
                             pinAllowed: true
                             property string action: ""
                             function ready(file) {
@@ -1237,7 +1249,7 @@ ApplicationWindow {
                             property string opened: ""
                             onRight: function(file) {
                                 opened = file
-                                if (!VaultController.openProven())
+                                if (!VaultController.openProven(remembers))
                                     opened = ""
                                 else if (ready(file))
                                     finish()
@@ -1260,6 +1272,31 @@ ApplicationWindow {
                                         unlockFirst.opened = ""
                                     }
                                 }
+                            }
+                        }
+                        // Only the crown moves (the owner, D-074).
+                        DialogWindow {
+                            id: primaryWindow
+                            objectName: "primaryWindow"
+                            memoryName: "makePrimary"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            title: qsTr("Make primary vault")
+                            standardButtons: Dialog.Cancel
+                            rightButtons: Button {
+                                objectName: "makePrimaryButton"
+                                text: qsTr("Make primary")
+                                onClicked: {
+                                    VaultController.makePrimary(primaryWindow.vaultFile)
+                                    primaryWindow.accept()
+                                }
+                            }
+                            Label {
+                                Layout.fillWidth: true
+                                text: qsTr("Are you sure you want to make “%1” your primary vault? No passwords are moved: what is remembered in “%2” stays there.")
+                                      .arg(VaultController.vaultNameOf(primaryWindow.vaultFile))
+                                      .arg(VaultController.vaultNameOf(VaultController.primaryVault))
+                                wrapMode: Text.Wrap
                             }
                         }
                         // Move…: where to, then the file here or the WebDAV folder (D-060).

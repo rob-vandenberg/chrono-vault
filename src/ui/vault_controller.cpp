@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.6.103
+// vault_controller.cpp 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
@@ -104,6 +105,8 @@ namespace {
 
 const QString lastVaultKey = QStringLiteral("vault/lastPath");
 const QString vaultListKey = QStringLiteral("vaults/list");
+const QString primaryKeyName = QStringLiteral("vaults/primary");
+const QString notRememberedKey = QStringLiteral("vaults/notRemembered");
 const QString keyfilesKey = QStringLiteral("vaults/keyfiles");
 // Vaults moved (old place to new) whose password saved in the primary still
 // names the old place, until the primary is next unlocked (D-060).
@@ -1049,6 +1052,7 @@ void VaultController::startUnlock(const QByteArray& password, bool savedPassword
                     // The copy saved in the primary is out of date: forgotten,
                     // and the person is told which password failed.
                     self->savedPasswords.remove(self->path);
+                    self->tellKept();
                     self->setState(State::Locked);
                     self->say(tr("The password saved in “%1” for this vault no longer opens it. Type its master "
                                  "password.")
@@ -2803,8 +2807,13 @@ QString VaultController::conflictPathFor(const QString& vaultFile)
 
 QString VaultController::primaryVault() const
 {
-    // Always the first: a primary on a drive that is not there at the moment
-    // never hands its place to another vault (D-030).
+    // The one the person made the primary (D-074), else the first: a primary
+    // on a drive that is not there at the moment never hands its place to
+    // another vault (D-030).
+    const QString made = VaultsFile().value(primaryKeyName).toString();
+    if (!made.isEmpty() && vaultList.contains(made)) {
+        return made;
+    }
     return vaultList.isEmpty() ? QString() : vaultList.constFirst();
 }
 
@@ -2894,6 +2903,7 @@ void VaultController::rememberPrimary()
             savedPasswords.insert(moved.value(vaultFile, vaultFile).toString(), password);
         }
     }
+    tellKept();
 }
 
 void VaultController::forgetPrimary()
@@ -2903,6 +2913,7 @@ void VaultController::forgetPrimary()
     crypto::wipe(primaryKeyfile);
     primaryKeyfile.clear();
     savedPasswords.clear();
+    tellKept();
 }
 
 void VaultController::showCreated(CreatedVault created)
@@ -2972,7 +2983,53 @@ void VaultController::switchToVault(const QString& vaultFile)
     setState(State::Locked);
 }
 
-void VaultController::updateSavedPassword(const QString& vaultFile, const QString& password)
+void VaultController::tellKept()
+{
+    ++keptCount;
+    emit keptChanged();
+    emit askChanged();
+}
+
+bool VaultController::remembersFor(const QString& vaultFile) const
+{
+    return !VaultsFile().value(notRememberedKey).toStringList().contains(vaultFile);
+}
+
+void VaultController::setRemembersFor(const QString& vaultFile, bool remembers)
+{
+    QStringList without = VaultsFile().value(notRememberedKey).toStringList();
+    without.removeAll(vaultFile);
+    if (!remembers) {
+        without.append(vaultFile);
+    }
+    VaultsFile().setValue(notRememberedKey, without);
+}
+
+int VaultController::vaultStateOf(const QString& vaultFile) const
+{
+    if (vaultFile == path && currentState == State::Unlocked) {
+        return 2;
+    }
+    const bool kept = (vaultFile == primaryVault() && primaryKey.isValid()) || savedPasswords.contains(vaultFile);
+    return kept ? 1 : 0;
+}
+
+void VaultController::makePrimary(const QString& vaultFile)
+{
+    if (!vaultList.contains(vaultFile) || vaultFile == primaryVault()) {
+        return;
+    }
+    VaultsFile().setValue(primaryKeyName, vaultFile);
+    // What was kept was the other primary's; the new one's own is read when it
+    // is the one that is open, else when it is opened.
+    forgetPrimary();
+    if (path == vaultFile) {
+        rememberPrimary();
+    }
+    emit vaultsChanged();
+}
+
+void VaultController::updateSavedPassword(const QString& vaultFile, const QString& password, bool add)
 {
     // The primary is not shown: it is read with its kept key, its saved
     // password for this vault changed, and written as safely as every save,
@@ -2982,7 +3039,7 @@ void VaultController::updateSavedPassword(const QString& vaultFile, const QStrin
     const QString primary = primaryVault();
     QPointer<VaultController> self(this);
     const std::shared_ptr<Stamps> box = stamps;
-    (void)QtConcurrent::run(&savePool, [self, kept, primary, vaultFile, password, box]() mutable {
+    (void)QtConcurrent::run(&savePool, [self, kept, primary, vaultFile, password, box, add]() mutable {
         bool updated = false;
         OpenResult opened = openVaultFileWithKey(primary, kept);
         if (opened.status == OpenStatus::Opened) {
@@ -3005,6 +3062,18 @@ void VaultController::updateSavedPassword(const QString& vaultFile, const QStrin
                     }
                     one.modified = QDateTime::currentDateTimeUtc();
                 }
+                if (!found && add) {
+                    const auto passwordTemplate = findTemplate(QStringLiteral("password"), read.contents);
+                    if (passwordTemplate) {
+                        Item saved = newItem(*passwordTemplate);
+                        saved.title = tr("%1 vault").arg(QFileInfo(vaultFile).completeBaseName());
+                        saved.fields.insert(1, makeField(QStringLiteral("vaultfile"), {}, FieldKind::Text, vaultFile));
+                        saved.fields[0].value = password;
+                        giveFieldsIds(saved);
+                        read.contents.items.append(saved);
+                        found = true;
+                    }
+                }
                 QByteArray json = contentsToJson(read.contents);
                 QByteArray written;
                 updated = found && saveVaultFile(primary, json, opened.key, {}, &written) == SaveStatus::Saved;
@@ -3018,17 +3087,23 @@ void VaultController::updateSavedPassword(const QString& vaultFile, const QStrin
         kept.wipe();
         QMetaObject::invokeMethod(
             qApp,
-            [self, vaultFile, password, primary, updated]() {
+            [self, vaultFile, password, primary, updated, add]() {
                 if (!self) {
                     return;
                 }
                 if (updated) {
                     if (self->primaryKey.isValid()) {
                         self->savedPasswords.insert(vaultFile, password);
+                        self->tellKept();
                     }
                     return;
                 }
                 self->savedPasswords.remove(vaultFile);
+                self->tellKept();
+                if (add) {
+                    self->say(tr("Your credentials could not be remembered in “%1”.").arg(QFileInfo(primary).completeBaseName()), true);
+                    return;
+                }
                 self->say(tr("The master password was changed, but the copy saved in “%1” could not be changed. "
                              "Change it there by hand.")
                               .arg(QFileInfo(primary).completeBaseName()),

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultBox.qml 0.6.103
+// VaultBox.qml 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
 // The large field that shows a vault, with its list: the start-up page's and the
@@ -174,7 +175,7 @@ ComboBox {
             Padlock {
                 objectName: "listPadlock"
                 visible: vaultBox.withPadlocks && !vaultRow.isOther && !vaultRow.missing
-                open: vaultRow.modelData === VaultController.vaultPath && VaultController.state === VaultController.Unlocked
+                vaultFile: vaultRow.modelData
                 paper: vaultBox.palette.button
                 ink: vaultBox.palette.buttonText
                 Layout.preferredWidth: Math.round(wide)

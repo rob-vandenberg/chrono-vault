@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.6.103
+// vault_controller.h 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
@@ -325,7 +326,23 @@ public:
     Q_INVOKABLE void proveWithPin(const QString& pin);
     Q_INVOKABLE void proveWithFinger();
     // With what was proven: the vault opened; the one shown exported; another read for an import.
-    Q_INVOKABLE bool openProven();
+    // With remember, a typed master password is also kept in the primary (D-074).
+    Q_INVOKABLE bool openProven(bool remember = false);
+    // "Remember my credentials": for a vault that is not the primary; possible
+    // while the primary's key is known; a tick taken away is remembered (D-074).
+    Q_PROPERTY(bool askRememberShown READ askRememberShown NOTIFY askChanged)
+    Q_PROPERTY(bool askRememberPossible READ askRememberPossible NOTIFY askChanged)
+    [[nodiscard]] bool askRememberShown() const;
+    [[nodiscard]] bool askRememberPossible() const;
+    [[nodiscard]] Q_INVOKABLE bool remembersFor(const QString& vaultFile) const;
+    Q_INVOKABLE void setRemembersFor(const QString& vaultFile, bool remembers);
+    // Another vault the primary: only that changes (the owner, D-074).
+    Q_INVOKABLE void makePrimary(const QString& vaultFile);
+    // How a vault feels: 2 Open (in it), 1 Closed (opens without a password),
+    // 0 Locked (asks one). keptRevision changes when that may have (D-074).
+    Q_PROPERTY(int keptRevision READ keptRevision NOTIFY keptChanged)
+    [[nodiscard]] int keptRevision() const { return keptCount; }
+    [[nodiscard]] Q_INVOKABLE int vaultStateOf(const QString& vaultFile) const;
     Q_INVOKABLE void exportProven(const QUrl& file);
     Q_INVOKABLE void importProven();
     // One setting for all vaults (the owner, D-043); a vault's key is kept at
@@ -710,6 +727,7 @@ signals:
     void systemIdleAvailableChanged();
     void unlockWaitChanged();
     void askChanged();
+    void keptChanged();
     void proven(const QString& vaultFile);
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
@@ -850,7 +868,8 @@ private:
     [[nodiscard]] static QString webDavNameProblem(const QString& name);
     void showWebDavFolder(const WebDavAccount& account, bool connecting);
     // The password saved in the primary for this vault, changed with it.
-    void updateSavedPassword(const QString& vaultFile, const QString& password);
+    // With add, kept there for the first time when it is not yet (D-074).
+    void updateSavedPassword(const QString& vaultFile, const QString& password, bool add = false);
 
     // An imported item taken in (D-060, D-061), in vault_controller_import.cpp:
     // an item the vault does not have is added; one it deleted for good comes
@@ -950,7 +969,7 @@ private:
     void readForImport(const QString& source, const QByteArray& password, const std::optional<VaultKey>& kept);
     void tellAsked(const QString& text, bool isTrouble);
     void checkProven(const VaultKey& candidate, const QByteArray& keyfile, int by);
-    void provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed);
+    void provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed, const QByteArray& words = {});
     void askedFingerAnswered(int result, const QByteArray& secret);
     void wipeProof();
     void updateAskWait();
@@ -966,6 +985,9 @@ private:
     VaultKey proofKey;
     QByteArray proofKeyfile;
     bool proofTyped = false;
+    QByteArray proofWords;
+    int keptCount = 0;
+    void tellKept();
     bool openingByTyped = false;
     void wrongPasswordTyped();
     void rightPasswordGiven();

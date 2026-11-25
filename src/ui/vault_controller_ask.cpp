@@ -25,14 +25,16 @@
 #include <QFileInfo>
 #include <QPointer>
 #include <QSaveFile>
+#include <QScopeGuard>
 #include <QtConcurrent/QtConcurrentRun>
 
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_ask.cpp 0.6.103
+// vault_controller_ask.cpp 0.6.105
 
 // --- Version history ----------------------------------------------------
+// v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
 // The standard dialog's question: a master password, a PIN or a finger for any
@@ -59,6 +61,18 @@ void VaultController::wipeProof()
     crypto::wipe(proofKeyfile);
     proofKeyfile.clear();
     proofTyped = false;
+    crypto::wipe(proofWords);
+    proofWords.clear();
+}
+
+bool VaultController::askRememberShown() const
+{
+    return !askedFor.isEmpty() && askedFor != primaryVault();
+}
+
+bool VaultController::askRememberPossible() const
+{
+    return primaryKey.isValid() || (currentState == State::Unlocked && path == primaryVault());
 }
 
 void VaultController::updateAskWait()
@@ -163,15 +177,19 @@ void VaultController::proveWithPassword(const QString& password)
                 crypto::wipe(result.contents);
             }
         }
-        crypto::wipe(typed);
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, fingerprint, attempt]() mutable {
+            [self, result, fingerprint, attempt, typed]() mutable {
                 if (!self || attempt != self->askAttempt) {
                     result.key.wipe();
+                    crypto::wipe(typed);
                     return;
                 }
                 self->askIsBusy = false;
+                QByteArray words = typed;
+                words.detach();
+                crypto::wipe(typed);
+                const auto wiped = qScopeGuard([&words]() { crypto::wipe(words); });
                 if (!fingerprint) {
                     self->tellAsked(tr("The keyfile could not be read. Choose it again below."), true);
                     return;
@@ -190,7 +208,7 @@ void VaultController::proveWithPassword(const QString& password)
                     self->tellAsked(openStatusText(result.status), true);
                     return;
                 }
-                self->provenNow(result.key, *fingerprint, true);
+                self->provenNow(result.key, *fingerprint, true, words);
                 result.key.wipe();
             },
             Qt::QueuedConnection);
@@ -350,7 +368,7 @@ void VaultController::checkProven(const VaultKey& candidate, const QByteArray& k
     });
 }
 
-void VaultController::provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed)
+void VaultController::provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed, const QByteArray& words)
 {
     forgetWrongPasswords(askedFor);
     updateAskWait();
@@ -362,12 +380,14 @@ void VaultController::provenNow(const VaultKey& right, const QByteArray& keyfile
     proofKeyfile = keyfile;
     proofKeyfile.detach();
     proofTyped = typed;
+    proofWords = words;
+    proofWords.detach();
     askNeedsKeyfile = false;
     tellAsked(QString(), false);
     emit proven(askedFor);
 }
 
-bool VaultController::openProven()
+bool VaultController::openProven(bool remember)
 {
     const QString vaultFile = askedFor;
     if (vaultFile.isEmpty() || !proofKey.isValid() || currentState == State::Busy) {
@@ -405,6 +425,10 @@ bool VaultController::openProven()
     keyfileSecret = keyfile;
     openingByTyped = typed;
     startOpenWithKey(with);
+    // "Remember my credentials": written into the primary with its key (D-074).
+    if (remember && typed && !proofWords.isEmpty() && vaultFile != primaryVault() && primaryKey.isValid()) {
+        updateSavedPassword(vaultFile, QString::fromUtf8(proofWords), true);
+    }
     with.wipe();
     crypto::wipe(keyfile);
     return true;

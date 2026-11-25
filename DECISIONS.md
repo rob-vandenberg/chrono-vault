@@ -82,3 +82,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-071](decisions/D-071.md) | Padlocks and Open in Settings > Vaults; round picture buttons, vertical dots |
 | [D-072](decisions/D-072.md) | Menus as wide as their longest entry, 120 at least; they close with their window |
 | [D-073](decisions/D-073.md) | One standard dialog for a master password, a PIN or a finger |
+| [D-074](decisions/D-074.md) | Another primary vault; Remember my credentials; Open, Closed, Locked |
