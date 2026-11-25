@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.6.86
+// VaultPage.qml 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: The audit: its group in the sidebar, its lists, an item left out of it (D-065)
 // v0.5.83: The focused item apart from the selected ones; gray marks with a blue bar; Change Category; the empty
 //          list's graphic; the vault's counts at the right (D-063)
@@ -263,8 +264,9 @@ Item {
     // File > New vault… and Open vault…, handled by the start page's windows.
     signal newVaultRequested()
     signal openVaultRequested()
-    // Settings > Customize, from the counts (D-063).
-    signal customizeRequested()
+    // Settings > Categories and Tags, from the counts (D-066).
+    signal categoriesRequested()
+    signal tagsRequested()
     // Settings > Security, for the check for leaked passwords (D-065).
     signal leakSettingRequested()
     // The item's sync conflict, to be settled in the Sync conflicts dialog (D-060).
@@ -1261,7 +1263,8 @@ Item {
             VaultOverview {
                 objectName: "vaultOverview"
                 onFilterChosen: function(filter) { vaultPage.choose(filter) }
-                onCustomizeRequested: vaultPage.customizeRequested()
+                onCategoriesRequested: vaultPage.categoriesRequested()
+                onTagsRequested: vaultPage.tagsRequested()
                 onLeakSettingRequested: vaultPage.leakSettingRequested()
             }
             ItemDetails {

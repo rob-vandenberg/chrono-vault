@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultOverview.qml 0.6.86
+// VaultOverview.qml 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: The audit above the counts (D-065)
 // v0.5.83: Initial release (D-063)
 
@@ -31,7 +32,8 @@ import QtQuick.Layouts
 ScrollView {
     id: overview
     signal filterChosen(string filter)
-    signal customizeRequested()
+    signal categoriesRequested()
+    signal tagsRequested()
     signal leakSettingRequested()
     readonly property var audit: VaultController.audit
     contentWidth: availableWidth
@@ -198,13 +200,13 @@ ScrollView {
                 objectName: "countCategories"
                 text: qsTr("Categories")
                 count: VaultController.revision >= 0 ? VaultController.categories().length : 0
-                onClicked: overview.customizeRequested()
+                onClicked: overview.categoriesRequested()
             }
             Count {
                 objectName: "countTags"
                 text: qsTr("Tags")
                 count: VaultController.revision >= 0 ? VaultController.tags().length : 0
-                onClicked: overview.customizeRequested()
+                onClicked: overview.tagsRequested()
             }
             Count {
                 objectName: "countArchive"

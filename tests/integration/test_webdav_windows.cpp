@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.5.77
+// test_webdav_windows.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
 // v0.5.77: Import… and Export… in the vault menu (D-060)
 // v0.5.75: Settings > Vaults: the menu per vault, Disconnect without deleting, Lock (D-060)
@@ -279,7 +280,7 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
     QVERIFY(settings);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
-    settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 5);
+    settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
     QTRY_VERIFY(inWindow(settings, QStringLiteral("vaultMenuButton_Home")));
     const auto entryOf = [settings](const QString& name) -> QObject* {
         QQuickItem* button = inWindow(settings, QStringLiteral("vaultMenuButton_Home"));

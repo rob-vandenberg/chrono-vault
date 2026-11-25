@@ -29,7 +29,7 @@ import QtQuick.Layouts
 
 // Edit a category, built-in or the person's own (D-056): its name, its icon
 // and whether it is shown in the left column. Opened from Settings >
-// Customize and from a right-click on a category in the left column.
+// Categories and from a right-click on a category in the left column.
 DialogWindow {
     id: categoryEditor
     objectName: "categoryEditor"

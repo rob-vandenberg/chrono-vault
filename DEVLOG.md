@@ -734,3 +734,9 @@ One review round of two, clean.
 ## 25 November 2026: version 0.6.87: the Windows build of Audit
 
 A parameter named as a member stopped Microsoft's compiler; renamed. 0.6.86 has no Windows setup.
+
+## 25 November 2026: version 0.6.88: the topics of Settings
+
+The owner's changelist items 1-14 (D-066). `qml/CategoriesPage.qml`, `qml/TagsPage.qml` and `qml/TemplatesPage.qml` out of
+`qml/CustomizePage.qml`; `qml/SettingsWindow.qml`. From this version on, a compile on the Windows twin before the push.
+One review round of two, clean.

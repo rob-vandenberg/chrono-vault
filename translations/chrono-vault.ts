@@ -41,6 +41,66 @@
     </message>
 </context>
 <context>
+    <name>CategoriesPage</name>
+    <message>
+        <location filename="../qml/CategoriesPage.qml" line="+39"/>
+        <source>Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The categories belong to the vault that is open. Changes here are kept in it at once.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Unlock a vault to change its categories.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Shown in the left column</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+4"/>
+        <source>%n item(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Edit…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>New category…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>New category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Name of the category:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Category</name>
     <message>
         <location filename="../src/core/templates.cpp" line="+102"/>
@@ -201,114 +261,6 @@
     <message>
         <location line="+37"/>
         <source>Field</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CustomizePage</name>
-    <message>
-        <location filename="../qml/CustomizePage.qml" line="+44"/>
-        <source>Customize</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+19"/>
-        <source>Categories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+21"/>
-        <source>Shown in the left column</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <location line="+4"/>
-        <location line="+57"/>
-        <source>%n item(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message>
-        <location line="-42"/>
-        <location line="+93"/>
-        <source>Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-93"/>
-        <source>Reset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+9"/>
-        <source>New category…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+6"/>
-        <source>Tags</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+6"/>
-        <source>No tags yet.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+26"/>
-        <source>Rename…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Remove</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
-        <source>Templates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+23"/>
-        <source>Copy…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-93"/>
-        <location line="+98"/>
-        <source>Edit…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-142"/>
-        <source>Unlock a vault to change its categories, tags and templates.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+6"/>
-        <source>The categories, tags and templates belong to the vault that is open. Changes here are kept in it at once.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+149"/>
-        <source>New template…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>New field</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+28"/>
-        <source>New category</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>Name of the category:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1816,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+71"/>
+        <location filename="../qml/Main.qml" line="+72"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2074,7 +2026,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+146"/>
+        <location line="+147"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2282,46 +2234,35 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+259"/>
-        <location line="+380"/>
+        <location filename="../qml/SettingsWindow.qml" line="+266"/>
+        <location line="+376"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-323"/>
+        <location line="-319"/>
         <source>Chrono Vault could not be set to start at startup. The other settings are kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+99"/>
+        <location line="+95"/>
         <source>Settings – Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+81"/>
-        <location line="+196"/>
+        <location line="+241"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-196"/>
-        <location line="+416"/>
-        <source>Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-416"/>
+        <location line="-241"/>
         <location line="+64"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-64"/>
-        <source>Customize</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+67"/>
+        <location line="+3"/>
         <source>Theme</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2357,18 +2298,18 @@
     </message>
     <message>
         <location line="-149"/>
-        <location line="+1037"/>
+        <location line="+1026"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1037"/>
-        <location line="+559"/>
+        <location line="-1027"/>
+        <location line="+468"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-404"/>
+        <location line="-312"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2378,7 +2319,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="+50"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2398,16 +2339,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+0"/>
-        <location line="+44"/>
-        <location line="+208"/>
+        <location line="-20"/>
         <location line="+3"/>
         <location line="+6"/>
+        <location line="+11"/>
+        <location line="+44"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-254"/>
+        <location line="-267"/>
+        <source>Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Templates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+229"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2452,7 +2408,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+212"/>
+        <location line="+75"/>
         <source>Primary vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2512,7 +2468,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location line="+111"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2527,7 +2483,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-822"/>
+        <location line="-766"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2547,7 +2503,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+199"/>
+        <location line="-73"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2557,7 +2513,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-163"/>
+        <location line="+109"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2598,7 +2554,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="-247"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2613,7 +2569,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+682"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2628,7 +2584,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+113"/>
+        <location line="-361"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2698,7 +2654,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+155"/>
+        <location line="+236"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2723,15 +2679,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1317"/>
-        <location line="+1256"/>
+        <location line="-1302"/>
+        <location line="+1241"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1323"/>
-        <location line="+1165"/>
+        <location line="-1308"/>
+        <location line="+1150"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -2886,6 +2842,46 @@
     </message>
 </context>
 <context>
+    <name>TagsPage</name>
+    <message>
+        <location filename="../qml/TagsPage.qml" line="+39"/>
+        <source>Tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The tags belong to the vault that is open. Changes here are kept in it at once.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Unlock a vault to change its tags.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>No tags yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location line="+21"/>
+        <source>%n item(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Rename…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Template</name>
     <message>
         <location filename="../src/core/templates.cpp" line="+22"/>
@@ -3018,6 +3014,49 @@
     <message>
         <location line="+8"/>
         <source>Add a field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>New field</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TemplatesPage</name>
+    <message>
+        <location filename="../qml/TemplatesPage.qml" line="+40"/>
+        <source>Templates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The templates belong to the vault that is open. Changes here are kept in it at once.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Unlock a vault to change its templates.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>Copy…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Edit…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>New template…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3289,7 +3328,7 @@
 <context>
     <name>VaultOverview</name>
     <message>
-        <location filename="../qml/VaultOverview.qml" line="+84"/>
+        <location filename="../qml/VaultOverview.qml" line="+86"/>
         <source>Not checked</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3377,7 +3416,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+734"/>
+        <location filename="../qml/VaultPage.qml" line="+736"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3397,8 +3436,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-576"/>
-        <location line="+584"/>
+        <location line="-577"/>
+        <location line="+585"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3514,12 +3553,12 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+365"/>
+        <location line="+366"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-354"/>
+        <location line="-355"/>
         <source>Trash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3550,7 +3589,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+262"/>
+        <location line="+263"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3610,7 +3649,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-727"/>
+        <location line="-728"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4037,7 +4076,7 @@
 <context>
     <name>chrono_vault::ItemListModel</name>
     <message numerus="yes">
-        <location filename="../src/ui/item_list_model.cpp" line="+100"/>
+        <location filename="../src/ui/item_list_model.cpp" line="+101"/>
         <source>%1. The same password in %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>

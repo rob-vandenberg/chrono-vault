@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_intuitive.cpp 0.5.83
+// test_intuitive.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.83: The fixture, and the tests of several items, in files of their own (D-063)
 // v0.5.82: Initial release (D-062)
 
@@ -180,7 +181,7 @@ private slots:
         QVERIFY(here("restoreDefaultsButton") && !here("createVaultButton") && !here("openVaultButton"));
         QObject* topics = settings->findChild<QObject*>(QStringLiteral("topics"));
         QVERIFY(topics);
-        topics->setProperty("currentIndex", 5);
+        topics->setProperty("currentIndex", 2);
         QTRY_VERIFY(here("createVaultButton") && here("openVaultButton") && !here("restoreDefaultsButton"));
         QTRY_VERIFY(here("primaryCrown_settings_vaults_has_its_own_buttons_and_the_crown"));
         QTRY_COMPARE(here("createVaultButton")->mapToScene(QPointF()).x(), here("vaultsPage")->mapToScene(QPointF()).x());

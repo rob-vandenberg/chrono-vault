@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.6.86
+# qml/CMakeLists.txt 0.6.88
 
 # --- Version history ----------------------------------------------------
+# v0.6.88: The settings' pages Categories, Tags and Templates (D-066)
 # v0.6.86: The audit (D-065)
 # v0.5.85: The tray icons (D-064)
 # v0.5.83: CategoryMenu, EmptyList, TagDialog, VaultOverview; the empty vault (D-063)
@@ -72,7 +73,9 @@ qt_add_qml_module(chrono_vault_ui
         ImportWindow.qml
         DialogWindow.qml
         ItemEditor.qml
-        CustomizePage.qml
+        CategoriesPage.qml
+        TagsPage.qml
+        TemplatesPage.qml
         ItemDetails.qml
         Main.qml
         MasterPasswordWindow.qml

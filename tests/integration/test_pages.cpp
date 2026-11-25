@@ -35,9 +35,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.5.82
+// test_pages.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.82: Move to Trash asked first (D-062)
 // v0.3.67: A change kept through a lock is asked about before another vault
 // v0.3.62: Save closes the editor on the saved item
@@ -459,13 +460,13 @@ void TestPages::categories_tags_favourites_and_templates_work_from_the_windows()
     QVERIFY(QMetaObject::invokeMethod(star, "clicked"));
     QVERIFY(controller->item(itemId).value(QStringLiteral("favourite")).toBool());
 
-    // Settings > Customize: a new template, named, kept in the vault.
+    // Settings > Templates: a new template, named, kept in the vault.
     QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
     QVERIFY(settings);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QObject* topics = settings->findChild<QObject*>(QStringLiteral("topics"));
     QVERIFY(topics);
-    topics->setProperty("currentIndex", 3);
+    topics->setProperty("currentIndex", 5);
     QObject* newTemplate = settings->findChild<QObject*>(QStringLiteral("newTemplateButton"));
     QObject* templateEditor = settings->findChild<QObject*>(QStringLiteral("templateEditor"));
     QVERIFY(newTemplate && templateEditor);

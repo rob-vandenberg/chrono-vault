@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.86
+// Main.qml 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: View > Audit; an item left out of the audit (D-065)
 // v0.5.83: The Item menu holds every action on the selected items (D-063)
 // v0.5.82: Delete, several items, the keyboard never nowhere; new and opened vaults from Settings (D-062)
@@ -839,7 +840,8 @@ ApplicationWindow {
             onNewVaultRequested: mainWindow.newVault()
             onOpenVaultRequested: mainWindow.openVault()
             onConflictRequested: function(itemId) { mainWindow.showConflict(itemId) }
-            onCustomizeRequested: settingsWindow.showCustomize()
+            onCategoriesRequested: settingsWindow.showCategories()
+            onTagsRequested: settingsWindow.showTags()
             onLeakSettingRequested: settingsWindow.showSecurity()
         }
     }

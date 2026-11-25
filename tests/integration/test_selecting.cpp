@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_selecting.cpp 0.6.86
+// test_selecting.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.6.86: The audit above the counts (D-065)
 // v0.5.83: Initial release (D-063)
 
@@ -243,11 +244,11 @@ private slots:
         QVERIFY(settings);
         click(part("countCategories"));
         QVERIFY(comesUp(settings));
-        QTRY_VERIFY(seen(settings->contentItem(), QStringLiteral("customizePage")));
+        QTRY_VERIFY(seen(settings->contentItem(), QStringLiteral("categoriesPage")));
         settings->close();
     }
 
-    void tags_are_renamed_and_removed_in_customize()
+    void tags_are_renamed_and_removed_in_the_settings()
     {
         window->resize(1000, 900); // the counts stand under the audit
         QTRY_COMPARE(window->height(), 900);
@@ -260,7 +261,7 @@ private slots:
         const auto there = [settings](const char* name) { return seen(settings->contentItem(), QString::fromLatin1(name)); };
         QTRY_VERIFY(there("tagRename_Work"));
         QMetaObject::invokeMethod(there("tagRename_Work"), "clicked");
-        QQuickWindow* naming = qobject_cast<QQuickWindow*>(settings->findChild<QObject*>(QStringLiteral("customizeTagDialog")));
+        QQuickWindow* naming = qobject_cast<QQuickWindow*>(settings->findChild<QObject*>(QStringLiteral("settingsTagDialog")));
         QVERIFY(comesUp(naming));
         seen(naming->contentItem(), QStringLiteral("tagNameField"))->setProperty("text", QStringLiteral("Home"));
         QTest::keyClick(naming, Qt::Key_Return);

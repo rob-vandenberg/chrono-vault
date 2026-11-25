@@ -284,13 +284,13 @@ public:
     void setEscapeExits(bool exits);
     [[nodiscard]] bool trayAvailable() const { return trayExists; }
     void setTrayAvailable(bool available);
-    // Settings > Security and Customize (D-033).
+    // Settings > Security and General (D-033).
     [[nodiscard]] bool hideSensitive() const { return hideSecrets; }
     void setHideSensitive(bool hide);
     [[nodiscard]] bool showSubtitles() const { return subtitlesShown; }
     // A touch screen is present: what shows under the mouse stays shown (D-034).
     [[nodiscard]] bool touchScreen() const;
-    // Settings > Customize > Use website icons, off by default (D-036).
+    // Settings > General > Use website icons, off by default (D-036).
     [[nodiscard]] bool useWebsiteIcons() const { return websiteIconsOn; }
     void setUseWebsiteIcons(bool use);
     // Unlocking with a fingerprint (D-038).

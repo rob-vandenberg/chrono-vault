@@ -38,9 +38,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.5.85
+// test_tray.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.85: The tray icon for a dark and a light tray (D-064)
 // v0.5.82: Esc cancels the editor (D-062)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -318,10 +319,22 @@ void TestTray::the_settings_window_keeps_changes_only_with_ok()
     QCOMPARE(loaded.controller->autoLockMinutes(), 5);
     QVERIFY(loaded.controller->startMinimized());
 
-    // Restore defaults on General.
+    // Restore defaults on General, also of what stood under Customize and
+    // Clipboard (D-066); none on the topics it would change nothing of.
+    settings->setProperty("showSubtitles", false);
+    settings->setProperty("useWebsiteIcons", true);
+    settings->setProperty("clipboardClearSeconds", 77);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     topics->setProperty("currentIndex", 0);
     QVERIFY(QMetaObject::invokeMethod(restore, "clicked"));
+    QVERIFY(settings->property("showSubtitles").toBool());
+    QVERIFY(!settings->property("useWebsiteIcons").toBool());
+    QCOMPARE(settings->property("clipboardClearSeconds").toInt(), 30);
+    QCOMPARE(topics->property("count").toInt(), 7);
+    for (int topic = 0; topic < 7; ++topic) {
+        topics->setProperty("currentIndex", topic);
+        QCOMPARE(restore->property("visible").toBool(), topic < 2 || topic == 6);
+    }
     QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
     QTRY_VERIFY(!settings->property("visible").toBool());
     QVERIFY(!loaded.controller->startMinimized());

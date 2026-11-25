@@ -74,3 +74,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-063](decisions/D-063.md) | Selected and focused; the Item menu on the selected items; Change Category; the empty list; the vault's counts |
 | [D-064](decisions/D-064.md) | The tray icon: the owner's white vault on a dark tray, with a dark edge everywhere else |
 | [D-065](decisions/D-065.md) | Audit: leaked, reused, weak, old, breached websites; a score; Have I Been Pwned off until ticked; items left out; contents format 10 |
+| [D-066](decisions/D-066.md) | The topics of Settings: Categories, Tags and Templates of their own; Customize and Clipboard gone |

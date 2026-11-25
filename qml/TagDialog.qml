@@ -26,7 +26,7 @@ import QtQuick.Layouts
 // v0.5.83: Initial release, out of VaultPage.qml (D-063)
 
 // Renames a tag and the tags nested under it, in every item (D-028): from the
-// sidebar's right-click and from Settings > Customize.
+// sidebar's right-click and from Settings > Tags.
 DialogWindow {
     id: tagDialog
     memoryName: "renameTag"

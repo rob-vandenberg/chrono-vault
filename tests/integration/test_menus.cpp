@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.6.86
+// test_menus.cpp 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The settings' topics in their new order (D-066)
 // v0.6.86: View > Audit, Exclude from Audit (D-065)
 // v0.5.83: The Item menu on the selected items (D-063)
 // v0.5.82: Backspace asks first (D-062)
@@ -617,7 +618,7 @@ void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
     QObject* topicList = settings->findChild<QObject*>(QStringLiteral("topics"));
     topicList->setProperty("currentIndex", 0);
     QTRY_VERIFY(flick->property("contentHeight").toReal() < shortcutsPage->implicitHeight() - 100);
-    topicList->setProperty("currentIndex", 4);
+    topicList->setProperty("currentIndex", 6);
     // "no key" stands in the keys' own column, at their left edge.
     {
         QQuickItem* noKey = nullptr;
@@ -798,7 +799,7 @@ void TestMenus::the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged()
     QTRY_COMPARE(qRound(column->width()), 180);
 }
 
-// Customize: Edit… on every category, then Reset for a built-in one and
+// Settings > Categories: Edit… on every category, then Reset for a built-in one and
 // Delete for the person's own; in the sidebar a right-click offers Edit…,
 // which opens the same dialog (the owner, D-056).
 void TestMenus::every_category_has_edit_and_reset_or_delete_and_a_right_click_menu()

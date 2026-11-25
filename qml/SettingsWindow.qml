@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.86
+// SettingsWindow.qml 0.6.88
 
 // --- Version history ----------------------------------------------------
+// v0.6.88: The topics Categories, Tags and Templates; Customize and Clipboard gone (D-066)
 // v0.6.86: The check for leaked passwords (Security) (D-065)
 // v0.5.83: showCustomize (D-063)
 // v0.5.82: Vaults: Create vault and Open vault, the crown, no Restore defaults; its keys only while it has the keyboard (D-062)
@@ -102,15 +103,19 @@ ApplicationWindow {
     }
 
     // From the vault's counts (D-063).
-    function showCustomize() {
+    function showCategories() {
         showWindow()
         topics.currentIndex = 3
+    }
+    function showTags() {
+        showWindow()
+        topics.currentIndex = 4
     }
 
     // Help > Keyboard shortcuts… (D-045).
     function showShortcuts() {
         showWindow()
-        topics.currentIndex = 4
+        topics.currentIndex = 6
     }
 
     // The small square buttons of the Keyboard shortcuts page: × and +, a grey
@@ -201,7 +206,9 @@ ApplicationWindow {
     // Import… and Export… of a vault's menu, once that vault is unlocked (D-060).
     signal createVaultRequested()
     signal openVaultRequested()
-    readonly property bool onVaults: topics.currentIndex === 5
+    readonly property bool onVaults: topics.currentIndex === 2
+    // What Restore defaults would change is on this topic (D-022, D-066).
+    readonly property bool restorable: topics.currentIndex < 2 || topics.currentIndex === 6
     signal importRequested()
     signal exportRequested()
     property int clipboardClearSeconds: 0
@@ -379,6 +386,9 @@ ApplicationWindow {
             startAtStartup = defaults.startAtStartup
             startMinimized = defaults.startMinimized
             escapeExits = defaults.escapeExits
+            showSubtitles = defaults.showSubtitles
+            useWebsiteIcons = defaults.useWebsiteIcons
+            clipboardClearSeconds = defaults.clipboardClearSeconds
             checkFrequency = Updater.defaultCheckFrequency()
             theme = Appearance.defaultTheme
             scale = Appearance.defaultScale
@@ -395,14 +405,7 @@ ApplicationWindow {
             checkLeaks = defaults.checkLeaks
             masterPasswordReminder = defaults.masterPasswordReminder
             break
-        case 2:
-            clipboardClearSeconds = defaults.clipboardClearSeconds
-            break
-        case 3:
-            showSubtitles = defaults.showSubtitles
-            useWebsiteIcons = defaults.useWebsiteIcons
-            break
-        case 4: {
+        case 6: {
             const map = {}
             for (const action of keyedActions)
                 map[action.actionId] = VaultController.defaultKeysOf(action.actionId)
@@ -493,8 +496,8 @@ ApplicationWindow {
                     anchors.margins: parent.border.width
                     clip: true
                     currentIndex: 0
-                    model: [qsTr("General"), qsTr("Security"), qsTr("Clipboard"), qsTr("Customize"),
-                            qsTr("Keyboard shortcuts"), qsTr("Vaults")]
+                    model: [qsTr("General"), qsTr("Security"), qsTr("Vaults"), qsTr("Categories"), qsTr("Tags"),
+                            qsTr("Templates"), qsTr("Keyboard shortcuts")]
                     delegate: Rectangle {
                         id: topic
                         required property int index
@@ -665,6 +668,52 @@ ApplicationWindow {
                             text: qsTr("Use the Esc key to exit the program")
                             checked: settingsWindow.escapeExits
                             onToggled: settingsWindow.escapeExits = checked
+                        }
+                        CheckBox {
+                            objectName: "showSubtitlesBox"
+                            text: qsTr("Show subtitles in the item list")
+                            checked: settingsWindow.showSubtitles
+                            onToggled: settingsWindow.showSubtitles = checked
+                        }
+                        CheckBox {
+                            objectName: "websiteIconsBox"
+                            text: qsTr("Use website icons")
+                            checked: settingsWindow.useWebsiteIcons
+                            onToggled: settingsWindow.useWebsiteIcons = checked
+                        }
+                        Label {
+                            text: qsTr("Each website in your vault is asked for its own icon, which that website can then see. The icons are kept only while the vault is unlocked, never on the disk.")
+                            wrapMode: Text.Wrap
+                            opacity: 0.7
+                            Layout.topMargin: -Math.round(6 * Appearance.factor) // close to its tick box
+                            leftPadding: Math.round(28 * Appearance.factor)
+                            Layout.fillWidth: true
+                        }
+                        // One line; 0 shows as "Never" (D-049).
+                        RowLayout {
+                            Label { text: qsTr("Clear the clipboard after") }
+                            SpinBox {
+                                objectName: "clipboardBox"
+                                // 40 narrower than its own width (the owner).
+                                Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
+                                from: 0
+                                to: 600
+                                value: settingsWindow.clipboardClearSeconds
+                                editable: true
+                                textFromValue: function(value) { return value === 0 ? qsTr("Never") : String(value) }
+                                // An emptied field keeps the value it had.
+                                valueFromText: function(text) {
+                                    if (text === qsTr("Never"))
+                                        return 0
+                                    const seconds = parseInt(text, 10)
+                                    return isNaN(seconds) ? value : seconds
+                                }
+                                validator: RegularExpressionValidator {
+                                    regularExpression: new RegExp("^(\\d{1,3}|" + qsTr("Never") + ")$")
+                                }
+                                onValueModified: settingsWindow.clipboardClearSeconds = value
+                            }
+                            Label { text: qsTr("seconds") }
                         }
                         RowLayout {
                             Label { text: qsTr("Check for updates") }
@@ -906,143 +955,6 @@ ApplicationWindow {
                         Item { Layout.fillHeight: true }
                     }
 
-                    ColumnLayout {
-                        spacing: Math.round(8 * Appearance.factor)
-                        Label {
-                            text: qsTr("Clipboard")
-                            font.pointSize: Appearance.fontPointSize * 1.4
-                        }
-                        // One line; 0 shows as "Never" (D-049).
-                        RowLayout {
-                            Label { text: qsTr("Clear the clipboard after") }
-                            SpinBox {
-                                objectName: "clipboardBox"
-                                // 40 narrower than its own width (the owner).
-                                Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
-                                from: 0
-                                to: 600
-                                value: settingsWindow.clipboardClearSeconds
-                                editable: true
-                                textFromValue: function(value) { return value === 0 ? qsTr("Never") : String(value) }
-                                // An emptied field keeps the value it had.
-                                valueFromText: function(text) {
-                                    if (text === qsTr("Never"))
-                                        return 0
-                                    const seconds = parseInt(text, 10)
-                                    return isNaN(seconds) ? value : seconds
-                                }
-                                validator: RegularExpressionValidator {
-                                    regularExpression: new RegExp("^(\\d{1,3}|" + qsTr("Never") + ")$")
-                                }
-                                onValueModified: settingsWindow.clipboardClearSeconds = value
-                            }
-                            Label { text: qsTr("seconds") }
-                        }
-                        Item { Layout.fillHeight: true }
-                    }
-
-                    // Kept in the vault at once; Restore defaults leaves it as
-                    // it is (D-027).
-                    ColumnLayout {
-                        spacing: Math.round(8 * Appearance.factor)
-                        CheckBox {
-                            objectName: "showSubtitlesBox"
-                            text: qsTr("Show subtitles in the item list")
-                            checked: settingsWindow.showSubtitles
-                            onToggled: settingsWindow.showSubtitles = checked
-                        }
-                        CheckBox {
-                            objectName: "websiteIconsBox"
-                            text: qsTr("Use website icons")
-                            checked: settingsWindow.useWebsiteIcons
-                            onToggled: settingsWindow.useWebsiteIcons = checked
-                        }
-                        Label {
-                            text: qsTr("Each website in your vault is asked for its own icon, which that website can then see. The icons are kept only while the vault is unlocked, never on the disk.")
-                            wrapMode: Text.Wrap
-                            opacity: 0.7
-                            leftPadding: Math.round(28 * Appearance.factor)
-                            Layout.fillWidth: true
-                        }
-                        CustomizePage { Layout.fillWidth: true }
-                    }
-
-                    // Keyboard shortcuts, after Chrono Viewer's page (D-045):
-                    // every action on its row with its keys one under the
-                    // other, a cross after each, a + on the first line.
-                    ColumnLayout {
-                        objectName: "shortcutsPage"
-                        spacing: Math.round(4 * Appearance.factor)
-                        // Escape cannot be set: it cancels and closes.
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Math.round(6 * Appearance.factor)
-                            opacity: 0.5
-                            Label {
-                                text: qsTr("Cancel, close a window")
-                                Layout.fillWidth: true
-                            }
-                            Label {
-                                text: qsTr("Esc")
-                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
-                            }
-                            // The room of the × and the +, which Escape does not have.
-                            KeyButton { opacity: 0; enabled: false }
-                            KeyButton { opacity: 0; enabled: false }
-                        }
-                        // Each action: its lines in fixed columns, as Chrono
-                        // Viewer's page: the name, the key (or "no key", greyed,
-                        // in the same column), the ×, and the + on the first line.
-                        Repeater {
-                            model: settingsWindow.keyedActions
-                            delegate: ColumnLayout {
-                                id: shortcutRow
-                                required property var modelData
-                                readonly property string actionId: modelData.actionId
-                                readonly property var keys: settingsWindow.keyMap[actionId] || []
-                                objectName: "shortcutRow_" + actionId
-                                spacing: Math.round(4 * Appearance.factor)
-                                Layout.fillWidth: true
-                                Repeater {
-                                    // At least one line: "no key" when it has none.
-                                    model: shortcutRow.keys.length > 0 ? shortcutRow.keys : [""]
-                                    delegate: RowLayout {
-                                        required property string modelData
-                                        required property int index
-                                        Layout.fillWidth: true
-                                        spacing: Math.round(6 * Appearance.factor)
-                                        Label {
-                                            text: index === 0 ? shortcutRow.modelData.text.replace("&", "") : ""
-                                            Layout.fillWidth: true
-                                        }
-                                        Label {
-                                            objectName: modelData === "" ? "noKey" : "shortcutKey"
-                                            text: modelData === "" ? qsTr("no key") : modelData
-                                            opacity: modelData === "" ? 0.5 : 1
-                                            horizontalAlignment: Text.AlignLeft
-                                            Layout.preferredWidth: Math.round(150 * Appearance.factor)
-                                        }
-                                        KeyButton {
-                                            objectName: "removeKey_" + shortcutRow.actionId
-                                            text: "×"
-                                            // A line without a key has no cross; its room stays.
-                                            opacity: modelData === "" ? 0 : 1
-                                            enabled: modelData !== ""
-                                            onClicked: settingsWindow.takeKey(shortcutRow.actionId, modelData)
-                                        }
-                                        KeyButton {
-                                            objectName: "addKey_" + shortcutRow.actionId
-                                            text: "+"
-                                            opacity: index === 0 ? 1 : 0
-                                            enabled: index === 0
-                                            onClicked: keyCatcher.askFor(shortcutRow.actionId,
-                                                                         shortcutRow.modelData.text.replace("&", ""))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                     // Vaults (ref, D-057): where each vault is kept and when it
                     // was last synchronized; a menu per vault with only what can
                     // be done to it now (the owner, D-060).
@@ -1436,6 +1348,87 @@ ApplicationWindow {
                             }
                         }
                     }
+
+                    CategoriesPage {}
+                    TagsPage {}
+                    TemplatesPage {}
+
+                    // Keyboard shortcuts, after Chrono Viewer's page (D-045):
+                    // every action on its row with its keys one under the
+                    // other, a cross after each, a + on the first line.
+                    ColumnLayout {
+                        objectName: "shortcutsPage"
+                        spacing: Math.round(4 * Appearance.factor)
+                        // Escape cannot be set: it cancels and closes.
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Math.round(6 * Appearance.factor)
+                            opacity: 0.5
+                            Label {
+                                text: qsTr("Cancel, close a window")
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                text: qsTr("Esc")
+                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                            }
+                            // The room of the × and the +, which Escape does not have.
+                            KeyButton { opacity: 0; enabled: false }
+                            KeyButton { opacity: 0; enabled: false }
+                        }
+                        // Each action: its lines in fixed columns, as Chrono
+                        // Viewer's page: the name, the key (or "no key", greyed,
+                        // in the same column), the ×, and the + on the first line.
+                        Repeater {
+                            model: settingsWindow.keyedActions
+                            delegate: ColumnLayout {
+                                id: shortcutRow
+                                required property var modelData
+                                readonly property string actionId: modelData.actionId
+                                readonly property var keys: settingsWindow.keyMap[actionId] || []
+                                objectName: "shortcutRow_" + actionId
+                                spacing: Math.round(4 * Appearance.factor)
+                                Layout.fillWidth: true
+                                Repeater {
+                                    // At least one line: "no key" when it has none.
+                                    model: shortcutRow.keys.length > 0 ? shortcutRow.keys : [""]
+                                    delegate: RowLayout {
+                                        required property string modelData
+                                        required property int index
+                                        Layout.fillWidth: true
+                                        spacing: Math.round(6 * Appearance.factor)
+                                        Label {
+                                            text: index === 0 ? shortcutRow.modelData.text.replace("&", "") : ""
+                                            Layout.fillWidth: true
+                                        }
+                                        Label {
+                                            objectName: modelData === "" ? "noKey" : "shortcutKey"
+                                            text: modelData === "" ? qsTr("no key") : modelData
+                                            opacity: modelData === "" ? 0.5 : 1
+                                            horizontalAlignment: Text.AlignLeft
+                                            Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                        }
+                                        KeyButton {
+                                            objectName: "removeKey_" + shortcutRow.actionId
+                                            text: "×"
+                                            // A line without a key has no cross; its room stays.
+                                            opacity: modelData === "" ? 0 : 1
+                                            enabled: modelData !== ""
+                                            onClicked: settingsWindow.takeKey(shortcutRow.actionId, modelData)
+                                        }
+                                        KeyButton {
+                                            objectName: "addKey_" + shortcutRow.actionId
+                                            text: "+"
+                                            opacity: index === 0 ? 1 : 0
+                                            enabled: index === 0
+                                            onClicked: keyCatcher.askFor(shortcutRow.actionId,
+                                                                         shortcutRow.modelData.text.replace("&", ""))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1662,7 +1655,7 @@ ApplicationWindow {
             Button {
                 objectName: "restoreDefaultsButton"
                 // Nothing to put back on the Vaults page (D-062).
-                visible: !settingsWindow.onVaults
+                visible: settingsWindow.restorable
                 text: qsTr("Restore defaults")
                 onClicked: settingsWindow.restoreDefaults()
             }
