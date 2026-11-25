@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.106
+// SettingsWindow.qml 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: Set PIN…, Change PIN… and Remove PIN… in a vault's menu; the PIN line leaves Security (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -277,10 +278,6 @@ ApplicationWindow {
     property bool useWebsiteIcons: false
     property bool checkLeaks: false
     property int masterPasswordReminder: 2
-    // A PIN wanted; OK keeps it only with a PIN set or one long enough typed.
-    property bool pinWanted: false
-    readonly property bool pinAcceptable: !pinWanted
-        || (pinField.text === "" ? VaultController.pinSet : pinField.text.length >= VaultController.pinShortest)
     // Shown at once while the window is open; kept with OK, put back otherwise.
     property int theme: 2
     property int scale: 100
@@ -305,9 +302,6 @@ ApplicationWindow {
         useWebsiteIcons = VaultController.useWebsiteIcons
         checkLeaks = VaultController.checkLeaks
         masterPasswordReminder = VaultController.masterPasswordReminder
-        pinWanted = VaultController.pinSet
-        pinField.clear()
-        pinField.revealed = false
         loadKeys()
     }
 
@@ -329,15 +323,8 @@ ApplicationWindow {
 
     // OK: every topic's changes are kept, whichever topic is shown.
     function accept() {
-        if (!pinAcceptable)
-            return
         // A number still being typed counts.
         okButton.forceActiveFocus()
-        if (pinWanted && pinField.text !== "")
-            VaultController.setPin(pinField.text)
-        else if (!pinWanted && VaultController.pinSet)
-            VaultController.setPin("")
-        pinField.clear()
         if (Appearance.theme !== theme || Appearance.scale !== scale)
             Appearance.keep(theme, scale)
         if (VaultController.keepInTray !== keepInTray)
@@ -947,39 +934,6 @@ ApplicationWindow {
                                 }
                             }
                         }
-                        // PIN unlock, after the locking, before the finger (the
-                        // owner's design, D-059); kept with OK.
-                        ExactRow {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8 * Appearance.factor
-                            CheckBox {
-                                id: pinBox
-                                objectName: "pinBox"
-                                text: qsTr("Use a PIN code to quickly unlock without having to enter the Master Password every time")
-                                checked: settingsWindow.pinWanted
-                                onToggled: settingsWindow.pinWanted = checked
-                                Layout.fillWidth: true
-                                // Room before the field, so the text breaks as the owner's design.
-                                Layout.rightMargin: 40 * Appearance.factor
-                                contentItem: Label {
-                                    text: pinBox.text
-                                    wrapMode: Text.Wrap
-                                    leftPadding: pinBox.indicator.width + pinBox.spacing
-                                    verticalAlignment: Text.AlignVCenter
-                                }
-                            }
-                            PasswordField {
-                                id: pinField
-                                objectName: "pinField"
-                                // Dots while a PIN is set; the PIN itself is never kept.
-                                placeholderText: VaultController.pinSet ? "••••••••••••" : ""
-                                // The eye only while a new PIN is typed (the owner).
-                                eyeAllowed: text !== ""
-                                enabled: pinBox.checked && !VaultController.pinBusy
-                                Layout.preferredWidth: 140 * Appearance.factor
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-                        }
                         // One line, for all vaults (the owner, D-043): ticked, it
                         // asks for one touch in a popup, at once, not with OK.
                         CheckBox {
@@ -1176,6 +1130,31 @@ ApplicationWindow {
                                                     VaultController.lockVault(vaultRow.modelData)
                                                 }
                                             }
+                                            // A PIN of its own (the owner, D-076).
+                                            MenuItem {
+                                                objectName: "setPin_" + vaultRow.name
+                                                readonly property bool has: VaultController.pinRevision >= 0
+                                                                            && VaultController.hasPin(vaultRow.modelData)
+                                                text: has ? qsTr("Change PIN…") : qsTr("Set PIN…")
+                                                visible: vaultRow.found
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    settingsWindow.problem = ""
+                                                    pinWindow.title = has ? qsTr("Change PIN") : qsTr("Set PIN")
+                                                    pinWindow.askVault(vaultRow.modelData)
+                                                }
+                                            }
+                                            MenuItem {
+                                                objectName: "removePin_" + vaultRow.name
+                                                visible: vaultRow.found && VaultController.pinRevision >= 0
+                                                         && VaultController.hasPin(vaultRow.modelData)
+                                                text: qsTr("Remove PIN…")
+                                                height: visible ? implicitHeight : 0
+                                                onTriggered: {
+                                                    removePinWindow.vaultFile = vaultRow.modelData
+                                                    removePinWindow.open()
+                                                }
+                                            }
                                             MenuItem {
                                                 objectName: "primaryVault_" + vaultRow.name
                                                 text: qsTr("Make primary vault")
@@ -1244,7 +1223,6 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             withList: true
                             mayRemember: true
-                            pinAllowed: true
                             property string action: ""
                             function ready(file) {
                                 return VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked
@@ -1322,6 +1300,42 @@ ApplicationWindow {
                                 text: qsTr("Are you sure you want to make “%1” your primary vault? No passwords are moved: what is remembered in “%2” stays there.")
                                       .arg(VaultController.vaultNameOf(primaryWindow.vaultFile))
                                       .arg(VaultController.vaultNameOf(VaultController.primaryVault))
+                                wrapMode: Text.Wrap
+                            }
+                        }
+                        // Set PIN… and Change PIN…: the vault's own master password, typed
+                        // now, and the new PIN (D-076).
+                        AskWindow {
+                            id: pinWindow
+                            objectName: "pinWindow"
+                            transientParent: settingsWindow
+                            withNewPin: true
+                            okText: qsTr("OK")
+                            onRight: function(file) {
+                                VaultController.setPinFor(file, newPinText)
+                                accept()
+                            }
+                        }
+                        DialogWindow {
+                            id: removePinWindow
+                            objectName: "removePinWindow"
+                            memoryName: "removePin"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            title: qsTr("Remove PIN")
+                            standardButtons: Dialog.Cancel
+                            rightButtons: Button {
+                                objectName: "removePinButton"
+                                text: qsTr("Remove")
+                                onClicked: {
+                                    VaultController.removePinFor(removePinWindow.vaultFile)
+                                    removePinWindow.accept()
+                                }
+                            }
+                            Label {
+                                Layout.fillWidth: true
+                                text: qsTr("Are you sure you want to remove the PIN of “%1”? After a lock, its password is asked instead.")
+                                      .arg(VaultController.vaultNameOf(removePinWindow.vaultFile))
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -1776,7 +1790,6 @@ ApplicationWindow {
                 objectName: "okButton"
                 text: qsTr("OK")
                 highlighted: true
-                enabled: settingsWindow.pinAcceptable
                 icon.source: "qrc:/icons/ok.svg"
                 icon.width: Math.round(16 * Appearance.factor)
                 icon.height: Math.round(16 * Appearance.factor)

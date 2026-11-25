@@ -15,12 +15,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-// PIN unlock (D-059). The PIN itself is never kept. A key is made from it
-// (Argon2id, as a vault's); on disk each vault keeps that key only sealed with
-// its own key, so a disk alone never lets a PIN open anything. While a vault is
-// unlocked the PIN's key is held, and the vault's key is kept in memory sealed
-// with it; at a lock the PIN's key is wiped, so only the PIN opens it again,
-// and only until Chrono Vault quits.
+// A PIN per vault, and the lock as a screen lock (D-059, D-076). The PIN itself
+// is never kept: a key is made from it (Argon2id, as a vault's), and on disk
+// each vault keeps that key only sealed with its own key, so a disk alone never
+// lets a PIN open anything. At a lock, what was open is sealed in memory under
+// the vault the person logged in with: with that vault's key (its password or
+// finger gives it back) and with its PIN's key. A PIN opens nothing else, and
+// only until Chrono Vault quits.
 
 #include "vault_controller.h"
 
@@ -34,9 +35,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_pin.cpp 0.6.106
+// vault_controller_pin.cpp 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: The primary opened for its key store only (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.70: Initial release (D-059)
@@ -45,11 +47,11 @@ namespace chrono_vault {
 
 namespace {
 
-const QString pinSaltKey = QStringLiteral("pin/salt");
-const QString pinDerivationKey = QStringLiteral("pin/derivation");
-const QString pinGroup = QStringLiteral("pin");
+const QString pinsGroup = QStringLiteral("pins/");
+const QString oldPinGroup = QStringLiteral("pin"); // one PIN for every vault, before 0.7.107
 const QByteArray pinEntryLabel = QByteArrayLiteral("pin key");
-const QByteArray lockedLabel = QByteArrayLiteral("pin locked");
+const QByteArray byKeyLabel = QByteArrayLiteral("session");
+const QByteArray byPinLabel = QByteArrayLiteral("session pin");
 
 QByteArray derivationOf(const crypto::KdfParameters& parameters)
 {
@@ -71,157 +73,245 @@ std::optional<crypto::KdfParameters> derivationFrom(const QByteArray& packed)
     return parameters;
 }
 
+// What a lock puts away: the vault that was open, its key, the key store.
+struct Session
+{
+    QString open;
+    QByteArray openSecret;
+    QByteArray primarySecret;
+    QHash<QString, QString> saved;
+
+    void wipe()
+    {
+        crypto::wipe(openSecret);
+        crypto::wipe(primarySecret);
+        saved.clear();
+    }
+};
+
+QByteArray packSession(const Session& session)
+{
+    QByteArray packed;
+    QDataStream out(&packed, QIODevice::WriteOnly);
+    out << quint8(1) << session.open << session.openSecret << session.primarySecret << session.saved;
+    return packed;
+}
+
+std::optional<Session> unpackSession(const QByteArray& packed)
+{
+    QDataStream in(packed);
+    quint8 version = 0;
+    Session session;
+    in >> version >> session.open >> session.openSecret >> session.primarySecret >> session.saved;
+    if (in.status() != QDataStream::Ok || version != 1) {
+        session.wipe();
+        return std::nullopt;
+    }
+    return session;
+}
+
 } // namespace
 
-QString VaultController::pinEntryKey(const QString& vaultFile) const
+QString VaultController::pinGroupOf(const QString& vaultFile)
 {
-    return pinGroup + QStringLiteral("/vaults/") +
+    return pinsGroup +
            QString::fromLatin1(QCryptographicHash::hash(vaultFile.toUtf8(), QCryptographicHash::Sha256).toHex().left(24));
 }
 
-bool VaultController::pinSet() const
+void VaultController::dropOldPin()
 {
-    return !VaultsFile().value(pinSaltKey).toByteArray().isEmpty();
+    // The one PIN of every vault may have reached vaults it was never meant
+    // for; it is not carried over (the owner, D-076).
+    VaultsFile settings;
+    if (settings.childGroups().contains(oldPinGroup) || settings.contains(oldPinGroup + QStringLiteral("/salt"))) {
+        settings.remove(oldPinGroup);
+    }
 }
 
-bool VaultController::pinCanOpen() const
+bool VaultController::hasPin(const QString& vaultFile) const
 {
-    return !path.isEmpty() && pinLocked.contains(path) && pinSet();
+    return !vaultFile.isEmpty() && !VaultsFile().value(pinGroupOf(vaultFile) + QStringLiteral("/entry")).toByteArray().isEmpty();
 }
 
 bool VaultController::pinUnlockReady() const
 {
-    // When the master password is due again, it is asked, not the PIN.
-    return currentState == State::Locked && pinCanOpen() && !reminderDue();
+    // Only after a lock, for the vault logged in with; when the master password
+    // is due again, it is asked, not the PIN (D-049).
+    return currentState == State::Locked && sessionPinReady() && !reminderDue();
 }
 
-void VaultController::setPin(const QString& pin)
+bool VaultController::sessionPinReady() const
 {
-    if (settingPin) {
-        return;
-    }
-    if (pin.isEmpty()) {
-        VaultsFile().remove(pinGroup);
-        forgetPinKey();
-        for (QByteArray& sealed : pinLocked) {
-            crypto::wipe(sealed);
-        }
-        pinLocked.clear();
-        emit pinChanged();
-        return;
-    }
-    if (pin.size() < pinMinimumLength) {
+    return !sessionByPin.isEmpty() && path == sessionLogin && hasPin(path);
+}
+
+void VaultController::setPinFor(const QString& vaultFile, const QString& pin)
+{
+    // Only with the vault's own master password typed just now (D-076).
+    if (settingPin || vaultFile.isEmpty() || vaultFile != askedFor || !proofKey.isValid() || !proofTyped ||
+        pin.size() < pinMinimumLength) {
         return;
     }
     settingPin = true;
     emit pinChanged();
+    VaultKey own = proofKey;
+    own.key.detach();
     const QByteArray salt = crypto::randomBytes(16);
     const crypto::KdfParameters parameters = kdfParameters;
     QByteArray pinBytes = pin.toUtf8();
     QPointer<VaultController> self(this);
     // Making the key takes a moment: never on the thread that draws (OR-5).
-    (void)QtConcurrent::run(&unlockPool, [self, pinBytes, salt, parameters]() mutable {
+    (void)QtConcurrent::run(&unlockPool, [self, pinBytes, salt, parameters, own, vaultFile]() mutable {
         std::optional<QByteArray> made = crypto::deriveKey(pinBytes, salt, parameters);
         crypto::wipe(pinBytes);
+        QByteArray entry;
+        if (made) {
+            entry = crypto::seal(own.key, *made, pinEntryLabel);
+            crypto::wipe(*made);
+        }
+        own.wipe();
         QMetaObject::invokeMethod(
             qApp,
-            [self, made, salt, parameters]() mutable {
+            [self, entry, salt, parameters, vaultFile]() {
                 if (!self) {
-                    if (made) {
-                        crypto::wipe(*made);
-                    }
                     return;
                 }
                 self->settingPin = false;
-                if (!made) {
+                if (entry.isEmpty()) {
                     emit self->pinChanged();
-                    self->say(tr("The PIN could not be set: not enough memory."), true);
+                    emit self->vaultMenuProblem(tr("The PIN could not be set: not enough memory."));
                     return;
                 }
-                // A new PIN: everything kept for the old one goes.
                 VaultsFile settings;
-                settings.remove(pinGroup);
-                settings.setValue(pinSaltKey, salt);
-                settings.setValue(pinDerivationKey, derivationOf(parameters));
-                for (QByteArray& sealed : self->pinLocked) {
-                    crypto::wipe(sealed);
-                }
-                self->pinLocked.clear();
-                self->forgetPinKey();
-                self->pinKey = *made;
-                crypto::wipe(*made);
-                if (self->currentState == State::Unlocked) {
-                    self->keepForPin();
-                    // The primary, unlocked alongside, is kept as well (D-030).
-                    if (self->primaryKey.isValid() && self->primaryVault() != self->path) {
-                        const QString primary = self->primaryVault();
-                        settings.setValue(self->pinEntryKey(primary),
-                                          crypto::seal(self->primaryKey.key, self->pinKey, pinEntryLabel));
-                        self->pinLocked.insert(
-                            primary, crypto::seal(self->pinKey, quickSecretOf(self->primaryKey, self->primaryKeyfile),
-                                                  lockedLabel));
-                    }
-                }
+                const QString group = pinGroupOf(vaultFile);
+                settings.remove(group);
+                settings.setValue(group + QStringLiteral("/salt"), salt);
+                settings.setValue(group + QStringLiteral("/derivation"), derivationOf(parameters));
+                settings.setValue(group + QStringLiteral("/entry"), entry);
+                ++self->pinCount;
                 emit self->pinChanged();
             },
             Qt::QueuedConnection);
     });
 }
 
-void VaultController::keepForPin()
+void VaultController::removePinFor(const QString& vaultFile)
 {
-    if ((currentState != State::Unlocked && !onlyKeyStore) || !key.isValid() || !pinSet()) {
+    if (vaultFile.isEmpty()) {
         return;
     }
-    VaultsFile settings;
-    const QString entry = pinEntryKey(path);
-    if (pinKey.isEmpty()) {
-        // After a start, the vault's own key gives the PIN's back.
-        const QByteArray sealed = settings.value(entry).toByteArray();
-        if (sealed.isEmpty()) {
-            return; // this vault has not been unlocked while the PIN's key was known
-        }
-        std::optional<QByteArray> opened = crypto::open(key.key, sealed, pinEntryLabel);
-        if (!opened) {
-            // Made with a key this vault no longer has: the PIN is not offered
-            // for it until it is set up again.
-            settings.remove(entry);
-            pinLocked.remove(path);
-            emit pinChanged();
-            return;
-        }
-        pinKey = *opened;
-        crypto::wipe(*opened);
+    VaultsFile().remove(pinGroupOf(vaultFile));
+    ++pinCount;
+    if (vaultFile == sessionLogin) {
+        crypto::wipe(sessionByPin);
+        sessionByPin.clear();
     }
-    // Written again each time, so it follows a changed master password.
-    settings.setValue(entry, crypto::seal(key.key, pinKey, pinEntryLabel));
-    QByteArray packed = quickSecretOf(key, keyfileSecret);
-    pinLocked.insert(path, crypto::seal(pinKey, packed, lockedLabel));
+    emit pinChanged();
+}
+
+void VaultController::resealPin(const QString& vaultFile, const VaultKey& oldKey, const VaultKey& newKey)
+{
+    // A changed master password keeps the PIN (D-059).
+    VaultsFile settings;
+    const QString name = pinGroupOf(vaultFile) + QStringLiteral("/entry");
+    const QByteArray entry = settings.value(name).toByteArray();
+    if (entry.isEmpty()) {
+        return;
+    }
+    std::optional<QByteArray> pinKey = crypto::open(oldKey.key, entry, pinEntryLabel);
+    if (!pinKey) {
+        return;
+    }
+    settings.setValue(name, crypto::seal(newKey.key, *pinKey, pinEntryLabel));
+    crypto::wipe(*pinKey);
+}
+
+void VaultController::sealSession()
+{
+    dropSession();
+    // Logged in with the primary while its key store is open, else with the
+    // vault that is open (D-076).
+    const QString primary = primaryVault();
+    const bool throughPrimary = primaryKey.isValid() && foundList.contains(primary);
+    if (!throughPrimary && currentState != State::Unlocked) {
+        return;
+    }
+    const QString login = throughPrimary ? primary : path;
+    const VaultKey& loginKey = throughPrimary ? primaryKey : key;
+    Session session;
+    if (currentState == State::Unlocked) {
+        session.open = path;
+        session.openSecret = quickSecretOf(key, keyfileSecret);
+    }
+    if (throughPrimary) {
+        session.primarySecret = quickSecretOf(primaryKey, primaryKeyfile);
+        session.saved = savedPasswords;
+    }
+    QByteArray packed = packSession(session);
+    session.wipe();
+    sessionLogin = login;
+    sessionByKey = crypto::seal(loginKey.key, packed, byKeyLabel);
+    VaultsFile settings;
+    const QString entryName = pinGroupOf(login) + QStringLiteral("/entry");
+    const QByteArray entry = settings.value(entryName).toByteArray();
+    if (!entry.isEmpty()) {
+        if (std::optional<QByteArray> pinKey = crypto::open(loginKey.key, entry, pinEntryLabel)) {
+            sessionByPin = crypto::seal(*pinKey, packed, byPinLabel);
+            crypto::wipe(*pinKey);
+        } else {
+            // Made with a key this vault no longer has: set it up again.
+            settings.remove(pinGroupOf(login));
+        }
+    }
     crypto::wipe(packed);
     emit pinChanged();
 }
 
-void VaultController::forgetPinKey()
+void VaultController::dropSession()
 {
-    crypto::wipe(pinKey);
-    pinKey.clear();
-}
-
-std::optional<VaultController::PinMeans> VaultController::pinMeans() const
-{
-    VaultsFile settings;
-    const QByteArray salt = settings.value(pinSaltKey).toByteArray();
-    const std::optional<crypto::KdfParameters> parameters =
-        derivationFrom(settings.value(pinDerivationKey).toByteArray());
-    if (salt.isEmpty() || !parameters) {
-        return std::nullopt;
+    if (sessionLogin.isEmpty() && sessionByKey.isEmpty() && sessionByPin.isEmpty()) {
+        return;
     }
-    return PinMeans{salt, *parameters};
+    sessionLogin.clear();
+    crypto::wipe(sessionByKey);
+    sessionByKey.clear();
+    crypto::wipe(sessionByPin);
+    sessionByPin.clear();
+    crypto::wipe(returnSecret);
+    returnSecret.clear();
+    emit pinChanged();
 }
 
-QByteArray VaultController::pinLockedLabel()
+bool VaultController::takeBackSession(const QByteArray& opener, bool byPin)
 {
-    return lockedLabel;
+    std::optional<QByteArray> packed = crypto::open(opener, byPin ? sessionByPin : sessionByKey, byPin ? byPinLabel : byKeyLabel);
+    if (!packed) {
+        return false;
+    }
+    std::optional<Session> session = unpackSession(*packed);
+    crypto::wipe(*packed);
+    if (!session) {
+        return false;
+    }
+    if (auto store = quickSecretFrom(session->primarySecret)) {
+        primaryKey.wipe();
+        primaryKey = store->first;
+        crypto::wipe(primaryKeyfile);
+        primaryKeyfile = store->second;
+        savedPasswords = session->saved;
+        tellKept();
+    }
+    // The vault that was open; it comes back by itself when it is not the one
+    // logged in with.
+    crypto::wipe(returnSecret);
+    returnSecret = session->openSecret;
+    returnSecret.detach();
+    if (!session->open.isEmpty() && session->open != sessionLogin && vaultList.contains(session->open)) {
+        returnTo = session->open;
+        emit returnChanged();
+    }
+    session->wipe();
+    return true;
 }
 
 void VaultController::unlockWithPin(const QString& pin)
@@ -236,40 +326,30 @@ void VaultController::unlockWithPin(const QString& pin)
         return;
     }
     VaultsFile settings;
-    const QByteArray salt = settings.value(pinSaltKey).toByteArray();
+    const QString group = pinGroupOf(path);
+    const QByteArray salt = settings.value(group + QStringLiteral("/salt")).toByteArray();
     const std::optional<crypto::KdfParameters> parameters =
-        derivationFrom(settings.value(pinDerivationKey).toByteArray());
+        derivationFrom(settings.value(group + QStringLiteral("/derivation")).toByteArray());
     if (salt.isEmpty() || !parameters) {
-        say(tr("The PIN could not be read. Type the master password."), true);
+        say(tr("The PIN could not be read. Type the password."), true);
         return;
     }
     setState(State::Busy);
     say(tr("Unlocking…"), false);
-    const QByteArray sealed = pinLocked.value(path);
     const quint64 attempt = ++unlockAttempt;
     QByteArray pinBytes = pin.toUtf8();
     const crypto::KdfParameters derivation = *parameters;
     QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&unlockPool, [self, pinBytes, salt, derivation, sealed, attempt]() mutable {
+    (void)QtConcurrent::run(&unlockPool, [self, pinBytes, salt, derivation, attempt]() mutable {
         std::optional<QByteArray> made = crypto::deriveKey(pinBytes, salt, derivation);
         crypto::wipe(pinBytes);
-        std::optional<QByteArray> packed;
-        if (made) {
-            packed = crypto::open(*made, sealed, lockedLabel);
-        }
         QMetaObject::invokeMethod(
             qApp,
-            [self, made, packed, attempt]() mutable {
-                const auto wipeAll = [&made, &packed]() {
+            [self, made, attempt]() mutable {
+                if (!self || attempt != self->unlockAttempt) {
                     if (made) {
                         crypto::wipe(*made);
                     }
-                    if (packed) {
-                        crypto::wipe(*packed);
-                    }
-                };
-                if (!self || attempt != self->unlockAttempt) {
-                    wipeAll();
                     return;
                 }
                 if (!made) {
@@ -277,28 +357,48 @@ void VaultController::unlockWithPin(const QString& pin)
                     self->say(tr("The PIN could not be checked: not enough memory."), true);
                     return;
                 }
-                std::optional<std::pair<VaultKey, QByteArray>> kept;
-                if (packed) {
-                    kept = quickSecretFrom(*packed);
-                }
-                if (!kept) {
-                    wipeAll();
+                const bool right = self->takeBackSession(*made, true);
+                crypto::wipe(*made);
+                if (!right) {
                     self->wrongPasswordTyped();
                     self->setState(State::Locked);
                     self->say(tr("That is not the PIN."), true);
                     return;
                 }
-                self->forgetPinKey();
-                self->pinKey = *made;
-                wipeAll();
-                self->keyfileSecret = kept->second;
-                self->openingByPin = true;
-                self->startOpenWithKey(kept->first);
-                kept->first.wipe();
-                crypto::wipe(kept->second);
+                self->openTakenBack();
             },
             Qt::QueuedConnection);
     });
+}
+
+void VaultController::openTakenBack()
+{
+    // After the PIN: the vault that was open, with the key it had; else the one
+    // logged in with, with the key store's own (D-076).
+    QByteArray secret;
+    if (!returnSecret.isEmpty()) {
+        secret = returnSecret;
+        secret.detach();
+        if (!returnTo.isEmpty()) {
+            const QString back = returnTo;
+            setPath(back);
+        }
+    } else if (path == primaryVault() && primaryKey.isValid()) {
+        secret = quickSecretOf(primaryKey, primaryKeyfile);
+    }
+    dropSession();
+    auto kept = quickSecretFrom(secret);
+    crypto::wipe(secret);
+    if (!kept) {
+        say(QString(), false);
+        setState(State::Locked);
+        return;
+    }
+    keyfileSecret = kept->second;
+    openingByPin = true;
+    startOpenWithKey(kept->first);
+    kept->first.wipe();
+    crypto::wipe(kept->second);
 }
 
 } // namespace chrono_vault

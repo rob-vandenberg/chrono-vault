@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.6.106
+// vault_controller.h 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -183,8 +184,8 @@ class VaultController : public QObject
     Q_PROPERTY(bool quickUnlockTrouble READ quickUnlockTrouble NOTIFY quickUnlockChanged)
     Q_PROPERTY(QString quickUnlockName READ quickUnlockName CONSTANT)
     Q_PROPERTY(bool reminderDue READ reminderDue NOTIFY quickUnlockChanged)
-    // PIN unlock (D-059): set, being set, and able to open the vault shown.
-    Q_PROPERTY(bool pinSet READ pinSet NOTIFY pinChanged)
+    // A PIN per vault (D-076): being set, and able to open the vault shown.
+    Q_PROPERTY(int pinRevision READ pinRevision NOTIFY pinChanged)
     Q_PROPERTY(bool pinBusy READ pinBusy NOTIFY pinChanged)
     Q_PROPERTY(bool pinUnlockReady READ pinUnlockReady NOTIFY pinChanged)
     Q_PROPERTY(int pinShortest READ pinShortest CONSTANT)
@@ -306,7 +307,6 @@ public:
     Q_PROPERTY(bool askBusy READ askBusy NOTIFY askChanged)
     Q_PROPERTY(QString askMessage READ askMessage NOTIFY askChanged)
     Q_PROPERTY(bool askTrouble READ askTrouble NOTIFY askChanged)
-    Q_PROPERTY(bool askPinReady READ askPinReady NOTIFY askChanged)
     Q_PROPERTY(bool askFingerOn READ askFingerOn NOTIFY askChanged)
     Q_PROPERTY(int askWaitSeconds READ askWaitSeconds NOTIFY askChanged)
     Q_PROPERTY(bool askKeyfileNeeded READ askKeyfileNeeded NOTIFY askChanged)
@@ -315,7 +315,6 @@ public:
     [[nodiscard]] bool askBusy() const { return askIsBusy; }
     [[nodiscard]] QString askMessage() const { return askText; }
     [[nodiscard]] bool askTrouble() const { return askIsTrouble; }
-    [[nodiscard]] bool askPinReady() const;
     [[nodiscard]] bool askFingerOn() const;
     [[nodiscard]] int askWaitSeconds() const { return askWait; }
     [[nodiscard]] bool askKeyfileNeeded() const { return askNeedsKeyfile || !askKeyfile().isEmpty(); }
@@ -324,7 +323,6 @@ public:
     Q_INVOKABLE void stopAsking();
     Q_INVOKABLE void setAskKeyfile(const QUrl& keyfile);
     Q_INVOKABLE void proveWithPassword(const QString& password);
-    Q_INVOKABLE void proveWithPin(const QString& pin);
     Q_INVOKABLE void proveWithFinger();
     // With what was proven: the vault opened; the one shown exported; another read for an import.
     // With remember, a typed master password is also kept in the primary (D-074).
@@ -362,11 +360,13 @@ public:
     void setMasterPasswordReminder(int every);
     Q_INVOKABLE void setQuickUnlock(bool on);
     Q_INVOKABLE void unlockWithQuickUnlock();
-    // A PIN of at least pinMinimumLength characters sets or changes it; an
-    // empty one removes it and all that was kept for it (D-059).
-    Q_INVOKABLE void setPin(const QString& pin);
+    // A PIN per vault, of at least pinMinimumLength characters, set with the
+    // master password just proven in the standard dialog (D-076).
+    Q_INVOKABLE void setPinFor(const QString& vaultFile, const QString& pin);
+    Q_INVOKABLE void removePinFor(const QString& vaultFile);
+    [[nodiscard]] Q_INVOKABLE bool hasPin(const QString& vaultFile) const;
+    [[nodiscard]] int pinRevision() const { return pinCount; }
     Q_INVOKABLE void unlockWithPin(const QString& pin);
-    [[nodiscard]] bool pinSet() const;
     [[nodiscard]] bool pinBusy() const { return settingPin; }
     [[nodiscard]] bool pinUnlockReady() const;
     static constexpr int pinMinimumLength = 4;
@@ -827,7 +827,7 @@ private:
     void forgetPrimary();
     void lockEverything();
     void leaveOpenVault();
-    void goBackThroughPrimary();
+    void goBackThroughPrimary(const QByteArray& secret);
     void dropSavedPassword(const QString& vaultFile);
     [[nodiscard]] bool canRememberHere() const;
     void showCreated(CreatedVault created);
@@ -837,12 +837,16 @@ private:
                         const QByteArray& written, const QString& keyfileFile, State before,
                         const QString& savedPassword);
     void connectQuickUnlock();
-    // The PIN's key kept for the vault unlocked now, on disk sealed with the
-    // vault's own key and in memory its key sealed with the PIN's (D-059).
-    void keepForPin();
-    void forgetPinKey();
-    [[nodiscard]] QString pinEntryKey(const QString& vaultFile) const;
-    [[nodiscard]] bool pinCanOpen() const;
+    // The lock as a screen lock (D-076): what is open put away under the vault
+    // logged in with, taken back with its key or its PIN's.
+    void sealSession();
+    void dropSession();
+    bool takeBackSession(const QByteArray& opener, bool byPin);
+    void openTakenBack();
+    [[nodiscard]] bool sessionPinReady() const;
+    [[nodiscard]] static QString pinGroupOf(const QString& vaultFile);
+    static void dropOldPin();
+    static void resealPin(const QString& vaultFile, const VaultKey& oldKey, const VaultKey& newKey);
     void recordMasterPassword();
     void recordMasterPasswordIfNone();
     // Asks each website not asked yet for its icon (D-036).
@@ -978,13 +982,6 @@ private:
     QTimer waitTimer;
     [[nodiscard]] qint64 nowMs() const;
     [[nodiscard]] static QString openStatusText(OpenStatus status);
-    struct PinMeans
-    {
-        QByteArray salt;
-        crypto::KdfParameters parameters;
-    };
-    [[nodiscard]] std::optional<PinMeans> pinMeans() const;
-    [[nodiscard]] static QByteArray pinLockedLabel();
     static void forgetWrongPasswords(const QString& vaultFile);
     void countWrongPassword(const QString& vaultFile);
     [[nodiscard]] int waitLeft(const QString& vaultFile) const;
@@ -1079,8 +1076,11 @@ private:
     QStringList vaultList;
     bool needKeyfile = false;
     QByteArray keyfileSecret;              // the unlocked vault's keyfile fingerprint
-    QByteArray pinKey;                     // made from the PIN; held only while a vault is unlocked (D-059)
-    QHash<QString, QByteArray> pinLocked;  // each vault's key sealed with the PIN's, this run only
+    QString sessionLogin;                  // after a lock, the vault logged in with (D-076)
+    QByteArray sessionByKey;               // what was open, sealed with that vault's key
+    QByteArray sessionByPin;               // and with its PIN's
+    QByteArray returnSecret;               // the key of the vault that was open, taken back
+    int pinCount = 0;
     bool settingPin = false;
     bool openingByPin = false;
     VaultKey primaryKey;                   // kept while unlocked (D-030)

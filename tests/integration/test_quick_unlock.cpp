@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.6.103
+// test_quick_unlock.cpp 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: After a lock the page shows the vault logged in with (D-076)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.74: A lost key turns the setting off
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
@@ -257,9 +258,11 @@ void TestQuickUnlock::the_standard_dialog_asks_the_finger_for_any_vault()
     QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
     controller->setQuickUnlock(true);
     QVERIFY(standIn->kept.contains(first) && standIn->kept.contains(second));
+    // Logged in with the primary: its password gives the second back (D-076).
     controller->lock();
-    controller->unlock(QStringLiteral("two"));
-    QTRY_COMPARE(controller->state(), State::Unlocked);
+    QCOMPARE(controller->vaultPath(), first);
+    controller->unlock(QStringLiteral("pass"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
 
     QSignalSpy proven(controller.get(), &VaultController::proven);
     // Cancelled: the one open is still open, and nothing was proven.
@@ -329,6 +332,8 @@ void TestQuickUnlock::the_standard_dialog_waits_and_asks_the_keyfile()
     QSignalSpy proven(controller.get(), &VaultController::proven);
     controller->proveWithPassword(QStringLiteral("two"));
     QTRY_COMPARE(proven.size(), 1);
+    controller->stopAsking();
+    controller->switchToVault(second); // the page shows the second
     // Wrong passwords: the waits of D-041, for the vault asked for.
     controller->askFor(first);
     for (int wrong = 0; wrong < 3; ++wrong) {

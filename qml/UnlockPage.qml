@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.6.106
+// UnlockPage.qml 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: The PIN of the vault logged in with, the list with it, "Unlock using password instead"; the password of any vault but the primary (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
@@ -85,10 +86,11 @@ Item {
         }
     }
 
-    // The PIN when it can open the vault shown, unless the person chose the
-    // master password (D-059).
+    // The PIN after a lock, of the vault logged in with, unless the person chose
+    // the password (D-059, D-076).
     property bool masterInstead: false
     readonly property bool usePin: VaultController.pinUnlockReady && !masterInstead && !closed
+    readonly property bool primaryShown: VaultController.vaultPath === VaultController.primaryVault
 
     function unlockNow() {
         if (usePin)
@@ -190,10 +192,10 @@ Item {
             readonly property string back: VaultController.vaultNameOf(VaultController.returnVault)
             readonly property bool goesBack: VaultController.returnVault !== ""
             textFormat: Text.PlainText
-            text: goesBack ? (unlockPage.usePin ? qsTr("Enter the PIN of “%1” to return to “%2”")
-                                                : qsTr("Enter the Master Password of “%1” to return to “%2”"))
-                             .arg(VaultController.vaultName).arg(back)
-                  : unlockPage.usePin ? qsTr("Enter the PIN to unlock") : qsTr("Enter the Master Password to unlock")
+            // The primary asks its master password, any other vault its password (the owner, D-076).
+            text: unlockPage.usePin ? qsTr("Enter the PIN to unlock")
+                  : goesBack ? qsTr("Enter the Master Password of “%1” to return to “%2”").arg(VaultController.vaultName).arg(back)
+                  : unlockPage.primaryShown ? qsTr("Enter the Master Password to unlock") : qsTr("Enter the password to unlock")
             font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
@@ -207,7 +209,7 @@ Item {
         VaultBox {
             id: vaultBox
             objectName: "unlockVaultBox"
-            visible: !unlockPage.usePin
+            // Also with the PIN: another vault picked is a new login (the owner, D-076).
             // Only the vaults found; the one used last also when it is not,
             // struck through (the owner, 0.3.65).
             listed: VaultController.foundVaults.concat(
@@ -249,7 +251,7 @@ Item {
             BigPasswordField {
                 id: passwordField
                 objectName: "masterPasswordField"
-                placeholderText: unlockPage.usePin ? qsTr("PIN") : qsTr("Master Password")
+                placeholderText: unlockPage.usePin ? qsTr("PIN") : unlockPage.primaryShown ? qsTr("Master Password") : qsTr("Password")
                 Layout.preferredHeight: 58 * Appearance.factor
                 Layout.fillWidth: true
                 // Greyed while waiting after wrong master passwords (D-041).
@@ -272,7 +274,7 @@ Item {
         Button {
             objectName: "useMasterPasswordButton"
             visible: unlockPage.usePin
-            text: qsTr("Use master password instead")
+            text: qsTr("Unlock using password instead")
             flat: true
             Layout.alignment: Qt.AlignHCenter
             onClicked: {

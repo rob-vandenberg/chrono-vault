@@ -16,9 +16,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 // --- Version ------------------------------------------------------------
-// test_pin_unlock.cpp 0.6.103
+// test_pin_unlock.cpp 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.71: The PIN page shows only the logo, its line, the field and the link
 // v0.4.70: Initial release (D-059)
@@ -29,11 +30,13 @@
 #include "vault_controller.h"
 
 #include <QDataStream>
+#include <functional>
 #include <QDateTime>
 #include <QFile>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
 #include <QQuickItem>
+#include <QQuickWindow>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -55,19 +58,23 @@ private slots:
     void cleanupTestCase();
     void init();
     void cleanup();
-    void a_pin_unlocks_after_a_lock_and_never_after_a_restart();
+    void a_pin_opens_only_after_a_lock_and_never_after_a_restart();
     void wrong_pins_count_toward_the_same_waits();
-    void a_short_pin_is_refused_and_an_empty_one_removes_it();
+    void a_pin_needs_the_typed_master_password_and_can_be_removed();
     void nothing_on_disk_opens_with_the_pin_alone();
     void the_reminder_asks_the_master_password_instead();
     void a_changed_master_password_keeps_the_pin();
+    void the_old_pin_of_every_vault_is_removed();
+    void a_pin_opens_only_its_own_vault();
+    void a_lock_gives_everything_back_as_a_screen_lock();
+    void another_vault_got_into_is_a_new_login();
     void the_settings_and_the_unlock_page_offer_the_pin();
-    void the_standard_dialog_takes_the_pin_of_another_vault();
 
 private:
     // A vault made and left unlocked; its file.
-    QString unlockedVault(VaultController& controller, const QString& name);
-    static bool pinSetTo(VaultController& controller, const QString& pin);
+    QString unlockedVault(VaultController& controller, const QString& name, const QString& password = QStringLiteral("right"),
+                          bool save = false);
+    static bool pinSetTo(VaultController& controller, const QString& vault, const QString& password, const QString& pin);
     static bool settled(VaultController& controller, State state);
     QTemporaryDir* folder = nullptr;
 };
@@ -104,38 +111,29 @@ void TestPinUnlock::cleanup()
     folder = nullptr;
 }
 
-// The standard dialog (D-073).
-void TestPinUnlock::the_standard_dialog_takes_the_pin_of_another_vault()
-{
-    VaultController controller;
-    const QString first = unlockedVault(controller, QStringLiteral("first"));
-    QVERIFY(!first.isEmpty() && pinSetTo(controller, QStringLiteral("2468")));
-    const QString second = unlockedVault(controller, QStringLiteral("second"));
-    QVERIFY(!second.isEmpty());
-    controller.askFor(first);
-    QVERIFY(controller.askPinReady());
-    controller.proveWithPin(QStringLiteral("1111"));
-    QTRY_VERIFY(controller.askTrouble() && !controller.askBusy());
-    QCOMPARE(controller.vaultPath(), second);
-    QSignalSpy proven(&controller, &VaultController::proven);
-    controller.proveWithPin(QStringLiteral("2468"));
-    QTRY_COMPARE(proven.size(), 1);
-    QVERIFY(controller.openProven());
-    controller.stopAsking();
-    QTRY_VERIFY(controller.vaultPath() == first && controller.state() == State::Unlocked);
-}
-
-QString TestPinUnlock::unlockedVault(VaultController& controller, const QString& name)
+QString TestPinUnlock::unlockedVault(VaultController& controller, const QString& name, const QString& password, bool save)
 {
     controller.setKdfParameters(crypto::KdfParameters{1024, 1, 1});
     const QString file = folder->filePath(name + QStringLiteral(".chronovault"));
-    controller.createVault(QUrl::fromLocalFile(file), QStringLiteral("right"), QStringLiteral("right"));
-    return settled(controller, State::Unlocked) ? file : QString();
+    controller.createVault(QUrl::fromLocalFile(file), password, password, QUrl(), save);
+    const bool made = QTest::qWaitFor([&]() {
+        return controller.vaultPath() == file && controller.state() == State::Unlocked && controller.isIdle();
+    }, 10000);
+    return made ? file : QString();
 }
 
-bool TestPinUnlock::pinSetTo(VaultController& controller, const QString& pin)
+// Set PIN… as the vault's menu does it: its master password typed, then the PIN.
+bool TestPinUnlock::pinSetTo(VaultController& controller, const QString& vault, const QString& password, const QString& pin)
 {
-    controller.setPin(pin);
+    QSignalSpy proven(&controller, &VaultController::proven);
+    controller.askFor(vault);
+    controller.proveWithPassword(password);
+    if (!proven.wait(10000)) {
+        controller.stopAsking();
+        return false;
+    }
+    controller.setPinFor(vault, pin);
+    controller.stopAsking();
     return QTest::qWaitFor([&controller]() { return !controller.pinBusy(); }, 10000);
 }
 
@@ -144,26 +142,30 @@ bool TestPinUnlock::settled(VaultController& controller, State state)
     return QTest::qWaitFor([&controller, state]() { return controller.state() == state; }, 10000);
 }
 
-void TestPinUnlock::a_pin_unlocks_after_a_lock_and_never_after_a_restart()
+void TestPinUnlock::a_pin_opens_only_after_a_lock_and_never_after_a_restart()
 {
+    QString file;
     {
         VaultController controller;
-        QVERIFY(!unlockedVault(controller, QStringLiteral("pin")).isEmpty());
-        QVERIFY(!controller.pinSet());
-        QVERIFY(pinSetTo(controller, QStringLiteral("12 ab")));
-        QVERIFY(controller.pinSet());
+        file = unlockedVault(controller, QStringLiteral("pin"));
+        QVERIFY(!file.isEmpty());
+        QVERIFY(!controller.hasPin(file));
+        QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("12 ab")));
+        QVERIFY(controller.hasPin(file));
         controller.lock();
         QVERIFY(controller.pinUnlockReady());
         controller.unlockWithPin(QStringLiteral("12 ab"));
         QVERIFY(settled(controller, State::Unlocked));
-        controller.lock();
-        QVERIFY(controller.pinUnlockReady());
+        // Close in the vault's own menu is no lock of the program: no PIN then.
+        controller.closeOpenVault(file);
+        QCOMPARE(controller.state(), State::Locked);
+        QVERIFY(!controller.pinUnlockReady());
     }
     // After a start the master password comes first; then the PIN again.
     VaultController controller;
     controller.setKdfParameters(crypto::KdfParameters{1024, 1, 1});
     QVERIFY(settled(controller, State::Locked));
-    QVERIFY(controller.pinSet());
+    QVERIFY(controller.hasPin(file));
     QVERIFY(!controller.pinUnlockReady());
     controller.unlockWithPin(QStringLiteral("12 ab"));
     QCOMPARE(controller.state(), State::Locked);
@@ -178,17 +180,17 @@ void TestPinUnlock::a_pin_unlocks_after_a_lock_and_never_after_a_restart()
 void TestPinUnlock::wrong_pins_count_toward_the_same_waits()
 {
     VaultController controller;
-    QVERIFY(!unlockedVault(controller, QStringLiteral("waits")).isEmpty());
-    QVERIFY(pinSetTo(controller, QStringLiteral("2468")));
+    const QString file = unlockedVault(controller, QStringLiteral("waits"));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("2468")));
     controller.lock();
     // Two wrong PINs and a wrong master password: three, then 10 seconds.
     for (int attempt = 1; attempt <= 2; ++attempt) {
         controller.unlockWithPin(QStringLiteral("1357"));
-        QVERIFY(QTest::qWaitFor([&controller]() { return controller.state() == State::Locked; }, 10000));
+        QVERIFY(settled(controller, State::Locked));
         QCOMPARE(controller.unlockWaitSeconds(), 0);
     }
     controller.unlock(QStringLiteral("wrong"));
-    QVERIFY(QTest::qWaitFor([&controller]() { return controller.state() == State::Locked; }, 10000));
+    QVERIFY(QTest::qWaitFor([&controller]() { return controller.state() == State::Locked && controller.unlockWaitSeconds() > 0; }, 10000));
     QCOMPARE(controller.unlockWaitSeconds(), 10);
     // During the wait not even the right PIN is tried.
     controller.unlockWithPin(QStringLiteral("2468"));
@@ -200,18 +202,26 @@ void TestPinUnlock::wrong_pins_count_toward_the_same_waits()
     QCOMPARE(controller.unlockWaitSeconds(), 0); // the right one ended the count
 }
 
-void TestPinUnlock::a_short_pin_is_refused_and_an_empty_one_removes_it()
+void TestPinUnlock::a_pin_needs_the_typed_master_password_and_can_be_removed()
 {
     VaultController controller;
-    QVERIFY(!unlockedVault(controller, QStringLiteral("short")).isEmpty());
-    QVERIFY(pinSetTo(controller, QStringLiteral("123")));
-    QVERIFY(!controller.pinSet());
-    QVERIFY(pinSetTo(controller, QStringLiteral("1234")));
-    QVERIFY(controller.pinSet());
-    QVERIFY(pinSetTo(controller, QString()));
-    QVERIFY(!controller.pinSet());
+    const QString file = unlockedVault(controller, QStringLiteral("short"));
+    // Nothing proven: no PIN (P79's first way).
+    controller.askFor(file);
+    controller.setPinFor(file, QStringLiteral("0000"));
+    controller.stopAsking();
+    QVERIFY(!controller.pinBusy() && !controller.hasPin(file));
+    // A wrong master password: no PIN either.
+    QVERIFY(!pinSetTo(controller, file, QStringLiteral("wrong"), QStringLiteral("0000")));
+    QVERIFY(!controller.hasPin(file));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("123")));
+    QVERIFY(!controller.hasPin(file));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("1234")));
+    QVERIFY(controller.hasPin(file));
+    controller.removePinFor(file);
+    QVERIFY(!controller.hasPin(file));
     VaultsFile settings;
-    settings.beginGroup(QStringLiteral("pin"));
+    settings.beginGroup(QStringLiteral("pins"));
     QVERIFY(settings.allKeys().isEmpty());
     settings.endGroup();
     controller.lock();
@@ -221,37 +231,32 @@ void TestPinUnlock::a_short_pin_is_refused_and_an_empty_one_removes_it()
 void TestPinUnlock::nothing_on_disk_opens_with_the_pin_alone()
 {
     VaultController controller;
-    QVERIFY(!unlockedVault(controller, QStringLiteral("disk")).isEmpty());
-    QVERIFY(pinSetTo(controller, QStringLiteral("9999")));
+    const QString file = unlockedVault(controller, QStringLiteral("disk"));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("9999")));
     controller.lock();
     VaultsFile settings;
-    const QByteArray salt = settings.value(QStringLiteral("pin/salt")).toByteArray();
+    settings.beginGroup(QStringLiteral("pins"));
+    const QStringList groups = settings.childGroups();
+    QCOMPARE(groups.size(), 1);
+    settings.beginGroup(groups.constFirst());
+    const QByteArray salt = settings.value(QStringLiteral("salt")).toByteArray();
     QVERIFY(!salt.isEmpty());
     // The key a thief could make from a guessed PIN, with what is on disk.
-    QDataStream in(settings.value(QStringLiteral("pin/derivation")).toByteArray());
+    QDataStream in(settings.value(QStringLiteral("derivation")).toByteArray());
     quint8 version = 0;
     crypto::KdfParameters parameters;
     in >> version >> parameters.memoryKiB >> parameters.iterations >> parameters.lanes;
     QCOMPARE(in.status(), QDataStream::Ok);
     const std::optional<QByteArray> guessed = crypto::deriveKey("9999", salt, parameters);
     QVERIFY(guessed);
-    settings.beginGroup(QStringLiteral("pin/vaults"));
-    const QStringList entries = settings.allKeys();
-    QCOMPARE(entries.size(), 1);
-    for (const QString& entry : entries) {
-        const QByteArray sealed = settings.value(entry).toByteArray();
-        QVERIFY(!crypto::open(*guessed, sealed, "pin key"));
-        QVERIFY(!crypto::open(*guessed, sealed, "pin locked"));
-    }
-    settings.endGroup();
+    QVERIFY(!crypto::open(*guessed, settings.value(QStringLiteral("entry")).toByteArray(), "pin key"));
 }
 
 void TestPinUnlock::the_reminder_asks_the_master_password_instead()
 {
     VaultController controller;
     const QString file = unlockedVault(controller, QStringLiteral("reminder"));
-    QVERIFY(!file.isEmpty());
-    QVERIFY(pinSetTo(controller, QStringLiteral("4321")));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("4321")));
     controller.setMasterPasswordReminder(0); // once a day
     VaultsFile settings;
     QVariantMap times;
@@ -272,8 +277,8 @@ void TestPinUnlock::the_reminder_asks_the_master_password_instead()
 void TestPinUnlock::a_changed_master_password_keeps_the_pin()
 {
     VaultController controller;
-    QVERIFY(!unlockedVault(controller, QStringLiteral("change")).isEmpty());
-    QVERIFY(pinSetTo(controller, QStringLiteral("5555")));
+    const QString file = unlockedVault(controller, QStringLiteral("change"));
+    QVERIFY(pinSetTo(controller, file, QStringLiteral("right"), QStringLiteral("5555")));
     QSignalSpy changed(&controller, &VaultController::masterPasswordChanged);
     controller.changeMasterPassword(QStringLiteral("right"), QStringLiteral("new one"), QStringLiteral("new one"),
                                     QUrl());
@@ -281,8 +286,119 @@ void TestPinUnlock::a_changed_master_password_keeps_the_pin()
     QCOMPARE(changed.constFirst().constFirst().toBool(), true);
     QVERIFY(QTest::qWaitFor([&controller]() { return controller.isIdle(); }, 10000));
     controller.lock();
+    QVERIFY(controller.pinUnlockReady());
     controller.unlockWithPin(QStringLiteral("5555"));
     QVERIFY(settled(controller, State::Unlocked));
+}
+
+void TestPinUnlock::the_old_pin_of_every_vault_is_removed()
+{
+    {
+        VaultsFile settings;
+        settings.setValue(QStringLiteral("pin/salt"), QByteArray("salt"));
+        settings.setValue(QStringLiteral("pin/vaults/abc"), QByteArray("sealed"));
+    }
+    VaultController controller;
+    VaultsFile settings;
+    QVERIFY(!settings.contains(QStringLiteral("pin/salt")));
+    QVERIFY(!settings.contains(QStringLiteral("pin/vaults/abc")));
+}
+
+// P79: a PIN of one vault never opens another, however it was set.
+void TestPinUnlock::a_pin_opens_only_its_own_vault()
+{
+    VaultController controller;
+    const QString home = unlockedVault(controller, QStringLiteral("home"), QStringLiteral("home pass"));
+    const QString work = unlockedVault(controller, QStringLiteral("work"), QStringLiteral("work pass"), true);
+    QVERIFY(!home.isEmpty() && !work.isEmpty());
+    QVERIFY(pinSetTo(controller, work, QStringLiteral("work pass"), QStringLiteral("1111")));
+    // Logged in with the primary (Work opened out of it): Work's PIN does not
+    // take back what the primary's key store holds.
+    controller.lock();
+    QCOMPARE(controller.vaultPath(), home);
+    QVERIFY(!controller.pinUnlockReady());
+    controller.switchToVault(work);
+    QVERIFY(!controller.pinUnlockReady());
+    controller.unlockWithPin(QStringLiteral("1111"));
+    QCOMPARE(controller.state(), State::Locked);
+    // The owner's way: the primary skipped, Work typed: its PIN gives Work back,
+    // and the primary still asks its own password.
+    controller.unlock(QStringLiteral("work pass"));
+    QVERIFY(settled(controller, State::Unlocked));
+    QVERIFY(!controller.keyStoreOpen());
+    controller.lock();
+    QCOMPARE(controller.vaultPath(), work);
+    QVERIFY(controller.pinUnlockReady());
+    controller.switchToVault(home);
+    QVERIFY(!controller.pinUnlockReady());
+    controller.switchToVault(work);
+    controller.unlockWithPin(QStringLiteral("1111"));
+    QVERIFY(settled(controller, State::Unlocked));
+    QCOMPARE(controller.vaultPath(), work);
+    QVERIFY(!controller.keyStoreOpen());
+    QCOMPARE(controller.vaultStateOf(home), 0);
+}
+
+void TestPinUnlock::a_lock_gives_everything_back_as_a_screen_lock()
+{
+    VaultController controller;
+    const QString home = unlockedVault(controller, QStringLiteral("home"), QStringLiteral("home pass"));
+    const QString kept = unlockedVault(controller, QStringLiteral("kept"), QStringLiteral("kept pass"), true);
+    const QString own = unlockedVault(controller, QStringLiteral("own"), QStringLiteral("own pass"));
+    QVERIFY(pinSetTo(controller, home, QStringLiteral("home pass"), QStringLiteral("2222")));
+    controller.switchToVault(home);
+    QVERIFY(settled(controller, State::Unlocked));
+    // A vault whose password is not kept, typed while logged in with the primary.
+    controller.switchToVault(own);
+    controller.unlock(QStringLiteral("own pass"));
+    QVERIFY(settled(controller, State::Unlocked));
+    QVERIFY(controller.keyStoreOpen());
+    QCOMPARE(controller.vaultStateOf(kept), 1);
+    controller.lock();
+    QCOMPARE(controller.vaultPath(), home);
+    QCOMPARE(controller.returnVault(), own);
+    QVERIFY(controller.pinUnlockReady());
+    controller.unlockWithPin(QStringLiteral("2222"));
+    QVERIFY(QTest::qWaitFor([&]() { return controller.vaultPath() == own && controller.state() == State::Unlocked; }, 10000));
+    QVERIFY(controller.keyStoreOpen());
+    QCOMPARE(controller.vaultStateOf(kept), 1);
+    // The same with the primary's password: the primary's items never shown.
+    controller.lock();
+    bool primaryShown = false;
+    QObject::connect(&controller, &VaultController::stateChanged, &controller, [&]() {
+        primaryShown = primaryShown || (controller.state() == State::Unlocked && controller.vaultPath() == home);
+    });
+    controller.unlock(QStringLiteral("home pass"));
+    QVERIFY(QTest::qWaitFor([&]() { return controller.vaultPath() == own && controller.state() == State::Unlocked; }, 10000));
+    QVERIFY(!primaryShown);
+    QVERIFY(controller.keyStoreOpen());
+    QCOMPARE(controller.vaultStateOf(kept), 1);
+}
+
+// The owner's example: the manager locks, an employee logs in with his own vault.
+void TestPinUnlock::another_vault_got_into_is_a_new_login()
+{
+    VaultController controller;
+    const QString home = unlockedVault(controller, QStringLiteral("manager"), QStringLiteral("boss"));
+    const QString staff = unlockedVault(controller, QStringLiteral("staff"), QStringLiteral("new hire"));
+    QVERIFY(pinSetTo(controller, home, QStringLiteral("boss"), QStringLiteral("3333")));
+    QVERIFY(pinSetTo(controller, staff, QStringLiteral("new hire"), QStringLiteral("4444")));
+    controller.switchToVault(home);
+    QVERIFY(settled(controller, State::Unlocked));
+    controller.lock();
+    QCOMPARE(controller.vaultPath(), home);
+    QVERIFY(!controller.keyStoreOpen()); // put away: no "Remember my credentials" (D-076)
+    controller.switchToVault(staff);
+    controller.unlock(QStringLiteral("new hire"), true);
+    QVERIFY(settled(controller, State::Unlocked));
+    QVERIFY(!controller.keyStoreOpen());
+    QVERIFY(!controller.isKept(staff)); // nothing went into the manager's vault
+    controller.lock();
+    QCOMPARE(controller.vaultPath(), staff);
+    QVERIFY(controller.pinUnlockReady());
+    // The manager's PIN no longer opens anything: it was a new login.
+    controller.switchToVault(home);
+    QVERIFY(!controller.pinUnlockReady());
 }
 
 void TestPinUnlock::the_settings_and_the_unlock_page_offer_the_pin()
@@ -297,17 +413,18 @@ void TestPinUnlock::the_settings_and_the_unlock_page_offer_the_pin()
     showMainWindow(qobject_cast<QWindow*>(window), false, false);
     auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
     QVERIFY(controller);
-    QVERIFY(!unlockedVault(*controller, QStringLiteral("page")).isEmpty());
+    const QString file = unlockedVault(*controller, QStringLiteral("page"));
+    QVERIFY(!file.isEmpty());
 
-    // Settings > Security, in the owner's order: the master password, the
-    // locking, the PIN, the finger, then sensitive fields.
+    // Settings > Security, in the owner's order, without the PIN now.
     QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
     QVERIFY(settings);
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 1);
+    QVERIFY(!settings->findChild<QQuickItem*>(QStringLiteral("pinBox")));
     const QStringList order{QStringLiteral("changeMasterPasswordButton"), QStringLiteral("reminderBox"),
-                            QStringLiteral("autolockGroup"),              QStringLiteral("pinBox"),
-                            QStringLiteral("quickUnlockToggle"),          QStringLiteral("hideSensitiveBox")};
+                            QStringLiteral("autolockGroup"), QStringLiteral("quickUnlockToggle"),
+                            QStringLiteral("hideSensitiveBox")};
     qreal above = -1;
     for (const QString& name : order) {
         auto* item = settings->findChild<QQuickItem*>(name);
@@ -317,49 +434,65 @@ void TestPinUnlock::the_settings_and_the_unlock_page_offer_the_pin()
         above = y;
     }
 
-    // The PIN: OK waits for 4 characters; the eye only while one is typed.
-    auto* pinBox = settings->findChild<QQuickItem*>(QStringLiteral("pinBox"));
-    auto* pinField = settings->findChild<QQuickItem*>(QStringLiteral("pinField"));
-    auto* okButton = settings->findChild<QQuickItem*>(QStringLiteral("okButton"));
-    QVERIFY(pinBox && pinField && okButton);
-    QVERIFY(!pinField->property("eyeAllowed").toBool());
-    QVERIFY(QMetaObject::invokeMethod(pinBox, "toggle"));
-    QVERIFY(QMetaObject::invokeMethod(pinBox, "toggled"));
-    QVERIFY(!okButton->isEnabled());
-    pinField->setProperty("text", QStringLiteral("12"));
-    QVERIFY(pinField->property("eyeAllowed").toBool());
-    QVERIFY(!okButton->isEnabled());
-    pinField->setProperty("text", QStringLiteral("1234"));
-    QVERIFY(okButton->isEnabled());
-    QVERIFY(QMetaObject::invokeMethod(okButton, "clicked"));
-    QTRY_VERIFY_WITH_TIMEOUT(controller->pinSet() && !controller->pinBusy(), 10000);
-    QTRY_VERIFY(!settings->property("visible").toBool());
+    // Set PIN… in the vault's menu: its master password and the PIN; OK waits
+    // for 4 characters.
+    settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
+    QQuickItem* dots = nullptr;
+    // Rows are delegates: looked for in the tree of items.
+    const std::function<QQuickItem*(QQuickItem*)> find = [&find](QQuickItem* in) -> QQuickItem* {
+        if (in->objectName() == QStringLiteral("vaultMenuButton_page")) {
+            return in;
+        }
+        for (QQuickItem* child : in->childItems()) {
+            if (QQuickItem* found = find(child)) {
+                return found;
+            }
+        }
+        return nullptr;
+    };
+    QTRY_VERIFY((dots = find(qobject_cast<QQuickWindow*>(settings)->contentItem())));
+    QObject* menu = dots->findChild<QObject*>(QStringLiteral("vaultMenu_page"));
+    QVERIFY(menu);
+    QObject* setPin = nullptr;
+    for (int index = 0; index < menu->property("count").toInt() && !setPin; ++index) {
+        QQuickItem* one = nullptr;
+        QMetaObject::invokeMethod(menu, "itemAt", Q_RETURN_ARG(QQuickItem*, one), Q_ARG(int, index));
+        if (one && one->objectName() == QStringLiteral("setPin_page")) {
+            setPin = one;
+        }
+    }
+    QVERIFY(setPin);
+    QCOMPARE(setPin->property("text").toString(), QStringLiteral("Set PIN…"));
+    QVERIFY(QMetaObject::invokeMethod(setPin, "triggered"));
+    auto* pinWindow = settings->findChild<QQuickWindow*>(QStringLiteral("pinWindow"));
+    QVERIFY(pinWindow);
+    QTRY_VERIFY(pinWindow->isVisible());
+    auto* ok = pinWindow->findChild<QQuickItem*>(QStringLiteral("askOk"));
+    pinWindow->findChild<QObject*>(QStringLiteral("askField"))->setProperty("text", QStringLiteral("right"));
+    pinWindow->findChild<QObject*>(QStringLiteral("askNewPin"))->setProperty("text", QStringLiteral("12"));
+    QVERIFY(!ok->isEnabled());
+    pinWindow->findChild<QObject*>(QStringLiteral("askNewPin"))->setProperty("text", QStringLiteral("1234"));
+    QVERIFY(ok->isEnabled());
+    QVERIFY(QMetaObject::invokeMethod(pinWindow, "go"));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->hasPin(file) && !controller->pinBusy(), 10000);
+    QTRY_VERIFY(!pinWindow->isVisible());
+    QTRY_COMPARE(setPin->property("text").toString(), QStringLiteral("Change PIN…"));
+    QVERIFY(QMetaObject::invokeMethod(settings, "close"));
 
-    // Locked: the field asks the PIN; the master password on request.
+    // Locked: the field asks the PIN, with the list; the password on request.
     controller->lock();
     auto* field = window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"));
     auto* instead = window->findChild<QQuickItem*>(QStringLiteral("useMasterPasswordButton"));
-    QVERIFY(field && instead);
-    QTRY_COMPARE(field->property("placeholderText").toString(), QStringLiteral("PIN"));
-    QVERIFY(instead->isVisible());
-    // Only the logo, the line, the field and the link (the owner, 0.4.71).
     auto* line = window->findChild<QQuickItem*>(QStringLiteral("unlockLine"));
-    auto* welcome = window->findChild<QQuickItem*>(QStringLiteral("welcomeLine"));
     auto* vaultBox = window->findChild<QQuickItem*>(QStringLiteral("unlockVaultBox"));
-    QQuickItem* createNew = nullptr;
-    for (QQuickItem* one : window->findChildren<QQuickItem*>(QStringLiteral("createNewButton"))) {
-        if (one->parentItem() == vaultBox->parentItem()) {
-            createNew = one;
-        }
-    }
-    QVERIFY(line && welcome && vaultBox && createNew);
+    QVERIFY(field && instead && line && vaultBox);
+    QTRY_COMPARE(field->property("placeholderText").toString(), QStringLiteral("PIN"));
+    QVERIFY(instead->isVisible() && vaultBox->isVisible());
+    QCOMPARE(instead->property("text").toString(), QStringLiteral("Unlock using password instead"));
     QCOMPARE(line->property("text").toString(), QStringLiteral("Enter the PIN to unlock"));
-    QVERIFY(!welcome->isVisible() && !vaultBox->isVisible() && !createNew->isVisible());
     QVERIFY(QMetaObject::invokeMethod(instead, "clicked"));
     QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Master Password"));
-    QVERIFY(!instead->isVisible());
     QCOMPARE(line->property("text").toString(), QStringLiteral("Enter the Master Password to unlock"));
-    QVERIFY(welcome->isVisible() && vaultBox->isVisible() && createNew->isVisible());
     controller->unlock(QStringLiteral("right"));
     QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
     controller->lock();

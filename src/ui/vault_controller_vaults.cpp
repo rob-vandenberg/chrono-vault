@@ -81,9 +81,6 @@ void VaultController::lockVault(const QString& vaultFile)
     }
     if (vaultFile == primary) {
         forgetPrimary(); // its key store; nothing is deleted, an open vault stays open
-        if (currentState != State::Unlocked) {
-            forgetPinKey();
-        }
         return;
     }
     if (!savedPasswords.contains(vaultFile)) {
@@ -117,7 +114,6 @@ void VaultController::leaveOpenVault()
     emit locking();
     keepUnsavedWhileLocked();
     forgetUnlockedVault();
-    forgetPinKey();
     const QString primary = primaryVault();
     if (primaryKey.isValid() && foundList.contains(primary)) {
         setPath(primary, false); // the start-up page begins with the primary

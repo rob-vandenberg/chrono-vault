@@ -832,3 +832,9 @@ The owner's changelist items 1-9 (D-074). `src/ui/vault_controller*.cpp`, `qml/P
 The owner's changelist items 1-12 (D-075). `src/ui/vault_controller*.cpp`, `src/ui/system_tray.cpp`, `qml/UnlockPage.qml`,
 `qml/SettingsWindow.qml`, `qml/VaultBox.qml`, `qml/Main.qml`; `test_vaults`, `test_vault_rows`, `test_vault_menu`,
 `test_webdav_windows`.
+
+## 26 November 2026: version 0.7.107: a PIN per vault
+
+The owner's changelist items 1-12 (D-076); the version 0.7 his. `src/ui/vault_controller_pin.cpp` anew,
+`src/ui/vault_controller*.cpp`, `qml/AskWindow.qml`, `qml/UnlockPage.qml`, `qml/SettingsWindow.qml`; `test_pin_unlock`
+anew, `test_quick_unlock`.

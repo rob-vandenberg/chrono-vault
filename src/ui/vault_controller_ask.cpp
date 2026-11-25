@@ -31,9 +31,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_ask.cpp 0.6.105
+// vault_controller_ask.cpp 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: The PIN is no longer asked here (D-076)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
@@ -44,7 +45,7 @@
 namespace chrono_vault {
 
 namespace {
-enum ProvenBy { ByPin, ByFinger };
+enum ProvenBy { ByFinger };
 }
 
 void VaultController::tellAsked(const QString& text, bool isTrouble)
@@ -87,11 +88,6 @@ void VaultController::updateAskWait()
         askWait = left;
         emit askChanged();
     }
-}
-
-bool VaultController::askPinReady() const
-{
-    return !askedFor.isEmpty() && pinSet() && pinLocked.contains(askedFor) && !reminderDueFor(askedFor, true);
 }
 
 bool VaultController::askFingerOn() const
@@ -215,75 +211,6 @@ void VaultController::proveWithPassword(const QString& password)
     });
 }
 
-void VaultController::proveWithPin(const QString& pin)
-{
-    updateAskWait();
-    if (!askPinReady() || askIsBusy || pin.isEmpty() || askWait > 0) {
-        return;
-    }
-    const std::optional<PinMeans> means = pinMeans();
-    if (!means) {
-        tellAsked(tr("The PIN could not be read. Type the master password."), true);
-        return;
-    }
-    if (std::exchange(askingFinger, false) && quick) {
-        quick->cancel();
-    }
-    wipeProof();
-    askIsBusy = true;
-    tellAsked(QString(), false);
-    const QByteArray sealed = pinLocked.value(askedFor);
-    const PinMeans with = *means;
-    const quint64 attempt = ++askAttempt;
-    QByteArray pinBytes = pin.toUtf8();
-    QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&unlockPool, [self, pinBytes, with, sealed, attempt]() mutable {
-        std::optional<QByteArray> made = crypto::deriveKey(pinBytes, with.salt, with.parameters);
-        crypto::wipe(pinBytes);
-        std::optional<QByteArray> packed;
-        if (made) {
-            packed = crypto::open(*made, sealed, pinLockedLabel());
-        }
-        const bool tried = made.has_value();
-        if (made) {
-            crypto::wipe(*made);
-        }
-        QMetaObject::invokeMethod(
-            qApp,
-            [self, tried, packed, attempt]() mutable {
-                auto kept = packed ? quickSecretFrom(*packed) : std::nullopt;
-                if (packed) {
-                    crypto::wipe(*packed);
-                }
-                if (!self || attempt != self->askAttempt) {
-                    if (kept) {
-                        kept->first.wipe();
-                        crypto::wipe(kept->second);
-                    }
-                    return;
-                }
-                if (!kept) {
-                    self->askIsBusy = false;
-                    if (tried) {
-                        self->countWrongPassword(self->askedFor);
-                        self->updateAskWait();
-                        if (self->askedFor == self->path) {
-                            self->updateWait();
-                        }
-                    }
-                    self->tellAsked(tried ? tr("That is not the PIN.")
-                                          : tr("The PIN could not be checked: not enough memory."),
-                                    true);
-                    return;
-                }
-                self->checkProven(kept->first, kept->second, ByPin);
-                kept->first.wipe();
-                crypto::wipe(kept->second);
-            },
-            Qt::QueuedConnection);
-    });
-}
-
 void VaultController::proveWithFinger()
 {
     if (!askFingerOn() || askIsBusy || askingFinger || retrieving || settingUp) {
@@ -349,11 +276,7 @@ void VaultController::checkProven(const VaultKey& candidate, const QByteArray& k
                 } else if (status == OpenStatus::KeyChanged) {
                     // The master password was changed on another computer: what
                     // was kept for it no longer fits (D-038, D-059).
-                    if (by == ByPin) {
-                        self->pinLocked.remove(self->askedFor);
-                        VaultsFile().remove(self->pinEntryKey(self->askedFor));
-                        emit self->pinChanged();
-                    } else if (self->quick) {
+                    if (by == ByFinger && self->quick) {
                         self->quick->remove(self->askedFor);
                         emit self->quickUnlockChanged();
                     }

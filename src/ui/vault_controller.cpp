@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.6.106
+// vault_controller.cpp 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -468,6 +469,7 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
             currentState = State::Locked;
         }
     }
+    dropOldPin();
     // Which vaults are found, in the background (the owner, 0.3.65).
     vaultRetry.setSingleShot(true);
     connect(&vaultRetry, &QTimer::timeout, this, &VaultController::checkVaults);
@@ -1148,13 +1150,8 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
                     // The key kept for the PIN no longer fits: the master
                     // password was changed on another computer (D-059).
                     result.key.wipe();
-                    self->pinLocked.remove(self->path);
-                    VaultsFile().remove(self->pinEntryKey(self->path));
                     self->setState(State::Locked);
-                    emit self->pinChanged();
-                    self->say(tr("The master password of this vault was changed on another computer. Type it; the "
-                                 "PIN opens the vault again after that."),
-                              true);
+                    self->say(tr("The master password of this vault was changed on another computer. Type it."), true);
                     return;
                 }
                 if (byFinger && result.status == OpenStatus::KeyChanged) {
@@ -1210,15 +1207,26 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
         needKeyfile = false;
         emit keyfileChanged();
     }
+    // After a lock: the vault logged in with takes back what was put away; any
+    // other vault got into is a new login, and what was put away goes (D-076).
+    QByteArray backSecret;
+    if (!sessionLogin.isEmpty()) {
+        if (path == sessionLogin && takeBackSession(key.key, false)) {
+            backSecret = returnSecret;
+            backSecret.detach();
+        }
+        dropSession();
+    }
     if (path == primaryVault() && !returnTo.isEmpty() && returnTo != path && vaultList.contains(returnTo)) {
-        goBackThroughPrimary();
+        goBackThroughPrimary(backSecret);
+        crypto::wipe(backSecret);
         return;
     }
+    crypto::wipe(backSecret);
     say(QString(), false);
     takeBackUnsaved();
     contentsChanged();
     setState(State::Unlocked);
-    keepForPin(); // the PIN opens it again after a lock (D-059)
     fetchWebsiteIcons(); // now that it counts as unlocked (D-036)
     startWebDav();       // every unlock syncs a vault kept on a server (D-057)
     if (path == primaryVault()) {
@@ -1227,20 +1235,27 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     }
 }
 
-void VaultController::goBackThroughPrimary()
+void VaultController::goBackThroughPrimary(const QByteArray& secret)
 {
     // After a lock: the primary's password was asked for its kept passwords
     // only; its items are never shown (D-075).
     const QString back = returnTo;
     onlyKeyStore = true;
     rememberPrimary();
-    keepForPin();
     onlyKeyStore = false;
     forgetUnlockedVault();
     ++unlockAttempt;
     leavingFor(back);
     setPath(back);
     emit keyfileChanged();
+    // With the key it had when the lock came (D-076), else its kept password.
+    if (auto kept = quickSecretFrom(secret)) {
+        keyfileSecret = kept->second;
+        startOpenWithKey(kept->first);
+        kept->first.wipe();
+        crypto::wipe(kept->second);
+        return;
+    }
     if (savedPasswords.contains(back)) {
         QByteArray password = savedPasswords.value(back).toUtf8();
         startUnlock(password, true);
@@ -1254,25 +1269,24 @@ void VaultController::goBackThroughPrimary()
 
 void VaultController::lock()
 {
-    if (currentState != State::Unlocked) {
-        // No vault is open: the key store alone (D-075).
-        if (currentState != State::Busy && primaryKey.isValid()) {
-            forgetPrimary();
-            forgetPinKey();
-            say(QString(), false);
-        }
+    // As a screen lock: what is open is put away under the vault logged in
+    // with, whose password, PIN or finger gives it all back (D-075, D-076).
+    if (currentState == State::Busy || (currentState != State::Unlocked && !primaryKey.isValid())) {
         return;
     }
-    // Opened out of the primary: the primary's password is asked, and it goes
-    // back to the vault shown; any other vault asks its own (D-075).
-    const QString shown = path;
-    const QString primary = primaryVault();
-    const bool throughPrimary = shown != primary && primaryKey.isValid() && savedPasswords.contains(shown) &&
-                                foundList.contains(primary);
-    lockEverything();
-    if (throughPrimary) {
-        setPath(primary, false);
-        returnTo = shown;
+    const QString open = currentState == State::Unlocked ? path : QString();
+    sealSession();
+    if (open.isEmpty()) {
+        forgetPrimary(); // no vault is open: the key store alone
+        say(QString(), false);
+    } else {
+        lockEverything();
+    }
+    if (!sessionLogin.isEmpty() && sessionLogin != path) {
+        setPath(sessionLogin, false);
+    }
+    if (!open.isEmpty() && open != path) {
+        returnTo = open;
         emit returnChanged();
     }
     setState(State::Locked);
@@ -1284,7 +1298,6 @@ void VaultController::lockEverything()
     keepUnsavedWhileLocked();
     forgetUnlockedVault();
     forgetPrimary();
-    forgetPinKey(); // from now on only the PIN opens it again (D-059)
     say(QString(), false);
 }
 
@@ -1292,7 +1305,7 @@ void VaultController::closeVault()
 {
     forgetUnlockedVault();
     forgetPrimary();
-    forgetPinKey();
+    dropSession();
     returnTo.clear();
     ++unlockAttempt;
     // The window has asked the person before this (OR-15).
@@ -2145,7 +2158,7 @@ void VaultController::recordMasterPasswordIfNone()
 bool VaultController::reminderDue() const
 {
     // Due only where a finger or the PIN would otherwise open it (D-059).
-    return reminderDueFor(path, quickUnlockOn() || pinCanOpen());
+    return reminderDueFor(path, quickUnlockOn() || sessionPinReady());
 }
 
 bool VaultController::reminderDueFor(const QString& vaultFile, bool easier) const
@@ -2972,6 +2985,7 @@ void VaultController::forgetPrimary()
 
 void VaultController::showCreated(CreatedVault created)
 {
+    dropSession(); // a new login (D-076)
     forgetUnlockedVault();
     leavingFor(created.path);
     setPath(created.path);
@@ -3377,6 +3391,7 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                 self->setState(State::Unlocked);
                 switch (outcome) {
                 case Outcome::Changed:
+                    self->resealPin(self->path, self->key, newKey); // the PIN stays (D-059)
                     self->key.wipe();
                     self->key = newKey;
                     self->keyfileSecret = *fingerprint;
@@ -3390,7 +3405,6 @@ void VaultController::changeMasterPassword(const QString& current, const QString
                         self->updateSavedPassword(self->path, newPassword);
                     }
                     self->recordMasterPassword(); // just typed: the reminder waits a year
-                    self->keepForPin();           // the PIN's key sealed with the new key (D-059)
                     if (self->quickUnlockOn()) {
                         // The finger's key follows the new master password (D-038);
                         // Windows Hello asks once more for that, and says so.
@@ -4084,15 +4098,14 @@ void VaultController::carryVaultSettings(const QString& from, const QString& to)
     }
     // The PIN's entry and the waits after wrong master passwords go with the
     // vault: a move never starts the count again (D-041, D-059).
-    const QVariant pinEntry = settings.value(pinEntryKey(from));
-    settings.remove(pinEntryKey(from));
-    if (!to.isEmpty() && pinEntry.isValid()) {
-        settings.setValue(pinEntryKey(to), pinEntry);
+    QVariantMap pin;
+    for (const QString& name : {QStringLiteral("salt"), QStringLiteral("derivation"), QStringLiteral("entry")}) {
+        pin.insert(name, settings.value(pinGroupOf(from) + QLatin1Char('/') + name));
     }
-    if (pinLocked.contains(from)) {
-        const QByteArray sealed = pinLocked.take(from);
-        if (!to.isEmpty()) {
-            pinLocked.insert(to, sealed);
+    settings.remove(pinGroupOf(from));
+    if (!to.isEmpty() && pin.value(QStringLiteral("entry")).isValid()) {
+        for (auto one = pin.cbegin(); one != pin.cend(); ++one) {
+            settings.setValue(pinGroupOf(to) + QLatin1Char('/') + one.key(), one.value());
         }
     }
     settings.beginGroup(waitKeyOf(from));

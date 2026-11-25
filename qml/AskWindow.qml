@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.6.105
+// AskWindow.qml 0.7.107
 
 // --- Version history ----------------------------------------------------
+// v0.7.107: No PIN face; Set or Change PIN; the password of any vault but the primary (D-076)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
@@ -43,17 +44,20 @@ DialogWindow {
     property string picture: "qrc:/icons/storage-webdav.svg"
     property string problem: ""
     property bool withList: false
-    property bool pinAllowed: false
+    // Set or Change PIN: a new PIN typed with the master password (D-076).
+    property bool withNewPin: false
     // "Remember my credentials" (the owner, D-074).
     property bool mayRemember: false
     readonly property bool remembers: rememberBox.wanted && rememberBox.enabled && rememberBox.checked
-    property string heading: qsTr("Enter the Master Password to unlock")
-    property string hint: qsTr("Master Password")
+    // The primary asks its master password, any other vault its password (the owner, D-076).
+    readonly property bool primaryAsked: vaultFile !== "" && vaultFile === VaultController.primaryVault
+    property string heading: primaryAsked || !proving ? qsTr("Enter the Master Password to unlock") : qsTr("Enter the password to unlock")
+    property string hint: primaryAsked || !proving ? qsTr("Master Password") : qsTr("Password")
     property string okText: qsTr("Unlock")
     readonly property bool proving: vaultFile !== ""
-    property bool masterInstead: false
-    readonly property bool usePin: proving && pinAllowed && !masterInstead && VaultController.askPinReady
     readonly property int waitSeconds: proving ? VaultController.askWaitSeconds : 0
+    readonly property bool pinReady: !withNewPin || newPin.text.length >= VaultController.pinShortest
+    readonly property string newPinText: newPin.text
     readonly property bool busy: proving && VaultController.askBusy
     readonly property string said: problem !== "" ? problem : proving ? VaultController.askMessage : ""
     // The vault was proven; the words were typed.
@@ -64,16 +68,16 @@ DialogWindow {
 
     function askVault(file) {
         problem = ""
-        masterInstead = false
         name = ""
         vaultFile = file
         field.clear()
+        newPin.clear()
         VaultController.askFor(file)
         rememberBox.checked = VaultController.askRememberPossible && VaultController.remembersFor(file)
         if (!visible)
             open()
         field.forceActiveFocus()
-        fingerWanted = true
+        fingerWanted = !withNewPin // a finger never sets a PIN
         askFinger()
     }
     // Once, and only when this window is active, so Windows lets Windows Hello
@@ -96,15 +100,13 @@ DialogWindow {
         field.forceActiveFocus()
     }
     function go() {
-        if (field.text === "" || busy || waitSeconds > 0)
+        if (field.text === "" || busy || waitSeconds > 0 || !pinReady)
             return
         const words = field.text
         field.clear()
         problem = ""
         if (!proving)
             entered(words)
-        else if (usePin)
-            VaultController.proveWithPin(words)
         else
             VaultController.proveWithPassword(words)
     }
@@ -116,7 +118,7 @@ DialogWindow {
     rightButtons: Button {
         objectName: "askOk"
         text: askWindow.okText
-        enabled: field.text !== "" && !askWindow.busy && askWindow.waitSeconds === 0
+        enabled: field.text !== "" && !askWindow.busy && askWindow.waitSeconds === 0 && askWindow.pinReady
         highlighted: true
         onClicked: askWindow.go()
     }
@@ -124,6 +126,7 @@ DialogWindow {
     onVisibleChanged: {
         if (!visible) {
             field.clear()
+            newPin.clear()
             vaultBox.popup.close()
             if (proving)
                 VaultController.stopAsking()
@@ -145,7 +148,7 @@ DialogWindow {
         Layout.rightMargin: 8 * Appearance.factor
         Label {
             objectName: "askHeading"
-            text: askWindow.usePin ? qsTr("Enter the PIN to unlock") : askWindow.heading
+            text: askWindow.heading
             font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
@@ -175,7 +178,7 @@ DialogWindow {
         BigPasswordField {
             id: field
             objectName: "askField"
-            placeholderText: askWindow.usePin ? qsTr("PIN") : askWindow.hint
+            placeholderText: askWindow.hint
             enabled: askWindow.waitSeconds === 0
             Layout.preferredHeight: 58 * Appearance.factor
             Layout.fillWidth: true
@@ -194,24 +197,21 @@ DialogWindow {
             CheckBox {
                 id: rememberBox
                 objectName: "askRemember"
-                readonly property bool wanted: askWindow.mayRemember && askWindow.proving && !askWindow.usePin
+                readonly property bool wanted: askWindow.mayRemember && askWindow.proving
                                                && VaultController.askRememberShown
                 enabled: VaultController.askRememberPossible
                 text: qsTr("Remember my credentials")
                 onToggled: VaultController.setRemembersFor(askWindow.vaultFile, checked)
             }
         }
-        Button {
-            objectName: "askMasterInstead"
-            visible: askWindow.usePin
-            text: qsTr("Use master password instead")
-            flat: true
-            Layout.alignment: Qt.AlignHCenter
-            onClicked: {
-                askWindow.masterInstead = true
-                field.clear()
-                field.forceActiveFocus()
-            }
+        BigPasswordField {
+            id: newPin
+            objectName: "askNewPin"
+            visible: askWindow.withNewPin
+            placeholderText: qsTr("New PIN (at least %1 characters)").arg(VaultController.pinShortest)
+            Layout.preferredHeight: 58 * Appearance.factor
+            Layout.fillWidth: true
+            onAccepted: askWindow.go()
         }
         Label {
             objectName: "askWaitText"
@@ -239,7 +239,7 @@ DialogWindow {
         }
         Button {
             objectName: "askFinger"
-            visible: askWindow.proving && VaultController.askFingerOn
+            visible: askWindow.proving && VaultController.askFingerOn && !askWindow.withNewPin
             text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
             flat: true
             Layout.alignment: Qt.AlignHCenter

@@ -52,6 +52,8 @@ atomic, verified save.
 **Open, Closed, Locked (D-075).** `VaultController::lock` locks the open vault and the key store (the primary's key and the
 kept passwords, in memory); `closeOpenVault` and `lockVault` (`src/ui/vault_controller_vaults.cpp`) work on one vault.
 `returnTo` is the vault that opens by itself once the primary is unlocked after a lock (`goBackThroughPrimary`).
+**The screen lock (D-076)**, `src/ui/vault_controller_pin.cpp`: `sealSession` puts what is open away under the vault logged in
+with, sealed with its key and its PIN's; `takeBackSession` and `openTakenBack` give it back. A PIN per vault in `pins/`.
 
 ## 6. WebDAV storage (D-057)
 
