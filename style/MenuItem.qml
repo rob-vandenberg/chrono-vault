@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// MenuItem.qml 0.6.92
+// MenuItem.qml 0.6.101
 //
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.24: The action's shortcut shown at the right (D-039)
 // v0.0.10: Initial release (D-023)
@@ -86,7 +87,7 @@ F.MenuItem {
                                                                       : control.palette.text
     }
     background: Rectangle {
-        implicitWidth: 200 * UiScale.factor
+        implicitWidth: 0 // the menu decides how wide it is
         implicitHeight: 20 * UiScale.factor
         color: Fusion.highlight(control.palette)
         visible: control.down || control.highlighted

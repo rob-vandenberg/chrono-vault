@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// PopupPanel.qml 0.6.92
+// PopupPanel.qml 0.6.101
 //
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
 
@@ -20,7 +21,7 @@ import QtQuick
 Rectangle {
     id: panel
     property color shade // Fusion's shadow
-    implicitWidth: 200 * UiScale.factor
+    implicitWidth: 120 * UiScale.factor
     implicitHeight: 20 * UiScale.factor
     Rectangle {
         z: -1

@@ -802,3 +802,8 @@ Scaled once (D-069). `qml/SettingsWindow.qml`, one value; no test and no reviewe
 The owner's changelist items 1-12 (D-071). `qml/PictureButton.qml`, `qml/SettingsWindow.qml`, `art/lock-open.svg`;
 `tests/integration/test_vault_rows.cpp`. Found by the test and fixed: the window that asks a master password for Import, Export
 (and now Open) waited for ever when the right password followed a wrong one.
+
+## 25 November 2026: version 0.6.101: menus
+
+The owner's changelist items 1-7 (D-072). `style/Menu.qml`, `MenuItem.qml`, `MenuSeparator.qml`, `ComboBox.qml`, `scaling.*`;
+`tests/integration/test_vault_rows.cpp`.

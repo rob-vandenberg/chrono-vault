@@ -177,7 +177,7 @@
 <context>
     <name>ConflictWindow</name>
     <message>
-        <location filename="../qml/ConflictWindow.qml" line="+232"/>
+        <location filename="../qml/ConflictWindow.qml" line="+233"/>
         <source>Sync conflict: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -566,7 +566,7 @@
 <context>
     <name>FieldRow</name>
     <message>
-        <location filename="../qml/FieldRow.qml" line="+169"/>
+        <location filename="../qml/FieldRow.qml" line="+170"/>
         <location line="+47"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
@@ -1362,7 +1362,7 @@
 <context>
     <name>ItemDetails</name>
     <message>
-        <location filename="../qml/ItemDetails.qml" line="+150"/>
+        <location filename="../qml/ItemDetails.qml" line="+151"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1477,7 +1477,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+203"/>
+        <location filename="../qml/ItemEditor.qml" line="+204"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+79"/>
+        <location filename="../qml/Main.qml" line="+80"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1778,7 +1778,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+220"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1834,12 +1834,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-637"/>
+        <location line="-628"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+190"/>
+        <location line="+181"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2238,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+288"/>
+        <location filename="../qml/SettingsWindow.qml" line="+289"/>
         <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2987,7 +2987,7 @@
 <context>
     <name>TemplateEditor</name>
     <message>
-        <location filename="../qml/TemplateEditor.qml" line="+36"/>
+        <location filename="../qml/TemplateEditor.qml" line="+37"/>
         <source>New template</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3323,7 +3323,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+244"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+245"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3474,7 +3474,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+741"/>
+        <location filename="../qml/VaultPage.qml" line="+742"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4009,7 +4009,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+69"/>
+        <location filename="../qml/WelcomePage.qml" line="+70"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>

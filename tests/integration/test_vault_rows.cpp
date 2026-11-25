@@ -17,10 +17,13 @@
 
 #include "intuitive_fixture.h"
 
+#include <QQmlComponent>
+
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.100
+// test_vault_rows.cpp 0.6.101
 
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Initial release (D-071)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -56,6 +59,46 @@ class TestVaultRows : public IntuitiveFixture
     }
 
 private slots:
+    // A menu is as wide as its longest entry, 120 at least, and closes when
+    // another window takes the keyboard; a choice box's list too (D-072).
+    void a_menu_fits_its_entries_and_closes_with_its_window()
+    {
+        QQmlComponent made(engine.get());
+        made.setData("import QtQuick\nimport QtQuick.Controls\n"
+                     "Item { id: all; property Menu small: Menu { MenuItem { text: 'Copy' } MenuSeparator {} }\n"
+                     "property Menu large: Menu { MenuItem { text: 'Copy' } MenuItem { objectName: 'long'; text: 'An entry that is a good deal longer' } }\n"
+                     "ComboBox { objectName: 'box'; y: 200; model: ['One', 'Two'] } }", QUrl());
+        std::unique_ptr<QObject> all(made.create());
+        QVERIFY2(all, qPrintable(made.errorString()));
+        auto* item = qobject_cast<QQuickItem*>(all.get());
+        item->setParentItem(window->contentItem());
+        QObject* small = item->property("small").value<QObject*>();
+        QObject* large = item->property("large").value<QObject*>();
+        QMetaObject::invokeMethod(small, "popup", Q_ARG(QQuickItem*, item));
+        QTRY_VERIFY(small->property("opened").toBool());
+        QCOMPARE(small->property("width").toDouble(), 120.0);
+        QMetaObject::invokeMethod(small, "close");
+        QMetaObject::invokeMethod(large, "popup", Q_ARG(QQuickItem*, item));
+        QTRY_VERIFY(large->property("opened").toBool());
+        QQuickItem* entryOf = nullptr;
+        QMetaObject::invokeMethod(large, "itemAt", Q_RETURN_ARG(QQuickItem*, entryOf), Q_ARG(int, 1));
+        QVERIFY(entryOf && entryOf->implicitWidth() > 120);
+        QVERIFY(qAbs(large->property("width").toDouble() - entryOf->implicitWidth()) <= 4);
+        // Another window has the keyboard.
+        QWindow other;
+        other.show();
+        other.requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), &other);
+        QTRY_VERIFY(!large->property("visible").toBool());
+        window->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), window);
+        QObject* list = seen(item, QStringLiteral("box"))->property("popup").value<QObject*>();
+        QMetaObject::invokeMethod(list, "open");
+        QTRY_VERIFY(list->property("opened").toBool());
+        other.requestActivate();
+        QTRY_VERIFY(!list->property("visible").toBool());
+    }
+
     void a_vault_is_opened_and_locked_in_its_row()
     {
         const QString first = QStringLiteral("a_vault_is_opened_and_locked_in_its_row");

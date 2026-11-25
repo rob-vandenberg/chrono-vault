@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// ComboBox.qml 0.6.92
+// ComboBox.qml 0.6.101
 //
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
 
@@ -18,6 +19,15 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's ComboBox, its list on the background of every pop-up (D-067).
 F.ComboBox {
     id: control
+    // As a menu: its list closes when another window takes the keyboard (D-072).
+    Connections {
+        target: UiScale
+        enabled: control.popup.visible
+        function onFocusWindowChanged() {
+            if (UiScale.focusWindow !== control.Window.window)
+                control.popup.close()
+        }
+    }
     popup.background: PopupPanel {
         color: control.palette.button
         border.color: Fusion.outline(control.palette)

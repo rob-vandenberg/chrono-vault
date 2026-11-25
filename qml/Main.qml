@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.100
+// Main.qml 0.6.101
 
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
@@ -270,18 +271,9 @@ ApplicationWindow {
     }
 
     // A menu of the bar: the style's own entries, with the shortcut at the
-    // right, and as wide as its widest entry (D-039).
+    // right (D-039).
     component MainMenu: Menu {
         delegate: MenuItem {}
-        width: {
-            let widest = implicitWidth
-            for (let index = 0; index < count; ++index) {
-                const entry = itemAt(index)
-                if (entry)
-                    widest = Math.max(widest, entry.implicitWidth + leftPadding + rightPadding)
-            }
-            return widest
-        }
     }
 
     // One bar at the top (D-025): the menus on the left, the buttons on the

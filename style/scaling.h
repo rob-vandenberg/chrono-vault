@@ -23,9 +23,10 @@ class QJSEngine;
 class QQmlEngine;
 
 // --- Version ------------------------------------------------------------
-// scaling.h 0.6.92
+// scaling.h 0.6.101
 
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.10: Initial release (D-023)
 
@@ -42,6 +43,8 @@ class UiScale : public QObject
     QML_SINGLETON
 
     Q_PROPERTY(double factor READ factor NOTIFY factorChanged)
+    // The one window that has the keyboard, for menus to close by (D-072).
+    Q_PROPERTY(QObject* focusWindow READ focusWindow NOTIFY focusWindowChanged)
 
 public:
     // The one instance, shared by every QML engine and by the program.
@@ -50,6 +53,7 @@ public:
 
     [[nodiscard]] double factor() const { return currentFactor; }
     void setFactor(double factor);
+    [[nodiscard]] static QObject* focusWindow();
 
     // A size in pixels at the factor now; never below 1.
     [[nodiscard]] Q_INVOKABLE int px(double pixels) const;
@@ -60,9 +64,10 @@ public:
 
 signals:
     void factorChanged();
+    void focusWindowChanged();
 
 private:
-    explicit UiScale(QObject* parent = nullptr) : QObject(parent) {}
+    explicit UiScale(QObject* parent = nullptr);
     double currentFactor = 1.0;
 };
 

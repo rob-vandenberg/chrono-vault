@@ -80,3 +80,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-069](decisions/D-069.md) | Exact UI scaling |
 | [D-070](decisions/D-070.md) | The main window keeps its size at another scaling; the others scale along |
 | [D-071](decisions/D-071.md) | Padlocks and Open in Settings > Vaults; round picture buttons, vertical dots |
+| [D-072](decisions/D-072.md) | Menus as wide as their longest entry, 120 at least; they close with their window |

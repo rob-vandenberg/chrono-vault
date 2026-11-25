@@ -53,7 +53,7 @@ The menus and settings of the reference program that Chrono Vault does not have 
 17. The person decides every difference an import or a sync meets (D-061, the owner, 24 November 2026): **done in
     0.5.78**; the windows as Chrono Mail's, with Retry sync and Keep here only: **done in 0.5.81**; what a person guesses
     is what happens (D-062): **done in 0.5.82**; selected and focused, the Item menu, the empty list and the counts (D-063): **done in
-    0.5.83**; the tray icon (D-064): **done in 0.5.85**; the topics of Settings (D-066): **done in 0.6.88**; the pop-ups' background (D-067): **done in 0.6.90**; the keyboard in dialogs (D-068): **done in 0.6.91**; exact UI scaling (D-069): **done in 0.6.92**; the windows and the scaling (D-070): **done in 0.6.94**; padlocks and round buttons (D-071): **done in 0.6.100**.
+    0.5.83**; the tray icon (D-064): **done in 0.5.85**; the topics of Settings (D-066): **done in 0.6.88**; the pop-ups' background (D-067): **done in 0.6.90**; the keyboard in dialogs (D-068): **done in 0.6.91**; exact UI scaling (D-069): **done in 0.6.92**; the windows and the scaling (D-070): **done in 0.6.94**; padlocks and round buttons (D-071): **done in 0.6.100**; menus (D-072): **done in 0.6.101**.
 
 **In all: about 15 to 20 person-months without AI, or about 1.5 to 4 months with AI.** The owner's own testing on five
 platforms and the store reviews push the real time toward the upper end.

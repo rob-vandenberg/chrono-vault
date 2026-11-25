@@ -16,19 +16,34 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "scaling.h"
 
+#include <QGuiApplication>
 #include <QQmlEngine>
+#include <QWindow>
 
 #include <algorithm>
 #include <cmath>
 
 // --- Version ------------------------------------------------------------
-// scaling.cpp 0.6.92
+// scaling.cpp 0.6.101
 
 // --- Version history ----------------------------------------------------
+// v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.10: Initial release (D-023)
 
 namespace chrono_vault {
+
+UiScale::UiScale(QObject* parent) : QObject(parent)
+{
+    if (qGuiApp) {
+        connect(qGuiApp, &QGuiApplication::focusWindowChanged, this, &UiScale::focusWindowChanged);
+    }
+}
+
+QObject* UiScale::focusWindow()
+{
+    return QGuiApplication::focusWindow();
+}
 
 UiScale* UiScale::instance()
 {
