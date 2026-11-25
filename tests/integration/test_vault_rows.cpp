@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.103
+// test_vault_rows.cpp 0.6.104
 
 // --- Version history ----------------------------------------------------
+// v0.6.104: A click on the eye
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
@@ -99,6 +100,25 @@ private slots:
         QTRY_VERIFY(list->property("opened").toBool());
         other.requestActivate();
         QTRY_VERIFY(!list->property("visible").toBool());
+    }
+
+    // The eye lies over the typed text: a click shows the password, another hides it.
+    void the_eye_is_clicked()
+    {
+        controller->lock();
+        QTRY_COMPARE(controller->state(), State::Locked);
+        QQuickItem* field = part("masterPasswordField");
+        QTRY_VERIFY(field && field->hasActiveFocus());
+        type(QStringLiteral("abc"));
+        QCOMPARE(field->property("text").toString(), QStringLiteral("abc"));
+        window->grabWindow(); // laid out
+        click(seen(field, QStringLiteral("passwordEye")));
+        QVERIFY(field->property("revealed").toBool());
+        click(seen(field, QStringLiteral("passwordEye")));
+        QVERIFY(!field->property("revealed").toBool());
+        // Beside it, a click still goes to the text.
+        QTest::mouseClick(window, Qt::LeftButton, {}, field->mapToScene(QPointF(20, field->height() / 2)).toPoint());
+        QVERIFY(field->hasActiveFocus());
     }
 
     // A kept password that no longer opens its vault: the reason in Settings too.

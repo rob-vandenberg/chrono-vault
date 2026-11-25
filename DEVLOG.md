@@ -817,3 +817,7 @@ The owner's changelist items 1-7 (D-072). `style/Menu.qml`, `MenuItem.qml`, `Men
 The owner's changelist items 1-13 (D-073). `src/ui/vault_controller_ask.cpp`, `qml/AskWindow.qml`, `qml/VaultBox.qml`,
 `qml/BigPasswordField.qml`, `qml/Padlock.qml` and the windows that asked by themselves; tests in `test_quick_unlock`,
 `test_pin_unlock`, `test_items`, `test_item_pages`, `test_vault_rows`, `test_dialog_keys`.
+
+## 25 November 2026: version 0.6.104: the eye
+
+Since 0.6.92 the typed text lay over the eye of a password field. `qml/PasswordField.qml`; `test_vault_rows`. No reviewers.

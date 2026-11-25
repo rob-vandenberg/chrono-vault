@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// PasswordField.qml 0.6.92
+// PasswordField.qml 0.6.104
 
 // --- Version history ----------------------------------------------------
+// v0.6.104: The eye over the typed text, so it can be clicked
 // v0.6.92: Exact sizes (D-069)
 // v0.4.70: eyeAllowed: the eye only where it may be shown (D-059)
 // v0.0.4: Initial release
@@ -41,7 +42,9 @@ TextField {
 
     ToolButton {
         id: eyeButton
+        objectName: "passwordEye"
         parent: passwordField
+        z: 1 // over the typed text, which fills the whole field
         visible: passwordField.eyeAllowed
         anchors.right: parent.right
         anchors.rightMargin: 2 * Appearance.factor
