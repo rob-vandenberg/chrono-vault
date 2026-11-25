@@ -792,3 +792,7 @@ as wide as their text on one line; the sizes remembered from that are not used a
 ## 25 November 2026: version 0.6.98: the texts of Forget
 
 The owner's, one for a vault on this computer and one for a remote one. `qml/SettingsWindow.qml`. No reviewers (words).
+
+## 25 November 2026: version 0.6.99: the "?" of a key in use
+
+Scaled once (D-069). `qml/SettingsWindow.qml`, one value; no test and no reviewers, at the owner's Proceed.

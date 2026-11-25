@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.98
+// SettingsWindow.qml 0.6.99
 
 // --- Version history ----------------------------------------------------
+// v0.6.99: The "?" of a key in use is scaled once (D-069)
 // v0.6.98: The texts of Forget (the owner)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
@@ -1592,7 +1593,7 @@ ApplicationWindow {
                             anchors.centerIn: parent
                             text: "?"
                             font.bold: true
-                            font.pixelSize: parent.height * 0.6
+                            font.pixelSize: parent.height / Appearance.factor * 0.6
                             color: keyTaken.palette.highlightedText
                         }
                     }
