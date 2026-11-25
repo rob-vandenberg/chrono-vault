@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.88
+// Main.qml 0.6.90
 
 // --- Version history ----------------------------------------------------
+// v0.6.90: The menus' colour from the style (D-067)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: View > Audit; an item left out of the audit (D-065)
 // v0.5.83: The Item menu holds every action on the selected items (D-063)
@@ -262,11 +263,6 @@ ApplicationWindow {
     // right, and as wide as its widest entry (D-039).
     component MainMenu: Menu {
         delegate: MenuItem {}
-        // A colour of its own, apart from the sidebar's (Base) and the
-        // window's: the style draws a menu in Base, so Base is the buttons'
-        // colour here, a step lighter than both in the dark theme and a step
-        // darker in the light one (the owner).
-        palette.base: mainWindow.palette.button
         width: {
             let widest = implicitWidth
             for (let index = 0; index < count; ++index) {
@@ -495,7 +491,6 @@ ApplicationWindow {
                     }
                     CategoryMenu {
                         objectName: "categoryAction"
-                        palette.base: mainWindow.palette.button
                         enabled: mainWindow.itemsFree && !vaultPage.anyTrashed
                         onChosen: function(categoryId) { vaultPage.changeCategory(categoryId) }
                     }

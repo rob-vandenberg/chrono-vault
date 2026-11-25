@@ -25,12 +25,15 @@ qt_add_qml_module(chrono_vault_style
         BusyIndicator.qml
         Button.qml
         CheckBox.qml
+        ComboBox.qml
         DialogButtonBox.qml
         Frame.qml
         ItemDelegate.qml
+        Menu.qml
         MenuBarItem.qml
         MenuItem.qml
         Pane.qml
+        PopupPanel.qml
         RadioButton.qml
         ScrollBar.qml
         ScrollView.qml

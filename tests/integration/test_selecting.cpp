@@ -16,11 +16,14 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "intuitive_fixture.h"
+#include "appearance.h"
+#include "theme.h"
 
 // --- Version ------------------------------------------------------------
-// test_selecting.cpp 0.6.88
+// test_selecting.cpp 0.6.90
 
 // --- Version history ----------------------------------------------------
+// v0.6.90: The background of every pop-up (D-067)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.6.86: The audit above the counts (D-065)
 // v0.5.83: Initial release (D-063)
@@ -33,6 +36,39 @@ class TestSelecting : public IntuitiveFixture
     Q_OBJECT
 
 private slots:
+    void every_popup_has_the_main_menus_background()
+    {
+        // Every menu, submenu and choice box's list, also after the theme is
+        // switched while Chrono Vault runs (D-067).
+        auto* look = engine->singletonInstance<Appearance*>("ChronoVault", "Appearance");
+        for (const Theme theme : {Theme::Light, Theme::Dark, Theme::Light}) {
+            look->show(int(theme), 100);
+            const QColor wanted = (theme == Theme::Dark ? darkPalette() : lightPalette()).color(QPalette::Button);
+            int menus = 0;
+            int lists = 0;
+            QList<QObject*> all = window->findChildren<QObject*>();
+            all += part("categoryEntry_finance")->children(); // a menu inside a row
+            for (QObject* one : std::as_const(all)) {
+                QObject* popup = one;
+                if (one->inherits("QQuickComboBox")) {
+                    popup = one->property("popup").value<QObject*>();
+                    ++lists;
+                } else if (one->inherits("QQuickMenu")) {
+                    ++menus;
+                } else {
+                    continue;
+                }
+                QVERIFY(popup);
+                QObject* back = popup->property("background").value<QObject*>();
+                QVERIFY2(back, qPrintable(one->objectName()));
+                QVERIFY2(back->property("color").value<QColor>() == wanted, qPrintable(one->objectName()));
+            }
+            QVERIFY2(menus >= 12, qPrintable(QString::number(menus)));
+            QVERIFY2(lists >= 3, qPrintable(QString::number(lists)));
+        }
+        Appearance::applyKept();
+    }
+
     void several_items_are_chosen_and_acted_on_together()
     {
         const auto focused = [this]() { return page->property("chosenItemId").toString(); };

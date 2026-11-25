@@ -744,3 +744,9 @@ One review round of two, clean.
 ## 25 November 2026: version 0.6.89: the size of the settings window
 
 The owner: 720 by 625 inside, opened and at least. `qml/SettingsWindow.qml`, `tests/integration/test_appearance.cpp`.
+
+## 25 November 2026: version 0.6.90: the background of every pop-up
+
+The owner's changelist items 1-9 (D-067). `style/Menu.qml`, `style/ComboBox.qml`, `style/PopupPanel.qml`, `qml/Main.qml`,
+`qml/UnlockPage.qml`; `tests/integration/test_selecting.cpp` checks every pop-up in both themes, switched while running.
+One review round of two, nothing real.

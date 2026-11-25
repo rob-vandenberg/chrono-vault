@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.5.82
+// UnlockPage.qml 0.6.90
 
 // --- Version history ----------------------------------------------------
+// v0.6.90: The list of vaults on the background of every pop-up (D-067)
 // v0.5.82: Enter never throws a kept change away (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.4.73: The finger asked only once the window is active (the owner)
@@ -243,7 +244,7 @@ Item {
                 margins: 0
                 background: Rectangle {
                     radius: Math.round(8 * Appearance.factor)
-                    color: vaultBox.palette.base
+                    color: vaultBox.palette.button // as every pop-up (D-067)
                     border.color: vaultBox.palette.mid
                 }
                 contentItem: ListView {
