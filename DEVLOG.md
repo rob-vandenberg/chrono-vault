@@ -788,3 +788,7 @@ The owner's own `art/chrono-vault-tray.svg` on every tray (D-064); `src/ui/tray_
 
 The owner's changelist items 1-8 (D-061). `style/ScaledText.qml`, the dialogs in `qml/`; `test_dialog_keys`. Ten dialogs opened
 as wide as their text on one line; the sizes remembered from that are not used any more.
+
+## 25 November 2026: version 0.6.98: the texts of Forget
+
+The owner's, one for a vault on this computer and one for a remote one. `qml/SettingsWindow.qml`. No reviewers (words).

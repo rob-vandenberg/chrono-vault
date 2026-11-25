@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+78"/>
+        <location filename="../qml/Main.qml" line="+79"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2238,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+271"/>
+        <location filename="../qml/SettingsWindow.qml" line="+272"/>
         <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2297,12 +2297,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1036"/>
+        <location line="+1038"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1037"/>
+        <location line="-1039"/>
         <location line="+474"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2462,7 +2462,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+133"/>
+        <location line="+121"/>
+        <source>Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The vault in the remote location is not deleted, but the local copy on this computer is, together with any changes that are not synced yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Nothing is deleted, only the name of the vault is removed from the list of vaults.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Are you sure you want Chrono Vault to forget “%1”?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
         <source>Disconnect from WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2502,7 +2522,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-770"/>
+        <location line="-772"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2588,7 +2608,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+690"/>
+        <location line="+692"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2603,7 +2623,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-365"/>
+        <location line="-367"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2658,17 +2678,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
-        <source>“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>“%1” is taken off the list of vaults. Its file stays where it is.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+261"/>
+        <location line="+274"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2693,15 +2703,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1314"/>
-        <location line="+1253"/>
+        <location line="-1316"/>
+        <location line="+1255"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1320"/>
-        <location line="+1162"/>
+        <location line="-1322"/>
+        <location line="+1164"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -2711,7 +2721,7 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+45"/>
+        <location filename="../qml/StorageWindow.qml" line="+46"/>
         <source>Select Storage</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3238,7 +3248,7 @@
 <context>
     <name>UpdateAvailableWindow</name>
     <message>
-        <location filename="../qml/UpdateAvailableWindow.qml" line="+38"/>
+        <location filename="../qml/UpdateAvailableWindow.qml" line="+39"/>
         <source>Update available</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3266,7 +3276,7 @@
 <context>
     <name>UpdateDownloadedWindow</name>
     <message>
-        <location filename="../qml/UpdateDownloadedWindow.qml" line="+39"/>
+        <location filename="../qml/UpdateDownloadedWindow.qml" line="+40"/>
         <source>Update downloaded</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3699,7 +3709,7 @@
 <context>
     <name>WebDavFileDialog</name>
     <message>
-        <location filename="../qml/WebDavFileDialog.qml" line="+55"/>
+        <location filename="../qml/WebDavFileDialog.qml" line="+56"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.97
+// SettingsWindow.qml 0.6.98
 
 // --- Version history ----------------------------------------------------
+// v0.6.98: The texts of Forget (the owner)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
@@ -1333,9 +1334,11 @@ ApplicationWindow {
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
-                                text: forgetWindow.onWebDav
-                                      ? qsTr("“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
-                                      : qsTr("“%1” is taken off the list of vaults. Its file stays where it is.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
+                                text: qsTr("Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.") + " "
+                                      + (forgetWindow.onWebDav
+                                         ? qsTr("The vault in the remote location is not deleted, but the local copy on this computer is, together with any changes that are not synced yet.")
+                                         : qsTr("Nothing is deleted, only the name of the vault is removed from the list of vaults.")) + "\n"
+                                      + qsTr("Are you sure you want Chrono Vault to forget “%1”?").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
                                 wrapMode: Text.Wrap
                             }
                         }
