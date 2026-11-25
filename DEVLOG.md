@@ -740,3 +740,7 @@ A parameter named as a member stopped Microsoft's compiler; renamed. 0.6.86 has 
 The owner's changelist items 1-14 (D-066). `qml/CategoriesPage.qml`, `qml/TagsPage.qml` and `qml/TemplatesPage.qml` out of
 `qml/CustomizePage.qml`; `qml/SettingsWindow.qml`. From this version on, a compile on the Windows twin before the push.
 One review round of two, clean.
+
+## 25 November 2026: version 0.6.89: the size of the settings window
+
+The owner: 720 by 625 inside, opened and at least. `qml/SettingsWindow.qml`, `tests/integration/test_appearance.cpp`.

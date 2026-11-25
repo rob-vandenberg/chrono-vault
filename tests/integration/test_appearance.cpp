@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.2.55
+// test_appearance.cpp 0.6.89
 
 // --- Version history ----------------------------------------------------
+// v0.6.89: The settings window at 720 by 625 inside (D-066)
 // v0.2.55: The font is 10 points whatever the system's size (the owner, D-017)
 // v0.2.54: The font is 11 points whatever the system's size (the owner, D-017)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -246,7 +247,7 @@ void TestAppearance::the_kept_look_is_drawn_from_the_start_whatever_the_desktop(
     auto* window = qobject_cast<QQuickWindow*>(settings);
     QTRY_VERIFY(window->isExposed());
     const QImage shot = window->grabWindow();
-    QCOMPARE(shot.pixelColor(shot.width() - 20, shot.height() / 2), darkPalette().color(QPalette::Window));
+    QCOMPARE(shot.pixelColor(shot.width() - 20, shot.height() - 4), darkPalette().color(QPalette::Window));
     QVERIFY(QMetaObject::invokeMethod(settings, "close"));
     SettingsFile().remove(QStringLiteral("view/theme"));
     Appearance::applyKept();
@@ -306,11 +307,11 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(settings);
     auto* window = qobject_cast<QWindow*>(settings);
     QVERIFY(window);
-    // Opens at 730 by 650 and is never smaller (the owner).
-    QCOMPARE(window->width(), 730);
-    QCOMPARE(window->height(), 650);
-    QCOMPARE(window->minimumWidth(), 730);
-    QCOMPARE(window->minimumHeight(), 650);
+    // Opens at 720 by 625 inside and is never smaller (the owner).
+    QCOMPARE(window->width(), 720);
+    QCOMPARE(window->height(), 625);
+    QCOMPARE(window->minimumWidth(), 720);
+    QCOMPARE(window->minimumHeight(), 625);
 
     // At 400% the size is larger than the screen: it gives way to the
     // screen's free room (the owner).
@@ -319,14 +320,24 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(window->minimumHeight() <= room.height());
     QVERIFY(window->minimumWidth() <= room.width());
     applyProgramScale(100);
-    QCOMPARE(window->minimumHeight(), 650);
-    // The title bar and frame are taken off the inside: the whole window is 730 by 650.
+    QCOMPARE(window->minimumHeight(), 625);
+    // The title bar and frame leave the inside as it is (D-066).
     settings->setProperty("frame", QSizeF(8, 40));
-    QCOMPARE(window->minimumWidth(), 730 - 8);
-    QCOMPARE(window->minimumHeight(), 650 - 40);
+    QCOMPARE(window->minimumWidth(), 720);
+    QCOMPARE(window->minimumHeight(), 625);
     settings->setProperty("frame", QSizeF(0, 0));
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());
+    // With a tray General fits without a scroll bar.
+    engine.singletonInstance<VaultController*>("ChronoVault", "VaultController")->setTrayAvailable(true);
+    auto* box = settings->findChild<QQuickItem*>(QStringLiteral("clipboardBox"));
+    QQuickItem* flick = box->parentItem();
+    while (flick && !flick->property("contentHeight").isValid()) {
+        flick = flick->parentItem();
+    }
+    QVERIFY(flick);
+    QTRY_VERIFY2(flick->property("contentHeight").toReal() <= flick->height(),
+                 qPrintable(flick->property("contentHeight").toString()));
     auto* slider = qobject_cast<QQuickItem*>(settings->findChild<QObject*>(QStringLiteral("scaleSlider")));
     QObject* marks = settings->findChild<QObject*>(QStringLiteral("scaleMarks"));
     QObject* row = settings->findChild<QObject*>(QStringLiteral("scaleRow"));

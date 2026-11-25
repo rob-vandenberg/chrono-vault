@@ -2,7 +2,7 @@
 
 ## Now
 
-**Version 0.6.88**: Settings: General, Security, Vaults, Categories, Tags, Templates, Keyboard shortcuts (D-066). Before,
+**Version 0.6.89**: the settings window 720 by 625 inside (D-066). Before, **0.6.88**: Settings: General, Security, Vaults, Categories, Tags, Templates, Keyboard shortcuts (D-066). Before,
 **0.6.87**: 0.6.86 with Microsoft's compiler content (its Windows setup could not be built). **0.6.86**: Audit, `ROADMAP.md` step 12 (D-065): leaked, reused, weak and old passwords and breached websites,
 with a score, cards, a sidebar group and remarks; items can be excluded (contents format 10). Before, **0.5.85**: a plain vault in the system tray, seen on dark and light trays (D-064). Before, **0.5.84**: the empty vault's door opens to the left, as the program's icon. Before, **0.5.83**: the focused item apart from the selected ones, gray marks with a thin blue bar, every action in
 the Item menu and the right-click menu, Change Category, the tags in Settings > Customize, an empty list's drawing, the
