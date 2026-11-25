@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.6.94
+// SyncConflictsWindow.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Every key of a list, Ctrl+A, ranges (D-062)
@@ -219,7 +220,7 @@ DialogWindow {
             conflictsWindow.saidTrouble = trouble
         }
         function onRetryPasswordNeeded(source, vaultName, itemIds, problem) {
-            retryPassword.ask(source, vaultName, itemIds, problem)
+            retryPassword.askNext(source, vaultName, itemIds, problem)
         }
     }
 
@@ -544,28 +545,25 @@ DialogWindow {
     }
 
     // Retry sync from a vault whose key is not at hand: its master password.
-    DialogWindow {
+    AskWindow {
         id: retryPassword
         objectName: "retryPasswordWindow"
-        memoryName: "retryPassword"
         transientParent: conflictsWindow
+        title: qsTr("Retry sync")
         // Those still to be asked; the first is the one shown.
         property var waiting: []
-        function ask(source, vaultName, itemIds, problem) {
+        function askNext(source, vaultName, itemIds, problem) {
             waiting = waiting.concat([{ source: source, name: vaultName, ids: itemIds, problem: problem }])
             if (!visible)
                 showFirst()
         }
         function showFirst() {
-            retryField.clear()
-            if (waiting.length > 0) {
-                open()
-                retryField.forceActiveFocus()
-            }
+            if (waiting.length === 0)
+                return
+            picture = String(waiting[0].source).indexOf("vault:") === 0 ? "qrc:/icons/storage-device.svg"
+                                                                        : "qrc:/icons/storage-webdav.svg"
+            ask(waiting[0].name, waiting[0].problem)
         }
-        title: qsTr("Retry sync")
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        Component.onCompleted: standardButton(Dialog.Ok).enabled = Qt.binding(function() { return retryField.text !== "" })
         Connections {
             target: VaultController
             function onLocking() {
@@ -574,46 +572,17 @@ DialogWindow {
                     retryPassword.reject()
             }
         }
-        onAccepted: {
+        onEntered: function(text) {
             const one = waiting[0]
-            const password = retryField.text
             waiting = waiting.slice(1)
+            accept()
             if (one)
-                VaultController.retryFromVault(one.source, one.ids, password)
+                VaultController.retryFromVault(one.source, one.ids, text)
             Qt.callLater(showFirst)
         }
         onRejected: {
             waiting = waiting.slice(1)
             Qt.callLater(showFirst)
-        }
-        ExactColumn {
-            gap: 8 * Appearance.factor
-            Layout.preferredWidth: 380 * Appearance.factor
-            Layout.fillWidth: true
-            Label {
-                text: retryPassword.waiting.length > 0
-                      ? qsTr("The master password of “%1”, to read it again:").arg(retryPassword.waiting[0].name) : ""
-                textFormat: Text.PlainText
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-            PasswordField {
-                id: retryField
-                objectName: "retryPasswordField"
-                Layout.fillWidth: true
-                onAccepted: {
-                    if (text !== "")
-                        retryPassword.accept()
-                }
-            }
-            Label {
-                objectName: "retryPasswordProblem"
-                visible: text !== ""
-                text: retryPassword.waiting.length > 0 ? retryPassword.waiting[0].problem : ""
-                color: "#e53e3e"
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
         }
     }
 }

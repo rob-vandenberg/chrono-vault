@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.6.100
+// vault_controller.h 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
@@ -296,6 +297,37 @@ public:
     void setUseWebsiteIcons(bool use);
     // Unlocking with a fingerprint (D-038).
     [[nodiscard]] bool quickUnlockAvailable() const { return quickAvailable; }
+    // A master password, a PIN or a finger asked for any vault, the one shown or
+    // another, in the standard dialog: nothing else changes until it was right
+    // and the vault is opened, exported or read with it (D-073).
+    Q_PROPERTY(QString askedVault READ askedVault NOTIFY askChanged)
+    Q_PROPERTY(bool askBusy READ askBusy NOTIFY askChanged)
+    Q_PROPERTY(QString askMessage READ askMessage NOTIFY askChanged)
+    Q_PROPERTY(bool askTrouble READ askTrouble NOTIFY askChanged)
+    Q_PROPERTY(bool askPinReady READ askPinReady NOTIFY askChanged)
+    Q_PROPERTY(bool askFingerOn READ askFingerOn NOTIFY askChanged)
+    Q_PROPERTY(int askWaitSeconds READ askWaitSeconds NOTIFY askChanged)
+    Q_PROPERTY(bool askKeyfileNeeded READ askKeyfileNeeded NOTIFY askChanged)
+    Q_PROPERTY(QString askKeyfile READ askKeyfile NOTIFY askChanged)
+    [[nodiscard]] QString askedVault() const { return askedFor; }
+    [[nodiscard]] bool askBusy() const { return askIsBusy; }
+    [[nodiscard]] QString askMessage() const { return askText; }
+    [[nodiscard]] bool askTrouble() const { return askIsTrouble; }
+    [[nodiscard]] bool askPinReady() const;
+    [[nodiscard]] bool askFingerOn() const;
+    [[nodiscard]] int askWaitSeconds() const { return askWait; }
+    [[nodiscard]] bool askKeyfileNeeded() const { return askNeedsKeyfile || !askKeyfile().isEmpty(); }
+    [[nodiscard]] QString askKeyfile() const { return keyfileOf(askedFor); }
+    Q_INVOKABLE void askFor(const QString& vaultFile);
+    Q_INVOKABLE void stopAsking();
+    Q_INVOKABLE void setAskKeyfile(const QUrl& keyfile);
+    Q_INVOKABLE void proveWithPassword(const QString& password);
+    Q_INVOKABLE void proveWithPin(const QString& pin);
+    Q_INVOKABLE void proveWithFinger();
+    // With what was proven: the vault opened; the one shown exported; another read for an import.
+    Q_INVOKABLE bool openProven();
+    Q_INVOKABLE void exportProven(const QUrl& file);
+    Q_INVOKABLE void importProven();
     // One setting for all vaults (the owner, D-043); a vault's key is kept at
     // its next master-password unlock.
     [[nodiscard]] bool quickUnlockEnabled() const;
@@ -397,7 +429,6 @@ public:
     // Writes the open vault, unencrypted, in the reference program's format
     // where the person chose, once the master password is right (D-037);
     // answered by exportDone. The file is readable by the person alone.
-    Q_INVOKABLE void exportVault(const QUrl& file, const QString& password);
     // A new master password, and a keyfile or none, for the unlocked vault;
     // answered by masterPasswordChanged (D-031).
     Q_INVOKABLE void changeMasterPassword(const QString& current, const QString& password, const QString& repeated,
@@ -678,6 +709,8 @@ signals:
     void autoLockMinutesChanged();
     void systemIdleAvailableChanged();
     void unlockWaitChanged();
+    void askChanged();
+    void proven(const QString& vaultFile);
     void clipboardClearSecondsChanged();
     void hideSensitiveChanged();
     void showSubtitlesChanged();
@@ -902,7 +935,38 @@ private:
     qint64 clockShiftMs = 0;
     QTimer waitTimer;
     [[nodiscard]] qint64 nowMs() const;
-    [[nodiscard]] QString waitKey() const;
+    [[nodiscard]] static QString openStatusText(OpenStatus status);
+    struct PinMeans
+    {
+        QByteArray salt;
+        crypto::KdfParameters parameters;
+    };
+    [[nodiscard]] std::optional<PinMeans> pinMeans() const;
+    [[nodiscard]] static QByteArray pinLockedLabel();
+    static void forgetWrongPasswords(const QString& vaultFile);
+    void countWrongPassword(const QString& vaultFile);
+    [[nodiscard]] int waitLeft(const QString& vaultFile) const;
+    [[nodiscard]] bool reminderDueFor(const QString& vaultFile, bool easier) const;
+    void readForImport(const QString& source, const QByteArray& password, const std::optional<VaultKey>& kept);
+    void tellAsked(const QString& text, bool isTrouble);
+    void checkProven(const VaultKey& candidate, const QByteArray& keyfile, int by);
+    void provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed);
+    void askedFingerAnswered(int result, const QByteArray& secret);
+    void wipeProof();
+    void updateAskWait();
+    QString askedFor;
+    bool askIsBusy = false;
+    bool askingFinger = false;
+    bool askNeedsKeyfile = false;
+    QString askText;
+    bool askIsTrouble = false;
+    int askWait = 0;
+    quint64 askAttempt = 0;
+    QTimer askWaitTimer;
+    VaultKey proofKey;
+    QByteArray proofKeyfile;
+    bool proofTyped = false;
+    bool openingByTyped = false;
     void wrongPasswordTyped();
     void rightPasswordGiven();
     void updateWait();

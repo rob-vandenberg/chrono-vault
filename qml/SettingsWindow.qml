@@ -17,14 +17,14 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Controls.impl
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.102
+// SettingsWindow.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.99: The "?" of a key in use is scaled once (D-069)
@@ -226,11 +226,14 @@ ApplicationWindow {
     signal openKnownRequested(string vaultFile)
     function openKnown(vaultFile) {
         problem = ""
-        if (!VaultController.opensAtOnce(vaultFile)) {
-            unlockFirst.ask(vaultFile, "open")
-            return
-        }
+        unlockFirst.ask(vaultFile, "open")
+    }
+    // With the kept key or password; then what it was opened for.
+    property string openingFor: ""
+    function openKept(vaultFile, what) {
+        problem = ""
         opening = vaultFile
+        openingFor = what
         VaultController.switchToVault(vaultFile)
         if (VaultController.vaultPath !== vaultFile) {
             opening = ""
@@ -244,8 +247,13 @@ ApplicationWindow {
         target: VaultController
         enabled: settingsWindow.opening !== ""
         function onStateChanged() {
-            if (VaultController.state === VaultController.Unlocked)
-                settingsWindow.opening = ""
+            if (VaultController.state !== VaultController.Unlocked)
+                return
+            settingsWindow.opening = ""
+            if (settingsWindow.openingFor === "import")
+                settingsWindow.importRequested()
+            else if (settingsWindow.openingFor === "export")
+                settingsWindow.exportRequested()
         }
         function onMessageChanged() {
             if (VaultController.state !== VaultController.Locked || VaultController.message === "")
@@ -1081,19 +1089,14 @@ ApplicationWindow {
                                                 ToolTip.text: qsTr("Primary vault")
                                             }
                                             // Open or locked, seen by shape and color (the owner, D-071).
-                                            ColorImage {
+                                            Padlock {
                                                 objectName: "padlock_" + vaultRow.name
-                                                readonly property bool open: vaultRow.unlocked
+                                                open: vaultRow.unlocked
+                                                paper: settingsWindow.palette.window
+                                                ink: settingsWindow.palette.windowText
                                                 visible: vaultRow.found
-                                                source: open ? "qrc:/icons/lock-open.svg" : "qrc:/icons/lock.svg"
-                                                color: open ? (settingsWindow.palette.window.hslLightness < 0.5 ? "#66bb6a" : "#2e7d32")
-                                                            : Qt.tint(settingsWindow.palette.window, Qt.alpha(settingsWindow.palette.windowText, 0.6))
-                                                sourceSize: Qt.size(Math.round((open ? 22.5 : 18) * Appearance.factor), Math.round(18 * Appearance.factor))
-                                                Layout.preferredWidth: Math.round((open ? 22.5 : 18) * Appearance.factor)
+                                                Layout.preferredWidth: Math.round(wide)
                                                 Layout.preferredHeight: Math.round(18 * Appearance.factor)
-                                                HoverHandler { id: overPadlock }
-                                                ToolTip.visible: overPadlock.hovered
-                                                ToolTip.text: open ? qsTr("Open") : qsTr("Locked")
                                             }
                                             Item { Layout.fillWidth: true }
                                         }
@@ -1198,35 +1201,30 @@ ApplicationWindow {
                         }
                         // Import… and Export… work on the vault that is unlocked: another
                         // vault is unlocked first with its master password (D-060).
-                        DialogWindow {
+                        AskWindow {
                             id: unlockFirst
                             objectName: "unlockFirstWindow"
-                            memoryName: "unlockFirst"
                             transientParent: settingsWindow
-                            property string vaultFile: ""
+                            withList: true
+                            pinAllowed: true
                             property string action: ""
-                            property bool waiting: false
-                            property string problem: ""
-                            // Asked each time, not a binding: at a change of state a binding may not
-                            // have followed yet, and the window would wait for ever.
-                            function ready() {
-                                return VaultController.vaultPath === vaultFile && VaultController.state === VaultController.Unlocked
+                            function ready(file) {
+                                return VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked
                             }
+                            // A vault that needs no password: done at once, without asking.
                             function ask(file, what) {
-                                vaultFile = file
                                 action = what
-                                problem = ""
-                                waiting = false
-                                if (ready()) {
-                                    go()
-                                    return
+                                if (ready(file)) {
+                                    goOn()
+                                } else if (VaultController.opensAtOnce(file)) {
+                                    if (visible)
+                                        reject()
+                                    settingsWindow.openKept(file, what)
+                                } else {
+                                    askVault(file)
                                 }
-                                unlockFirstPassword.clear()
-                                open()
-                                unlockFirstPassword.forceActiveFocus()
                             }
-                            function go() {
-                                waiting = false
+                            function goOn() {
                                 if (visible)
                                     accept()
                                 if (action === "import")
@@ -1234,71 +1232,33 @@ ApplicationWindow {
                                 else if (action === "export")
                                     settingsWindow.exportRequested()
                             }
-                            function unlockNow() {
-                                if (unlockFirstPassword.text === "" || waiting)
-                                    return
-                                problem = ""
-                                waiting = true
-                                if (VaultController.vaultPath !== vaultFile)
-                                    VaultController.switchToVault(vaultFile)
-                                if (ready()) {
-                                    go() // opened with the password saved in the primary
-                                    return
-                                }
-                                if (VaultController.vaultPath !== vaultFile) {
-                                    waiting = false
-                                    problem = VaultController.message
-                                    return
-                                }
-                                if (VaultController.state === VaultController.Locked)
-                                    VaultController.unlock(unlockFirstPassword.text)
-                                unlockFirstPassword.clear()
+                            onPicked: function(file) { ask(file, action) }
+                            // Right: the vault is opened with it, and only now the other one closes.
+                            property string opened: ""
+                            onRight: function(file) {
+                                opened = file
+                                if (!VaultController.openProven())
+                                    opened = ""
+                                else if (ready(file))
+                                    finish()
                             }
-                            title: qsTr("Unlock the vault")
-                            standardButtons: Dialog.Cancel
-                            onRejected: { waiting = false; unlockFirstPassword.clear() }
-                            rightButtons: Button {
-                                objectName: "unlockFirstButton"
-                                text: qsTr("Unlock")
-                                enabled: !unlockFirst.waiting && unlockFirstPassword.text !== ""
-                                highlighted: true
-                                onClicked: unlockFirst.unlockNow()
+                            function finish() {
+                                opened = ""
+                                goOn()
                             }
                             Connections {
                                 target: VaultController
+                                enabled: unlockFirst.opened !== ""
                                 function onStateChanged() {
-                                    if (!unlockFirst.waiting)
-                                        return
-                                    if (unlockFirst.ready()) {
-                                        unlockFirst.go()
-                                    } else if (VaultController.state === VaultController.Locked) {
-                                        unlockFirst.waiting = false
+                                    if (unlockFirst.ready(unlockFirst.opened))
+                                        unlockFirst.finish()
+                                }
+                                function onMessageChanged() {
+                                    if (unlockFirst.opened !== "" && VaultController.state === VaultController.Locked
+                                            && VaultController.message !== "") {
                                         unlockFirst.problem = VaultController.message
+                                        unlockFirst.opened = ""
                                     }
-                                }
-                            }
-                            ExactColumn {
-                                gap: 8 * Appearance.factor
-                                Layout.preferredWidth: 400 * Appearance.factor
-                                Layout.fillWidth: true
-                                Label {
-                                    text: qsTr("Enter the master password of “%1”. It is then the vault shown.").arg(VaultController.vaultNameOf(unlockFirst.vaultFile))
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
-                                }
-                                PasswordField {
-                                    id: unlockFirstPassword
-                                    objectName: "unlockFirstPassword"
-                                    Layout.fillWidth: true
-                                    onAccepted: unlockFirst.unlockNow()
-                                }
-                                Label {
-                                    objectName: "unlockFirstProblem"
-                                    visible: unlockFirst.problem !== ""
-                                    text: unlockFirst.problem
-                                    color: "#e53e3e"
-                                    wrapMode: Text.Wrap
-                                    Layout.fillWidth: true
                                 }
                             }
                         }

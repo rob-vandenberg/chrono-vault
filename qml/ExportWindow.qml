@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.6.92
+// ExportWindow.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
@@ -41,44 +42,54 @@ DialogWindow {
     standardButtons: Dialog.Ok | Dialog.Cancel
 
     function ask() {
-        passwordField.clear()
         busy = false
         problem = ""
         open()
-        passwordField.forceActiveFocus()
     }
 
     // Set once the button exists; a binding to it made earlier never took hold.
     Component.onCompleted: {
         exportWindow.standardButton(Dialog.Ok).text = qsTr("Export…")
-        exportWindow.standardButton(Dialog.Ok).enabled = Qt.binding(function() { return passwordField.text !== "" && !exportWindow.busy })
+        exportWindow.standardButton(Dialog.Ok).enabled = Qt.binding(function() { return !exportWindow.busy })
     }
 
-    // Export… chooses where; the window stays open until it is written.
+    // Export… asks for the master password, or the finger, and then where; the
+    // window stays open until it is written.
     onAccepted: {
         open()
-        saveDialog.selectedFile = saveDialog.currentFolder + "/" + encodeURIComponent(VaultController.vaultName + ".json")
-        saveDialog.open()
+        problem = ""
+        askWindow.askVault(VaultController.vaultPath)
     }
-    onRejected: passwordField.clear()
 
     Connections {
         target: VaultController
         function onExportDone(ok) {
             exportWindow.busy = false
+            if (askWindow.visible)
+                askWindow.accept()
             // Said here too, not only in the main window behind this one.
             exportWindow.problem = ok ? "" : VaultController.message
             if (ok) {
-                passwordField.clear()
                 exportWindow.answered = true
                 exportWindow.hide()
             }
         }
         function onLocking() {
-            if (exportWindow.visible) {
-                passwordField.clear()
+            if (askWindow.visible)
+                askWindow.reject()
+            if (exportWindow.visible)
                 exportWindow.reject()
-            }
+        }
+    }
+
+    AskWindow {
+        id: askWindow
+        objectName: "exportAskWindow"
+        transientParent: exportWindow
+        title: exportWindow.title
+        onRight: {
+            saveDialog.selectedFile = saveDialog.currentFolder + "/" + encodeURIComponent(VaultController.vaultName + ".json")
+            saveDialog.open()
         }
     }
 
@@ -91,16 +102,6 @@ DialogWindow {
             font.bold: true
             wrapMode: Text.Wrap
             Layout.fillWidth: true
-        }
-        Label {
-            text: qsTr("The master password of this vault:")
-        }
-        PasswordField {
-            id: passwordField
-            objectName: "exportPasswordField"
-            placeholderText: qsTr("Master password")
-            Layout.fillWidth: true
-            onAccepted: if (text !== "") exportWindow.accept()
         }
         Label {
             objectName: "exportProblem"
@@ -116,14 +117,15 @@ DialogWindow {
         id: saveDialog
         memoryName: "ExportWindow.saveDialog"
         objectName: "exportSaveDialog"
-        parentWindow: exportWindow
+        parentWindow: askWindow
         title: qsTr("Where should the export be saved?")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "json"
         nameFilters: [qsTr("JSON exports (*.json)")]
         onAccepted: {
             exportWindow.busy = true
-            VaultController.exportVault(selectedFile, passwordField.text)
+            VaultController.exportProven(selectedFile)
         }
+        onRejected: askWindow.reject()
     }
 }

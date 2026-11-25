@@ -24,9 +24,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_items.cpp 0.5.77
+// test_items.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.5.77: An export imported again passes over the same items (D-060)
 // v0.1.41: Tests of the Notes box, the arrow keys, the cards, the switch and the field types (D-051)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -326,13 +327,19 @@ void TestItems::the_vault_is_exported_only_with_its_master_password()
     const QString target = folder->filePath(QStringLiteral("export.json"));
     QSignalSpy done(controller.get(), &VaultController::exportDone);
 
-    controller->exportVault(QUrl::fromLocalFile(target), QStringLiteral("wrong"));
-    QTRY_COMPARE(done.size(), 1);
+    // Nothing proven, or a wrong password: nothing is written.
+    QSignalSpy proven(controller.get(), &VaultController::proven);
+    controller->askFor(controller->vaultPath());
+    controller->proveWithPassword(QStringLiteral("wrong"));
+    QTRY_VERIFY(controller->askTrouble());
+    controller->exportProven(QUrl::fromLocalFile(target));
+    QCOMPARE(done.size(), 1);
     QVERIFY(!done.last().first().toBool());
     QVERIFY(!QFile::exists(target));
-    QVERIFY(controller->messageIsTrouble());
 
-    controller->exportVault(QUrl::fromLocalFile(target), QStringLiteral("pass"));
+    controller->proveWithPassword(QStringLiteral("pass"));
+    QTRY_COMPARE(proven.size(), 1);
+    controller->exportProven(QUrl::fromLocalFile(target));
     QTRY_COMPARE(done.size(), 2);
     QVERIFY(done.last().first().toBool());
 #ifndef Q_OS_WIN
@@ -347,11 +354,15 @@ void TestItems::the_vault_is_exported_only_with_its_master_password()
     QCOMPARE(back.items.constFirst().title, QStringLiteral("Mail"));
 
     // A folder that cannot be written to is said, and nothing is left.
-    controller->exportVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("no/such/folder/e.json"))),
-                            QStringLiteral("pass"));
+    controller->exportProven(QUrl::fromLocalFile(folder->filePath(QStringLiteral("no/such/folder/e.json"))));
     QTRY_COMPARE(done.size(), 3);
     QVERIFY(!done.last().first().toBool());
     QVERIFY(controller->messageIsTrouble());
+    // The dialog closed: what was proven is gone.
+    controller->stopAsking();
+    controller->exportProven(QUrl::fromLocalFile(folder->filePath(QStringLiteral("later.json"))));
+    QCOMPARE(done.size(), 4);
+    QVERIFY(!done.last().first().toBool());
 }
 
 QTEST_MAIN(TestItems)

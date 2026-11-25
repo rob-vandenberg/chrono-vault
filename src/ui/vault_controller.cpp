@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.6.100
+// vault_controller.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.86: The audit (D-065)
 // v0.5.83: setCategoryOf (D-063)
@@ -315,33 +316,6 @@ bool isUnder(const QString& tag, const QString& top)
     return tag == top || tag.startsWith(top + QLatin1Char('/'));
 }
 
-QString openStatusText(OpenStatus status)
-{
-    switch (status) {
-    case OpenStatus::Opened: return {};
-    case OpenStatus::FileMissing:
-        return QCoreApplication::translate("VaultController", "The vault file is no longer where it was.");
-    case OpenStatus::CannotRead:
-        return QCoreApplication::translate("VaultController", "The vault file could not be read.");
-    case OpenStatus::NotAVault:
-        return QCoreApplication::translate("VaultController", "This file is not a Chrono Vault vault.");
-    case OpenStatus::NewerFormat:
-        return QCoreApplication::translate("VaultController",
-                                           "This vault was made by a newer Chrono Vault. Update Chrono Vault to open it.");
-    case OpenStatus::WrongPasswordOrDamaged:
-        return QCoreApplication::translate("VaultController", "That password does not open this vault.");
-    case OpenStatus::TooLarge:
-        return QCoreApplication::translate("VaultController", "This file is too large to be a vault.");
-    case OpenStatus::KeyChanged:
-        return QCoreApplication::translate("VaultController",
-                                           "This vault now has another master password. Unlock it with that one.");
-    case OpenStatus::KeyfileNeeded:
-        return QCoreApplication::translate("VaultController",
-                                           "This vault also needs its keyfile. Choose it below, then unlock.");
-    }
-    return {};
-}
-
 QString saveStatusText(SaveStatus status)
 {
     switch (status) {
@@ -418,6 +392,8 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
     activity->askIdleTime();
     // The wait after wrong master passwords counts down each second (D-041).
     waitTimer.setInterval(1000);
+    askWaitTimer.setInterval(1000);
+    connect(&askWaitTimer, &QTimer::timeout, this, &VaultController::updateAskWait);
     connect(&waitTimer, &QTimer::timeout, this, &VaultController::updateWait);
     systemIdleTimer.setInterval(30 * 1000);
     connect(&systemIdleTimer, &QTimer::timeout, this, &VaultController::checkSystemIdle);
@@ -564,11 +540,39 @@ void VaultController::vaultsChecked(const QStringList& checked, QStringList foun
     emit vaultsFoundChanged();
 }
 
+QString VaultController::openStatusText(OpenStatus status)
+{
+    switch (status) {
+    case OpenStatus::Opened: return {};
+    case OpenStatus::FileMissing:
+        return QCoreApplication::translate("VaultController", "The vault file is no longer where it was.");
+    case OpenStatus::CannotRead:
+        return QCoreApplication::translate("VaultController", "The vault file could not be read.");
+    case OpenStatus::NotAVault:
+        return QCoreApplication::translate("VaultController", "This file is not a Chrono Vault vault.");
+    case OpenStatus::NewerFormat:
+        return QCoreApplication::translate("VaultController",
+                                           "This vault was made by a newer Chrono Vault. Update Chrono Vault to open it.");
+    case OpenStatus::WrongPasswordOrDamaged:
+        return QCoreApplication::translate("VaultController", "That password does not open this vault.");
+    case OpenStatus::TooLarge:
+        return QCoreApplication::translate("VaultController", "This file is too large to be a vault.");
+    case OpenStatus::KeyChanged:
+        return QCoreApplication::translate("VaultController",
+                                           "This vault now has another master password. Unlock it with that one.");
+    case OpenStatus::KeyfileNeeded:
+        return QCoreApplication::translate("VaultController",
+                                           "This vault also needs its keyfile. Choose it below, then unlock.");
+    }
+    return {};
+}
+
 VaultController::~VaultController()
 {
     savePool.waitForDone();
     unlockPool.waitForDone();
     filePool.waitForDone();
+    wipeProof();
     forgetUnlockedVault();
     forgetPrimary();
 }
@@ -933,41 +937,51 @@ QString waitKeyOf(const QString& vaultFile)
 }
 } // namespace
 
-QString VaultController::waitKey() const
-{
-    return waitKeyOf(path);
-}
-
-void VaultController::wrongPasswordTyped()
+void VaultController::countWrongPassword(const QString& vaultFile)
 {
     VaultsFile settings;
-    const QString keyPrefix = waitKey();
+    const QString keyPrefix = waitKeyOf(vaultFile);
     const int wrong = settings.value(keyPrefix + QStringLiteral("/count"), 0).toInt() + 1;
     const int wait = waitBeforeAttempt(wrong + 1);
     settings.setValue(keyPrefix + QStringLiteral("/count"), wrong);
     settings.setValue(keyPrefix + QStringLiteral("/until"), nowMs() + qint64(wait) * 1000);
     settings.setValue(keyPrefix + QStringLiteral("/wait"), wait);
+}
+
+int VaultController::waitLeft(const QString& vaultFile) const
+{
+    if (vaultFile.isEmpty()) {
+        return 0;
+    }
+    VaultsFile settings;
+    const QString keyPrefix = waitKeyOf(vaultFile);
+    const qint64 until = settings.value(keyPrefix + QStringLiteral("/until"), 0).toLongLong();
+    const qint64 wait = settings.value(keyPrefix + QStringLiteral("/wait"), 0).toLongLong();
+    // A clock set back never makes the wait longer than the wait itself.
+    const qint64 remainingMs = std::min(until - nowMs(), wait * 1000);
+    return remainingMs > 0 ? static_cast<int>((remainingMs + 999) / 1000) : 0;
+}
+
+void VaultController::forgetWrongPasswords(const QString& vaultFile)
+{
+    VaultsFile().remove(waitKeyOf(vaultFile));
+}
+
+void VaultController::wrongPasswordTyped()
+{
+    countWrongPassword(path);
     updateWait();
 }
 
 void VaultController::rightPasswordGiven()
 {
-    VaultsFile().remove(waitKey());
+    forgetWrongPasswords(path);
     updateWait();
 }
 
 void VaultController::updateWait()
 {
-    int left = 0;
-    if (!path.isEmpty()) {
-        VaultsFile settings;
-        const QString keyPrefix = waitKey();
-        const qint64 until = settings.value(keyPrefix + QStringLiteral("/until"), 0).toLongLong();
-        const qint64 wait = settings.value(keyPrefix + QStringLiteral("/wait"), 0).toLongLong();
-        // A clock set back never makes the wait longer than the wait itself.
-        const qint64 remainingMs = std::min(until - nowMs(), wait * 1000);
-        left = remainingMs > 0 ? static_cast<int>((remainingMs + 999) / 1000) : 0;
-    }
+    const int left = waitLeft(path);
     if (left > 0) {
         if (!waitTimer.isActive()) {
             waitTimer.start();
@@ -1095,9 +1109,10 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
     // later one never takes it over.
     const bool byFinger = std::exchange(openingByFinger, false);
     const bool byPin = std::exchange(openingByPin, false);
+    const bool byTyped = std::exchange(openingByTyped, false);
     QPointer<VaultController> self(this);
     // On the save thread: after any write to this vault still running.
-    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint, byFinger, byPin]() mutable {
+    (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, attempt, fingerprint, byFinger, byPin, byTyped]() mutable {
         OpenResult result = openVaultFileWithKey(vaultFile, kept);
         ContentsResult read;
         if (result.status == OpenStatus::Opened) {
@@ -1106,7 +1121,7 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
         }
         QMetaObject::invokeMethod(
             qApp,
-            [self, result, read, attempt, fingerprint, byFinger, byPin]() mutable {
+            [self, result, read, attempt, fingerprint, byFinger, byPin, byTyped]() mutable {
                 if (!self || attempt != self->unlockAttempt) {
                     result.key.wipe();
                     return;
@@ -1149,7 +1164,13 @@ void VaultController::startOpenWithKey(const VaultKey& kept)
                     return;
                 }
                 self->unlockedStamp = result.stamp;
+                if (byTyped) {
+                    self->recordMasterPassword(); // typed in the standard dialog (D-073)
+                }
                 self->unlocked(result.key, read.contents, fingerprint);
+                if (byTyped) {
+                    self->keepForThisVault();
+                }
             },
             Qt::QueuedConnection);
     });
@@ -1858,14 +1879,18 @@ void VaultController::fetchWebsiteIcons()
 void VaultController::connectQuickUnlock()
 {
     connect(quick.get(), &QuickUnlock::fingerReady, this, [this]() {
-        if (settingUp) {
+        if (askingFinger) {
+            tellAsked(quick->touchPrompt(), false);
+        } else if (settingUp) {
             tellSetup(quick->touchPrompt(), false);
         } else if (retrieving && currentState == State::Locked) {
             say(quick->touchPrompt(), false);
         }
     });
     connect(quick.get(), &QuickUnlock::notRecognized, this, [this]() {
-        if (settingUp) {
+        if (askingFinger) {
+            tellAsked(tr("Not recognized. Try again."), true);
+        } else if (settingUp) {
             tellSetup(tr("Not recognized. Try again."), true);
         } else if (retrieving && currentState == State::Locked) {
             say(tr("Not recognized. Try again."), true);
@@ -1918,6 +1943,10 @@ void VaultController::connectQuickUnlock()
     });
     connect(quick.get(), &QuickUnlock::retrieved, this, [this](QuickUnlock::Result result, const QByteArray& secret) {
         fingerLog(QStringLiteral("unlock: answer %1").arg(int(result)));
+        if (std::exchange(askingFinger, false)) {
+            askedFingerAnswered(int(result), secret); // the standard dialog's (D-073)
+            return;
+        }
         retrieving = false;
         if (currentState != State::Locked) {
             return;
@@ -2058,10 +2087,15 @@ void VaultController::recordMasterPasswordIfNone()
 bool VaultController::reminderDue() const
 {
     // Due only where a finger or the PIN would otherwise open it (D-059).
-    if (reminderEvery >= reminderNever || (!quickUnlockOn() && !pinCanOpen())) {
+    return reminderDueFor(path, quickUnlockOn() || pinCanOpen());
+}
+
+bool VaultController::reminderDueFor(const QString& vaultFile, bool easier) const
+{
+    if (reminderEvery >= reminderNever || !easier) {
         return false;
     }
-    const QDateTime last = VaultsFile().value(lastPasswordKey).toMap().value(path).toDateTime();
+    const QDateTime last = VaultsFile().value(lastPasswordKey).toMap().value(vaultFile).toDateTime();
     if (!last.isValid()) {
         return false;
     }
@@ -3031,70 +3065,6 @@ void VaultController::makeKeyfile(const QUrl& file)
                               true);
                 }
                 emit self->keyfileMade(target, made);
-            },
-            Qt::QueuedConnection);
-    });
-}
-
-void VaultController::exportVault(const QUrl& file, const QString& password)
-{
-    const QString target = file.isLocalFile() ? file.toLocalFile() : file.toString();
-    if (currentState != State::Unlocked || target.isEmpty()) {
-        emit exportDone(false);
-        return;
-    }
-    QByteArray typed = password.toUtf8();
-    const QByteArray secret = keyfileSecret;
-    const VaultKey current = key;
-    const VaultContents snapshot = contents;
-    const quint64 session = vaultSession;
-    say(tr("Exporting…"), false);
-    QPointer<VaultController> self(this);
-    (void)QtConcurrent::run(&filePool, [self, target, typed, secret, current, snapshot, session]() mutable {
-        enum class Outcome { Written, WrongPassword, CannotWrite };
-        Outcome outcome = Outcome::CannotWrite;
-        // The master password checked as the vault itself would (D-037).
-        QByteArray checked = current.usesKeyfile ? typed + secret : typed;
-        const auto derived = crypto::deriveKey(checked, current.salt, current.parameters);
-        crypto::wipe(checked);
-        crypto::wipe(typed);
-        if (!derived || *derived != current.key) {
-            outcome = Outcome::WrongPassword;
-        } else {
-            QByteArray json = writeReferenceExport(snapshot);
-            QSaveFile output(target);
-            // Readable by the person alone: it holds every password unencrypted.
-            outcome = output.open(QIODevice::WriteOnly) &&
-                              output.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) &&
-                              output.write(json) == json.size() && output.commit()
-                          ? Outcome::Written
-                          : Outcome::CannotWrite;
-            crypto::wipe(json);
-        }
-        QMetaObject::invokeMethod(
-            qApp,
-            [self, outcome, target, session]() {
-                if (!self || session != self->vaultSession) {
-                    return;
-                }
-                switch (outcome) {
-                case Outcome::Written:
-                    self->say(tr("Exported to “%1”. It holds every password unencrypted: keep it safe and delete it "
-                                 "when done.")
-                                  .arg(QFileInfo(target).fileName()),
-                              false);
-                    emit self->exportDone(true);
-                    return;
-                case Outcome::WrongPassword:
-                    self->say(tr("That is not the master password. Nothing was exported."), true);
-                    break;
-                case Outcome::CannotWrite:
-                    self->say(tr("The export could not be written: the folder cannot be written to, or the disk is "
-                                 "full."),
-                              true);
-                    break;
-                }
-                emit self->exportDone(false);
             },
             Qt::QueuedConnection);
     });

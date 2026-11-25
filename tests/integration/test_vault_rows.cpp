@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.102
+// test_vault_rows.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Initial release (D-071)
@@ -177,13 +178,16 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), second), "triggered"));
         QQuickWindow* ask = settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"));
         QTRY_VERIFY(ask->isVisible());
-        QObject* password = ask->findChild<QObject*>(QStringLiteral("unlockFirstPassword"));
+        QObject* password = ask->findChild<QObject*>(QStringLiteral("askField"));
         password->setProperty("text", QStringLiteral("wrong"));
-        QMetaObject::invokeMethod(ask, "unlockNow");
-        QTRY_VERIFY(!ask->property("problem").toString().isEmpty());
+        QMetaObject::invokeMethod(ask, "go");
+        QTRY_VERIFY(!ask->property("said").toString().isEmpty());
         QVERIFY(ask->isVisible() && !opened(second));
+        // In the look of the start-up page (D-073), its list with every vault.
+        QCOMPARE(ask->width(), 534);
+        QVERIFY(ask->findChild<QObject*>(QStringLiteral("askVaultBox"))->property("isList").toBool());
         password->setProperty("text", QStringLiteral("two"));
-        QMetaObject::invokeMethod(ask, "unlockNow");
+        QMetaObject::invokeMethod(ask, "go");
         QTRY_VERIFY(!ask->isVisible());
         QTRY_VERIFY(opened(second));
         QVERIFY(!opened(first));

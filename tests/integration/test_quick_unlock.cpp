@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.0.39
+// test_quick_unlock.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.74: A lost key turns the setting off
 // v0.0.39: Tests of the settings tidied, the scroll bars and Esc in the About box (D-049)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -95,6 +96,8 @@ private slots:
     void a_new_master_password_is_kept_for_the_finger();
     void a_new_key_not_kept_says_so_and_turns_it_off();
     void the_master_password_is_asked_once_a_year();
+    void the_standard_dialog_asks_the_finger_for_any_vault();
+    void the_standard_dialog_waits_and_asks_the_keyfile();
     void a_master_password_changed_elsewhere_turns_it_off_and_says_so();
 
 private:
@@ -238,6 +241,105 @@ void TestQuickUnlock::a_new_key_not_kept_says_so_and_turns_it_off()
     QTRY_VERIFY(!controller->quickUnlockOn());
     QVERIFY(controller->messageIsTrouble());
     QVERIFY(controller->message().contains(QStringLiteral("Settings")));
+}
+
+// The standard dialog (D-073): the vault that is open stays open until the
+// other one is opened with what was proven.
+void TestQuickUnlock::the_standard_dialog_asks_the_finger_for_any_vault()
+{
+    StandIn* standIn = nullptr;
+    auto controller = unlocked(standIn);
+    QVERIFY(controller);
+    const QString first = controller->vaultPath();
+    controller->setQuickUnlock(true);
+    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+    controller->setQuickUnlock(true);
+    QVERIFY(standIn->kept.contains(first) && standIn->kept.contains(second));
+    controller->lock();
+    controller->unlock(QStringLiteral("two"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    QSignalSpy proven(controller.get(), &VaultController::proven);
+    // Cancelled: the one open is still open, and nothing was proven.
+    standIn->next = QuickUnlock::Result::Cancelled;
+    controller->askFor(first);
+    QVERIFY(controller->askFingerOn());
+    controller->proveWithFinger();
+    QVERIFY(!controller->openProven());
+    controller->stopAsking();
+    QCOMPARE(proven.size(), 0);
+    QVERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+    // A wrong password: the same.
+    controller->askFor(first);
+    controller->proveWithPassword(QStringLiteral("wrong"));
+    QTRY_VERIFY(controller->askTrouble());
+    QVERIFY(!controller->openProven());
+    QVERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+    // The finger: proven, and opened only when that is asked.
+    standIn->next = QuickUnlock::Result::Done;
+    controller->askFor(first);
+    controller->proveWithFinger();
+    QTRY_COMPARE(proven.size(), 1);
+    QVERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+    QVERIFY(controller->openProven());
+    controller->stopAsking();
+    QTRY_VERIFY(controller->vaultPath() == first && controller->state() == State::Unlocked);
+    // Enough for an export.
+    QSignalSpy done(controller.get(), &VaultController::exportDone);
+    controller->askFor(first);
+    controller->proveWithFinger();
+    QTRY_COMPARE(proven.size(), 2);
+    controller->exportProven(QUrl::fromLocalFile(folder->filePath(QStringLiteral("out.json"))));
+    QTRY_COMPARE(done.size(), 1);
+    QVERIFY(done.last().first().toBool());
+    // The master password due again: no finger.
+    VaultsFile settings;
+    QVariantMap times = settings.value(QStringLiteral("security/lastMasterPassword")).toMap();
+    times.insert(second, QDateTime::currentDateTimeUtc().addDays(-400));
+    settings.setValue(QStringLiteral("security/lastMasterPassword"), times);
+    controller->askFor(second);
+    QVERIFY(!controller->askFingerOn());
+    controller->stopAsking();
+}
+
+void TestQuickUnlock::the_standard_dialog_waits_and_asks_the_keyfile()
+{
+    StandIn* standIn = nullptr;
+    auto controller = unlocked(standIn);
+    QVERIFY(controller);
+    const QString keyfile = folder->filePath(QStringLiteral("key"));
+    QFile made(keyfile);
+    QVERIFY(made.open(QIODevice::WriteOnly) && made.write(QByteArray(64, 'k')) == 64);
+    made.close();
+    const QString first = controller->vaultPath();
+    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"),
+                            QUrl::fromLocalFile(keyfile));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+    controller->lock();
+    // Its keyfile not known on this computer.
+    controller->askFor(second);
+    controller->setAskKeyfile(QUrl());
+    QVERIFY(!controller->askKeyfileNeeded());
+    controller->proveWithPassword(QStringLiteral("two"));
+    QTRY_VERIFY(controller->askKeyfileNeeded() && controller->askTrouble());
+    controller->setAskKeyfile(QUrl::fromLocalFile(keyfile));
+    QSignalSpy proven(controller.get(), &VaultController::proven);
+    controller->proveWithPassword(QStringLiteral("two"));
+    QTRY_COMPARE(proven.size(), 1);
+    // Wrong passwords: the waits of D-041, for the vault asked for.
+    controller->askFor(first);
+    for (int wrong = 0; wrong < 3; ++wrong) {
+        controller->proveWithPassword(QStringLiteral("no"));
+        QTRY_VERIFY(!controller->askBusy());
+    }
+    QVERIFY(controller->askWaitSeconds() > 0);
+    controller->proveWithPassword(QStringLiteral("pass"));
+    QVERIFY(!controller->askBusy()); // not tried while waiting
+    QCOMPARE(controller->unlockWaitSeconds(), 0); // the one shown does not wait
+    controller->stopAsking();
 }
 
 void TestQuickUnlock::the_master_password_is_asked_once_a_year()

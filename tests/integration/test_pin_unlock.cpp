@@ -16,9 +16,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 // --- Version ------------------------------------------------------------
-// test_pin_unlock.cpp 0.4.70
+// test_pin_unlock.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.71: The PIN page shows only the logo, its line, the field and the link
 // v0.4.70: Initial release (D-059)
 
@@ -61,6 +62,7 @@ private slots:
     void the_reminder_asks_the_master_password_instead();
     void a_changed_master_password_keeps_the_pin();
     void the_settings_and_the_unlock_page_offer_the_pin();
+    void the_standard_dialog_takes_the_pin_of_another_vault();
 
 private:
     // A vault made and left unlocked; its file.
@@ -100,6 +102,27 @@ void TestPinUnlock::cleanup()
     VaultsFile().clear();
     delete folder;
     folder = nullptr;
+}
+
+// The standard dialog (D-073).
+void TestPinUnlock::the_standard_dialog_takes_the_pin_of_another_vault()
+{
+    VaultController controller;
+    const QString first = unlockedVault(controller, QStringLiteral("first"));
+    QVERIFY(!first.isEmpty() && pinSetTo(controller, QStringLiteral("2468")));
+    const QString second = unlockedVault(controller, QStringLiteral("second"));
+    QVERIFY(!second.isEmpty());
+    controller.askFor(first);
+    QVERIFY(controller.askPinReady());
+    controller.proveWithPin(QStringLiteral("1111"));
+    QTRY_VERIFY(controller.askTrouble() && !controller.askBusy());
+    QCOMPARE(controller.vaultPath(), second);
+    QSignalSpy proven(&controller, &VaultController::proven);
+    controller.proveWithPin(QStringLiteral("2468"));
+    QTRY_COMPARE(proven.size(), 1);
+    QVERIFY(controller.openProven());
+    controller.stopAsking();
+    QTRY_VERIFY(controller.vaultPath() == first && controller.state() == State::Unlocked);
 }
 
 QString TestPinUnlock::unlockedVault(VaultController& controller, const QString& name)

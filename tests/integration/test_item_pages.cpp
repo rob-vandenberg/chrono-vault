@@ -41,9 +41,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// test_item_pages.cpp 0.5.78.3
+// test_item_pages.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.5.78.3: The export's chooser over the open import window
 // v0.5.77: Import… asks first where from (D-060)
 // v0.5.76: The item's conflict settled in the Sync conflicts dialog (D-060)
@@ -422,9 +423,20 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
     auto* exportButton = buttonValue.value<QObject*>();
     QVERIFY(exportButton);
     QCOMPARE(exportButton->property("text").toString(), QStringLiteral("Export…"));
-    QVERIFY(!exportButton->property("enabled").toBool());
-    exportWindow->findChild<QObject*>(QStringLiteral("exportPasswordField"))->setProperty("text", QStringLiteral("a"));
     QVERIFY(exportButton->property("enabled").toBool());
+    // Export… asks the master password in the standard dialog (D-073).
+    QObject* askWindow = exportWindow->findChild<QObject*>(QStringLiteral("exportAskWindow"));
+    QVERIFY(askWindow);
+    const auto prove = [&](const QString& password) {
+        QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+        QTRY_VERIFY(askWindow->property("visible").toBool());
+        askWindow->findChild<QObject*>(QStringLiteral("askField"))->setProperty("text", password);
+        QVERIFY(QMetaObject::invokeMethod(askWindow, "go"));
+    };
+    prove(QStringLiteral("wrong"));
+    QTRY_VERIFY(!askWindow->property("said").toString().isEmpty());
+    QVERIFY(askWindow->property("visible").toBool());
+    QMetaObject::invokeMethod(askWindow, "reject");
     // Export… chooses where, the window staying open.
     bool chosen = false;
     bool stillOpen = false;
@@ -433,7 +445,7 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
         stillOpen = exportWindow->property("opened").toBool();
         dialog->reject();
     });
-    QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    prove(QStringLiteral("a"));
     QTRY_VERIFY(chosen);
     QVERIFY(stillOpen);
 
@@ -449,7 +461,7 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
         name->setText(QFileInfo(target).fileName());
         static_cast<QDialog*>(dialog)->accept();
     });
-    QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    prove(QStringLiteral("a"));
     QTRY_VERIFY(QFile::exists(target));
     QObject* saveDialog = exportWindow->findChild<QObject*>(QStringLiteral("exportSaveDialog"));
     QVERIFY(saveDialog);
@@ -457,7 +469,6 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
 
     // A lock while the dialog is open closes it as Cancel: nothing is written.
     QTRY_VERIFY(!exportWindow->property("busy").toBool());
-    exportWindow->findChild<QObject*>(QStringLiteral("exportPasswordField"))->setProperty("text", QStringLiteral("a"));
     const QString second = folder.filePath(QStringLiteral("exports/second.json"));
     bool closedByLock = false;
     answerNextFileDialog([&](QFileDialog* dialog) {
@@ -468,7 +479,7 @@ void TestItemPages::the_export_window_asks_the_master_password_first()
         controller->lock();
         closedByLock = !dialog->isVisible();
     });
-    QVERIFY(QMetaObject::invokeMethod(exportWindow, "accept"));
+    prove(QStringLiteral("a"));
     QTRY_VERIFY(closedByLock);
     QVERIFY(QApplication::activeModalWidget() == nullptr);
     QVERIFY(!QFile::exists(second));

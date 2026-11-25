@@ -811,3 +811,9 @@ The owner's changelist items 1-7 (D-072). `style/Menu.qml`, `MenuItem.qml`, `Men
 ## 25 November 2026: version 0.6.102: Open's message, the cogwheel's tooltip
 
 `qml/SettingsWindow.qml`, `qml/Main.qml`; `tests/integration/test_vault_rows.cpp` (D-071).
+
+## 25 November 2026: version 0.6.103: the standard password dialog
+
+The owner's changelist items 1-13 (D-073). `src/ui/vault_controller_ask.cpp`, `qml/AskWindow.qml`, `qml/VaultBox.qml`,
+`qml/BigPasswordField.qml`, `qml/Padlock.qml` and the windows that asked by themselves; tests in `test_quick_unlock`,
+`test_pin_unlock`, `test_items`, `test_item_pages`, `test_vault_rows`, `test_dialog_keys`.

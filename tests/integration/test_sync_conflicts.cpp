@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_sync_conflicts.cpp 0.5.82
+// test_sync_conflicts.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.5.82: The program's own style; the free room at a button's sides
 // v0.5.81: Initial release (D-061)
 
@@ -418,8 +419,8 @@ private slots:
         auto* password = qobject_cast<QQuickWindow*>(window->findChild<QObject*>(QStringLiteral("retryPasswordWindow")));
         QVERIFY(password);
         QTRY_VERIFY(password->isVisible());
-        button(password, "retryPasswordField")->setProperty("text", QStringLiteral("pass"));
-        QVERIFY(QMetaObject::invokeMethod(password, "accept"));
+        button(password, "askField")->setProperty("text", QStringLiteral("pass"));
+        QVERIFY(QMetaObject::invokeMethod(password, "go"));
         QTRY_VERIFY(!button(list, "conflictsSaid")->property("text").toString().isEmpty());
         QTRY_VERIFY(controller->isIdle());
         QVERIFY(QMetaObject::invokeMethod(list, "reject"));

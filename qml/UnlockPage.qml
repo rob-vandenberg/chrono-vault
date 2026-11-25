@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.6.92
+// UnlockPage.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.90: The list of vaults on the background of every pop-up (D-067)
 // v0.5.82: Enter never throws a kept change away (D-062)
@@ -184,148 +185,20 @@ Item {
 
         // Every vault Chrono Vault knows, each with its own master password;
         // the one used last is chosen (the owner, D-058).
-        ComboBox {
+        VaultBox {
             id: vaultBox
             objectName: "unlockVaultBox"
             visible: !unlockPage.usePin
-            readonly property string other: "\u0001other"
             // Only the vaults found; the one used last also when it is not,
             // struck through (the owner, 0.3.65).
-            readonly property var listed: VaultController.foundVaults.concat(
+            listed: VaultController.foundVaults.concat(
                 VaultController.missingVault !== "" && VaultController.foundVaults.indexOf(VaultController.missingVault) < 0
                     ? [VaultController.missingVault] : [])
-            model: listed.concat([other])
-            currentIndex: listed.indexOf(VaultController.vaultPath)
-            font.pointSize: Appearance.fontPointSize * 1.4
+            shown: VaultController.vaultPath
+            withOther: true
+            withLastUsed: true
             Layout.fillWidth: true
             Layout.preferredHeight: 58 * Appearance.factor
-            function placeOf(vaultFile) {
-                const place = VaultController.vaultPlace(vaultFile)
-                if (!place.onWebDav)
-                    return qsTr("this computer")
-                const host = String(place.address).replace(/^[a-z]+:\/\//i, "").split("/")[0]
-                return host.toLowerCase().indexOf("pcloud") >= 0 ? qsTr("pCloud") : host
-            }
-            function iconOf(vaultFile) {
-                return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/storage-webdav.svg"
-                                                                       : "qrc:/icons/storage-device.svg"
-            }
-            contentItem: ExactRow {
-                gap: 8 * Appearance.factor
-                Item { Layout.preferredWidth: 6 * Appearance.factor }
-                Image {
-                    source: vaultBox.iconOf(VaultController.vaultPath)
-                    sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
-                    Layout.preferredWidth: Math.round(24 * Appearance.factor)
-                    Layout.preferredHeight: Math.round(24 * Appearance.factor)
-                }
-                Label {
-                    text: VaultController.vaultName
-                    textFormat: Text.PlainText
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-            }
-            // Rounded, as the owner's design.
-            background: Rectangle {
-                radius: Math.round(8 * Appearance.factor)
-                color: vaultBox.palette.base
-                border.color: vaultBox.activeFocus ? vaultBox.palette.highlight : vaultBox.palette.mid
-            }
-            // The list opens below the field, as big as it, in a rounded frame
-            // (the mockup the owner chose).
-            popup: Popup {
-                y: vaultBox.height + 4 * Appearance.factor
-                width: vaultBox.width
-                padding: 1
-                // Below the field always, scrolling when the room below is short.
-                implicitHeight: Math.min(contentItem.implicitHeight + 2,
-                                         unlockPage.height - vaultBox.mapToItem(unlockPage, 0, 0).y - vaultBox.height
-                                         - 12 * Appearance.factor)
-                margins: 0
-                background: Rectangle {
-                    radius: Math.round(8 * Appearance.factor)
-                    color: vaultBox.palette.button // as every pop-up (D-067)
-                    border.color: vaultBox.palette.mid
-                }
-                contentItem: ListView {
-                    clip: true
-                    ScrollIndicator.vertical: ScrollIndicator {}
-                    implicitHeight: contentHeight
-                    model: vaultBox.popup.visible ? vaultBox.delegateModel : null
-                    currentIndex: vaultBox.highlightedIndex
-                }
-            }
-            delegate: ItemDelegate {
-                id: vaultRow
-                required property string modelData
-                required property int index
-                readonly property bool isOther: modelData === vaultBox.other
-                readonly property bool missing: !isOther && VaultController.foundVaults.indexOf(modelData) < 0
-                objectName: isOther ? "openOrCreateAnother" : "unlockVault_" + VaultController.vaultNameOf(modelData)
-                width: vaultBox.width - 2
-                height: isOther ? 48 * Appearance.factor : 60 * Appearance.factor
-                font: vaultBox.font
-                highlighted: vaultBox.highlightedIndex === index && !missing
-                enabled: !missing
-                background: Rectangle {
-                    color: vaultRow.highlighted ? vaultBox.palette.highlight : "transparent"
-                    opacity: vaultRow.highlighted ? 0.5 : 1
-                    radius: Math.round(6 * Appearance.factor)
-                    // A line above "Open or create another vault…".
-                    Rectangle {
-                        visible: vaultRow.isOther
-                        anchors.top: parent.top
-                        width: parent.width
-                        height: 1
-                        color: vaultBox.palette.mid
-                    }
-                }
-                contentItem: ExactRow {
-                    gap: 10 * Appearance.factor
-                    Image {
-                        visible: !vaultRow.isOther
-                        source: vaultRow.isOther ? "" : vaultBox.iconOf(vaultRow.modelData)
-                        sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
-                        Layout.preferredWidth: Math.round(24 * Appearance.factor)
-                        Layout.preferredHeight: Math.round(24 * Appearance.factor)
-                    }
-                    Label {
-                        visible: vaultRow.isOther
-                        text: "+"
-                        font: vaultBox.font
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.preferredWidth: 24 * Appearance.factor
-                    }
-                    ExactColumn {
-                        gap: 0
-                        Layout.fillWidth: true
-                        Label {
-                            text: vaultRow.isOther ? qsTr("Open another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
-                            textFormat: Text.PlainText
-                            font.pointSize: vaultBox.font.pointSize
-                            font.strikeout: vaultRow.missing
-                            opacity: vaultRow.missing ? 0.45 : vaultRow.isOther ? 0.8 : 1
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                        }
-                        // Where it is kept, so two vaults of one name are told apart.
-                        Label {
-                            visible: !vaultRow.isOther
-                            text: vaultRow.isOther ? "" : vaultBox.placeOf(vaultRow.modelData)
-                            textFormat: Text.PlainText
-                            opacity: 0.6
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
-                        }
-                    }
-                    Label {
-                        visible: !vaultRow.isOther && (vaultRow.missing || vaultRow.modelData === VaultController.vaultPath)
-                        text: vaultRow.missing ? qsTr("not found") : qsTr("last used")
-                        opacity: 0.7
-                    }
-                }
-            }
             onActivated: function(index) {
                 const chosen = model[index]
                 // The list follows the vault shown again, whatever was picked.
@@ -341,20 +214,10 @@ Item {
         ExactRow {
             gap: 0
             Layout.fillWidth: true
-            PasswordField {
+            BigPasswordField {
                 id: passwordField
                 objectName: "masterPasswordField"
                 placeholderText: unlockPage.usePin ? qsTr("PIN") : qsTr("Master Password")
-                font.pointSize: Appearance.fontPointSize * 1.4
-                // The placeholder in the normal font, the password in the monospaced one.
-                font.family: text === "" ? Appearance.font.family : "Noto Sans Mono"
-                leftPadding: 14 * Appearance.factor
-                // Rounded, as the owner's design.
-                background: Rectangle {
-                    radius: Math.round(8 * Appearance.factor)
-                    color: passwordField.palette.base
-                    border.color: passwordField.activeFocus ? passwordField.palette.highlight : passwordField.palette.mid
-                }
                 Layout.preferredHeight: 58 * Appearance.factor
                 Layout.fillWidth: true
                 // Greyed while waiting after wrong master passwords (D-041).

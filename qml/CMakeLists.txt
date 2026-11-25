@@ -19,6 +19,7 @@
 # qml/CMakeLists.txt 0.6.88
 
 # --- Version history ----------------------------------------------------
+# v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 # v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 # v0.6.96: One tray icon, the owner's, on every tray (D-064)
 # v0.6.88: The settings' pages Categories, Tags and Templates (D-066)
@@ -94,7 +95,11 @@ qt_add_qml_module(chrono_vault_ui
         StorageWindow.qml
         SyncConflictsWindow.qml
         PictureButton.qml
+        AskWindow.qml
+        BigPasswordField.qml
+        Padlock.qml
         TickBox.qml
+        VaultBox.qml
         ConflictWindow.qml
         BigButton.qml
         WebDavFileDialog.qml
@@ -135,6 +140,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/vault_controller.cpp
         ../src/ui/vault_controller.h
         ../src/ui/vault_controller_audit.cpp
+        ../src/ui/vault_controller_ask.cpp
         ../src/ui/vault_controller_pin.cpp
         ../src/ui/vault_controller_webdav.cpp
         ../src/ui/vault_controller_vaults.cpp
@@ -286,6 +292,7 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/updater.cpp
     ../src/ui/vault_controller.cpp
     ../src/ui/vault_controller_audit.cpp
+    ../src/ui/vault_controller_ask.cpp
     ../src/ui/vault_controller_pin.cpp
     ../src/ui/vault_controller_webdav.cpp
     ../src/ui/vault_controller_vaults.cpp

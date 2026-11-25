@@ -17,6 +17,7 @@ decided is marked as a proposal.
 | Folder | What belongs in it |
 |---|---|
 | `src/core/` | The vault core: plain C++ with Qt Core only, no window code, tested without a screen |
+| `src/ui/vault_controller_ask.cpp` | The standard dialog's question: proves a master password, PIN or finger for any vault without touching the one shown (D-073) |
 | `style/` | Chrono Vault's Qt Quick Controls style: Fusion with every size times the UI scaling and every text enlarged by exactly it (D-023, D-069); rows and columns are `ExactRow` and `ExactColumn` |
 | `qml/` | The windows, one QML module (URI `ChronoVault`) in Qt Quick; they only call the core |
 | `src/app/` | `main.cpp`, which starts the windows |

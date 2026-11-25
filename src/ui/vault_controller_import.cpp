@@ -28,9 +28,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_import.cpp 0.5.81
+// vault_controller_import.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.5.81: A source read for Import and for Retry sync alike; an item deleted for good here simply imported (D-061)
 // v0.5.78: Every difference a conflict; an item deleted for good here comes back with a conflict (D-061)
 // v0.5.77: Initial release: importing another vault; an import's duplicates skipped or made conflicts (D-060)
@@ -110,7 +111,13 @@ VaultController::SourceRead VaultController::readVaultSource(const QString& file
 
 void VaultController::readVaultImport(const QUrl& file, const QString& password)
 {
-    const QString source = file.isLocalFile() ? file.toLocalFile() : file.toString();
+    QByteArray passwordBytes = password.toUtf8();
+    readForImport(file.isLocalFile() ? file.toLocalFile() : file.toString(), passwordBytes, std::nullopt);
+    crypto::wipe(passwordBytes);
+}
+
+void VaultController::readForImport(const QString& source, const QByteArray& password, const std::optional<VaultKey>& kept)
+{
     if (currentState != State::Unlocked || source.isEmpty()) {
         return;
     }
@@ -123,12 +130,20 @@ void VaultController::readVaultImport(const QUrl& file, const QString& password)
     const VaultContents snapshot = contents;
     const quint64 session = vaultSession;
     const QString keyfileFile = keyfileOf(source);
-    QByteArray passwordBytes = password.toUtf8();
+    QByteArray passwordBytes = password;
+    passwordBytes.detach();
+    std::optional<VaultKey> given = kept;
+    if (given) {
+        given->key.detach();
+    }
     QPointer<VaultController> self(this);
     say(tr("Reading the vault…"), false);
     // Deriving the key is slow: off the window's thread (OR-5).
-    (void)QtConcurrent::run(&unlockPool, [self, source, passwordBytes, keyfileFile, snapshot, session]() mutable {
-        SourceRead read = readVaultSource(source, std::move(passwordBytes), std::nullopt, keyfileFile, snapshot);
+    (void)QtConcurrent::run(&unlockPool, [self, source, passwordBytes, given, keyfileFile, snapshot, session]() mutable {
+        SourceRead read = readVaultSource(source, std::move(passwordBytes), given, keyfileFile, snapshot);
+        if (given) {
+            given->wipe();
+        }
         QMetaObject::invokeMethod(
             qApp,
             [self, read, source, session]() mutable {

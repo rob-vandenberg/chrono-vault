@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.6.92
+// ImportWindow.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.80: Only a comment (D-055)
 // v0.5.78.3: Next… a button of its own: the window stays open and owns the export's file dialog, as Browse… (a debug version)
@@ -78,7 +79,6 @@ DialogWindow {
         reading = false
         problem = ""
         vaultFile = otherVaults.length > 0 ? otherVaults[0] : ""
-        passwordField.clear()
         open()
     }
     function next() {
@@ -90,11 +90,21 @@ DialogWindow {
             exportDialog.open()
             return
         }
-        if (vaultFile === "" || passwordField.text === "")
-            return
-        reading = true
-        VaultController.readVaultImport(VaultController.fileUrl(vaultFile), passwordField.text)
-        passwordField.clear()
+        if (vaultFile !== "")
+            askWindow.askVault(vaultFile)
+    }
+
+    // The other vault's master password, or the finger.
+    AskWindow {
+        id: askWindow
+        objectName: "importAskWindow"
+        transientParent: importWindow
+        title: importWindow.title
+        onRight: {
+            importWindow.reading = true
+            VaultController.importProven()
+        }
+        onRejected: importWindow.reading = false
     }
 
     // Next… while choosing: a button of its own, so the window never closes
@@ -108,7 +118,7 @@ DialogWindow {
         highlighted: true
         enabled: !importWindow.reading
                  && (importWindow.source === "export"
-                     || (importWindow.vaultFile !== "" && passwordField.text !== ""))
+                     || importWindow.vaultFile !== "")
         onClicked: {
             FilePickers.logImportStep("Next… clicked", importWindow)
             importWindow.next()
@@ -128,6 +138,8 @@ DialogWindow {
         target: VaultController
         // The vault locks: what was read is gone, and so is this window.
         function onLocking() {
+            if (askWindow.visible)
+                askWindow.reject()
             if (importWindow.visible)
                 importWindow.reject()
         }
@@ -135,6 +147,8 @@ DialogWindow {
             if (!importWindow.reading)
                 return
             importWindow.reading = false
+            if (askWindow.visible)
+                askWindow.accept()
             importWindow.summary = result
             if (importWindow.source === "vault" && result.ok !== true) {
                 importWindow.problem = result.message || ""
@@ -151,10 +165,7 @@ DialogWindow {
         if (VaultController.confirmImport() && VaultController.lastImportConflicts() > 0)
             conflictsToSettle()
     }
-    onRejected: {
-        passwordField.clear()
-        VaultController.cancelImport()
-    }
+    onRejected: VaultController.cancelImport()
 
     ExactColumn {
         gap: 10 * Appearance.factor
@@ -213,15 +224,6 @@ DialogWindow {
                     text: qsTr("Browse…")
                     onClicked: vaultPicker.open()
                 }
-            }
-            PasswordField {
-                id: passwordField
-                objectName: "importPasswordField"
-                enabled: importWindow.source === "vault"
-                placeholderText: qsTr("The vault's master password")
-                Layout.fillWidth: true
-                Layout.leftMargin: 28 * Appearance.factor
-                onAccepted: importWindow.next()
             }
             RadioButton {
                 objectName: "importFromExport"

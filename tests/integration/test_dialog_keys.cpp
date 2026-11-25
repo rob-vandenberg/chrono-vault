@@ -25,9 +25,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_keys.cpp 0.6.97
+// test_dialog_keys.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.93: A start on a locked vault (D-068)
 // v0.6.92: A field has the keyboard, not its own item (D-069)
@@ -72,13 +73,16 @@ private slots:
     {
         QMetaObject::invokeMethod(window, "changeMasterPassword");
         typed(named("masterPasswordWindow"), "master password");
-        QVERIFY(QMetaObject::invokeMethod(named("exportWindow"), "ask"));
-        typed(named("exportWindow"), "export");
+        QVERIFY(QMetaObject::invokeMethod(named("exportAskWindow"), "askVault", Q_ARG(QVariant, controller->vaultPath())));
+        typed(named("exportAskWindow"), "export");
+        QVERIFY(QMetaObject::invokeMethod(named("importAskWindow"), "askVault", Q_ARG(QVariant, controller->vaultPath())));
+        typed(named("importAskWindow"), "import");
         QVERIFY(QMetaObject::invokeMethod(named("tagDialog"), "ask", Q_ARG(QVariant, QStringLiteral("Work"))));
         typed(named("tagDialog"), "tag");
         QVERIFY(QMetaObject::invokeMethod(named("categoryDialog"), "ask", Q_ARG(QVariant, QString()), Q_ARG(QVariant, QString())));
         typed(named("categoryDialog"), "new category");
-        QVERIFY(QMetaObject::invokeMethod(named("webDavPasswordWindow"), "open"));
+        QVERIFY(QMetaObject::invokeMethod(named("webDavPasswordWindow"), "ask", Q_ARG(QVariant, QStringLiteral("server")),
+                                          Q_ARG(QVariant, QString())));
         typed(named("webDavPasswordWindow"), "WebDAV password");
         QVERIFY(QMetaObject::invokeMethod(named("templateEditor"), "edit",
                                           Q_ARG(QVariant, QVariantMap({{"id", ""}, {"name", ""}, {"categoryId", "misc"},
@@ -89,7 +93,7 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(named("unlockFirstWindow"), "ask", Q_ARG(QVariant, folder.filePath(QStringLiteral("other.chronovault"))),
                                           Q_ARG(QVariant, QStringLiteral("export"))));
         typed(named("unlockFirstWindow"), "unlock first");
-        QVERIFY(QMetaObject::invokeMethod(named("retryPasswordWindow"), "ask", Q_ARG(QVariant, QStringLiteral("vault:x")),
+        QVERIFY(QMetaObject::invokeMethod(named("retryPasswordWindow"), "askNext", Q_ARG(QVariant, QStringLiteral("vault:x")),
                                           Q_ARG(QVariant, QStringLiteral("x")), Q_ARG(QVariant, QVariantList()),
                                           Q_ARG(QVariant, QString())));
         typed(named("retryPasswordWindow"), "retry sync");

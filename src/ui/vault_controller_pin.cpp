@@ -34,9 +34,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_pin.cpp 0.4.70
+// vault_controller_pin.cpp 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.70: Initial release (D-059)
 
 namespace chrono_vault {
@@ -47,7 +48,7 @@ const QString pinSaltKey = QStringLiteral("pin/salt");
 const QString pinDerivationKey = QStringLiteral("pin/derivation");
 const QString pinGroup = QStringLiteral("pin");
 const QByteArray pinEntryLabel = QByteArrayLiteral("pin key");
-const QByteArray pinLockedLabel = QByteArrayLiteral("pin locked");
+const QByteArray lockedLabel = QByteArrayLiteral("pin locked");
 
 QByteArray derivationOf(const crypto::KdfParameters& parameters)
 {
@@ -157,7 +158,7 @@ void VaultController::setPin(const QString& pin)
                                           crypto::seal(self->primaryKey.key, self->pinKey, pinEntryLabel));
                         self->pinLocked.insert(
                             primary, crypto::seal(self->pinKey, quickSecretOf(self->primaryKey, self->primaryKeyfile),
-                                                  pinLockedLabel));
+                                                  lockedLabel));
                     }
                 }
                 emit self->pinChanged();
@@ -194,7 +195,7 @@ void VaultController::keepForPin()
     // Written again each time, so it follows a changed master password.
     settings.setValue(entry, crypto::seal(key.key, pinKey, pinEntryLabel));
     QByteArray packed = quickSecretOf(key, keyfileSecret);
-    pinLocked.insert(path, crypto::seal(pinKey, packed, pinLockedLabel));
+    pinLocked.insert(path, crypto::seal(pinKey, packed, lockedLabel));
     crypto::wipe(packed);
     emit pinChanged();
 }
@@ -203,6 +204,23 @@ void VaultController::forgetPinKey()
 {
     crypto::wipe(pinKey);
     pinKey.clear();
+}
+
+std::optional<VaultController::PinMeans> VaultController::pinMeans() const
+{
+    VaultsFile settings;
+    const QByteArray salt = settings.value(pinSaltKey).toByteArray();
+    const std::optional<crypto::KdfParameters> parameters =
+        derivationFrom(settings.value(pinDerivationKey).toByteArray());
+    if (salt.isEmpty() || !parameters) {
+        return std::nullopt;
+    }
+    return PinMeans{salt, *parameters};
+}
+
+QByteArray VaultController::pinLockedLabel()
+{
+    return lockedLabel;
 }
 
 void VaultController::unlockWithPin(const QString& pin)
@@ -236,7 +254,7 @@ void VaultController::unlockWithPin(const QString& pin)
         crypto::wipe(pinBytes);
         std::optional<QByteArray> packed;
         if (made) {
-            packed = crypto::open(*made, sealed, pinLockedLabel);
+            packed = crypto::open(*made, sealed, lockedLabel);
         }
         QMetaObject::invokeMethod(
             qApp,

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.102
+// Main.qml 0.6.103
 
 // --- Version history ----------------------------------------------------
+// v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -1121,32 +1122,17 @@ ApplicationWindow {
         }
     }
 
-    DialogWindow {
+    AskWindow {
         id: webDavPasswordWindow
         objectName: "webDavPasswordWindow"
-        memoryName: "webDavPassword2"
         transientParent: mainWindow
         title: qsTr("WebDAV password")
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        onShown: serverPassword.forceActiveFocus()
-        onAccepted: {
-            VaultController.giveWebDavPassword(serverPassword.text)
-            serverPassword.clear()
-        }
-        onRejected: serverPassword.clear()
-        ExactColumn {
-            gap: 8 * Appearance.factor
-            Layout.preferredWidth: 380 * Appearance.factor
-            Label {
-                text: qsTr("Type the password of the WebDAV server where “%1” is kept.").arg(VaultController.vaultName)
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-            PasswordField {
-                id: serverPassword
-                Layout.fillWidth: true
-                onAccepted: if (text !== "") webDavPasswordWindow.accept()
-            }
+        heading: qsTr("Enter the password of the WebDAV server")
+        hint: qsTr("Password")
+        okText: qsTr("OK")
+        onEntered: function(text) {
+            accept()
+            VaultController.giveWebDavPassword(text)
         }
     }
 
@@ -1156,7 +1142,7 @@ ApplicationWindow {
             if (VaultController.certificateAsked !== "" && !certificateWindow.visible)
                 certificateWindow.open()
             if (VaultController.webDavPasswordNeeded && !webDavPasswordWindow.visible)
-                webDavPasswordWindow.open()
+                webDavPasswordWindow.ask(VaultController.vaultPlace(VaultController.vaultPath).address || VaultController.vaultName, "")
         }
     }
 }
