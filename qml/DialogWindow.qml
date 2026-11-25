@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.5.82
+// DialogWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.82: Esc only of the active dialog; Enter presses the button, which has the keyboard when a question opens (D-062)
 // v0.5.78: Never narrower than its content can take (D-061)
 // v0.1.43: Esc also through the window's own keys, as Chrono Viewer's QDialog
@@ -152,7 +153,7 @@ ApplicationWindow {
     modality: Qt.ApplicationModal
     visible: false
     // The edge around everything, the same as the settings window's.
-    readonly property int edge: Math.round(10 * Appearance.factor)
+    readonly property real edge: 10 * Appearance.factor
     width: Math.max(Math.round(400 * Appearance.factor), layout.implicitWidth + 2 * edge)
     height: Math.max(Math.round(160 * Appearance.factor), layout.implicitHeight + 2 * edge)
     // Never narrower than its content can take, so nothing is cut off or
@@ -188,7 +189,7 @@ ApplicationWindow {
         onActivated: dialogWindow.reject()
     }
 
-    ColumnLayout {
+    ExactColumn {
         id: layout
         anchors.fill: parent
         anchors.margins: dialogWindow.edge
@@ -212,27 +213,27 @@ ApplicationWindow {
                 }
             }
         }
-        spacing: Math.round(10 * Appearance.factor)
+        gap: 10 * Appearance.factor
 
-        ColumnLayout {
+        ExactColumn {
             id: contentArea
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
 
-        RowLayout {
+        ExactRow {
             Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             // The left buttons' area takes the free room, so the right ones
             // stand at the right.
-            RowLayout {
+            ExactRow {
                 id: leftArea
-                spacing: Math.round(6 * Appearance.factor)
+                gap: 6 * Appearance.factor
                 Layout.fillWidth: true
             }
-            RowLayout {
+            ExactRow {
                 id: rightArea
-                spacing: Math.round(6 * Appearance.factor)
+                gap: 6 * Appearance.factor
             }
             DialogButtonBox {
                 id: buttonBox

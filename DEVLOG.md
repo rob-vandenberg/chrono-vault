@@ -757,3 +757,9 @@ The owner's changelist items 1-13 (D-068). `qml/IconPicker.qml`, `style/TextMenu
 `style/TextArea.qml`, `qml/SettingsWindow.qml`; `tests/integration/test_dialog_keys.cpp`. The style's texts are translated too.
 Review round 1: the keys did nothing after the outlined icon was deleted; fixed with a test.
 Round 2: the outline cut off in the first column, fixed and looked at; nothing else.
+
+## 25 November 2026: version 0.6.92: exact UI scaling
+
+The owner's changelist items 1-13 (D-069). `style/` (every control with a text), `qml/` (exact sizes, ExactRow, ExactColumn),
+`src/ui/program_scale.*`, `src/ui/appearance.cpp`; `tests/integration/test_exact_scaling.cpp`. General's height is exact at
+five scalings. The windows open 13 to 20% slower in a debug test.

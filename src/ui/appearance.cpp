@@ -33,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.5.82
+// appearance.cpp 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: The font at 100% for the windows (D-069)
 // v0.5.82: focusWindow (D-062)
 // v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -123,7 +124,7 @@ int Appearance::defaultScale()
 
 double Appearance::fontPointSize() const
 {
-    return QFontInfo(QGuiApplication::font()).pointSizeF();
+    return QFontInfo(programFont()).pointSizeF();
 }
 
 double Appearance::factor()
@@ -138,7 +139,7 @@ QObject* Appearance::focusWindow()
 
 QFont Appearance::font()
 {
-    return QGuiApplication::font();
+    return programFont();
 }
 
 namespace {

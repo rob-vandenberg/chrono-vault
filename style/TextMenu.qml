@@ -4,13 +4,13 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// TextMenu.qml 0.6.91
+// TextMenu.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.91: Initial release (D-068)
 
 import QtQuick
-import QtQuick.Controls.Fusion as F
 
 // The right-click menu of every text field (D-068): what cannot be done is
 // grey. What a password field hides is never cut or copied.
@@ -40,7 +40,7 @@ Menu {
         enabled: control.editor.canPaste && !control.editor.readOnly
         onTriggered: control.editor.paste()
     }
-    F.MenuSeparator {}
+    MenuSeparator {}
     MenuItem {
         objectName: "textSelectAll"
         text: qsTr("Select All")

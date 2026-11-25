@@ -25,9 +25,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_keys.cpp 0.6.91
+// test_dialog_keys.cpp 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: A field has the keyboard, not its own item (D-069)
 // v0.6.91: Initial release (D-068)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -97,7 +98,7 @@ private slots:
         key(Qt::Key_Return);
         QTRY_VERIFY(page->property("editing").toBool());
         QObject* editor = window->findChild<QObject*>(QStringLiteral("itemEditor"));
-        QTRY_COMPARE(window->activeFocusItem(), window->findChild<QQuickItem*>(QStringLiteral("titleField")));
+        QTRY_VERIFY(window->findChild<QQuickItem*>(QStringLiteral("titleField"))->hasActiveFocus());
         QVERIFY(QMetaObject::invokeMethod(named("fieldOptions"), "showForNew", Q_ARG(QVariant, QStringLiteral("text"))));
         typed(named("fieldOptions"), "field options");
         QMetaObject::invokeMethod(editor, "close");
@@ -108,7 +109,7 @@ private slots:
         QTRY_COMPARE(controller->state(), State::Locked);
         window->requestActivate();
         QTRY_COMPARE(QGuiApplication::focusWindow(), window);
-        QTRY_COMPARE(window->activeFocusItem(), window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField")));
+        QTRY_VERIFY(window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"))->hasActiveFocus());
     }
 
     void the_icons_by_keyboard()

@@ -20,17 +20,18 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TagsPage.qml 0.6.88
+// TagsPage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.88: Initial release, out of CustomizePage.qml (D-066)
 
 // Settings > Tags (D-063, D-066): those of the unlocked vault, renamed and
 // removed as with a right-click in the sidebar. Kept in the vault at once.
-ColumnLayout {
+ExactColumn {
     id: tagsPage
     objectName: "tagsPage"
-    spacing: Math.round(8 * Appearance.factor)
+    gap: 8 * Appearance.factor
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
     readonly property var tagList: VaultController.revision >= 0 ? VaultController.tags() : []
@@ -56,18 +57,18 @@ ColumnLayout {
     // Renamed and removed as with a right-click in the sidebar (D-063).
     Repeater {
         model: tagsPage.unlocked ? tagsPage.tagList : []
-        delegate: RowLayout {
+        delegate: ExactRow {
             id: tagRow
             required property var modelData
             objectName: "tagRow_" + modelData.tag
             Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Label {
                 text: tagRow.modelData.name
                 textFormat: Text.PlainText
                 elide: Text.ElideRight
                 // A nested tag stands under the one above it.
-                leftPadding: Math.round(16 * tagRow.modelData.depth * Appearance.factor)
+                leftPadding: 16 * tagRow.modelData.depth * Appearance.factor
                 Layout.fillWidth: true
             }
             Label {

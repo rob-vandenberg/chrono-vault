@@ -4,12 +4,14 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// Slider.qml 0.0.10
+// Slider.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.10: Initial release (D-023)
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls.impl
 import QtQuick.Controls.Fusion as F
 import QtQuick.Controls.Fusion.impl
@@ -17,6 +19,10 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's Slider, its fixed sizes times the UI scaling (D-023).
 F.Slider {
     id: control
+    // Its handle is drawn in whole pixels; the room for it is exact.
+    implicitHeight: (horizontal ? 13 * UiScale.factor : implicitBackgroundHeight) + topPadding + bottomPadding
+    Layout.preferredWidth: UiScale.whole(implicitWidth)
+    Layout.preferredHeight: UiScale.whole(implicitHeight)
     handle: Rectangle {
         x: control.leftPadding + Math.round(control.horizontal ? control.visualPosition * (control.availableWidth - width)
                                                                 : (control.availableWidth - width) / 2)
@@ -32,7 +38,7 @@ F.Slider {
         x: control.leftPadding + (control.horizontal ? 0 : (control.availableWidth - width) / 2)
         y: control.topPadding + (control.horizontal ? (control.availableHeight - height) / 2 : 0)
         implicitWidth: control.horizontal ? Math.round(160 * UiScale.factor) : Math.round(5 * UiScale.factor)
-        implicitHeight: control.horizontal ? Math.round(5 * UiScale.factor) : Math.round(160 * UiScale.factor)
+        implicitHeight: control.horizontal ? 5 * UiScale.factor : 160 * UiScale.factor
         width: control.horizontal ? control.availableWidth : implicitWidth
         height: control.horizontal ? implicitHeight : control.availableHeight
         radius: Math.round(2 * UiScale.factor)

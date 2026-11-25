@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.5.78
+// MasterPasswordWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: OK greyed until ready: set once the button exists, as the earlier binding never took hold
@@ -70,13 +71,13 @@ DialogWindow {
         repeatedPassword.clear()
     }
 
-    ColumnLayout {
-        spacing: Math.round(8 * Appearance.factor)
+    ExactColumn {
+        gap: 8 * Appearance.factor
         PasswordField {
             id: currentPassword
             objectName: "currentPasswordField"
             placeholderText: qsTr("Current master password")
-            Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            Layout.preferredWidth: 360 * Appearance.factor
             Layout.fillWidth: true
         }
         PasswordField {
@@ -102,13 +103,13 @@ DialogWindow {
             objectName: "changeUseKeyfileBox"
             text: qsTr("Also lock the vault with a keyfile")
         }
-        ColumnLayout {
+        ExactColumn {
             visible: useKeyfile.checked
             Label {
                 text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
                 font.bold: true
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
             Label {
@@ -116,10 +117,10 @@ DialogWindow {
                       : qsTr("Keyfile: %1").arg(decodeURIComponent(passwordWindow.keyfile.toString().replace(/^.*\//, "")))
                 elide: Text.ElideMiddle
                 opacity: 0.8
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
-            RowLayout {
+            ExactRow {
                 Button {
                     text: qsTr("Choose a keyfile…")
                     onClicked: chooseDialog.open()

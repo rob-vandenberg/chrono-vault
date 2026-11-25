@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// Menu.qml 0.6.90
+// Menu.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
 
 import QtQuick
@@ -16,6 +17,7 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's Menu on the background of every pop-up (D-067).
 F.Menu {
     id: control
+    delegate: MenuItem {}
     // A menu made inside a row of a list does not hear of a change of theme by
     // itself: its colours are those of what it belongs to.
     Binding {

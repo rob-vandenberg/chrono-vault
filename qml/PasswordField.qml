@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// PasswordField.qml 0.0.4
+// PasswordField.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.4.70: eyeAllowed: the eye only where it may be shown (D-059)
 // v0.0.4: Initial release
 
@@ -36,15 +37,16 @@ TextField {
 
     echoMode: revealed ? TextInput.Normal : TextInput.Password
     font.family: "Noto Sans Mono"
-    rightPadding: (eyeButton.visible ? eyeButton.width : 0) + Math.round(6 * Appearance.factor)
+    rightPadding: (eyeButton.visible ? eyeButton.width : 0) + 6 * Appearance.factor
 
     ToolButton {
         id: eyeButton
+        parent: passwordField
         visible: passwordField.eyeAllowed
         anchors.right: parent.right
-        anchors.rightMargin: Math.round(2 * Appearance.factor)
+        anchors.rightMargin: 2 * Appearance.factor
         anchors.verticalCenter: parent.verticalCenter
-        height: parent.height - Math.round(4 * Appearance.factor)
+        height: parent.height - 4 * Appearance.factor
         width: height
         focusPolicy: Qt.NoFocus
         icon.source: passwordField.revealed ? "qrc:/icons/eye-hidden.svg" : "qrc:/icons/eye.svg"

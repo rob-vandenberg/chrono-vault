@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.6.86
+// ItemDetails.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.86: What the audit says under a password (D-065)
 // v0.5.82: Trash, Restore and Archive through the page, asked first (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
@@ -75,8 +76,8 @@ Item {
         }
         return result.filter(function(card) { return card.rows.length > 0 })
     }
-    readonly property int labelWidth: Math.round(170 * Appearance.factor) // 50 to the left (the owner, 23 November 2026)
-    readonly property int rowHeight: Math.round(54 * Appearance.factor)
+    readonly property real labelWidth: 170 * Appearance.factor // 50 to the left (the owner, 23 November 2026)
+    readonly property real rowHeight: 54 * Appearance.factor
     // Card borders and the lines between rows: a faint shade of the text,
     // seen on a light and a dark page alike.
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
@@ -102,16 +103,16 @@ Item {
         onTriggered: itemDetails.tick++
     }
 
-    ColumnLayout {
+    ExactColumn {
         anchors.fill: parent
-        spacing: 0
+        gap: 0
 
         // The header: icon, title, and the pencil, the star and "…".
-        RowLayout {
-            spacing: Math.round(16 * Appearance.factor)
+        ExactRow {
+            gap: 16 * Appearance.factor
             Layout.fillWidth: true
-            Layout.margins: Math.round(24 * Appearance.factor)
-            Layout.bottomMargin: Math.round(16 * Appearance.factor)
+            Layout.margins: 24 * Appearance.factor
+            Layout.bottomMargin: 16 * Appearance.factor
             Image {
                 source: itemDetails.item.icon ? "data:image/png;base64," + itemDetails.item.icon
                         : (itemDetails.item.defaultIcon || "")
@@ -181,15 +182,15 @@ Item {
             contentWidth: availableWidth
             clip: true
 
-            ColumnLayout {
-                width: fieldsScroll.availableWidth - 2 * Math.round(24 * Appearance.factor)
-                x: Math.round(24 * Appearance.factor)
-                spacing: Math.round(12 * Appearance.factor)
+            ExactColumn {
+                width: fieldsScroll.availableWidth - 2 * 24 * Appearance.factor
+                x: 24 * Appearance.factor
+                gap: 12 * Appearance.factor
 
-                Item { Layout.preferredHeight: Math.round(12 * Appearance.factor) }
+                Item { Layout.preferredHeight: 12 * Appearance.factor }
 
                 // In the Trash or the Archive: said, with the way out.
-                RowLayout {
+                ExactRow {
                     visible: itemDetails.item.trashed === true || itemDetails.item.archived === true
                     Layout.fillWidth: true
                     Label {
@@ -217,16 +218,16 @@ Item {
                     objectName: "mergeNote"
                     visible: itemDetails.mergeNotes.length > 0
                     Layout.fillWidth: true
-                    implicitHeight: noteLayout.implicitHeight + 2 * Math.round(10 * Appearance.factor)
+                    implicitHeight: noteLayout.implicitHeight + 2 * 10 * Appearance.factor
                     radius: Math.round(6 * Appearance.factor)
                     color: "transparent"
                     border.color: "#d32f2f"
                     border.width: Math.max(1, Math.round(Appearance.factor))
-                    RowLayout {
+                    ExactRow {
                         id: noteLayout
                         anchors.fill: parent
-                        anchors.margins: Math.round(10 * Appearance.factor)
-                        spacing: Math.round(8 * Appearance.factor)
+                        anchors.margins: 10 * Appearance.factor
+                        gap: 8 * Appearance.factor
                         Label {
                             Layout.fillWidth: true
                             wrapMode: Text.Wrap
@@ -243,7 +244,7 @@ Item {
                 // The tags, each a way to the items that carry it (D-028).
                 Flow {
                     Layout.fillWidth: true
-                    spacing: Math.round(6 * Appearance.factor)
+                    spacing: 6 * Appearance.factor
                     visible: (itemDetails.item.tags || []).length > 0
                     Repeater {
                         model: itemDetails.item.tags || []
@@ -262,10 +263,10 @@ Item {
                 // One card per section, its heading above it at the value column.
                 Repeater {
                     model: itemDetails.cards
-                    delegate: ColumnLayout {
+                    delegate: ExactColumn {
                         id: cardBlock
                         required property var modelData
-                        spacing: Math.round(8 * Appearance.factor)
+                        gap: 8 * Appearance.factor
                         Layout.fillWidth: true
                         Label {
                             objectName: "sectionHeading"
@@ -274,8 +275,8 @@ Item {
                             textFormat: Text.PlainText
                             font.bold: true
                             opacity: 0.7
-                            leftPadding: itemDetails.labelWidth + Math.round(24 * Appearance.factor)
-                            Layout.topMargin: Math.round(6 * Appearance.factor)
+                            leftPadding: itemDetails.labelWidth + 24 * Appearance.factor
+                            Layout.topMargin: 6 * Appearance.factor
                         }
                         Rectangle {
                             objectName: "fieldCard"
@@ -338,11 +339,11 @@ Item {
                                     height: 1
                                     color: itemDetails.lineColour
                                 }
-                                RowLayout {
+                                ExactRow {
                                     anchors.fill: parent
-                                    anchors.leftMargin: Math.round(16 * Appearance.factor)
-                                    anchors.rightMargin: Math.round(8 * Appearance.factor)
-                                    spacing: Math.round(10 * Appearance.factor)
+                                    anchors.leftMargin: 16 * Appearance.factor
+                                    anchors.rightMargin: 8 * Appearance.factor
+                                    gap: 10 * Appearance.factor
                                     Image {
                                         source: "qrc:/icons/attachment.svg"
                                         sourceSize: Qt.size(Math.round(16 * Appearance.factor), Math.round(16 * Appearance.factor))
@@ -372,9 +373,9 @@ Item {
                 GridLayout {
                     columns: 2
                     Layout.fillWidth: true
-                    columnSpacing: Math.round(24 * Appearance.factor)
-                    rowSpacing: Math.round(8 * Appearance.factor)
-                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                    columnSpacing: 24 * Appearance.factor
+                    rowSpacing: 8 * Appearance.factor
+                    Layout.topMargin: 16 * Appearance.factor
                     Label {
                         text: qsTr("Last Modified:")
                         opacity: 0.7
@@ -415,7 +416,7 @@ Item {
                     }
                 }
 
-                Item { Layout.preferredHeight: Math.round(24 * Appearance.factor) }
+                Item { Layout.preferredHeight: 24 * Appearance.factor }
             }
         }
     }
@@ -443,13 +444,13 @@ Item {
             text: historyWindow.revealed ? qsTr("Hide") : qsTr("Show")
             onClicked: historyWindow.revealed = !historyWindow.revealed
         }
-        ColumnLayout {
-            spacing: Math.round(6 * Appearance.factor)
-            Layout.preferredWidth: Math.round(460 * Appearance.factor)
+        ExactColumn {
+            gap: 6 * Appearance.factor
+            Layout.preferredWidth: 460 * Appearance.factor
             Layout.fillWidth: true
             Repeater {
                 model: historyWindow.field.history || []
-                delegate: RowLayout {
+                delegate: ExactRow {
                     required property var modelData
                     Layout.fillWidth: true
                     Label {

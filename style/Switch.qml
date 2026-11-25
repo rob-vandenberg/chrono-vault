@@ -4,13 +4,15 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// Switch.qml 0.1.41
+// Switch.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.1.41: Initial release (D-051)
 
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Templates as T
 
 // Chrono Vault's own switch, the owner's choice (D-051): a rounded track with
@@ -19,6 +21,8 @@ import QtQuick.Templates as T
 // reads both ways. Used wherever the program shows a switch.
 T.Switch {
     id: control
+    Layout.preferredWidth: UiScale.whole(implicitWidth)
+    Layout.preferredHeight: UiScale.whole(implicitHeight)
 
     readonly property int trackWidth: Math.round(44 * UiScale.factor)
     readonly property int trackHeight: Math.round(24 * UiScale.factor)
@@ -28,8 +32,8 @@ T.Switch {
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding,
                              implicitIndicatorHeight + topPadding + bottomPadding)
-    padding: Math.round(6 * UiScale.factor)
-    spacing: Math.round(8 * UiScale.factor)
+    padding: 6 * UiScale.factor
+    spacing: 8 * UiScale.factor
 
     indicator: Rectangle {
         objectName: "switchTrack"
@@ -65,7 +69,7 @@ T.Switch {
         }
     }
 
-    contentItem: Text {
+    contentItem: ScaledText {
         leftPadding: control.mirrored ? control.indicator.width + control.spacing : 0
         rightPadding: control.mirrored ? 0 : control.indicator.width + control.spacing
         text: control.text

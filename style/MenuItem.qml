@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// MenuItem.qml 0.0.24
+// MenuItem.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.24: The action's shortcut shown at the right (D-039)
 // v0.0.10: Initial release (D-023)
 
@@ -18,8 +19,8 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's MenuItem, its fixed sizes times the UI scaling (D-023).
 F.MenuItem {
     id: control
-    padding: Math.round(6 * UiScale.factor)
-    spacing: Math.round(6 * UiScale.factor)
+    padding: 6 * UiScale.factor
+    spacing: 6 * UiScale.factor
     icon.width: Math.round(16 * UiScale.factor)
     icon.height: Math.round(16 * UiScale.factor)
     // The text, and the action's shortcut at the right, as menus show it
@@ -44,12 +45,12 @@ F.MenuItem {
                                                  ? control.indicator.width + control.spacing : 0
         readonly property real arrowPadding: control.subMenu && control.arrow ? control.arrow.width + control.spacing : 0
         implicitWidth: indicatorPadding + label.implicitWidth
-                       + (keys.text !== "" ? Math.round(32 * UiScale.factor) + keys.implicitWidth : 0) + arrowPadding
+                       + (keys.text !== "" ? 32 * UiScale.factor + keys.implicitWidth : 0) + arrowPadding
         implicitHeight: Math.max(label.implicitHeight, keys.implicitHeight)
-        IconLabel {
+        IconText {
             id: label
             x: control.mirrored ? parent.width - width - parent.indicatorPadding : parent.indicatorPadding
-            anchors.verticalCenter: parent.verticalCenter
+            y: (parent.height - height) / 2
             spacing: control.spacing
             mirrored: control.mirrored
             display: control.display
@@ -59,11 +60,11 @@ F.MenuItem {
             font: control.font
             color: control.down || control.highlighted ? Fusion.highlightedText(control.palette) : control.palette.text
         }
-        Text {
+        ScaledText {
             id: keys
             objectName: "menuShortcut"
             x: control.mirrored ? parent.arrowPadding : parent.width - width - parent.arrowPadding
-            anchors.verticalCenter: parent.verticalCenter
+            y: (parent.height - height) / 2
             text: control.shortcutText
             font: control.font
             color: control.down || control.highlighted ? Fusion.highlightedText(control.palette) : control.palette.text
@@ -75,5 +76,19 @@ F.MenuItem {
         y: control.topPadding + (control.availableHeight - height) / 2
         visible: control.checkable
         control: control
+    }
+    arrow: Arrow {
+        x: control.mirrored ? control.padding : control.width - width - control.padding
+        y: control.topPadding + (control.availableHeight - height) / 2
+        visible: control.subMenu
+        rotation: control.mirrored ? 90 : -90
+        color: control.down || control.hovered || control.highlighted ? Fusion.highlightedText(control.palette)
+                                                                      : control.palette.text
+    }
+    background: Rectangle {
+        implicitWidth: 200 * UiScale.factor
+        implicitHeight: 20 * UiScale.factor
+        color: Fusion.highlight(control.palette)
+        visible: control.down || control.highlighted
     }
 }

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.5.78
+// ExportWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
 // v0.2.51: Its file dialogs as Chrono Viewer's (D-055)
 // v0.0.22: Initial release (D-037)
@@ -81,9 +82,9 @@ DialogWindow {
         }
     }
 
-    ColumnLayout {
-        spacing: Math.round(10 * Appearance.factor)
-        Layout.preferredWidth: Math.round(440 * Appearance.factor)
+    ExactColumn {
+        gap: 10 * Appearance.factor
+        Layout.preferredWidth: 440 * Appearance.factor
         Layout.fillWidth: true
         Label {
             text: qsTr("The export holds every password of “%1” unencrypted: anyone who gets the file can read them all. Keep it safe, and delete it when you no longer need it.").arg(VaultController.vaultName)

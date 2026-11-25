@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplateEditor.qml 0.5.78
+// TemplateEditor.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
 // v0.0.14: Initial release (D-027)
 
@@ -94,14 +95,14 @@ DialogWindow {
 
     ListModel { id: fieldsModel }
 
-    ColumnLayout {
-        spacing: Math.round(8 * Appearance.factor)
-        Layout.preferredWidth: Math.round(520 * Appearance.factor)
+    ExactColumn {
+        gap: 8 * Appearance.factor
+        Layout.preferredWidth: 520 * Appearance.factor
         Layout.fillWidth: true
 
         GridLayout {
             columns: 2
-            columnSpacing: Math.round(8 * Appearance.factor)
+            columnSpacing: 8 * Appearance.factor
             Layout.fillWidth: true
             Label { text: qsTr("Name:") }
             TextField {
@@ -126,19 +127,19 @@ DialogWindow {
         ScrollView {
             id: fieldScroll
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(260 * Appearance.factor)
+            Layout.preferredHeight: 260 * Appearance.factor
             contentWidth: availableWidth
             clip: true
-            ColumnLayout {
+            ExactColumn {
                 width: fieldScroll.availableWidth
                 Repeater {
                     model: fieldsModel
-                    delegate: RowLayout {
+                    delegate: ExactRow {
                         id: fieldRow
                         required property int index
                         required property var model
                         Layout.fillWidth: true
-                        spacing: Math.round(4 * Appearance.factor)
+                        gap: 4 * Appearance.factor
                         TextField {
                             visible: fieldRow.model.role === ""
                             text: fieldRow.model.label

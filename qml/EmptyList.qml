@@ -21,19 +21,20 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// EmptyList.qml 0.6.86
+// EmptyList.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.86: The lists of the audit (D-065)
 // v0.5.83: Initial release (D-063)
 
 // What a list without items shows: an open, empty vault and why; a search
 // that finds nothing only says so.
-ColumnLayout {
+ExactColumn {
     id: emptyList
     property var categories: []
     signal settingsRequested()
-    spacing: Math.round(4 * Appearance.factor)
+    gap: 4 * Appearance.factor
 
     readonly property string filter: VaultController.filter
     readonly property bool searching: VaultController.searchText !== ""
@@ -84,7 +85,7 @@ ColumnLayout {
         opacity: 0.6
         sourceSize: Qt.size(Math.round(150 * Appearance.factor), Math.round(130 * Appearance.factor))
         Layout.alignment: Qt.AlignHCenter
-        Layout.bottomMargin: Math.round(12 * Appearance.factor)
+        Layout.bottomMargin: 12 * Appearance.factor
     }
     Label {
         objectName: "emptyHeadline"
@@ -113,11 +114,11 @@ ColumnLayout {
         text: emptyList.onlineState === "failed" ? qsTr("Check now") : qsTr("Settings…")
         onClicked: emptyList.onlineState === "failed" ? VaultController.checkLeaksNow() : emptyList.settingsRequested()
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Math.round(8 * Appearance.factor)
+        Layout.topMargin: 8 * Appearance.factor
     }
     AuditSource {
         visible: !emptyList.searching && emptyList.onlineState === "done"
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Math.round(8 * Appearance.factor)
+        Layout.topMargin: 8 * Appearance.factor
     }
 }

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.5.82
+// WelcomePage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.82: Its windows in front of the window that asked (D-062)
 // v0.5.78: Choose the master password: the saved password's tick box first; every text wraps with the window (D-061)
 // v0.3.66: As the unlock page, with only Open an existing vault… and Create a new vault…, big (the owner, D-058)
@@ -51,10 +52,10 @@ Item {
     function newVault(over) { overWindow = over || null; storageChoice.mode = "new"; storageChoice.open() }
     function openVault(over) { overWindow = over || null; storageChoice.mode = "open"; storageChoice.open() }
 
-    ColumnLayout {
+    ExactColumn {
         anchors.centerIn: parent
-        spacing: Math.round(12 * Appearance.factor)
-        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(500 * Appearance.factor))
+        gap: 12 * Appearance.factor
+        width: Math.min(parent.width - 32 * Appearance.factor, 500 * Appearance.factor)
 
         // As the unlock page: no vault found, so only open and create (the owner, D-058).
         Image {
@@ -68,12 +69,12 @@ Item {
             text: qsTr("Welcome to Chrono Vault")
             font.pointSize: Appearance.fontPointSize * 2.2
             Layout.alignment: Qt.AlignHCenter
-            Layout.bottomMargin: Math.round(24 * Appearance.factor)
+            Layout.bottomMargin: 24 * Appearance.factor
         }
         // No vault found: said, and looked for again now and then (the owner, D-058).
-        RowLayout {
+        ExactRow {
             visible: VaultController.noVaultFound
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Layout.alignment: Qt.AlignHCenter
             Label {
                 objectName: "primaryNotFound"
@@ -221,12 +222,12 @@ Item {
             secondPassword.clear()
         }
 
-        ColumnLayout {
-            spacing: Math.round(8 * Appearance.factor)
+        ExactColumn {
+            gap: 8 * Appearance.factor
             Label {
                 text: qsTr("This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
             PasswordField {
@@ -255,7 +256,7 @@ Item {
                 // What the primary vault is for, said where it matters (the owner, D-058).
                 // Its text wraps with the window, as every text does (the owner).
                 Layout.fillWidth: true
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 contentItem: Label {
                     leftPadding: saveInPrimary.indicator.width + saveInPrimary.spacing
                     text: saveInPrimary.text
@@ -270,14 +271,14 @@ Item {
                 objectName: "useKeyfileBox"
                 text: qsTr("Also lock the vault with a keyfile")
             }
-            ColumnLayout {
+            ExactColumn {
                 visible: useKeyfile.checked
-                spacing: Math.round(6 * Appearance.factor)
+                gap: 6 * Appearance.factor
                 Label {
                     text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
                     font.bold: true
                     wrapMode: Text.Wrap
-                    Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                    Layout.preferredWidth: 360 * Appearance.factor
                     Layout.fillWidth: true
                 }
                 Label {
@@ -286,10 +287,10 @@ Item {
                           : qsTr("Keyfile: %1").arg(decodeURIComponent(newVaultDialog.keyfile.toString().replace(/^.*\//, "")))
                     elide: Text.ElideMiddle
                     opacity: 0.8
-                    Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                    Layout.preferredWidth: 360 * Appearance.factor
                     Layout.fillWidth: true
                 }
-                RowLayout {
+                ExactRow {
                     Button {
                         text: qsTr("Choose a keyfile…")
                         onClicked: keyfileOpenDialog.open()

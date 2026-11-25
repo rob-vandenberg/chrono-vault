@@ -16,10 +16,13 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
+#include <QFont>
+
 // --- Version ------------------------------------------------------------
-// program_scale.h 0.0.11
+// program_scale.h 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: The font at 100% for the windows (D-069)
 // v0.0.11: A mark every 25% (the owner)
 // v0.0.10: In steps of 5%; every size follows the factor (D-023)
 // v0.0.7: Initial release, as in Chrono Viewer (D-023)
@@ -45,6 +48,10 @@ inline constexpr int programScaleStep = 5;
 // size, never from a size already scaled; every other size follows the same
 // factor through UiScale.
 void applyProgramScale(int percent);
+// The font at 100%, whatever the scale: what Chrono Vault's windows draw their
+// texts in, enlarged by exactly the scale (D-069). The program's own font is the
+// scaled one, for the windows that are not Chrono Vault's (the file dialogs).
+[[nodiscard]] QFont programFont();
 [[nodiscard]] int programScaleInUse();
 
 // Tests only: the font the scale starts from is taken again from the program.

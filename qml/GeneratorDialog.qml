@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GeneratorDialog.qml 0.5.78
+// GeneratorDialog.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
 // v0.0.4: The password in Noto Sans Mono
 // v0.0.3: Initial release
@@ -50,18 +51,18 @@ DialogWindow {
     onShown: makeOne()
     onAccepted: usePassword(password)
 
-    ColumnLayout {
-        spacing: Math.round(8 * Appearance.factor)
+    ExactColumn {
+        gap: 8 * Appearance.factor
 
         TextField {
             text: generatorDialog.password
             readOnly: true
             font.family: "Noto Sans Mono"
             selectByMouse: true
-            Layout.preferredWidth: Math.round(420 * Appearance.factor)
+            Layout.preferredWidth: 420 * Appearance.factor
             Layout.fillWidth: true
         }
-        RowLayout {
+        ExactRow {
             Label { text: qsTr("Length: %1").arg(lengthSlider.value) }
             Slider {
                 id: lengthSlider

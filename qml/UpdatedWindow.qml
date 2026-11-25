@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdatedWindow.qml 0.0.9
+// UpdatedWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.0.9: Initial release, as in Chrono Mail (D-024)
 
 // Linux, once the system has installed the update: Restart or Close. Chrono
@@ -39,7 +40,7 @@ DialogWindow {
         text: Updater.message
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: Math.round(420 * Appearance.factor)
+        Layout.preferredWidth: 420 * Appearance.factor
         Layout.fillWidth: true
     }
 

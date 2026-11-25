@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultOverview.qml 0.6.88
+// VaultOverview.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: The audit above the counts (D-065)
 // v0.5.83: Initial release (D-063)
@@ -45,8 +46,8 @@ ScrollView {
         property string instead: ""
         property color numberColour: palette.text
         Layout.fillWidth: true
-        Layout.preferredWidth: Math.round(160 * Appearance.factor)
-        padding: Math.round(14 * Appearance.factor)
+        Layout.preferredWidth: 160 * Appearance.factor
+        padding: 14 * Appearance.factor
         hoverEnabled: true
         Accessible.name: text + " " + (instead !== "" ? instead : count)
         Keys.onReturnPressed: clicked()
@@ -58,8 +59,8 @@ ScrollView {
             border.width: card.visualFocus ? Math.max(1, Math.round(2 * Appearance.factor)) : 0
             border.color: card.palette.highlight
         }
-        contentItem: ColumnLayout {
-            spacing: Math.round(2 * Appearance.factor)
+        contentItem: ExactColumn {
+            gap: 2 * Appearance.factor
             Label {
                 text: card.text
                 opacity: 0.7
@@ -107,9 +108,9 @@ ScrollView {
         return VaultController.revision >= 0 ? VaultController.items.countOf(filter) : 0
     }
 
-    ColumnLayout {
+    ExactColumn {
         width: overview.availableWidth
-        spacing: Math.round(16 * Appearance.factor)
+        gap: 16 * Appearance.factor
         Label {
             objectName: "overviewName"
             text: VaultController.vaultName
@@ -117,27 +118,27 @@ ScrollView {
             font.pointSize: Appearance.fontPointSize * 1.6
             elide: Text.ElideRight
             Layout.fillWidth: true
-            Layout.margins: Math.round(20 * Appearance.factor)
+            Layout.margins: 20 * Appearance.factor
             Layout.bottomMargin: 0
         }
         // The audit (D-065): the part of the passwords in none of its lists.
-        ColumnLayout {
+        ExactColumn {
             objectName: "auditBlock"
-            spacing: Math.round(8 * Appearance.factor)
+            gap: 8 * Appearance.factor
             Layout.fillWidth: true
-            Layout.maximumWidth: Math.round(640 * Appearance.factor)
-            Layout.leftMargin: Math.round(20 * Appearance.factor)
-            Layout.rightMargin: Math.round(20 * Appearance.factor)
-            RowLayout {
+            Layout.maximumWidth: 640 * Appearance.factor
+            Layout.leftMargin: 20 * Appearance.factor
+            Layout.rightMargin: 20 * Appearance.factor
+            ExactRow {
                 visible: overview.audit.score >= 0
-                spacing: Math.round(12 * Appearance.factor)
+                gap: 12 * Appearance.factor
                 Label {
                     text: qsTr("Score")
                     font.bold: true
                 }
                 Rectangle {
                     Layout.fillWidth: true
-                    implicitHeight: Math.round(10 * Appearance.factor)
+                    implicitHeight: 10 * Appearance.factor
                     radius: height / 2
                     color: Qt.rgba(overview.palette.text.r, overview.palette.text.g, overview.palette.text.b, 0.12)
                     Rectangle {
@@ -158,8 +159,8 @@ ScrollView {
             GridLayout {
                 columns: 2
                 uniformCellWidths: true
-                columnSpacing: Math.round(12 * Appearance.factor)
-                rowSpacing: Math.round(12 * Appearance.factor)
+                columnSpacing: 12 * Appearance.factor
+                rowSpacing: 12 * Appearance.factor
                 Layout.fillWidth: true
                 AuditCard { text: qsTr("Leaked"); list: "leaked"; state: overview.audit.leakState }
                 AuditCard { text: qsTr("Reused"); list: "reused" }
@@ -172,18 +173,18 @@ ScrollView {
         Label {
             text: qsTr("Vault")
             font.bold: true
-            Layout.leftMargin: Math.round(20 * Appearance.factor)
+            Layout.leftMargin: 20 * Appearance.factor
         }
         GridLayout {
             columns: 2
             uniformCellWidths: true
-            columnSpacing: Math.round(12 * Appearance.factor)
-            rowSpacing: Math.round(12 * Appearance.factor)
+            columnSpacing: 12 * Appearance.factor
+            rowSpacing: 12 * Appearance.factor
             Layout.fillWidth: true
-            Layout.maximumWidth: Math.round(640 * Appearance.factor)
-            Layout.leftMargin: Math.round(20 * Appearance.factor)
-            Layout.rightMargin: Math.round(20 * Appearance.factor)
-            Layout.bottomMargin: Math.round(20 * Appearance.factor)
+            Layout.maximumWidth: 640 * Appearance.factor
+            Layout.leftMargin: 20 * Appearance.factor
+            Layout.rightMargin: 20 * Appearance.factor
+            Layout.bottomMargin: 20 * Appearance.factor
             Count {
                 objectName: "countItems"
                 text: qsTr("Items")

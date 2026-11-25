@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.5.82
+// SyncConflictsWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.82: Every key of a list, Ctrl+A, ranges (D-062)
 // v0.5.81: The list as Chrono Mail's: a table whose columns are dragged, line icons, Retry sync, Keep here only, every button greyed and never hidden (D-061)
 // v0.5.78: The buttons "Use Vault" and "Use Import", or "Use This device" and "Use Other device"; the row tick boxes as clear as Check all (D-061)
@@ -79,14 +80,14 @@ DialogWindow {
     property var shares: [0.12, 0.38, 0.2, 0.3]
     property bool whatDragged: false
     property var columnWidths: [80, 200, 120, 160]
-    readonly property int cellPad: Math.round(6 * Appearance.factor)
-    readonly property int tickWidth: Math.round(34 * Appearance.factor)
-    readonly property int whyWidth: Math.ceil(metrics.advanceWidth(qsTr("Why"))) + Math.round(28 * Appearance.factor)
-    readonly property int barRoom: list.contentHeight > list.height ? Math.round(16 * Appearance.factor) : 0
+    readonly property real cellPad: 6 * Appearance.factor
+    readonly property real tickWidth: 34 * Appearance.factor
+    readonly property real whyWidth: Math.ceil(metrics.advanceWidth(qsTr("Why")) * Appearance.factor) + 28 * Appearance.factor
+    readonly property real barRoom: list.contentHeight > list.height ? 16 * Appearance.factor : 0
     readonly property int freeWidth: Math.max(0, table.width - tickWidth - whyWidth - barRoom)
     onFreeWidthChanged: fitColumns()
     function smallestOf(column) {
-        return Math.ceil(metrics.advanceWidth(columnNames[column])) + 2 * cellPad + 4
+        return Math.ceil(metrics.advanceWidth(columnNames[column]) * Appearance.factor) + 2 * cellPad + 4
     }
     function fitColumns() {
         if (freeWidth <= 0)
@@ -98,7 +99,7 @@ DialogWindow {
         if (!whatDragged) {
             let what = smallest[0]
             for (let i = 0; i < rows.length; ++i)
-                what = Math.max(what, Math.ceil(metrics.advanceWidth(rows[i].what || "")) + 2 * cellPad + 2)
+                what = Math.max(what, Math.ceil(metrics.advanceWidth(rows[i].what || "") * Appearance.factor) + 2 * cellPad + 2)
             widths[0] = Math.max(smallest[0], Math.min(what, freeWidth - smallest[1] - smallest[2] - smallest[3]))
             rest = [1, 2, 3]
             room -= widths[0]
@@ -251,8 +252,8 @@ DialogWindow {
         ToolTip.delay: 500
     }
 
-    ColumnLayout {
-        spacing: Math.round(8 * Appearance.factor)
+    ExactColumn {
+        gap: 8 * Appearance.factor
         Layout.fillWidth: true
         Layout.fillHeight: true
 
@@ -270,14 +271,14 @@ DialogWindow {
             id: table
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: Math.round(160 * Appearance.factor)
+            Layout.minimumHeight: 160 * Appearance.factor
             color: conflictsWindow.palette.base
 
             // The header bar.
             Rectangle {
                 id: header
                 width: parent.width
-                height: metrics.height + Math.round(8 * Appearance.factor)
+                height: metrics.height * Appearance.factor + 8 * Appearance.factor
                 color: conflictsWindow.palette.button
                 Row {
                     height: parent.height
@@ -305,8 +306,8 @@ DialogWindow {
                             MouseArea {
                                 property real from: 0
                                 anchors.right: parent.right
-                                anchors.rightMargin: -Math.round(4 * Appearance.factor)
-                                width: Math.round(8 * Appearance.factor)
+                                anchors.rightMargin: -4 * Appearance.factor
+                                width: 8 * Appearance.factor
                                 height: parent.height
                                 enabled: headerCell.index < 3
                                 z: 1
@@ -406,7 +407,7 @@ DialogWindow {
                     readonly property color ink: selected ? conflictsWindow.palette.highlightedText : conflictsWindow.palette.text
                     objectName: "conflictRow_" + index
                     width: list.width
-                    height: metrics.height + Math.round(8 * Appearance.factor)
+                    height: metrics.height * Appearance.factor + 8 * Appearance.factor
                     color: selected ? conflictsWindow.palette.highlight : "transparent"
                     signal doubleClicked()
                     onDoubleClicked: conflictWindow.showItem(modelData.itemId)
@@ -464,15 +465,15 @@ DialogWindow {
                 visible: conflictsWindow.rows.length === 0
                 anchors.top: header.bottom
                 anchors.left: parent.left
-                anchors.margins: Math.round(8 * Appearance.factor)
+                anchors.margins: 8 * Appearance.factor
                 text: qsTr("No conflicts to settle.")
                 opacity: 0.7
             }
         }
 
         // The ticked rows, settled whole. Greyed, never hidden.
-        RowLayout {
-            spacing: Math.round(6 * Appearance.factor)
+        ExactRow {
+            gap: 6 * Appearance.factor
             Button {
                 objectName: "useLeftButton"
                 text: qsTr("Use %1").arg(conflictsWindow.sides.left)
@@ -526,10 +527,10 @@ DialogWindow {
         // What the Why icons mean, in the same words as their hover texts.
         Repeater {
             model: ["both", "deletedThere", "deletedHere", "imported"]
-            delegate: RowLayout {
+            delegate: ExactRow {
                 id: legend
                 required property string modelData
-                spacing: Math.round(6 * Appearance.factor)
+                gap: 6 * Appearance.factor
                 Why { kind: legend.modelData; icon.color: conflictsWindow.palette.windowText }
                 Label { text: conflictsWindow.whyWords[legend.modelData] }
             }
@@ -584,9 +585,9 @@ DialogWindow {
             waiting = waiting.slice(1)
             Qt.callLater(showFirst)
         }
-        ColumnLayout {
-            spacing: Math.round(8 * Appearance.factor)
-            Layout.preferredWidth: Math.round(380 * Appearance.factor)
+        ExactColumn {
+            gap: 8 * Appearance.factor
+            Layout.preferredWidth: 380 * Appearance.factor
             Layout.fillWidth: true
             Label {
                 text: retryPassword.waiting.length > 0

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.6.88
+// VaultPage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: The audit: its group in the sidebar, its lists, an item left out of it (D-065)
 // v0.5.83: The focused item apart from the selected ones; gray marks with a blue bar; Change Category; the empty
@@ -105,8 +106,8 @@ Item {
 
     // The sidebar collapsed to its icons (D-042).
     readonly property bool collapsed: VaultController.sidebarCollapsed
-    readonly property int collapsedWidth: Math.round(64 * Appearance.factor)
-    property int expandedWidth: Math.round(220 * Appearance.factor)
+    readonly property real collapsedWidth: 64 * Appearance.factor
+    property real expandedWidth: 220 * Appearance.factor
     function setCollapsed(on) {
         if (on === collapsed)
             return
@@ -117,11 +118,11 @@ Item {
     }
     Component.onCompleted: if (collapsed) vaultColumn.SplitView.preferredWidth = collapsedWidth
     // The narrowest the expanded sidebar gets (the owner, 23 November 2026).
-    readonly property int sidebarMinimum: Math.round(180 * Appearance.factor)
+    readonly property real sidebarMinimum: 180 * Appearance.factor
     // Dragging its splitter: the sidebar holds at its minimum, or at its icons,
     // while the pointer travels 80 pixels more; then it snaps shut or open, as
     // the collapse button does (the owner, 23 November 2026).
-    readonly property int snapTravel: Math.round(80 * Appearance.factor)
+    readonly property real snapTravel: 80 * Appearance.factor
     function dragSidebarTo(x) {
         if (!collapsed && x < sidebarMinimum - snapTravel) {
             setCollapsed(true)
@@ -145,8 +146,8 @@ Item {
         Rectangle {
             objectName: "chosenBar"
             visible: mark.focused
-            width: Math.round(3 * Appearance.factor)
-            height: parent.height - Math.round(12 * Appearance.factor)
+            width: 3 * Appearance.factor
+            height: parent.height - 12 * Appearance.factor
             anchors.verticalCenter: parent.verticalCenter
             radius: width / 2
             color: vaultPage.palette.highlight
@@ -188,7 +189,7 @@ Item {
                                          ? VaultController.items.countOf(countFilter) : 0
         readonly property bool countShown: counted && VaultController.showItemCounts && !vaultPage.collapsed
                                            && itemCount > 0
-        rightPadding: padding + (countShown ? countLabel.implicitWidth + Math.round(10 * Appearance.factor) : 0)
+        rightPadding: padding + (countShown ? countLabel.implicitWidth + 10 * Appearance.factor : 0)
         Label {
             id: countLabel
             objectName: "count_" + parent.countFilter
@@ -196,7 +197,7 @@ Item {
             text: parent.itemCount
             opacity: 0.6
             anchors.right: parent.right
-            anchors.rightMargin: Math.round(10 * Appearance.factor)
+            anchors.rightMargin: 10 * Appearance.factor
             anchors.verticalCenter: parent.verticalCenter
         }
     }
@@ -211,14 +212,14 @@ Item {
     }
     // A group's heading: its triangle folds or unfolds the group, in both
     // states of the sidebar; the name only while expanded (D-042).
-    component GroupHeading: RowLayout {
+    component GroupHeading: ExactRow {
         id: heading
         property string title: ""
         property string key: ""
         property bool folded: false
         signal foldToggled()
-        spacing: 0
-        Layout.topMargin: Math.round(14 * Appearance.factor)
+        gap: 0
+        Layout.topMargin: 14 * Appearance.factor
         Layout.fillWidth: true
         ToolButton {
             objectName: "foldButton_" + heading.key
@@ -227,8 +228,8 @@ Item {
             Layout.fillWidth: vaultPage.collapsed
             text: heading.folded ? "▸" : "▾"
             opacity: 0.7
-            implicitWidth: Math.round(24 * Appearance.factor)
-            implicitHeight: Math.round(22 * Appearance.factor)
+            implicitWidth: 24 * Appearance.factor
+            implicitHeight: 22 * Appearance.factor
             onClicked: heading.foldToggled()
             ToolTip.visible: vaultPage.collapsed && hovered
             ToolTip.text: heading.title
@@ -594,7 +595,7 @@ Item {
         // as thin as before (D-042).
         handle: Item {
             id: splitHandle
-            implicitWidth: Math.max(8, Math.round(8 * Appearance.factor))
+            implicitWidth: Math.max(8, 8 * Appearance.factor)
             // The sidebar's own splitter, while held: where the pointer is
             // decides whether the sidebar snaps shut or open.
             Timer {
@@ -620,11 +621,11 @@ Item {
             objectName: "vaultColumn"
             // View > Hide Sidebar (D-039).
             visible: !VaultController.sidebarHidden
-            SplitView.preferredWidth: Math.round(220 * Appearance.factor)
+            SplitView.preferredWidth: 220 * Appearance.factor
             // Collapsed: a narrow column of fixed width (D-042).
             SplitView.minimumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : vaultPage.sidebarMinimum
             SplitView.maximumWidth: vaultPage.collapsed ? vaultPage.collapsedWidth : Number.POSITIVE_INFINITY
-            padding: vaultPage.collapsed ? Math.round(6 * Appearance.factor) : Math.round(12 * Appearance.factor)
+            padding: vaultPage.collapsed ? 6 * Appearance.factor : 12 * Appearance.factor
             // The cards' own colour, the theme's Base (the owner, 23 November 2026).
             background: Rectangle { color: vaultPage.palette.base }
 
@@ -682,10 +683,10 @@ Item {
                 contentWidth: availableWidth
                 clip: true
 
-                ColumnLayout {
+                ExactColumn {
                     id: sideColumn
                     width: columnScroll.availableWidth
-                    spacing: Math.round(2 * Appearance.factor)
+                    gap: 2 * Appearance.factor
 
                     // Collapses the sidebar to its icons, or expands it (D-042).
                     ToolButton {
@@ -703,14 +704,14 @@ Item {
                         id: vaultChooser
                         objectName: "vaultChooser"
                         Layout.fillWidth: true
-                        Layout.bottomMargin: Math.round(14 * Appearance.factor)
+                        Layout.bottomMargin: 14 * Appearance.factor
                         onClicked: vaultMenu.popup(this, 0, height)
                         ToolTip.visible: vaultPage.collapsed && hovered
                         ToolTip.text: VaultController.vaultName
                         // Collapsed: the icon with its ▾ below it (D-042).
                         contentItem: GridLayout {
                             columns: vaultPage.collapsed ? 1 : 3
-                            columnSpacing: Math.round(10 * Appearance.factor)
+                            columnSpacing: 10 * Appearance.factor
                             rowSpacing: 0
                             Image {
                                 Layout.alignment: Qt.AlignHCenter
@@ -719,9 +720,9 @@ Item {
                                 Layout.preferredWidth: Math.round(36 * Appearance.factor)
                                 Layout.preferredHeight: Math.round(36 * Appearance.factor)
                             }
-                            ColumnLayout {
+                            ExactColumn {
                                 visible: !vaultPage.collapsed
-                                spacing: 0
+                                gap: 0
                                 Layout.fillWidth: true
                                 Label {
                                     objectName: "vaultName"
@@ -861,7 +862,7 @@ Item {
                                  && vaultColumn.tagList.length === 0
                         text: qsTr("No tags yet.")
                         opacity: 0.6
-                        Layout.leftMargin: Math.round(8 * Appearance.factor)
+                        Layout.leftMargin: 8 * Appearance.factor
                     }
                     Repeater {
                         model: VaultController.showTags && !VaultController.tagsFolded ? vaultColumn.tagList : []
@@ -873,7 +874,7 @@ Item {
                             icon.source: "qrc:/icons/tag.svg"
                             icon.color: vaultPage.palette.buttonText
                             // A nested tag stands under the one above it.
-                            leftPadding: Math.round((8 + (vaultPage.collapsed ? 0 : 16 * modelData.depth)) * Appearance.factor)
+                            leftPadding: (8 + (vaultPage.collapsed ? 0 : 16 * modelData.depth)) * Appearance.factor
                             chosen: VaultController.filter === "tag:" + modelData.tag
                             Layout.fillWidth: true
                             onClicked: vaultPage.choose("tag:" + modelData.tag)
@@ -995,10 +996,10 @@ Item {
         }
 
         // Middle: the search, the order, and the items under letter headings.
-        ColumnLayout {
-            SplitView.preferredWidth: Math.round(300 * Appearance.factor)
-            SplitView.minimumWidth: Math.round(200 * Appearance.factor)
-            spacing: Math.round(4 * Appearance.factor)
+        ExactColumn {
+            SplitView.preferredWidth: 300 * Appearance.factor
+            SplitView.minimumWidth: 200 * Appearance.factor
+            gap: 4 * Appearance.factor
 
             TextField {
                 id: searchField
@@ -1020,14 +1021,14 @@ Item {
                 text: VaultController.searchText
                 onTextEdited: VaultController.searchText = text
                 Layout.fillWidth: true
-                Layout.topMargin: Math.round(8 * Appearance.factor)
-                Layout.leftMargin: Math.round(13 * Appearance.factor)
-                Layout.rightMargin: Math.round(13 * Appearance.factor)
+                Layout.topMargin: 8 * Appearance.factor
+                Layout.leftMargin: 13 * Appearance.factor
+                Layout.rightMargin: 13 * Appearance.factor
             }
 
-            RowLayout {
-                spacing: Math.round(2 * Appearance.factor)
-                Layout.leftMargin: Math.round(13 * Appearance.factor)
+            ExactRow {
+                gap: 2 * Appearance.factor
+                Layout.leftMargin: 13 * Appearance.factor
                 Label {
                     text: qsTr("Sort By:")
                     opacity: 0.7
@@ -1049,10 +1050,10 @@ Item {
             }
 
             // The Trash as a whole (D-062).
-            RowLayout {
+            ExactRow {
                 visible: vaultPage.inTrash
-                spacing: Math.round(6 * Appearance.factor)
-                Layout.leftMargin: Math.round(13 * Appearance.factor)
+                gap: 6 * Appearance.factor
+                Layout.leftMargin: 13 * Appearance.factor
                 readonly property bool any: VaultController.revision >= 0 && VaultController.items.countOf("trash") > 0
                 Button {
                     objectName: "restoreAllButton"
@@ -1087,8 +1088,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 // 5 pixels more at the left and right (the owner, 23 November 2026).
-                Layout.leftMargin: Math.round(5 * Appearance.factor)
-                Layout.rightMargin: Math.round(5 * Appearance.factor)
+                Layout.leftMargin: 5 * Appearance.factor
+                Layout.rightMargin: 5 * Appearance.factor
                 activeFocusOnTab: true
                 keyNavigationEnabled: false
                 highlightMoveDuration: 0 // the view is there at once, however far
@@ -1158,9 +1159,9 @@ Item {
                     text: section
                     font.bold: true
                     opacity: 0.7
-                    leftPadding: Math.round(12 * Appearance.factor)
-                    topPadding: Math.round(6 * Appearance.factor)
-                    bottomPadding: Math.round(2 * Appearance.factor)
+                    leftPadding: 12 * Appearance.factor
+                    topPadding: 6 * Appearance.factor
+                    bottomPadding: 2 * Appearance.factor
                 }
 
                 delegate: ItemDelegate {
@@ -1175,16 +1176,16 @@ Item {
                         focused: model.itemId === vaultPage.chosenItemId
                         hovered: listEntry.hovered
                     }
-                    contentItem: RowLayout {
-                        spacing: Math.round(10 * Appearance.factor)
+                    contentItem: ExactRow {
+                        gap: 10 * Appearance.factor
                         Image {
                             source: model.icon
                             sourceSize: Qt.size(Math.round(36 * Appearance.factor), Math.round(36 * Appearance.factor))
                             Layout.preferredWidth: Math.round(36 * Appearance.factor)
                             Layout.preferredHeight: Math.round(36 * Appearance.factor)
                         }
-                        ColumnLayout {
-                            spacing: Math.round(2 * Appearance.factor)
+                        ExactColumn {
+                            gap: 2 * Appearance.factor
                             Layout.fillWidth: true
                             Label {
                                 text: model.title
@@ -1208,7 +1209,7 @@ Item {
                         Rectangle {
                             objectName: "mergedMark"
                             visible: model.merged
-                            implicitWidth: Math.round(8 * Appearance.factor)
+                            implicitWidth: 8 * Appearance.factor
                             implicitHeight: implicitWidth
                             radius: width / 2
                             color: "#d32f2f"
@@ -1247,7 +1248,7 @@ Item {
                 EmptyList {
                     objectName: "emptyList"
                     anchors.centerIn: parent
-                    width: parent.width - Math.round(24 * Appearance.factor)
+                    width: parent.width - 24 * Appearance.factor
                     visible: itemList.count === 0
                     categories: vaultColumn.categoryList
                     onSettingsRequested: vaultPage.leakSettingRequested()
@@ -1388,13 +1389,13 @@ Item {
             action = doIt
             open()
         }
-        ColumnLayout {
+        ExactColumn {
             Label {
                 objectName: "placeQuestionText"
                 text: placeQuestion.question
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -1420,12 +1421,12 @@ Item {
             what = name
             open()
         }
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: qsTr("%1 will be removed from the vault for good. This cannot be undone.").arg(foreverQuestion.what)
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }

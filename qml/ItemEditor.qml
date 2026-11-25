@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.5.82
+// ItemEditor.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.82: Edit puts the keyboard in the title, Esc cancels, Ctrl+S saves (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
 // v0.3.62: Save closes the editor on the saved item (the owner)
@@ -72,7 +73,7 @@ Item {
     property var afterAsking: null
     property var afterCancelling: null
 
-    readonly property int labelWidth: Math.round(170 * Appearance.factor) // 50 to the left, as the view (the owner, 23 November 2026)
+    readonly property real labelWidth: 170 * Appearance.factor // 50 to the left, as the view (the owner, 23 November 2026)
     readonly property color lineColour: Qt.rgba(palette.text.r, palette.text.g, palette.text.b, 0.14)
     // The reference program's field types, in the order its Field Options lists them.
     // The field types, with the reference program's names, in its order
@@ -268,17 +269,17 @@ Item {
     ListModel { id: tagsModel }
     ListModel { id: attachmentsModel }
 
-    ColumnLayout {
+    ExactColumn {
         anchors.fill: parent
         visible: editor.itemId !== ""
-        spacing: 0
+        gap: 0
 
         // "Add ▾" at the left; the blue Save and Cancel at the right, 12
         // pixels between the buttons and the icon below (the owner, D-050).
-        RowLayout {
+        ExactRow {
             Layout.fillWidth: true
-            Layout.margins: Math.round(16 * Appearance.factor)
-            Layout.bottomMargin: Math.round(14 * Appearance.factor)
+            Layout.margins: 16 * Appearance.factor
+            Layout.bottomMargin: 14 * Appearance.factor
             Button {
                 objectName: "addButton"
                 text: qsTr("Add") + "  ▾"
@@ -325,17 +326,17 @@ Item {
         }
 
         // The icon with its pencil badge, and the title across the width.
-        RowLayout {
-            spacing: Math.round(16 * Appearance.factor)
+        ExactRow {
+            gap: 16 * Appearance.factor
             Layout.fillWidth: true
-            Layout.leftMargin: Math.round(16 * Appearance.factor)
-            Layout.rightMargin: Math.round(16 * Appearance.factor)
-            Layout.bottomMargin: Math.round(16 * Appearance.factor)
+            Layout.leftMargin: 16 * Appearance.factor
+            Layout.rightMargin: 16 * Appearance.factor
+            Layout.bottomMargin: 16 * Appearance.factor
             // A click anywhere on the icon opens the icon picker (D-050).
             Item {
                 objectName: "itemIcon"
-                Layout.preferredWidth: Math.round(52 * Appearance.factor)
-                Layout.preferredHeight: Math.round(52 * Appearance.factor)
+                Layout.preferredWidth: 52 * Appearance.factor
+                Layout.preferredHeight: 52 * Appearance.factor
                 Image {
                     objectName: "itemIconImage"
                     anchors.fill: parent
@@ -344,11 +345,11 @@ Item {
                 }
                 ToolButton {
                     objectName: "iconBadge"
-                    width: Math.round(22 * Appearance.factor)
+                    width: 22 * Appearance.factor
                     height: width
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.margins: -Math.round(4 * Appearance.factor)
+                    anchors.margins: -4 * Appearance.factor
                     icon.source: "qrc:/icons/edit.svg"
                     icon.color: editor.palette.buttonText
                     icon.width: Math.round(12 * Appearance.factor)
@@ -392,17 +393,17 @@ Item {
             contentWidth: availableWidth
             clip: true
 
-            ColumnLayout {
-                width: scroller.availableWidth - 2 * Math.round(24 * Appearance.factor)
-                x: Math.round(24 * Appearance.factor)
-                spacing: Math.round(4 * Appearance.factor)
+            ExactColumn {
+                width: scroller.availableWidth - 2 * 24 * Appearance.factor
+                x: 24 * Appearance.factor
+                gap: 4 * Appearance.factor
 
-                Item { Layout.preferredHeight: Math.round(12 * Appearance.factor) }
+                Item { Layout.preferredHeight: 12 * Appearance.factor }
 
                 Column {
                     id: fieldColumn
                     Layout.fillWidth: true
-                    spacing: Math.round(4 * Appearance.factor)
+                    spacing: 4 * Appearance.factor
 
                     // The row whose top is nearest to y, for dragging.
                     function indexAt(y) {
@@ -429,8 +430,8 @@ Item {
                             // Kept but never shown, as in the reference program (D-033).
                             visible: !(model.deleted === true || model.kind === "hidden")
                             width: fieldColumn.width
-                            height: visible ? Math.max(Math.round(44 * Appearance.factor),
-                                                       line.implicitHeight + Math.round(12 * Appearance.factor)) : 0
+                            height: visible ? Math.max(44 * Appearance.factor,
+                                                       line.implicitHeight + 12 * Appearance.factor) : 0
 
                             HoverHandler { id: rowHover }
                             Rectangle {
@@ -440,12 +441,12 @@ Item {
                                 visible: fieldRow.active
                             }
 
-                            RowLayout {
+                            ExactRow {
                                 id: line
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: Math.round(12 * Appearance.factor)
+                                gap: 12 * Appearance.factor
 
                                 // The drag handle: drag it up or down to move the field.
                                 Label {
@@ -453,11 +454,11 @@ Item {
                                     text: "≡"
                                     font.pointSize: Appearance.fontPointSize * 1.3
                                     opacity: fieldRow.active ? 0.8 : 0
-                                    Layout.leftMargin: Math.round(10 * Appearance.factor)
+                                    Layout.leftMargin: 10 * Appearance.factor
                                     MouseArea {
                                         id: dragArea
                                         anchors.fill: parent
-                                        anchors.margins: -Math.round(6 * Appearance.factor)
+                                        anchors.margins: -6 * Appearance.factor
                                         cursorShape: Qt.SizeVerCursor
                                         onPositionChanged: function(mouse) {
                                             const point = mapToItem(fieldColumn, mouse.x, mouse.y)
@@ -474,9 +475,9 @@ Item {
                                     horizontalAlignment: Text.AlignRight
                                     opacity: 0.7
                                     elide: Text.ElideRight
-                                    Layout.preferredWidth: editor.labelWidth - Math.round(30 * Appearance.factor)
+                                    Layout.preferredWidth: editor.labelWidth - 30 * Appearance.factor
                                     Layout.alignment: fieldRow.model.kind === "multiline" ? Qt.AlignTop : Qt.AlignVCenter
-                                    Layout.topMargin: fieldRow.model.kind === "multiline" ? Math.round(8 * Appearance.factor) : 0
+                                    Layout.topMargin: fieldRow.model.kind === "multiline" ? 8 * Appearance.factor : 0
                                 }
                                 // A section's heading, bold, at the value column.
                                 Label {
@@ -486,9 +487,9 @@ Item {
                                     textFormat: Text.PlainText
                                     font.bold: true
                                     opacity: 0.7
-                                    leftPadding: editor.labelWidth - Math.round(18 * Appearance.factor)
+                                    leftPadding: editor.labelWidth - 18 * Appearance.factor
                                     Layout.fillWidth: true
-                                    Layout.topMargin: Math.round(10 * Appearance.factor)
+                                    Layout.topMargin: 10 * Appearance.factor
                                 }
                                 TextField {
                                     visible: !fieldRow.isSection && !fieldRow.isSecret && fieldRow.model.kind !== "multiline"
@@ -515,7 +516,7 @@ Item {
                                     text: fieldRow.model.value
                                     wrapMode: TextEdit.Wrap
                                     Layout.fillWidth: true
-                                    Layout.minimumHeight: Math.round(80 * Appearance.factor)
+                                    Layout.minimumHeight: 80 * Appearance.factor
                                     onTextChanged: {
                                         if (text !== fieldRow.model.value) {
                                             fieldsModel.setProperty(fieldRow.index, "value", text)
@@ -547,13 +548,13 @@ Item {
                 Label {
                     text: qsTr("Notes")
                     opacity: 0.7
-                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                    Layout.topMargin: 16 * Appearance.factor
                 }
                 TextArea {
                     id: noteArea
                     objectName: "noteArea"
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(implicitHeight, Math.round(120 * Appearance.factor))
+                    Layout.preferredHeight: Math.max(implicitHeight, 120 * Appearance.factor)
                     placeholderText: qsTr("Add Note")
                     wrapMode: TextEdit.Wrap
                     onTextChanged: if (activeFocus) editor.changed = true
@@ -563,11 +564,11 @@ Item {
                 Label {
                     text: qsTr("Tags")
                     opacity: 0.7
-                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                    Layout.topMargin: 16 * Appearance.factor
                 }
                 Flow {
                     Layout.fillWidth: true
-                    spacing: Math.round(6 * Appearance.factor)
+                    spacing: 6 * Appearance.factor
                     visible: tagsModel.count > 0
                     Repeater {
                         model: tagsModel
@@ -596,11 +597,11 @@ Item {
                     visible: attachmentsModel.count > 0 || editor.waitingFor.length > 0
                     text: qsTr("Attachments")
                     opacity: 0.7
-                    Layout.topMargin: Math.round(16 * Appearance.factor)
+                    Layout.topMargin: 16 * Appearance.factor
                 }
                 Repeater {
                     model: attachmentsModel
-                    delegate: RowLayout {
+                    delegate: ExactRow {
                         required property int index
                         required property string name
                         required property double size
@@ -635,7 +636,7 @@ Item {
                     opacity: 0.7
                 }
 
-                Item { Layout.preferredHeight: Math.round(24 * Appearance.factor) }
+                Item { Layout.preferredHeight: 24 * Appearance.factor }
             }
         }
     }
@@ -715,9 +716,9 @@ Item {
         }
         GridLayout {
             columns: 2
-            columnSpacing: Math.round(24 * Appearance.factor)
-            rowSpacing: Math.round(12 * Appearance.factor)
-            Layout.preferredWidth: Math.round(420 * Appearance.factor)
+            columnSpacing: 24 * Appearance.factor
+            rowSpacing: 12 * Appearance.factor
+            Layout.preferredWidth: 420 * Appearance.factor
             Layout.fillWidth: true
             Label { text: fieldOptions.isSection ? qsTr("Section Name") : qsTr("Field Name") }
             TextField {
@@ -804,11 +805,11 @@ Item {
         memoryName: "readingAttachment"
         title: qsTr("A file is being read")
         standardButtons: Dialog.Ok
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: qsTr("The file you added is still being read. Try again in a moment.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -820,11 +821,11 @@ Item {
         objectName: "unsavedDialog"
         title: qsTr("Save your changes?")
         standardButtons: Dialog.Save | Dialog.Discard | Dialog.Cancel
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: qsTr("“%1” has changes that are not saved yet.").arg(titleField.text)
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(360 * Appearance.factor)
+                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }

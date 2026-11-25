@@ -20,17 +20,18 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// CategoriesPage.qml 0.6.88
+// CategoriesPage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.88: Initial release, out of CustomizePage.qml (D-066)
 
 // Settings > Categories (D-027, D-056, D-066): those of the unlocked vault,
 // shown or hidden, edited, reset or deleted. Kept in the vault at once.
-ColumnLayout {
+ExactColumn {
     id: categoriesPage
     objectName: "categoriesPage"
-    spacing: Math.round(8 * Appearance.factor)
+    gap: 8 * Appearance.factor
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
     readonly property var categoryList: VaultController.revision >= 0 ? VaultController.categories() : []
@@ -50,11 +51,11 @@ ColumnLayout {
 
     Repeater {
         model: categoriesPage.unlocked ? categoriesPage.categoryList : []
-        delegate: RowLayout {
+        delegate: ExactRow {
             id: categoryRow
             required property var modelData
             Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Image {
                 source: categoryRow.modelData.icon
                 sourceSize: Qt.size(Math.round(20 * Appearance.factor), Math.round(20 * Appearance.factor))
@@ -120,14 +121,14 @@ ColumnLayout {
             categoryName.forceActiveFocus()
             categoryName.selectAll()
         }
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: qsTr("Name of the category:")
             }
             TextField {
                 id: categoryName
                 objectName: "categoryNameField"
-                Layout.preferredWidth: Math.round(320 * Appearance.factor)
+                Layout.preferredWidth: 320 * Appearance.factor
                 Layout.fillWidth: true
                 onAccepted: categoryDialog.accept()
             }

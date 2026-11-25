@@ -23,9 +23,10 @@ class QJSEngine;
 class QQmlEngine;
 
 // --- Version ------------------------------------------------------------
-// scaling.h 0.0.10
+// scaling.h 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.10: Initial release (D-023)
 
 namespace chrono_vault {
@@ -52,6 +53,10 @@ public:
 
     // A size in pixels at the factor now; never below 1.
     [[nodiscard]] Q_INVOKABLE int px(double pixels) const;
+
+    // A size rounded up to what it is in whole pixels at 100%, as Qt's layouts
+    // do there, at the factor now: a layout is the one of 100%, enlarged (D-069).
+    Q_INVOKABLE static double whole(double pixels);
 
 signals:
     void factorChanged();

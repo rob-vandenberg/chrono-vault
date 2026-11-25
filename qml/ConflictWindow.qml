@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.5.82
+// ConflictWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.82: The normal scroll bar, Enter applies; the split button with 5 pixels free at its sides (D-062)
 // v0.5.81: As Chrono Mail's: every field, the choices in the second accent, a split, Retry sync, Keep here only and Keep both chosen and applied (D-061)
 // v0.5.78: The sides "Vault" and "Import", or "This device" and "Other device"; every kind of difference; the header's choices in line with the rows' (D-061)
@@ -66,10 +67,10 @@ DialogWindow {
     // Chrono Mail's second accent: what differs in a sync conflict.
     readonly property color accent: palette.window.hslLightness < 0.5 ? "#c86400" : "#c62828"
     readonly property int line: Math.max(2, Math.round(2 * Appearance.factor))
-    readonly property int innerSide: Math.round(4 * Appearance.factor)
-    readonly property int innerTop: Math.round(2 * Appearance.factor)
+    readonly property real innerSide: 4 * Appearance.factor
+    readonly property real innerTop: 2 * Appearance.factor
     readonly property int circleSize: Math.round(14 * Appearance.factor)
-    readonly property int circleGap: Math.round(6 * Appearance.factor)
+    readonly property real circleGap: 6 * Appearance.factor
     // Where the text beside a circle begins.
     readonly property int textLeft: line + innerSide + circleSize + circleGap
 
@@ -176,7 +177,7 @@ DialogWindow {
     function fitWidth() {
         const room = Appearance.screenRoom(conflictWindow)
         const kept = given()
-        const wanted = kept ? kept.width : Math.round(720 * Appearance.factor)
+        const wanted = kept ? kept.width : 720 * Appearance.factor
         width = Math.max(minimumWidth, Math.min(wanted, room.width))
     }
     function fitHeight() {
@@ -315,7 +316,7 @@ DialogWindow {
         indicator: Rectangle {
             x: choice.leftPadding
             // In the middle of the text's first line.
-            y: choice.topPadding + Math.round((lineHeight.height - height) / 2)
+            y: choice.topPadding + Math.round((lineHeight.height * Appearance.factor - height) / 2)
             implicitWidth: conflictWindow.circleSize
             implicitHeight: implicitWidth
             radius: width / 2
@@ -356,7 +357,7 @@ DialogWindow {
         required property string side
         readonly property bool isSplit: conflictWindow.split.indexOf(row.index) >= 0
         readonly property bool choosing: row.differs && !isSplit
-        implicitWidth: Math.round(120 * Appearance.factor)
+        implicitWidth: 120 * Appearance.factor
         implicitHeight: choosing ? outline.height : texts.height
         Rectangle {
             id: outline
@@ -405,16 +406,16 @@ DialogWindow {
         }
     }
 
-    ColumnLayout {
+    ExactColumn {
         id: contentLayout
-        spacing: Math.round(8 * Appearance.factor)
+        gap: 8 * Appearance.factor
         Layout.fillWidth: true
         Layout.fillHeight: true
 
         GridLayout {
             columns: 2
-            columnSpacing: Math.round(12 * Appearance.factor)
-            rowSpacing: Math.round(4 * Appearance.factor)
+            columnSpacing: 12 * Appearance.factor
+            rowSpacing: 4 * Appearance.factor
             Layout.fillWidth: true
             Label { text: qsTr("What") }
             Label { text: conflictWindow.conflict.what || ""; textFormat: Text.PlainText; wrapMode: Text.Wrap; Layout.fillWidth: true }
@@ -448,7 +449,7 @@ DialogWindow {
             id: fields
             objectName: "conflictFields"
             // The header and about three rows.
-            readonly property int smallest: Math.round(130 * Appearance.factor)
+            readonly property real smallest: 130 * Appearance.factor
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredHeight: smallest
@@ -457,7 +458,7 @@ DialogWindow {
             clip: true
             // The normal scroll bar (D-049), in room of its own beside the
             // rows, so no outline lies under it.
-            rightPadding: fieldsBar.width + Math.round(6 * Appearance.factor)
+            rightPadding: fieldsBar.width + 6 * Appearance.factor
             ScrollBar.vertical: ScrollBar {
                 id: fieldsBar
                 objectName: "conflictScrollBar"
@@ -472,8 +473,8 @@ DialogWindow {
                 id: choices
                 width: fields.availableWidth
                 columns: 4
-                columnSpacing: Math.round(10 * Appearance.factor)
-                rowSpacing: Math.round(4 * Appearance.factor)
+                columnSpacing: 10 * Appearance.factor
+                rowSpacing: 4 * Appearance.factor
 
                 Label {
                     text: qsTr("Field")
@@ -517,12 +518,12 @@ DialogWindow {
                         Layout.row: index + 1
                         Layout.column: 0
                         Layout.alignment: Qt.AlignTop
-                        Layout.maximumWidth: Math.round(200 * Appearance.factor)
+                        Layout.maximumWidth: 200 * Appearance.factor
                         spacing: choices.rowSpacing
                         Repeater {
                             model: conflictWindow.split.indexOf(nameCell.modelData.index) >= 0 ? 2 : 1
                             delegate: Label {
-                                width: Math.min(implicitWidth, Math.round(200 * Appearance.factor))
+                                width: Math.min(implicitWidth, 200 * Appearance.factor)
                                 topPadding: conflictWindow.line + conflictWindow.innerTop
                                 bottomPadding: topPadding
                                 text: nameCell.modelData.label
@@ -573,10 +574,10 @@ DialogWindow {
                         Layout.row: index + 1
                         Layout.column: 3
                         Layout.alignment: Qt.AlignTop
-                        Layout.preferredHeight: lineHeightOfRow.height + 2 * (conflictWindow.line + conflictWindow.innerTop)
+                        Layout.preferredHeight: lineHeightOfRow.height * Appearance.factor + 2 * (conflictWindow.line + conflictWindow.innerTop)
                         Layout.preferredWidth: implicitWidth
                         padding: 0
-                        horizontalPadding: 1 + Math.round(5 * Appearance.factor)
+                        horizontalPadding: 1 + 5 * Appearance.factor
                         icon.source: "qrc:/icons/split.svg"
                         icon.width: Math.round(20 * Appearance.factor)
                         icon.height: Math.round(20 * Appearance.factor)

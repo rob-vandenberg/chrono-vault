@@ -17,6 +17,7 @@ decided is marked as a proposal.
 | Folder | What belongs in it |
 |---|---|
 | `src/core/` | The vault core: plain C++ with Qt Core only, no window code, tested without a screen |
+| `style/` | Chrono Vault's Qt Quick Controls style: Fusion with every size times the UI scaling and every text enlarged by exactly it (D-023, D-069); rows and columns are `ExactRow` and `ExactColumn` |
 | `qml/` | The windows, one QML module (URI `ChronoVault`) in Qt Quick; they only call the core |
 | `src/app/` | `main.cpp`, which starts the windows |
 | `tests/unit/` | Tests of one class each, Qt Test under CTest |

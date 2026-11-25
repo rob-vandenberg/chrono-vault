@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// PopupPanel.qml 0.6.90
+// PopupPanel.qml 0.6.92
 //
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
 
 import QtQuick
@@ -19,8 +20,8 @@ import QtQuick
 Rectangle {
     id: panel
     property color shade // Fusion's shadow
-    implicitWidth: 200
-    implicitHeight: 20
+    implicitWidth: 200 * UiScale.factor
+    implicitHeight: 20 * UiScale.factor
     Rectangle {
         z: -1
         x: 1; y: 1

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TagDialog.qml 0.5.83
+// TagDialog.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.83: Initial release, out of VaultPage.qml (D-063)
 
 // Renames a tag and the tags nested under it, in every item (D-028): from the
@@ -40,11 +41,11 @@ DialogWindow {
         tagName.forceActiveFocus()
         tagName.selectAll()
     }
-    ColumnLayout {
+    ExactColumn {
         Label {
             text: qsTr("A slash nests a tag under another, as in “Work/Servers”.")
             wrapMode: Text.Wrap
-            Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            Layout.preferredWidth: 360 * Appearance.factor
             Layout.fillWidth: true
         }
         TextField {

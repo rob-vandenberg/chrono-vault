@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.6.90
+// UnlockPage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.90: The list of vaults on the background of every pop-up (D-067)
 // v0.5.82: Enter never throws a kept change away (D-062)
 // v0.5.78: Texts in dialogs wrap with the window (D-061)
@@ -149,10 +150,10 @@ Item {
         }
     }
 
-    ColumnLayout {
+    ExactColumn {
         anchors.centerIn: parent
-        spacing: Math.round(12 * Appearance.factor)
-        width: Math.min(parent.width - Math.round(32 * Appearance.factor), Math.round(500 * Appearance.factor))
+        gap: 12 * Appearance.factor
+        width: Math.min(parent.width - 32 * Appearance.factor, 500 * Appearance.factor)
 
         Image {
             source: "qrc:/icons/chrono-vault.svg"
@@ -177,8 +178,8 @@ Item {
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
-            Layout.topMargin: Math.round(24 * Appearance.factor)
-            Layout.bottomMargin: Math.round(8 * Appearance.factor)
+            Layout.topMargin: 24 * Appearance.factor
+            Layout.bottomMargin: 8 * Appearance.factor
         }
 
         // Every vault Chrono Vault knows, each with its own master password;
@@ -197,7 +198,7 @@ Item {
             currentIndex: listed.indexOf(VaultController.vaultPath)
             font.pointSize: Appearance.fontPointSize * 1.4
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(58 * Appearance.factor)
+            Layout.preferredHeight: 58 * Appearance.factor
             function placeOf(vaultFile) {
                 const place = VaultController.vaultPlace(vaultFile)
                 if (!place.onWebDav)
@@ -209,9 +210,9 @@ Item {
                 return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/storage-webdav.svg"
                                                                        : "qrc:/icons/storage-device.svg"
             }
-            contentItem: RowLayout {
-                spacing: Math.round(8 * Appearance.factor)
-                Item { Layout.preferredWidth: Math.round(6 * Appearance.factor) }
+            contentItem: ExactRow {
+                gap: 8 * Appearance.factor
+                Item { Layout.preferredWidth: 6 * Appearance.factor }
                 Image {
                     source: vaultBox.iconOf(VaultController.vaultPath)
                     sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
@@ -234,13 +235,13 @@ Item {
             // The list opens below the field, as big as it, in a rounded frame
             // (the mockup the owner chose).
             popup: Popup {
-                y: vaultBox.height + Math.round(4 * Appearance.factor)
+                y: vaultBox.height + 4 * Appearance.factor
                 width: vaultBox.width
                 padding: 1
                 // Below the field always, scrolling when the room below is short.
                 implicitHeight: Math.min(contentItem.implicitHeight + 2,
                                          unlockPage.height - vaultBox.mapToItem(unlockPage, 0, 0).y - vaultBox.height
-                                         - Math.round(12 * Appearance.factor))
+                                         - 12 * Appearance.factor)
                 margins: 0
                 background: Rectangle {
                     radius: Math.round(8 * Appearance.factor)
@@ -263,7 +264,7 @@ Item {
                 readonly property bool missing: !isOther && VaultController.foundVaults.indexOf(modelData) < 0
                 objectName: isOther ? "openOrCreateAnother" : "unlockVault_" + VaultController.vaultNameOf(modelData)
                 width: vaultBox.width - 2
-                height: isOther ? Math.round(48 * Appearance.factor) : Math.round(60 * Appearance.factor)
+                height: isOther ? 48 * Appearance.factor : 60 * Appearance.factor
                 font: vaultBox.font
                 highlighted: vaultBox.highlightedIndex === index && !missing
                 enabled: !missing
@@ -280,8 +281,8 @@ Item {
                         color: vaultBox.palette.mid
                     }
                 }
-                contentItem: RowLayout {
-                    spacing: Math.round(10 * Appearance.factor)
+                contentItem: ExactRow {
+                    gap: 10 * Appearance.factor
                     Image {
                         visible: !vaultRow.isOther
                         source: vaultRow.isOther ? "" : vaultBox.iconOf(vaultRow.modelData)
@@ -294,10 +295,10 @@ Item {
                         text: "+"
                         font: vaultBox.font
                         horizontalAlignment: Text.AlignHCenter
-                        Layout.preferredWidth: Math.round(24 * Appearance.factor)
+                        Layout.preferredWidth: 24 * Appearance.factor
                     }
-                    ColumnLayout {
-                        spacing: 0
+                    ExactColumn {
+                        gap: 0
                         Layout.fillWidth: true
                         Label {
                             text: vaultRow.isOther ? qsTr("Open another vault…") : VaultController.vaultNameOf(vaultRow.modelData)
@@ -337,8 +338,8 @@ Item {
             }
         }
 
-        RowLayout {
-            spacing: 0
+        ExactRow {
+            gap: 0
             Layout.fillWidth: true
             PasswordField {
                 id: passwordField
@@ -347,14 +348,14 @@ Item {
                 font.pointSize: Appearance.fontPointSize * 1.4
                 // The placeholder in the normal font, the password in the monospaced one.
                 font.family: text === "" ? Appearance.font.family : "Noto Sans Mono"
-                leftPadding: Math.round(14 * Appearance.factor)
+                leftPadding: 14 * Appearance.factor
                 // Rounded, as the owner's design.
                 background: Rectangle {
                     radius: Math.round(8 * Appearance.factor)
                     color: passwordField.palette.base
                     border.color: passwordField.activeFocus ? passwordField.palette.highlight : passwordField.palette.mid
                 }
-                Layout.preferredHeight: Math.round(58 * Appearance.factor)
+                Layout.preferredHeight: 58 * Appearance.factor
                 Layout.fillWidth: true
                 // Greyed while waiting after wrong master passwords (D-041).
                 enabled: VaultController.unlockWaitSeconds === 0
@@ -379,7 +380,7 @@ Item {
             visible: !unlockPage.usePin
             text: qsTr("Create a new vault…")
             Layout.fillWidth: true
-            Layout.topMargin: Math.round(12 * Appearance.factor)
+            Layout.topMargin: 12 * Appearance.factor
             onClicked: unlockPage.leaveForAnother(function() { unlockPage.createRequested() })
         }
         Label {
@@ -391,7 +392,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
         }
         // The keyfile, when this vault needs one (D-031).
-        RowLayout {
+        ExactRow {
             visible: VaultController.keyfileNeeded
             Layout.fillWidth: true
             Label {
@@ -455,11 +456,11 @@ Item {
         title: qsTr("A change is not saved")
         standardButtons: Dialog.Discard | Dialog.Cancel
         defaultButton: Dialog.Cancel // Enter never throws a change away
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you open another vault now, the change is lost.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(380 * Appearance.factor)
+                Layout.preferredWidth: 380 * Appearance.factor
                 Layout.fillWidth: true
             }
         }

@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavFileDialog.qml 0.3.63
+// WebDavFileDialog.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.3.67: A folder joins Back's history only once the next one is shown
 // v0.3.63: Initial release (the owner, D-057)
 
@@ -138,11 +139,11 @@ DialogWindow {
         }
     }
 
-    ColumnLayout {
-        spacing: Math.round(6 * Appearance.factor)
+    ExactColumn {
+        gap: 6 * Appearance.factor
 
-        RowLayout {
-            spacing: Math.round(6 * Appearance.factor)
+        ExactRow {
+            gap: 6 * Appearance.factor
             Layout.fillWidth: true
             Button {
                 objectName: "fileDialogBackButton"
@@ -174,10 +175,10 @@ DialogWindow {
                 }
             }
         }
-        RowLayout {
+        ExactRow {
             id: newFolderRow
             visible: false
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Layout.fillWidth: true
             TextField {
                 id: folderNameField
@@ -207,20 +208,20 @@ DialogWindow {
         Frame {
             padding: 1
             Layout.fillWidth: true
-            Layout.preferredWidth: Math.round(600 * Appearance.factor)
-            Layout.preferredHeight: Math.round(300 * Appearance.factor)
-            ColumnLayout {
+            Layout.preferredWidth: 600 * Appearance.factor
+            Layout.preferredHeight: 300 * Appearance.factor
+            ExactColumn {
                 anchors.fill: parent
-                spacing: 0
+                gap: 0
                 // The columns' names.
-                RowLayout {
-                    spacing: 0
+                ExactRow {
+                    gap: 0
                     Layout.fillWidth: true
-                    Layout.leftMargin: Math.round(8 * Appearance.factor)
-                    Layout.rightMargin: Math.round(8 * Appearance.factor)
+                    Layout.leftMargin: 8 * Appearance.factor
+                    Layout.rightMargin: 8 * Appearance.factor
                     Label { text: qsTr("Name"); font.bold: true; Layout.fillWidth: true }
-                    Label { text: qsTr("Size"); font.bold: true; Layout.preferredWidth: Math.round(90 * Appearance.factor) }
-                    Label { text: qsTr("Modified"); font.bold: true; Layout.preferredWidth: Math.round(150 * Appearance.factor) }
+                    Label { text: qsTr("Size"); font.bold: true; Layout.preferredWidth: 90 * Appearance.factor }
+                    Label { text: qsTr("Modified"); font.bold: true; Layout.preferredWidth: 150 * Appearance.factor }
                 }
                 ListView {
                     id: browser
@@ -240,8 +241,8 @@ DialogWindow {
                         width: ListView.view.width
                         enabled: !fileDialog.waiting && (modelData.folder || fileDialog.mode !== "folder")
                         highlighted: !modelData.folder && modelData.name === nameField.text
-                        contentItem: RowLayout {
-                            spacing: Math.round(8 * Appearance.factor)
+                        contentItem: ExactRow {
+                            gap: 8 * Appearance.factor
                             Image {
                                 source: row.modelData.folder ? "qrc:/icons/folder.svg" : "qrc:/icons/chrono-vault.svg"
                                 sourceSize: Qt.size(Math.round(20 * Appearance.factor), Math.round(20 * Appearance.factor))
@@ -257,12 +258,12 @@ DialogWindow {
                             Label {
                                 text: row.modelData.size
                                 opacity: 0.8
-                                Layout.preferredWidth: Math.round(90 * Appearance.factor)
+                                Layout.preferredWidth: 90 * Appearance.factor
                             }
                             Label {
                                 text: row.modelData.modified
                                 opacity: 0.8
-                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                Layout.preferredWidth: 150 * Appearance.factor
                             }
                         }
                         onClicked: if (!modelData.folder) nameField.text = modelData.name
@@ -296,9 +297,9 @@ DialogWindow {
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }
-        RowLayout {
+        ExactRow {
             visible: fileDialog.mode !== "folder"
-            spacing: Math.round(8 * Appearance.factor)
+            gap: 8 * Appearance.factor
             Layout.fillWidth: true
             Label { text: qsTr("File name:") }
             TextField {

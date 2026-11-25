@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// CategoryEditor.qml 0.2.58
+// CategoryEditor.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.2.58: "Show in sidebar", under "Name:" and 4 pixels higher (the owner)
 // v0.2.57: The icon at the left with a pen badge, the whole icon a button; the name beside it (the owner)
 // v0.2.56: Initial release (D-056)
@@ -58,14 +59,14 @@ DialogWindow {
 
     // The icon at the left with a pen in a small circle, the whole icon a
     // button; the name to its right (the owner, as the item editor's).
-    ColumnLayout {
-        spacing: Math.round(12 * Appearance.factor)
-        RowLayout {
-            spacing: Math.round(16 * Appearance.factor)
+    ExactColumn {
+        gap: 12 * Appearance.factor
+        ExactRow {
+            gap: 16 * Appearance.factor
             Item {
                 objectName: "categoryIcon"
-                Layout.preferredWidth: Math.round(52 * Appearance.factor)
-                Layout.preferredHeight: Math.round(52 * Appearance.factor)
+                Layout.preferredWidth: 52 * Appearance.factor
+                Layout.preferredHeight: 52 * Appearance.factor
                 Image {
                     anchors.fill: parent
                     source: categoryEditor.icon !== "" ? "data:image/png;base64," + categoryEditor.icon
@@ -75,11 +76,11 @@ DialogWindow {
                 }
                 ToolButton {
                     objectName: "categoryIconBadge"
-                    width: Math.round(22 * Appearance.factor)
+                    width: 22 * Appearance.factor
                     height: width
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.margins: -Math.round(4 * Appearance.factor)
+                    anchors.margins: -4 * Appearance.factor
                     icon.source: "qrc:/icons/edit.svg"
                     icon.color: categoryEditor.palette.buttonText
                     icon.width: Math.round(12 * Appearance.factor)
@@ -109,7 +110,7 @@ DialogWindow {
             TextField {
                 id: nameField
                 objectName: "categoryNameField"
-                Layout.preferredWidth: Math.round(280 * Appearance.factor)
+                Layout.preferredWidth: 280 * Appearance.factor
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 onAccepted: categoryEditor.accept()
@@ -122,8 +123,8 @@ DialogWindow {
             objectName: "categoryShownBox"
             text: qsTr("Show in sidebar")
             // Its own padding taken off, so its square stands under "Name:".
-            Layout.leftMargin: Math.round((52 + 16) * Appearance.factor) - leftPadding
-            Layout.topMargin: -Math.round(4 * Appearance.factor)
+            Layout.leftMargin: (52 + 16) * Appearance.factor - leftPadding
+            Layout.topMargin: -4 * Appearance.factor
         }
     }
 

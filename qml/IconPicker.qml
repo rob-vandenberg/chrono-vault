@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.6.91
+// IconPicker.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.91: Opens in Search; the icons by keyboard (D-068)
 // v0.5.82: Enter never deletes an icon (D-062)
 // v0.2.57: A search field: by name, any case, anywhere in the name (the owner, D-050)
@@ -115,7 +116,7 @@ DialogWindow {
             objectName: "tileOutline"
             visible: grid.activeFocus && grid.outlined === tile
             anchors.fill: parent
-            anchors.margins: -Math.round(3 * Appearance.factor)
+            anchors.margins: -3 * Appearance.factor
             color: "transparent"
             radius: Math.round(6 * Appearance.factor)
             border.width: Math.max(2, Math.round(2 * Appearance.factor))
@@ -135,7 +136,7 @@ DialogWindow {
         Rectangle {
             objectName: "checkMark"
             visible: picker.chosen === tile.key
-            width: Math.round(18 * Appearance.factor)
+            width: 18 * Appearance.factor
             height: width
             radius: width / 2
             color: "#2f80ed"
@@ -143,13 +144,13 @@ DialogWindow {
             border.width: Math.max(1, Math.round(1.5 * Appearance.factor))
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: -Math.round(2 * Appearance.factor)
+            anchors.margins: -2 * Appearance.factor
             Label {
                 anchors.centerIn: parent
                 text: "✓"
                 color: "white"
                 font.bold: true
-                font.pixelSize: Math.round(12 * Appearance.factor)
+                font.pixelSize: 12
             }
         }
         MouseArea {
@@ -181,7 +182,7 @@ DialogWindow {
     component Heading: Label {
         font.bold: true
         opacity: 0.7
-        Layout.topMargin: Math.round(8 * Appearance.factor)
+        Layout.topMargin: 8 * Appearance.factor
     }
 
     // As the search field above the item list (the owner).
@@ -197,10 +198,10 @@ DialogWindow {
         objectName: "iconScroll"
         Layout.fillWidth: true
         Layout.fillHeight: true
-        implicitHeight: Math.round(200 * Appearance.factor)
+        implicitHeight: 200 * Appearance.factor
         contentWidth: availableWidth
         clip: true
-        rightPadding: scrollBar.width + Math.round(6 * Appearance.factor)
+        rightPadding: scrollBar.width + 6 * Appearance.factor
         ScrollBar.vertical: ScrollBar {
             id: scrollBar
             parent: scroll
@@ -213,7 +214,7 @@ DialogWindow {
         // The icons by keyboard (the owner, D-068): Tab comes here from Search
         // and outlines the first one; the keys move the outline, over the
         // headings; Enter takes that icon.
-        ColumnLayout {
+        ExactColumn {
             id: grid
             objectName: "iconGrid"
             activeFocusOnTab: true
@@ -243,7 +244,7 @@ DialogWindow {
                     return
                 // In view, the first row with its heading.
                 const view = scroll.contentItem
-                const margin = Math.round(6 * Appearance.factor)
+                const margin = 6 * Appearance.factor
                 const top = placeOf(outlined).y - margin
                 const bottom = top + outlined.height + 2 * margin
                 if (outlined === tiles()[0])
@@ -312,9 +313,9 @@ DialogWindow {
                     outline(to)
             }
             // Room for the outline of the first column.
-            x: Math.round(4 * Appearance.factor)
+            x: 4 * Appearance.factor
             width: scroll.availableWidth - x
-            spacing: Math.round(8 * Appearance.factor)
+            gap: 8 * Appearance.factor
 
             // The vault's own icons have no names: not shown while searching.
             Heading {
@@ -325,7 +326,7 @@ DialogWindow {
                 objectName: "customIcons"
                 visible: picker.searchText === ""
                 Layout.fillWidth: true
-                spacing: Math.round(10 * Appearance.factor)
+                spacing: 10 * Appearance.factor
                 Tile {
                     objectName: "defaultIconTile"
                     key: "default"
@@ -345,15 +346,15 @@ DialogWindow {
 
             Repeater {
                 model: picker.shownSections
-                delegate: ColumnLayout {
+                delegate: ExactColumn {
                     id: section
                     required property var modelData
                     Layout.fillWidth: true
-                    spacing: Math.round(8 * Appearance.factor)
+                    gap: 8 * Appearance.factor
                     Heading { text: section.modelData.heading }
                     Flow {
                         Layout.fillWidth: true
-                        spacing: Math.round(10 * Appearance.factor)
+                        spacing: 10 * Appearance.factor
                         Repeater {
                             model: section.modelData.icons
                             delegate: Tile {
@@ -430,7 +431,7 @@ DialogWindow {
             text: qsTr("This icon is used by %n item(s). They will get their category's icon instead. Delete it?", "", deleteQuestion.uses)
             wrapMode: Text.Wrap
             Layout.fillWidth: true
-            Layout.preferredWidth: Math.round(360 * Appearance.factor)
+            Layout.preferredWidth: 360 * Appearance.factor
         }
         onAccepted: picker.deleteIcon(picker.menuIcon)
     }

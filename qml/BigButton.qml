@@ -20,16 +20,17 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// BigButton.qml 0.3.66
+// BigButton.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.3.66: Initial release (D-058)
 
 // A button with the weight of the start page's fields: as tall, the same
 // large text, rounded (the owner, D-058).
 Button {
     id: bigButton
-    implicitHeight: Math.round(58 * Appearance.factor)
+    implicitHeight: 58 * Appearance.factor
     font.pointSize: Appearance.fontPointSize * 1.4
     background: Rectangle {
         radius: Math.round(8 * Appearance.factor)

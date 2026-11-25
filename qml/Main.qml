@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.90
+// Main.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.90: The menus' colour from the style (D-067)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
 // v0.6.86: View > Audit; an item left out of the audit (D-065)
@@ -279,12 +280,12 @@ ApplicationWindow {
     header: ToolBar {
         objectName: "topBar"
         // 5 pixels more above and below (the owner, 23 November 2026).
-        topPadding: SafeArea.margins.top + Math.round(5 * Appearance.factor)
-        bottomPadding: SafeArea.margins.bottom + Math.round(5 * Appearance.factor)
-        RowLayout {
+        topPadding: SafeArea.margins.top + 5 * Appearance.factor
+        bottomPadding: SafeArea.margins.bottom + 5 * Appearance.factor
+        ExactRow {
             anchors.fill: parent
-            anchors.rightMargin: Math.round(8 * Appearance.factor)
-            spacing: Math.round(6 * Appearance.factor)
+            anchors.rightMargin: 8 * Appearance.factor
+            gap: 6 * Appearance.factor
 
             // The menus after the reference program's, with only what Chrono
             // Vault does (D-039). A shortcut never acts while a text field is
@@ -686,8 +687,8 @@ ApplicationWindow {
                 palette.buttonText: mainWindow.palette.highlightedText
                 background: Rectangle {
                     objectName: "newItemFill"
-                    implicitWidth: Math.round(80 * Appearance.factor)
-                    implicitHeight: Math.round(28 * Appearance.factor)
+                    implicitWidth: 80 * Appearance.factor
+                    implicitHeight: 28 * Appearance.factor
                     radius: Math.round(3 * Appearance.factor)
                     color: !parent.enabled ? mainWindow.palette.mid
                            : parent.down ? Qt.darker(mainWindow.palette.highlight, 1.3)
@@ -949,13 +950,13 @@ ApplicationWindow {
         standardButtons: VaultController.state === VaultController.Unlocked
                          ? Dialog.Retry | Dialog.Discard | Dialog.Cancel
                          : Dialog.Discard | Dialog.Cancel
-        ColumnLayout {
+        ExactColumn {
             Label {
                 text: VaultController.state === VaultController.Unlocked
                       ? qsTr("Your last change could not be saved. If you quit now, it is lost. The vault on disk is unchanged.")
                       : qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you quit now, it is lost.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: Math.round(380 * Appearance.factor)
+                Layout.preferredWidth: 380 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -978,8 +979,8 @@ ApplicationWindow {
         }
     }
 
-    footer: ColumnLayout {
-        spacing: 0
+    footer: ExactColumn {
+        gap: 0
         visible: VaultController.message !== ""
                  || (VaultController.saveFailed && VaultController.state === VaultController.Unlocked)
         Label {
@@ -987,23 +988,23 @@ ApplicationWindow {
             text: VaultController.message
             font.bold: VaultController.messageIsTrouble
             wrapMode: Text.Wrap
-            padding: Math.round(8 * Appearance.factor)
+            padding: 8 * Appearance.factor
             Layout.fillWidth: true
         }
-        RowLayout {
+        ExactRow {
             visible: VaultController.saveFailed && VaultController.state === VaultController.Unlocked
             Layout.fillWidth: true
             Label {
                 text: qsTr("A change is not saved yet. The vault on disk is unchanged.")
                 font.bold: true
                 wrapMode: Text.Wrap
-                padding: Math.round(8 * Appearance.factor)
+                padding: 8 * Appearance.factor
                 Layout.fillWidth: true
             }
             Button {
                 text: qsTr("Try saving again")
                 onClicked: VaultController.retrySave()
-                Layout.rightMargin: Math.round(8 * Appearance.factor)
+                Layout.rightMargin: 8 * Appearance.factor
             }
         }
     }
@@ -1087,9 +1088,9 @@ ApplicationWindow {
         Component.onCompleted: certificateWindow.standardButton(Dialog.Ok).text = qsTr("Trust it")
         onAccepted: VaultController.trustCertificate(true)
         onRejected: VaultController.trustCertificate(false)
-        ColumnLayout {
-            spacing: Math.round(8 * Appearance.factor)
-            width: Math.round(420 * Appearance.factor)
+        ExactColumn {
+            gap: 8 * Appearance.factor
+            width: 420 * Appearance.factor
             Label {
                 text: qsTr("The WebDAV server's certificate is not trusted by this system. Trust it only when it is your server's. Its SHA-256 fingerprint:")
                 wrapMode: Text.Wrap
@@ -1117,9 +1118,9 @@ ApplicationWindow {
             serverPassword.clear()
         }
         onRejected: serverPassword.clear()
-        ColumnLayout {
-            spacing: Math.round(8 * Appearance.factor)
-            width: Math.round(380 * Appearance.factor)
+        ExactColumn {
+            gap: 8 * Appearance.factor
+            width: 380 * Appearance.factor
             Label {
                 text: qsTr("Type the password of the WebDAV server where “%1” is kept.").arg(VaultController.vaultName)
                 wrapMode: Text.Wrap

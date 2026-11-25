@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.91
+// SettingsWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.91: More room for the last two lines of General; 720 by 640 inside (D-068)
 // v0.6.89: 720 by 625 inside, opened and at least (the owner, D-066)
 // v0.6.88: The topics Categories, Tags and Templates; Customize and Clipboard gone (D-066)
@@ -123,10 +124,10 @@ ApplicationWindow {
     // The small square buttons of the Keyboard shortcuts page: × and +, a grey
     // fill, as on Chrono Viewer's page (D-047).
     component KeyButton: Button {
-        implicitWidth: Math.round(24 * Appearance.factor)
-        implicitHeight: Math.round(24 * Appearance.factor)
+        implicitWidth: 24 * Appearance.factor
+        implicitHeight: 24 * Appearance.factor
         padding: 0
-        font.pixelSize: Math.round(14 * Appearance.factor)
+        font.pixelSize: 14
         background: Rectangle {
             radius: Math.round(3 * Appearance.factor)
             color: parent.down ? settingsWindow.palette.mid : settingsWindow.palette.button
@@ -262,7 +263,7 @@ ApplicationWindow {
         Appearance.show(theme, scale)
     }
     // Room for the longest percentage, in the font in use.
-    Text {
+    Label {
         id: widestPercent
         visible: false
         text: qsTr("%1%").arg(Appearance.largestScale)
@@ -343,15 +344,15 @@ ApplicationWindow {
         closePolicy: Popup.NoAutoClose
         visible: settingsWindow.visible && !settingsWindow.helloOnTheLine
                  && (VaultController.quickUnlockBusy || VaultController.quickUnlockMessage !== "")
-        padding: Math.round(16 * Appearance.factor)
-        contentItem: ColumnLayout {
-            spacing: Math.round(12 * Appearance.factor)
+        padding: 16 * Appearance.factor
+        contentItem: ExactColumn {
+            gap: 12 * Appearance.factor
             Label {
                 objectName: "quickUnlockMessage"
                 text: VaultController.quickUnlockMessage
                 font.bold: VaultController.quickUnlockTrouble
                 wrapMode: Text.Wrap
-                Layout.maximumWidth: Math.round(360 * Appearance.factor)
+                Layout.maximumWidth: 360 * Appearance.factor
             }
             Button {
                 objectName: "quickUnlockCancel"
@@ -461,7 +462,7 @@ ApplicationWindow {
         visible: false
         Repeater {
             model: topics.model
-            Text {
+            Label {
                 required property string modelData
                 text: modelData
                 font: Appearance.font
@@ -469,23 +470,23 @@ ApplicationWindow {
         }
     }
 
-    ColumnLayout {
+    ExactColumn {
         anchors.fill: parent
-        anchors.margins: Math.round(10 * Appearance.factor)
-        spacing: Math.round(10 * Appearance.factor)
+        anchors.margins: 10 * Appearance.factor
+        gap: 10 * Appearance.factor
 
-        RowLayout {
+        ExactRow {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: Math.round(12 * Appearance.factor)
+            gap: 12 * Appearance.factor
 
             // The topics: a framed panel, the chosen one marked across its
             // whole width.
             Rectangle {
                 objectName: "topicsPanel"
                 Layout.fillHeight: true
-                Layout.preferredWidth: Math.ceil(topicNames.implicitWidth) + 2 * topicPadding + 2 * border.width
-                readonly property int topicPadding: 6
+                Layout.preferredWidth: Math.ceil(topicNames.implicitWidth / Appearance.factor) * Appearance.factor + 2 * topicPadding + 2 * border.width
+                readonly property real topicPadding: 6 * Appearance.factor
                 color: settingsWindow.palette.base
                 border.color: settingsWindow.palette.mid
                 border.width: 1
@@ -506,12 +507,12 @@ ApplicationWindow {
                         required property string modelData
                         readonly property bool chosen: ListView.isCurrentItem
                         width: ListView.view.width
-                        height: topicText.implicitHeight + Math.round(6 * Appearance.factor)
+                        height: topicText.implicitHeight + 6 * Appearance.factor
                         color: chosen ? settingsWindow.palette.highlight : "transparent"
-                        Text {
+                        Label {
                             id: topicText
                             anchors.verticalCenter: parent.verticalCenter
-                            x: 6
+                            x: 6 * Appearance.factor
                             text: topic.modelData
                             font: settingsWindow.font
                             color: topic.chosen ? settingsWindow.palette.highlightedText : settingsWindow.palette.text
@@ -534,7 +535,7 @@ ApplicationWindow {
                 // beside the page, so it never covers the + buttons; the room
                 // is kept also when the page fits, so the page never depends
                 // on whether the bar shows.
-                rightPadding: pageScrollBar.width + Math.round(6 * Appearance.factor)
+                rightPadding: 20 * Appearance.factor
                 ScrollBar.vertical: ScrollBar {
                     id: pageScrollBar
                     objectName: "pageScrollBar"
@@ -550,7 +551,7 @@ ApplicationWindow {
                 // As tall as the topic shown, not the tallest one, so a topic
                 // ends at its last row (D-047).
                 contentHeight: pageStack.children[pageStack.currentIndex]
-                               ? pageStack.children[pageStack.currentIndex].implicitHeight + Math.round(10 * Appearance.factor)
+                               ? pageStack.children[pageStack.currentIndex].implicitHeight + 10 * Appearance.factor
                                : 0
                 clip: true
 
@@ -559,8 +560,8 @@ ApplicationWindow {
                     currentIndex: topics.currentIndex
                     width: pageScroll.availableWidth
 
-                    ColumnLayout {
-                        spacing: Math.round(8 * Appearance.factor)
+                    ExactColumn {
+                        gap: 8 * Appearance.factor
                         Label {
                             text: qsTr("General")
                             font.pointSize: Appearance.fontPointSize * 1.4
@@ -568,8 +569,8 @@ ApplicationWindow {
                         Label { text: qsTr("Theme") }
                         Frame {
                             Layout.fillWidth: true
-                            ColumnLayout {
-                                spacing: 0
+                            ExactColumn {
+                                gap: 0
                                 RadioButton {
                                     objectName: "lightTheme"
                                     text: qsTr("Light")
@@ -590,20 +591,21 @@ ApplicationWindow {
                                 }
                             }
                         }
-                        RowLayout {
+                        ExactRow {
                             objectName: "scaleRow"
                             Layout.fillWidth: true
                             // Half a line height of room above and below (the owner).
-                            Layout.topMargin: Math.round(widestPercent.implicitHeight / 2)
-                            Layout.bottomMargin: Math.round(widestPercent.implicitHeight / 2)
-                            spacing: Math.round(12 * Appearance.factor)
+                            Layout.topMargin: widestPercent.implicitHeight / 2
+                            Layout.bottomMargin: widestPercent.implicitHeight / 2
+                            gap: 12 * Appearance.factor
                             Label { text: qsTr("UI scaling") }
                             Item {
                                 id: scaleTrack
-                                readonly property int markHeight: Math.round(5 * Appearance.factor)
+                                readonly property real markHeight: 5 * Appearance.factor
                                 Layout.fillWidth: true
                                 // The marks on top, the slider below them.
-                                implicitHeight: markHeight + Math.round(2 * Appearance.factor) + scaleSlider.implicitHeight
+                                implicitHeight: markHeight + 2 * Appearance.factor + scaleSlider.implicitHeight
+                                Layout.preferredHeight: implicitHeight
                                 Slider {
                                     id: scaleSlider
                                     objectName: "scaleSlider"
@@ -684,22 +686,23 @@ ApplicationWindow {
                             onToggled: settingsWindow.useWebsiteIcons = checked
                         }
                         Label {
+                            objectName: "websiteIconsRemark"
                             text: qsTr("Each website in your vault is asked for its own icon, which that website can then see. The icons are kept only while the vault is unlocked, never on the disk.")
                             wrapMode: Text.Wrap
                             opacity: 0.7
-                            Layout.topMargin: -Math.round(6 * Appearance.factor) // close to its tick box
-                            leftPadding: Math.round(28 * Appearance.factor)
+                            Layout.topMargin: -6 * Appearance.factor // close to its tick box
+                            leftPadding: 28 * Appearance.factor
                             Layout.fillWidth: true
                         }
                         // One line; 0 shows as "Never" (D-049).
-                        RowLayout {
+                        ExactRow {
                             // As far apart as the tick boxes, this line and the next (the owner).
-                            Layout.topMargin: Math.round(9 * Appearance.factor)
+                            Layout.topMargin: 9 * Appearance.factor
                             Label { text: qsTr("Clear the clipboard after") }
                             SpinBox {
                                 objectName: "clipboardBox"
                                 // 40 narrower than its own width (the owner).
-                                Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
+                                Layout.preferredWidth: implicitWidth - 40 * Appearance.factor
                                 from: 0
                                 to: 600
                                 value: settingsWindow.clipboardClearSeconds
@@ -719,8 +722,8 @@ ApplicationWindow {
                             }
                             Label { text: qsTr("seconds") }
                         }
-                        RowLayout {
-                            Layout.topMargin: Math.round(5 * Appearance.factor)
+                        ExactRow {
+                            Layout.topMargin: 5 * Appearance.factor
                             Label { text: qsTr("Check for updates") }
                             ComboBox {
                                 id: frequencyBox
@@ -740,15 +743,15 @@ ApplicationWindow {
                         Item { Layout.fillHeight: true }
                     }
 
-                    ColumnLayout {
-                        spacing: Math.round(8 * Appearance.factor)
+                    ExactColumn {
+                        gap: 8 * Appearance.factor
                         Label {
                             text: qsTr("Security")
                             font.pointSize: Appearance.fontPointSize * 1.4
                         }
                         // Change the Master Password, as a row of its own
                         // (the reference program's settings).
-                        RowLayout {
+                        ExactRow {
                             Layout.fillWidth: true
                             // The button right after the text (the owner).
                             Label {
@@ -763,7 +766,7 @@ ApplicationWindow {
                         }
                         // How often the master password is asked though a finger
                         // would do; Quarter by default (D-049).
-                        RowLayout {
+                        ExactRow {
                             Layout.fillWidth: true
                             Label { text: qsTr("Ask for the master password again, once every") }
                             ComboBox {
@@ -776,12 +779,12 @@ ApplicationWindow {
                                 // word and the arrow; open, the word with 5 pixels on
                                 // either side. The chosen word is shown semi-bold in
                                 // the list, so that is what is measured.
-                                readonly property int margin: Math.round(5 * Appearance.factor)
+                                readonly property real margin: 5 * Appearance.factor
                                 readonly property real widestWord: {
                                     let widest = 0
                                     for (const word of model)
                                         widest = Math.max(widest, reminderMeasure.advanceWidth(word))
-                                    return Math.ceil(widest)
+                                    return Math.ceil(widest * Appearance.factor)
                                 }
                                 FontMetrics {
                                     id: reminderMeasure
@@ -794,7 +797,7 @@ ApplicationWindow {
                                 // the word; the arrow has a slot of its own.
                                 padding: 0
                                 spacing: 0
-                                Layout.preferredWidth: 4 + widestWord + 4 + (indicator ? indicator.width : 0)
+                                Layout.preferredWidth: 8 * Appearance.factor + widestWord + (indicator ? indicator.width : 0)
                                 popup.width: widestWord + 2 * margin + 2 * popup.padding
                                 delegate: MenuItem {
                                     required property var model
@@ -815,10 +818,10 @@ ApplicationWindow {
                             objectName: "autolockGroup"
                             title: qsTr("Autolock when")
                             Layout.fillWidth: true
-                            Layout.topMargin: Math.round(8 * Appearance.factor)
-                            ColumnLayout {
+                            Layout.topMargin: 8 * Appearance.factor
+                            ExactColumn {
                                 anchors.fill: parent
-                                spacing: Math.round(8 * Appearance.factor)
+                                gap: 8 * Appearance.factor
                                 CheckBox {
                                     objectName: "lockWhenClosedBox"
                                     text: qsTr("Main window is closed")
@@ -831,7 +834,7 @@ ApplicationWindow {
                                     checked: settingsWindow.lockOnSleep
                                     onToggled: settingsWindow.lockOnSleep = checked
                                 }
-                                RowLayout {
+                                ExactRow {
                                     Layout.fillWidth: true
                                     CheckBox {
                                         objectName: "idleLockBox"
@@ -849,11 +852,11 @@ ApplicationWindow {
                                         enabled: settingsWindow.idleLockOn
                                         onValueModified: settingsWindow.autoLockMinutes = value
                                         // 40 pixels narrower (the owner, 23 November 2026).
-                                        Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
+                                        Layout.preferredWidth: implicitWidth - 40 * Appearance.factor
                                     }
                                     Label { text: qsTr("Minutes") }
                                 }
-                                RowLayout {
+                                ExactRow {
                                     Layout.fillWidth: true
                                     CheckBox {
                                         objectName: "systemIdleLockBox"
@@ -871,7 +874,7 @@ ApplicationWindow {
                                         editable: true
                                         enabled: VaultController.systemIdleAvailable && settingsWindow.systemIdleLockOn
                                         onValueModified: settingsWindow.systemIdleMinutes = value
-                                        Layout.preferredWidth: implicitWidth - Math.round(40 * Appearance.factor)
+                                        Layout.preferredWidth: implicitWidth - 40 * Appearance.factor
                                     }
                                     Label { text: qsTr("Minutes") }
                                 }
@@ -887,9 +890,9 @@ ApplicationWindow {
                         }
                         // PIN unlock, after the locking, before the finger (the
                         // owner's design, D-059); kept with OK.
-                        RowLayout {
+                        ExactRow {
                             Layout.fillWidth: true
-                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                            Layout.topMargin: 8 * Appearance.factor
                             CheckBox {
                                 id: pinBox
                                 objectName: "pinBox"
@@ -898,7 +901,7 @@ ApplicationWindow {
                                 onToggled: settingsWindow.pinWanted = checked
                                 Layout.fillWidth: true
                                 // Room before the field, so the text breaks as the owner's design.
-                                Layout.rightMargin: Math.round(40 * Appearance.factor)
+                                Layout.rightMargin: 40 * Appearance.factor
                                 contentItem: Label {
                                     text: pinBox.text
                                     wrapMode: Text.Wrap
@@ -914,7 +917,7 @@ ApplicationWindow {
                                 // The eye only while a new PIN is typed (the owner).
                                 eyeAllowed: text !== ""
                                 enabled: pinBox.checked && !VaultController.pinBusy
-                                Layout.preferredWidth: Math.round(140 * Appearance.factor)
+                                Layout.preferredWidth: 140 * Appearance.factor
                                 Layout.alignment: Qt.AlignVCenter
                             }
                         }
@@ -928,7 +931,7 @@ ApplicationWindow {
                             checked: VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
                             enabled: VaultController.quickUnlockAvailable && !VaultController.quickUnlockBusy
                                      && (checked || VaultController.state === VaultController.Unlocked)
-                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                            Layout.topMargin: 8 * Appearance.factor
                             onToggled: {
                                 VaultController.setQuickUnlock(checked)
                                 checked = Qt.binding(function() {
@@ -941,20 +944,20 @@ ApplicationWindow {
                             text: qsTr("Hide sensitive fields: show them as dots until asked")
                             checked: settingsWindow.hideSensitive
                             onToggled: settingsWindow.hideSensitive = checked
-                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                            Layout.topMargin: 8 * Appearance.factor
                         }
                         CheckBox {
                             objectName: "checkLeaksBox"
                             text: qsTr("Check for leaked passwords and breached websites")
                             checked: settingsWindow.checkLeaks
                             onToggled: settingsWindow.checkLeaks = checked
-                            Layout.topMargin: Math.round(8 * Appearance.factor)
+                            Layout.topMargin: 8 * Appearance.factor
                         }
                         Label {
                             text: qsTr("With Have I Been Pwned. Of each password only the first 5 characters of its hash are sent, never the password itself. The list of breached websites is fetched whole.")
                             wrapMode: Text.Wrap
                             opacity: 0.7
-                            leftPadding: Math.round(28 * Appearance.factor)
+                            leftPadding: 28 * Appearance.factor
                             Layout.fillWidth: true
                         }
                         Item { Layout.fillHeight: true }
@@ -963,10 +966,10 @@ ApplicationWindow {
                     // Vaults (ref, D-057): where each vault is kept and when it
                     // was last synchronized; a menu per vault with only what can
                     // be done to it now (the owner, D-060).
-                    ColumnLayout {
+                    ExactColumn {
                         id: vaultsPage
                         objectName: "vaultsPage"
-                        spacing: Math.round(8 * Appearance.factor)
+                        gap: 8 * Appearance.factor
                         // Vaults not found are listed so they can be forgotten.
                         onVisibleChanged: if (visible) VaultController.checkVaults()
                         Label {
@@ -997,15 +1000,15 @@ ApplicationWindow {
                                     function onSyncChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
                                     function onVaultsChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
                                 }
-                                RowLayout {
+                                ExactRow {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
-                                    spacing: Math.round(8 * Appearance.factor)
-                                    ColumnLayout {
-                                        spacing: Math.round(2 * Appearance.factor)
+                                    gap: 8 * Appearance.factor
+                                    ExactColumn {
+                                        gap: 2 * Appearance.factor
                                         Layout.fillWidth: true
-                                        RowLayout {
-                                            spacing: Math.round(6 * Appearance.factor)
+                                        ExactRow {
+                                            gap: 6 * Appearance.factor
                                             Layout.fillWidth: true
                                             Label {
                                                 text: vaultRow.name
@@ -1199,9 +1202,9 @@ ApplicationWindow {
                                     }
                                 }
                             }
-                            ColumnLayout {
-                                spacing: Math.round(8 * Appearance.factor)
-                                Layout.preferredWidth: Math.round(400 * Appearance.factor)
+                            ExactColumn {
+                                gap: 8 * Appearance.factor
+                                Layout.preferredWidth: 400 * Appearance.factor
                                 Layout.fillWidth: true
                                 Label {
                                     text: qsTr("Enter the master password of “%1”. It is then the vault shown.").arg(VaultController.vaultNameOf(unlockFirst.vaultFile))
@@ -1281,9 +1284,9 @@ ApplicationWindow {
                                         moveStatus.problem = problem
                                 }
                             }
-                            ColumnLayout {
-                                spacing: Math.round(8 * Appearance.factor)
-                                width: Math.round(400 * Appearance.factor)
+                            ExactColumn {
+                                gap: 8 * Appearance.factor
+                                width: 400 * Appearance.factor
                                 Label {
                                     visible: moveStatus.busy
                                     text: qsTr("Moving “%1”…").arg(VaultController.vaultNameOf(moveStatus.vaultFile))
@@ -1323,7 +1326,7 @@ ApplicationWindow {
                                 }
                             }
                             Label {
-                                width: Math.round(400 * Appearance.factor)
+                                width: 400 * Appearance.factor
                                 text: forgetWindow.onWebDav
                                       ? qsTr("“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
                                       : qsTr("“%1” is taken off the list of vaults. Its file stays where it is.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
@@ -1347,7 +1350,7 @@ ApplicationWindow {
                                 }
                             }
                             Label {
-                                width: Math.round(400 * Appearance.factor)
+                                width: 400 * Appearance.factor
                                 text: qsTr("“%1” stops synchronizing. From then on there are two separate vaults: the one on this computer and the one on the server. Nothing is deleted.").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
                                 wrapMode: Text.Wrap
                             }
@@ -1361,13 +1364,13 @@ ApplicationWindow {
                     // Keyboard shortcuts, after Chrono Viewer's page (D-045):
                     // every action on its row with its keys one under the
                     // other, a cross after each, a + on the first line.
-                    ColumnLayout {
+                    ExactColumn {
                         objectName: "shortcutsPage"
-                        spacing: Math.round(4 * Appearance.factor)
+                        gap: 4 * Appearance.factor
                         // Escape cannot be set: it cancels and closes.
-                        RowLayout {
+                        ExactRow {
                             Layout.fillWidth: true
-                            spacing: Math.round(6 * Appearance.factor)
+                            gap: 6 * Appearance.factor
                             opacity: 0.5
                             Label {
                                 text: qsTr("Cancel, close a window")
@@ -1375,7 +1378,7 @@ ApplicationWindow {
                             }
                             Label {
                                 text: qsTr("Esc")
-                                Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                Layout.preferredWidth: 150 * Appearance.factor
                             }
                             // The room of the × and the +, which Escape does not have.
                             KeyButton { opacity: 0; enabled: false }
@@ -1386,22 +1389,22 @@ ApplicationWindow {
                         // in the same column), the ×, and the + on the first line.
                         Repeater {
                             model: settingsWindow.keyedActions
-                            delegate: ColumnLayout {
+                            delegate: ExactColumn {
                                 id: shortcutRow
                                 required property var modelData
                                 readonly property string actionId: modelData.actionId
                                 readonly property var keys: settingsWindow.keyMap[actionId] || []
                                 objectName: "shortcutRow_" + actionId
-                                spacing: Math.round(4 * Appearance.factor)
+                                gap: 4 * Appearance.factor
                                 Layout.fillWidth: true
                                 Repeater {
                                     // At least one line: "no key" when it has none.
                                     model: shortcutRow.keys.length > 0 ? shortcutRow.keys : [""]
-                                    delegate: RowLayout {
+                                    delegate: ExactRow {
                                         required property string modelData
                                         required property int index
                                         Layout.fillWidth: true
-                                        spacing: Math.round(6 * Appearance.factor)
+                                        gap: 6 * Appearance.factor
                                         Label {
                                             text: index === 0 ? shortcutRow.modelData.text.replace("&", "") : ""
                                             Layout.fillWidth: true
@@ -1411,7 +1414,7 @@ ApplicationWindow {
                                             text: modelData === "" ? qsTr("no key") : modelData
                                             opacity: modelData === "" ? 0.5 : 1
                                             horizontalAlignment: Text.AlignLeft
-                                            Layout.preferredWidth: Math.round(150 * Appearance.factor)
+                                            Layout.preferredWidth: 150 * Appearance.factor
                                         }
                                         KeyButton {
                                             objectName: "removeKey_" + shortcutRow.actionId
@@ -1453,7 +1456,7 @@ ApplicationWindow {
             visible: false
             title: qsTr("Press the new key")
             color: palette.window
-            width: Math.max(Math.round(300 * Appearance.factor), catchLayout.implicitWidth + 2 * catchLayout.anchors.margins)
+            width: Math.max(300 * Appearance.factor, catchLayout.implicitWidth + 2 * catchLayout.anchors.margins)
             height: catchLayout.implicitHeight + 2 * catchLayout.anchors.margins
             property string actionId: ""
             property string actionName: ""
@@ -1484,11 +1487,11 @@ ApplicationWindow {
                 }
                 settingsWindow.giveKey(actionId, key)
             }
-            ColumnLayout {
+            ExactColumn {
                 id: catchLayout
                 anchors.fill: parent
-                anchors.margins: Math.round(12 * Appearance.factor)
-                spacing: Math.round(12 * Appearance.factor)
+                anchors.margins: 12 * Appearance.factor
+                gap: 12 * Appearance.factor
                 Label {
                     text: qsTr("Press a key for “%1”").arg(keyCatcher.actionName)
                     textFormat: Text.PlainText
@@ -1531,7 +1534,7 @@ ApplicationWindow {
             visible: false
             title: qsTr("Keyboard shortcuts")
             color: palette.window
-            width: Math.max(Math.round(380 * Appearance.factor), takenLayout.implicitWidth + 2 * takenLayout.anchors.margins)
+            width: Math.max(380 * Appearance.factor, takenLayout.implicitWidth + 2 * takenLayout.anchors.margins)
             height: takenLayout.implicitHeight + 2 * takenLayout.anchors.margins
             property string informative: ""
             function ask(key, oldName, newName) {
@@ -1550,11 +1553,11 @@ ApplicationWindow {
                 close()
             }
             onClosing: keyCatcher.pendingKey = ""
-            ColumnLayout {
+            ExactColumn {
                 id: takenLayout
                 anchors.fill: parent
-                anchors.margins: Math.round(12 * Appearance.factor)
-                spacing: Math.round(12 * Appearance.factor)
+                anchors.margins: 12 * Appearance.factor
+                gap: 12 * Appearance.factor
                 Keys.onPressed: function(event) {
                     if (event.key === Qt.Key_Escape) {
                         event.accepted = true
@@ -1564,12 +1567,12 @@ ApplicationWindow {
                         keyTaken.answer(takenOk.activeFocus)
                     }
                 }
-                RowLayout {
-                    spacing: Math.round(12 * Appearance.factor)
+                ExactRow {
+                    gap: 12 * Appearance.factor
                     // The question mark of a question box.
                     Rectangle {
                         Layout.alignment: Qt.AlignTop
-                        implicitWidth: Math.round(32 * Appearance.factor)
+                        implicitWidth: 32 * Appearance.factor
                         implicitHeight: implicitWidth
                         radius: width / 2
                         color: keyTaken.palette.highlight
@@ -1581,8 +1584,8 @@ ApplicationWindow {
                             color: keyTaken.palette.highlightedText
                         }
                     }
-                    ColumnLayout {
-                        spacing: Math.round(6 * Appearance.factor)
+                    ExactColumn {
+                        gap: 6 * Appearance.factor
                         Label {
                             text: qsTr("This key has already been assigned")
                             font.bold: true
@@ -1595,7 +1598,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                RowLayout {
+                ExactRow {
                     Layout.alignment: Qt.AlignRight
                     Button {
                         id: takenOk
@@ -1615,14 +1618,14 @@ ApplicationWindow {
         }
 
         // OK, Cancel and Restore defaults at the bottom right.
-        RowLayout {
+        ExactRow {
             id: bottomRow
             Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             // The Vaults page's own buttons, at the section's left edge (D-062).
             Item {
                 visible: settingsWindow.onVaults
-                Layout.preferredWidth: Math.max(0, pageScroll.x - bottomRow.spacing)
+                Layout.preferredWidth: Math.max(0, pageScroll.x - bottomRow.gap)
             }
             Button {
                 objectName: "createVaultButton"

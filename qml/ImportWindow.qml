@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.5.80
+// ImportWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.80: Only a comment (D-055)
 // v0.5.78.3: Next… a button of its own: the window stays open and owns the export's file dialog, as Browse… (a debug version)
 // v0.5.78.2: Next… for an export goes straight to the file dialog, the window not shown again first (a debug version)
@@ -155,14 +156,14 @@ DialogWindow {
         VaultController.cancelImport()
     }
 
-    ColumnLayout {
-        spacing: Math.round(10 * Appearance.factor)
-        Layout.preferredWidth: Math.round(460 * Appearance.factor)
+    ExactColumn {
+        gap: 10 * Appearance.factor
+        Layout.preferredWidth: 460 * Appearance.factor
         Layout.fillWidth: true
 
-        ColumnLayout {
+        ExactColumn {
             visible: importWindow.step === "choose"
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Layout.fillWidth: true
             Label {
                 text: qsTr("Import into “%1” from:").arg(VaultController.vaultName)
@@ -175,11 +176,11 @@ DialogWindow {
                 checked: importWindow.source === "vault"
                 onClicked: importWindow.source = "vault"
             }
-            RowLayout {
+            ExactRow {
                 enabled: importWindow.source === "vault"
-                spacing: Math.round(6 * Appearance.factor)
+                gap: 6 * Appearance.factor
                 Layout.fillWidth: true
-                Layout.leftMargin: Math.round(28 * Appearance.factor)
+                Layout.leftMargin: 28 * Appearance.factor
                 ComboBox {
                     id: vaultBox
                     objectName: "importVaultBox"
@@ -219,7 +220,7 @@ DialogWindow {
                 enabled: importWindow.source === "vault"
                 placeholderText: qsTr("The vault's master password")
                 Layout.fillWidth: true
-                Layout.leftMargin: Math.round(28 * Appearance.factor)
+                Layout.leftMargin: 28 * Appearance.factor
                 onAccepted: importWindow.next()
             }
             RadioButton {

@@ -4,9 +4,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# style/CMakeLists.txt 0.1.41
+# style/CMakeLists.txt 0.6.92
 #
 # --- Version history ----------------------------------------------------
+# v0.6.92: The enlarged texts and the exact rows and columns (D-069)
 # v0.1.41: Switch.qml (D-051)
 # v0.0.39: ScrollBar.qml (D-049)
 # v0.0.10: Initial release (D-023)
@@ -22,6 +23,16 @@ qt_add_qml_module(chrono_vault_style
     OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ChronoVault/Style"
     IMPORTS QtQuick.Controls.Fusion/auto
     QML_FILES
+        Arrow.qml
+        ExactColumn.qml
+        ExactRow.qml
+        GroupBox.qml
+        IconText.qml
+        Label.qml
+        MenuBar.qml
+        MenuSeparator.qml
+        ProgressBar.qml
+        ScaledText.qml
         BusyIndicator.qml
         Button.qml
         CheckBox.qml

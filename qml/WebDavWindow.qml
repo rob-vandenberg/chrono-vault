@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavWindow.qml 0.5.75
+// WebDavWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.5.75: Move is the vault menu's: the vault leaves its old place once its copy is checked (D-060)
 // v0.3.67: Leaving the file dialog without a new choice goes back to the folder of the choice shown
 // v0.3.63: One button: Connect, then Open, Next… or Move; the vault or folder chosen with Browse… in a file dialog of
@@ -61,7 +62,7 @@ DialogWindow {
     property string certificate: ""
     property string trusted: ""
     property string problem: ""
-    readonly property int columnWidth: Math.round(460 * Appearance.factor)
+    readonly property real columnWidth: 460 * Appearance.factor
     // As tall as its content, whatever height was remembered (the owner).
     maximumHeight: minimumHeight
     readonly property bool busy: connecting || waitingFor !== ""
@@ -205,8 +206,8 @@ DialogWindow {
         }
     }
 
-    ColumnLayout {
-        spacing: Math.round(8 * Appearance.factor)
+    ExactColumn {
+        gap: 8 * Appearance.factor
 
         Label {
             visible: webDavWindow.mode === "move"
@@ -278,9 +279,9 @@ DialogWindow {
         }
 
         // A certificate the system does not trust (D-057).
-        ColumnLayout {
+        ExactColumn {
             visible: webDavWindow.certificate !== ""
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Label {
                 text: qsTr("Trust this certificate only when it is your server's. Its SHA-256 fingerprint:")
                 wrapMode: Text.Wrap
@@ -310,9 +311,9 @@ DialogWindow {
             visible: webDavWindow.connected
             text: webDavWindow.mode === "move" ? qsTr("Folder") : qsTr("Vault")
         }
-        RowLayout {
+        ExactRow {
             visible: webDavWindow.connected
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Layout.preferredWidth: webDavWindow.columnWidth
             TextField {
                 objectName: "webDavChosenField"

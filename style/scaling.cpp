@@ -22,9 +22,10 @@
 #include <cmath>
 
 // --- Version ------------------------------------------------------------
-// scaling.cpp 0.0.10
+// scaling.cpp 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.0.10: Initial release (D-023)
 
 namespace chrono_vault {
@@ -51,6 +52,12 @@ void UiScale::setFactor(double factor)
         currentFactor = factor;
         emit factorChanged();
     }
+}
+
+double UiScale::whole(double pixels)
+{
+    const double factor = instance()->currentFactor;
+    return std::ceil(pixels / factor - 0.001) * factor;
 }
 
 int UiScale::px(double pixels) const

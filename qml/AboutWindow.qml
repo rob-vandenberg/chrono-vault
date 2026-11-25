@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.0.39
+// AboutWindow.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.0.39: A normal scroll bar with arrows, beside the text (D-049)
 // v0.0.13: Its size includes the title bar and frame (the owner)
 // v0.0.12: Its size gives way to a screen too small for it (the owner)
@@ -61,8 +62,8 @@ DialogWindow {
     standardButtons: Dialog.Close
 
     // The icon with the name, the version and the copyright beside it.
-    RowLayout {
-        spacing: Math.round(16 * Appearance.factor)
+    ExactRow {
+        gap: 16 * Appearance.factor
         Layout.fillWidth: true
 
         Image {
@@ -77,7 +78,7 @@ DialogWindow {
         Item {
             id: heading
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.max(Math.round(64 * Appearance.factor), nameLine.height + copyrightLine.height + siteLine.height)
+            Layout.preferredHeight: Math.max(64 * Appearance.factor, nameLine.height + copyrightLine.height + siteLine.height)
             implicitWidth: Math.max(nameLine.implicitWidth, copyrightLine.implicitWidth, siteLine.implicitWidth)
             Layout.alignment: Qt.AlignTop
 
@@ -119,11 +120,13 @@ DialogWindow {
     // the top lines and the buttons.
     ScrollView {
         id: licenceScroll
+        contentWidth: availableWidth
+        contentHeight: licenceText.implicitHeight
         Layout.fillWidth: true
         Layout.fillHeight: true
         // More room around it (the owner): 8 pixels above, 2 below.
-        Layout.topMargin: Math.round(8 * Appearance.factor)
-        Layout.bottomMargin: Math.round(2 * Appearance.factor)
+        Layout.topMargin: 8 * Appearance.factor
+        Layout.bottomMargin: 2 * Appearance.factor
         // A normal scroll bar, arrows at both ends, always there (the owner,
         // D-046, D-049): the style's own, beside the text.
         ScrollBar.vertical: ScrollBar {
@@ -136,7 +139,7 @@ DialogWindow {
             orientation: Qt.Vertical
             policy: ScrollBar.AlwaysOn
         }
-        rightPadding: licenceScrollBar.width + Math.round(6 * Appearance.factor)
+        rightPadding: licenceScrollBar.width + 6 * Appearance.factor
         // Up/Down a line, Page Up/Down a page, Home/End the start and end,
         // as a person expects of a text to read (the owner, D-046).
         function scrollTo(y) {
@@ -148,10 +151,11 @@ DialogWindow {
         }
         TextArea {
             id: licenceText
+            width: licenceScroll.availableWidth
             objectName: "licenceText"
             focus: true
             Keys.onPressed: function(event) {
-                const line = Math.round(font.pixelSize > 0 ? font.pixelSize * 1.5 : 20 * Appearance.factor)
+                const line = Math.round((font.pixelSize > 0 ? font.pixelSize * 1.5 : 20) * Appearance.factor)
                 const pageStep = licenceScroll.height - line
                 switch (event.key) {
                 case Qt.Key_Up: licenceScroll.scrollBy(-line); break
@@ -196,7 +200,7 @@ DialogWindow {
                   || Updater.state === Updater.Unreachable || Updater.state === Updater.Failed ? Updater.message : ""
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            Layout.maximumWidth: Math.round(260 * Appearance.factor)
+            Layout.maximumWidth: 260 * Appearance.factor
         }
     ]
     // Help > Check for update.

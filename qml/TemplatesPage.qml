@@ -20,18 +20,19 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplatesPage.qml 0.6.88
+// TemplatesPage.qml 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: Exact sizes (D-069)
 // v0.6.88: Initial release, out of CustomizePage.qml (D-066)
 
 // Settings > Templates (D-027, D-066): those of the unlocked vault; the
 // built-in ones can be copied, the person's own also changed and deleted.
 // Kept in the vault at once.
-ColumnLayout {
+ExactColumn {
     id: templatesPage
     objectName: "templatesPage"
-    spacing: Math.round(8 * Appearance.factor)
+    gap: 8 * Appearance.factor
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
     readonly property var templateList: VaultController.revision >= 0 ? VaultController.templates() : []
@@ -51,11 +52,11 @@ ColumnLayout {
 
     Repeater {
         model: templatesPage.unlocked ? templatesPage.templateList : []
-        delegate: RowLayout {
+        delegate: ExactRow {
             id: templateRow
             required property var modelData
             Layout.fillWidth: true
-            spacing: Math.round(6 * Appearance.factor)
+            gap: 6 * Appearance.factor
             Label {
                 text: templateRow.modelData.name
                 textFormat: Text.PlainText

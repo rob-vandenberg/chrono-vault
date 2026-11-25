@@ -26,9 +26,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// program_scale.cpp 0.0.10
+// program_scale.cpp 0.6.92
 
 // --- Version history ----------------------------------------------------
+// v0.6.92: The font at 100% for the windows (D-069)
 // v0.0.10: In steps of 5%; every size follows the factor, not only the text (D-023)
 // v0.0.7: Initial release, as in Chrono Viewer (D-023)
 
@@ -79,6 +80,11 @@ void applyProgramScale(int percent)
     if (ours != QGuiApplication::font()) {
         QGuiApplication::setFont(ours);
     }
+}
+
+QFont programFont()
+{
+    return desktopFont() ? *desktopFont() : QGuiApplication::font();
 }
 
 int programScaleInUse()

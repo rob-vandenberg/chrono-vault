@@ -77,3 +77,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-066](decisions/D-066.md) | The topics of Settings: Categories, Tags and Templates of their own; Customize and Clipboard gone |
 | [D-067](decisions/D-067.md) | The main menu's background for every pop-up menu and list |
 | [D-068](decisions/D-068.md) | Dialogs open in their text field; Choose Icon by keyboard; a right-click menu for text fields |
+| [D-069](decisions/D-069.md) | Exact UI scaling |
