@@ -24,9 +24,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.6.86
+// item_list_model.cpp 0.6.87
 
 // --- Version history ----------------------------------------------------
+// v0.6.87: A parameter no longer named as a member, for Microsoft's compiler
 // v0.6.86: The lists of the audit (D-065)
 // v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
@@ -215,36 +216,36 @@ int ItemListModel::countOf(const QString& filter) const
                                           [this, &filter](const Item& item) { return passesFilter(item, filter); }));
 }
 
-bool ItemListModel::passesFilter(const Item& item, const QString& chosen) const
+bool ItemListModel::passesFilter(const Item& item, const QString& filter) const
 {
     // The Trash and the Archive show only their own items; every other
     // view leaves them out (D-033).
-    if (chosen == QLatin1String("trash")) {
+    if (filter == QLatin1String("trash")) {
         return item.trashed;
     }
     if (item.trashed) {
         return false;
     }
-    if (chosen == QLatin1String("archive")) {
+    if (filter == QLatin1String("archive")) {
         return item.archived;
     }
     if (item.archived) {
         return false;
     }
-    if (chosen.isEmpty()) {
+    if (filter.isEmpty()) {
         return true;
     }
-    if (chosen == QLatin1String("favourites")) {
+    if (filter == QLatin1String("favourites")) {
         return item.favourite;
     }
-    if (chosen.startsWith(QLatin1String("audit:"))) {
-        return auditLists.value(chosen.mid(6)).contains(item.id);
+    if (filter.startsWith(QLatin1String("audit:"))) {
+        return auditLists.value(filter.mid(6)).contains(item.id);
     }
-    if (chosen.startsWith(QLatin1String("category:"))) {
-        return item.categoryId == chosen.mid(9);
+    if (filter.startsWith(QLatin1String("category:"))) {
+        return item.categoryId == filter.mid(9);
     }
-    if (chosen.startsWith(QLatin1String("tag:"))) {
-        const QString tag = chosen.mid(4);
+    if (filter.startsWith(QLatin1String("tag:"))) {
+        const QString tag = filter.mid(4);
         return std::any_of(item.tags.cbegin(), item.tags.cend(), [&tag](const QString& one) {
             return one == tag || one.startsWith(tag + QLatin1Char('/'));
         });

@@ -730,3 +730,7 @@ The owner's changelist items 1-11, in autonomous mode (D-065). `src/core/passwor
 `qml/EmptyList.qml`, `qml/FieldRow.qml`, `qml/VaultPage.qml`, `qml/Main.qml`, `qml/SettingsWindow.qml`; contents format 10;
 `tests/unit/test_audit.cpp`, `tests/integration/test_audit_windows.cpp` (a server of our own, never the internet).
 One review round of two, clean.
+
+## 25 November 2026: version 0.6.87: the Windows build of Audit
+
+A parameter named as a member stopped Microsoft's compiler; renamed. 0.6.86 has no Windows setup.
