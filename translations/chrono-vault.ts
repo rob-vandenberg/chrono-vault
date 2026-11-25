@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+80"/>
+        <location filename="../qml/Main.qml" line="+81"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1829,12 +1829,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
-        <source>Preferences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-628"/>
+        <location line="-620"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2001,11 +1996,12 @@
     </message>
     <message>
         <location line="+16"/>
+        <location line="+116"/>
         <source>Options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="-105"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2234,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+289"/>
+        <location filename="../qml/SettingsWindow.qml" line="+310"/>
         <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>

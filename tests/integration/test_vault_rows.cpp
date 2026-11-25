@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.6.101
+// test_vault_rows.cpp 0.6.102
 
 // --- Version history ----------------------------------------------------
+// v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Initial release (D-071)
 
@@ -97,6 +98,35 @@ private slots:
         QTRY_VERIFY(list->property("opened").toBool());
         other.requestActivate();
         QTRY_VERIFY(!list->property("visible").toBool());
+    }
+
+    // A kept password that no longer opens its vault: the reason in Settings too.
+    void an_outdated_kept_password_is_said_in_settings()
+    {
+        const QString primary = controller->vaultPath();
+        const QString second = folder.filePath(QStringLiteral("kept.chronovault"));
+        const QString other = folder.filePath(QStringLiteral("other.chronovault"));
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"), QUrl(), true);
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+        controller->switchToVault(primary);
+        QTRY_VERIFY(controller->vaultPath() == primary && controller->state() == State::Unlocked && controller->isIdle());
+        // As another device would: the same vault with another master password.
+        controller->createVault(QUrl::fromLocalFile(other), QStringLiteral("new"), QStringLiteral("new"));
+        QTRY_VERIFY(controller->vaultPath() == other && controller->state() == State::Unlocked && controller->isIdle());
+        controller->switchToVault(primary);
+        QTRY_VERIFY(controller->vaultPath() == primary && controller->state() == State::Unlocked && controller->isIdle());
+        QVERIFY(QFile::remove(second) && QFile::copy(other, second));
+        QVERIFY(controller->opensAtOnce(second));
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QMetaObject::invokeMethod(settings(), "openKnown", Q_ARG(QVariant, second));
+        QTRY_VERIFY(!settings()->property("problem").toString().isEmpty());
+        QCOMPARE(controller->state(), State::Locked);
+        // The next Open asks its master password, and the reason is gone.
+        QMetaObject::invokeMethod(settings(), "openKnown", Q_ARG(QVariant, second));
+        QVERIFY(settings()->property("problem").toString().isEmpty());
+        QTRY_VERIFY(settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"))->isVisible());
+        QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("unlockFirstWindow")), "reject");
+        QMetaObject::invokeMethod(settings(), "close");
     }
 
     void a_vault_is_opened_and_locked_in_its_row()

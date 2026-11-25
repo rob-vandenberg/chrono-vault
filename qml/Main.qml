@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.101
+// Main.qml 0.6.102
 
 // --- Version history ----------------------------------------------------
+// v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
@@ -751,7 +752,7 @@ ApplicationWindow {
                 icon.color: mainWindow.palette.buttonText
                 onClicked: settingsWindow.showWindow()
                 ToolTip.visible: hovered
-                ToolTip.text: qsTr("Preferences")
+                ToolTip.text: qsTr("Options")
             }
         }
     }

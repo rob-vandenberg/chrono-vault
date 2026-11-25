@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.100
+// SettingsWindow.qml 0.6.102
 
 // --- Version history ----------------------------------------------------
+// v0.6.102: An outdated kept password is said in Settings; the gear is "Options" (D-071)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.99: The "?" of a key in use is scaled once (D-069)
 // v0.6.98: The texts of Forget (the owner)
@@ -229,9 +230,30 @@ ApplicationWindow {
             unlockFirst.ask(vaultFile, "open")
             return
         }
+        opening = vaultFile
         VaultController.switchToVault(vaultFile)
-        if (VaultController.vaultPath !== vaultFile)
+        if (VaultController.vaultPath !== vaultFile) {
+            opening = ""
             problem = VaultController.message
+        }
+    }
+    // The vault being opened with a kept password: when that no longer opens it,
+    // the reason is said here too (D-071).
+    property string opening: ""
+    Connections {
+        target: VaultController
+        enabled: settingsWindow.opening !== ""
+        function onStateChanged() {
+            if (VaultController.state === VaultController.Unlocked)
+                settingsWindow.opening = ""
+        }
+        function onMessageChanged() {
+            if (VaultController.state !== VaultController.Locked || VaultController.message === "")
+                return
+            if (VaultController.vaultPath === settingsWindow.opening)
+                settingsWindow.problem = VaultController.message
+            settingsWindow.opening = ""
+        }
     }
     signal exportRequested()
     property int clipboardClearSeconds: 0

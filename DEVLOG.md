@@ -807,3 +807,7 @@ The owner's changelist items 1-12 (D-071). `qml/PictureButton.qml`, `qml/Setting
 
 The owner's changelist items 1-7 (D-072). `style/Menu.qml`, `MenuItem.qml`, `MenuSeparator.qml`, `ComboBox.qml`, `scaling.*`;
 `tests/integration/test_vault_rows.cpp`.
+
+## 25 November 2026: version 0.6.102: Open's message, the cogwheel's tooltip
+
+`qml/SettingsWindow.qml`, `qml/Main.qml`; `tests/integration/test_vault_rows.cpp` (D-071).
