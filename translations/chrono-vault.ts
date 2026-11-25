@@ -1768,7 +1768,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+77"/>
+        <location filename="../qml/Main.qml" line="+78"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2083,7 +2083,7 @@
 <context>
     <name>MasterPasswordWindow</name>
     <message>
-        <location filename="../qml/MasterPasswordWindow.qml" line="+43"/>
+        <location filename="../qml/MasterPasswordWindow.qml" line="+44"/>
         <source>Change master password or keyfile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2238,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+270"/>
+        <location filename="../qml/SettingsWindow.qml" line="+271"/>
         <location line="+379"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2297,12 +2297,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1032"/>
+        <location line="+1036"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1033"/>
+        <location line="-1037"/>
         <location line="+474"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2462,7 +2462,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+132"/>
+        <location line="+133"/>
         <source>Disconnect from WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2472,7 +2472,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+111"/>
+        <location line="+9"/>
+        <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, so you can keep working when you are offline. Changes are synced automatically once your connection is restored.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault. This action cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Are you sure you want to disconnect “%1” from the remote vault?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+103"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2487,7 +2502,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-766"/>
+        <location line="-770"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2573,7 +2588,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+686"/>
+        <location line="+690"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2588,7 +2603,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-361"/>
+        <location line="-365"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2643,7 +2658,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2653,12 +2668,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
-        <source>“%1” stops synchronizing. From then on there are two separate vaults: the one on this computer and the one on the server. Nothing is deleted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+236"/>
+        <location line="+261"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2683,15 +2693,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1310"/>
-        <location line="+1249"/>
+        <location line="-1314"/>
+        <location line="+1253"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1316"/>
-        <location line="+1158"/>
+        <location line="-1320"/>
+        <location line="+1162"/>
         <location line="+97"/>
         <location line="+72"/>
         <source>Cancel</source>
@@ -4166,7 +4176,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+11"/>
         <source>Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>

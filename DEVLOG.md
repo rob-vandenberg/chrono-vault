@@ -783,3 +783,8 @@ The owner's changelist items 1-10: `src/ui/program_scale.h`, `qml/Main.qml`, `qm
 
 The owner's own `art/chrono-vault-tray.svg` on every tray (D-064); `src/ui/tray_icon.*` and the edged icon are gone.
 `test_tray`. No reviewers.
+
+## 25 November 2026: version 0.6.97: long texts in dialogs
+
+The owner's changelist items 1-8 (D-061). `style/ScaledText.qml`, the dialogs in `qml/`; `test_dialog_keys`. Ten dialogs opened
+as wide as their text on one line; the sizes remembered from that are not used any more.

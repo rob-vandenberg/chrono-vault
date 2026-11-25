@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.95
+// Main.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.93: A start on a locked vault has the keyboard in its field (D-068)
@@ -1090,7 +1091,7 @@ ApplicationWindow {
     DialogWindow {
         id: certificateWindow
         objectName: "certificateWindow"
-        memoryName: "certificate"
+        memoryName: "certificate2"
         transientParent: mainWindow
         title: qsTr("Trust this certificate?")
         standardButtons: Dialog.Ok | Dialog.Cancel
@@ -1099,7 +1100,7 @@ ApplicationWindow {
         onRejected: VaultController.trustCertificate(false)
         ExactColumn {
             gap: 8 * Appearance.factor
-            width: 420 * Appearance.factor
+            Layout.preferredWidth: 420 * Appearance.factor
             Label {
                 text: qsTr("The WebDAV server's certificate is not trusted by this system. Trust it only when it is your server's. Its SHA-256 fingerprint:")
                 wrapMode: Text.Wrap
@@ -1117,7 +1118,7 @@ ApplicationWindow {
     DialogWindow {
         id: webDavPasswordWindow
         objectName: "webDavPasswordWindow"
-        memoryName: "webDavPassword"
+        memoryName: "webDavPassword2"
         transientParent: mainWindow
         title: qsTr("WebDAV password")
         standardButtons: Dialog.Ok | Dialog.Cancel
@@ -1129,7 +1130,7 @@ ApplicationWindow {
         onRejected: serverPassword.clear()
         ExactColumn {
             gap: 8 * Appearance.factor
-            width: 380 * Appearance.factor
+            Layout.preferredWidth: 380 * Appearance.factor
             Label {
                 text: qsTr("Type the password of the WebDAV server where “%1” is kept.").arg(VaultController.vaultName)
                 wrapMode: Text.Wrap

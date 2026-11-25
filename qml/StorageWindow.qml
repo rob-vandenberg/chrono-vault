@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.6.92
+// StorageWindow.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.75: "move": where a vault is moved to (D-060)
 // v0.3.63: Local at the top, Cloud below it (the owner)
@@ -35,7 +36,7 @@ import QtQuick.Layouts
 DialogWindow {
     id: storageWindow
     objectName: "storageWindow"
-    memoryName: "storage"
+    memoryName: "storage2"
 
     // "new", "open" or "move".
     property string mode: "new"
@@ -87,7 +88,7 @@ DialogWindow {
 
     ExactColumn {
         gap: 10 * Appearance.factor
-        width: 420 * Appearance.factor
+        Layout.preferredWidth: 420 * Appearance.factor
 
         Label {
             text: storageWindow.mode === "move" ? qsTr("Select where the vault should move to:")

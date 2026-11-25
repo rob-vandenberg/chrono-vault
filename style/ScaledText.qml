@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 
 // --- Version ------------------------------------------------------------
-// ScaledText.qml 0.6.92
+// ScaledText.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Initial release (D-069)
 
 import QtQuick
@@ -50,7 +51,10 @@ Item {
     baselineOffset: topPadding + words.baselineOffset * UiScale.factor
     // A layout rounds what it takes by itself up to a whole pixel, and over
     // many rows that adds up; what it is told it keeps.
-    Layout.preferredWidth: UiScale.whole(implicitWidth)
+    // A text that breaks never asks for its whole length on one line: a window
+    // would open that wide, and could not be made narrower (the owner, D-061).
+    Layout.preferredWidth: wrapMode === Text.NoWrap ? UiScale.whole(implicitWidth)
+                                                    : Math.min(UiScale.whole(implicitWidth), 400 * UiScale.factor)
     Layout.preferredHeight: UiScale.whole(implicitHeight)
 
     // The room in the text's own pixels, followed when the room changes, and

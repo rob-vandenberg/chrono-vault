@@ -25,9 +25,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_keys.cpp 0.6.93
+// test_dialog_keys.cpp 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.93: A start on a locked vault (D-068)
 // v0.6.92: A field has the keyboard, not its own item (D-069)
 // v0.6.91: Initial release (D-068)
@@ -128,6 +129,28 @@ private slots:
         QTRY_VERIFY(field->hasActiveFocus());
         type(QStringLiteral("ab"));
         QCOMPARE(field->property("text").toString(), QStringLiteral("ab"));
+    }
+
+    // A long text breaks in a window of normal width, which can be narrower too (D-061).
+    void a_long_text_breaks_in_its_dialog()
+    {
+        QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+        QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+        for (const char* name : {"disconnectWindow", "forgetWindow"}) {
+            QQuickWindow* one = named(name);
+            QVERIFY2(one, name);
+            one->setProperty("vaultFile", folder.filePath(QStringLiteral("away.chronovault")));
+            one->setProperty("onWebDav", true);
+            QVERIFY(QMetaObject::invokeMethod(one, "open"));
+            QTRY_VERIFY2(one->isExposed(), name);
+            QVERIFY2(one->width() <= 450 && one->minimumWidth() <= 450, qPrintable(QString::number(one->width())));
+            const QList<QQuickItem*> texts = one->findChildren<QQuickItem*>(QStringLiteral("dialogText"));
+            QCOMPARE(texts.size(), 1);
+            QTRY_VERIFY2(texts.constFirst()->property("lineCount").toInt() > (qstrcmp(name, "disconnectWindow") == 0 ? 6 : 1), name);
+            QTRY_VERIFY2(one->height() >= one->minimumHeight(), name);
+            QMetaObject::invokeMethod(one, "reject");
+        }
+        QMetaObject::invokeMethod(settings, "close");
     }
 
     void the_icons_by_keyboard()

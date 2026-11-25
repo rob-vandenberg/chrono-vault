@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdateDownloadedWindow.qml 0.6.92
+// UpdateDownloadedWindow.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.9: Initial release, as in Chrono Mail (D-024)
 
@@ -35,7 +36,7 @@ DialogWindow {
     readonly property int state: Updater.state
     readonly property bool installing: state === Updater.Installing
 
-    memoryName: "updateDownloaded"
+    memoryName: "updateDownloaded2"
     title: qsTr("Update downloaded")
     // The system's installer is at work: the window waits for its answer.
     closable: !installing

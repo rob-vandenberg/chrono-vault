@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.95
+// SettingsWindow.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
@@ -1269,7 +1270,7 @@ ApplicationWindow {
                         DialogWindow {
                             id: moveStatus
                             objectName: "moveStatusWindow"
-                            memoryName: "moveVault"
+                            memoryName: "moveVault2"
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property bool busy: false
@@ -1290,7 +1291,7 @@ ApplicationWindow {
                             }
                             ExactColumn {
                                 gap: 8 * Appearance.factor
-                                width: 400 * Appearance.factor
+                                Layout.preferredWidth: 400 * Appearance.factor
                                 Label {
                                     visible: moveStatus.busy
                                     text: qsTr("Moving “%1”…").arg(VaultController.vaultNameOf(moveStatus.vaultFile))
@@ -1315,7 +1316,7 @@ ApplicationWindow {
                         DialogWindow {
                             id: forgetWindow
                             objectName: "forgetWindow"
-                            memoryName: "forgetVault"
+                            memoryName: "forgetVault2"
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property bool onWebDav: false
@@ -1330,7 +1331,8 @@ ApplicationWindow {
                                 }
                             }
                             Label {
-                                width: 400 * Appearance.factor
+                                objectName: "dialogText"
+                                Layout.fillWidth: true
                                 text: forgetWindow.onWebDav
                                       ? qsTr("“%1” is taken off the list of vaults. Its copy on this computer is deleted at once, with any change not yet on the server. The vault on the server stays.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
                                       : qsTr("“%1” is taken off the list of vaults. Its file stays where it is.").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
@@ -1340,7 +1342,7 @@ ApplicationWindow {
                         DialogWindow {
                             id: disconnectWindow
                             objectName: "disconnectWindow"
-                            memoryName: "disconnectWebDav"
+                            memoryName: "disconnectWebDav2"
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             title: qsTr("Disconnect from WebDAV")
@@ -1354,8 +1356,11 @@ ApplicationWindow {
                                 }
                             }
                             Label {
-                                width: 400 * Appearance.factor
-                                text: qsTr("“%1” stops synchronizing. From then on there are two separate vaults: the one on this computer and the one on the server. Nothing is deleted.").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
+                                objectName: "dialogText"
+                                Layout.fillWidth: true
+                                text: qsTr("Chrono Vault keeps a local copy of every vault that is stored in a remote location, so you can keep working when you are offline. Changes are synced automatically once your connection is restored.") + "\n"
+                                      + qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault. This action cannot be undone.") + "\n"
+                                      + qsTr("Are you sure you want to disconnect “%1” from the remote vault?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
                                 wrapMode: Text.Wrap
                             }
                         }

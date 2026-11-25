@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavFileDialog.qml 0.6.92
+// WebDavFileDialog.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.3.67: A folder joins Back's history only once the next one is shown
 // v0.3.63: Initial release (the owner, D-057)
@@ -35,7 +36,7 @@ import QtQuick.Layouts
 DialogWindow {
     id: fileDialog
     objectName: "webDavFileDialog"
-    memoryName: "webDavFileDialog"
+    memoryName: "webDavFileDialog2"
 
     // "open", "save" or "folder".
     property string mode: "open"

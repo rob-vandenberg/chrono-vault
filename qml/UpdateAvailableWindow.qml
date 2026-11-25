@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdateAvailableWindow.qml 0.6.92
+// UpdateAvailableWindow.qml 0.6.97
 
 // --- Version history ----------------------------------------------------
+// v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.9: Initial release, as in Chrono Mail (D-024)
 
@@ -34,7 +35,7 @@ DialogWindow {
 
     readonly property int state: Updater.state
 
-    memoryName: "updateAvailable"
+    memoryName: "updateAvailable2"
     title: qsTr("Update available")
     // Found by itself, it never holds up the rest of the program.
     modality: Qt.NonModal
