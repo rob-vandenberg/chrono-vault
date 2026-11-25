@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.92
+// Main.qml 0.6.93
 
 // --- Version history ----------------------------------------------------
+// v0.6.93: A start on a locked vault has the keyboard in its field (D-068)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.90: The menus' colour from the style (D-067)
 // v0.6.88: Settings > Categories and Settings > Tags (D-066)
@@ -189,14 +190,17 @@ ApplicationWindow {
     onActiveFocusItemChanged: keepFocus()
     // Back from another window: never with the keyboard nowhere (D-062).
     onActiveChanged: keepFocus()
+    // At a start the pages as a whole have it, and a locked vault's field not.
+    function keyboardNowhere() {
+        return activeFocusItem === null || activeFocusItem === contentItem || inMenuBar(activeFocusItem)
+               || (activeFocusItem === pages && unlockPage.visible)
+    }
     function keepFocus() {
         if (!active || aMenuIsOpen())
             return
-        if (activeFocusItem === null || activeFocusItem === contentItem || inMenuBar(activeFocusItem))
+        if (keyboardNowhere())
             Qt.callLater(function() {
-                if (mainWindow.active && !mainWindow.aMenuIsOpen()
-                        && (mainWindow.activeFocusItem === null || mainWindow.activeFocusItem === mainWindow.contentItem
-                            || mainWindow.inMenuBar(mainWindow.activeFocusItem)))
+                if (mainWindow.active && !mainWindow.aMenuIsOpen() && mainWindow.keyboardNowhere())
                     mainWindow.focusContent()
             })
     }

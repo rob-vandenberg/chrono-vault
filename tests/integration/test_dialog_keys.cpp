@@ -25,9 +25,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_keys.cpp 0.6.92
+// test_dialog_keys.cpp 0.6.93
 
 // --- Version history ----------------------------------------------------
+// v0.6.93: A start on a locked vault (D-068)
 // v0.6.92: A field has the keyboard, not its own item (D-069)
 // v0.6.91: Initial release (D-068)
 
@@ -110,6 +111,23 @@ private slots:
         window->requestActivate();
         QTRY_COMPARE(QGuiApplication::focusWindow(), window);
         QTRY_VERIFY(window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"))->hasActiveFocus());
+    }
+
+    // Started on a locked vault: the keyboard waits in the password's field.
+    void a_start_on_a_locked_vault_waits_in_the_password()
+    {
+        controller->lock();
+        QTRY_COMPARE(controller->state(), State::Locked);
+        engine = std::make_unique<QQmlApplicationEngine>();
+        engine->loadFromModule("ChronoVault", "Main");
+        window = qobject_cast<QQuickWindow*>(engine->rootObjects().constFirst());
+        showMainWindow(window, false, false);
+        window->requestActivate();
+        QTRY_COMPARE(QGuiApplication::focusWindow(), window);
+        QQuickItem* field = window->findChild<QQuickItem*>(QStringLiteral("masterPasswordField"));
+        QTRY_VERIFY(field->hasActiveFocus());
+        type(QStringLiteral("ab"));
+        QCOMPARE(field->property("text").toString(), QStringLiteral("ab"));
     }
 
     void the_icons_by_keyboard()
