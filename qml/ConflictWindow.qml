@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.6.92
+// ConflictWindow.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: The normal scroll bar, Enter applies; the split button with 5 pixels free at its sides (D-062)
 // v0.5.81: As Chrono Mail's: every field, the choices in the second accent, a split, Retry sync, Keep here only and Keep both chosen and applied (D-061)
@@ -171,7 +172,9 @@ DialogWindow {
     // then as tall as its first 11 fields.
     function given() {
         const parts = VaultController.windowValue("conflict/given").split(",")
-        const size = parts.length === 2 ? Qt.size(parseInt(parts[0]), parseInt(parts[1])) : Qt.size(0, 0)
+        // Given at the UI scaling of that time, the third part (D-070).
+        const by = parts.length === 3 ? Appearance.factor / parseFloat(parts[2]) : 1
+        const size = parts.length >= 2 ? Qt.size(parseInt(parts[0]) * by, parseInt(parts[1]) * by) : Qt.size(0, 0)
         return size.width > 0 && size.height > 0 ? size : null
     }
     function fitWidth() {
@@ -233,7 +236,7 @@ DialogWindow {
 
     onVisibleChanged: {
         if (!visible && openedSize.width > 0 && (width !== openedSize.width || height !== openedSize.height))
-            VaultController.keepWindowValue("conflict/given", width + "," + height)
+            VaultController.keepWindowValue("conflict/given", width + "," + height + "," + Appearance.factor)
     }
 
     leftButtons: [

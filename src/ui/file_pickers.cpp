@@ -27,6 +27,7 @@
 #include <QPointer>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QStyle>
 #include <QStyleFactory>
@@ -38,9 +39,10 @@
 #endif
 
 // --- Version ------------------------------------------------------------
-// file_pickers.cpp 0.5.80
+// file_pickers.cpp 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.5.80: Only a comment: the dialog's invisibility had another cause (D-055)
 // v0.5.79: Explorer's dialog gets its owner from Qt (D-055)
 // v0.5.78.2: The folder the import's file dialog opens in, in the --debug log (a debug version)
@@ -69,6 +71,12 @@ constexpr int firstHeight = 640;
 QString memoryKey(const QString& memoryName)
 {
     return QStringLiteral("fileDialogs/") + (memoryName.isEmpty() ? QStringLiteral("file") : memoryName);
+}
+
+// The UI scaling, in percent, the size was kept at.
+QString scaleKey(const QString& memoryName)
+{
+    return QStringLiteral("fileDialogScales/") + (memoryName.isEmpty() ? QStringLiteral("file") : memoryName);
 }
 
 // The window a dialog opens over, from an item or a window.
@@ -205,6 +213,14 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
         if (kept.isEmpty() || !dialog.restoreGeometry(kept)) {
             const double factor = Appearance::factor();
             dialog.resize(qRound(firstWidth * factor), qRound(firstHeight * factor));
+        } else {
+            // As it was left, at the UI scaling now (D-070).
+            const double then = SettingsFile().value(scaleKey(memoryName), 100 * Appearance::factor()).toDouble() / 100;
+            if (then > 0 && then != Appearance::factor()) {
+                const QScreen* screen = dialog.screen();
+                const QSize room = screen ? screen->availableGeometry().size() : dialog.size();
+                dialog.resize((QSizeF(dialog.size()) * Appearance::factor() / then).toSize().boundedTo(room));
+            }
         }
         places_here::showEveryPlaceWhole(dialog);
     }
@@ -225,6 +241,7 @@ QUrl FilePickers::pick(const QString& memoryName, const QString& title, bool sav
     }
     if (!explorersOwn) {
         SettingsFile().setValue(memoryKey(memoryName), dialog.saveGeometry());
+        SettingsFile().setValue(scaleKey(memoryName), qRound(100 * Appearance::factor()));
     }
     if (!chosen || dialog.selectedUrls().isEmpty()) {
         return {};

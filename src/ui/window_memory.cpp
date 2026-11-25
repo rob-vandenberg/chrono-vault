@@ -17,17 +17,21 @@
 
 #include "window_memory.h"
 
+#include "scaling.h"
+
 #include <QGuiApplication>
 #include <QScreen>
 #include "settings_files.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 // --- Version ------------------------------------------------------------
-// window_memory.cpp 0.0.38
+// window_memory.cpp 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: A remembered size never smaller than the window's minimum, and moved back inside its screen
 // v0.0.4: Initial release
@@ -73,6 +77,9 @@ void WindowMemory::setName(const QString& name)
 
 void WindowMemory::componentComplete()
 {
+    if (!scales && kept.width() < 0) {
+        kept = asked; // the size it was made with
+    }
     restore();
 }
 
@@ -83,10 +90,16 @@ void WindowMemory::restore()
     }
     const QRect saved = SettingsFile().value(settingsKey(key, "geometry")).toRect();
     if (saved.isValid()) {
+        // Its size at 100%: it was remembered at the scaling of that time, the
+        // one now when that was not written down (before 0.6.94).
+        const double then = SettingsFile().value(settingsKey(key, "scale"), 100 * scaleNow()).toDouble() / 100;
+        ownSize = QSizeF(saved.size()) / (scales && then > 0 ? then : 1.0);
+        emit ownChanged();
         // Never smaller than the window's minimum now: a size remembered from
         // before a window got a larger minimum does not bring it back.
         QRect atLeast = saved;
-        atLeast.setSize(saved.size().expandedTo(target->minimumSize()));
+        atLeast.setSize((ownSize * scaleNow()).toSize().expandedTo(target->minimumSize()));
+        asked = atLeast.size();
         target->setGeometry(insideItsScreen(onAScreen(atLeast)));
     }
     restored = true;
@@ -103,6 +116,7 @@ void WindowMemory::watch()
         return;
     }
     const auto later = [this]() {
+        notice();
         if (restored) {
             saveTimer.start();
         }
@@ -121,6 +135,66 @@ void WindowMemory::watch()
     });
 }
 
+double WindowMemory::scaleNow() const
+{
+    return scales ? UiScale::instance()->factor() : 1.0;
+}
+
+bool WindowMemory::isNormal() const
+{
+    return target && target->windowState() == Qt::WindowNoState;
+}
+
+int WindowMemory::wide(double first, double least, const QSizeF& own)
+{
+    if (target && target->isVisible() && !isNormal()) {
+        return target->width(); // maximized: as wide as the screen gives it
+    }
+    if (!scales && kept.width() < 0) {
+        kept.setWidth(first);
+    }
+    double width = own.isValid() ? own.width() * scaleNow() : scales ? first : kept.width();
+    width = std::max(width, std::ceil(least));
+    if (const QScreen* screen = target ? target->screen() : nullptr) {
+        // With its frame, or the desktop would make it smaller itself.
+        const QMargins frame = target->frameMargins();
+        width = std::min<double>(width, screen->availableGeometry().width() - frame.left() - frame.right());
+    }
+    asked.setWidth(static_cast<int>(std::lround(width)));
+    return asked.width();
+}
+
+int WindowMemory::high(double first, double least, const QSizeF& own)
+{
+    if (target && target->isVisible() && !isNormal()) {
+        return target->height();
+    }
+    if (!scales && kept.height() < 0) {
+        kept.setHeight(first);
+    }
+    double height = own.isValid() ? own.height() * scaleNow() : scales ? first : kept.height();
+    height = std::max(height, std::ceil(least));
+    if (const QScreen* screen = target ? target->screen() : nullptr) {
+        const QMargins frame = target->frameMargins();
+        height = std::min<double>(height, screen->availableGeometry().height() - frame.top() - frame.bottom());
+    }
+    asked.setHeight(static_cast<int>(std::lround(height)));
+    return asked.height();
+}
+
+void WindowMemory::notice()
+{
+    if (!restored || !target->isVisible() || !isNormal() || target->size() == asked) {
+        return;
+    }
+    const QSizeF given = QSizeF(target->size()) / scaleNow();
+    if (given != ownSize) {
+        ownSize = given;
+        asked = target->size();
+        emit ownChanged();
+    }
+}
+
 void WindowMemory::save()
 {
     if (!target || key.isEmpty()) {
@@ -133,6 +207,7 @@ void WindowMemory::save()
     // comes back to that when it is made normal again.
     if (state == Qt::WindowNoState && (target->isVisible() || shownOnce)) {
         settings.setValue(settingsKey(key, "geometry"), target->geometry());
+        settings.setValue(settingsKey(key, "scale"), qRound(100 * scaleNow()));
     }
 }
 

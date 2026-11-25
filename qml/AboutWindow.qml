@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.6.92
+// AboutWindow.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.39: A normal scroll bar with arrows, beside the text (D-049)
 // v0.0.13: Its size includes the title bar and frame (the owner)
@@ -54,8 +55,8 @@ DialogWindow {
     }
     // Opens at 555 by 440 and is never smaller, also when a smaller size was
     // remembered from before (the owner).
-    width: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
-    height: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
+    firstWidth: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
+    firstHeight: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
     minimumWidth: Math.min(Math.round(555 * Appearance.factor), Appearance.screenRoom(this).width) - frame.width
     minimumHeight: Math.min(Math.round(440 * Appearance.factor), Appearance.screenRoom(this).height) - frame.height
     title: qsTr("About Chrono Vault")

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.6.92
+// DialogWindow.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Esc only of the active dialog; Enter presses the button, which has the keyboard when a question opens (D-062)
 // v0.5.78: Never narrower than its content can take (D-061)
@@ -154,8 +155,12 @@ ApplicationWindow {
     visible: false
     // The edge around everything, the same as the settings window's.
     readonly property real edge: 10 * Appearance.factor
-    width: Math.max(Math.round(400 * Appearance.factor), layout.implicitWidth + 2 * edge)
-    height: Math.max(Math.round(160 * Appearance.factor), layout.implicitHeight + 2 * edge)
+    // The size it first opens at; then the person's own, which scales along
+    // with the UI scaling (D-070).
+    property real firstWidth: Math.max(400 * Appearance.factor, layout.implicitWidth + 2 * edge)
+    property real firstHeight: Math.max(160 * Appearance.factor, layout.implicitHeight + 2 * edge)
+    width: memory.wide(firstWidth, minimumWidth, memory.own)
+    height: memory.high(firstHeight, minimumHeight, memory.own)
     // Never narrower than its content can take, so nothing is cut off or
     // pushed outside: texts wrap within their reading width, and the window
     // only grows wider (D-061).

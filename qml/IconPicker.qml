@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.6.92
+// IconPicker.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.91: Opens in Search; the icons by keyboard (D-068)
 // v0.5.82: Enter never deletes an icon (D-062)
@@ -41,8 +42,8 @@ DialogWindow {
     objectName: "iconPicker"
     title: qsTr("Choose Icon")
     memoryName: "iconPicker"
-    width: Math.round(480 * Appearance.factor)
-    height: Math.round(680 * Appearance.factor)
+    firstWidth: 480 * Appearance.factor
+    firstHeight: 680 * Appearance.factor
     standardButtons: Dialog.Ok | Dialog.Cancel
 
     // The chosen icon: "" none yet, "default" the category's own, "custom:"

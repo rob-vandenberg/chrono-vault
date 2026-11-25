@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.6.93
+// Main.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.93: A start on a locked vault has the keyboard in its field (D-068)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.90: The menus' colour from the style (D-067)
@@ -66,8 +67,9 @@ ApplicationWindow {
     // The program's colours, never the desktop theme's (D-023).
     Component.onCompleted: Appearance.dress(this)
 
-    width: Math.round(960 * Appearance.factor)
-    height: Math.round(640 * Appearance.factor)
+    // Its size stays when the UI scaling changes: only its contents scale (D-070).
+    width: mainMemory.wide(960 * Appearance.factor, 0, mainMemory.own)
+    height: mainMemory.high(640 * Appearance.factor, 0, mainMemory.own)
     // Shown by the program as it starts: normally, minimized, or not at all
     // when "Start Chrono Vault minimized" keeps it in the tray (D-019).
     visible: false
@@ -1076,8 +1078,10 @@ ApplicationWindow {
     }
 
     WindowMemory {
+        id: mainMemory
         window: mainWindow
         name: "main"
+        scales: false
     }
 
     // The questions of a WebDAV sync (D-057): a certificate the system does

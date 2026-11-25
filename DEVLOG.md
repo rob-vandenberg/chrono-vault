@@ -768,3 +768,8 @@ five scalings. The windows open 13 to 20% slower in a debug test.
 
 The owner's word: the keyboard waits in the password field. `qml/Main.qml`; `tests/integration/test_dialog_keys.cpp`.
 No reviewers, at the owner's word (no more cost than needed).
+
+## 25 November 2026: version 0.6.94: the windows and the scaling
+
+The owner's changelist items 1-9 (D-070). `src/ui/window_memory.*`, `src/ui/file_pickers.cpp`, the windows in `qml/`;
+`tests/integration/test_exact_scaling.cpp`, `test_file_pickers.cpp`.

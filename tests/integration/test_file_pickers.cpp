@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "file_pickers.h"
+#include "program_scale.h"
 #include "places_here.h"
 #include "settings_files.h"
 
@@ -25,12 +26,14 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QFileInfo>
+#include <QScopeGuard>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_file_pickers.cpp 0.3.64
+// test_file_pickers.cpp 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.3.64: A new vault's default folder, Documents/chrono-vault (D-058)
 // v0.2.51: Initial release (D-055)
 
@@ -137,6 +140,20 @@ private slots:
                              QUrl::fromLocalFile(folder.path()), nullptr)
                     .isEmpty());
         QCOMPARE(size, QSize(700, 500));
+
+        // At another UI scaling its size scales along (D-070).
+        applyProgramScale(110);
+        const auto back = qScopeGuard([]() { applyProgramScale(100); });
+        QTimer::singleShot(0, [&]() {
+            auto* dialog = qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+            QVERIFY(dialog);
+            size = dialog->size();
+            dialog->reject();
+        });
+        QVERIFY(pickers.pick(QStringLiteral("test.save"), QStringLiteral("Save"), true, {}, QString(), QUrl(),
+                             QUrl::fromLocalFile(folder.path()), nullptr)
+                    .isEmpty());
+        QCOMPARE(size, QSize(770, 550));
     }
 };
 

@@ -23,9 +23,10 @@
 #include <QScopeGuard>
 
 // --- Version ------------------------------------------------------------
-// test_exact_scaling.cpp 0.6.92
+// test_exact_scaling.cpp 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Initial release (D-069)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -122,6 +123,40 @@ private slots:
             QVERIFY2(search->property("selectedText").toString() == QLatin1String("mill"), at.constData());
         }
         QMetaObject::invokeMethod(search, "clear");
+    }
+
+    // The main window keeps its size, every other window scales along (D-070).
+    void the_main_window_keeps_its_size_and_another_scales_along()
+    {
+        const auto back = qScopeGuard([]() { applyProgramScale(100); });
+        window->resize(700, 500);
+        settle(window);
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QTRY_VERIFY(settings()->isExposed());
+        settings()->resize(740, 700);
+        settle(settings());
+        applyProgramScale(105);
+        settle(settings());
+        QCOMPARE(window->size(), QSize(700, 500));
+        QCOMPARE(settings()->size(), QSize(777, 735));
+        applyProgramScale(50);
+        settle(settings());
+        QCOMPARE(window->size(), QSize(700, 500));
+        QCOMPARE(settings()->size(), QSize(370, 350));
+        QMetaObject::invokeMethod(settings(), "close");
+        // Closed too: scaled at its next opening, and in the next run.
+        applyProgramScale(105);
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QTRY_VERIFY(settings()->isExposed());
+        QCOMPARE(settings()->size(), QSize(777, 735));
+        QMetaObject::invokeMethod(settings(), "close");
+        engine.reset();
+        applyProgramScale(100);
+        engine = std::make_unique<QQmlApplicationEngine>();
+        engine->loadFromModule("ChronoVault", "Main");
+        window = qobject_cast<QQuickWindow*>(engine->rootObjects().constFirst());
+        QCOMPARE(settings()->size(), QSize(740, 700));
+        QCOMPARE(window->size(), QSize(700, 500));
     }
 
     void a_number_is_typed_at_another_scaling()

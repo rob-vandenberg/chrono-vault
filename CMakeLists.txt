@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.6.93 LANGUAGES CXX)
+project(chrono-vault VERSION 0.6.94 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.6.93
+# CMakeLists.txt 0.6.94
 
 # --- Version history ----------------------------------------------------
+# v0.6.94: Version 0.6.94 (D-070)
 # v0.6.93: Version 0.6.93
 # v0.6.92: Version 0.6.92 (D-069)
 # v0.6.91: Version 0.6.91; Qt 6.9 or newer (D-068)

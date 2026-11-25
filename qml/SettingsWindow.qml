@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.6.92
+// SettingsWindow.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.91: More room for the last two lines of General; 720 by 640 inside (D-068)
 // v0.6.89: 720 by 625 inside, opened and at least (the owner, D-066)
@@ -419,8 +420,9 @@ ApplicationWindow {
     }
 
     title: qsTr("Settings – Chrono Vault %1").arg(VaultController.version)
-    width: Math.min(Math.round(720 * Appearance.factor), Appearance.screenRoom(this).width - frame.width)
-    height: Math.min(Math.round(640 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
+    // It scales along with the UI scaling, from the size the person gave it (D-070).
+    width: settingsMemory.wide(minimumWidth, minimumWidth, settingsMemory.own)
+    height: settingsMemory.high(minimumHeight, minimumHeight, settingsMemory.own)
     // Never smaller than it opens (the owner).
     minimumWidth: Math.min(Math.round(720 * Appearance.factor), Appearance.screenRoom(this).width - frame.width)
     minimumHeight: Math.min(Math.round(640 * Appearance.factor), Appearance.screenRoom(this).height - frame.height)
@@ -428,6 +430,7 @@ ApplicationWindow {
     color: palette.window
 
     WindowMemory {
+        id: settingsMemory
         window: settingsWindow
         name: "settings"
     }

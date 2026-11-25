@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.6.92
+// SyncConflictsWindow.qml 0.6.94
 
 // --- Version history ----------------------------------------------------
+// v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Every key of a list, Ctrl+A, ranges (D-062)
 // v0.5.81: The list as Chrono Mail's: a table whose columns are dragged, line icons, Retry sync, Keep here only, every button greyed and never hidden (D-061)
@@ -191,8 +192,8 @@ DialogWindow {
 
     title: qsTr("Sync conflicts")
     standardButtons: Dialog.Close
-    width: Math.round(1000 * Appearance.factor)
-    height: Math.round(520 * Appearance.factor)
+    firstWidth: 1000 * Appearance.factor
+    firstHeight: 520 * Appearance.factor
 
     Component.onCompleted: readColumns()
     onShown: {
