@@ -86,3 +86,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-075](decisions/D-075.md) | Close and Lock per vault; the start-up page begins with the primary; the way back after a lock |
 | [D-076](decisions/D-076.md) | A PIN per vault; the lock as a screen lock |
 | [D-077](decisions/D-077.md) | Open a vault: your vaults and the storage locations; the crown in the start-up list |
+| [D-078](decisions/D-078.md) | Another vault opens without anything in between; never a page that needs nothing |

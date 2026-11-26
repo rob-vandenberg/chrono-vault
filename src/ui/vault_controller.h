@@ -49,9 +49,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.7.107
+// vault_controller.h 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -664,6 +665,10 @@ public:
     // The kept passwords can be used: the primary was opened and not locked since.
     Q_PROPERTY(bool keyStoreOpen READ keyStoreOpen NOTIFY keptChanged)
     [[nodiscard]] bool keyStoreOpen() const { return primaryKey.isValid(); }
+    // Another vault is being opened with what is kept, while the one shown
+    // stays until it is open; nothing can be changed meanwhile (D-078).
+    Q_PROPERTY(bool switching READ isSwitching NOTIFY switchingChanged)
+    [[nodiscard]] bool isSwitching() const { return !switchingTo.isEmpty(); }
     // After a lock: the vault that comes back once the primary shown is unlocked.
     Q_PROPERTY(QString returnVault READ returnVault NOTIFY returnChanged)
     [[nodiscard]] QString returnVault() const { return returnTo; }
@@ -720,6 +725,9 @@ public:
 
 signals:
     void stateChanged();
+    void switchingChanged();
+    // The vault being switched to did not open; the one shown stays (D-078).
+    void switchFailed(const QString& vaultFile);
     void vaultPathChanged();
     void messageChanged();
     void searchTextChanged();
@@ -821,6 +829,8 @@ private:
     // before; both off the window's thread (OR-5).
     void startUnlock(const QByteArray& password, bool savedPassword = false, bool remember = false);
     void startOpenWithKey(const VaultKey& kept);
+    void startSwitch(const QString& vaultFile, bool withPrimaryKey);
+    void cancelSwitch();
     void unlocked(const VaultKey& newKey, const VaultContents& read, const QByteArray& keyfile);
     // The primary's key and the passwords saved in it, kept while unlocked.
     void rememberPrimary();
@@ -1087,6 +1097,9 @@ private:
     QByteArray primaryKeyfile;             // the primary's keyfile fingerprint, with its key
     std::optional<CreatedVault> createdVault; // see CreatedVault
     QHash<QString, QString> savedPasswords; // vault file to its password, from the primary
+    // A saved password found not to open its vault: not used again while the
+    // primary still holds it, so the vault's own password is asked (D-078).
+    QHash<QString, QString> stalePasswords;
     QString returnTo;                      // the vault shown before the lock, reached through the primary
     QString lastUsed;
     bool onlyKeyStore = false;             // the primary is opened for its kept passwords only
@@ -1110,6 +1123,8 @@ private:
     QByteArray unsavedBaseSealed; // the base of that change, for a merge at the unlock (D-054)
     QString unsavedPath;
     quint64 unlockAttempt = 0;
+    QString switchingTo;
+    quint64 switchAttempt = 0;
 
     QTimer autoLockTimer;
     QTimer clipboardTimer;

@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.7.109
+// vault_controller.cpp 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.109: A Closed vault picked in the file picker opens at once
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
@@ -2973,8 +2974,9 @@ void VaultController::rememberPrimary()
                 password = field.value;
             }
         }
-        if (!vaultFile.isEmpty() && !password.isEmpty()) {
-            savedPasswords.insert(moved.value(vaultFile, vaultFile).toString(), password);
+        const QString at = moved.value(vaultFile, vaultFile).toString();
+        if (!vaultFile.isEmpty() && !password.isEmpty() && stalePasswords.value(at) != password) {
+            savedPasswords.insert(at, password);
         }
     }
     tellKept();
@@ -2987,6 +2989,7 @@ void VaultController::forgetPrimary()
     crypto::wipe(primaryKeyfile);
     primaryKeyfile.clear();
     savedPasswords.clear();
+    stalePasswords.clear();
     tellKept();
 }
 
@@ -3031,6 +3034,17 @@ void VaultController::switchToVault(const QString& vaultFile)
         rememberPrimary();
     }
     const bool canUseKept = currentState == State::Unlocked || !savedPasswords.isEmpty() || primaryKey.isValid();
+    // From an open vault: that one stays shown until the other is open, so no
+    // page needing nothing is ever shown in between (the owner, D-078).
+    if (currentState == State::Unlocked && !isSwitching()) {
+        const bool withPrimaryKey = vaultFile == primaryVault() && primaryKey.isValid();
+        if (withPrimaryKey || savedPasswords.contains(vaultFile)) {
+            startSwitch(vaultFile, withPrimaryKey);
+            return;
+        }
+    } else if (isSwitching()) {
+        return;
+    }
     forgetUnlockedVault();
     ++unlockAttempt;
     addVault(vaultFile);
@@ -3057,6 +3071,147 @@ void VaultController::switchToVault(const QString& vaultFile)
     }
     say(QString(), false);
     setState(State::Locked);
+}
+
+void VaultController::startSwitch(const QString& vaultFile, bool withPrimaryKey)
+{
+    if (moveRunning && movingVault == vaultFile) {
+        say(tr("This vault is being moved. Unlock it once the move is done."), true);
+        emit switchFailed(vaultFile);
+        return;
+    }
+    switchingTo = vaultFile;
+    const quint64 attempt = ++switchAttempt;
+    emit switchingChanged();
+    say(tr("Opening “%1”…").arg(QFileInfo(vaultFile).completeBaseName()), false);
+    QPointer<VaultController> self(this);
+    // What would go wrong is said with the vault's name: the one shown stays.
+    const auto sayFailed = [self, vaultFile](const QString& reason) {
+        self->say(tr("“%1” could not be opened. %2").arg(QFileInfo(vaultFile).completeBaseName(), reason), true);
+        emit self->switchFailed(vaultFile);
+    };
+    // The new vault replaces the one shown in one step, never drawn between.
+    const auto swap = [self, vaultFile](const OpenResult& result, const VaultContents& read,
+                                        const QByteArray& keyfile, bool forFinger) {
+        self->forgetUnlockedVault();
+        ++self->unlockAttempt;
+        self->addVault(vaultFile);
+        self->leavingFor(vaultFile);
+        self->setPath(vaultFile);
+        self->needKeyfile = false;
+        emit self->keyfileChanged();
+        self->setState(State::Busy); // the one shown is closed now
+        self->unlockedStamp = result.stamp;
+        self->unlocked(result.key, read, keyfile);
+        if (forFinger) {
+            self->keepForThisVault(); // its key for the finger, as unlocking with it (D-043)
+        }
+    };
+    if (withPrimaryKey) {
+        VaultKey kept = primaryKey;
+        kept.key = QByteArray(primaryKey.key.constData(), primaryKey.key.size());
+        const QByteArray keyfile(primaryKeyfile.constData(), primaryKeyfile.size());
+        // On the save thread: after any write to this vault still running.
+        (void)QtConcurrent::run(&savePool, [self, vaultFile, kept, keyfile, attempt, sayFailed, swap]() mutable {
+            OpenResult result = openVaultFileWithKey(vaultFile, kept);
+            kept.wipe();
+            ContentsResult read;
+            if (result.status == OpenStatus::Opened) {
+                read = contentsFromJson(result.contents);
+                crypto::wipe(result.contents);
+            }
+            QMetaObject::invokeMethod(
+                qApp,
+                [self, result, read, keyfile, attempt, sayFailed, swap]() mutable {
+                    if (!self || attempt != self->switchAttempt || !self->isSwitching()) {
+                        result.key.wipe();
+                        return;
+                    }
+                    self->switchingTo.clear();
+                    emit self->switchingChanged();
+                    if (result.status != OpenStatus::Opened || read.status != ContentsStatus::Read) {
+                        result.key.wipe();
+                        sayFailed(result.status == OpenStatus::FileMissing
+                                   ? openStatusText(result.status)
+                                   : tr("It was changed elsewhere since it was opened. Open it with its master "
+                                        "password."));
+                        return;
+                    }
+                    swap(result, read.contents, keyfile, false);
+                },
+                Qt::QueuedConnection);
+        });
+        crypto::wipe(kept.key);
+        return;
+    }
+    QByteArray password = savedPasswords.value(vaultFile).toUtf8();
+    const QString keyfileFile = keyfileOf(vaultFile);
+    (void)QtConcurrent::run(&unlockPool, [self, vaultFile, password, keyfileFile, attempt, sayFailed, swap]() mutable {
+        std::optional<QByteArray> fingerprint = QByteArray();
+        if (!keyfileFile.isEmpty()) {
+            fingerprint = keyfileFingerprint(keyfileFile);
+        }
+        OpenResult result;
+        if (fingerprint) {
+            result = openVaultFile(vaultFile, password, *fingerprint);
+        }
+        crypto::wipe(password);
+        ContentsResult read;
+        if (result.status == OpenStatus::Opened) {
+            read = contentsFromJson(result.contents);
+            crypto::wipe(result.contents);
+        }
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, result, read, fingerprint, attempt, sayFailed, swap]() mutable {
+                if (!self || attempt != self->switchAttempt || !self->isSwitching()) {
+                    result.key.wipe();
+                    return;
+                }
+                self->switchingTo.clear();
+                emit self->switchingChanged();
+                if (!fingerprint) {
+                    sayFailed(tr("Its keyfile could not be read."));
+                    return;
+                }
+                if (result.status == OpenStatus::WrongPasswordOrDamaged) {
+                    // The copy saved in the primary is out of date: forgotten,
+                    // and the person is told which password failed.
+                    self->stalePasswords.insert(vaultFile, self->savedPasswords.take(vaultFile));
+                    self->tellKept();
+                    self->say(tr("The password saved in “%1” for “%2” no longer opens it. Open “%2” with its "
+                                 "master password.")
+                                  .arg(QFileInfo(self->primaryVault()).completeBaseName(),
+                                       QFileInfo(vaultFile).completeBaseName()),
+                              true);
+                    emit self->switchFailed(vaultFile);
+                    return;
+                }
+                if (result.status != OpenStatus::Opened) {
+                    sayFailed(openStatusText(result.status));
+                    return;
+                }
+                if (read.status != ContentsStatus::Read) {
+                    result.key.wipe();
+                    sayFailed(read.status == ContentsStatus::NewerFormat ? openStatusText(OpenStatus::NewerFormat)
+                                                                       : tr("The vault opened, but what it holds is "
+                                                                            "damaged. It was not changed."));
+                    return;
+                }
+                swap(result, read.contents, *fingerprint, true);
+            },
+            Qt::QueuedConnection);
+    });
+    crypto::wipe(password);
+}
+
+void VaultController::cancelSwitch()
+{
+    if (isSwitching()) {
+        switchingTo.clear();
+        ++switchAttempt;
+        emit switchingChanged();
+    }
 }
 
 void VaultController::tellKept()
@@ -4057,6 +4212,7 @@ void VaultController::takeBackUnsaved()
 
 void VaultController::forgetUnlockedVault()
 {
+    cancelSwitch(); // a lock or another vault comes first (D-078)
     stopWebDav();
     setDirty(false);
     setFailed(false);

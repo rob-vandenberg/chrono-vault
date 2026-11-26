@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.7.108
+// Main.qml 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: The vault shown stays, unchangeable, until the other one is open (D-078)
 // v0.7.108: Open a vault: a known vault opened as in Settings > Vaults (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -88,6 +89,8 @@ ApplicationWindow {
     readonly property bool busy: VaultController.state === VaultController.Busy
 
     readonly property bool unlocked: VaultController.state === VaultController.Unlocked
+    // Open and not being left for another vault: only then can it be changed (D-078).
+    readonly property bool free: unlocked && !VaultController.switching
     // Also with no vault open, while others open without a password (D-075).
     readonly property bool lockable: unlocked || (VaultController.keyStoreOpen && VaultController.state !== VaultController.Busy)
 
@@ -130,7 +133,7 @@ ApplicationWindow {
         id: action_sidebar
         property string actionId: "sidebar"
         text: qsTr("Collapse or expand the sidebar")
-        enabled: mainWindow.unlocked
+        enabled: mainWindow.free
         onTriggered: vaultPage.setCollapsed(!vaultPage.collapsed)
     }
     readonly property var keyedActions: [
@@ -221,8 +224,8 @@ ApplicationWindow {
 
     // The item the Item menu acts on: the one shown, while the editor is not
     // open (D-039).
-    readonly property bool itemFree: unlocked && vaultPage.chosenItemId !== "" && !vaultPage.editing
-    readonly property bool itemsFree: unlocked && vaultPage.selectedIds.length > 0 && !vaultPage.editing
+    readonly property bool itemFree: free && vaultPage.chosenItemId !== "" && !vaultPage.editing
+    readonly property bool itemsFree: free && vaultPage.selectedIds.length > 0 && !vaultPage.editing
     readonly property var chosenItem: itemFree && VaultController.revision >= 0
                                       ? VaultController.item(vaultPage.chosenItemId) : ({})
     readonly property bool hasSensitive: (chosenItem.fields || []).some(function(field) {
@@ -336,7 +339,7 @@ ApplicationWindow {
                         property string actionId: "changeMasterPassword"
                         property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Change Master Password")
-                        enabled: mainWindow.unlocked
+                        enabled: mainWindow.free
                         onTriggered: mainWindow.changeMasterPassword()
                     }
                     MenuSeparator {}
@@ -361,7 +364,7 @@ ApplicationWindow {
                         property string actionId: "import"
                         property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Import")
-                        enabled: mainWindow.unlocked
+                        enabled: mainWindow.free
                         onTriggered: vaultPage.whenEditorFree(function() { importWindow.start() })
                     }
                     Action {
@@ -369,7 +372,7 @@ ApplicationWindow {
                         property string actionId: "export"
                         property string shownKeys: mainWindow.firstKey(actionId)
                         text: qsTr("Export")
-                        enabled: mainWindow.unlocked
+                        enabled: mainWindow.free
                         onTriggered: vaultPage.whenEditorFree(function() { exportWindow.ask() })
                     }
                     MenuSeparator {}
@@ -611,13 +614,13 @@ ApplicationWindow {
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "syncNowAction"
                         text: qsTr("Sync Now")
-                        enabled: mainWindow.unlocked && VaultController.onWebDav
+                        enabled: mainWindow.free && VaultController.onWebDav
                         onTriggered: VaultController.syncNow()
                     }
                     Action {
                         objectName: "syncConflictsAction"
                         text: qsTr("Sync Conflicts…")
-                        enabled: mainWindow.unlocked && VaultController.conflictCount > 0
+                        enabled: mainWindow.free && VaultController.conflictCount > 0
                         onTriggered: syncConflicts.open()
                     }
                     Action {
@@ -705,7 +708,7 @@ ApplicationWindow {
                     border.width: parent.visualFocus ? Math.max(2, Math.round(2 * Appearance.factor)) : 0
                     border.color: mainWindow.palette.highlightedText
                 }
-                enabled: mainWindow.unlocked
+                enabled: mainWindow.free
                 onClicked: newItemMenu.popup(this, 0, height)
                 // Every category shown in the left column, with its templates
                 // (D-027).
@@ -905,6 +908,20 @@ ApplicationWindow {
             onTagsRequested: settingsWindow.showTags()
             onLeakSettingRequested: settingsWindow.showSecurity()
         }
+    }
+
+    // While another vault opens, the one shown stays as it is: the mouse and the
+    // keys reach it no more, and nothing about it changes on the screen (D-078).
+    MouseArea {
+        id: switchingShield
+        objectName: "switchingShield"
+        anchors.fill: parent
+        visible: VaultController.switching
+        hoverEnabled: true
+        acceptedButtons: Qt.AllButtons
+        onWheel: function(wheel) { wheel.accepted = true }
+        Keys.onPressed: function(event) { event.accepted = true }
+        onVisibleChanged: if (visible) forceActiveFocus()
     }
 
     BusyIndicator {

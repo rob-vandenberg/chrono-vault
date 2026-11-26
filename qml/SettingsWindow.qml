@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.7.107
+// SettingsWindow.qml 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: Open with what is kept: the vault shown stays until the other one is open (D-078)
 // v0.7.107: Set PIN…, Change PIN… and Remove PIN… in a vault's menu; the PIN line leaves Security (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -243,7 +244,7 @@ ApplicationWindow {
         opening = vaultFile
         openingFor = what
         VaultController.switchToVault(vaultFile)
-        if (VaultController.vaultPath !== vaultFile) {
+        if (VaultController.vaultPath !== vaultFile && !VaultController.switching) {
             opening = ""
             problem = VaultController.message
         }
@@ -270,6 +271,24 @@ ApplicationWindow {
                 settingsWindow.problem = VaultController.message
             settingsWindow.opening = ""
         }
+        // The vault shown stayed: the reason is said here (D-078).
+        function onSwitchFailed(vaultFile) {
+            if (vaultFile === settingsWindow.opening)
+                settingsWindow.problem = VaultController.message
+            settingsWindow.opening = ""
+        }
+    }
+    // While another vault opens, nothing here reaches the vault shown (D-078).
+    MouseArea {
+        objectName: "settingsSwitchingShield"
+        anchors.fill: parent
+        z: 1000
+        visible: VaultController.switching
+        hoverEnabled: true
+        acceptedButtons: Qt.AllButtons
+        onWheel: function(wheel) { wheel.accepted = true }
+        Keys.onPressed: function(event) { event.accepted = true }
+        onVisibleChanged: if (visible) forceActiveFocus()
     }
     signal exportRequested()
     property int clipboardClearSeconds: 0

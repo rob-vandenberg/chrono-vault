@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.7.109
+// test_vault_rows.cpp 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: An outdated kept password keeps the vault shown open (D-078)
 // v0.7.109: Create a vault in the look of Open a vault; no OK without the list
 // v0.7.108: Open a vault and its list; the crown in the start-up page's list (D-077)
 // v0.6.106: Close and Lock per vault (D-075)
@@ -338,7 +339,10 @@ private slots:
         QMetaObject::invokeMethod(settings(), "showWindow");
         QMetaObject::invokeMethod(settings(), "openKnown", Q_ARG(QVariant, second));
         QTRY_VERIFY(!settings()->property("problem").toString().isEmpty());
-        QCOMPARE(controller->state(), State::Locked);
+        // The vault shown stays open (D-078).
+        QVERIFY(!controller->isSwitching());
+        QCOMPARE(controller->state(), State::Unlocked);
+        QCOMPARE(controller->vaultPath(), primary);
         // The next Open asks its master password, and the reason is gone.
         QMetaObject::invokeMethod(settings(), "openKnown", Q_ARG(QVariant, second));
         QVERIFY(settings()->property("problem").toString().isEmpty());

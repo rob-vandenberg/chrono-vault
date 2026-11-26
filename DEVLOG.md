@@ -849,3 +849,11 @@ The owner's changelist items 1-13 (D-077). `qml/StorageWindow.qml`, `qml/Welcome
 The owner's changelist items 1-8. `VaultController::chooseVault` opened every vault picked in the file picker on the
 start-up page, also one that needs no password; now it opens it at once. Create a vault and Move a vault in the look of
 Open a vault (`qml/StorageWindow.qml`). Item 8 was no fault (a cropped screenshot); its check stays in `test_vault_rows`.
+
+## 26 November 2026: version 0.7.110: opening a vault without a flash
+
+The owner's changelist items 1, 2, 4-9 (D-078; item 3 left out). `VaultController::switchToVault` closed the open vault
+first and then made the key (about a second), so the start-up page showed meanwhile. Now `startSwitch` opens the other
+vault first while the open one stays, unchangeable; the swap is one step. A failure keeps the open vault and says why; a
+kept password that failed is not used again while the primary holds it. `test_vaults` (new: no page between, the
+failure), `test_vault_rows`; existing switch tests wait for the switch to end. No reviewers (the owner).

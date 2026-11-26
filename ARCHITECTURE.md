@@ -56,6 +56,9 @@ kept passwords, in memory); `closeOpenVault` and `lockVault` (`src/ui/vault_cont
 with, sealed with its key and its PIN's; `takeBackSession` and `openTakenBack` give it back. A PIN per vault in `pins/`.
 **Open a vault (D-077)**: `qml/StorageWindow.qml` in its "open" mode lists the known vaults; a chosen one goes to
 `openKnownAsk` in `qml/Main.qml`, the standard dialog as Settings > Vaults uses it.
+**Switching without a page between (D-078)**: `VaultController::startSwitch` makes the key and reads the other vault off the
+window's thread while the open one stays (`switching`, the shields in `qml/Main.qml` and `qml/SettingsWindow.qml`); the swap is
+one step on the window's thread; a failure leaves the open vault and says `switchFailed`.
 
 ## 6. WebDAV storage (D-057)
 

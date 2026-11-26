@@ -26,9 +26,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vaults.cpp 0.7.109
+// test_vaults.cpp 0.7.110
 
 // --- Version history ----------------------------------------------------
+// v0.7.110: A kept vault replaces the open one with no page between; a failure keeps it (D-078)
 // v0.7.109: A Closed vault picked as a file opens at once
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.3.64: A lock keeps the vault used last; its own password opens it (D-058)
@@ -84,6 +85,7 @@ private slots:
     void a_changed_password_is_changed_in_the_primary_too();
     void a_new_keyfile_is_never_made_over_a_file();
     void a_stale_saved_password_and_a_primary_changed_elsewhere_are_said();
+    void a_kept_vault_replaces_the_open_one_with_no_page_between();
 
 private:
     std::unique_ptr<VaultController> controller();
@@ -154,6 +156,7 @@ void TestVaults::a_second_vault_is_opened_with_its_password_saved_in_the_primary
 
     // Back to the primary: opened with the key kept from this session.
     vaults->switchToVault(file("Home"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     QCOMPARE(vaults->vaultPath(), file("Home"));
     QCOMPARE(vaults->items()->rowCount(), 1);
@@ -164,6 +167,7 @@ void TestVaults::a_second_vault_is_opened_with_its_password_saved_in_the_primary
 
     // And to Work again: opened with the password saved in the primary.
     vaults->switchToVault(file("Work"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     QCOMPARE(vaults->vaultPath(), file("Work"));
 }
@@ -372,6 +376,7 @@ void TestVaults::a_password_typed_on_the_start_up_page_is_remembered()
     create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
     create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"));
     vaults->switchToVault(file("Home"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     vaults->closeOpenVault(file("Home"));
     vaults->switchToVault(file("Work"));
@@ -395,6 +400,7 @@ void TestVaults::a_closed_vault_picked_as_a_file_opens_at_once()
     create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
     create(*vaults, QStringLiteral("Own"), QStringLiteral("own pass"));
     vaults->switchToVault(file("Home"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     // The open one: nothing changes.
     vaults->chooseVault(QUrl::fromLocalFile(file("Home")));
@@ -402,7 +408,7 @@ void TestVaults::a_closed_vault_picked_as_a_file_opens_at_once()
     QCOMPARE(vaults->vaultPath(), file("Home"));
     // A Closed one: open at once, without the start-up page.
     vaults->chooseVault(QUrl::fromLocalFile(file("Work")));
-    QTRY_VERIFY(vaults->vaultPath() == file("Work") && vaults->state() == State::Unlocked);
+    QTRY_VERIFY(vaults->vaultPath() == file("Work") && vaults->state() == State::Unlocked && !vaults->isSwitching());
     // One whose password is not kept: asked.
     vaults->chooseVault(QUrl::fromLocalFile(file("Own")));
     QCOMPARE(vaults->state(), State::Locked);
@@ -415,6 +421,7 @@ void TestVaults::a_vault_whose_password_is_not_saved_asks_for_it()
     create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
     create(*vaults, QStringLiteral("Private"), QStringLiteral("own pass"), {}, false);
     vaults->switchToVault(file("Home"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     QCOMPARE(vaults->items()->rowCount(), 0); // nothing saved in the primary
     vaults->switchToVault(file("Private"));
@@ -616,10 +623,21 @@ void TestVaults::a_stale_saved_password_and_a_primary_changed_elsewhere_are_said
         QCOMPARE(saveVaultFile(file("Work"), opened.contents, makeVaultKey("elsewhere", quick)), SaveStatus::Saved);
     }
     vaults->switchToVault(file("Home"));
+    QTRY_VERIFY(!vaults->isSwitching());
     QTRY_COMPARE(vaults->state(), State::Unlocked);
+    // It fails: Home stays open, and the reason names both (D-078).
+    QSignalSpy failed(vaults.get(), &VaultController::switchFailed);
     vaults->switchToVault(file("Work"));
-    QTRY_COMPARE(vaults->state(), State::Locked);
-    QTRY_VERIFY(vaults->message().contains(QStringLiteral("Home")));
+    QTRY_COMPARE(failed.size(), 1);
+    QCOMPARE(failed.first().at(0).toString(), file("Work"));
+    QCOMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    QVERIFY(!vaults->isSwitching());
+    QVERIFY(vaults->messageIsTrouble());
+    QVERIFY(vaults->message().contains(QStringLiteral("“Home”")) && vaults->message().contains(QStringLiteral("“Work”")));
+    QVERIFY(!vaults->isKept(file("Work")));
+    vaults->switchToVault(file("Work")); // now asked
+    QCOMPARE(vaults->state(), State::Locked);
     vaults->unlock(QStringLiteral("elsewhere"));
     QTRY_COMPARE(vaults->state(), State::Unlocked);
 
@@ -630,13 +648,49 @@ void TestVaults::a_stale_saved_password_and_a_primary_changed_elsewhere_are_said
         QCOMPARE(saveVaultFile(file("Home"), opened.contents, makeVaultKey("other", quick)), SaveStatus::Saved);
     }
     vaults->switchToVault(file("Home"));
-    QTRY_COMPARE(vaults->state(), State::Locked);
-    QTRY_VERIFY(vaults->messageIsTrouble());
+    QTRY_COMPARE(failed.size(), 2);
+    QCOMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Work"));
+    QVERIFY(vaults->messageIsTrouble());
     QVERIFY(vaults->message().contains(QStringLiteral("changed elsewhere")));
 
     // The primary's file away for a while: it stays the primary.
     QVERIFY(QFile::rename(file("Home"), file("Home") + QStringLiteral(".away")));
     QCOMPARE(vaults->primaryVault(), file("Home"));
+}
+
+void TestVaults::a_kept_vault_replaces_the_open_one_with_no_page_between()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    for (const QString& to : {file("Home"), file("Work")}) {
+        const QString from = vaults->vaultPath();
+        // Each change of state, and whether the event loop ran (a frame could
+        // have been drawn) since the one before.
+        QList<State> seen;
+        bool loopRan = false;
+        bool drawnBetween = false;
+        const QMetaObject::Connection watching = connect(vaults.get(), &VaultController::stateChanged, this, [&]() {
+            if (!seen.isEmpty() && loopRan) {
+                drawnBetween = true;
+            }
+            seen.append(vaults->state());
+            loopRan = false;
+            QTimer::singleShot(0, this, [&loopRan]() { loopRan = true; });
+        });
+        vaults->switchToVault(to);
+        // Meanwhile the open vault stays as it is.
+        QVERIFY(vaults->isSwitching());
+        QCOMPARE(vaults->state(), State::Unlocked);
+        QCOMPARE(vaults->vaultPath(), from);
+        QTRY_VERIFY(!vaults->isSwitching());
+        QCOMPARE(vaults->vaultPath(), to);
+        QCOMPARE(seen, QList<State>({State::Busy, State::Unlocked}));
+        QVERIFY(!drawnBetween);
+        disconnect(watching);
+        QTest::qWait(1); // the timers above end while their captures live
+    }
 }
 
 QTEST_MAIN(TestVaults)
