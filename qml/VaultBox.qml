@@ -17,6 +17,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
@@ -42,7 +43,7 @@ ComboBox {
     property bool isList: true
     // Instead of a vault's name and picture: a server's.
     property string otherName: ""
-    property string otherPicture: "qrc:/icons/storage-webdav.svg"
+    property string otherPicture: "qrc:/icons/places-webdav.svg"
     readonly property string other: "\u0001other"
     model: withOther ? listed.concat([other]) : listed
     currentIndex: listed.indexOf(shown)
@@ -57,14 +58,16 @@ ComboBox {
         return host.toLowerCase().indexOf("pcloud") >= 0 ? qsTr("pCloud") : host
     }
     function iconOf(vaultFile) {
-        return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/storage-webdav.svg"
-                                                               : "qrc:/icons/storage-device.svg"
+        return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/places-webdav.svg"
+                                                               : "qrc:/icons/places-device.svg"
     }
     contentItem: ExactRow {
         gap: 8 * Appearance.factor
         Item { Layout.preferredWidth: 6 * Appearance.factor }
-        Image {
+        // A places picture, one colour in the text colour (the owner, D-079).
+        IconImage {
             source: vaultBox.otherName !== "" ? vaultBox.otherPicture : vaultBox.iconOf(vaultBox.shown)
+            color: vaultBox.palette.buttonText
             sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
             Layout.preferredWidth: Math.round(24 * Appearance.factor)
             Layout.preferredHeight: Math.round(24 * Appearance.factor)
@@ -116,6 +119,7 @@ ComboBox {
         }
         contentItem: ListView {
             clip: true
+            boundsBehavior: Flickable.StopAtBounds // no bounce (the owner, D-046)
             ScrollIndicator.vertical: ScrollIndicator {}
             implicitHeight: contentHeight
             model: vaultBox.popup.visible ? vaultBox.delegateModel : null
@@ -149,9 +153,10 @@ ComboBox {
         }
         contentItem: ExactRow {
             gap: 10 * Appearance.factor
-            Image {
+            IconImage {
                 visible: !vaultRow.isOther
                 source: vaultRow.isOther ? "" : vaultBox.iconOf(vaultRow.modelData)
+                color: vaultBox.palette.buttonText
                 sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
                 Layout.preferredWidth: Math.round(24 * Appearance.factor)
                 Layout.preferredHeight: Math.round(24 * Appearance.factor)

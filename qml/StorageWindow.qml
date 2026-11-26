@@ -18,6 +18,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
@@ -186,9 +187,10 @@ DialogWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: 10 * Appearance.factor
                     gap: 8 * Appearance.factor
-                    // Where it is kept, as the storage locations below (the owner, D-079).
-                    Image {
-                        source: knownRow.place.onWebDav ? "qrc:/icons/storage-webdav.svg" : "qrc:/icons/storage-device.svg"
+                    // Where it is kept: a places picture in the text colour (the owner, D-079).
+                    IconImage {
+                        source: knownRow.place.onWebDav ? "qrc:/icons/places-webdav.svg" : "qrc:/icons/places-device.svg"
+                        color: palette.windowText
                         sourceSize.width: Math.round(32 * Appearance.factor)
                         sourceSize.height: Math.round(32 * Appearance.factor)
                         Layout.preferredWidth: Math.round(32 * Appearance.factor)

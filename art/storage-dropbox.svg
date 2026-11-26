@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a vault in Dropbox, a Storage locations tile. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>storage-dropbox.svg</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <path d="M89.154 52.103 L114 67.923 L89 83.872 L64 67.949 L39 83.872 L14 67.923 L38.846 52.103 L14 36.282 L39 20.41 L64 36.282 L89 20.41 L114 36.333 Z M88.821 52.103 L64 36.308 L39.179 52.103 L64 67.923 Z M39.179 91.718 L64.179 75.769 L89.179 91.718 L64.179 107.59 Z" fill="#0061fe"/>
+  </g>
+</svg>

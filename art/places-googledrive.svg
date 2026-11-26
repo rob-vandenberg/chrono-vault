@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a vault in Google Drive, one colour for a vault's row. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 800">
+  <defs>
+    <style>
+      .cls-1{fill:#ffffff;fill-rule:evenodd}
+    </style>
+  </defs>
+  <title>google-drive.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M266.477 104.146 C270.946 96.423 279.193 91.667 288.116 91.667 L511.883 91.667 C520.807 91.667 529.053 96.423 533.523 104.146 L754.973 486.87 C759.583 494.837 759.44 504.693 754.603 512.527 L640.98 696.47 C636.427 703.843 628.377 708.333 619.71 708.333 L180.29 708.333 C171.623 708.333 163.575 703.843 159.02 696.47 L45.397 512.527 C40.559 504.693 40.417 494.837 45.028 486.87 Z M288.172 166.487 L95.793 498.97 L179.729 634.853 L266.506 486.82 L266.548 486.747 L370.5 308.028 Z M399.42 357.75 L331.578 474.39 L467.263 474.39 Z M525.103 474.39 L689.983 474.39 L497.467 141.667 L331.578 141.667 Z M688.507 524.39 L302.44 524.39 L223.923 658.333 L605.767 658.333 Z" class="cls-1"/>
+  </g>
+</svg>

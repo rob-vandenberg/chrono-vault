@@ -560,8 +560,8 @@ DialogWindow {
         function showFirst() {
             if (waiting.length === 0)
                 return
-            picture = String(waiting[0].source).indexOf("vault:") === 0 ? "qrc:/icons/storage-device.svg"
-                                                                        : "qrc:/icons/storage-webdav.svg"
+            picture = String(waiting[0].source).indexOf("vault:") === 0 ? "qrc:/icons/places-device.svg"
+                                                                        : "qrc:/icons/places-webdav.svg"
             ask(waiting[0].name, waiting[0].problem)
         }
         Connections {

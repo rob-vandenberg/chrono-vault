@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Chrono Vault: a vault on this device, a computer screen on its stand. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect x="0" y="0" width="128" height="128" rx="28" fill="#4a5568"/>
-  <rect x="18" y="24" width="92" height="62" rx="7" fill="#ffffff"/>
-  <rect x="27" y="33" width="74" height="44" rx="3" fill="#4a5568"/>
-  <path d="M56 86 L52 102 H76 L72 86 Z" fill="#ffffff"/>
-  <path d="M42 104 H86" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+<!-- Chrono Vault: a vault on this device, a Storage locations tile. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <title>storage-device.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M28 0 L100 0 C115.464 0 128 12.536 128 28 L128 100 C128 115.464 115.464 128 100 128 L28 128 C12.536 128 0 115.464 0 100 L0 28 C0 12.536 12.536 0 28 0 Z" fill="#4a5568"/>
+    <path d="M18 31 C18 27.134 21.134 24 25 24 L103 24 C106.866 24 110 27.134 110 31 L110 79 C110 82.866 106.866 86 103 86 L71 86 L71 100.5 L88 100.5 C89.933 100.5 91.5 102.067 91.5 104 C91.5 105.933 89.933 107.5 88 107.5 L40 107.5 C38.067 107.5 36.5 105.933 36.5 104 C36.5 102.067 38.067 100.5 40 100.5 L57 100.5 L57 86 L25 86 C21.134 86 18 82.866 18 79 Z M30 33 C28.343 33 27 34.343 27 36 L27 74 C27 75.657 28.343 77 30 77 L98 77 C99.657 77 101 75.657 101 74 L101 36 C101 34.343 99.657 33 98 33 Z" fill="#ffffff"/>
+  </g>
 </svg>

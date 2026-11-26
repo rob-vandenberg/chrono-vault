@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/unit/CMakeLists.txt 0.6.86
+# tests/unit/CMakeLists.txt 0.7.112
 
 # --- Version history ----------------------------------------------------
+# v0.7.112: Nothing bounces, the test reads every list (D-046)
 # v0.6.86: The audit (D-065)
 # v0.3.60: The WebDAV client's test, with our own test server (D-057)
 # v0.0.22: The exporter's test (D-037)
@@ -38,6 +39,12 @@ target_link_libraries(test_every_string_translatable PRIVATE Qt6::Core Qt6::Test
 target_compile_definitions(test_every_string_translatable PRIVATE CHRONO_VAULT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 chrono_vault_strict_warnings(test_every_string_translatable)
 chrono_vault_add_test(test_every_string_translatable)
+
+qt_add_executable(test_no_bounce test_no_bounce.cpp)
+target_link_libraries(test_no_bounce PRIVATE Qt6::Core Qt6::Test)
+target_compile_definitions(test_no_bounce PRIVATE CHRONO_VAULT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+chrono_vault_strict_warnings(test_no_bounce)
+chrono_vault_add_test(test_no_bounce)
 
 # The tests of one part of the vault core each.
 foreach(core_test IN ITEMS test_audit test_crypto test_vault_file test_vault_contents test_password_generator test_totp test_release_check test_json_import test_json_export test_vault_merge test_item_differences)

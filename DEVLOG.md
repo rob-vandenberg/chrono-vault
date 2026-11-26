@@ -869,3 +869,13 @@ translation check counted the n of "\n" as a letter. Tests: `test_intuitive` (ne
 `test_selecting`, `test_dialog_keys`, `test_main_window`, `test_tray`, `test_menus`, `test_vault_rows` pass.
 Review round 1: the arrows in the key-in-use window threw a script error (a line starting with "("), fixed, with a
 test in `test_menus`; round 2 clean.
+
+## 26 November 2026: version 0.7.112: nothing bounces, places pictures
+
+The owner's changelist items 1-9, item 8 (reviewers) struck by the owner. D-046 was kept per list, so a new list got Qt's
+default: `qml/VaultBox.qml`'s list, and the lists Qt's style builds for `style/Menu.qml` and `style/ComboBox.qml`, now
+stop at their ends; `tests/unit/test_no_bounce.cpp` (new) reads every QML file and fails on a list that bounces. The
+places pictures, in the text colour (`IconImage`), in Settings > Vaults, Open a vault's list, the vault dropdown and its
+field, the password dialog and Sync Conflicts; the storage pictures only in the Storage tiles (D-079). All twelve
+pictures ship with their licence line. Tests: `test_no_bounce`, `test_every_string_translatable`, `test_intuitive`,
+`test_vault_rows` pass.

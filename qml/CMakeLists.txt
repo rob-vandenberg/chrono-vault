@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.6.88
+# qml/CMakeLists.txt 0.7.112
 
 # --- Version history ----------------------------------------------------
+# v0.7.112: The places pictures and the four storage types still to come (D-079)
 # v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 # v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 # v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -207,6 +208,16 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/trash.svg"
         "${PROJECT_SOURCE_DIR}/art/storage-webdav.svg"
         "${PROJECT_SOURCE_DIR}/art/storage-device.svg"
+        "${PROJECT_SOURCE_DIR}/art/storage-pcloud.svg"
+        "${PROJECT_SOURCE_DIR}/art/storage-googledrive.svg"
+        "${PROJECT_SOURCE_DIR}/art/storage-onedrive.svg"
+        "${PROJECT_SOURCE_DIR}/art/storage-dropbox.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-pcloud.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-googledrive.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-onedrive.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-dropbox.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-webdav.svg"
+        "${PROJECT_SOURCE_DIR}/art/places-device.svg"
         "${PROJECT_SOURCE_DIR}/art/folder.svg"
 )
 # The licences Chrono Vault ships, shown in the About box (D-021).

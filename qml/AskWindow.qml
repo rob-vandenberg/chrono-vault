@@ -41,7 +41,7 @@ DialogWindow {
     // The vault asked for, "" for something else; the words in the field's place then.
     property string vaultFile: ""
     property string name: ""
-    property string picture: "qrc:/icons/storage-webdav.svg"
+    property string picture: "qrc:/icons/places-webdav.svg"
     property string problem: ""
     property bool withList: false
     // Set or Change PIN: a new PIN typed with the master password (D-076).

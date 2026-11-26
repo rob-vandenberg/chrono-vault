@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// Menu.qml 0.6.101
+// Menu.qml 0.7.112
 //
 // --- Version history ----------------------------------------------------
+// v0.7.112: Its list stops at its ends, no bounce (D-046)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
@@ -18,6 +19,13 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's Menu on the background of every pop-up (D-067).
 F.Menu {
     id: control
+    // Its list stops at its ends, it is never pulled past them (the owner, D-046).
+    Binding {
+        target: control.contentItem
+        property: "boundsBehavior"
+        value: Flickable.StopAtBounds
+        when: control.contentItem && control.contentItem.boundsBehavior !== undefined
+    }
     delegate: MenuItem {}
     // As wide as its longest entry, and 120 at least (the owner, D-072).
     readonly property real longest: {

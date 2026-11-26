@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a vault in Dropbox, an open box of five diamonds, one colour for a vault's row. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <path fill="#ffffff" d="M15 40 L39 25 L63 40 L39 55 Z"/>
+  <path fill="#ffffff" d="M65 40 L89 25 L113 40 L89 55 Z"/>
+  <path fill="#ffffff" d="M15 72 L39 57 L63 72 L39 87 Z"/>
+  <path fill="#ffffff" d="M65 72 L89 57 L113 72 L89 87 Z"/>
+  <path fill="#ffffff" d="M40 94 L64 79 L88 94 L64 109 Z"/>
+</svg>

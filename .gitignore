@@ -14,6 +14,16 @@ art/*
 !art/chrono-vault-tray.svg
 !art/storage-webdav.svg
 !art/storage-device.svg
+!art/storage-pcloud.svg
+!art/storage-googledrive.svg
+!art/storage-onedrive.svg
+!art/storage-dropbox.svg
+!art/places-pcloud.svg
+!art/places-googledrive.svg
+!art/places-onedrive.svg
+!art/places-dropbox.svg
+!art/places-webdav.svg
+!art/places-device.svg
 !art/folder.svg
 !art/eye.svg
 !art/eye-hidden.svg

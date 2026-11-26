@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Chrono Vault: a vault in OneDrive, a Storage locations tile. SPDX-License-Identifier: AGPL-3.0-only. Copyright (C) 2026 Rob Vandenberg -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <mask id="mask-1" maskUnits="userSpaceOnUse" color-interpolation="sRGB" x="12.005" y="30.751" width="104" height="66.5">
+    <path d="M38.473 95.251 C24.96 95.251 14.005 84.524 14.005 71.293 C14.005 58.351 24.484 47.807 37.586 47.35 C42.99 38.6 52.8 32.751 64.004 32.751 C78.475 32.751 90.619 42.507 93.951 55.668 C105.04 55.752 114.004 64.581 114.004 75.459 C114.004 86.04 104.629 95.251 94.855 95.224 Z" fill="#ffffff"/>
+    </mask>
+    <linearGradient id="linear-gradient-1" x1="27.836" y1="91.084" x2="99.101" y2="86.74" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2086b8"/>
+      <stop offset="1" stop-color="#46d3f6"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="88.473" y1="75.46" x2="108.413" y2="61.527" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1694db"/>
+      <stop offset="1" stop-color="#62c3fe"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="40.6" y1="36.918" x2="86.921" y2="63.797" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0d3d78"/>
+      <stop offset="1" stop-color="#063b83"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-4" x1="12.941" y1="76.5" x2="59.515" y2="59.204" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#16589b"/>
+      <stop offset="1" stop-color="#1464b7"/>
+    </linearGradient>
+  </defs>
+  <title>storage-onedrive.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <g mask="url(#mask-1)">
+      <g>
+        <path d="M38.474 95.251 C30.812 95.251 23.972 91.803 19.486 86.404 L70.388 65.043 L109.969 87.328 C106.481 91.879 101.212 95.251 95.255 95.224 C86.271 95.251 51.701 95.251 38.474 95.251 Z" fill="url(#linear-gradient-1)"/>
+        <path d="M93.937 55.61 L70.389 65.043 L109.969 87.328 C112.503 84.021 114.005 79.912 114.005 75.46 C114.005 64.581 105.042 55.753 93.952 55.669 C93.947 55.649 93.942 55.63 93.937 55.61 Z" fill="url(#linear-gradient-2)"/>
+        <path d="M36.081 47.448 L70.386 65.043 L93.935 55.61 C90.582 42.478 78.453 32.751 64.003 32.751 C52.799 32.751 42.989 38.6 37.586 47.35 C37.08 47.368 36.578 47.4 36.081 47.448 Z" fill="url(#linear-gradient-3)"/>
+        <path d="M19.485 86.403 L70.387 65.042 L36.082 47.447 C23.691 48.624 14.005 58.85 14.005 71.292 C14.005 77.021 16.059 82.281 19.485 86.403 Z" fill="url(#linear-gradient-4)"/>
+      </g>
+    </g>
+  </g>
+</svg>

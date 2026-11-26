@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// ComboBox.qml 0.6.101
+// ComboBox.qml 0.7.112
 //
 // --- Version history ----------------------------------------------------
+// v0.7.112: Its list stops at its ends, no bounce (D-046)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.90: Initial release (D-067)
@@ -19,6 +20,13 @@ import QtQuick.Controls.Fusion.impl
 // Fusion's ComboBox, its list on the background of every pop-up (D-067).
 F.ComboBox {
     id: control
+    // Its list stops at its ends, it is never pulled past them (the owner, D-046).
+    Binding {
+        target: control.popup.contentItem
+        property: "boundsBehavior"
+        value: Flickable.StopAtBounds
+        when: control.popup.contentItem && control.popup.contentItem.boundsBehavior !== undefined
+    }
     // As a menu: its list closes when another window takes the keyboard (D-072).
     Connections {
         target: UiScale
