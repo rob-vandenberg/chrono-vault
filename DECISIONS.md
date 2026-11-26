@@ -87,3 +87,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-076](decisions/D-076.md) | A PIN per vault; the lock as a screen lock |
 | [D-077](decisions/D-077.md) | Open a vault: your vaults and the storage locations; the crown in the start-up list |
 | [D-078](decisions/D-078.md) | Another vault opens without anything in between; never a page that needs nothing |
+| [D-079](decisions/D-079.md) | Question dialogs fit their text; Enter on the selected button, Esc on Cancel, Y and N; where a vault is kept |

@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
-  <defs>
-    <linearGradient id="linear-gradient-1" x1="4" y1="3" x2="18" y2="21" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fff0a8"/>
-      <stop offset="0.35" stop-color="#ecc550"/>
-      <stop offset="0.6" stop-color="#d09c22"/>
-      <stop offset="0.78" stop-color="#f1d26a"/>
-      <stop offset="1" stop-color="#a87614"/>
-    </linearGradient>
-  </defs>
   <title>crown.svg</title>
   <g id="Layer_1" data-name="Layer 1">
-    <polygon points="4.6,16.4 2.6,6.6 7.6,11.4 12,3.6 16.4,11.4 21.4,6.759 19.4,16.4" fill="url(#linear-gradient-1)" stroke="#7d560c" stroke-width="0.5" stroke-linejoin="round"/>
-    <rect x="4.6" y="17.8" width="14.8" height="2.8" fill="url(#linear-gradient-1)" stroke="#7d560c" stroke-width="0.5" stroke-linejoin="round"/>
-    <circle cx="2.6" cy="6.6" r="1.7" fill="url(#linear-gradient-1)" stroke="#7d560c" stroke-width="0.5"/>
-    <circle cx="12" cy="3.6" r="1.9" fill="url(#linear-gradient-1)" stroke="#7d560c" stroke-width="0.5"/>
-    <circle cx="21.4" cy="6.6" r="1.7" fill="url(#linear-gradient-1)" stroke="#7d560c" stroke-width="0.5"/>
+    <g>
+      <polygon points="4.6,17.25 2.6,8.45 7.6,12.25 12,5.45 16.4,12.25 21.4,8.342 19.4,17.25" fill="#ccaa00" stroke="#806940" stroke-width="0.5" stroke-linejoin="round"/>
+      <rect x="4.6" y="18.65" width="14.8" height="2.8" fill="#ccaa00" stroke="#806940" stroke-width="0.5" stroke-linejoin="round"/>
+      <circle cx="2.6" cy="8.45" r="1.7" fill="#cccccc" stroke="#806940" stroke-width="0.5" stroke-linejoin="round"/>
+      <circle cx="12" cy="5.45" r="1.9" fill="#cccccc" stroke="#806940" stroke-width="0.5" stroke-linejoin="round"/>
+      <circle cx="21.4" cy="8.45" r="1.7" fill="#cccccc" stroke="#806940" stroke-width="0.5" stroke-linejoin="round"/>
+    </g>
   </g>
 </svg>

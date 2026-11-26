@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.6.94
+// IconPicker.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.91: Opens in Search; the icons by keyboard (D-068)
@@ -422,6 +423,7 @@ DialogWindow {
     // A custom icon that items carry: asked first (the owner).
     DialogWindow {
         id: deleteQuestion
+        fitsContent: true // only asks: as tall as its text (D-079)
         objectName: "deleteIconQuestion"
         property int uses: 0
         title: qsTr("Delete icon")

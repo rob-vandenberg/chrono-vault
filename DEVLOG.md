@@ -857,3 +857,15 @@ first and then made the key (about a second), so the start-up page showed meanwh
 vault first while the open one stays, unchangeable; the swap is one step. A failure keeps the open vault and says why; a
 kept password that failed is not used again while the primary holds it. `test_vaults` (new: no page between, the
 failure), `test_vault_rows`; existing switch tests wait for the switch to end. No reviewers (the owner).
+
+## 26 November 2026: version 0.7.111: question dialogs and where a vault is kept
+
+The owner's changelist items 1-15 (D-079). `qml/DialogWindow.qml`: `fitsContent` for the 16 question dialogs; Enter only
+on the selected button; Esc by `escTarget`; Y and N. The missing blue edge: a button given the keyboard through the button
+row gets the reason "other", and the window's activation gives it back as "window"; Qt draws the edge only for keyboard
+reasons, so a dialog's button holding the keyboard is marked selected (`markSelected`). The key-in-use window of Settings
+follows the same rules. Storage pictures in Settings > Vaults and Open a vault; the owner's new `art/crown.svg`. P81: the
+translation check counted the n of "\n" as a letter. Tests: `test_intuitive` (new), `test_every_string_translatable`;
+`test_selecting`, `test_dialog_keys`, `test_main_window`, `test_tray`, `test_menus`, `test_vault_rows` pass.
+Review round 1: the arrows in the key-in-use window threw a script error (a line starting with "("), fixed, with a
+test in `test_menus`; round 2 clean.

@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.7.109
+// StorageWindow.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Your vaults show where each is kept (D-079)
 // v0.7.109: Create a vault and Move a vault in the look of Open a vault
 // v0.7.108: Opening: "Open a vault", your vaults on top, the storage locations in one row (D-077)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
@@ -179,55 +180,68 @@ DialogWindow {
                         storageWindow.openSelected()
                     }
                 }
-                ExactColumn {
+                ExactRow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: 10 * Appearance.factor
-                    gap: 2 * Appearance.factor
-                    ExactRow {
-                        gap: 6 * Appearance.factor
+                    gap: 8 * Appearance.factor
+                    // Where it is kept, as the storage locations below (the owner, D-079).
+                    Image {
+                        source: knownRow.place.onWebDav ? "qrc:/icons/storage-webdav.svg" : "qrc:/icons/storage-device.svg"
+                        sourceSize.width: Math.round(32 * Appearance.factor)
+                        sourceSize.height: Math.round(32 * Appearance.factor)
+                        Layout.preferredWidth: Math.round(32 * Appearance.factor)
+                        Layout.preferredHeight: Math.round(32 * Appearance.factor)
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                    ExactColumn {
                         Layout.fillWidth: true
+                        gap: 2 * Appearance.factor
+                        ExactRow {
+                            gap: 6 * Appearance.factor
+                            Layout.fillWidth: true
+                            Label {
+                                text: knownRow.name
+                                textFormat: Text.PlainText
+                                font.bold: true
+                                font.strikeout: !knownRow.found
+                                elide: Text.ElideRight
+                                Layout.maximumWidth: implicitWidth
+                                Layout.fillWidth: true
+                            }
+                            Image {
+                                visible: knownRow.modelData === VaultController.primaryVault
+                                source: "qrc:/icons/crown.svg"
+                                sourceSize: Qt.size(Math.round(18 * Appearance.factor), Math.round(18 * Appearance.factor))
+                                Layout.preferredWidth: Math.round(18 * Appearance.factor)
+                                Layout.preferredHeight: Math.round(18 * Appearance.factor)
+                            }
+                            Padlock {
+                                visible: knownRow.found
+                                vaultFile: knownRow.modelData
+                                paper: storageWindow.palette.base
+                                ink: storageWindow.palette.windowText
+                                Layout.preferredWidth: Math.round(wide)
+                                Layout.preferredHeight: Math.round(18 * Appearance.factor)
+                            }
+                            Item { Layout.fillWidth: true }
+                            Label {
+                                visible: !knownRow.found
+                                text: qsTr("Not found")
+                                color: "#e53e3e"
+                            }
+                        }
                         Label {
-                            text: knownRow.name
+                            text: knownRow.place.onWebDav
+                                  ? qsTr("WebDAV: %1").arg(knownRow.place.address)
+                                    + (knownRow.place.lastSynced ? "   " + qsTr("Last synchronized: %1").arg(knownRow.place.lastSynced) : "")
+                                  : qsTr("This computer: %1").arg(knownRow.place.address)
                             textFormat: Text.PlainText
-                            font.bold: true
-                            font.strikeout: !knownRow.found
-                            elide: Text.ElideRight
-                            Layout.maximumWidth: implicitWidth
+                            opacity: 0.7
+                            elide: Text.ElideMiddle
                             Layout.fillWidth: true
                         }
-                        Image {
-                            visible: knownRow.modelData === VaultController.primaryVault
-                            source: "qrc:/icons/crown.svg"
-                            sourceSize: Qt.size(Math.round(18 * Appearance.factor), Math.round(18 * Appearance.factor))
-                            Layout.preferredWidth: Math.round(18 * Appearance.factor)
-                            Layout.preferredHeight: Math.round(18 * Appearance.factor)
-                        }
-                        Padlock {
-                            visible: knownRow.found
-                            vaultFile: knownRow.modelData
-                            paper: storageWindow.palette.base
-                            ink: storageWindow.palette.windowText
-                            Layout.preferredWidth: Math.round(wide)
-                            Layout.preferredHeight: Math.round(18 * Appearance.factor)
-                        }
-                        Item { Layout.fillWidth: true }
-                        Label {
-                            visible: !knownRow.found
-                            text: qsTr("Not found")
-                            color: "#e53e3e"
-                        }
-                    }
-                    Label {
-                        text: knownRow.place.onWebDav
-                              ? qsTr("WebDAV: %1").arg(knownRow.place.address)
-                                + (knownRow.place.lastSynced ? "   " + qsTr("Last synchronized: %1").arg(knownRow.place.lastSynced) : "")
-                              : qsTr("This computer: %1").arg(knownRow.place.address)
-                        textFormat: Text.PlainText
-                        opacity: 0.7
-                        elide: Text.ElideMiddle
-                        Layout.fillWidth: true
                     }
                 }
             }

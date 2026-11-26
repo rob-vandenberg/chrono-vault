@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.6.100
+// ItemEditor.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Edit puts the keyboard in the title, Esc cancels, Ctrl+S saves (D-062)
@@ -803,6 +804,7 @@ Item {
 
     DialogWindow {
         id: readingDialog
+        fitsContent: true // only asks: as tall as its text (D-079)
         objectName: "readingDialog"
         memoryName: "readingAttachment"
         title: qsTr("A file is being read")
@@ -819,6 +821,7 @@ Item {
 
     DialogWindow {
         id: unsavedDialog
+        fitsContent: true // only asks: as tall as its text (D-079)
         memoryName: "unsavedChanges"
         objectName: "unsavedDialog"
         title: qsTr("Save your changes?")

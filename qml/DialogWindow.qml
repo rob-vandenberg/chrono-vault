@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.6.94
+// DialogWindow.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: A question as tall as its text; Enter only on the selected button, shown; Esc on Cancel or Close; Y and N (D-079)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.82: Esc only of the active dialog; Enter presses the button, which has the keyboard when a question opens (D-062)
@@ -42,7 +43,10 @@ ApplicationWindow {
     id: dialogWindow
     font: Appearance.font
     // The program's colours, never the desktop theme's (D-023).
-    Component.onCompleted: Appearance.dress(this)
+    Component.onCompleted: {
+        Appearance.dress(this)
+        markLetters()
+    }
 
     property string memoryName: ""
     property alias standardButtons: buttonBox.standardButtons
@@ -55,9 +59,10 @@ ApplicationWindow {
     // (as Download and Skip this update before Cancel).
     property alias rightButtons: rightArea.data
     property bool answered: false
-    // The button that Enter presses and that holds the keyboard when the
-    // window opens: the highlighted one, or what a window names itself (the
-    // safe one, when the other cannot be undone).
+    // The button selected when the window opens, with the keyboard and its
+    // blue edge: the highlighted one, or what a window names itself (the safe
+    // one, when the other cannot be undone). Enter presses only the selected
+    // button (D-079).
     property int defaultButton: Dialog.NoButton
     property Item defaultItem: null
     readonly property Item enterTarget: {
@@ -84,10 +89,76 @@ ApplicationWindow {
     function isTyping(item) {
         return item && item.cursorPosition !== undefined
     }
+    // A field to type in anywhere in the window's content (a text only to
+    // read, as the licences, is none).
+    function hasFields(item) {
+        const from = item || contentArea
+        for (let i = 0; i < from.children.length; ++i) {
+            const one = from.children[i]
+            if (one.visible && ((isTyping(one) && !one.readOnly) || hasFields(one)))
+                return true
+        }
+        return false
+    }
+    // Esc presses Cancel, or Close in a window without a field; nothing else
+    // (the owner, D-079).
+    function escTarget() {
+        const cancel = buttonBox.standardButton(Dialog.Cancel)
+        if (cancel && cancel.visible && cancel.enabled)
+            return cancel
+        const close = buttonBox.standardButton(Dialog.Close)
+        if (close && close.visible && close.enabled && !hasFields())
+            return close
+        return null
+    }
+    function pressEscape() {
+        const target = escTarget()
+        if (target)
+            target.click()
+    }
+    // Yes and No without a field: Y and N press them, the letter underlined
+    // and the translator's own (D-079).
+    readonly property bool asksYesNo: (standardButtons & Dialog.Yes) !== 0 && (standardButtons & Dialog.No) !== 0
+    property string yesLetter: ""
+    property string noLetter: ""
+    function letterOf(text) {
+        const at = text.indexOf("&")
+        return at >= 0 && at + 1 < text.length ? text.charAt(at + 1).toUpperCase() : ""
+    }
+    function markLetters() {
+        const yes = buttonBox.standardButton(Dialog.Yes)
+        const no = buttonBox.standardButton(Dialog.No)
+        if (yes)
+            yes.text = qsTr("&Yes")
+        if (no)
+            no.text = qsTr("&No")
+        yesLetter = yes ? letterOf(yes.text) : ""
+        noLetter = no ? letterOf(no.text) : ""
+    }
+    onStandardButtonsChanged: markLetters()
+    // A window that only asks: exactly as tall as its text, never resized,
+    // no size remembered (the owner, D-079).
+    property bool fitsContent: false
     // Opened: the keyboard on its button, unless the window put it in a field.
     function focusDefault() {
         if (!isTyping(activeFocusItem) && enterTarget && enterTarget.enabled && enterTarget.visible)
             enterTarget.forceActiveFocus(Qt.TabFocusReason)
+    }
+    // A button holding the keyboard is the selected one, which Enter presses,
+    // so it always shows its blue edge (the owner, D-079). Passed on through
+    // the button row, or given back as the window becomes active, it would
+    // arrive as "other" or "window", which Qt draws without the edge.
+    Connections {
+        target: dialogWindow.isButton(dialogWindow.activeFocusItem) ? dialogWindow.activeFocusItem : null
+        ignoreUnknownSignals: true
+        function onFocusReasonChanged() { dialogWindow.markSelected() }
+    }
+    onActiveFocusItemChanged: markSelected()
+    function markSelected() {
+        const on = activeFocusItem
+        if (isButton(on) && on.focusReason !== undefined
+                && (on.focusReason === Qt.OtherFocusReason || on.focusReason === Qt.ActiveWindowFocusReason))
+            on.focusReason = Qt.TabFocusReason
     }
 
     signal shown()
@@ -146,11 +217,25 @@ ApplicationWindow {
         answered = true
         discarded()
     }
+    function buttonBox_yes() { return buttonBox.standardButton(Dialog.Yes) }
+    function buttonBox_no() { return buttonBox.standardButton(Dialog.No) }
+    function selectNext(forward) {
+        let next = activeFocusItem
+        for (let step = 0; step < 50; ++step) {
+            next = next.nextItemInFocusChain(forward)
+            if (!next || next === activeFocusItem)
+                return
+            if (isButton(next) && next.visible && next.enabled) {
+                next.forceActiveFocus(forward ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+                return
+            }
+        }
+    }
     function standardButton(button) {
         return buttonBox.standardButton(button)
     }
 
-    flags: Qt.Dialog
+    flags: fitsContent ? Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint : Qt.Dialog
     modality: Qt.ApplicationModal
     visible: false
     // The edge around everything, the same as the settings window's.
@@ -159,13 +244,16 @@ ApplicationWindow {
     // with the UI scaling (D-070).
     property real firstWidth: Math.max(400 * Appearance.factor, layout.implicitWidth + 2 * edge)
     property real firstHeight: Math.max(160 * Appearance.factor, layout.implicitHeight + 2 * edge)
-    width: memory.wide(firstWidth, minimumWidth, memory.own)
-    height: memory.high(firstHeight, minimumHeight, memory.own)
+    width: fitsContent ? minimumWidth : memory.wide(firstWidth, minimumWidth, memory.own)
+    height: fitsContent ? minimumHeight : memory.high(firstHeight, minimumHeight, memory.own)
     // Never narrower than its content can take, so nothing is cut off or
     // pushed outside: texts wrap within their reading width, and the window
     // only grows wider (D-061).
-    minimumWidth: layout.implicitWidth + 2 * edge
+    minimumWidth: fitsContent ? Math.max(400 * Appearance.factor, layout.implicitWidth + 2 * edge)
+                              : layout.implicitWidth + 2 * edge
     minimumHeight: layout.implicitHeight + 2 * edge
+    maximumWidth: fitsContent ? minimumWidth : 16777215
+    maximumHeight: fitsContent ? minimumHeight : 16777215
     color: palette.window
 
     // Closed with its own title bar button: the same as Cancel.
@@ -183,7 +271,7 @@ ApplicationWindow {
     WindowMemory {
         id: memory
         window: dialogWindow
-        name: dialogWindow.memoryName
+        name: dialogWindow.fitsContent ? "" : dialogWindow.memoryName
     }
 
     // Only the active window's: a dialog made inside another has this key too,
@@ -191,7 +279,17 @@ ApplicationWindow {
     Shortcut {
         sequences: [StandardKey.Cancel]
         enabled: Appearance.focusWindow === dialogWindow
-        onActivated: dialogWindow.reject()
+        onActivated: dialogWindow.pressEscape()
+    }
+    Shortcut {
+        sequences: [dialogWindow.yesLetter]
+        enabled: Appearance.focusWindow === dialogWindow && dialogWindow.asksYesNo && dialogWindow.yesLetter !== ""
+        onActivated: if (!dialogWindow.hasFields()) dialogWindow.buttonBox_yes().click()
+    }
+    Shortcut {
+        sequences: [dialogWindow.noLetter]
+        enabled: Appearance.focusWindow === dialogWindow && dialogWindow.asksYesNo && dialogWindow.noLetter !== ""
+        onActivated: if (!dialogWindow.hasFields()) dialogWindow.buttonBox_no().click()
     }
 
     ExactColumn {
@@ -204,18 +302,21 @@ ApplicationWindow {
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape && event.modifiers === Qt.NoModifier) {
                 event.accepted = true
-                dialogWindow.reject()
+                dialogWindow.pressEscape()
             } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && !event.isAutoRepeat
                        && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.KeypadModifier)) {
-                // Enter presses the button that has the keyboard, else the
-                // window's own; a field that is typed in answers Enter itself.
+                // Enter presses the selected button only; a field that is
+                // typed in answers Enter itself (D-079).
                 const on = dialogWindow.activeFocusItem
-                const target = dialogWindow.isButton(on) ? on
-                             : dialogWindow.isTyping(on) ? null : dialogWindow.enterTarget
-                if (target && target.enabled && target.visible) {
+                if (dialogWindow.isButton(on) && on.enabled && on.visible) {
                     event.accepted = true
-                    target.click()
+                    on.click()
                 }
+            } else if ((event.key === Qt.Key_Left || event.key === Qt.Key_Right) && event.modifiers === Qt.NoModifier
+                       && dialogWindow.isButton(dialogWindow.activeFocusItem)) {
+                // The arrows move the selection from button to button.
+                event.accepted = true
+                dialogWindow.selectNext(event.key === Qt.Key_Right)
             }
         }
         gap: 10 * Appearance.factor

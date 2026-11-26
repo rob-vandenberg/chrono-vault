@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.6.95
+// test_menus.cpp 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: The arrows move the selection in the key-in-use window (D-079)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.6.86: View > Audit, Exclude from Audit (D-065)
@@ -669,6 +670,18 @@ void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
     QVERIFY(keyTaken && keyTaken->property("visible").toBool());
     QVERIFY(!catcher->property("visible").toBool());
     QVERIFY(keyTaken->property("informative").toString().contains(QStringLiteral("Ctrl+K")));
+    // The arrows move the selection, which shows its edge (D-079).
+    {
+        auto* takenWindow = qobject_cast<QQuickWindow*>(keyTaken);
+        auto* okButton = settings->findChild<QQuickItem*>(QStringLiteral("keyTakenOk"));
+        auto* cancelButton = settings->findChild<QQuickItem*>(QStringLiteral("keyTakenCancel"));
+        QTRY_COMPARE(QGuiApplication::focusWindow(), takenWindow);
+        QTRY_VERIFY(cancelButton->hasActiveFocus() && cancelButton->property("visualFocus").toBool());
+        QTest::keyClick(takenWindow, Qt::Key_Right);
+        QTRY_VERIFY(okButton->hasActiveFocus() && okButton->property("visualFocus").toBool());
+        QTest::keyClick(takenWindow, Qt::Key_Left);
+        QTRY_VERIFY(cancelButton->hasActiveFocus());
+    }
     QVERIFY(QMetaObject::invokeMethod(settings->findChild<QObject*>(QStringLiteral("keyTakenCancel")), "clicked"));
     QCOMPARE(keyMap("lock"), QStringList({QStringLiteral("Ctrl+L"), QStringLiteral("Ctrl+K")}));
     QMetaObject::invokeMethod(catcher, "askFor", Q_ARG(QVariant, QStringLiteral("copyOtp")), Q_ARG(QVariant, QStringLiteral("Copy OTP")));

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.7.110
+// SettingsWindow.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: A vault row shows where it is kept; question dialogs fit their text (D-079)
 // v0.7.110: Open with what is kept: the vault shown stays until the other one is open (D-078)
 // v0.7.107: Set PIN…, Change PIN… and Remove PIN… in a vault's menu; the PIN line leaves Security (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
@@ -1048,6 +1049,16 @@ ApplicationWindow {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     gap: 8 * Appearance.factor
+                                    // Where it is kept (the owner, D-079).
+                                    Image {
+                                        source: vaultRow.place.onWebDav ? "qrc:/icons/storage-webdav.svg"
+                                                                        : "qrc:/icons/storage-device.svg"
+                                        sourceSize.width: Math.round(32 * Appearance.factor)
+                                        sourceSize.height: Math.round(32 * Appearance.factor)
+                                        Layout.preferredWidth: Math.round(32 * Appearance.factor)
+                                        Layout.preferredHeight: Math.round(32 * Appearance.factor)
+                                        Layout.alignment: Qt.AlignVCenter
+                                    }
                                     ExactColumn {
                                         gap: 2 * Appearance.factor
                                         Layout.fillWidth: true
@@ -1300,6 +1311,7 @@ ApplicationWindow {
                         // Only the crown moves (the owner, D-074).
                         DialogWindow {
                             id: primaryWindow
+                            fitsContent: true // only asks: as tall as its text (D-079)
                             objectName: "primaryWindow"
                             memoryName: "makePrimary"
                             transientParent: settingsWindow
@@ -1337,6 +1349,7 @@ ApplicationWindow {
                         }
                         DialogWindow {
                             id: removePinWindow
+                            fitsContent: true // only asks: as tall as its text (D-079)
                             objectName: "removePinWindow"
                             memoryName: "removePin"
                             transientParent: settingsWindow
@@ -1395,6 +1408,7 @@ ApplicationWindow {
                         }
                         DialogWindow {
                             id: moveStatus
+                            fitsContent: true // only asks: as tall as its text (D-079)
                             objectName: "moveStatusWindow"
                             memoryName: "moveVault2"
                             transientParent: settingsWindow
@@ -1441,6 +1455,7 @@ ApplicationWindow {
                         }
                         DialogWindow {
                             id: forgetWindow
+                            fitsContent: true // only asks: as tall as its text (D-079)
                             objectName: "forgetWindow"
                             memoryName: "forgetVault2"
                             transientParent: settingsWindow
@@ -1469,6 +1484,7 @@ ApplicationWindow {
                         }
                         DialogWindow {
                             id: disconnectWindow
+                            fitsContent: true // only asks: as tall as its text (D-079)
                             objectName: "disconnectWindow"
                             memoryName: "disconnectWebDav2"
                             transientParent: settingsWindow
@@ -1681,7 +1697,21 @@ ApplicationWindow {
                 show()
                 raise()
                 requestActivate()
-                takenCancel.forceActiveFocus()
+                takenCancel.forceActiveFocus(Qt.TabFocusReason)
+            }
+            // The button holding the keyboard is the selected one: it always
+            // shows its blue edge, as in every dialog (D-079).
+            function markSelected() {
+                const on = activeFocusItem
+                if ((on === takenOk || on === takenCancel)
+                        && (on.focusReason === Qt.OtherFocusReason || on.focusReason === Qt.ActiveWindowFocusReason))
+                    on.focusReason = Qt.TabFocusReason
+            }
+            onActiveFocusItemChanged: markSelected()
+            Connections {
+                target: keyTaken.activeFocusItem === takenOk || keyTaken.activeFocusItem === takenCancel
+                        ? keyTaken.activeFocusItem : null
+                function onFocusReasonChanged() { keyTaken.markSelected() }
             }
             function answer(ok) {
                 if (ok)
@@ -1699,9 +1729,16 @@ ApplicationWindow {
                     if (event.key === Qt.Key_Escape) {
                         event.accepted = true
                         keyTaken.answer(false)
-                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                    } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                               && (takenOk.activeFocus || takenCancel.activeFocus)) {
+                        // Only the selected button (D-079).
                         event.accepted = true
                         keyTaken.answer(takenOk.activeFocus)
+                    } else if ((event.key === Qt.Key_Left || event.key === Qt.Key_Right)
+                               && (takenOk.activeFocus || takenCancel.activeFocus)) {
+                        event.accepted = true
+                        const other = takenOk.activeFocus ? takenCancel : takenOk
+                        other.forceActiveFocus(Qt.TabFocusReason)
                     }
                 }
                 ExactRow {

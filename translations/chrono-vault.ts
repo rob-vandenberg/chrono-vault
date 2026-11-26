@@ -343,6 +343,19 @@
     </message>
 </context>
 <context>
+    <name>DialogWindow</name>
+    <message>
+        <location filename="../qml/DialogWindow.qml" line="+132"/>
+        <source>&amp;Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>&amp;No</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>EmptyList</name>
     <message>
         <location filename="../qml/EmptyList.qml" line="+48"/>
@@ -438,7 +451,7 @@
 <context>
     <name>ExportWindow</name>
     <message>
-        <location filename="../qml/ExportWindow.qml" line="+41"/>
+        <location filename="../qml/ExportWindow.qml" line="+43"/>
         <source>Export the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1270,7 +1283,7 @@
 <context>
     <name>IconPicker</name>
     <message>
-        <location filename="../qml/IconPicker.qml" line="+43"/>
+        <location filename="../qml/IconPicker.qml" line="+44"/>
         <source>Choose Icon</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1297,17 +1310,17 @@
     </message>
     <message>
         <location line="-25"/>
-        <location line="+42"/>
+        <location line="+43"/>
         <source>Delete icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-15"/>
+        <location line="-16"/>
         <source>Pictures (*.jpg *.jpeg *.png *.bmp *.ico *.svg)</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+20"/>
+        <location line="+21"/>
         <source>This icon is used by %n item(s). They will get their category&apos;s icon instead. Delete it?</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -1540,7 +1553,7 @@
 <context>
     <name>ItemEditor</name>
     <message>
-        <location filename="../qml/ItemEditor.qml" line="+204"/>
+        <location filename="../qml/ItemEditor.qml" line="+205"/>
         <location line="+1"/>
         <source>New field</source>
         <translation type="unfinished"></translation>
@@ -1644,7 +1657,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+40"/>
         <source>Save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1654,12 +1667,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-20"/>
+        <location line="-21"/>
         <source>A file is being read</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-722"/>
+        <location line="-723"/>
         <source>Numeric</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1800,7 +1813,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+62"/>
         <source>The file you added is still being read. Try again in a moment.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1831,7 +1844,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+86"/>
+        <location filename="../qml/Main.qml" line="+87"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2038,7 +2051,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+612"/>
+        <location line="+614"/>
         <source>Enter the password of the WebDAV server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2053,7 +2066,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-884"/>
+        <location line="-886"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2104,7 +2117,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+166"/>
+        <location line="+167"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2129,7 +2142,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+101"/>
+        <location line="+102"/>
         <source>Trust this certificate?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2325,7 +2338,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+339"/>
+        <location filename="../qml/SettingsWindow.qml" line="+340"/>
         <location line="+372"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2384,12 +2397,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1104"/>
+        <location line="+1119"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1105"/>
+        <location line="-1120"/>
         <location line="+441"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2494,7 +2507,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+87"/>
+        <location line="+97"/>
         <source>Primary vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2550,12 +2563,12 @@
     </message>
     <message>
         <location line="+9"/>
-        <location line="+128"/>
+        <location line="+129"/>
         <source>Make primary vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-97"/>
+        <location line="-98"/>
         <source>Import…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2570,7 +2583,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+87"/>
+        <location line="+88"/>
         <source>Make primary</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2580,7 +2593,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+26"/>
         <source>Remove PIN</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2595,7 +2608,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+106"/>
+        <location line="+108"/>
         <source>Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2615,7 +2628,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <source>Disconnect from WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2655,7 +2668,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-838"/>
+        <location line="-853"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2741,7 +2754,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+758"/>
+        <location line="+773"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2756,7 +2769,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-444"/>
+        <location line="-449"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2781,7 +2794,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+185"/>
+        <location line="+187"/>
         <source>Where should the vault be moved to?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2791,7 +2804,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+18"/>
         <source>Move the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2801,7 +2814,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+27"/>
         <source>Forget the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2811,7 +2824,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+274"/>
+        <location line="+295"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2836,17 +2849,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1382"/>
-        <location line="+910"/>
-        <location line="+411"/>
+        <location line="-1417"/>
+        <location line="+921"/>
+        <location line="+435"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1388"/>
-        <location line="+1230"/>
-        <location line="+97"/>
+        <location line="-1423"/>
+        <location line="+1245"/>
+        <location line="+117"/>
         <location line="+71"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
@@ -2855,7 +2868,7 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+59"/>
+        <location filename="../qml/StorageWindow.qml" line="+60"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2880,7 +2893,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+81"/>
+        <location line="+93"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2900,7 +2913,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+11"/>
         <location line="+28"/>
         <source>Storage locations</source>
         <translation type="unfinished"></translation>
@@ -3272,7 +3285,7 @@
 <context>
     <name>UnlockPage</name>
     <message>
-        <location filename="../qml/UnlockPage.qml" line="+297"/>
+        <location filename="../qml/UnlockPage.qml" line="+298"/>
         <source>Try again in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3387,7 +3400,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+14"/>
         <source>A change is not saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3433,7 +3446,7 @@
 <context>
     <name>UpdateDownloadedWindow</name>
     <message>
-        <location filename="../qml/UpdateDownloadedWindow.qml" line="+40"/>
+        <location filename="../qml/UpdateDownloadedWindow.qml" line="+42"/>
         <source>Update downloaded</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3456,7 +3469,7 @@
 <context>
     <name>UpdatedWindow</name>
     <message>
-        <location filename="../qml/UpdatedWindow.qml" line="+37"/>
+        <location filename="../qml/UpdatedWindow.qml" line="+39"/>
         <source>Chrono Vault was updated</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3648,7 +3661,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+742"/>
+        <location filename="../qml/VaultPage.qml" line="+743"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3866,12 +3879,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+62"/>
         <source>Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+31"/>
+        <location line="+32"/>
         <source>Delete permanently?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3881,7 +3894,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-728"/>
+        <location line="-730"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>

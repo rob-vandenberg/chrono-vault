@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdatedWindow.qml 0.6.92
+// UpdatedWindow.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.9: Initial release, as in Chrono Mail (D-024)
 
@@ -31,6 +32,7 @@ import QtQuick.Layouts
 // Restart starts it again.
 DialogWindow {
     id: updatedWindow
+    fitsContent: true // only asks: as tall as its text (D-079)
     objectName: "updatedWindow"
 
     memoryName: "updated"

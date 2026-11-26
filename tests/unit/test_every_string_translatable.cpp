@@ -21,9 +21,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_every_string_translatable.cpp 0.4.72
+// test_every_string_translatable.cpp 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: An escape such as a line break is no visible letter (P81)
 // v0.4.72: Also texts inside ? : choices, on their continuation lines and in lists
 // v0.0.2: Initial release
 
@@ -43,6 +44,7 @@ bool bareTextIn(const QString& line)
     static const QRegularExpression literal(QStringLiteral("\"((?:[^\"\\\\]|\\\\.)*)\""));
     static const QRegularExpression letter(QStringLiteral("[A-Za-z]"));
     static const QRegularExpression words(QStringLiteral("[A-Za-z]{2,} [A-Za-z]{2,}"));
+    static const QRegularExpression escaped(QStringLiteral("\\\\."));
     QString rest = line;
     rest.remove(translated).remove(compared);
     const bool onVisible = visible.match(line).hasMatch();
@@ -52,7 +54,8 @@ bool bareTextIn(const QString& line)
     }
     auto found = literal.globalMatch(rest);
     while (found.hasNext()) {
-        const QString text = found.next().captured(1);
+        // "\n" is a line break, not the letter n.
+        const QString text = found.next().captured(1).remove(escaped);
         if (onVisible ? text.contains(letter) : text.contains(words)) {
             return true;
         }
@@ -108,6 +111,8 @@ void TestEveryStringTranslatable::the_rule_for_choices_and_lists_finds_bare_text
     QVERIFY(!bareTextIn(QStringLiteral("text: mode === \"open\" ? qsTr(\"Open\") : qsTr(\"Save\")")));
     QVERIFY(!bareTextIn(QStringLiteral("color: chosen ? palette.highlight : \"transparent\"")));
     QVERIFY(!bareTextIn(QStringLiteral("sequences: [\"Return\", \"Enter\"]")));
+    QVERIFY(!bareTextIn(QStringLiteral("text: qsTr(\"One.\") + \"\\n\"")));
+    QVERIFY(bareTextIn(QStringLiteral("text: qsTr(\"One.\") + \"\\nTwo\"")));
 }
 
 void TestEveryStringTranslatable::texts_in_choices_and_lists_go_through_qsTr_too()

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.7.110
+// Main.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.7.110: The vault shown stays, unchangeable, until the other one is open (D-078)
 // v0.7.108: Open a vault: a known vault opened as in Settings > Vaults (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
@@ -1025,6 +1026,7 @@ ApplicationWindow {
     DialogWindow {
 
         id: quitDialog
+        fitsContent: true // only asks: as tall as its text (D-079)
 
         memoryName: "quit"
         objectName: "quitDialog"
@@ -1182,6 +1184,7 @@ ApplicationWindow {
     // not trust, and the server's password when the system's store lacks it.
     DialogWindow {
         id: certificateWindow
+        fitsContent: true // only asks: as tall as its text (D-079)
         objectName: "certificateWindow"
         memoryName: "certificate2"
         transientParent: mainWindow

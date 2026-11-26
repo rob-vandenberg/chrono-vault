@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_intuitive.cpp 0.6.88
+// test_intuitive.cpp 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: A question fits its text; Enter, Esc, Y and N as the owner set them (D-079)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.83: The fixture, and the tests of several items, in files of their own (D-063)
 // v0.5.82: Initial release (D-062)
@@ -66,7 +67,7 @@ private slots:
         QQuickWindow* question = dialog("placeQuestion");
         key(Qt::Key_Delete);
         QVERIFY(comesUp(question));
-        QTest::keyClick(question, Qt::Key_Escape); // Esc is No
+        QTest::keyClick(question, Qt::Key_N); // N is No (Esc only presses Cancel, D-079)
         QTRY_VERIFY(!question->isVisible());
         QVERIFY(!controller->item(gone).value(QStringLiteral("trashed")).toBool());
         window->requestActivate();
@@ -204,8 +205,60 @@ private slots:
             QVERIFY2(one, name);
             auto* target = one->property("enterTarget").value<QQuickItem*>();
             QVERIFY2(target, name);
-            const QString text = target->property("text").toString();
+            const QString text = target->property("text").toString().remove(QLatin1Char('&'));
             QVERIFY2(text == QLatin1String("Cancel") || text == QLatin1String("No"), qPrintable(QLatin1String(name) + text));
+        }
+    }
+
+    // A question is as tall as its text; its selected button shows its edge;
+    // Enter presses only that one; Y and N answer; Esc presses Cancel, or
+    // Close where there is no field, and nothing else (the owner, D-079).
+    void a_question_fits_its_text_and_its_keys_are_plain()
+    {
+        QQuickWindow* question = dialog("placeQuestion");
+        QSignalSpy yes(question, SIGNAL(accepted()));
+        QSignalSpy no(question, SIGNAL(rejected()));
+        const auto ask = [&]() {
+            QVERIFY(QMetaObject::invokeMethod(question, "ask", Q_ARG(QVariant, QStringLiteral("Move 3 items to the Trash?")),
+                                              Q_ARG(QVariant, QVariant())));
+            QVERIFY(comesUp(question));
+        };
+        ask();
+        QCOMPARE(question->minimumHeight(), question->maximumHeight());
+        QCOMPARE(question->minimumWidth(), question->maximumWidth());
+        QCOMPARE(question->height(), question->minimumHeight());
+        auto* yesButton = question->property("enterTarget").value<QQuickItem*>();
+        QVERIFY(yesButton);
+        QCOMPARE(yesButton->property("text").toString(), QStringLiteral("&Yes"));
+        QTRY_VERIFY(yesButton->property("visualFocus").toBool());
+        QTest::keyClick(question, Qt::Key_Escape); // no Cancel: nothing
+        QTest::qWait(50);
+        QVERIFY(question->isVisible());
+        QCOMPARE(yes.size() + no.size(), 0);
+        QTest::keyClick(question, Qt::Key_Right); // the selection moves to No, with its edge
+        auto* noButton = qobject_cast<QQuickItem*>(question->activeFocusItem());
+        QVERIFY(noButton && noButton != yesButton);
+        QVERIFY(noButton->property("visualFocus").toBool());
+        QTest::keyClick(question, Qt::Key_Return); // the selected one
+        QTRY_COMPARE(no.size(), 1);
+        QCOMPARE(yes.size(), 0);
+        ask();
+        QTest::keyClick(question, Qt::Key_Y);
+        QTRY_COMPARE(yes.size(), 1);
+        ask();
+        QTest::keyClick(question, Qt::Key_N);
+        QTRY_COMPARE(no.size(), 2);
+
+        // With Cancel, Esc presses it; with only Close and no field, Close.
+        for (const char* name : {"certificateWindow", "updatedWindow"}) {
+            QQuickWindow* one = dialog(name);
+            QVERIFY2(one, name);
+            QSignalSpy closed(one, SIGNAL(rejected()));
+            QVERIFY(QMetaObject::invokeMethod(one, "open"));
+            QVERIFY(comesUp(one));
+            QTest::keyClick(one, Qt::Key_Escape);
+            QTRY_VERIFY2(!one->isVisible(), name);
+            QCOMPARE(closed.size(), 1);
         }
     }
 

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.6.103
+// ExportWindow.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
@@ -34,6 +35,7 @@ import QtQuick.Layouts
 // password unencrypted, the master password, and then where to save it.
 DialogWindow {
     id: exportWindow
+    fitsContent: true // only asks: as tall as its text (D-079)
     objectName: "exportWindow"
     memoryName: "export"
     property bool busy: false

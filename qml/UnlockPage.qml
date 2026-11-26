@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UnlockPage.qml 0.7.107
+// UnlockPage.qml 0.7.111
 
 // --- Version history ----------------------------------------------------
+// v0.7.111: Question dialogs fit their text (D-079)
 // v0.7.107: The PIN of the vault logged in with, the list with it, "Unlock using password instead"; the password of any vault but the primary (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -358,6 +359,7 @@ Item {
     DialogWindow {
 
         id: leaveDialog
+        fitsContent: true // only asks: as tall as its text (D-079)
         objectName: "leaveVaultDialog"
 
         memoryName: "leaveVault"
