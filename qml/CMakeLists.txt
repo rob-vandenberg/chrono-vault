@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.7.112
+# qml/CMakeLists.txt 0.7.113
 
 # --- Version history ----------------------------------------------------
+# v0.7.113: The padlock pictures renamed; lock.svg removed
 # v0.7.112: The places pictures and the four storage types still to come (D-079)
 # v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 # v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -172,10 +173,9 @@ qt_add_resources(chrono_vault_ui chrono_vault_icons
         "${PROJECT_SOURCE_DIR}/art/cancel.svg"
         "${PROJECT_SOURCE_DIR}/art/plus.svg"
         "${PROJECT_SOURCE_DIR}/art/generate.svg"
-        "${PROJECT_SOURCE_DIR}/art/lock.svg"
-        "${PROJECT_SOURCE_DIR}/art/lock-open.svg"
-        "${PROJECT_SOURCE_DIR}/art/lock-closed.svg"
-        "${PROJECT_SOURCE_DIR}/art/lock-locked.svg"
+        "${PROJECT_SOURCE_DIR}/art/padlock-open.svg"
+        "${PROJECT_SOURCE_DIR}/art/padlock-closed.svg"
+        "${PROJECT_SOURCE_DIR}/art/padlock-locked.svg"
         "${PROJECT_SOURCE_DIR}/art/settings.svg"
         "${PROJECT_SOURCE_DIR}/art/home.svg"
         "${PROJECT_SOURCE_DIR}/art/edit.svg"

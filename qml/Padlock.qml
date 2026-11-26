@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Controls.impl
 
 // --- Version ------------------------------------------------------------
-// Padlock.qml 0.6.105
+// Padlock.qml 0.7.113
 
 // --- Version history ----------------------------------------------------
+// v0.7.113: The padlock pictures renamed padlock-locked, -closed, -open
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
 
@@ -38,7 +39,7 @@ ColorImage {
     property color paper: "black" // what it is drawn on
     property color ink: "white"
     readonly property real wide: (open ? 22.5 : 18) * Appearance.factor
-    source: open ? "qrc:/icons/lock-open.svg" : vaultState === 1 ? "qrc:/icons/lock-closed.svg" : "qrc:/icons/lock-locked.svg"
+    source: open ? "qrc:/icons/padlock-open.svg" : vaultState === 1 ? "qrc:/icons/padlock-closed.svg" : "qrc:/icons/padlock-locked.svg"
     color: open ? (paper.hslLightness < 0.5 ? "#66bb6a" : "#2e7d32") : Qt.tint(paper, Qt.alpha(ink, 0.6))
     sourceSize: Qt.size(Math.round(wide), Math.round(18 * Appearance.factor))
     HoverHandler { id: overPadlock }

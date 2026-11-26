@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.7.111
+// Main.qml 0.7.113
 
 // --- Version history ----------------------------------------------------
+// v0.7.113: The lock button shows the solid padlock; lock and gear pictures 24 by 24
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.7.110: The vault shown stays, unchangeable, until the other one is open (D-078)
 // v0.7.108: Open a vault: a known vault opened as in Settings > Vaults (D-077)
@@ -748,7 +749,9 @@ ApplicationWindow {
             }
             PictureButton {
                 objectName: "lockButton"
-                icon.source: "qrc:/icons/lock.svg"
+                icon.width: Math.round(24 * UiScale.factor) // the top bar's two pictures (the owner)
+                icon.height: Math.round(24 * UiScale.factor)
+                icon.source: "qrc:/icons/padlock-locked.svg"
                 icon.color: mainWindow.palette.buttonText
                 enabled: mainWindow.lockable
                 onClicked: VaultController.lock()
@@ -757,6 +760,8 @@ ApplicationWindow {
             }
             PictureButton {
                 objectName: "preferencesButton"
+                icon.width: Math.round(24 * UiScale.factor) // the top bar's two pictures (the owner)
+                icon.height: Math.round(24 * UiScale.factor)
                 icon.source: "qrc:/icons/settings.svg"
                 icon.color: mainWindow.palette.buttonText
                 onClicked: settingsWindow.showWindow()

@@ -879,3 +879,11 @@ places pictures, in the text colour (`IconImage`), in Settings > Vaults, Open a 
 field, the password dialog and Sync Conflicts; the storage pictures only in the Storage tiles (D-079). All twelve
 pictures ship with their licence line. Tests: `test_no_bounce`, `test_every_string_translatable`, `test_intuitive`,
 `test_vault_rows` pass.
+
+## 26 November 2026: the privacy policy and the terms of service (documents only, 0.7.113)
+
+For Google Drive (`ROADMAP.md` step 15): Google's sign-in screen needs a home page, a privacy policy and terms of
+service before the app can be published. `PRIVACY.md` names every internet contact the code makes (the chosen storage,
+GitHub's release list, Have I Been Pwned's range and breach list, each website's own icon when turned on) and the
+`drive.file` permission with Google's Limited Use statement; `TERMS.md` the AGPL-3.0-only licence, no warranty, and
+the person's own care of master password, keyfile and backups. Both checked against the code while written.
