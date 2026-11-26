@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.5.81
+// vault_controller_webdav.cpp 0.8.114
 
 // --- Version history ----------------------------------------------------
+// v0.8.114: The sync of a vault in any cloud storage, CloudSync; vaultPlace names the storage (D-080)
 // v0.5.81: Retry sync answered by the sync it asked for (D-061)
 // v0.5.75: Disconnect deletes nothing; moving to a server is the vault menu's Move (D-060)
 // v0.3.63: A folder's entries with their size and time of change, for the file dialog (D-057)
@@ -41,7 +42,7 @@
 
 // The controller's WebDAV part (D-057). A vault kept on a server has a
 // working copy on this device, which every unlock, save and merge uses as
-// a local vault does; WebDavSync keeps it the same as the server's.
+// a local vault does; CloudSync keeps it the same as the storage's.
 
 namespace chrono_vault {
 
@@ -106,11 +107,12 @@ QString VaultController::connectProblem(const WebDavReply& answer)
 void VaultController::startWebDav()
 {
     stopWebDav();
-    const auto place = webDavPlaceOf(path);
+    const auto place = cloudPlaceOf(path);
     if (!place || currentState != State::Unlocked) {
         emit syncChanged();
         return;
     }
+    cloudKindNow = place->kind;
     if (webDavPasswords.contains(place->id)) {
         makeSyncer(*place, webDavPasswords.value(place->id));
         return;
@@ -119,7 +121,7 @@ void VaultController::startWebDav()
     emit syncChanged();
     const quint64 session = vaultSession;
     QPointer<VaultController> self(this);
-    withWebDavPassword(*place, [self, session, place = *place](std::optional<QString> password) {
+    withCloudSecret(*place, [self, session, place = *place](std::optional<QString> password) {
         if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
             return;
         }
@@ -140,7 +142,7 @@ void VaultController::startWebDav()
     });
 }
 
-void VaultController::withWebDavPassword(const WebDavPlace& place, std::function<void(std::optional<QString>)> then)
+void VaultController::withCloudSecret(const CloudPlace& place, std::function<void(std::optional<QString>)> then)
 {
     if (webDavPasswords.contains(place.id)) {
         then(webDavPasswords.value(place.id));
@@ -168,7 +170,7 @@ void VaultController::withWebDavPassword(const WebDavPlace& place, std::function
     });
 }
 
-void VaultController::keepWebDavPassword(const WebDavPlace& place, const QString& password)
+void VaultController::keepCloudSecret(const CloudPlace& place, const QString& password)
 {
     webDavPasswords.insert(place.id, password);
     const std::shared_ptr<SecretStore> store = secrets;
@@ -184,16 +186,21 @@ void VaultController::keepWebDavPassword(const WebDavPlace& place, const QString
     });
 }
 
-void VaultController::makeSyncer(const WebDavPlace& place, const QString& password)
+void VaultController::makeSyncer(const CloudPlace& place, const QString& secret)
 {
+    std::unique_ptr<CloudStorage> storage = makeCloudStorage(place, secret);
+    if (!storage) {
+        return; // a storage this build does not have (D-080)
+    }
     webDavWaiting = false;
     passwordNeeded = false;
-    syncer = std::make_unique<WebDavSync>(path, place, password, key, &savePool);
+    cloudKindNow = place.kind;
+    syncer = std::make_unique<CloudSync>(path, place, std::move(storage), key, &savePool);
     if (syncStepCheck) {
         syncer->setStepCheckForTests(syncStepCheck);
     }
-    connect(syncer.get(), &WebDavSync::finished, this, &VaultController::syncFinished);
-    connect(syncer.get(), &WebDavSync::workingCopyChanged, this, [this]() {
+    connect(syncer.get(), &CloudSync::finished, this, &VaultController::syncFinished);
+    connect(syncer.get(), &CloudSync::workingCopyChanged, this, [this]() {
         // Read again, or merged with a change waiting here at its save
         // (D-032, D-054).
         checkForChangeElsewhere();
@@ -218,6 +225,7 @@ void VaultController::stopWebDav()
     passwordNeeded = false;
     syncTrouble.clear();
     askedCertificate.clear();
+    cloudKindNow.clear();
     if (changed) {
         emit syncChanged();
     }
@@ -231,7 +239,7 @@ void VaultController::syncNow()
     if (syncer) {
         syncer->start();
         emit syncChanged();
-    } else if (webDavPlaceOf(path)) {
+    } else if (cloudPlaceOf(path)) {
         startWebDav();
     }
 }
@@ -292,21 +300,21 @@ void VaultController::trustCertificate(bool trust)
         emit syncChanged();
         return;
     }
-    WebDavPlace place = syncer->place();
+    WebDavPlace place = WebDavPlace::fromCloud(syncer->place());
     place.trustedCertificate = fingerprint; // remembered for this vault; another certificate asks again
     rememberWebDavPlace(path, place);
     const QString password = webDavPasswords.value(place.id);
     stopWebDav();
-    makeSyncer(place, password);
+    makeSyncer(place.toCloud(), password);
 }
 
 void VaultController::giveWebDavPassword(const QString& password)
 {
-    const auto place = webDavPlaceOf(path);
+    const auto place = cloudPlaceOf(path);
     if (!place || currentState != State::Unlocked || password.isEmpty()) {
         return;
     }
-    keepWebDavPassword(*place, password);
+    keepCloudSecret(*place, password);
     stopWebDav();
     makeSyncer(*place, password);
 }
@@ -556,9 +564,11 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
                                              "copy, or the disk is full."));
                     return;
                 }
-                auto* first = new WebDavSync(workingCopy, place, serverPassword, newKey, &self->savePool, self);
+                auto* first = new CloudSync(workingCopy, place.toCloud(),
+                                            makeCloudStorage(place.toCloud(), serverPassword), newKey,
+                                            &self->savePool, self);
                 QObject::connect(
-                    first, &WebDavSync::finished, self,
+                    first, &CloudSync::finished, self,
                     [self, first, workingCopy, newKey, fingerprint, written, keyfileFile, before, savedPassword, place,
                      serverPassword, failed](SyncOutcome outcome, const QByteArray&, const QString&) mutable {
                         first->deleteLater();
@@ -645,7 +655,7 @@ void VaultController::openWebDavVault(const QString& fileName)
 
 void VaultController::disconnectWebDav(const QString& vaultFile)
 {
-    const auto place = webDavPlaceOf(vaultFile);
+    const auto place = cloudPlaceOf(vaultFile);
     if (!place) {
         return;
     }
@@ -654,8 +664,8 @@ void VaultController::disconnectWebDav(const QString& vaultFile)
     if (vaultFile == path) {
         stopWebDav();
     }
-    forgetWebDavPlace(vaultFile);
-    QFile::remove(webDavBasePath(place->id));
+    forgetCloudPlace(vaultFile);
+    QFile::remove(cloudBasePath(*place));
     webDavPasswords.remove(place->id);
     if (const std::shared_ptr<SecretStore> store = secrets) {
         const QString name = place->secretName();
@@ -666,19 +676,41 @@ void VaultController::disconnectWebDav(const QString& vaultFile)
     emit webDavDone(true, QString());
 }
 
+QString VaultController::storageName() const
+{
+    if (!inCloud()) {
+        return QString();
+    }
+    const auto kind = cloudKindOf(cloudKindNow);
+    return kind ? kind->name : QString();
+}
+
 QVariantMap VaultController::vaultPlace(const QString& vaultFile) const
 {
-    const auto place = webDavPlaceOf(vaultFile);
-    if (!place) {
-        return {{QStringLiteral("onWebDav"), false}, {QStringLiteral("address"), QDir::toNativeSeparators(vaultFile)}};
+    const auto place = cloudPlaceOf(vaultFile);
+    const auto kind = place ? cloudKindOf(place->kind) : std::nullopt;
+    if (!place || !kind) {
+        return {
+            {QStringLiteral("inCloud"), false},
+            {QStringLiteral("kind"), QString()},
+            {QStringLiteral("storageName"), QString()},
+            {QStringLiteral("placePicture"), QStringLiteral("qrc:/icons/places-device.svg")},
+            {QStringLiteral("onWebDav"), false},
+            {QStringLiteral("address"), QDir::toNativeSeparators(vaultFile)},
+        };
     }
     const QString synced = place->lastSynced.isValid()
                                ? QLocale().toString(place->lastSynced.toLocalTime(), QLocale::ShortFormat)
                                : tr("Not yet");
+    const bool webDav = place->kind == QLatin1String("webdav");
     return {
-        {QStringLiteral("onWebDav"), true},
-        {QStringLiteral("address"), place->shownAddress()},
-        {QStringLiteral("user"), place->user},
+        {QStringLiteral("inCloud"), true},
+        {QStringLiteral("kind"), place->kind},
+        {QStringLiteral("storageName"), kind->name},
+        {QStringLiteral("placePicture"), kind->placePicture},
+        {QStringLiteral("onWebDav"), webDav},
+        {QStringLiteral("address"), shownCloudAddress(*place)},
+        {QStringLiteral("user"), webDav ? WebDavPlace::fromCloud(*place).user : QString()},
         {QStringLiteral("lastSynced"), synced},
     };
 }

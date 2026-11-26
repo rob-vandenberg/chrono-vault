@@ -189,7 +189,7 @@ DialogWindow {
                     gap: 8 * Appearance.factor
                     // Where it is kept: a places picture in the text colour (the owner, D-079).
                     IconImage {
-                        source: knownRow.place.onWebDav ? "qrc:/icons/places-webdav.svg" : "qrc:/icons/places-device.svg"
+                        source: knownRow.place.placePicture
                         color: palette.windowText
                         sourceSize.width: Math.round(32 * Appearance.factor)
                         sourceSize.height: Math.round(32 * Appearance.factor)
@@ -235,8 +235,8 @@ DialogWindow {
                             }
                         }
                         Label {
-                            text: knownRow.place.onWebDav
-                                  ? qsTr("WebDAV: %1").arg(knownRow.place.address)
+                            text: knownRow.place.inCloud
+                                  ? qsTr("%1: %2").arg(knownRow.place.storageName, knownRow.place.address)
                                     + (knownRow.place.lastSynced ? "   " + qsTr("Last synchronized: %1").arg(knownRow.place.lastSynced) : "")
                                   : qsTr("This computer: %1").arg(knownRow.place.address)
                             textFormat: Text.PlainText
@@ -261,11 +261,16 @@ DialogWindow {
                 iconSource: "qrc:/icons/storage-device.svg"
                 onClicked: storageWindow.choose("device")
             }
-            Tile {
-                objectName: "openWebDavTile"
-                text: qsTr("WebDAV")
-                iconSource: "qrc:/icons/storage-webdav.svg"
-                onClicked: storageWindow.choose("webdav")
+            // One tile per cloud storage this build has (D-080).
+            Repeater {
+                model: VaultController.storages
+                Tile {
+                    required property var modelData
+                    objectName: "open" + modelData.identifier + "Tile"
+                    text: modelData.name
+                    iconSource: modelData.tile
+                    onClicked: storageWindow.choose(modelData.kind)
+                }
             }
         }
     }
@@ -288,11 +293,15 @@ DialogWindow {
                 iconSource: "qrc:/icons/storage-device.svg"
                 onClicked: storageWindow.choose("device")
             }
-            Tile {
-                objectName: "webDavTile"
-                text: qsTr("WebDAV")
-                iconSource: "qrc:/icons/storage-webdav.svg"
-                onClicked: storageWindow.choose("webdav")
+            Repeater {
+                model: VaultController.storages
+                Tile {
+                    required property var modelData
+                    objectName: modelData.identifier.charAt(0).toLowerCase() + modelData.identifier.slice(1) + "Tile"
+                    text: modelData.name
+                    iconSource: modelData.tile
+                    onClicked: storageWindow.choose(modelData.kind)
+                }
             }
         }
     }

@@ -52,14 +52,15 @@ ComboBox {
     indicator.visible: isList
     function placeOf(vaultFile) {
         const place = VaultController.vaultPlace(vaultFile)
-        if (!place.onWebDav)
+        if (!place.inCloud)
             return qsTr("this computer")
+        if (!place.onWebDav)
+            return place.storageName
         const host = String(place.address).replace(/^[a-z]+:\/\//i, "").split("/")[0]
         return host.toLowerCase().indexOf("pcloud") >= 0 ? qsTr("pCloud") : host
     }
     function iconOf(vaultFile) {
-        return VaultController.vaultPlace(vaultFile).onWebDav ? "qrc:/icons/places-webdav.svg"
-                                                               : "qrc:/icons/places-device.svg"
+        return VaultController.vaultPlace(vaultFile).placePicture
     }
     contentItem: ExactRow {
         gap: 8 * Appearance.factor

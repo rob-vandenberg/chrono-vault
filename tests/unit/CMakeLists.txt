@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/unit/CMakeLists.txt 0.7.112
+# tests/unit/CMakeLists.txt 0.8.114
 
 # --- Version history ----------------------------------------------------
+# v0.8.114: test_cloud_sync (D-080)
 # v0.7.112: Nothing bounces, the test reads every list (D-046)
 # v0.6.86: The audit (D-065)
 # v0.3.60: The WebDAV client's test, with our own test server (D-057)
@@ -60,3 +61,9 @@ target_include_directories(test_webdav_client PRIVATE "${PROJECT_SOURCE_DIR}/tes
 target_link_libraries(test_webdav_client PRIVATE chrono_vault_ui Qt6::Network Qt6::Test)
 chrono_vault_strict_warnings(test_webdav_client)
 chrono_vault_add_test(test_webdav_client)
+
+# The sync with a cloud storage of the test's own, stopped at every step (D-080).
+qt_add_executable(test_cloud_sync test_cloud_sync.cpp)
+target_link_libraries(test_cloud_sync PRIVATE chrono_vault_ui Qt6::Test)
+chrono_vault_strict_warnings(test_cloud_sync)
+chrono_vault_add_test(test_cloud_sync)

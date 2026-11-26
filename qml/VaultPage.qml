@@ -740,7 +740,7 @@ Item {
                                 }
                                 Label {
                                     objectName: "vaultPlace"
-                                    text: VaultController.onWebDav ? qsTr("WebDAV") : qsTr("Local file")
+                                    text: VaultController.inCloud ? VaultController.storageName : qsTr("Local file")
                                     opacity: 0.7
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true

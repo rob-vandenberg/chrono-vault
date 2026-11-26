@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "cloud_storage.h"
+
 #include <QByteArray>
 #include <QDateTime>
 #include <QList>
@@ -30,9 +32,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// webdav_client.h 0.5.75
+// webdav_client.h 0.8.114
 
 // --- Version history ----------------------------------------------------
+// v0.8.114: Its answers are the cloud storage's own (D-080)
 // v0.5.75: A move that never replaces a file already there (D-060)
 // v0.3.63: A file's time of change, for the file dialog (D-057)
 // v0.3.62: Making a folder, for the folder browser (D-057)
@@ -54,41 +57,10 @@ struct WebDavAccount
     QByteArray trustedCertificate;
 };
 
-enum class WebDavError {
-    None,
-    NoConnection,   // no network, the server not found or not answering
-    Unauthorized,   // the user name or password is wrong
-    NotFound,       // the folder or file is not there
-    Certificate,    // a certificate the system does not trust, not trusted by the person either
-    Changed,        // a condition failed: the file changed meanwhile
-    Locked,         // another device holds the file's lock
-    NotSupported,   // the server does not offer what was asked (for example LOCK)
-    TooLarge,       // larger than a vault may be (OR-4)
-    Damaged,        // an answer that cannot be understood
-    Server,         // any other refusal of the server
-};
-
-// The answer to one request. Nothing in it is trusted beyond its checks.
-struct WebDavReply
-{
-    WebDavError error = WebDavError::None;
-    int status = 0;            // the HTTP status, 0 when none came
-    QByteArray body;           // a file read, or a lock's token
-    QByteArray tag;            // the file's version tag (ETag), when given
-    QByteArray certificate;    // the untrusted certificate's SHA-256 (hex), with Certificate
-    qint64 size = -1;          // from tagOf: the file's length, -1 when not said
-    [[nodiscard]] bool ok() const { return error == WebDavError::None; }
-};
-
-// One entry of a folder.
-struct WebDavEntry
-{
-    QString name;
-    bool isFolder = false;
-    QByteArray tag;
-    qint64 size = -1;
-    QDateTime modified; // invalid when not said
-};
+// The answers are the same for every cloud storage (D-080).
+using WebDavError = CloudError;
+using WebDavReply = CloudReply;
+using WebDavEntry = CloudEntry;
 
 // The few WebDAV requests Chrono Vault needs, made with Qt Network and never
 // waited for on the window's thread (OR-5): each answer comes to its
@@ -126,7 +98,7 @@ public:
     void unlock(const QString& name, const QByteArray& lockToken, Done done);
 
     // The largest answer read: a vault at most, a little more for a folder's list.
-    static constexpr qint64 largestAnswerBytes = 256LL * 1024 * 1024 + 1024 * 1024;
+    static constexpr qint64 largestAnswerBytes = CloudStorage::largestAnswerBytes;
 
     // The address of a file of the folder.
     [[nodiscard]] QUrl addressOf(const QString& name) const;

@@ -29,9 +29,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_retry.cpp 0.5.81
+// vault_controller_retry.cpp 0.8.114
 
 // --- Version history ----------------------------------------------------
+// v0.8.114: A vault in any cloud storage, not only WebDAV (D-080)
 // v0.5.81: Initial release: Retry sync (D-061)
 
 // The controller's part for Retry sync (D-061): an item with a conflict read
@@ -149,7 +150,7 @@ void VaultController::retryFromVault(const QString& source, const QStringList& i
 // is merged as at any sync.
 void VaultController::retryShared()
 {
-    if (webDavPlaceOf(path)) {
+    if (cloudPlaceOf(path)) {
         if (passwordNeeded) {
             emit retried(tr("Not synchronized: the server's password is needed. The conflict stays."), true);
             return;

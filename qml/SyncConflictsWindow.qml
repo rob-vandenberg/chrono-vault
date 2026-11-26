@@ -560,8 +560,9 @@ DialogWindow {
         function showFirst() {
             if (waiting.length === 0)
                 return
-            picture = String(waiting[0].source).indexOf("vault:") === 0 ? "qrc:/icons/places-device.svg"
-                                                                        : "qrc:/icons/places-webdav.svg"
+            picture = String(waiting[0].source).indexOf("vault:") === 0
+                      ? "qrc:/icons/places-device.svg"
+                      : VaultController.vaultPlace(VaultController.vaultPath).placePicture
             ask(waiting[0].name, waiting[0].problem)
         }
         Connections {

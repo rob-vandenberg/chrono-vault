@@ -28,6 +28,8 @@
 #include "vault_merge.h"
 #include "vault_file.h"
 #include "secret_store.h"
+#include "cloud_storage.h"
+#include "cloud_sync.h"
 #include "webdav_client.h"
 #include "webdav_sync.h"
 
@@ -49,9 +51,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.7.110
+// vault_controller.h 0.8.114
 
 // --- Version history ----------------------------------------------------
+// v0.8.114: Any cloud storage: inCloud, storageName, storages; the sync is CloudSync (D-080)
 // v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault (D-075)
@@ -201,6 +204,12 @@ class VaultController : public QObject
     // certificate to be trusted (its fingerprint, "" for none) and whether
     // the server's password must be typed.
     Q_PROPERTY(bool onWebDav READ onWebDav NOTIFY syncChanged)
+    // A cloud storage of any kind (D-080): whether the vault shown is kept in
+    // one, that storage's name ("" for this device), and the storages this
+    // build has, for every window that names one: kind, name, tile, place.
+    Q_PROPERTY(bool inCloud READ inCloud NOTIFY syncChanged)
+    Q_PROPERTY(QString storageName READ storageName NOTIFY syncChanged)
+    Q_PROPERTY(QVariantList storages READ storages CONSTANT)
     Q_PROPERTY(QString syncProblem READ syncProblem NOTIFY syncChanged)
     Q_PROPERTY(bool syncing READ syncing NOTIFY syncChanged)
     Q_PROPERTY(QString certificateAsked READ certificateAsked NOTIFY syncChanged)
@@ -616,7 +625,10 @@ public:
     Q_INVOKABLE void retrySave();
 
     // WebDAV (D-057).
-    [[nodiscard]] bool onWebDav() const { return syncer != nullptr || webDavWaiting; }
+    [[nodiscard]] bool inCloud() const { return syncer != nullptr || webDavWaiting; }
+    [[nodiscard]] bool onWebDav() const { return inCloud() && cloudKindNow == QLatin1String("webdav"); }
+    [[nodiscard]] QString storageName() const;
+    [[nodiscard]] QVariantList storages() const { return cloudKindsForWindows(); }
     [[nodiscard]] QString syncProblem() const { return syncTrouble; }
     [[nodiscard]] bool syncing() const { return syncer && syncer->running(); }
     [[nodiscard]] QString certificateAsked() const { return shownFingerprint(askedCertificate); }
@@ -685,12 +697,13 @@ public:
     // the primary.
     Q_INVOKABLE void forgetVault(const QString& vaultFile);
     void setMoveStepCheckForTests(std::function<bool(MoveStep)> check) { moveStepCheck = std::move(check); }
-    // For Settings > Vaults: onWebDav, address, user, lastSynced (as words).
+    // For Settings > Vaults: inCloud, kind, storageName, onWebDav, address,
+    // user, lastSynced (as words).
     [[nodiscard]] Q_INVOKABLE QVariantMap vaultPlace(const QString& vaultFile) const;
     // Tests: a stand-in for the system's store, and a sync stopped at a step.
     void setSecretStoreForTests(std::unique_ptr<SecretStore> standIn) { secrets = std::move(standIn); }
     void setSyncStepCheckForTests(std::function<bool(SyncStep)> check) { syncStepCheck = std::move(check); }
-    [[nodiscard]] WebDavSync* syncForTests() const { return syncer.get(); }
+    [[nodiscard]] CloudSync* syncForTests() const { return syncer.get(); }
 
     // Copies text, marked as secret for clipboard history tools, and clears
     // it again after the chosen number of seconds (D-007).
@@ -892,13 +905,23 @@ private:
                         const QString& itemId);
     [[nodiscard]] static QString mergeText(const MergeResult& merged);
 
-    // WebDAV (D-057), in vault_controller_webdav.cpp.
+    // A vault kept in a cloud storage (D-057, D-080), in vault_controller_webdav.cpp.
     void startWebDav();
     void stopWebDav();
-    void makeSyncer(const WebDavPlace& place, const QString& password);
+    void makeSyncer(const CloudPlace& place, const QString& secret);
     void syncFinished(SyncOutcome outcome, const QByteArray& certificate, const QString& conflictCopy);
-    void keepWebDavPassword(const WebDavPlace& place, const QString& password);
-    void withWebDavPassword(const WebDavPlace& place, std::function<void(std::optional<QString>)> then);
+    // A storage's secret (a password, a token), kept in memory and in the
+    // system's store under the place's secret name.
+    void keepCloudSecret(const CloudPlace& place, const QString& secret);
+    void withCloudSecret(const CloudPlace& place, std::function<void(std::optional<QString>)> then);
+    void keepWebDavPassword(const WebDavPlace& place, const QString& password)
+    {
+        keepCloudSecret(place.toCloud(), password);
+    }
+    void withWebDavPassword(const WebDavPlace& place, std::function<void(std::optional<QString>)> then)
+    {
+        withCloudSecret(place.toCloud(), std::move(then));
+    }
     [[nodiscard]] QString newWorkingCopyPath(const QString& name) const;
     [[nodiscard]] static QString shownFingerprint(const QByteArray& fingerprint);
     [[nodiscard]] static QString connectProblem(const WebDavReply& answer);
@@ -1138,7 +1161,8 @@ private:
     bool keptChangesGivenUp = false;
     qint64 missingSinceMs = 0;
     QTimer vaultRetry;
-    std::unique_ptr<WebDavSync> syncer;
+    std::unique_ptr<CloudSync> syncer;
+    QString cloudKindNow; // the storage of the vault shown, "" for this device
     std::shared_ptr<SecretStore> secrets; // shared with the threads that ask it
     std::function<bool(SyncStep)> syncStepCheck;
     QTimer syncTimer;      // every 10 minutes while unlocked (ref)
@@ -1147,7 +1171,7 @@ private:
     QByteArray askedCertificate;
     bool passwordNeeded = false;
     bool webDavWaiting = false;           // the shown vault's sync waits for its password
-    QHash<QString, QString> webDavPasswords; // by place id, in memory while the program runs
+    QHash<QString, QString> webDavPasswords; // every storage's secret by place id, in memory while the program runs
     std::unique_ptr<WebDavClient> connection; // the folder shown in the WebDAV window
     std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;

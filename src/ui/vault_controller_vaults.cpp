@@ -27,9 +27,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_vaults.cpp 0.6.106
+// vault_controller_vaults.cpp 0.8.114
 
 // --- Version history ----------------------------------------------------
+// v0.8.114: A vault in any cloud storage, not only WebDAV (D-080)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.5.75: Initial release: the vault menu's Lock, Move… and Forget… (D-060)
@@ -145,7 +146,7 @@ QString VaultController::moveProblem(const QString& vaultFile) const
         return tr("This vault holds a change kept from before it was locked. Unlock it so the change is saved, then "
                   "move it.");
     }
-    if (const auto place = webDavPlaceOf(vaultFile); place && vaultFileStamp(vaultFile) != place->syncedStamp) {
+    if (const auto place = cloudPlaceOf(vaultFile); place && vaultFileStamp(vaultFile) != place->syncedStamp) {
         return tr("This vault has changes that are not on the server yet. Unlock it so it synchronizes, then move "
                   "it.");
     }
@@ -156,10 +157,10 @@ void VaultController::readForMove(const QString& vaultFile,
                                   std::function<void(std::optional<QByteArray>, QString)> then)
 {
     QPointer<VaultController> self(this);
-    if (const auto place = webDavPlaceOf(vaultFile)) {
-        // The server's version: this device sent all it had (moveProblem),
+    if (const auto place = cloudPlaceOf(vaultFile)) {
+        // The storage's version: this device sent all it had (moveProblem),
         // and another device's latest change is in it.
-        withWebDavPassword(*place, [self, place = *place, then = std::move(then)](std::optional<QString> password) {
+        withCloudSecret(*place, [self, place = *place, then = std::move(then)](std::optional<QString> password) {
             if (!self) {
                 return;
             }
@@ -168,9 +169,13 @@ void VaultController::readForMove(const QString& vaultFile,
                                       "it is asked, then move it."));
                 return;
             }
-            auto* client = new WebDavClient(WebDavAccount{place.folder, place.user, *password, place.trustedCertificate},
-                                            self);
-            client->get(place.fileName, {}, [self, client, then](const WebDavReply& answer) {
+            CloudStorage* client = makeCloudStorage(place, *password).release();
+            if (!client) {
+                then(std::nullopt, tr("The vault could not be read."));
+                return;
+            }
+            client->setParent(self);
+            client->get(place.fileName, {}, [self, client, then](const CloudReply& answer) {
                 client->deleteLater();
                 if (!self) {
                     return;
@@ -450,7 +455,7 @@ void VaultController::finishMove(const QString& vaultFile, const QString& newPat
     emit moveDone(true, QString());
 
     // Then the original goes.
-    const auto place = webDavPlaceOf(vaultFile);
+    const auto place = cloudPlaceOf(vaultFile);
     if (!place) {
         if (!QFile::remove(vaultFile)) {
             say(tr("The vault was moved, but its old file could not be deleted: %1. Delete it yourself.")
@@ -459,18 +464,18 @@ void VaultController::finishMove(const QString& vaultFile, const QString& newPat
         }
         return;
     }
-    forgetWebDavPlace(vaultFile);
+    forgetCloudPlace(vaultFile);
     QFile::remove(vaultFile);
-    QFile::remove(webDavBasePath(place->id));
+    QFile::remove(cloudBasePath(*place));
     QPointer<VaultController> self(this);
-    withWebDavPassword(*place, [self, place = *place](std::optional<QString> password) {
+    withCloudSecret(*place, [self, place = *place](std::optional<QString> password) {
         if (!self) {
             return;
         }
         const auto tell = [self, place](const QString& why) {
             self->say(tr("The vault was moved, but its old copy on the server could not be deleted (%1): %2. Delete it "
                          "there yourself.")
-                          .arg(why, place.shownAddress()),
+                          .arg(why, shownCloudAddress(place)),
                       true);
         };
         self->webDavPasswords.remove(place.id);
@@ -482,9 +487,13 @@ void VaultController::finishMove(const QString& vaultFile, const QString& newPat
             tell(tr("the server's password is not known"));
             return;
         }
-        auto* client = new WebDavClient(WebDavAccount{place.folder, place.user, *password, place.trustedCertificate},
-                                        self);
-        client->remove(place.fileName, [self, client, tell](const WebDavReply& answer) {
+        CloudStorage* client = makeCloudStorage(place, *password).release();
+        if (!client) {
+            tell(tr("the server's password is not known"));
+            return;
+        }
+        client->setParent(self);
+        client->remove(place.fileName, [self, client, tell](const CloudReply& answer) {
             client->deleteLater();
             if (self && !answer.ok() && answer.error != WebDavError::NotFound) {
                 tell(connectProblem(answer));
@@ -517,15 +526,15 @@ void VaultController::forgetVault(const QString& vaultFile)
     if (vaultFile == unsavedPath) {
         discardKeptChanges();
     }
-    if (const auto place = webDavPlaceOf(vaultFile)) {
+    if (const auto place = cloudPlaceOf(vaultFile)) {
         // The working copy goes at once, a change not yet on the server with
         // it (the owner, D-060); the server's copy stays.
         if (vaultFile == path) {
             stopWebDav();
         }
-        forgetWebDavPlace(vaultFile);
+        forgetCloudPlace(vaultFile);
         QFile::remove(vaultFile);
-        QFile::remove(webDavBasePath(place->id));
+        QFile::remove(cloudBasePath(*place));
         webDavPasswords.remove(place->id);
         if (const std::shared_ptr<SecretStore> store = secrets) {
             const QString name = place->secretName();

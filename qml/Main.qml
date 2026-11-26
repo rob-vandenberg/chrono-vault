@@ -616,7 +616,7 @@ ApplicationWindow {
                         property string shownKeys: mainWindow.firstKey(actionId)
                         objectName: "syncNowAction"
                         text: qsTr("Sync Now")
-                        enabled: mainWindow.free && VaultController.onWebDav
+                        enabled: mainWindow.free && VaultController.inCloud
                         onTriggered: VaultController.syncNow()
                     }
                     Action {

@@ -887,3 +887,13 @@ service before the app can be published. `PRIVACY.md` names every internet conta
 GitHub's release list, Have I Been Pwned's range and breach list, each website's own icon when turned on) and the
 `drive.file` permission with Google's Limited Use statement; `TERMS.md` the AGPL-3.0-only licence, no warranty, and
 the person's own care of master password, keyfile and backups. Both checked against the code while written.
+
+## 26 November 2026: one cloud storage base class, WebDAV moved onto it (0.8.114)
+
+`ROADMAP.md` step 14 (Google Drive, now before pCloud), first part (D-080). `CloudStorage` is the base of every
+storage; `WebDavStorage` is derived from it and makes its requests with the WebDAV client of D-057; the sync of D-057
+became `CloudSync`, the same steps for any storage. A WebDAV vault is kept as before, nothing to convert. One list of
+storages drives the Storage tiles, the vault lines and places pictures, Disconnect's title, Sync Now and the line under
+the vault's name. New test `test_cloud_sync` (a storage without locks, stopped at every step); every WebDAV test passes
+unchanged, with `test_vault_menu`, `test_vault_rows`, `test_intuitive`, `test_dialog_keys` and
+`test_every_string_translatable`.

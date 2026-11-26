@@ -1033,7 +1033,7 @@ ApplicationWindow {
                                 readonly property bool canOpen: found && !unlocked
                                 readonly property bool canMove: found
                                 readonly property bool canForget: !primary
-                                readonly property bool canDisconnect: found && place.onWebDav === true
+                                readonly property bool canDisconnect: found && place.inCloud === true
                                 readonly property bool canImport: found
                                 readonly property bool canExport: found
                                 Layout.fillWidth: true
@@ -1052,8 +1052,7 @@ ApplicationWindow {
                                     gap: 8 * Appearance.factor
                                     // Where it is kept (the owner, D-079).
                                     IconImage {
-                                        source: vaultRow.place.onWebDav ? "qrc:/icons/places-webdav.svg"
-                                                                        : "qrc:/icons/places-device.svg"
+                                        source: vaultRow.place.placePicture
                                         color: palette.windowText
                                         sourceSize.width: Math.round(32 * Appearance.factor)
                                         sourceSize.height: Math.round(32 * Appearance.factor)
@@ -1101,15 +1100,15 @@ ApplicationWindow {
                                             Item { Layout.fillWidth: true }
                                         }
                                         Label {
-                                            text: vaultRow.place.onWebDav ? qsTr("WebDAV: %1").arg(vaultRow.place.address)
-                                                                          : qsTr("This computer: %1").arg(vaultRow.place.address)
+                                            text: vaultRow.place.inCloud ? qsTr("%1: %2").arg(vaultRow.place.storageName, vaultRow.place.address)
+                                                                         : qsTr("This computer: %1").arg(vaultRow.place.address)
                                             textFormat: Text.PlainText
                                             opacity: 0.7
                                             elide: Text.ElideMiddle
                                             Layout.fillWidth: true
                                         }
                                         Label {
-                                            visible: vaultRow.found && vaultRow.place.onWebDav === true
+                                            visible: vaultRow.found && vaultRow.place.inCloud === true
                                             text: qsTr("Last synchronized: %1").arg(vaultRow.place.lastSynced || "")
                                             opacity: 0.7
                                             Layout.fillWidth: true
@@ -1214,7 +1213,7 @@ ApplicationWindow {
                                                 height: visible ? implicitHeight : 0
                                                 onTriggered: {
                                                     forgetWindow.vaultFile = vaultRow.modelData
-                                                    forgetWindow.onWebDav = vaultRow.place.onWebDav === true
+                                                    forgetWindow.onWebDav = vaultRow.place.inCloud === true
                                                     forgetWindow.open()
                                                 }
                                             }
@@ -1239,6 +1238,7 @@ ApplicationWindow {
                                                 height: visible ? implicitHeight : 0
                                                 onTriggered: {
                                                     disconnectWindow.vaultFile = vaultRow.modelData
+                                                    disconnectWindow.storageName = vaultRow.place.storageName || ""
                                                     disconnectWindow.open()
                                                 }
                                             }
@@ -1491,7 +1491,8 @@ ApplicationWindow {
                             memoryName: "disconnectWebDav2"
                             transientParent: settingsWindow
                             property string vaultFile: ""
-                            title: qsTr("Disconnect from WebDAV")
+                            property string storageName: ""
+                            title: qsTr("Disconnect from %1").arg(storageName)
                             standardButtons: Dialog.Cancel
                             rightButtons: Button {
                                 objectName: "disconnectButton"

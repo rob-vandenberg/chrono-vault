@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.7.113
+# qml/CMakeLists.txt 0.8.114
 
 # --- Version history ----------------------------------------------------
+# v0.8.114: The cloud storage base, its WebDAV storage and CloudSync (D-080)
 # v0.7.113: The padlock pictures renamed; lock.svg removed
 # v0.7.112: The places pictures and the four storage types still to come (D-079)
 # v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -151,8 +152,14 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/vault_controller_import.cpp
         ../src/ui/vault_controller_retry.cpp
         ../src/ui/secret_store.h
+        ../src/ui/cloud_storage.cpp
+        ../src/ui/cloud_storage.h
+        ../src/ui/cloud_sync.cpp
+        ../src/ui/cloud_sync.h
         ../src/ui/webdav_client.cpp
         ../src/ui/webdav_client.h
+        ../src/ui/webdav_storage.cpp
+        ../src/ui/webdav_storage.h
         ../src/ui/webdav_sync.cpp
         ../src/ui/webdav_sync.h
         ../src/ui/window_memory.cpp
@@ -313,7 +320,10 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/vault_controller_conflicts.cpp
     ../src/ui/vault_controller_import.cpp
     ../src/ui/vault_controller_retry.cpp
+    ../src/ui/cloud_storage.cpp
+    ../src/ui/cloud_sync.cpp
     ../src/ui/webdav_client.cpp
+    ../src/ui/webdav_storage.cpp
     ../src/ui/webdav_sync.cpp
     ../src/ui/window_memory.cpp
 )
