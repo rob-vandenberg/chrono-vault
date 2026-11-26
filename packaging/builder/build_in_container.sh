@@ -6,9 +6,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# build_in_container.sh 0.0.40
+# build_in_container.sh 0.8.115
 #
 # --- Version history ----------------------------------------------------
+# v0.8.115: The Google client for Google Drive, from the environment the private script gives (D-080)
 # v0.0.40: The icons for the icon picker copied in too (D-050)
 # v0.0.10: The style folder, Chrono Vault's own Qt Quick style (D-023)
 # v0.0.5: Qt's TLS plugins and OpenSSL's libssl, for HTTPS to GitHub (D-021)
@@ -42,7 +43,9 @@ tar -C /src -cf - CMakeLists.txt LICENSE cmake src qml style art fonts icons pac
 
 cmake -S /work -B /work/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCHRONO_VAULT_BUILD_TESTS=OFF \
     -DCMAKE_PREFIX_PATH="$QT" -DOPENSSL_ROOT_DIR="$SSL" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_INSTALL_PREFIX="$OUT" >/dev/null
+    -DCMAKE_INSTALL_PREFIX="$OUT" \
+    -DCHRONO_VAULT_GOOGLE_CLIENT_ID="${CHRONO_VAULT_GOOGLE_CLIENT_ID:-}" \
+    -DCHRONO_VAULT_GOOGLE_CLIENT_SECRET="${CHRONO_VAULT_GOOGLE_CLIENT_SECRET:-}" >/dev/null
 cmake --build /work/build
 rm -rf "$OUT"
 cmake --install /work/build >/dev/null

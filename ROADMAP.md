@@ -20,7 +20,7 @@ work is 5 to 10 times faster. Every step starts with a changelist and the owner'
 | 11 | Storage: WebDAV | Qt Network, a working copy here, synced and merged (D-057) | 2 to 3 weeks | done (0.3.60) |
 | 12 | Audit | Weak, reused and leaked passwords, with the Have I Been Pwned check | 2 weeks | done in 0.6.86 (D-065) |
 | 13 | Importers | CSV first, then the formats the owner chooses, each tested with random damaged input (OR-3, OR-4) | about 1 week per format | not started |
-| 14 | Storage: Google Drive | Before pCloud (the owner, 26 November 2026); the permission `drive.file` only; a cloud storage base class, WebDAV moved onto it first (D-080) | 2.5 to 4 weeks | in progress: the base class done in 0.8.114 |
+| 14 | Storage: Google Drive | Before pCloud (the owner, 26 November 2026); the permission `drive.file` only; a cloud storage base class, WebDAV moved onto it first (D-080) | 2.5 to 4 weeks | done in 0.8.115 (the base class in 0.8.114); the owner's test with his own Google account still to come |
 | 15 | Storage: pCloud | Technique decided by the owner when this step is reached (D-005); a class derived from the cloud storage base (D-080) | 2 to 3 weeks | not started |
 | 16 | First release, Linux and Windows | The owner tests it; push guard and personal-data scan; first push only after the owner says it works (OR-10) | 2 weeks | not started |
 | 17 | Android | Build, phone layout, the storages on the phone (D-009) | 2 to 3 months, shared with 18 and 19 | not started |

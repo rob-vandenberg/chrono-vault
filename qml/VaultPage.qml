@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.7.111
+// VaultPage.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: The storage's name under the vault's name (D-080)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)

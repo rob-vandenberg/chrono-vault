@@ -18,6 +18,7 @@
 
 #include "cloud_storage.h"
 
+#include "google_drive_storage.h"
 #include "settings_files.h"
 #include "webdav_storage.h"
 #include "webdav_sync.h"
@@ -29,9 +30,10 @@
 #include <QUrl>
 
 // --- Version ------------------------------------------------------------
-// cloud_storage.cpp 0.8.114
+// cloud_storage.cpp 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Google Drive in the list of storages, when the build has its client (D-080)
 // v0.8.114: Initial release: the base of every cloud storage, and where a vault is kept (D-080)
 
 namespace chrono_vault {
@@ -39,6 +41,7 @@ namespace chrono_vault {
 namespace {
 
 const QString webDavKind = QStringLiteral("webdav");
+const QString googleDriveKind = QStringLiteral("googledrive");
 
 QString placesKey(const QString& kind)
 {
@@ -53,6 +56,9 @@ bool usable(const CloudPlace& place)
     }
     if (place.kind == webDavKind) {
         return QUrl(place.details.value(QStringLiteral("folder")).toString()).isValid();
+    }
+    if (place.kind == googleDriveKind) {
+        return !place.details.value(QStringLiteral("folderId")).toString().isEmpty();
     }
     return true;
 }
@@ -175,15 +181,26 @@ QString shownCloudAddress(const CloudPlace& place)
     if (place.kind == webDavKind) {
         return WebDavPlace::fromCloud(place).shownAddress();
     }
+    if (place.kind == googleDriveKind) {
+        return place.details.value(QStringLiteral("folderPath")).toString() + QLatin1Char('/') + place.fileName;
+    }
     return place.fileName;
 }
 
 QList<CloudKind> cloudKinds()
 {
-    return {
+    QList<CloudKind> kinds{
         CloudKind{webDavKind, QStringLiteral("WebDav"), QCoreApplication::translate("CloudStorage", "WebDAV"),
                   QStringLiteral("qrc:/icons/storage-webdav.svg"), QStringLiteral("qrc:/icons/places-webdav.svg")},
     };
+    if (googleDriveAvailable()) {
+        // Only in a build that has the program's Google client (the owner, Q6).
+        kinds.append(CloudKind{googleDriveKind, QStringLiteral("GoogleDrive"),
+                               QCoreApplication::translate("CloudStorage", "Google Drive"),
+                               QStringLiteral("qrc:/icons/storage-googledrive.svg"),
+                               QStringLiteral("qrc:/icons/places-googledrive.svg")});
+    }
+    return kinds;
 }
 
 std::optional<CloudKind> cloudKindOf(const QString& kind)
@@ -217,6 +234,11 @@ std::unique_ptr<CloudStorage> makeCloudStorage(const CloudPlace& place, const QS
         const WebDavPlace where = WebDavPlace::fromCloud(place);
         return std::make_unique<WebDavStorage>(
             WebDavAccount{where.folder, where.user, secret, where.trustedCertificate});
+    }
+    if (place.kind == googleDriveKind && googleDriveAvailable()) {
+        return std::make_unique<GoogleDriveStorage>(
+            GoogleDriveAccount{secret, place.details.value(QStringLiteral("folderId")).toString(),
+                               place.details.value(QStringLiteral("folderPath")).toString()});
     }
     return nullptr;
 }

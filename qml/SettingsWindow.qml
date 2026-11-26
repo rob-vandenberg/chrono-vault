@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.7.111
+// SettingsWindow.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Any storage in the vault lines and Disconnect; Move to Google Drive; Also delete the vault on Google Drive (D-080)
 // v0.7.111: A vault row shows where it is kept; question dialogs fit their text (D-079)
 // v0.7.110: Open with what is kept: the vault shown stays until the other one is open (D-078)
 // v0.7.107: Set PIN…, Change PIN… and Remove PIN… in a vault's menu; the PIN line leaves Security (D-076)
@@ -1239,6 +1240,9 @@ ApplicationWindow {
                                                 onTriggered: {
                                                     disconnectWindow.vaultFile = vaultRow.modelData
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
+                                                    disconnectWindow.kind = vaultRow.place.kind || ""
+                                                    if (alsoDelete.item)
+                                                        alsoDelete.item.checked = false
                                                     disconnectWindow.open()
                                                 }
                                             }
@@ -1384,6 +1388,10 @@ ApplicationWindow {
                                 if (storage === "device") {
                                     movePicker.vaultFile = moveChoice.vaultFile
                                     movePicker.open()
+                                } else if (storage === "googledrive") {
+                                    moveToDriveWindow.mode = "move"
+                                    moveToDriveWindow.moveVault = moveChoice.vaultFile
+                                    moveToDriveWindow.open()
                                 } else {
                                     moveWindow.mode = "move"
                                     moveWindow.moveVault = moveChoice.vaultFile
@@ -1455,6 +1463,11 @@ ApplicationWindow {
                             objectName: "moveToWebDavWindow"
                             transientParent: settingsWindow
                         }
+                        GoogleDriveWindow {
+                            id: moveToDriveWindow
+                            objectName: "moveToGoogleDriveWindow"
+                            transientParent: settingsWindow
+                        }
                         DialogWindow {
                             id: forgetWindow
                             fitsContent: true // only asks: as tall as its text (D-079)
@@ -1492,13 +1505,16 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property string storageName: ""
+                            property string kind: ""
                             title: qsTr("Disconnect from %1").arg(storageName)
                             standardButtons: Dialog.Cancel
                             rightButtons: Button {
                                 objectName: "disconnectButton"
                                 text: qsTr("Disconnect")
                                 onClicked: {
-                                    VaultController.disconnectWebDav(disconnectWindow.vaultFile)
+                                    VaultController.disconnectVault(disconnectWindow.vaultFile,
+                                                                    disconnectWindow.kind === "googledrive" && alsoDelete.item !== null
+                                                                    && alsoDelete.item.checked)
                                     disconnectWindow.accept()
                                 }
                             }
@@ -1509,6 +1525,17 @@ ApplicationWindow {
                                       + qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault. This action cannot be undone.") + "\n"
                                       + qsTr("Are you sure you want to disconnect “%1” from the remote vault?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
                                 wrapMode: Text.Wrap
+                            }
+                            // Google Drive only, off unless ticked (D-080): the copy there goes to
+                            // Drive's trash. A WebDAV vault's Disconnect deletes nothing (D-060), so
+                            // there the box is not there at all.
+                            Loader {
+                                id: alsoDelete
+                                active: disconnectWindow.kind === "googledrive"
+                                sourceComponent: CheckBox {
+                                    objectName: "alsoDeleteBox"
+                                    text: qsTr("Also delete the vault on Google Drive")
+                                }
                             }
                         }
                     }

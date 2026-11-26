@@ -897,3 +897,16 @@ storages drives the Storage tiles, the vault lines and places pictures, Disconne
 the vault's name. New test `test_cloud_sync` (a storage without locks, stopped at every step); every WebDAV test passes
 unchanged, with `test_vault_menu`, `test_vault_rows`, `test_intuitive`, `test_dialog_keys` and
 `test_every_string_translatable`.
+
+## 27 November 2026: Google Drive (0.8.115)
+
+`ROADMAP.md` step 14 (D-080): `GoogleDriveStorage`, derived from the cloud storage base, with only the permission
+`drive.file`; the sign-in in the browser with Qt Network Authorization; the "Chrono Vault" folder at the top of My
+Drive; Drive has no write that is refused when the file changed, so after every write Drive's version history is read
+and a version that came in between is put back and merged (the owner's Q2, A); the newest 10 versions kept. The
+Google Drive window, the tile, Move to Google Drive, Disconnect with "Also delete the vault on Google Drive", the
+renewed sign-in. Create, open and move a vault are one implementation for every storage now. The program's Google
+client comes from the private folder through the build scripts; Qt Network Authorization in the Linux builder image.
+Tests: `test_google_drive`, `test_google_drive_interruptions`, against a Google of our own; the WebDAV tests,
+`test_cloud_sync`, `test_vault_menu`, `test_vault_rows`, `test_intuitive`, `test_dialog_keys`,
+`test_every_string_translatable` and `test_no_bounce` pass.

@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavFileDialog.qml 0.6.97
+// WebDavFileDialog.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Any storage's folders: WebDAV or Google Drive (D-080)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.3.67: A folder joins Back's history only once the next one is shown
@@ -40,6 +41,8 @@ DialogWindow {
 
     // "open", "save" or "folder".
     property string mode: "open"
+    // The storage whose folders are shown: "webdav" or "googledrive" (D-080).
+    property string storage: "webdav"
     property string serverRoot: ""
     property string folderShown: ""
     property var entries: []
@@ -88,7 +91,10 @@ DialogWindow {
         leaving = remember ? folderShown : ""
         problem = ""
         waiting = true
-        VaultController.openWebDavFolder(name)
+        if (storage === "googledrive")
+            VaultController.openGoogleDriveFolder(name)
+        else
+            VaultController.openWebDavFolder(name)
     }
     function back() {
         if (history.length === 0)
@@ -161,7 +167,8 @@ DialogWindow {
             TextField {
                 objectName: "fileDialogPath"
                 // From the server's top, as the folder is shown in the WebDAV window.
-                text: fileDialog.folderShown.replace(fileDialog.serverRoot, "/").replace("//", "/")
+                text: fileDialog.storage === "googledrive" ? fileDialog.folderShown
+                      : fileDialog.folderShown.replace(fileDialog.serverRoot, "/").replace("//", "/")
                 readOnly: true
                 Layout.fillWidth: true
             }
@@ -199,7 +206,10 @@ DialogWindow {
                     fileDialog.leaving = fileDialog.folderShown
                     fileDialog.problem = ""
                     fileDialog.waiting = true
-                    VaultController.makeWebDavFolder(folderNameField.text)
+                    if (fileDialog.storage === "googledrive")
+                        VaultController.makeGoogleDriveFolder(folderNameField.text)
+                    else
+                        VaultController.makeWebDavFolder(folderNameField.text)
                     folderNameField.clear()
                     newFolderRow.visible = false
                 }

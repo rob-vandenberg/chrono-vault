@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.7.113
+// Main.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Sync Now for any storage; the Google sign-in renewed (D-080)
 // v0.7.113: The lock button shows the solid padlock; lock and gear pictures 24 by 24
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.7.110: The vault shown stays, unchangeable, until the other one is open (D-078)
@@ -1229,9 +1230,29 @@ ApplicationWindow {
         }
     }
 
+    // Google's sign-in of the vault shown must be renewed (D-080).
+    DialogWindow {
+        id: googleSignInWindow
+        fitsContent: true // only asks: as tall as its text (D-079)
+        objectName: "googleSignInWindow"
+        memoryName: "googleSignIn"
+        transientParent: mainWindow
+        title: qsTr("Sign in to Google Drive")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        Component.onCompleted: googleSignInWindow.standardButton(Dialog.Ok).text = qsTr("Sign in with Google")
+        onAccepted: VaultController.signInToCloudAgain()
+        Label {
+            text: qsTr("“%1” is kept on Google Drive, and Chrono Vault must sign in to Google again to synchronize it. Sign in with Google opens your web browser.").arg(VaultController.vaultName)
+            wrapMode: Text.Wrap
+            Layout.preferredWidth: 420 * Appearance.factor
+        }
+    }
+
     Connections {
         target: VaultController
         function onSyncChanged() {
+            if (VaultController.cloudSignInNeeded && !googleSignInWindow.visible)
+                googleSignInWindow.open()
             if (VaultController.certificateAsked !== "" && !certificateWindow.visible)
                 certificateWindow.open()
             if (VaultController.webDavPasswordNeeded && !webDavPasswordWindow.visible)

@@ -255,8 +255,13 @@
 <context>
     <name>CloudStorage</name>
     <message>
-        <location filename="../src/ui/cloud_storage.cpp" line="+184"/>
+        <location filename="../src/ui/cloud_storage.cpp" line="+193"/>
         <source>WebDAV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Google Drive</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -711,6 +716,99 @@
     <message>
         <location line="+6"/>
         <source>Another one</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GoogleDriveWindow</name>
+    <message>
+        <location filename="../qml/GoogleDriveWindow.qml" line="+65"/>
+        <source>New vault on Google Drive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Open a vault on Google Drive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Move the vault to Google Drive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+77"/>
+        <source>Waiting for Google…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Sign in with Google</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Next…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+52"/>
+        <source>“%1” moves to the Google Drive folder you choose. Where it is now, it is deleted once its copy there is checked.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Sign in to Google in your web browser, then come back here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sign in with Google opens your web browser. Chrono Vault keeps its vaults in the folder “Chrono Vault” in your Google Drive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Only vaults created or moved here by Chrono Vault are shown. To bring in another vault, open it from this computer and use Move to Google Drive…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Choose the folder with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Choose the folder and name with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Choose the vault with Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Browse…</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1852,7 +1950,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+88"/>
+        <location filename="../qml/Main.qml" line="+89"/>
         <source>%1 – Chrono Vault %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2074,7 +2172,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-890"/>
+        <location line="+14"/>
+        <source>Sign in to Google Drive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Sign in with Google</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>“%1” is kept on Google Drive, and Chrono Vault must sign in to Google again to synchronize it. Sign in with Google opens your web browser.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-909"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2346,7 +2459,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+341"/>
+        <location filename="../qml/SettingsWindow.qml" line="+342"/>
         <location line="+372"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2405,12 +2518,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1121"/>
+        <location line="+1147"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1122"/>
+        <location line="-1148"/>
         <location line="+441"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2566,12 +2679,12 @@
     </message>
     <message>
         <location line="+9"/>
-        <location line="+130"/>
+        <location line="+133"/>
         <source>Make primary vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-99"/>
+        <location line="-102"/>
         <source>Import…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2586,7 +2699,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+89"/>
+        <location line="+92"/>
         <source>Make primary</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2611,7 +2724,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location line="+117"/>
         <source>Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2631,12 +2744,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+17"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+11"/>
         <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, so you can keep working when you are offline. Changes are synced automatically once your connection is restored.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2648,6 +2761,11 @@
     <message>
         <location line="+1"/>
         <source>Are you sure you want to disconnect “%1” from the remote vault?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Also delete the vault on Google Drive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2666,7 +2784,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-855"/>
+        <location line="-881"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2752,7 +2870,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+775"/>
+        <location line="+801"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2767,7 +2885,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-451"/>
+        <location line="-477"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2797,7 +2915,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+188"/>
+        <location line="+195"/>
         <source>Where should the vault be moved to?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2817,7 +2935,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+32"/>
         <source>Forget the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2827,12 +2945,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+26"/>
         <source>Disconnect from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+272"/>
+        <location line="+285"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2857,16 +2975,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1420"/>
-        <location line="+922"/>
-        <location line="+437"/>
+        <location line="-1446"/>
+        <location line="+925"/>
+        <location line="+460"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1426"/>
-        <location line="+1247"/>
+        <location line="-1452"/>
+        <location line="+1273"/>
         <location line="+118"/>
         <location line="+71"/>
         <source>Cancel</source>
@@ -2876,7 +2994,7 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+61"/>
+        <location filename="../qml/StorageWindow.qml" line="+62"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2936,7 +3054,7 @@
 <context>
     <name>SyncConflictsWindow</name>
     <message>
-        <location filename="../qml/SyncConflictsWindow.qml" line="+194"/>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+195"/>
         <source>Sync conflicts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3484,7 +3602,7 @@
 <context>
     <name>VaultBox</name>
     <message>
-        <location filename="../qml/VaultBox.qml" line="+56"/>
+        <location filename="../qml/VaultBox.qml" line="+57"/>
         <source>this computer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3663,7 +3781,7 @@
 <context>
     <name>VaultPage</name>
     <message>
-        <location filename="../qml/VaultPage.qml" line="+743"/>
+        <location filename="../qml/VaultPage.qml" line="+744"/>
         <source>Local file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3904,7 +4022,7 @@
 <context>
     <name>WebDavFileDialog</name>
     <message>
-        <location filename="../qml/WebDavFileDialog.qml" line="+56"/>
+        <location filename="../qml/WebDavFileDialog.qml" line="+59"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3919,7 +4037,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+56"/>
+        <location line="+59"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3944,7 +4062,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+14"/>
         <source>New folder…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3959,7 +4077,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+32"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3998,6 +4116,31 @@
     <name>WebDavSync</name>
     <message>
         <location filename="../src/ui/cloud_sync.cpp" line="+114"/>
+        <source>Google Drive cannot be reached</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the sign-in to Google Drive must be renewed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>the vault&apos;s folder is not found on Google Drive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Google Drive is full, or the vault is too large for it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Google Drive refused it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
         <source>the server cannot be reached</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4193,7 +4336,7 @@
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../qml/WelcomePage.qml" line="+79"/>
+        <location filename="../qml/WelcomePage.qml" line="+80"/>
         <source>Welcome to Chrono Vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4219,7 +4362,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+70"/>
         <source>Where should the new vault be kept?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4240,12 +4383,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+24"/>
         <source>Choose the master password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+36"/>
         <source>This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4312,6 +4455,44 @@
     <message>
         <location line="+3"/>
         <source>Chrono Vault keyfiles (*.chronovaultkey)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>chrono_vault::GoogleSignIn</name>
+    <message>
+        <location filename="../src/ui/google_drive_storage.cpp" line="+876"/>
+        <source>Chrono Vault cannot wait for Google&apos;s answer on this computer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Chrono Vault is signed in to Google Drive. You can close this page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>No web browser could be opened for the Google sign-in.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Google did not give Chrono Vault a lasting sign-in. Try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The sign-in to Google was cancelled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Google refused the sign-in (%1).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>The sign-in to Google failed. Check the network and try again.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4514,7 +4695,7 @@
     <message>
         <location line="+4"/>
         <location line="+2692"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+502"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+543"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4547,18 +4728,18 @@
         <location line="+2121"/>
         <location line="+461"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="+327"/>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="+91"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="+92"/>
         <location line="+12"/>
         <location line="+40"/>
-        <location line="+376"/>
+        <location line="+393"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
-        <location line="+91"/>
+        <location line="+121"/>
         <source>Wait until your last change is saved, then try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="-2657"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-39"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-65"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4799,7 +4980,7 @@
     </message>
     <message>
         <location line="+68"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-427"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-464"/>
         <source>Not synchronized: the server&apos;s password is needed. The conflict stays.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5139,7 +5320,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-54"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-61"/>
         <source>The server cannot be reached. Check the address and the network.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5159,12 +5340,64 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
-        <source>The file is too large to be a vault.</source>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+53"/>
+        <source>Google Drive cannot be reached. Check the network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
+        <source>Google no longer accepts Chrono Vault&apos;s sign-in. Sign in to Google Drive again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>That folder or vault is no longer on Google Drive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+2"/>
+        <source>The file is too large to be a vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+2"/>
+        <source>Google Drive is full, or the file is too large to be a vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Google Drive refused it (%1).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>This version of Chrono Vault has no Google Drive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+110"/>
+        <source>That folder is not on Google Drive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <location line="+17"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+436"/>
+        <source>Sign in to Google Drive first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>The vault on Google Drive could not be deleted: sign in to Google Drive first. It was disconnected; delete it there yourself.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>The vault on Google Drive could not be deleted (%1): %2. Delete it there yourself.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-434"/>
         <source>The address does not answer as a WebDAV folder.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5174,7 +5407,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+8"/>
         <source>The server sends this address elsewhere (%1). Check the address, for example https:// in place of http://.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5184,8 +5417,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+149"/>
-        <location line="+32"/>
+        <location line="+157"/>
+        <location line="+37"/>
         <source>Not synchronized: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5210,17 +5443,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+110"/>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="-72"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+116"/>
         <source>A folder or file with that name is already there.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+18"/>
         <source>Choose a name without / \ : * ? &quot; &lt; &gt; |, not starting or ending with a dot.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="-467"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="-484"/>
         <source>The move was stopped. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5283,14 +5517,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+21"/>
-        <location line="+115"/>
+        <location line="+26"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+44"/>
+        <location line="+122"/>
         <source>Connect to the WebDAV folder first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+84"/>
+        <location line="+46"/>
+        <source>That storage is not in this version of Chrono Vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+48"/>
         <source>The copy on the server did not read back the same. The vault stays where it was.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5316,33 +5555,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-105"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-112"/>
         <source>A vault with that name is already in that folder. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+26"/>
         <source>Creating the vault on the WebDAV server…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+42"/>
+        <location line="+0"/>
+        <source>Creating the vault on Google Drive…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+46"/>
         <source>The new vault could not be created: this computer cannot write its copy, or the disk is full.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+7"/>
+        <source>That storage is not in this version of Chrono Vault. Nothing was kept.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
         <source>The vault could not be put on the WebDAV server: %1. Nothing was kept.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+1"/>
+        <source>The vault could not be put on Google Drive: %1. Nothing was kept.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+80"/>
         <source>That file is not a Chrono Vault vault, or this device cannot write its copy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="-200"/>
-        <location line="+70"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="-201"/>
+        <location line="+71"/>
         <source>A vault with the name “%1” is already in that folder.</source>
         <translation type="unfinished"></translation>
     </message>

@@ -30,6 +30,7 @@
 #include "secret_store.h"
 #include "cloud_storage.h"
 #include "cloud_sync.h"
+#include "google_drive_storage.h"
 #include "webdav_client.h"
 #include "webdav_sync.h"
 
@@ -51,9 +52,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.8.114
+// vault_controller.h 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Google Drive: sign in, its folders, create, open, move, disconnect; one create, open and move for all (D-080)
 // v0.8.114: Any cloud storage: inCloud, storageName, storages; the sync is CloudSync (D-080)
 // v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
@@ -210,6 +212,9 @@ class VaultController : public QObject
     Q_PROPERTY(bool inCloud READ inCloud NOTIFY syncChanged)
     Q_PROPERTY(QString storageName READ storageName NOTIFY syncChanged)
     Q_PROPERTY(QVariantList storages READ storages CONSTANT)
+    // Google's sign-in of the vault shown must be renewed (taken away, or
+    // not on this device): signInToCloudAgain opens the browser (D-080).
+    Q_PROPERTY(bool cloudSignInNeeded READ cloudSignInNeeded NOTIFY syncChanged)
     Q_PROPERTY(QString syncProblem READ syncProblem NOTIFY syncChanged)
     Q_PROPERTY(bool syncing READ syncing NOTIFY syncChanged)
     Q_PROPERTY(QString certificateAsked READ certificateAsked NOTIFY syncChanged)
@@ -629,6 +634,25 @@ public:
     [[nodiscard]] bool onWebDav() const { return inCloud() && cloudKindNow == QLatin1String("webdav"); }
     [[nodiscard]] QString storageName() const;
     [[nodiscard]] QVariantList storages() const { return cloudKindsForWindows(); }
+    [[nodiscard]] bool cloudSignInNeeded() const { return signInNeeded; }
+
+    // Google Drive (D-080), in vault_controller_googledrive.cpp. Sign in in
+    // the browser, then the "Chrono Vault" folder is shown: googleDriveConnected
+    // answers, webDavFolderShown and webDavDone as for a WebDAV folder.
+    Q_INVOKABLE void connectGoogleDrive();
+    Q_INVOKABLE void cancelGoogleSignIn();
+    Q_INVOKABLE void openGoogleDriveFolder(const QString& name);
+    Q_INVOKABLE void makeGoogleDriveFolder(const QString& name);
+    Q_INVOKABLE void createGoogleDriveVault(const QString& name, const QString& password, const QString& repeated,
+                                            const QUrl& keyfile = QUrl(), bool savePassword = false);
+    Q_INVOKABLE void openGoogleDriveVault(const QString& fileName);
+    Q_INVOKABLE void moveVaultToGoogleDrive(const QString& vaultFile);
+    // Disconnect…, and with alsoDelete the vault on Google Drive goes to its
+    // trash; this device's copy stays a vault of its own.
+    Q_INVOKABLE void disconnectVault(const QString& vaultFile, bool alsoDelete);
+    Q_INVOKABLE void signInToCloudAgain();
+    // Tests: the address the browser would open goes here.
+    void setGoogleBrowserForTests(std::function<void(const QUrl&)> open) { googleBrowserForTests = std::move(open); }
     [[nodiscard]] QString syncProblem() const { return syncTrouble; }
     [[nodiscard]] bool syncing() const { return syncer && syncer->running(); }
     [[nodiscard]] QString certificateAsked() const { return shownFingerprint(askedCertificate); }
@@ -800,6 +824,8 @@ signals:
     void moveDone(bool ok, const QString& problem);
     // A new WebDAV vault that could not be made or put on the server; nothing was kept.
     void webDavCreateFailed(const QString& problem);
+    void googleDriveCreateFailed(const QString& problem);
+    void googleDriveConnected(bool ok, const QString& problem);
     // A folder of the server, listed, for the WebDAV file dialog: each entry a
     // map of name, folder, size and modified (as words), folders first.
     void webDavFolderShown(const QString& address, const QVariantList& entries, const QStringList& vaultFiles);
@@ -923,6 +949,22 @@ private:
         withCloudSecret(place.toCloud(), std::move(then));
     }
     [[nodiscard]] QString newWorkingCopyPath(const QString& name) const;
+    [[nodiscard]] QString newWorkingCopyPath(const QString& kind, const QString& name) const;
+    // Shared by every storage (D-080): a new vault, one already there, one
+    // of this device moved there.
+    void createCloudVault(const std::optional<CloudPlace>& target, const QString& secret, const QStringList& files,
+                          const QString& name, const QString& password, const QString& repeated, const QUrl& keyfile,
+                          bool savePassword);
+    void openCloudVault(const CloudPlace& target, const QString& secret, const QString& fileName,
+                        std::function<void(const QString&, CloudStorage::Done)> read, std::function<bool()> stillAsked);
+    void moveVaultToCloud(const QString& vaultFile, const std::optional<CloudPlace>& target, const QString& secret,
+                          const QStringList& files, const QString& notConnected);
+    // A folder's entries for the file dialog, folders first; its vaults into files.
+    [[nodiscard]] QVariantList shownEntries(const QList<CloudEntry>& entries, QStringList& files) const;
+    [[nodiscard]] static QString cloudProblem(const QString& kind, const CloudReply& answer);
+    [[nodiscard]] std::optional<CloudPlace> driveTarget() const;
+    void showGoogleDrive();
+    void listGoogleDrive(bool connecting);
     [[nodiscard]] static QString shownFingerprint(const QByteArray& fingerprint);
     [[nodiscard]] static QString connectProblem(const WebDavReply& answer);
     [[nodiscard]] static QString webDavNameProblem(const QString& name);
@@ -1175,6 +1217,13 @@ private:
     std::unique_ptr<WebDavClient> connection; // the folder shown in the WebDAV window
     std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;
+    bool signInNeeded = false;
+    QString googleToken; // the Google sign-in of this run, in memory only
+    std::unique_ptr<GoogleSignIn> googleSignIn;
+    std::unique_ptr<GoogleDriveStorage> driveSigningIn;
+    std::unique_ptr<GoogleDriveStorage> drive; // the folder shown in the Google Drive window
+    QStringList driveFiles;
+    std::function<void(const QUrl&)> googleBrowserForTests;
     int lastConflicts = 0;
     bool moveRunning = false;
     QString movingVault; // never unlocked while it is moved (OR-15)

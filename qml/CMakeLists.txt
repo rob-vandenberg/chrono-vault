@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.8.114
+# qml/CMakeLists.txt 0.8.115
 
 # --- Version history ----------------------------------------------------
+# v0.8.115: Google Drive: its storage, the Google client from the build, Qt Network Authorization (D-080)
 # v0.8.114: The cloud storage base, its WebDAV storage and CloudSync (D-080)
 # v0.7.113: The padlock pictures renamed; lock.svg removed
 # v0.7.112: The places pictures and the four storage types still to come (D-079)
@@ -96,6 +97,7 @@ qt_add_qml_module(chrono_vault_ui
         VaultPage.qml
         WelcomePage.qml
         WebDavWindow.qml
+        GoogleDriveWindow.qml
         StorageWindow.qml
         SyncConflictsWindow.qml
         PictureButton.qml
@@ -147,6 +149,7 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/vault_controller_ask.cpp
         ../src/ui/vault_controller_pin.cpp
         ../src/ui/vault_controller_webdav.cpp
+        ../src/ui/vault_controller_googledrive.cpp
         ../src/ui/vault_controller_vaults.cpp
         ../src/ui/vault_controller_conflicts.cpp
         ../src/ui/vault_controller_import.cpp
@@ -156,6 +159,8 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/cloud_storage.h
         ../src/ui/cloud_sync.cpp
         ../src/ui/cloud_sync.h
+        ../src/ui/google_drive_storage.cpp
+        ../src/ui/google_drive_storage.h
         ../src/ui/webdav_client.cpp
         ../src/ui/webdav_client.h
         ../src/ui/webdav_storage.cpp
@@ -255,8 +260,12 @@ qt_add_resources(chrono_vault_ui chrono_vault_fonts
         "${PROJECT_SOURCE_DIR}/fonts/NotoSansMono-Regular.ttf"
 )
 target_include_directories(chrono_vault_ui PUBLIC "${PROJECT_SOURCE_DIR}/src/ui")
+# The Google client, written into the build folder only, never into git (D-080).
+configure_file("${PROJECT_SOURCE_DIR}/src/ui/google_drive_client.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/generated/google_drive_client.h" @ONLY)
+target_include_directories(chrono_vault_ui PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(chrono_vault_ui
-    PUBLIC chrono_vault_core chrono_vault_style chrono_vault_styleplugin Qt6::Gui Qt6::Qml Qt6::Widgets Qt6::Svg Qt6::Network
+    PUBLIC chrono_vault_core chrono_vault_style chrono_vault_styleplugin Qt6::Gui Qt6::Qml Qt6::Widgets Qt6::Svg Qt6::Network Qt6::NetworkAuth
     PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Concurrent
 )
 # Strict for our own sources; Qt's generated QML cache is Qt's code.
@@ -316,12 +325,14 @@ chrono_vault_strict_warnings_for_sources(
     ../src/ui/vault_controller_ask.cpp
     ../src/ui/vault_controller_pin.cpp
     ../src/ui/vault_controller_webdav.cpp
+    ../src/ui/vault_controller_googledrive.cpp
     ../src/ui/vault_controller_vaults.cpp
     ../src/ui/vault_controller_conflicts.cpp
     ../src/ui/vault_controller_import.cpp
     ../src/ui/vault_controller_retry.cpp
     ../src/ui/cloud_storage.cpp
     ../src/ui/cloud_sync.cpp
+    ../src/ui/google_drive_storage.cpp
     ../src/ui/webdav_client.cpp
     ../src/ui/webdav_storage.cpp
     ../src/ui/webdav_sync.cpp

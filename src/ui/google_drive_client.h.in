@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+// Chrono Vault, a password manager.
+// Copyright (C) 2026 Rob Vandenberg <RobVandenberg64@gmail.com>
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU Affero General Public License version 3 as
+// published by the Free Software Foundation.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+// General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
+#pragma once
+
+// --- Version ------------------------------------------------------------
+// google_drive_client.h.in 0.8.115
+
+// --- Version history ----------------------------------------------------
+// v0.8.115: Initial release: the program's Google client, filled in by the build (D-080)
+
+// Filled in by CMake from CHRONO_VAULT_GOOGLE_CLIENT_ID and
+// CHRONO_VAULT_GOOGLE_CLIENT_SECRET, which the build scripts give from a
+// private file; the values never stand in a file in git. Empty: no Google
+// Drive in this build (the owner, Q5, Q6).
+#define CHRONO_VAULT_GOOGLE_CLIENT_ID "@CHRONO_VAULT_GOOGLE_CLIENT_ID@"
+#define CHRONO_VAULT_GOOGLE_CLIENT_SECRET "@CHRONO_VAULT_GOOGLE_CLIENT_SECRET@"

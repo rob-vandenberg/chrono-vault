@@ -2,9 +2,9 @@
 
 ## Now
 
-**Version 0.8.114**: one cloud storage base class with a class per storage, and one sync for all; WebDAV moved onto it
-and behaves as before (D-080, `ROADMAP.md` step 14, Google Drive, now before pCloud). Before it, the documents
-`PRIVACY.md` and `TERMS.md` for Google's sign-in screen (0.7.113, documents only).
+**Version 0.8.115**: Google Drive (D-080, `ROADMAP.md` step 14): sign in with Google in the browser, the "Chrono Vault"
+folder in My Drive, the permission `drive.file` only, and nothing lost when two devices write at the same moment.
+Before it, 0.8.114: one cloud storage base class with a class per storage, one sync for all, WebDAV moved onto it.
 
 **Version 0.7.112**: nothing bounces anywhere, held by a test (D-046); places pictures in the text colour in every list and dropdown, storage pictures only in the Storage tiles (D-079); before it, 0.7.111: question dialogs as tall as their text, Enter on the selected button with its blue edge, Esc on Cancel or Close, Y and N; a picture of where each vault is kept; the new crown (D-079); before it, 0.7.110: a vault that opens without a password replaces the open one with no page between, and a failure keeps the open one (D-078); before it, 0.7.109: a Closed vault picked as a file opens at once; Create a vault and Move a vault in the look of Open a vault; before it, 0.7.108: Open a vault, with your vaults; the crown in the start-up list (D-077); before it, 0.7.107: a PIN per vault, the lock as a screen lock (D-076); before it, 0.6.106: Close and Lock per vault, the start-up page begins with the primary (D-075); before it, 0.6.105: another primary vault, Remember my credentials, three padlocks (D-074); before it, 0.6.104: the eye of password fields answers clicks again; before it, 0.6.103: one standard dialog for a master password, a PIN or a finger (D-073); before it, 0.6.102: an outdated kept password is said in Settings; before it, 0.6.101: menus fit their entries and close with their window (D-072); before it, 0.6.100: padlocks and Open in Settings > Vaults, round picture buttons (D-071); before it, 0.6.99: the "?" of a key in use at the right size; before it, 0.6.98: the texts of Forget; before it, 0.6.97: long texts break in dialogs of normal width (D-061); before it, 0.6.96: one tray icon on every tray (D-064); before it, 0.6.95: the scaling up to 200%, Options in Tools, Lock vault in File; before it, 0.6.94: the main window keeps its size at another scaling, the others scale along (D-070); before it, 0.6.93: a start on a locked vault waits in its password field (D-068); before it, 0.6.92: exact UI scaling, every text and size (D-069); before it, 0.6.91: dialogs open in their text field, Choose Icon by keyboard, a right-click menu for text fields (D-068);
 more room in General. Before, **0.6.90**: every pop-up menu and list on the main menu's background (D-067). Before, **0.6.89**: the settings window 720 by 625 inside (D-066). Before, **0.6.88**: Settings: General, Security, Vaults, Categories, Tags, Templates, Keyboard shortcuts (D-066). Before,
@@ -44,9 +44,9 @@ versions. "Use the Esc key to exit the program" in Settings > General (D-048).
 
 ## Next task
 
-Google Drive storage, version 0.8.115 (D-080): `GoogleDriveStorage` derived from the cloud storage base, sign-in with
-Qt Network Authorization and the `drive.file` permission. Also open: Chrono Mail's dialog details the owner showed (every field
-shown, Found, orange outlines, a table look, line icons, a split icon that keeps both values), to be asked.
+The owner tests Google Drive with his own Google account (he signs in himself). Then pCloud (`ROADMAP.md` step 15).
+Also open: Chrono Mail's dialog details the owner showed (every field shown, Found, orange outlines, a table look,
+line icons, a split icon that keeps both values), to be asked.
 
 ## Open questions
 

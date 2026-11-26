@@ -21,9 +21,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultBox.qml 0.7.108
+// VaultBox.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: The places picture and name of any storage (D-080)
 // v0.7.108: The primary's crown in the list and the field (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)

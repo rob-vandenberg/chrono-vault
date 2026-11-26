@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.7.108
+// WelcomePage.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: The Google Drive window; a new vault created on Google Drive (D-080)
 // v0.7.108: Open a vault lists the known vaults (D-077)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -130,6 +131,9 @@ Item {
                 }
                 else
                     openFileDialog.open()
+            } else if (storage === "googledrive") {
+                googleDriveWindow.mode = storageChoice.mode
+                googleDriveWindow.open()
             } else {
                 webDavWindow.mode = storageChoice.mode
                 webDavWindow.open()
@@ -141,6 +145,17 @@ Item {
         id: webDavWindow
         transientParent: welcomePage.overWindow || welcomePage.Window.window
         onNewVaultNamed: function(name) {
+            newVaultDialog.cloudKind = "webdav"
+            newVaultDialog.webDavName = name
+            newVaultDialog.open()
+        }
+    }
+
+    GoogleDriveWindow {
+        id: googleDriveWindow
+        transientParent: welcomePage.overWindow || welcomePage.Window.window
+        onNewVaultNamed: function(name) {
+            newVaultDialog.cloudKind = "googledrive"
             newVaultDialog.webDavName = name
             newVaultDialog.open()
         }
@@ -153,6 +168,10 @@ Item {
         function onWebDavCreateFailed(problem) {
             webDavWindow.mode = "new"
             webDavWindow.openWithProblem(problem)
+        }
+        function onGoogleDriveCreateFailed(problem) {
+            googleDriveWindow.mode = "new"
+            googleDriveWindow.openWithProblem(problem)
         }
     }
 
@@ -196,6 +215,8 @@ Item {
         property url file
         // The new vault's name on the WebDAV server, "" for a file here (D-057).
         property string webDavName: ""
+        // The storage of a vault named in its window: "webdav" or "googledrive".
+        property string cloudKind: "webdav"
         property url keyfile
         // Asked when the window opens: whether the primary vault is unlocked.
         property bool offerSave: false
@@ -219,7 +240,10 @@ Item {
             firstPassword.forceActiveFocus()
         }
         onAccepted: {
-            if (webDavName !== "")
+            if (webDavName !== "" && cloudKind === "googledrive")
+                VaultController.createGoogleDriveVault(webDavName, firstPassword.text, secondPassword.text,
+                                                       useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
+            else if (webDavName !== "")
                 VaultController.createWebDavVault(webDavName, firstPassword.text, secondPassword.text,
                                                   useKeyfile.checked ? keyfile : "", offerSave && saveInPrimary.checked)
             else

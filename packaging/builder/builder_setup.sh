@@ -6,9 +6,10 @@
 # Copyright (C) 2026 Rob Vandenberg
 #
 # --- Version ------------------------------------------------------------
-# builder_setup.sh 0.0.4
+# builder_setup.sh 0.8.115
 #
 # --- Version history ----------------------------------------------------
+# v0.8.115: Qt Network Authorization, for Google Drive (D-080)
 # v0.0.4: Initial release, modelled on Chrono Viewer's
 #
 # Runs once, while the builder image is made (packaging/builder/Containerfile). It puts into Ubuntu 22.04 what a
@@ -48,9 +49,10 @@ python3 -m venv /opt/tools
 export PATH="/opt/tools/bin:$PATH"
 
 # 3. Qt; its base brings Qt's own SVG, QML and Quick, the translation tools and Wayland.
-aqt install-qt linux desktop "$QT_VERSION" linux_gcc_64 --outputdir /opt/qt
+# Qt Network Authorization too, for the Google sign-in of Google Drive (D-080).
+aqt install-qt linux desktop "$QT_VERSION" linux_gcc_64 -m qtnetworkauth --outputdir /opt/qt
 QT="/opt/qt/$QT_VERSION/gcc_64"
-for library in Core Gui Widgets Svg Qml Quick QuickControls2; do
+for library in Core Gui Widgets Svg Qml Quick QuickControls2 NetworkAuth; do
     test -f "$QT/lib/libQt6$library.so.6" || { echo "Qt's $library is missing from the install." >&2; exit 1; }
 done
 

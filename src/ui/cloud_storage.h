@@ -32,9 +32,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// cloud_storage.h 0.8.114
+// cloud_storage.h 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Superseded; Google Drive in the list of storages (D-080)
 // v0.8.114: Initial release: the base of every cloud storage, and where a vault is kept (D-080)
 
 namespace chrono_vault {
@@ -53,6 +54,7 @@ enum class CloudError {
     TooLarge,       // larger than a vault may be (OR-4)
     Damaged,        // an answer that cannot be understood
     Server,         // any other refusal of the storage
+    Superseded,     // another device's version came in at the same moment: put back, merged in a new round
 };
 
 // The answer to one request. Nothing in it is trusted beyond its checks.

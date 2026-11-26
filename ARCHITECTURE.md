@@ -7,8 +7,8 @@ decided is marked as a proposal.
 
 1. C++20, Qt 6, CMake (D-002).
 2. The windows in Qt Quick (QML), one design for all five platforms (D-003).
-3. Four kinds of storage, built in this order: a local vault file, WebDAV, pCloud, Google Drive; the technique for
-   each is decided when development reaches it (D-005).
+3. The kinds of storage, built in this order: a local vault file, WebDAV, Google Drive, pCloud (the owner moved Google
+   Drive before pCloud, D-080); the technique for each is decided when development reaches it (D-005).
 4. Changes from two devices are merged; what cannot be merged goes to the person (D-005).
 5. Nothing that reads a disk, decrypts or derives a key runs on the thread that draws the window (OR-5).
 
@@ -62,9 +62,23 @@ one step on the window's thread; a failure leaves the open vault and says `switc
 
 ## 6. WebDAV storage (D-057)
 
-`src/ui/webdav_client.*` makes the WebDAV requests with Qt Network. `src/ui/webdav_sync.*` syncs one vault's working
+`src/ui/webdav_client.*` makes the WebDAV requests with Qt Network; `src/ui/webdav_storage.*` is WebDAV as a cloud
+storage (section 7), and `src/ui/webdav_sync.*` keeps where a vault is on its server. `src/ui/cloud_sync.*` syncs one vault's working
 copy (an ordinary vault file on this device) with its server: download when the tag changed, merge with
 `src/core/vault_merge.*` against the base file, upload under a temporary name, read it back, move it into place under
 a lock. Where each vault is kept is in `chrono-vault.conf` (`vaults/webdav`); the password is in the system's store
 (`src/ui/secret_store*`). The controller's part is `src/ui/vault_controller_webdav.cpp`; the windows are
 `qml/WebDavWindow.qml`, the choice in `qml/WelcomePage.qml` and Settings > Vaults in `qml/SettingsWindow.qml`.
+
+## 7. Cloud storage (D-080)
+
+`src/ui/cloud_storage.*` is the base of every storage (`CloudStorage`): sign in, list a folder, download, upload,
+delete, make a folder, a file's version tag, put an upload in place, and a lock where the storage has locks; with
+`CloudPlace`, where one vault is kept (`vaults/<kind>` in `chrono-vault.conf`, its secret in the system's store as
+`<kind>-<id>`), and `cloudKinds()`, the one list of storages this build has, which every window that names a storage
+reads. `CloudSync` (`src/ui/cloud_sync.*`) is the one sync for all of them. Each storage is a class of its own:
+`WebDavStorage` (`src/ui/webdav_storage.*`) and `GoogleDriveStorage` (`src/ui/google_drive_storage.*`, with
+`GoogleSignIn`, the browser sign-in with Qt Network Authorization). Google Drive is in a build only when the build was
+given the program's Google client (`CHRONO_VAULT_GOOGLE_CLIENT_ID` and `_SECRET`, written into the build folder's
+`google_drive_client.h`, never into git). The controller's Google Drive part is `src/ui/vault_controller_googledrive.cpp`;
+its window `qml/GoogleDriveWindow.qml`, with the same file dialog as WebDAV (`qml/WebDavFileDialog.qml`).

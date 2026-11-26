@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.6.92
+# tests/integration/CMakeLists.txt 0.8.115
 
 # --- Version history ----------------------------------------------------
+# v0.8.115: test_google_drive and its interruptions (D-080)
 # v0.6.100: test_vault_rows (D-071)
 # v0.6.92: test_exact_scaling (D-069)
 # v0.6.91: test_dialog_keys (D-068)
@@ -236,6 +237,20 @@ target_link_libraries(test_webdav_windows PRIVATE
     chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Network Qt6::Test)
 chrono_vault_strict_warnings(test_webdav_windows)
 chrono_vault_add_test(test_webdav_windows)
+
+# A vault on Google Drive, against a Drive of our own (D-080).
+qt_add_executable(test_google_drive test_google_drive.cpp ../google_drive_test_server.cpp ../google_drive_test_server.h)
+target_include_directories(test_google_drive PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_google_drive PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::NetworkAuth Qt6::Test)
+chrono_vault_strict_warnings(test_google_drive)
+chrono_vault_add_test(test_google_drive)
+
+qt_add_executable(test_google_drive_interruptions test_google_drive.cpp ../google_drive_test_server.cpp ../google_drive_test_server.h)
+target_compile_definitions(test_google_drive_interruptions PRIVATE CHRONO_VAULT_DRIVE_INTERRUPTIONS)
+target_include_directories(test_google_drive_interruptions PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_google_drive_interruptions PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::NetworkAuth Qt6::Test)
+chrono_vault_strict_warnings(test_google_drive_interruptions)
+chrono_vault_add_test(test_google_drive_interruptions)
 
 # The vault menu: Lock, Move… and Forget… (D-060).
 qt_add_executable(test_vault_menu test_vault_menu.cpp ../webdav_test_server.cpp ../webdav_test_server.h)

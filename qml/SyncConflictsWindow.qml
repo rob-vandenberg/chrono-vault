@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.6.103
+// SyncConflictsWindow.qml 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: The places picture of the vault's own storage (D-080)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)

@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.8.114
+// vault_controller_webdav.cpp 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: Create and open shared by every storage; a Google sign-in renewed in the browser (D-080)
 // v0.8.114: The sync of a vault in any cloud storage, CloudSync; vaultPlace names the storage (D-080)
 // v0.5.81: Retry sync answered by the sync it asked for (D-061)
 // v0.5.75: Disconnect deletes nothing; moving to a server is the vault menu's Move (D-060)
@@ -94,6 +95,7 @@ QString VaultController::connectProblem(const WebDavReply& answer)
     case WebDavError::Changed:
     case WebDavError::Locked:
     case WebDavError::Server:
+    case WebDavError::Superseded:
         break;
     }
     if (answer.status >= 300 && answer.status < 400) {
@@ -123,6 +125,12 @@ void VaultController::startWebDav()
     QPointer<VaultController> self(this);
     withCloudSecret(*place, [self, session, place = *place](std::optional<QString> password) {
         if (!self || session != self->vaultSession || self->currentState != State::Unlocked) {
+            return;
+        }
+        if (!password && place.kind != QLatin1String("webdav")) {
+            // No sign-in on this device for it: the person signs in (D-080).
+            self->signInNeeded = true;
+            emit self->syncChanged();
             return;
         }
         if (!password) {
@@ -220,9 +228,11 @@ void VaultController::stopWebDav()
         syncer->disconnect(this);
         syncer.release()->deleteLater();
     }
-    const bool changed = webDavWaiting || passwordNeeded || !syncTrouble.isEmpty() || !askedCertificate.isEmpty();
+    const bool changed =
+        webDavWaiting || passwordNeeded || signInNeeded || !syncTrouble.isEmpty() || !askedCertificate.isEmpty();
     webDavWaiting = false;
     passwordNeeded = false;
+    signInNeeded = false;
     syncTrouble.clear();
     askedCertificate.clear();
     cloudKindNow.clear();
@@ -250,15 +260,20 @@ void VaultController::syncFinished(SyncOutcome outcome, const QByteArray& certif
     if (outcome == SyncOutcome::Synced) {
         syncTrouble.clear();
     } else if (outcome != SyncOutcome::Interrupted) {
-        syncTrouble = tr("Not synchronized: %1").arg(syncOutcomeText(outcome));
+        syncTrouble = tr("Not synchronized: %1").arg(syncOutcomeText(outcome, cloudKindNow));
     }
     if (outcome == SyncOutcome::Certificate) {
         askedCertificate = certificate; // asked of the person (D-057)
     }
     if (outcome == SyncOutcome::Unauthorized && syncer) {
-        // The password kept is no longer the server's: asked again.
+        // The password kept is no longer the server's: asked again; a
+        // Google sign-in taken away is renewed in the browser (D-080).
         webDavPasswords.remove(syncer->place().id);
-        passwordNeeded = true;
+        if (syncer->place().kind == QLatin1String("webdav")) {
+            passwordNeeded = true;
+        } else {
+            signInNeeded = true;
+        }
     }
     if (outcome == SyncOutcome::OtherPassword) {
         // The server's version has another master password: this device's
@@ -282,7 +297,7 @@ void VaultController::syncFinished(SyncOutcome outcome, const QByteArray& certif
         retryWaiting = false;
         emit retried(outcome == SyncOutcome::Synced
                          ? tr("The vault was synchronized. A conflict still listed is the same there.")
-                         : tr("Not synchronized: %1").arg(syncOutcomeText(outcome)) + QLatin1Char(' ') +
+                         : tr("Not synchronized: %1").arg(syncOutcomeText(outcome, cloudKindNow)) + QLatin1Char(' ') +
                                tr("The conflict stays."),
                      outcome != SyncOutcome::Synced);
     }
@@ -364,32 +379,7 @@ void VaultController::showWebDavFolder(const WebDavAccount& account, bool connec
             return;
         }
         QStringList files;
-        QVariantList shown; // folders first, then vaults, each by name
-        QList<WebDavEntry> sorted = entries;
-        std::sort(sorted.begin(), sorted.end(), [](const WebDavEntry& one, const WebDavEntry& other) {
-            if (one.isFolder != other.isFolder) {
-                return one.isFolder;
-            }
-            return one.name.compare(other.name, Qt::CaseInsensitive) < 0;
-        });
-        for (const WebDavEntry& entry : std::as_const(sorted)) {
-            const bool vault = !entry.isFolder && entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
-                               !entry.name.contains(QLatin1String(".uploading"));
-            if (!entry.isFolder && !vault) {
-                continue;
-            }
-            if (vault) {
-                files.append(entry.name);
-            }
-            shown.append(QVariantMap{
-                {QStringLiteral("name"), entry.name},
-                {QStringLiteral("folder"), entry.isFolder},
-                {QStringLiteral("size"), entry.isFolder || entry.size < 0 ? QString() : self->sizeText(entry.size)},
-                {QStringLiteral("modified"), entry.modified.isValid()
-                                                 ? QLocale().toString(entry.modified.toLocalTime(), QLocale::ShortFormat)
-                                                 : QString()},
-            });
-        }
+        const QVariantList shown = self->shownEntries(entries, files);
         self->connection = std::move(self->browsing);
         self->connectedFiles = files;
         if (connecting) {
@@ -397,6 +387,37 @@ void VaultController::showWebDavFolder(const WebDavAccount& account, bool connec
         }
         emit self->webDavFolderShown(asking->account().folder.toDisplayString(QUrl::RemoveUserInfo), shown, files);
     });
+}
+
+QVariantList VaultController::shownEntries(const QList<CloudEntry>& entries, QStringList& files) const
+{
+    QVariantList shown; // folders first, then vaults, each by name
+    QList<CloudEntry> sorted = entries;
+    std::sort(sorted.begin(), sorted.end(), [](const CloudEntry& one, const CloudEntry& other) {
+        if (one.isFolder != other.isFolder) {
+            return one.isFolder;
+        }
+        return one.name.compare(other.name, Qt::CaseInsensitive) < 0;
+    });
+    for (const CloudEntry& entry : std::as_const(sorted)) {
+        const bool vault = !entry.isFolder && entry.name.endsWith(vaultSuffix, Qt::CaseInsensitive) &&
+                           !entry.name.contains(QLatin1String(".uploading"));
+        if (!entry.isFolder && !vault) {
+            continue;
+        }
+        if (vault) {
+            files.append(entry.name);
+        }
+        shown.append(QVariantMap{
+            {QStringLiteral("name"), entry.name},
+            {QStringLiteral("folder"), entry.isFolder},
+            {QStringLiteral("size"), entry.isFolder || entry.size < 0 ? QString() : sizeText(entry.size)},
+            {QStringLiteral("modified"), entry.modified.isValid()
+                                             ? QLocale().toString(entry.modified.toLocalTime(), QLocale::ShortFormat)
+                                             : QString()},
+        });
+    }
+    return shown;
 }
 
 void VaultController::openWebDavFolder(const QString& name)
@@ -465,8 +486,13 @@ QString VaultController::webDavNameProblem(const QString& name)
 
 QString VaultController::newWorkingCopyPath(const QString& name) const
 {
-    QDir().mkpath(webDavDataFolder());
-    const QString start = webDavDataFolder() + QLatin1Char('/') + name;
+    return newWorkingCopyPath(QStringLiteral("webdav"), name);
+}
+
+QString VaultController::newWorkingCopyPath(const QString& kind, const QString& name) const
+{
+    QDir().mkpath(cloudDataFolder(kind));
+    const QString start = cloudDataFolder(kind) + QLatin1Char('/') + name;
     QString candidate = start + vaultSuffix;
     for (int number = 2; QFileInfo::exists(candidate) || vaultList.contains(candidate); ++number) {
         candidate = start + QStringLiteral(" %1").arg(number) + vaultSuffix;
@@ -477,9 +503,27 @@ QString VaultController::newWorkingCopyPath(const QString& name) const
 void VaultController::createWebDavVault(const QString& name, const QString& password, const QString& repeated,
                                         const QUrl& keyfile, bool savePassword)
 {
+    std::optional<CloudPlace> target;
+    QString secret;
+    if (connection) {
+        WebDavPlace place;
+        place.folder = connection->account().folder;
+        place.user = connection->account().user;
+        place.trustedCertificate = connection->account().trustedCertificate;
+        target = place.toCloud();
+        secret = connection->account().password;
+    }
+    createCloudVault(target, secret, connectedFiles, name, password, repeated, keyfile, savePassword);
+}
+
+void VaultController::createCloudVault(const std::optional<CloudPlace>& target, const QString& secret,
+                                       const QStringList& files, const QString& name, const QString& password,
+                                       const QString& repeated, const QUrl& keyfile, bool savePassword)
+{
     const QString cleanName = name.trimmed();
-    if (!connection) {
-        say(tr("Connect to the WebDAV folder first."), true);
+    const bool webDav = !target || target->kind == QLatin1String("webdav");
+    if (!target) {
+        say(webDav ? tr("Connect to the WebDAV folder first.") : tr("Sign in to Google Drive first."), true);
         return;
     }
     if (const QString problem = webDavNameProblem(cleanName); !problem.isEmpty()) {
@@ -487,17 +531,14 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
         return;
     }
     const QString fileName = cleanName + vaultSuffix;
-    if (connectedFiles.contains(fileName, Qt::CaseInsensitive)) {
+    if (files.contains(fileName, Qt::CaseInsensitive)) {
         // Never over a vault already there (OR-15).
         say(tr("A vault with that name is already in that folder. Choose another name."), true);
         return;
     }
-    WebDavPlace place;
-    place.id = newWebDavId();
-    place.folder = connection->account().folder;
+    CloudPlace place = *target;
+    place.id = newCloudId();
     place.fileName = fileName;
-    place.user = connection->account().user;
-    place.trustedCertificate = connection->account().trustedCertificate;
     if (password.isEmpty()) {
         say(tr("Choose a master password."), true);
         return;
@@ -512,13 +553,13 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
     }
     // The new vault is made here, put on the server, and only then kept:
     // a first upload that fails leaves nothing behind (the owner, 0.3.62).
-    const QString workingCopy = newWorkingCopyPath(cleanName);
-    const QString serverPassword = connection->account().password;
+    const QString workingCopy = newWorkingCopyPath(place.kind, cleanName);
+    const QString serverPassword = secret;
     const QString keyfileFile = keyfile.isLocalFile() ? keyfile.toLocalFile() : keyfile.toString();
     const QString savedPassword = savePassword && canSaveInPrimary() ? password : QString();
     const State before = currentState;
     setState(State::Busy);
-    say(tr("Creating the vault on the WebDAV server…"), false);
+    say(webDav ? tr("Creating the vault on the WebDAV server…") : tr("Creating the vault on Google Drive…"), false);
     QByteArray passwordBytes = password.toUtf8();
     const crypto::KdfParameters parameters = kdfParameters;
     const quint64 attempt = ++unlockAttempt;
@@ -549,13 +590,17 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
                 }
                 const auto failed = [self, workingCopy, before, place](const QString& problem) {
                     QFile::remove(workingCopy);
-                    QFile::remove(webDavBasePath(place.id));
-                    forgetWebDavPlace(workingCopy);
+                    QFile::remove(cloudBasePath(place));
+                    forgetCloudPlace(workingCopy);
                     self->setState(before == State::Unlocked ? State::Unlocked
                                    : self->path.isEmpty()    ? State::NoVault
                                                              : State::Locked);
                     self->say(problem, true);
-                    emit self->webDavCreateFailed(problem);
+                    if (place.kind == QLatin1String("webdav")) {
+                        emit self->webDavCreateFailed(problem);
+                    } else {
+                        emit self->googleDriveCreateFailed(problem);
+                    }
                 };
                 if (!fingerprint || status != SaveStatus::Saved) {
                     newKey.wipe();
@@ -564,9 +609,13 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
                                              "copy, or the disk is full."));
                     return;
                 }
-                auto* first = new CloudSync(workingCopy, place.toCloud(),
-                                            makeCloudStorage(place.toCloud(), serverPassword), newKey,
-                                            &self->savePool, self);
+                std::unique_ptr<CloudStorage> storage = makeCloudStorage(place, serverPassword);
+                if (!storage) {
+                    newKey.wipe();
+                    failed(tr("That storage is not in this version of Chrono Vault. Nothing was kept."));
+                    return;
+                }
+                auto* first = new CloudSync(workingCopy, place, std::move(storage), newKey, &self->savePool, self);
                 QObject::connect(
                     first, &CloudSync::finished, self,
                     [self, first, workingCopy, newKey, fingerprint, written, keyfileFile, before, savedPassword, place,
@@ -574,11 +623,13 @@ void VaultController::createWebDavVault(const QString& name, const QString& pass
                         first->deleteLater();
                         if (outcome != SyncOutcome::Synced) {
                             newKey.wipe();
-                            failed(tr("The vault could not be put on the WebDAV server: %1. Nothing was kept.")
-                                       .arg(syncOutcomeText(outcome)));
+                            failed((place.kind == QLatin1String("webdav")
+                                        ? tr("The vault could not be put on the WebDAV server: %1. Nothing was kept.")
+                                        : tr("The vault could not be put on Google Drive: %1. Nothing was kept."))
+                                       .arg(syncOutcomeText(outcome, place.kind)));
                             return;
                         }
-                        self->keepWebDavPassword(place, serverPassword);
+                        self->keepCloudSecret(place, serverPassword);
                         self->finishCreating(workingCopy, newKey, *fingerprint, written, keyfileFile, before,
                                              savedPassword);
                     });
@@ -597,33 +648,49 @@ void VaultController::openWebDavVault(const QString& fileName)
         emit webDavDone(false, tr("Connect to the WebDAV folder first."));
         return;
     }
+    WebDavPlace onServer;
+    onServer.folder = connection->account().folder;
+    onServer.user = connection->account().user;
+    onServer.trustedCertificate = connection->account().trustedCertificate;
+    WebDavClient* asking = connection.get();
+    QPointer<VaultController> self(this);
+    openCloudVault(
+        onServer.toCloud(), connection->account().password, fileName,
+        [self, asking](const QString& name, CloudStorage::Done done) {
+            if (self && self->connection.get() == asking) {
+                asking->get(name, {}, std::move(done));
+            }
+        },
+        [self, asking]() { return self && self->connection.get() == asking; });
+}
+
+void VaultController::openCloudVault(const CloudPlace& target, const QString& secret, const QString& fileName,
+                                     std::function<void(const QString&, CloudStorage::Done)> read,
+                                     std::function<bool()> stillAsked)
+{
     if (currentState == State::Unlocked && (dirty || savesRunning > 0)) {
         emit webDavDone(false, tr("Wait until your last change is saved, then try again."));
         return;
     }
-    WebDavClient* asking = connection.get();
     QPointer<VaultController> self(this);
-    asking->get(fileName, {}, [self, asking, fileName](const WebDavReply& answer) {
-        if (!self || self->connection.get() != asking) {
+    read(fileName, [self, target, secret, fileName, stillAsked](const CloudReply& answer) {
+        if (!self || !stillAsked()) {
             return;
         }
         if (!answer.ok()) {
-            emit self->webDavDone(false, connectProblem(answer));
+            emit self->webDavDone(false, cloudProblem(target.kind, answer));
             return;
         }
-        WebDavPlace place;
-        place.id = newWebDavId();
-        place.folder = asking->account().folder;
+        CloudPlace place = target;
+        place.id = newCloudId();
         place.fileName = fileName;
-        place.user = asking->account().user;
-        place.trustedCertificate = asking->account().trustedCertificate;
         place.tag = answer.tag;
         place.syncedStamp = answer.body.left(52);
         place.lastSynced = QDateTime::currentDateTimeUtc();
-        const QString password = asking->account().password;
+        const QString password = secret;
         const QString workingCopy =
-            self->newWorkingCopyPath(fileName.left(fileName.size() - vaultSuffix.size()));
-        const QString base = webDavBasePath(place.id);
+            self->newWorkingCopyPath(place.kind, fileName.left(fileName.size() - vaultSuffix.size()));
+        const QString base = cloudBasePath(place);
         // Written as it came, safely, on the save thread (OR-5, OR-15); only
         // a vault is ever written as one (OR-4).
         (void)QtConcurrent::run(&self->savePool, [self, data = answer.body, workingCopy, base, place, password]() {
@@ -642,8 +709,8 @@ void VaultController::openWebDavVault(const QString& fileName)
                                                         "cannot write its copy."));
                         return;
                     }
-                    rememberWebDavPlace(workingCopy, place);
-                    self->keepWebDavPassword(place, password);
+                    rememberCloudPlace(workingCopy, place);
+                    self->keepCloudSecret(place, password);
                     self->addVault(workingCopy);
                     emit self->webDavDone(true, QString());
                     self->chooseVault(QUrl::fromLocalFile(workingCopy));

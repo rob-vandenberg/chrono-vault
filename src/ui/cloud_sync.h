@@ -33,9 +33,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// cloud_sync.h 0.8.114
+// cloud_sync.h 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: syncOutcomeText names Google Drive (D-080)
 // v0.8.114: Initial release: the WebDAV sync of D-057, for any cloud storage (D-080)
 
 class QThreadPool;
@@ -121,6 +122,7 @@ private:
     QByteArray uploading;    // the bytes being put on the server
 };
 
-[[nodiscard]] QString syncOutcomeText(SyncOutcome outcome);
+// The words for an outcome; a storage other than WebDAV names itself.
+[[nodiscard]] QString syncOutcomeText(SyncOutcome outcome, const QString& kind = QStringLiteral("webdav"));
 
 } // namespace chrono_vault

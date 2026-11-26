@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.114 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.115 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.114
+# CMakeLists.txt 0.8.115
 
 # --- Version history ----------------------------------------------------
+# v0.8.115: Version 0.8.115; Qt Network Authorization and the Google client (D-080)
 # v0.8.114: Version 0.8.114 (D-080)
 # v0.7.113: Version 0.7.113
 # v0.7.112: Version 0.7.112 (D-046, D-079)
@@ -147,7 +148,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(CHRONO_VAULT_BUILD_TESTS "Build the tests (a release build leaves them out)" ON)
 option(CHRONO_VAULT_SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Widgets Svg Network Qml Quick QuickControls2 Concurrent Test LinguistTools)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Widgets Svg Network NetworkAuth Qml Quick QuickControls2 Concurrent Test LinguistTools)
+# The program's Google client for Google Drive (D-080), given by the build
+# scripts from a private file; empty means no Google Drive in this build.
+set(CHRONO_VAULT_GOOGLE_CLIENT_ID "" CACHE STRING "The Google client ID for Google Drive")
+set(CHRONO_VAULT_GOOGLE_CLIENT_SECRET "" CACHE STRING "The Google client secret for Google Drive")
 qt_standard_project_setup(REQUIRES 6.8)
 find_package(OpenSSL 3.2 REQUIRED COMPONENTS Crypto)
 if(LINUX)

@@ -33,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// cloud_sync.cpp 0.8.114
+// cloud_sync.cpp 0.8.115
 
 // --- Version history ----------------------------------------------------
+// v0.8.115: A version that came in at the same moment is merged in a new round (D-080)
 // v0.8.114: Initial release: WebDavSync of webdav_sync.cpp 0.5.78, for any cloud storage (D-080)
 
 namespace chrono_vault {
@@ -105,8 +106,24 @@ QString logPrefix(const CloudPlace& place)
 
 } // namespace
 
-QString syncOutcomeText(SyncOutcome outcome)
+QString syncOutcomeText(SyncOutcome outcome, const QString& kind)
 {
+    if (kind == QLatin1String("googledrive")) {
+        switch (outcome) {
+        case SyncOutcome::NoConnection:
+            return QCoreApplication::translate("WebDavSync", "Google Drive cannot be reached");
+        case SyncOutcome::Unauthorized:
+            return QCoreApplication::translate("WebDavSync", "the sign-in to Google Drive must be renewed");
+        case SyncOutcome::NotFound:
+            return QCoreApplication::translate("WebDavSync", "the vault's folder is not found on Google Drive");
+        case SyncOutcome::TooLarge:
+            return QCoreApplication::translate("WebDavSync", "Google Drive is full, or the vault is too large for it");
+        case SyncOutcome::Server:
+            return QCoreApplication::translate("WebDavSync", "Google Drive refused it");
+        default:
+            break;
+        }
+    }
     switch (outcome) {
     case SyncOutcome::Synced:
         return QString();
@@ -605,6 +622,12 @@ void CloudSync::moveIntoPlace(const QByteArray& lockToken)
             return;
         }
         fingerLog(logPrefix(self->where) + QStringLiteral("move: error %1, status %2").arg(static_cast<int>(answer.error)).arg(answer.status));
+        if (answer.error == CloudError::Superseded) {
+            // Another device's version came in at the same moment; the
+            // storage put it back on top, and it is merged now (D-080).
+            self->changedMeanwhile(lockToken);
+            return;
+        }
         if (!answer.ok()) {
             if (!lockToken.isEmpty()) {
                 self->client->unlock(self->where.fileName, lockToken, [](const CloudReply&) {});
@@ -671,6 +694,7 @@ void CloudSync::finishFrom(const CloudReply& answer)
         return;
     case CloudError::Changed:
     case CloudError::Locked:
+    case CloudError::Superseded:
         finish(SyncOutcome::Busy);
         return;
     case CloudError::TooLarge:
