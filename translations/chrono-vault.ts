@@ -2038,7 +2038,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+597"/>
+        <location line="+598"/>
         <source>Enter the password of the WebDAV server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2053,7 +2053,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-869"/>
+        <location line="-870"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2099,7 +2099,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+180"/>
+        <location line="+181"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2855,13 +2855,18 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+58"/>
-        <source>Select Storage</source>
+        <location filename="../qml/StorageWindow.qml" line="+59"/>
+        <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+0"/>
-        <source>Open a vault</source>
+        <source>Move a vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Create a vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2870,7 +2875,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+66"/>
+        <location line="+73"/>
         <source>Your vaults</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2896,38 +2901,19 @@
     </message>
     <message>
         <location line="+10"/>
+        <location line="+28"/>
         <source>Storage locations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="-14"/>
         <location line="+27"/>
-        <source>Select where the vault should move to:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Select where you already have or want to create your vault:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Local</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+13"/>
-        <source>Cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-32"/>
-        <location line="+39"/>
         <source>WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-45"/>
-        <location line="+32"/>
+        <location line="-33"/>
+        <location line="+27"/>
         <source>This Device</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3511,7 +3497,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+251"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+252"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4517,26 +4503,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2532"/>
+        <location line="+2538"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+494"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2528"/>
-        <location line="+2533"/>
+        <location line="-2534"/>
+        <location line="+2539"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2436"/>
-        <location line="+2400"/>
+        <location line="-2442"/>
+        <location line="+2406"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2489"/>
+        <location line="-2495"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4547,7 +4533,7 @@
     </message>
     <message>
         <location line="+37"/>
-        <location line="+124"/>
+        <location line="+130"/>
         <location line="+2119"/>
         <location line="+309"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="+327"/>
@@ -4561,7 +4547,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2497"/>
+        <location line="-2503"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-37"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -4573,7 +4559,7 @@
     </message>
     <message>
         <location line="+25"/>
-        <location line="+2368"/>
+        <location line="+2374"/>
         <source>%1 vault</source>
         <translation type="unfinished"></translation>
     </message>

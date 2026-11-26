@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.7.107
+// vault_controller.cpp 0.7.109
 
 // --- Version history ----------------------------------------------------
+// v0.7.109: A Closed vault picked in the file picker opens at once
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -894,7 +895,13 @@ bool VaultController::canCreateAt(const QUrl& file)
 void VaultController::chooseVault(const QUrl& file)
 {
     const QString chosen = file.isLocalFile() ? file.toLocalFile() : file.toString();
-    if (chosen.isEmpty()) {
+    if (chosen.isEmpty() || (chosen == path && currentState == State::Unlocked)) {
+        return;
+    }
+    // A vault that opens without a password opens at once, as one picked from
+    // a list (the owner, 0.7.109).
+    if (vaultList.contains(chosen) && opensAtOnce(chosen)) {
+        switchToVault(chosen);
         return;
     }
     if (currentState == State::Unlocked && (dirty || savesRunning > 0)) {

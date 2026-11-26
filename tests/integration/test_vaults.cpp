@@ -26,9 +26,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vaults.cpp 0.6.106
+// test_vaults.cpp 0.7.109
 
 // --- Version history ----------------------------------------------------
+// v0.7.109: A Closed vault picked as a file opens at once
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.3.64: A lock keeps the vault used last; its own password opens it (D-058)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
@@ -73,6 +74,7 @@ private slots:
     void a_password_that_cannot_be_removed_leaves_the_vault_closed();
     void a_start_and_a_missing_primary_show_the_right_vault();
     void a_password_typed_on_the_start_up_page_is_remembered();
+    void a_closed_vault_picked_as_a_file_opens_at_once();
     void a_vault_whose_password_is_not_saved_asks_for_it();
     void the_one_vault_of_an_older_version_becomes_the_primary();
     void a_vault_with_a_keyfile_needs_it_and_remembers_it();
@@ -384,6 +386,27 @@ void TestVaults::a_password_typed_on_the_start_up_page_is_remembered()
     vaults->unlock(QStringLiteral("home pass"));
     QTRY_COMPARE(vaults->state(), State::Unlocked);
     QCOMPARE(vaults->vaultPath(), file("Work"));
+}
+
+void TestVaults::a_closed_vault_picked_as_a_file_opens_at_once()
+{
+    auto vaults = controller();
+    create(*vaults, QStringLiteral("Home"), QStringLiteral("home pass"));
+    create(*vaults, QStringLiteral("Work"), QStringLiteral("work pass"), {}, true);
+    create(*vaults, QStringLiteral("Own"), QStringLiteral("own pass"));
+    vaults->switchToVault(file("Home"));
+    QTRY_COMPARE(vaults->state(), State::Unlocked);
+    // The open one: nothing changes.
+    vaults->chooseVault(QUrl::fromLocalFile(file("Home")));
+    QCOMPARE(vaults->state(), State::Unlocked);
+    QCOMPARE(vaults->vaultPath(), file("Home"));
+    // A Closed one: open at once, without the start-up page.
+    vaults->chooseVault(QUrl::fromLocalFile(file("Work")));
+    QTRY_VERIFY(vaults->vaultPath() == file("Work") && vaults->state() == State::Unlocked);
+    // One whose password is not kept: asked.
+    vaults->chooseVault(QUrl::fromLocalFile(file("Own")));
+    QCOMPARE(vaults->state(), State::Locked);
+    QCOMPARE(vaults->vaultPath(), file("Own"));
 }
 
 void TestVaults::a_vault_whose_password_is_not_saved_asks_for_it()

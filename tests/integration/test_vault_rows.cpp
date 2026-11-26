@@ -20,9 +20,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.7.108
+// test_vault_rows.cpp 0.7.109
 
 // --- Version history ----------------------------------------------------
+// v0.7.109: Create a vault in the look of Open a vault; no OK without the list
 // v0.7.108: Open a vault and its list; the crown in the start-up page's list (D-077)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -149,6 +150,15 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(box, "activated", Q_ARG(int, other)));
         QTRY_VERIFY(storage->isVisible());
         QVERIFY(!list->isVisible());
+        QVERIFY(!ok->isVisible()); // no list: no OK, only Cancel
+        QMetaObject::invokeMethod(storage, "reject");
+        QTRY_VERIFY(!storage->isVisible());
+        // Creating: the same look, its own title (0.7.109).
+        QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
+        QTRY_VERIFY(storage->isVisible());
+        QCOMPARE(storage->title(), QStringLiteral("Create a vault"));
+        QVERIFY(seen(storage->contentItem(), QStringLiteral("deviceTile"))->isVisible());
+        QVERIFY(!ok->isVisible());
         QMetaObject::invokeMethod(storage, "reject");
         QTRY_VERIFY(!storage->isVisible());
     }

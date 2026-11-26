@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.7.108
+// StorageWindow.qml 0.7.109
 
 // --- Version history ----------------------------------------------------
+// v0.7.109: Create a vault and Move a vault in the look of Open a vault
 // v0.7.108: Opening: "Open a vault", your vaults on top, the storage locations in one row (D-077)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
@@ -55,7 +56,7 @@ DialogWindow {
     signal chosen(string storage) // "webdav" or "device"
     signal vaultChosen(string vaultFile)
 
-    title: opening ? qsTr("Open a vault") : qsTr("Select Storage")
+    title: opening ? qsTr("Open a vault") : mode === "move" ? qsTr("Move a vault") : qsTr("Create a vault")
     standardButtons: Dialog.Cancel
     rightButtons: Button {
         objectName: "openChosenButton"
@@ -258,15 +259,10 @@ DialogWindow {
         gap: 10 * Appearance.factor
         Layout.preferredWidth: 420 * Appearance.factor
 
+        // As Open a vault: one row of storage locations (the owner, 0.7.109).
         Label {
-            text: storageWindow.mode === "move" ? qsTr("Select where the vault should move to:")
-                                                : qsTr("Select where you already have or want to create your vault:")
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-        }
-        Label {
-            text: qsTr("Local")
-            font.bold: true
+            text: qsTr("Storage locations")
+            font.pointSize: Appearance.fontPointSize * 1.3
         }
         ExactRow {
             gap: 8 * Appearance.factor
@@ -276,13 +272,6 @@ DialogWindow {
                 iconSource: "qrc:/icons/storage-device.svg"
                 onClicked: storageWindow.choose("device")
             }
-        }
-        Label {
-            text: qsTr("Cloud")
-            font.bold: true
-        }
-        ExactRow {
-            gap: 8 * Appearance.factor
             Tile {
                 objectName: "webDavTile"
                 text: qsTr("WebDAV")

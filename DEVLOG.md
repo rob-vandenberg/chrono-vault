@@ -843,3 +843,9 @@ anew, `test_quick_unlock`.
 
 The owner's changelist items 1-13 (D-077). `qml/StorageWindow.qml`, `qml/WelcomePage.qml`, `qml/Main.qml`,
 `qml/VaultBox.qml`; `test_vault_rows`.
+
+## 26 November 2026: version 0.7.109: a Closed vault picked as a file opens at once
+
+The owner's changelist items 1-8. `VaultController::chooseVault` opened every vault picked in the file picker on the
+start-up page, also one that needs no password; now it opens it at once. Create a vault and Move a vault in the look of
+Open a vault (`qml/StorageWindow.qml`). Item 8 was no fault (a cropped screenshot); its check stays in `test_vault_rows`.
