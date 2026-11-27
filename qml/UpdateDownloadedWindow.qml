@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdateDownloadedWindow.qml 0.7.111
+// UpdateDownloadedWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The one width of every dialog (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
@@ -48,7 +49,6 @@ DialogWindow {
               .arg(Updater.newVersion)
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: 420 * Appearance.factor
         Layout.fillWidth: true
     }
     Label {

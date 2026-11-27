@@ -17,6 +17,8 @@
 
 
 #include "app_setup.h"
+#include "google_drive_storage.h"
+#include "google_drive_test_server.h"
 #include "settings_files.h"
 #include "vault_controller.h"
 #include "webdav_sync.h"
@@ -24,18 +26,22 @@
 
 #include <QDir>
 #include <QMutex>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QStandardPaths>
 #include <QtQml/QQmlExtensionPlugin>
+#include <QUrlQuery>
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.8.119
+// test_webdav_windows.cpp 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Create and Move fit their tiles, Open keeps its size; WebDAV and Google Drive straight to the file dialog; Disconnect in paragraphs (D-082)
 // v0.8.119: The Disconnect dialog names the storage and the vault (D-060)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.88: The settings' topics in their new order (D-066)
@@ -102,6 +108,20 @@ QQuickItem* inWindow(QObject* window, const QString& name)
     return quick ? visualItem(quick->contentItem(), name) : nullptr;
 }
 
+// Google's page in the browser, answered at once with a sign-in.
+void signInInBrowser(const QUrl& address)
+{
+    static QNetworkAccessManager browser;
+    const QUrlQuery asked(address);
+    QUrl back(asked.queryItemValue(QStringLiteral("redirect_uri"), QUrl::FullyDecoded));
+    QUrlQuery answer;
+    answer.addQueryItem(QStringLiteral("code"), QStringLiteral("the-code"));
+    answer.addQueryItem(QStringLiteral("state"), asked.queryItemValue(QStringLiteral("state"), QUrl::FullyDecoded));
+    back.setQuery(answer);
+    QNetworkReply* reply = browser.get(QNetworkRequest(back));
+    QObject::connect(reply, &QNetworkReply::finished, reply, &QObject::deleteLater);
+}
+
 void click(QObject* button)
 {
     QVERIFY(button);
@@ -136,7 +156,113 @@ private slots:
     }
 
     void a_new_vault_on_a_webdav_server_through_the_windows();
+    void create_and_move_fit_their_tiles_and_open_keeps_its_size();
+    void google_drive_opens_its_file_dialog_once_signed_in();
 };
+
+// Signed in: Google Drive's file dialog opens by itself, the only window
+// seen; Cancel there ends it all, a name goes on to the master password (D-082).
+void TestWebDavWindows::google_drive_opens_its_file_dialog_once_signed_in()
+{
+    GoogleDriveTestServer server;
+    const QUrl base = server.base();
+    setGoogleForTests({base.resolved(QUrl(QStringLiteral("auth"))), base.resolved(QUrl(QStringLiteral("token"))),
+                       base.resolved(QUrl(QStringLiteral("drive/v3/"))), base.resolved(QUrl(QStringLiteral("upload/drive/v3/")))},
+                      QStringLiteral("test-client"), QStringLiteral("test-secret"));
+    const auto done = qScopeGuard([]() { setGoogleForTests({}, QString(), QString()); });
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QCOMPARE(engine.rootObjects().size(), 1);
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->setSecretStoreForTests(std::make_unique<MemoryStore>());
+    controller->setGoogleBrowserForTests(signInInBrowser);
+    QObject* choice = window->findChild<QObject*>(QStringLiteral("storageWindow"));
+    QObject* drive = window->findChild<QObject*>(QStringLiteral("googleDriveWindow"));
+    QVERIFY(choice && drive);
+    QObject* files = drive->findChild<QObject*>(QStringLiteral("googleDriveFileDialog"));
+    QVERIFY(files);
+    for (const bool cancelled : {true, false}) {
+        QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
+        QTRY_VERIFY(choice->property("visible").toBool());
+        click(inWindow(choice, QStringLiteral("googleDriveTile")));
+        QTRY_VERIFY(drive->property("visible").toBool());
+        click(inWindow(drive, QStringLiteral("googleDriveGoButton")));
+        QTRY_VERIFY_WITH_TIMEOUT(files->property("visible").toBool(), 10000);
+        QVERIFY(!inWindow(drive, QStringLiteral("googleDriveChosenField")));
+        if (cancelled) {
+            QVERIFY(QMetaObject::invokeMethod(files, "reject"));
+            QTRY_VERIFY(!files->property("visible").toBool());
+            QTRY_VERIFY(!drive->property("visible").toBool());
+            continue;
+        }
+        inWindow(files, QStringLiteral("fileDialogNameField"))->setProperty("text", QStringLiteral("Drive"));
+        click(inWindow(files, QStringLiteral("fileDialogChooseButton")));
+        QTRY_VERIFY(!files->property("visible").toBool());
+        QObject* masterPassword = window->findChild<QObject*>(QStringLiteral("newVaultDialog"));
+        QTRY_VERIFY(masterPassword->property("visible").toBool());
+        QCOMPARE(masterPassword->property("webDavName").toString(), QStringLiteral("Drive"));
+        QCOMPARE(masterPassword->property("cloudKind").toString(), QStringLiteral("googledrive"));
+        QTRY_VERIFY(!drive->property("visible").toBool());
+        QVERIFY(QMetaObject::invokeMethod(masterPassword, "reject"));
+    }
+}
+
+// Open a vault remembers the size the person gave it; Create a vault, in the
+// same window, and Move a vault are exactly as large as their tiles (D-079).
+void TestWebDavWindows::create_and_move_fit_their_tiles_and_open_keeps_its_size()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QCOMPARE(engine.rootObjects().size(), 1);
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* choice = qobject_cast<QQuickWindow*>(window->findChild<QObject*>(QStringLiteral("storageWindow")));
+    QVERIFY(choice);
+    const auto fits = [](QQuickWindow* shown) {
+        return shown->width() == shown->minimumWidth() && shown->height() == shown->minimumHeight()
+               && shown->maximumWidth() == shown->minimumWidth() && shown->maximumHeight() == shown->minimumHeight();
+    };
+
+    // Open a vault, made large by the person.
+    QVERIFY(QMetaObject::invokeMethod(window, "openVault"));
+    QTRY_VERIFY(choice->isVisible());
+    const QSize large(choice->minimumWidth() + 200, choice->minimumHeight() + 300);
+    choice->resize(large);
+    QTRY_COMPARE(choice->size(), large);
+    QVERIFY(QMetaObject::invokeMethod(choice, "reject"));
+    QTRY_VERIFY(!choice->isVisible());
+
+    // Create a vault: its tiles, no room around them.
+    QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
+    QTRY_VERIFY(choice->isVisible());
+    QTRY_VERIFY(fits(choice));
+    QVERIFY(choice->height() < large.height());
+    QVERIFY(QMetaObject::invokeMethod(choice, "reject"));
+    QTRY_VERIFY(!choice->isVisible());
+
+    // Open a vault again: the size it was given.
+    QVERIFY(QMetaObject::invokeMethod(window, "openVault"));
+    QTRY_VERIFY(choice->isVisible());
+    QTRY_COMPARE(choice->size(), large);
+    QVERIFY(QMetaObject::invokeMethod(choice, "reject"));
+    QTRY_VERIFY(!choice->isVisible());
+
+    // Move a vault, from Settings > Vaults: its tiles too.
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    auto* move = qobject_cast<QQuickWindow*>(settings->findChild<QObject*>(QStringLiteral("moveStorageWindow")));
+    QVERIFY(move);
+    QVERIFY(QMetaObject::invokeMethod(move, "open"));
+    QTRY_VERIFY(move->isVisible());
+    QTRY_VERIFY(fits(move));
+    QVERIFY(QMetaObject::invokeMethod(move, "reject"));
+    QTRY_VERIFY(!move->isVisible());
+    click(settings->findChild<QObject*>(QStringLiteral("cancelButton")));
+}
 
 void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
 {
@@ -197,18 +323,16 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
              WebDavTestServer::certificateFingerprint());
     click(inWindow(webDav, QStringLiteral("trustCertificateButton")));
     QTRY_VERIFY_WITH_TIMEOUT(webDav->property("connected").toBool(), 10000);
-    QCOMPARE(goButton->property("text").toString(), QStringLiteral("Next…"));
-    QVERIFY(!goButton->isEnabled());
+    // Connected: the WebDAV file dialog opens by itself, the only window seen
+    // (the owner, D-082): a new folder, shown at once, Back, Up.
+    QObject* files = webDav->findChild<QObject*>(QStringLiteral("webDavFileDialog"));
+    QVERIFY(files);
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("visible").toBool(), 10000);
+    QCOMPARE(goButton->property("text").toString(), QStringLiteral("Browse…"));
+    QVERIFY(!inWindow(webDav, QStringLiteral("webDavChosenField")));
     // As tall as its content, whatever height it had.
     auto* webDavWindow = qobject_cast<QQuickWindow*>(webDav);
     QCOMPARE(webDavWindow->height(), webDavWindow->minimumHeight());
-
-    // Browse… opens the WebDAV file dialog: a new folder, shown at once,
-    // Back, Up, then the name and Save.
-    click(inWindow(webDav, QStringLiteral("webDavBrowseButton")));
-    QObject* files = webDav->findChild<QObject*>(QStringLiteral("webDavFileDialog"));
-    QVERIFY(files);
-    QTRY_VERIFY(files->property("visible").toBool());
     click(inWindow(files, QStringLiteral("fileDialogNewFolderButton")));
     inWindow(files, QStringLiteral("fileDialogFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
     click(inWindow(files, QStringLiteral("fileDialogCreateFolderButton")));
@@ -217,36 +341,37 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     click(inWindow(files, QStringLiteral("fileDialogBackButton")));
     QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString() == files->property("serverRoot").toString(), 10000);
     QVERIFY(!inWindow(files, QStringLiteral("fileDialogUpButton"))->isEnabled());
-    QVERIFY(QMetaObject::invokeMethod(files, "go", Q_ARG(QVariant, QStringLiteral("Work vaults")), Q_ARG(QVariant, true)));
-    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
-    inWindow(files, QStringLiteral("fileDialogNameField"))->setProperty("text", QStringLiteral("Home"));
-    click(inWindow(files, QStringLiteral("fileDialogChooseButton")));
-    QTRY_VERIFY(!files->property("visible").toBool());
-    QVERIFY(inWindow(webDav, QStringLiteral("webDavChosenField"))->property("text").toString().endsWith(
-        QStringLiteral("/Work vaults/Home.chronovault")));
-    QVERIFY(goButton->isEnabled());
-
-    // Browse… again, Up, a folder the server refuses: Back gains no step for
-    // the folder that was not made. Cancel keeps the choice, and Next… stays
-    // enabled.
-    click(inWindow(webDav, QStringLiteral("webDavBrowseButton")));
-    QTRY_VERIFY(files->property("visible").toBool());
-    click(inWindow(files, QStringLiteral("fileDialogUpButton")));
-    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString() == files->property("serverRoot").toString(), 10000);
+    // A folder the server refuses: Back gains no step for the folder that
+    // was not made.
     const qsizetype steps = files->property("history").toList().size();
     click(inWindow(files, QStringLiteral("fileDialogNewFolderButton")));
     inWindow(files, QStringLiteral("fileDialogFolderNameField"))->setProperty("text", QStringLiteral("Work vaults"));
     click(inWindow(files, QStringLiteral("fileDialogCreateFolderButton")));
     QTRY_VERIFY_WITH_TIMEOUT(!files->property("problem").toString().isEmpty(), 10000);
     QCOMPARE(files->property("history").toList().size(), steps);
+    // Cancel in the file dialog ends it all (the owner, D-082).
     QVERIFY(QMetaObject::invokeMethod(files, "reject"));
     QTRY_VERIFY(!files->property("visible").toBool());
-    QTRY_VERIFY_WITH_TIMEOUT(goButton->isEnabled(), 10000);
-    QVERIFY(inWindow(webDav, QStringLiteral("webDavChosenField"))->property("text").toString().endsWith(
-        QStringLiteral("/Work vaults/Home.chronovault")));
+    QTRY_VERIFY(!webDav->property("visible").toBool());
 
-    // Next…, then the master password, as for a file here.
+    // Again: the vault named in the file dialog goes on at once to its master
+    // password, as for a file here.
+    QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
+    QTRY_VERIFY(choice->property("visible").toBool());
+    click(inWindow(choice, QStringLiteral("webDavTile")));
+    QTRY_VERIFY(webDav->property("visible").toBool());
+    address->setProperty("text", server.folder().toString());
+    inWindow(webDav, QStringLiteral("webDavUserField"))->setProperty("text", server.user);
+    inWindow(webDav, QStringLiteral("webDavPasswordField"))->setProperty("text", server.password);
     click(goButton);
+    QTRY_VERIFY_WITH_TIMEOUT(!webDav->property("certificate").toString().isEmpty(), 10000);
+    click(inWindow(webDav, QStringLiteral("trustCertificateButton")));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("visible").toBool(), 10000);
+    QVERIFY(QMetaObject::invokeMethod(files, "go", Q_ARG(QVariant, QStringLiteral("Work vaults")), Q_ARG(QVariant, true)));
+    QTRY_VERIFY_WITH_TIMEOUT(files->property("folderShown").toString().endsWith(QStringLiteral("/Work vaults/")), 10000);
+    inWindow(files, QStringLiteral("fileDialogNameField"))->setProperty("text", QStringLiteral("Home"));
+    click(inWindow(files, QStringLiteral("fileDialogChooseButton")));
+    QTRY_VERIFY(!files->property("visible").toBool());
     QObject* masterPassword = window->findChild<QObject*>(QStringLiteral("newVaultDialog"));
     QVERIFY(masterPassword);
     QTRY_VERIFY(masterPassword->property("visible").toBool());
@@ -322,7 +447,9 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     const QString said = inWindow(disconnectWindow, QStringLiteral("dialogText"))->property("text").toString();
     QVERIFY2(said.contains(QStringLiteral("stored in a remote location, like WebDAV, so you")), qPrintable(said));
     QVERIFY2(said.contains(QStringLiteral("nothing is deleted")), qPrintable(said));
-    QVERIFY2(said.endsWith(QStringLiteral("This action cannot be undone. Are you sure you want to disconnect from “Home”?")),
+    // Three paragraphs, the last one the question (D-082).
+    QCOMPARE(said.count(QStringLiteral("<p ")), 3);
+    QVERIFY2(said.endsWith(QStringLiteral("This action cannot be undone. Are you sure you want to disconnect from “Home”?</p>")),
              qPrintable(said));
     click(inWindow(disconnectWindow, QStringLiteral("disconnectButton")));
     QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);

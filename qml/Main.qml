@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.8.119
+// Main.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The questions in the one width (D-082)
 // v0.8.119: The title is Chrono Vault and its version only (D-017); the top bar's two spaces alike (D-074); a copy or the website opened is a use (D-081)
 // v0.8.115: Sync Now for any storage; the Google sign-in renewed (D-080)
 // v0.7.113: The lock button shows the solid padlock; lock and gear pictures 24 by 24
@@ -1061,7 +1062,6 @@ ApplicationWindow {
                       ? qsTr("Your last change could not be saved. If you quit now, it is lost. The vault on disk is unchanged.")
                       : qsTr("This vault holds a change that could not be saved yet; unlocking it saves it. If you quit now, it is lost.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 380 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -1216,7 +1216,7 @@ ApplicationWindow {
         onRejected: VaultController.trustCertificate(false)
         ExactColumn {
             gap: 8 * Appearance.factor
-            Layout.preferredWidth: 420 * Appearance.factor
+            Layout.fillWidth: true
             Label {
                 text: qsTr("The WebDAV server's certificate is not trusted by this system. Trust it only when it is your server's. Its SHA-256 fingerprint:")
                 wrapMode: Text.Wrap
@@ -1259,7 +1259,7 @@ ApplicationWindow {
         Label {
             text: qsTr("“%1” is kept on Google Drive, and Chrono Vault must sign in to Google again to synchronize it. Sign in with Google opens your web browser.").arg(VaultController.vaultName)
             wrapMode: Text.Wrap
-            Layout.preferredWidth: 420 * Appearance.factor
+            Layout.fillWidth: true
         }
     }
 

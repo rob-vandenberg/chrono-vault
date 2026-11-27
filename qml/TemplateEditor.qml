@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplateEditor.qml 0.6.100
+// TemplateEditor.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
@@ -34,6 +35,8 @@ import QtQuick.Layouts
 DialogWindow {
     id: templateEditor
     memoryName: "templateEditor"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
     title: templateId === "" ? qsTr("New template") : qsTr("Edit template")
     standardButtons: Dialog.Save | Dialog.Cancel
 

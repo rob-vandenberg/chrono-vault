@@ -22,9 +22,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.8.118
+// test_vault_rows.cpp 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The unlock question 440 wide; opened and locked in its row in the second binary (D-082, OR-11)
 // v0.8.118: A double click on a row opens the vault
 // v0.8.117: A cloud vault's row shows its account, in Settings and Open a vault
 // v0.7.110: An outdated kept password keeps the vault shown open (D-078)
@@ -152,6 +153,91 @@ private slots:
         settings()->close();
     }
 
+    void a_vault_is_opened_and_locked_in_its_row()
+    {
+        const QString first = QStringLiteral("a_vault_is_opened_and_locked_in_its_row");
+        controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("second.chronovault"))),
+                                QStringLiteral("two"), QStringLiteral("two"));
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        QTRY_VERIFY(controller->isIdle());
+        const QString second = QStringLiteral("second");
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QTRY_VERIFY(settings()->isExposed());
+        settings()->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
+        QTRY_VERIFY(there(QStringLiteral("padlock_") + first) && there(QStringLiteral("padlock_") + second));
+        QVERIFY(opened(second) && !opened(first));
+        QVERIFY(entry(QStringLiteral("openVault_"), first));
+
+        // A round button of 32 by 32; a right click on the row opens its menu.
+        QQuickItem* dots = there(QStringLiteral("vaultMenuButton_") + first);
+        QVERIFY(dots);
+        QCOMPARE(dots->width(), 32.0);
+        QCOMPARE(dots->height(), 32.0);
+        QObject* menu = entry(QString(), first);
+        QQuickItem* lock = there(QStringLiteral("padlock_") + first);
+        settings()->grabWindow(); // laid out
+        QTest::mouseClick(settings(), Qt::RightButton, {}, lock->mapToScene(QPointF(40, 8)).toPoint());
+        QTRY_VERIFY(menu->property("opened").toBool());
+        QVERIFY(entry(QStringLiteral("openVault_"), first)->property("height").toDouble() > 0);
+        // The primary is Closed: Open and Lock, no Close (D-075).
+        QVERIFY(entry(QStringLiteral("lockVault_"), first)->property("height").toDouble() > 0);
+        QCOMPARE(entry(QStringLiteral("closeVault_"), first)->property("height").toDouble(), 0.0);
+        QMetaObject::invokeMethod(menu, "close");
+        QTRY_VERIFY(!menu->property("visible").toBool());
+        // The open vault's has Lock.
+        click(there(QStringLiteral("vaultMenuButton_") + second));
+        QTRY_VERIFY(entry(QString(), second)->property("opened").toBool());
+        QVERIFY(entry(QStringLiteral("lockVault_"), second)->property("height").toDouble() > 0);
+        QCOMPARE(entry(QStringLiteral("openVault_"), second)->property("height").toDouble(), 0.0);
+        QCOMPARE(entry(QStringLiteral("closeVault_"), second)->property("height").toDouble(), 0.0);
+        QMetaObject::invokeMethod(entry(QString(), second), "close");
+        QTRY_VERIFY(!entry(QString(), second)->property("visible").toBool());
+
+        // The primary, its key kept from this session, opens at once.
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), first), "triggered"));
+        QTRY_VERIFY(opened(first));
+        QVERIFY(!opened(second));
+        // Close: the start-up page with Open in the field's place, no tick box
+        // for the primary; then Lock, from the same menu: the field again.
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first) && !opened(second));
+        QTRY_VERIFY(part("openClosedButton") && part("openClosedButton")->isVisible());
+        QVERIFY(!part("masterPasswordField") || !part("masterPasswordField")->isVisible());
+        QVERIFY(window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
+        QVERIFY(QMetaObject::invokeMethod(part("openClosedButton"), "clicked"));
+        QTRY_VERIFY(opened(first));
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first));
+        // A Locked vault picked while the key store is open has the tick box.
+        controller->switchToVault(controller->vaults().constLast());
+        QTRY_VERIFY(part("unlockRemember") && part("unlockRemember")->isVisible());
+        controller->switchToVault(controller->primaryVault());
+        QTRY_VERIFY(opened(first));
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first));
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("lockVault_"), first), "triggered"));
+        QTRY_VERIFY(!opened(first) && !opened(second));
+        QTRY_VERIFY(part("masterPasswordField") && part("masterPasswordField")->isVisible());
+        QVERIFY(!window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
+        // Open asks the master password; a wrong one is said, the right one opens it.
+        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), second), "triggered"));
+        QQuickWindow* ask = settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"));
+        QTRY_VERIFY(ask->isVisible());
+        QObject* password = ask->findChild<QObject*>(QStringLiteral("askField"));
+        password->setProperty("text", QStringLiteral("wrong"));
+        QMetaObject::invokeMethod(ask, "go");
+        QTRY_VERIFY(!ask->property("said").toString().isEmpty());
+        QVERIFY(ask->isVisible() && !opened(second));
+        // In the design of every dialog (D-082), its list with every vault.
+        QCOMPARE(ask->width(), 440);
+        QVERIFY(ask->findChild<QObject*>(QStringLiteral("askVaultBox"))->property("isList").toBool());
+        password->setProperty("text", QStringLiteral("two"));
+        QMetaObject::invokeMethod(ask, "go");
+        QTRY_VERIFY(!ask->isVisible());
+        QTRY_VERIFY(opened(second));
+        QVERIFY(!opened(first));
+        QMetaObject::invokeMethod(settings(), "close");
+    }
 #else
     // Open a vault: your vaults on top, the storage locations below; the crown in
     // the start-up page's list (D-077).
@@ -437,91 +523,6 @@ private slots:
         QMetaObject::invokeMethod(settings(), "close");
     }
 
-    void a_vault_is_opened_and_locked_in_its_row()
-    {
-        const QString first = QStringLiteral("a_vault_is_opened_and_locked_in_its_row");
-        controller->createVault(QUrl::fromLocalFile(folder.filePath(QStringLiteral("second.chronovault"))),
-                                QStringLiteral("two"), QStringLiteral("two"));
-        QTRY_COMPARE(controller->state(), State::Unlocked);
-        QTRY_VERIFY(controller->isIdle());
-        const QString second = QStringLiteral("second");
-        QMetaObject::invokeMethod(settings(), "showWindow");
-        QTRY_VERIFY(settings()->isExposed());
-        settings()->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
-        QTRY_VERIFY(there(QStringLiteral("padlock_") + first) && there(QStringLiteral("padlock_") + second));
-        QVERIFY(opened(second) && !opened(first));
-        QVERIFY(entry(QStringLiteral("openVault_"), first));
-
-        // A round button of 32 by 32; a right click on the row opens its menu.
-        QQuickItem* dots = there(QStringLiteral("vaultMenuButton_") + first);
-        QVERIFY(dots);
-        QCOMPARE(dots->width(), 32.0);
-        QCOMPARE(dots->height(), 32.0);
-        QObject* menu = entry(QString(), first);
-        QQuickItem* lock = there(QStringLiteral("padlock_") + first);
-        settings()->grabWindow(); // laid out
-        QTest::mouseClick(settings(), Qt::RightButton, {}, lock->mapToScene(QPointF(40, 8)).toPoint());
-        QTRY_VERIFY(menu->property("opened").toBool());
-        QVERIFY(entry(QStringLiteral("openVault_"), first)->property("height").toDouble() > 0);
-        // The primary is Closed: Open and Lock, no Close (D-075).
-        QVERIFY(entry(QStringLiteral("lockVault_"), first)->property("height").toDouble() > 0);
-        QCOMPARE(entry(QStringLiteral("closeVault_"), first)->property("height").toDouble(), 0.0);
-        QMetaObject::invokeMethod(menu, "close");
-        QTRY_VERIFY(!menu->property("visible").toBool());
-        // The open vault's has Lock.
-        click(there(QStringLiteral("vaultMenuButton_") + second));
-        QTRY_VERIFY(entry(QString(), second)->property("opened").toBool());
-        QVERIFY(entry(QStringLiteral("lockVault_"), second)->property("height").toDouble() > 0);
-        QCOMPARE(entry(QStringLiteral("openVault_"), second)->property("height").toDouble(), 0.0);
-        QCOMPARE(entry(QStringLiteral("closeVault_"), second)->property("height").toDouble(), 0.0);
-        QMetaObject::invokeMethod(entry(QString(), second), "close");
-        QTRY_VERIFY(!entry(QString(), second)->property("visible").toBool());
-
-        // The primary, its key kept from this session, opens at once.
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), first), "triggered"));
-        QTRY_VERIFY(opened(first));
-        QVERIFY(!opened(second));
-        // Close: the start-up page with Open in the field's place, no tick box
-        // for the primary; then Lock, from the same menu: the field again.
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
-        QTRY_VERIFY(!opened(first) && !opened(second));
-        QTRY_VERIFY(part("openClosedButton") && part("openClosedButton")->isVisible());
-        QVERIFY(!part("masterPasswordField") || !part("masterPasswordField")->isVisible());
-        QVERIFY(window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
-        QVERIFY(QMetaObject::invokeMethod(part("openClosedButton"), "clicked"));
-        QTRY_VERIFY(opened(first));
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
-        QTRY_VERIFY(!opened(first));
-        // A Locked vault picked while the key store is open has the tick box.
-        controller->switchToVault(controller->vaults().constLast());
-        QTRY_VERIFY(part("unlockRemember") && part("unlockRemember")->isVisible());
-        controller->switchToVault(controller->primaryVault());
-        QTRY_VERIFY(opened(first));
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("closeVault_"), first), "triggered"));
-        QTRY_VERIFY(!opened(first));
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("lockVault_"), first), "triggered"));
-        QTRY_VERIFY(!opened(first) && !opened(second));
-        QTRY_VERIFY(part("masterPasswordField") && part("masterPasswordField")->isVisible());
-        QVERIFY(!window->findChild<QObject*>(QStringLiteral("lockAction"))->property("enabled").toBool());
-        // Open asks the master password; a wrong one is said, the right one opens it.
-        QVERIFY(QMetaObject::invokeMethod(entry(QStringLiteral("openVault_"), second), "triggered"));
-        QQuickWindow* ask = settings()->findChild<QQuickWindow*>(QStringLiteral("unlockFirstWindow"));
-        QTRY_VERIFY(ask->isVisible());
-        QObject* password = ask->findChild<QObject*>(QStringLiteral("askField"));
-        password->setProperty("text", QStringLiteral("wrong"));
-        QMetaObject::invokeMethod(ask, "go");
-        QTRY_VERIFY(!ask->property("said").toString().isEmpty());
-        QVERIFY(ask->isVisible() && !opened(second));
-        // In the look of the start-up page (D-073), its list with every vault.
-        QCOMPARE(ask->width(), 534);
-        QVERIFY(ask->findChild<QObject*>(QStringLiteral("askVaultBox"))->property("isList").toBool());
-        password->setProperty("text", QStringLiteral("two"));
-        QMetaObject::invokeMethod(ask, "go");
-        QTRY_VERIFY(!ask->isVisible());
-        QTRY_VERIFY(opened(second));
-        QVERIFY(!opened(first));
-        QMetaObject::invokeMethod(settings(), "close");
-    }
 #endif
 };
 

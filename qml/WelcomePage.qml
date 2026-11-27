@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.8.115
+// WelcomePage.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Choose the master password in the one width; no text bold as a whole (D-082)
 // v0.8.115: The Google Drive window; a new vault created on Google Drive (D-080)
 // v0.7.108: Open a vault lists the known vaults (D-077)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -262,7 +263,6 @@ Item {
             Label {
                 text: qsTr("This password opens the vault. Nobody can open it without it, not even you, so choose one you will remember.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
             PasswordField {
@@ -281,7 +281,6 @@ Item {
             Label {
                 visible: secondPassword.text !== "" && !newVaultDialog.passwordsAgree
                 text: qsTr("The two passwords are not the same yet.")
-                font.bold: true
             }
             // First the saved password, then the keyfile (the owner).
             CheckBox {
@@ -291,7 +290,6 @@ Item {
                 // What the primary vault is for, said where it matters (the owner, D-058).
                 // Its text wraps with the window, as every text does (the owner).
                 Layout.fillWidth: true
-                Layout.preferredWidth: 360 * Appearance.factor
                 contentItem: Label {
                     leftPadding: saveInPrimary.indicator.width + saveInPrimary.spacing
                     text: saveInPrimary.text
@@ -311,9 +309,7 @@ Item {
                 gap: 6 * Appearance.factor
                 Label {
                     text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
-                    font.bold: true
                     wrapMode: Text.Wrap
-                    Layout.preferredWidth: 360 * Appearance.factor
                     Layout.fillWidth: true
                 }
                 Label {
@@ -322,7 +318,6 @@ Item {
                           : qsTr("Keyfile: %1").arg(decodeURIComponent(newVaultDialog.keyfile.toString().replace(/^.*\//, "")))
                     elide: Text.ElideMiddle
                     opacity: 0.8
-                    Layout.preferredWidth: 360 * Appearance.factor
                     Layout.fillWidth: true
                 }
                 ExactRow {

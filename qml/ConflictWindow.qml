@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.6.100
+// ConflictWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person; its buttons alike (D-082)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
@@ -44,6 +45,8 @@ DialogWindow {
     id: conflictWindow
     objectName: "conflictWindow"
     memoryName: "conflict"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
 
     property string itemId: ""
     property var conflict: ({})

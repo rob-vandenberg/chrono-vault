@@ -40,9 +40,10 @@
 #include <memory>
 
 // --- Version ------------------------------------------------------------
-// test_appearance.cpp 0.6.95
+// test_appearance.cpp 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Change Master Password in the one design (D-082)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.91: The settings window at 720 by 640 inside (D-068)
 // v0.6.89: The settings window at 720 by 625 inside (D-066)
@@ -331,10 +332,13 @@ void TestAppearance::the_settings_window_and_its_slider_have_their_sizes()
     QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
     QTRY_VERIFY(window->isExposed());
     QCOMPARE(window->title(), QStringLiteral("Chrono Vault - Settings"));
-    // Change Master Password as the owner measured it.
+    // Change Master Password in the design of every dialog: 440 wide, exactly
+    // as tall as its content, never resized (D-082).
     auto* password = engine.rootObjects().constFirst()->findChild<QQuickWindow*>(QStringLiteral("masterPasswordWindow"));
     QVERIFY(password);
-    QCOMPARE(password->size(), QSize(445, 210));
+    QCOMPARE(password->width(), 440);
+    QCOMPARE(password->minimumSize(), password->maximumSize());
+    QCOMPARE(password->size(), password->minimumSize());
     // With a tray General fits without a scroll bar.
     engine.singletonInstance<VaultController*>("ChronoVault", "VaultController")->setTrayAvailable(true);
     auto* box = settings->findChild<QQuickItem*>(QStringLiteral("clipboardBox"));

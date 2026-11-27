@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.8.119
+# tests/integration/CMakeLists.txt 0.8.120
 
 # --- Version history ----------------------------------------------------
+# v0.8.120: test_dialog_design and test_dialog_design_200; test_webdav_windows with the Google Drive test server (D-082)
 # v0.8.119: test_intuitive_bars (D-079), test_intuitive_sorting (D-081), test_pages_second, test_menus_second (OR-11)
 # v0.8.117: test_vault_row_accounts (D-080)
 # v0.8.115: test_google_drive and its interruptions (D-080)
@@ -103,6 +104,17 @@ qt_add_executable(test_exact_scaling test_exact_scaling.cpp intuitive_fixture.h)
 target_link_libraries(test_exact_scaling PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_exact_scaling)
 chrono_vault_add_test(test_exact_scaling)
+
+# Every dialog in the one design, at 100% and at 200% apart (D-082, OR-11).
+qt_add_executable(test_dialog_design test_dialog_design.cpp intuitive_fixture.h)
+target_link_libraries(test_dialog_design PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_dialog_design)
+chrono_vault_add_test(test_dialog_design)
+qt_add_executable(test_dialog_design_200 test_dialog_design.cpp intuitive_fixture.h)
+target_compile_definitions(test_dialog_design_200 PRIVATE CHRONO_VAULT_DESIGN_200)
+target_link_libraries(test_dialog_design_200 PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_dialog_design_200)
+chrono_vault_add_test(test_dialog_design_200)
 
 qt_add_executable(test_vault_rows test_vault_rows.cpp intuitive_fixture.h)
 target_link_libraries(test_vault_rows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
@@ -268,10 +280,11 @@ target_link_libraries(test_webdav_create PRIVATE chrono_vault_ui Qt6::Gui Qt6::N
 chrono_vault_strict_warnings(test_webdav_create)
 chrono_vault_add_test(test_webdav_create)
 
-qt_add_executable(test_webdav_windows test_webdav_windows.cpp ../webdav_test_server.cpp ../webdav_test_server.h)
+qt_add_executable(test_webdav_windows test_webdav_windows.cpp ../webdav_test_server.cpp ../webdav_test_server.h
+    ../google_drive_test_server.cpp ../google_drive_test_server.h)
 target_include_directories(test_webdav_windows PRIVATE "${PROJECT_SOURCE_DIR}/tests")
 target_link_libraries(test_webdav_windows PRIVATE
-    chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Network Qt6::Test)
+    chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Network Qt6::NetworkAuth Qt6::Test)
 chrono_vault_strict_warnings(test_webdav_windows)
 chrono_vault_add_test(test_webdav_windows)
 

@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.8.117
+// StorageWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Create a vault and Move a vault exactly as large as their tiles; only Open a vault remembers its size (D-082)
 // v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
 // v0.8.115: One tile per storage of the build; any storage named in the vault lines (D-080)
 // v0.7.111: Your vaults show where each is kept (D-079)
@@ -60,6 +61,9 @@ DialogWindow {
     signal chosen(string storage) // "webdav" or "device"
     signal vaultChosen(string vaultFile)
 
+    // Only Open a vault, whose list grows, keeps the size the person gave it;
+    // Create and Move are exactly as large as their tiles (the owner, D-079).
+    fitsContent: !opening
     title: opening ? qsTr("Open a vault") : mode === "move" ? qsTr("Move a vault") : qsTr("Create a vault")
     standardButtons: Dialog.Cancel
     rightButtons: Button {
@@ -282,7 +286,7 @@ DialogWindow {
     ExactColumn {
         visible: !storageWindow.opening
         gap: 10 * Appearance.factor
-        Layout.preferredWidth: 420 * Appearance.factor
+        Layout.fillWidth: true
 
         // As Open a vault: one row of storage locations (the owner, 0.7.109).
         Label {

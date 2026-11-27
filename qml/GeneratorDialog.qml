@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GeneratorDialog.qml 0.6.92
+// GeneratorDialog.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The one width of every dialog (D-082)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
 // v0.0.4: The password in Noto Sans Mono
@@ -59,7 +60,6 @@ DialogWindow {
             readOnly: true
             font.family: "Noto Sans Mono"
             selectByMouse: true
-            Layout.preferredWidth: 420 * Appearance.factor
             Layout.fillWidth: true
         }
         ExactRow {

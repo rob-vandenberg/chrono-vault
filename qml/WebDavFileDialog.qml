@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavFileDialog.qml 0.8.115
+// WebDavFileDialog.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person; Google Drive's size apart from WebDAV's (D-082)
 // v0.8.115: Any storage's folders: WebDAV or Google Drive (D-080)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
@@ -37,7 +38,10 @@ import QtQuick.Layouts
 DialogWindow {
     id: fileDialog
     objectName: "webDavFileDialog"
-    memoryName: "webDavFileDialog2"
+    // Its own size per storage (D-082).
+    memoryName: storage === "googledrive" ? "googleDriveFileDialog" : "webDavFileDialog2"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
 
     // "open", "save" or "folder".
     property string mode: "open"

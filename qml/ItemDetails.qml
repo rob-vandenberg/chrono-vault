@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.8.119
+// ItemDetails.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The history resized by the person (D-082)
 // v0.8.119: A copy from a field's history is a use of the item (D-081)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
@@ -433,6 +434,8 @@ Item {
         id: historyWindow
         objectName: "historyWindow"
         memoryName: "fieldHistory"
+        // A list of values: resized by the person (D-082).
+        fitsContent: false
         property var field: ({})
         property bool revealed: false
         title: qsTr("History of “%1”").arg(field.name || "")

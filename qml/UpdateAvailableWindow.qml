@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdateAvailableWindow.qml 0.6.97
+// UpdateAvailableWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The one width of every dialog (D-082)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.9: Initial release, as in Chrono Mail (D-024)
@@ -45,7 +46,6 @@ DialogWindow {
         text: qsTr("Chrono Vault %1 is available. You have %2.").arg(Updater.newVersion).arg(VaultController.version)
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
-        Layout.preferredWidth: 420 * Appearance.factor
         Layout.fillWidth: true
     }
     Label {

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.8.119
+// DialogWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: One design for every dialog: 440 wide, as tall as its content, one edge all round, the buttons of a row alike (D-082)
 // v0.8.119: A title and × only, never minimize (D-079)
 // v0.7.111: A question as tall as its text; Enter only on the selected button, shown; Esc on Cancel or Close; Y and N (D-079)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
@@ -137,9 +138,11 @@ ApplicationWindow {
         noLetter = no ? letterOf(no.text) : ""
     }
     onStandardButtonsChanged: markLetters()
-    // A window that only asks: exactly as tall as its text, never resized,
-    // no size remembered (the owner, D-079).
-    property bool fitsContent: false
+    // A dialog of text, a few fields and buttons: one width for all of them,
+    // exactly as tall as its content, never resized, no size remembered. A
+    // window with a list, an editor or a file view says false: it is resized
+    // by the person and remembers that under its own name (the owner, D-082).
+    property bool fitsContent: true
     // Opened: the keyboard on its button, unless the window put it in a field.
     function focusDefault() {
         if (!isTyping(activeFocusItem) && enterTarget && enterTarget.enabled && enterTarget.visible)
@@ -177,6 +180,19 @@ ApplicationWindow {
         }
         show()
         shown()
+    }
+    // Paragraphs for one label with textFormat Text.RichText, half a line
+    // apart, as every dialog's (the owner, D-082); never read as markup.
+    function paragraphs(list) {
+        const escape = function(text) {
+            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        }
+        // Half a line, in pixels: a point is 4/3 pixel at 96 dpi.
+        const apart = Math.round(Appearance.fontPointSize * 4 / 3 * 0.5)
+        let joined = ""
+        for (let i = 0; i < list.length; ++i)
+            joined += "<p style=\"margin-top:0; margin-bottom:" + (i + 1 < list.length ? apart : 0) + "px\">" + escape(list[i]) + "</p>"
+        return joined
     }
     // A link for a label: the words (already translated) escaped, never read
     // as markup.
@@ -241,21 +257,55 @@ ApplicationWindow {
     modality: Qt.ApplicationModal
     visible: false
     // The edge around everything, the same as the settings window's.
-    readonly property real edge: 10 * Appearance.factor
+    // The same on all four sides, the bottom too (the owner, D-082).
+    readonly property real edge: 12 * Appearance.factor
+    // The width of every dialog that fits its content (D-082).
+    readonly property real simpleWidth: Math.round(440 * Appearance.factor)
+    // The room the screen gives a window, its frame taken off.
+    readonly property real roomHigh: Appearance.screenRoom(dialogWindow).height - Appearance.frameOf(dialogWindow).height
+    // Every button in the bottom row as wide as the widest there (D-082).
+    readonly property real buttonWidth: {
+        let widest = 0
+        for (const area of [leftArea, rightArea]) {
+            for (let i = 0; i < area.children.length; ++i) {
+                const one = area.children[i]
+                if (isButton(one) && one.visible)
+                    widest = Math.max(widest, one.implicitWidth)
+            }
+        }
+        const boxed = buttonBox.contentChildren
+        for (let i = 0; i < boxed.length; ++i) {
+            if (boxed[i].visible)
+                widest = Math.max(widest, boxed[i].implicitWidth)
+        }
+        return Math.ceil(widest)
+    }
+    function sizeOwnButtons() {
+        for (const area of [leftArea, rightArea]) {
+            for (let i = 0; i < area.children.length; ++i) {
+                const one = area.children[i]
+                if (isButton(one))
+                    one.Layout.preferredWidth = Qt.binding(function() { return dialogWindow.buttonWidth })
+            }
+        }
+    }
     // The size it first opens at; then the person's own, which scales along
     // with the UI scaling (D-070).
     property real firstWidth: Math.max(400 * Appearance.factor, layout.implicitWidth + 2 * edge)
     property real firstHeight: Math.max(160 * Appearance.factor, layout.implicitHeight + 2 * edge)
+    readonly property real fittedHeight: Math.min(Math.ceil(layout.implicitHeight + 2 * edge), roomHigh)
     width: fitsContent ? minimumWidth : memory.wide(firstWidth, minimumWidth, memory.own)
-    height: fitsContent ? minimumHeight : memory.high(firstHeight, minimumHeight, memory.own)
+    height: fitsContent ? fittedHeight : memory.high(firstHeight, minimumHeight, memory.own)
     // Never narrower than its content can take, so nothing is cut off or
     // pushed outside: texts wrap within their reading width, and the window
     // only grows wider (D-061).
-    minimumWidth: fitsContent ? Math.max(400 * Appearance.factor, layout.implicitWidth + 2 * edge)
-                              : layout.implicitWidth + 2 * edge
-    minimumHeight: layout.implicitHeight + 2 * edge
+    // One width for every dialog that fits its content: its texts wrap
+    // within it, its fields fill it (D-082).
+    minimumWidth: fitsContent ? simpleWidth : layout.implicitWidth + 2 * edge
+    // A text taller than the screen scrolls inside the window (D-082).
+    minimumHeight: fitsContent ? fittedHeight : Math.min(layout.implicitHeight + 2 * edge, roomHigh)
     maximumWidth: fitsContent ? minimumWidth : 16777215
-    maximumHeight: fitsContent ? minimumHeight : 16777215
+    maximumHeight: fitsContent ? fittedHeight : 16777215
     color: palette.window
 
     // Closed with its own title bar button: the same as Cancel.
@@ -323,10 +373,28 @@ ApplicationWindow {
         }
         gap: 10 * Appearance.factor
 
-        ExactColumn {
-            id: contentArea
+        // The content scrolls only when the screen is too small for it.
+        Flickable {
+            id: scroller
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredHeight: contentArea.implicitHeight
+            Layout.preferredWidth: contentArea.implicitWidth
+            implicitWidth: contentArea.implicitWidth
+            implicitHeight: contentArea.implicitHeight
+            contentWidth: width
+            contentHeight: contentArea.height
+            // Only a dialog that fits its content scrolls as a whole; a
+            // resizable one gives its list or editor the room.
+            clip: dialogWindow.fitsContent && contentArea.implicitHeight > height + 0.5
+            interactive: clip
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: ScrollBar { policy: scroller.interactive ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff }
+            ExactColumn {
+                id: contentArea
+                width: scroller.width
+                height: dialogWindow.fitsContent ? Math.max(implicitHeight, scroller.height) : scroller.height
+            }
         }
 
         ExactRow {
@@ -338,15 +406,33 @@ ApplicationWindow {
                 id: leftArea
                 gap: 6 * Appearance.factor
                 Layout.fillWidth: true
+                onChildrenChanged: dialogWindow.sizeOwnButtons()
             }
             ExactRow {
                 id: rightArea
                 gap: 6 * Appearance.factor
+                onChildrenChanged: dialogWindow.sizeOwnButtons()
             }
             DialogButtonBox {
                 id: buttonBox
-                // No edge of its own: the window's edge is the only one.
+                // No edge, frame or room of its own: the window's edge is the
+                // only one, and the box is exactly as large as its buttons.
                 padding: 0
+                background: null
+                alignment: Qt.AlignRight
+                // A row as wide as its buttons now, not as they were made.
+                // A row that leaves out a button not shown (Import's own OK).
+                contentItem: Row {
+                    spacing: buttonBox.spacing
+                    Repeater { model: buttonBox.contentModel }
+                }
+                // By its number of buttons: whether they show depends on the box.
+                visible: count > 0
+                contentWidth: implicitWidth
+                // Its buttons shown, each as wide as the widest in the row.
+                implicitWidth: contentItem ? contentItem.implicitWidth : 0
+                implicitHeight: contentItem ? contentItem.implicitHeight : 0
+                delegate: Button { width: dialogWindow.buttonWidth }
                 onAccepted: dialogWindow.accept()
                 onRejected: dialogWindow.reject()
                 onDiscarded: dialogWindow.discard()

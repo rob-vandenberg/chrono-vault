@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.8.119
+// VaultPage.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The questions in the one width (D-082)
 // v0.8.119: Sort By: six orders, either way, per vault; headings by title only; a key brings its heading to the top (D-081)
 // v0.8.115: The storage's name under the vault's name (D-080)
 // v0.7.111: Question dialogs fit their text (D-079)
@@ -1458,7 +1459,6 @@ Item {
                 text: placeQuestion.question
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -1490,7 +1490,6 @@ Item {
                 text: qsTr("%1 will be removed from the vault for good. This cannot be undone.").arg(foreverQuestion.what)
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }

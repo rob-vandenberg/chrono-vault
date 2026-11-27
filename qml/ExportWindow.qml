@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.7.111
+// ExportWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Its text in normal weight, the one width (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
@@ -97,11 +98,9 @@ DialogWindow {
 
     ExactColumn {
         gap: 10 * Appearance.factor
-        Layout.preferredWidth: 440 * Appearance.factor
         Layout.fillWidth: true
         Label {
             text: qsTr("The export holds every password of “%1” unencrypted: anyone who gets the file can read them all. Keep it safe, and delete it when you no longer need it.").arg(VaultController.vaultName)
-            font.bold: true
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }

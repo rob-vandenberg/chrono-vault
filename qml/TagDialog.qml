@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TagDialog.qml 0.6.92
+// TagDialog.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The one width of every dialog (D-082)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.83: Initial release, out of VaultPage.qml (D-063)
 
@@ -45,7 +46,6 @@ DialogWindow {
         Label {
             text: qsTr("A slash nests a tag under another, as in “Work/Servers”.")
             wrapMode: Text.Wrap
-            Layout.preferredWidth: 360 * Appearance.factor
             Layout.fillWidth: true
         }
         TextField {

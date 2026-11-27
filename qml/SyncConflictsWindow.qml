@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.8.115
+// SyncConflictsWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.8.115: The places picture of the vault's own storage (D-080)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
@@ -43,6 +44,8 @@ DialogWindow {
     id: conflictsWindow
     objectName: "syncConflictsWindow"
     memoryName: "syncConflicts"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
     modality: Qt.NonModal
 
     property var rows: []

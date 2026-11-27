@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.7.111
+// ItemEditor.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Field options and the questions in the one width (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
@@ -721,7 +722,6 @@ Item {
             columns: 2
             columnSpacing: 24 * Appearance.factor
             rowSpacing: 12 * Appearance.factor
-            Layout.preferredWidth: 420 * Appearance.factor
             Layout.fillWidth: true
             Label { text: fieldOptions.isSection ? qsTr("Section Name") : qsTr("Field Name") }
             TextField {
@@ -813,7 +813,6 @@ Item {
             Label {
                 text: qsTr("The file you added is still being read. Try again in a moment.")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }
@@ -830,7 +829,6 @@ Item {
             Label {
                 text: qsTr("“%1” has changes that are not saved yet.").arg(titleField.text)
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
         }

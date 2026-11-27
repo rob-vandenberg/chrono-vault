@@ -2,6 +2,15 @@
 
 ## Now
 
+**Version 0.8.120**: one design for every dialog (D-082): a dialog of text, fields and buttons is 440 wide and exactly
+as tall as its content, never resized and with no size remembered; a window with a list or editor keeps the size the
+person gives it under its own name; one edge of 12 pixels all round; the buttons of a row alike; paragraphs half a line
+apart; the password and PIN dialogs and the key dialogs in the same design. Once connected or signed in, WebDAV and
+Google Drive open their file dialog by themselves; a choice there goes on at once and its Cancel ends it all. Open a
+vault keeps its own size apart from Create a vault. Every dialog is checked by `test_dialog_design` at 100% and 200%.
+Two tests fail as they did in 0.8.119: `test_sync_conflicts` (Enter does not apply when no button holds the keyboard)
+and `test_audit_windows` (`not_reached_is_never_called_safe`).
+
 **Version 0.8.119**: Disconnect deletes nothing on any storage, with the owner's new text (D-060, D-080 point 16); no
 minimize button on any window that asks an answer (D-079 point 7); the main window's title is "Chrono Vault" and the
 version only (D-017); the top bar's two spaces alike (D-074); Check for updates above Clear the clipboard in Settings >

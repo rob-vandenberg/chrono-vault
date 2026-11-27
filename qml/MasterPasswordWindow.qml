@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.6.95
+// MasterPasswordWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The one width of every dialog; no text bold as a whole (D-082)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Texts wrap with the window (D-061)
@@ -81,7 +82,6 @@ DialogWindow {
             id: currentPassword
             objectName: "currentPasswordField"
             placeholderText: qsTr("Current master password")
-            Layout.preferredWidth: 360 * Appearance.factor
             Layout.fillWidth: true
         }
         PasswordField {
@@ -100,7 +100,6 @@ DialogWindow {
         Label {
             visible: repeatedPassword.text !== "" && !passwordWindow.passwordsAgree
             text: qsTr("The two passwords are not the same yet.")
-            font.bold: true
         }
         CheckBox {
             id: useKeyfile
@@ -111,9 +110,7 @@ DialogWindow {
             visible: useKeyfile.checked
             Label {
                 text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
-                font.bold: true
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
             Label {
@@ -121,7 +118,6 @@ DialogWindow {
                       : qsTr("Keyfile: %1").arg(decodeURIComponent(passwordWindow.keyfile.toString().replace(/^.*\//, "")))
                 elide: Text.ElideMiddle
                 opacity: 0.8
-                Layout.preferredWidth: 360 * Appearance.factor
                 Layout.fillWidth: true
             }
             ExactRow {

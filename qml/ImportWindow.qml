@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.6.103
+// ImportWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.80: Only a comment (D-055)
@@ -48,6 +49,8 @@ DialogWindow {
     id: importWindow
     objectName: "importWindow"
     memoryName: "import"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
     readonly property string program: VaultController.referenceName()
     // "choose" first, then "summary".
     property string step: "choose"

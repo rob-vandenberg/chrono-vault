@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AboutWindow.qml 0.6.94
+// AboutWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
 // v0.0.39: A normal scroll bar with arrows, beside the text (D-049)
@@ -42,6 +43,8 @@ DialogWindow {
     signal checkRequested()
 
     memoryName: "about"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
     // The whole window, title bar and frame included, is the size set here
     // (the owner): the frame the desktop draws, known once it is shown, is
     // taken off the inside.

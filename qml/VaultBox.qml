@@ -21,9 +21,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultBox.qml 0.8.115
+// VaultBox.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: large false: a field as in every dialog (D-082)
 // v0.8.115: The places picture and name of any storage (D-080)
 // v0.7.108: The primary's crown in the list and the field (D-077)
 // v0.6.106: Close and Lock per vault; the primary first; back to the vault after a lock (D-075)
@@ -46,9 +47,13 @@ ComboBox {
     property string otherName: ""
     property string otherPicture: "qrc:/icons/places-webdav.svg"
     readonly property string other: "\u0001other"
+    // false: a field as in every dialog, its normal text and height (D-082);
+    // true: the unlock page's large one.
+    property bool large: true
+    readonly property real pictureSize: Math.round((large ? 24 : 16) * Appearance.factor)
     model: withOther ? listed.concat([other]) : listed
     currentIndex: listed.indexOf(shown)
-    font.pointSize: Appearance.fontPointSize * 1.4
+    font.pointSize: Appearance.fontPointSize * (large ? 1.4 : 1)
     enabled: isList
     indicator.visible: isList
     function placeOf(vaultFile) {
@@ -65,14 +70,14 @@ ComboBox {
     }
     contentItem: ExactRow {
         gap: 8 * Appearance.factor
-        Item { Layout.preferredWidth: 6 * Appearance.factor }
+        Item { Layout.preferredWidth: (vaultBox.large ? 6 : 0) * Appearance.factor }
         // A places picture, one colour in the text colour (the owner, D-079).
         IconImage {
             source: vaultBox.otherName !== "" ? vaultBox.otherPicture : vaultBox.iconOf(vaultBox.shown)
             color: vaultBox.palette.buttonText
-            sourceSize: Qt.size(Math.round(24 * Appearance.factor), Math.round(24 * Appearance.factor))
-            Layout.preferredWidth: Math.round(24 * Appearance.factor)
-            Layout.preferredHeight: Math.round(24 * Appearance.factor)
+            sourceSize: Qt.size(vaultBox.pictureSize, vaultBox.pictureSize)
+            Layout.preferredWidth: vaultBox.pictureSize
+            Layout.preferredHeight: vaultBox.pictureSize
         }
         Label {
             text: vaultBox.otherName !== "" ? vaultBox.otherName : VaultController.vaultNameOf(vaultBox.shown)
@@ -95,7 +100,7 @@ ComboBox {
     }
     // Rounded, as the owner's design.
     background: Rectangle {
-        radius: Math.round(8 * Appearance.factor)
+        radius: vaultBox.large ? Math.round(8 * Appearance.factor) : 2
         color: vaultBox.palette.base
         border.color: vaultBox.activeFocus ? vaultBox.palette.highlight : vaultBox.palette.mid
     }

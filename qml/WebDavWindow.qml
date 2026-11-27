@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavWindow.qml 0.6.92
+// WebDavWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Connected: the file dialog opens by itself, a choice goes on at once, its Cancel ends it all; no Vault field (D-082)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.75: Move is the vault menu's: the vault leaves its old place once its copy is checked (D-060)
 // v0.3.67: Leaving the file dialog without a new choice goes back to the folder of the choice shown
@@ -62,9 +63,12 @@ DialogWindow {
     property string certificate: ""
     property string trusted: ""
     property string problem: ""
-    readonly property real columnWidth: 460 * Appearance.factor
+    // The width inside the window, as every dialog (D-082).
+    readonly property real columnWidth: simpleWidth - 2 * edge
     // As tall as its content, whatever height was remembered (the owner).
     maximumHeight: minimumHeight
+    // Connected or signed in: the file dialog opens by itself, once (D-082).
+    property bool browseWhenListed: false
     readonly property bool busy: connecting || waitingFor !== ""
 
     // A choice made in the file dialog holds while the folder it was made in
@@ -142,6 +146,7 @@ DialogWindow {
         chosenFolder = ""
         chosen = false
         connecting = true
+        browseWhenListed = true
         VaultController.connectWebDav(addressField.text, userField.text, passwordField.text, trusted)
     }
 
@@ -153,11 +158,12 @@ DialogWindow {
 
     rightButtons: Button {
         objectName: "webDavGoButton"
+        // Connected: the file dialog again, after a choice that failed (D-082).
         text: webDavWindow.connecting ? qsTr("Connecting…") : !webDavWindow.connected ? qsTr("Connect")
-            : webDavWindow.mode === "new" ? qsTr("Next…") : webDavWindow.mode === "open" ? qsTr("Open") : qsTr("Move")
-        enabled: webDavWindow.connected ? webDavWindow.ready : addressField.text.trim() !== "" && !webDavWindow.busy
+            : qsTr("Browse…")
+        enabled: webDavWindow.connected ? !webDavWindow.busy : addressField.text.trim() !== "" && !webDavWindow.busy
         highlighted: true
-        onClicked: webDavWindow.go()
+        onClicked: webDavWindow.connected ? webDavWindow.browse() : webDavWindow.go()
     }
 
     Connections {
@@ -179,6 +185,10 @@ DialogWindow {
             webDavWindow.entries = entries
             webDavWindow.vaultFiles = files
             webDavWindow.waitingFor = ""
+            if (webDavWindow.browseWhenListed) {
+                webDavWindow.browseWhenListed = false
+                Qt.callLater(webDavWindow.browse)
+            }
         }
         // A move answers on its own (D-060).
         function onMoveDone(ok, problem) {
@@ -304,53 +314,20 @@ DialogWindow {
                 }
             }
         }
-
-        // Once connected: the vault or folder, chosen in the WebDAV file
-        // dialog (the owner, D-057).
-        Label {
-            visible: webDavWindow.connected
-            text: webDavWindow.mode === "move" ? qsTr("Folder") : qsTr("Vault")
-        }
-        ExactRow {
-            visible: webDavWindow.connected
-            gap: 6 * Appearance.factor
-            Layout.preferredWidth: webDavWindow.columnWidth
-            TextField {
-                objectName: "webDavChosenField"
-                readOnly: true
-                placeholderText: webDavWindow.mode === "move" ? qsTr("Choose the folder with Browse…")
-                               : webDavWindow.mode === "new" ? qsTr("Choose the folder and name with Browse…")
-                               : qsTr("Choose the vault with Browse…")
-                text: !webDavWindow.chosen ? ""
-                      : webDavWindow.chosenFolder.replace(webDavWindow.serverRoot, "/").replace("//", "/")
-                        + (webDavWindow.chosenFile === "" ? "" : webDavWindow.chosenFile
-                           + (webDavWindow.mode === "new" ? ".chronovault" : ""))
-                Layout.fillWidth: true
-            }
-            Button {
-                objectName: "webDavBrowseButton"
-                text: qsTr("Browse…")
-                enabled: !webDavWindow.busy
-                onClicked: webDavWindow.browse()
-            }
-        }
     }
 
     WebDavFileDialog {
         id: fileDialog
         transientParent: webDavWindow
+        // Chosen: on at once, a new vault to its password (D-082).
         onChosen: function(fileName, folder) {
             webDavWindow.chosenFile = fileName
             webDavWindow.chosenFolder = folder
             webDavWindow.chosen = true
+            Qt.callLater(webDavWindow.go)
         }
-        // Left without a new choice after looking elsewhere: the choice still
-        // shown holds, so the connection goes back to its folder.
-        onRejected: {
-            if (webDavWindow.chosen && webDavWindow.folderShown !== webDavWindow.chosenFolder) {
-                webDavWindow.waitingFor = "browse"
-                VaultController.openWebDavFolder(webDavWindow.chosenFolder)
-            }
-        }
+        // Cancel in the file dialog ends it all: it is the only window seen
+        // (the owner, D-082).
+        onRejected: webDavWindow.reject()
     }
 }

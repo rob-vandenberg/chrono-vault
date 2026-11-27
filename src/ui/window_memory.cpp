@@ -28,9 +28,10 @@
 #include <limits>
 
 // --- Version ------------------------------------------------------------
-// window_memory.cpp 0.6.94
+// window_memory.cpp 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: A new name reads that name's size and place: one window used for two dialogs keeps each its own (D-082)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.0.38: The settings in chrono-vault.ini, the vaults in chrono-vault.conf (D-026)
 // v0.0.11: A remembered size never smaller than the window's minimum, and moved back inside its screen
@@ -72,11 +73,20 @@ void WindowMemory::setName(const QString& name)
     if (key != name) {
         key = name;
         emit nameChanged();
+        // A window used for two dialogs (Open a vault and Create a vault):
+        // what is remembered under the new name, or nothing (D-082).
+        if (completed) {
+            restored = false;
+            ownSize = QSizeF();
+            emit ownChanged();
+            restore();
+        }
     }
 }
 
 void WindowMemory::componentComplete()
 {
+    completed = true;
     if (!scales && kept.width() < 0) {
         kept = asked; // the size it was made with
     }

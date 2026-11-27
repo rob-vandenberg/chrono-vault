@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// IconPicker.qml 0.7.111
+// IconPicker.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: Resized by the person; the question in the one width (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
@@ -43,6 +44,8 @@ DialogWindow {
     objectName: "iconPicker"
     title: qsTr("Choose Icon")
     memoryName: "iconPicker"
+    // Resized by the person, who finds it at that size again (D-082).
+    fitsContent: false
     firstWidth: 480 * Appearance.factor
     firstHeight: 680 * Appearance.factor
     standardButtons: Dialog.Ok | Dialog.Cancel
@@ -434,7 +437,6 @@ DialogWindow {
             text: qsTr("This icon is used by %n item(s). They will get their category's icon instead. Delete it?", "", deleteQuestion.uses)
             wrapMode: Text.Wrap
             Layout.fillWidth: true
-            Layout.preferredWidth: 360 * Appearance.factor
         }
         onAccepted: picker.deleteIcon(picker.menuIcon)
     }

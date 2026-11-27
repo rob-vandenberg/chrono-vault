@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.119
+// SettingsWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The edge of every dialog, its buttons alike; the key dialogs and the paragraphs in the one design (D-082)
 // v0.8.119: Disconnect deletes nothing, its new text (D-060); no minimize button (D-079); Check for updates above the clipboard
 // v0.8.118: A double click on a vault's row opens it, as Open in its menu (D-071)
 // v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
@@ -543,7 +544,8 @@ ApplicationWindow {
 
     ExactColumn {
         anchors.fill: parent
-        anchors.margins: 10 * Appearance.factor
+        // The edge of every dialog, on all four sides (D-082).
+        anchors.margins: 12 * Appearance.factor
         gap: 10 * Appearance.factor
 
         ExactRow {
@@ -1458,7 +1460,7 @@ ApplicationWindow {
                             }
                             ExactColumn {
                                 gap: 8 * Appearance.factor
-                                Layout.preferredWidth: 400 * Appearance.factor
+                                Layout.fillWidth: true
                                 Label {
                                     visible: moveStatus.busy
                                     text: qsTr("Moving “%1”…").arg(VaultController.vaultNameOf(moveStatus.vaultFile))
@@ -1506,11 +1508,14 @@ ApplicationWindow {
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
-                                text: qsTr("Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.") + " "
+                                // Its paragraphs half a line apart (D-082).
+                                textFormat: Text.RichText
+                                text: forgetWindow.paragraphs([
+                                    qsTr("Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.") + " "
                                       + (forgetWindow.onWebDav
                                          ? qsTr("The vault in the remote location is not deleted, but the local copy on this computer is, together with any changes that are not synced yet.")
-                                         : qsTr("Nothing is deleted, only the name of the vault is removed from the list of vaults.")) + "\n"
-                                      + qsTr("Are you sure you want Chrono Vault to forget “%1”?").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))
+                                         : qsTr("Nothing is deleted, only the name of the vault is removed from the list of vaults.")),
+                                    qsTr("Are you sure you want Chrono Vault to forget “%1”?").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))])
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -1536,9 +1541,11 @@ ApplicationWindow {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
                                 // Three paragraphs; Disconnect deletes nothing, on any storage (D-060).
-                                text: qsTr("Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.").arg(disconnectWindow.storageName) + "\n"
-                                      + qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault.") + "\n"
-                                      + qsTr("This action cannot be undone. Are you sure you want to disconnect from “%1”?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
+                                textFormat: Text.RichText
+                                text: disconnectWindow.paragraphs([
+                                    qsTr("Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.").arg(disconnectWindow.storageName),
+                                    qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault."),
+                                    qsTr("This action cannot be undone. Are you sure you want to disconnect from “%1”?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))])
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -1632,19 +1639,16 @@ ApplicationWindow {
         // of its own that holds the keyboard, so every key pressed becomes the
         // new key and never runs a command. Escape cancels it; its Cancel
         // never takes the focus, so Space, Return and Tab arrive as keys.
-        ApplicationWindow {
+        DialogWindow {
             id: keyCatcher
             objectName: "keyCatcher"
-            font: Appearance.font
-            Component.onCompleted: Appearance.dress(this)
             transientParent: settingsWindow
-            flags: Appearance.questionFlags // a title and ×, nothing else (D-079)
-            modality: Qt.ApplicationModal
-            visible: false
             title: qsTr("Press the new key")
-            color: palette.window
-            width: Math.max(300 * Appearance.factor, catchLayout.implicitWidth + 2 * catchLayout.anchors.margins)
-            height: catchLayout.implicitHeight + 2 * catchLayout.anchors.margins
+            standardButtons: Dialog.Cancel
+            // The keyboard in the catcher, never on Cancel: Space, Return and
+            // Tab arrive as keys (the design of every dialog, D-082).
+            defaultItem: catcher
+            Component.onCompleted: standardButton(Dialog.Cancel).focusPolicy = Qt.NoFocus
             property string actionId: ""
             property string actionName: ""
             property string pendingKey: ""
@@ -1652,11 +1656,7 @@ ApplicationWindow {
                 actionId = id
                 actionName = name
                 pendingKey = ""
-                x = settingsWindow.x + (settingsWindow.width - width) / 2
-                y = settingsWindow.y + (settingsWindow.height - height) / 2
-                show()
-                raise()
-                requestActivate()
+                open()
                 catcher.forceActiveFocus()
             }
             // A key pressed, or the tests' stand-in for one.
@@ -1674,154 +1674,61 @@ ApplicationWindow {
                 }
                 settingsWindow.giveKey(actionId, key)
             }
-            ExactColumn {
-                id: catchLayout
-                anchors.fill: parent
-                anchors.margins: 12 * Appearance.factor
-                gap: 12 * Appearance.factor
-                Label {
-                    text: qsTr("Press a key for “%1”").arg(keyCatcher.actionName)
-                    textFormat: Text.PlainText
-                    wrapMode: Text.Wrap
-                    Layout.fillWidth: true
-                }
-                Item {
-                    id: catcher
-                    focus: true
-                    implicitHeight: 1
-                    Keys.onPressed: function(event) {
-                        event.accepted = true
-                        if (event.key === Qt.Key_Escape) {
-                            keyCatcher.close()
-                            return
-                        }
-                        keyCatcher.take(VaultController.keyName(event.key, event.modifiers))
+            Label {
+                text: qsTr("Press a key for “%1”").arg(keyCatcher.actionName)
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            Item {
+                id: catcher
+                focus: true
+                implicitHeight: 1
+                Keys.onPressed: function(event) {
+                    event.accepted = true
+                    if (event.key === Qt.Key_Escape) {
+                        keyCatcher.close()
+                        return
                     }
-                }
-                Button {
-                    text: qsTr("Cancel")
-                    focusPolicy: Qt.NoFocus
-                    Layout.alignment: Qt.AlignRight
-                    onClicked: keyCatcher.close()
+                    keyCatcher.take(VaultController.keyName(event.key, event.modifiers))
                 }
             }
         }
 
         // A key already in use, asked as Chrono Viewer asks it: OK gives the
         // key to the new action and takes that one key from the old one;
-        // Cancel, the default, changes nothing.
-        ApplicationWindow {
+        // Cancel, the default, changes nothing. The design of every dialog (D-082).
+        DialogWindow {
             id: keyTaken
             objectName: "keyTaken"
-            font: Appearance.font
-            Component.onCompleted: Appearance.dress(this)
             transientParent: settingsWindow
-            flags: Appearance.questionFlags // a title and ×, nothing else (D-079)
-            modality: Qt.ApplicationModal
-            visible: false
             title: qsTr("Keyboard shortcuts")
-            color: palette.window
-            width: Math.max(380 * Appearance.factor, takenLayout.implicitWidth + 2 * takenLayout.anchors.margins)
-            height: takenLayout.implicitHeight + 2 * takenLayout.anchors.margins
+            standardButtons: Dialog.Ok | Dialog.Cancel
+            defaultButton: Dialog.Cancel
+            Component.onCompleted: {
+                standardButton(Dialog.Ok).objectName = "keyTakenOk"
+                standardButton(Dialog.Cancel).objectName = "keyTakenCancel"
+            }
             property string informative: ""
             function ask(key, oldName, newName) {
                 informative = qsTr("%1 is assigned to “%2”. Reassign it to “%3”?").arg(key).arg(oldName).arg(newName)
-                x = settingsWindow.x + (settingsWindow.width - width) / 2
-                y = settingsWindow.y + (settingsWindow.height - height) / 2
-                show()
-                raise()
-                requestActivate()
-                takenCancel.forceActiveFocus(Qt.TabFocusReason)
+                open()
             }
-            // The button holding the keyboard is the selected one: it always
-            // shows its blue edge, as in every dialog (D-079).
-            function markSelected() {
-                const on = activeFocusItem
-                if ((on === takenOk || on === takenCancel)
-                        && (on.focusReason === Qt.OtherFocusReason || on.focusReason === Qt.ActiveWindowFocusReason))
-                    on.focusReason = Qt.TabFocusReason
-            }
-            onActiveFocusItemChanged: markSelected()
-            Connections {
-                target: keyTaken.activeFocusItem === takenOk || keyTaken.activeFocusItem === takenCancel
-                        ? keyTaken.activeFocusItem : null
-                function onFocusReasonChanged() { keyTaken.markSelected() }
-            }
-            function answer(ok) {
-                if (ok)
-                    settingsWindow.giveKey(keyCatcher.actionId, keyCatcher.pendingKey)
+            onAccepted: {
+                settingsWindow.giveKey(keyCatcher.actionId, keyCatcher.pendingKey)
                 keyCatcher.pendingKey = ""
-                close()
             }
-            onClosing: keyCatcher.pendingKey = ""
-            ExactColumn {
-                id: takenLayout
-                anchors.fill: parent
-                anchors.margins: 12 * Appearance.factor
-                gap: 12 * Appearance.factor
-                Keys.onPressed: function(event) {
-                    if (event.key === Qt.Key_Escape) {
-                        event.accepted = true
-                        keyTaken.answer(false)
-                    } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
-                               && (takenOk.activeFocus || takenCancel.activeFocus)) {
-                        // Only the selected button (D-079).
-                        event.accepted = true
-                        keyTaken.answer(takenOk.activeFocus)
-                    } else if ((event.key === Qt.Key_Left || event.key === Qt.Key_Right)
-                               && (takenOk.activeFocus || takenCancel.activeFocus)) {
-                        event.accepted = true
-                        const other = takenOk.activeFocus ? takenCancel : takenOk
-                        other.forceActiveFocus(Qt.TabFocusReason)
-                    }
-                }
-                ExactRow {
-                    gap: 12 * Appearance.factor
-                    // The question mark of a question box.
-                    Rectangle {
-                        Layout.alignment: Qt.AlignTop
-                        implicitWidth: 32 * Appearance.factor
-                        implicitHeight: implicitWidth
-                        radius: width / 2
-                        color: keyTaken.palette.highlight
-                        Label {
-                            anchors.centerIn: parent
-                            text: "?"
-                            font.bold: true
-                            font.pixelSize: parent.height / Appearance.factor * 0.6
-                            color: keyTaken.palette.highlightedText
-                        }
-                    }
-                    ExactColumn {
-                        gap: 6 * Appearance.factor
-                        Label {
-                            text: qsTr("This key has already been assigned")
-                            font.bold: true
-                        }
-                        Label {
-                            text: keyTaken.informative
-                            textFormat: Text.PlainText
-                            wrapMode: Text.Wrap
-                            Layout.fillWidth: true
-                        }
-                    }
-                }
-                ExactRow {
-                    Layout.alignment: Qt.AlignRight
-                    Button {
-                        id: takenOk
-                        objectName: "keyTakenOk"
-                        text: qsTr("OK")
-                        onClicked: keyTaken.answer(true)
-                    }
-                    Button {
-                        id: takenCancel
-                        objectName: "keyTakenCancel"
-                        text: qsTr("Cancel")
-                        highlighted: true
-                        onClicked: keyTaken.answer(false)
-                    }
-                }
+            onRejected: keyCatcher.pendingKey = ""
+            Label {
+                text: qsTr("This key has already been assigned")
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            Label {
+                text: keyTaken.informative
+                textFormat: Text.PlainText
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
             }
         }
 
@@ -1830,19 +1737,29 @@ ApplicationWindow {
             id: bottomRow
             Layout.fillWidth: true
             gap: 6 * Appearance.factor
+            // Every button of the row as wide as the widest shown (D-082).
+            readonly property real buttonWidth: Math.ceil(Math.max(
+                createVaultButton.visible ? createVaultButton.implicitWidth : 0,
+                openVaultButton.visible ? openVaultButton.implicitWidth : 0,
+                restoreDefaultsButton.visible ? restoreDefaultsButton.implicitWidth : 0,
+                okButton.implicitWidth, cancelButton.implicitWidth))
             // The Vaults page's own buttons, at the section's left edge (D-062).
             Item {
                 visible: settingsWindow.onVaults
                 Layout.preferredWidth: Math.max(0, pageScroll.x - bottomRow.gap)
             }
             Button {
+                id: createVaultButton
                 objectName: "createVaultButton"
+                Layout.preferredWidth: bottomRow.buttonWidth
                 visible: settingsWindow.onVaults
                 text: qsTr("Create vault")
                 onClicked: settingsWindow.createVaultRequested()
             }
             Button {
+                id: openVaultButton
                 objectName: "openVaultButton"
+                Layout.preferredWidth: bottomRow.buttonWidth
                 visible: settingsWindow.onVaults
                 text: qsTr("Open vault")
                 onClicked: settingsWindow.openVaultRequested()
@@ -1869,7 +1786,9 @@ ApplicationWindow {
                 Layout.fillWidth: true
             }
             Button {
+                id: restoreDefaultsButton
                 objectName: "restoreDefaultsButton"
+                Layout.preferredWidth: bottomRow.buttonWidth
                 // Nothing to put back on the Vaults page (D-062).
                 visible: settingsWindow.restorable
                 text: qsTr("Restore defaults")
@@ -1878,6 +1797,7 @@ ApplicationWindow {
             Button {
                 id: okButton
                 objectName: "okButton"
+                Layout.preferredWidth: bottomRow.buttonWidth
                 text: qsTr("OK")
                 highlighted: true
                 icon.source: "qrc:/icons/ok.svg"
@@ -1887,7 +1807,9 @@ ApplicationWindow {
                 onClicked: settingsWindow.accept()
             }
             Button {
+                id: cancelButton
                 objectName: "cancelButton"
+                Layout.preferredWidth: bottomRow.buttonWidth
                 text: qsTr("Cancel")
                 icon.source: "qrc:/icons/cancel.svg"
                 icon.width: Math.round(16 * Appearance.factor)

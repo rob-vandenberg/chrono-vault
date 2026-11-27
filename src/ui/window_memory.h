@@ -27,9 +27,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// window_memory.h 0.6.94
+// window_memory.h 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: completed: a name set later reads its own size (D-082)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.0.11: A place moved back inside its screen
 // v0.0.4: Initial release
@@ -102,6 +103,7 @@ private:
     QPointer<QWindow> target;
     QString key;
     bool restored = false;
+    bool completed = false; // a name set after this reads its own size
     bool scales = true;
     QSizeF ownSize;
     QSize asked{-1, -1}; // what the window was last told to be

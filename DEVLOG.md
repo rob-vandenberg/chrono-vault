@@ -949,3 +949,20 @@ with each item's use in the vaults file (`src/ui/item_order.*`), headings by tit
 heading to the top with the list's end laid out first so the last row is never cut off. Tests: `test_intuitive_bars`
 and `test_intuitive_sorting` (new, from `test_intuitive.cpp`), `test_pages_second` and `test_menus_second` (new
 halves, OR-11), `test_google_drive`, `test_webdav_windows` and the related tests pass, each under 20 seconds.
+
+## 27 November 2026: version 0.8.120, one design for every dialog (autonomous mode)
+
+An inventory of every dialog (a scratch tool that opens each from a clean start at 100% and 200%, pictures and
+measures it) found 13 widths, empty bands, fixed content that remembered a size, and buttons of different sizes at
+different distances from the edges. `qml/DialogWindow.qml` now holds one design (D-082): a dialog that fits its
+content is 440 wide, exactly as tall as its content, never resized, no size kept, scrolling only when the screen is too
+small; one edge of 12 all round; the bottom row's buttons as wide as the widest, in a row of their own that leaves out a
+hidden button (the box's own list kept a hidden OK's room and an old width). Resizable windows say so and keep their
+size under their own name; the Google Drive file dialog apart from WebDAV's. `WindowMemory` reads a new name's size,
+so Open a vault keeps its own beside Create a vault. The password and PIN dialogs, the key dialogs, Forget and
+Disconnect (paragraphs half a line apart), Export (not bold) and every password field's placeholder follow it. WebDAV
+and Google Drive open their file dialog by themselves once connected; a choice goes on at once and Cancel ends it all.
+Tests: `test_dialog_design` and `test_dialog_design_200` (new), `test_webdav_windows` (Create, Move and Open sizes, the
+direct file dialog for WebDAV and Google Drive), `test_appearance`, `test_dialog_keys`, `test_vault_rows` (its slowest
+case moved into `test_vault_row_accounts`, OR-11); the related tests pass, each under 20 seconds alone.
+`test_sync_conflicts` and `test_audit_windows` fail as they did in 0.8.119.

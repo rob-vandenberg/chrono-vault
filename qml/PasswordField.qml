@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// PasswordField.qml 0.6.104
+// PasswordField.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The placeholder in the normal font, as every password field (D-082)
 // v0.6.104: The eye over the typed text, so it can be clicked
 // v0.6.92: Exact sizes (D-069)
 // v0.4.70: eyeAllowed: the eye only where it may be shown (D-059)
@@ -37,7 +38,9 @@ TextField {
     property bool eyeAllowed: true
 
     echoMode: revealed ? TextInput.Normal : TextInput.Password
-    font.family: "Noto Sans Mono"
+    // The placeholder in the normal font, the password in the monospaced
+    // one, in every password field (the owner, D-082).
+    font.family: text === "" ? Appearance.font.family : "Noto Sans Mono"
     rightPadding: (eyeButton.visible ? eyeButton.width : 0) + 6 * Appearance.factor
 
     ToolButton {

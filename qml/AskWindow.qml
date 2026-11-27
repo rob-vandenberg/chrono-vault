@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.7.107
+// AskWindow.qml 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: The design of every dialog: its text and normal fields, 440 wide, no size remembered (the owner, D-082)
 // v0.7.107: No PIN face; Set or Change PIN; the password of any vault but the primary (D-076)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
@@ -36,7 +37,6 @@ import QtQuick.Layouts
 DialogWindow {
     id: askWindow
     objectName: "askWindow"
-    memoryName: "ask"
 
     // The vault asked for, "" for something else; the words in the field's place then.
     property string vaultFile: ""
@@ -113,8 +113,6 @@ DialogWindow {
 
     title: qsTr("Unlock the vault")
     standardButtons: Dialog.Cancel
-    firstWidth: 534 * Appearance.factor
-    firstHeight: Math.max(271 * Appearance.factor, minimumHeight)
     rightButtons: Button {
         objectName: "askOk"
         text: askWindow.okText
@@ -141,20 +139,15 @@ DialogWindow {
         }
     }
 
+    // The design of every dialog: its text, then the fields (the owner, D-082).
     ExactColumn {
-        gap: 12 * Appearance.factor
+        gap: 8 * Appearance.factor
         Layout.fillWidth: true
-        Layout.leftMargin: 8 * Appearance.factor
-        Layout.rightMargin: 8 * Appearance.factor
         Label {
             objectName: "askHeading"
             text: askWindow.heading
-            font.pointSize: Appearance.fontPointSize * 1.6
             wrapMode: Text.Wrap
-            horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
-            Layout.topMargin: 6 * Appearance.factor
-            Layout.bottomMargin: 8 * Appearance.factor
         }
         VaultBox {
             id: vaultBox
@@ -166,7 +159,8 @@ DialogWindow {
             otherName: askWindow.name
             otherPicture: askWindow.picture
             Layout.fillWidth: true
-            Layout.preferredHeight: 58 * Appearance.factor
+            large: false
+            Layout.preferredHeight: 28 * Appearance.factor
             onActivated: function(index) {
                 const chosen = model[index]
                 currentIndex = Qt.binding(function() { return vaultBox.listed.indexOf(vaultBox.shown) })
@@ -175,12 +169,11 @@ DialogWindow {
                 field.forceActiveFocus()
             }
         }
-        BigPasswordField {
+        PasswordField {
             id: field
             objectName: "askField"
             placeholderText: askWindow.hint
             enabled: askWindow.waitSeconds === 0
-            Layout.preferredHeight: 58 * Appearance.factor
             Layout.fillWidth: true
             onAccepted: askWindow.go()
             onEnabledChanged: if (enabled && askWindow.visible) forceActiveFocus()
@@ -204,12 +197,11 @@ DialogWindow {
                 onToggled: VaultController.setRemembersFor(askWindow.vaultFile, checked)
             }
         }
-        BigPasswordField {
+        PasswordField {
             id: newPin
             objectName: "askNewPin"
             visible: askWindow.withNewPin
             placeholderText: qsTr("New PIN (at least %1 characters)").arg(VaultController.pinShortest)
-            Layout.preferredHeight: 58 * Appearance.factor
             Layout.fillWidth: true
             onAccepted: askWindow.go()
         }
@@ -219,7 +211,6 @@ DialogWindow {
             text: qsTr("Try again in %1").arg(Math.floor(askWindow.waitSeconds / 60) + ":"
                                               + String(askWindow.waitSeconds % 60).padStart(2, "0"))
             Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
         }
         // The keyfile, when this vault needs one (D-031).
         ExactRow {
@@ -242,7 +233,6 @@ DialogWindow {
             visible: askWindow.proving && VaultController.askFingerOn && !askWindow.withNewPin
             text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
             flat: true
-            Layout.alignment: Qt.AlignHCenter
             onClicked: VaultController.proveWithFinger()
         }
         Label {
@@ -252,7 +242,6 @@ DialogWindow {
             textFormat: Text.PlainText
             color: askWindow.problem !== "" || VaultController.askTrouble ? "#e53e3e" : askWindow.palette.windowText
             wrapMode: Text.Wrap
-            horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
         }
     }

@@ -20,14 +20,16 @@
 #include "icon_library.h"
 
 #include <QDir>
+#include <QFontMetricsF>
 #include <QImage>
 #include <QScopeGuard>
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_keys.cpp 0.6.103
+// test_dialog_keys.cpp 0.8.120
 
 // --- Version history ----------------------------------------------------
+// v0.8.120: A long text's lines measured, its paragraphs apart (D-082)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.93: A start on a locked vault (D-068)
@@ -150,7 +152,9 @@ private slots:
             QVERIFY2(one->width() <= 450 && one->minimumWidth() <= 450, qPrintable(QString::number(one->width())));
             const QList<QQuickItem*> texts = one->findChildren<QQuickItem*>(QStringLiteral("dialogText"));
             QCOMPARE(texts.size(), 1);
-            QTRY_VERIFY2(texts.constFirst()->property("lineCount").toInt() > (qstrcmp(name, "disconnectWindow") == 0 ? 6 : 1), name);
+            // Its lines, measured: a text of paragraphs counts its lines apart (D-082).
+            const qreal line = QFontMetricsF(texts.constFirst()->property("font").value<QFont>()).lineSpacing();
+            QTRY_VERIFY2(texts.constFirst()->property("contentHeight").toReal() > line * (qstrcmp(name, "disconnectWindow") == 0 ? 6 : 1), name);
             QTRY_VERIFY2(one->height() >= one->minimumHeight(), name);
             QMetaObject::invokeMethod(one, "reject");
         }
