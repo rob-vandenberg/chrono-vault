@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_delete_vault_windows.cpp 0.8.122
+// test_delete_vault_windows.cpp 0.8.123
 
 // --- Version history ----------------------------------------------------
+// v0.8.123: The question on one line; whose password it asks; "Password" always; requires its keyfile (D-083)
 // v0.8.122: Initial release: Delete… in Settings > Vaults, its three dialogs (D-083)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -122,7 +123,15 @@ private slots:
         QVERIFY(said.contains(QStringLiteral("The vault and all information it contains will be permanently lost!")));
         QVERIFY(said.contains(QStringLiteral("This action cannot be undone. Are you sure you want to delete the vault?")));
         QCOMPARE(seen(question->contentItem(), QStringLiteral("deleteVaultField"))->property("placeholderText").toString(),
-                 QStringLiteral("Password")); // its own, never the primary's
+                 QStringLiteral("Password"));
+        // Whose password it asks, and the question on one line (the owner, D-083).
+        QCOMPARE(textOf(question, "deleteVaultAsks"), QStringLiteral("Enter the password of the vault you are about to delete."));
+        QQuickItem* paragraphs = seen(question->contentItem(), QStringLiteral("dialogText"));
+        QVERIFY2(paragraphs->implicitWidth() <= paragraphs->width() + 0.5,
+                 qPrintable(QStringLiteral("%1 > %2").arg(paragraphs->implicitWidth()).arg(paragraphs->width())));
+        QVERIFY(question->width() > 440); // wider than before, for the question
+        QCOMPARE(question->findChild<QObject*>(QStringLiteral("deleteVaultKeyfile"))->property("text").toString(),
+                 QStringLiteral("This vault requires its keyfile."));
 
         // Delete in red at the far left, used once a password is typed;
         // Cancel the default at the right.
@@ -185,9 +194,9 @@ private slots:
         QQuickWindow* question = dialog("deleteVaultWindow");
         QVERIFY(askDelete(only));
         QTRY_VERIFY(comesUp(question));
-        // The primary asks its master password.
+        // "Password" for the primary too (the owner, D-083).
         QQuickItem* field = seen(question->contentItem(), QStringLiteral("deleteVaultField"));
-        QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Master Password"));
+        QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Password"));
         field->setProperty("text", QStringLiteral("pass"));
         QVERIFY(QMetaObject::invokeMethod(question->findChild<QObject*>(QStringLiteral("deleteVaultButton")), "clicked"));
         QTRY_VERIFY(!question->isVisible());

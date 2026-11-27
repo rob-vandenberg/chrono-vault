@@ -344,66 +344,66 @@ msgctxt "ConflictWindow|"
 msgid "Field"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:36
+#: ../qml/DeleteVaultWindow.qml:37
 msgctxt "DeleteVaultWindow|"
 msgid "Delete the vault"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:73
+#: ../qml/DeleteVaultWindow.qml:82
 msgctxt "DeleteVaultWindow|"
 msgid "Delete"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:120
+#: ../qml/DeleteVaultWindow.qml:129
 #, qt-format
 msgctxt "DeleteVaultWindow|"
 msgid "WARNING: You are about to delete the vault “%1”."
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:130
+#: ../qml/DeleteVaultWindow.qml:139
 msgctxt "DeleteVaultWindow|"
 msgid "The vault and all information it contains will be permanently lost!"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:131
+#: ../qml/DeleteVaultWindow.qml:151
+msgctxt "DeleteVaultWindow|"
+msgid "Enter the password of the vault you are about to delete."
+msgstr ""
+
+#: ../qml/DeleteVaultWindow.qml:177
+msgctxt "DeleteVaultWindow|"
+msgid "This vault requires its keyfile."
+msgstr ""
+
+#: ../qml/DeleteVaultWindow.qml:45
 msgctxt "DeleteVaultWindow|"
 msgid ""
 "This action cannot be undone. Are you sure you want to delete the vault?"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:142
-msgctxt "DeleteVaultWindow|"
-msgid "Master Password"
-msgstr ""
-
-#: ../qml/DeleteVaultWindow.qml:142
+#: ../qml/DeleteVaultWindow.qml:158
 msgctxt "DeleteVaultWindow|"
 msgid "Password"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:151
+#: ../qml/DeleteVaultWindow.qml:167
 #, qt-format
 msgctxt "DeleteVaultWindow|"
 msgid "Try again in %1"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:161
-msgctxt "DeleteVaultWindow|"
-msgid "This vault needs its keyfile."
-msgstr ""
-
-#: ../qml/DeleteVaultWindow.qml:162
+#: ../qml/DeleteVaultWindow.qml:178
 #, qt-format
 msgctxt "DeleteVaultWindow|"
 msgid "Keyfile: %1"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:167
+#: ../qml/DeleteVaultWindow.qml:183
 msgctxt "DeleteVaultWindow|"
 msgid "Choose keyfile…"
 msgstr ""
 
-#: ../qml/DeleteVaultWindow.qml:187
+#: ../qml/DeleteVaultWindow.qml:203
 msgctxt "DeleteVaultWindow|"
 msgid "Choose the vault's keyfile"
 msgstr ""

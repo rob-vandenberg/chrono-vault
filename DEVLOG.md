@@ -999,3 +999,10 @@ dots of a row always show, since Delete… is in every menu. `qml/DialogWindow.q
 and a missing keyfile, the only vault, WebDAV, a server that fails, stopped at every step, Google Drive's trash) and
 `test_delete_vault_windows` (the three dialogs, their order, Enter and Esc, the start page); the related tests pass,
 each under 20 seconds alone.
+
+## 27 November 2026: version 0.8.123, the Delete dialog as its mockup
+
+`qml/DeleteVaultWindow.qml`: `fitWidth` from the question's own width (TextMetrics), never under 440, so it stands on
+one line in every language; the line "Enter the password of the vault you are about to delete." in the field's group;
+the hint "Password" always; "This vault requires its keyfile.". `test_delete_vault_windows` checks them;
+`test_delete_vault_windows`, `test_dialog_design` and `test_every_string_translatable` pass.

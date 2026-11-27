@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DeleteVaultWindow.qml 0.8.122
+// DeleteVaultWindow.qml 0.8.123
 
 // --- Version history ----------------------------------------------------
+// v0.8.123: As wide as the question on one line; whose password it asks; "Password" always; requires its keyfile (D-083)
 // v0.8.122: Initial release (D-083)
 
 // Delete… in Settings > Vaults (the owner, D-083): a locked vault is deleted
@@ -39,7 +40,15 @@ DialogWindow {
     property string problem: ""
     property bool deleting: false
     readonly property string name: VaultController.vaultNameOf(vaultFile)
-    readonly property bool primaryAsked: vaultFile !== "" && vaultFile === VaultController.primaryVault
+    // Just wide enough that the question stands on one line, in every
+    // language (the owner, D-083).
+    readonly property string question: qsTr("This action cannot be undone. Are you sure you want to delete the vault?")
+    TextMetrics {
+        id: questionWidth
+        font: deleteWindow.font
+        text: deleteWindow.question
+    }
+    fitWidth: Math.max(440, Math.ceil((questionWidth.advanceWidth + 1) / Appearance.factor) + 32)
     readonly property int waitSeconds: VaultController.askWaitSeconds
     readonly property bool busy: deleting || VaultController.askBusy
     readonly property string said: problem !== "" ? problem : VaultController.askMessage
@@ -128,7 +137,7 @@ DialogWindow {
                 textFormat: Text.RichText
                 text: deleteWindow.paragraphs([
                     qsTr("The vault and all information it contains will be permanently lost!"),
-                    qsTr("This action cannot be undone. Are you sure you want to delete the vault?")])
+                    deleteWindow.question])
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -136,10 +145,17 @@ DialogWindow {
         ExactColumn {
             gap: 8 * Appearance.factor
             Layout.fillWidth: true
+            // Whose password it asks (the owner, D-083).
+            Label {
+                objectName: "deleteVaultAsks"
+                text: qsTr("Enter the password of the vault you are about to delete.")
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
             PasswordField {
                 id: field
                 objectName: "deleteVaultField"
-                placeholderText: deleteWindow.primaryAsked ? qsTr("Master Password") : qsTr("Password")
+                placeholderText: qsTr("Password")
                 enabled: deleteWindow.waitSeconds === 0 && !deleteWindow.deleting
                 Layout.fillWidth: true
                 // Enter in the field never deletes (the owner, D-083).
@@ -158,7 +174,7 @@ DialogWindow {
                 Layout.fillWidth: true
                 Label {
                     objectName: "deleteVaultKeyfile"
-                    text: VaultController.askKeyfile === "" ? qsTr("This vault needs its keyfile.")
+                    text: VaultController.askKeyfile === "" ? qsTr("This vault requires its keyfile.")
                           : qsTr("Keyfile: %1").arg(VaultController.askKeyfile)
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true

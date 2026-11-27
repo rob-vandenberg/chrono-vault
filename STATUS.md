@@ -2,6 +2,10 @@
 
 ## Now
 
+**Version 0.8.123**: the Delete dialog as the owner's mockup (D-083): just wide enough that its question stands on one
+line; "Enter the password of the vault you are about to delete." above the field; the hint "Password" for every
+vault; "This vault requires its keyfile.".
+
 **Version 0.8.122**: Delete… in every vault's menu in Settings > Vaults (D-083). The primary while other vaults exist,
 an open and a closed vault each say why they cannot be deleted, with Close only. A locked vault asks its own password
 (and keyfile) under a bold warning; Delete in red at the far left, Cancel the default; Enter and Esc never delete. A

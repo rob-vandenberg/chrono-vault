@@ -363,12 +363,12 @@
 <context>
     <name>DeleteVaultWindow</name>
     <message>
-        <location filename="../qml/DeleteVaultWindow.qml" line="+36"/>
+        <location filename="../qml/DeleteVaultWindow.qml" line="+37"/>
         <source>Delete the vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+37"/>
+        <location line="+45"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -383,17 +383,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+12"/>
+        <source>Enter the password of the vault you are about to delete.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>This vault requires its keyfile.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-132"/>
         <source>This action cannot be undone. Are you sure you want to delete the vault?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
-        <source>Master Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+0"/>
+        <location line="+113"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -403,12 +408,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
-        <source>This vault needs its keyfile.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="+11"/>
         <source>Keyfile: %1</source>
         <translation type="unfinished"></translation>
     </message>

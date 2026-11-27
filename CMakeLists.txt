@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.122 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.123 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.122
+# CMakeLists.txt 0.8.123
 
 # --- Version history ----------------------------------------------------
+# v0.8.123: Version 0.8.123; the Delete dialog as its mockup (D-083)
 # v0.8.122: Version 0.8.122; Delete a vault (D-083)
 # v0.8.121: Version 0.8.121; every dialog as its mockup (D-082)
 # v0.8.120: Version 0.8.120; one design for every dialog, WebDAV and Google Drive straight to the file dialog (D-082)
