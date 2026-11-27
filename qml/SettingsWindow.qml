@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.128
+// SettingsWindow.qml 0.8.129
 
 // --- Version history ----------------------------------------------------
+// v0.8.129: Forget and Disconnect on a closed or locked vault: first the password dialog, then the warning (the owner, D-060)
 // v0.8.128: The password dialog per action; Forget and Disconnect ask a closed or locked vault's password; the fingerprint for the primary only (D-043, D-060, D-073)
 // v0.8.127: Make primary asks the master password, the current primary's, before the crown moves (D-074)
 // v0.8.126: The standard master password dialog, the primary vault's, before the finger (D-043)
@@ -95,6 +96,12 @@ import QtQuick.Layouts
 // topic being shown, to be kept with OK (D-022).
 ApplicationWindow {
     id: settingsWindow
+    // Forget and Disconnect ask the password of a closed or locked vault whose
+    // file is on this computer; the open vault's owner needs none (the owner, D-060).
+    function needsVaultPassword(file) {
+        return VaultController.foundVaults.indexOf(file) >= 0
+               && !(VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked)
+    }
     // The program's font, so the UI scaling reaches every control (D-023).
     font: Appearance.font
     // The program's colours, never the desktop theme's (D-023).
@@ -1261,8 +1268,7 @@ ApplicationWindow {
                                                 onTriggered: {
                                                     forgetWindow.vaultFile = vaultRow.modelData
                                                     forgetWindow.onWebDav = vaultRow.place.inCloud === true
-                                                    forgetWindow.open()
-                                                    forgetPassword.start(vaultRow.modelData)
+                                                    forgetAsk.start(vaultRow.modelData)
                                                 }
                                             }
                                             MenuItem {
@@ -1287,8 +1293,7 @@ ApplicationWindow {
                                                 onTriggered: {
                                                     disconnectWindow.vaultFile = vaultRow.modelData
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
-                                                    disconnectWindow.open()
-                                                    disconnectPassword.start(vaultRow.modelData)
+                                                    disconnectAsk.start(vaultRow.modelData)
                                                 }
                                             }
                                             // Every vault, every state (the owner, D-083).
@@ -1584,16 +1589,25 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property bool onWebDav: false
+                            // The vault's password was proven in the dialog before this one.
+                            property bool proofKept: false
                             title: qsTr("Forget the vault")
                             standardButtons: Dialog.Cancel
                             rightButtons: Button {
                                 objectName: "forgetButton"
                                 text: qsTr("Forget")
-                                enabled: forgetPassword.ready
-                                // A closed or locked vault: its password first, in this dialog (the owner, D-060).
-                                onClicked: forgetPassword.go()
+                                onClicked: {
+                                    VaultController.forgetVault(forgetWindow.vaultFile)
+                                    forgetWindow.accept()
+                                }
                             }
-                            onVisibleChanged: if (!visible) forgetPassword.stop()
+                            // Nothing proven is left behind.
+                            onVisibleChanged: {
+                                if (!visible && proofKept) {
+                                    proofKept = false
+                                    VaultController.stopAsking()
+                                }
+                            }
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
@@ -1607,15 +1621,26 @@ ApplicationWindow {
                                     qsTr("Are you sure you want Chrono Vault to forget “%1”?").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))])
                                 wrapMode: Text.Wrap
                             }
-                            VaultPasswordPart {
-                                id: forgetPassword
-                                objectName: "forgetPassword"
-                                action: "forget"
-                                Layout.topMargin: 8 * Appearance.factor
-                                onProven: function(file) {
-                                    VaultController.forgetVault(file)
-                                    forgetWindow.accept()
-                                }
+                        }
+                        // A closed or locked vault: first its password, in the standard
+                        // dialog, then the warning (the owner, D-060). The open vault's
+                        // owner, and a vault whose file is not here, only the warning.
+                        AskWindow {
+                            id: forgetAsk
+                            objectName: "forgetAskWindow"
+                            transientParent: settingsWindow
+                            typedOnly: true
+                            action: "forget"
+                            function start(file) {
+                                if (settingsWindow.needsVaultPassword(file))
+                                    askVault(file)
+                                else
+                                    forgetWindow.open()
+                            }
+                            onRight: {
+                                forgetWindow.proofKept = true
+                                handOn()
+                                forgetWindow.open()
                             }
                         }
                         DialogWindow {
@@ -1626,16 +1651,25 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property string storageName: ""
+                            // The vault's password was proven in the dialog before this one.
+                            property bool proofKept: false
                             title: qsTr("Disconnect from %1").arg(storageName)
                             standardButtons: Dialog.Cancel
                             rightButtons: Button {
                                 objectName: "disconnectButton"
                                 text: qsTr("Disconnect")
-                                enabled: disconnectPassword.ready
-                                // A closed or locked vault: its password first, in this dialog (the owner, D-060).
-                                onClicked: disconnectPassword.go()
+                                onClicked: {
+                                    VaultController.disconnectVault(disconnectWindow.vaultFile)
+                                    disconnectWindow.accept()
+                                }
                             }
-                            onVisibleChanged: if (!visible) disconnectPassword.stop()
+                            // Nothing proven is left behind.
+                            onVisibleChanged: {
+                                if (!visible && proofKept) {
+                                    proofKept = false
+                                    VaultController.stopAsking()
+                                }
+                            }
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
@@ -1647,15 +1681,23 @@ ApplicationWindow {
                                     qsTr("This action cannot be undone. Are you sure you want to disconnect from “%1”?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))])
                                 wrapMode: Text.Wrap
                             }
-                            VaultPasswordPart {
-                                id: disconnectPassword
-                                objectName: "disconnectPassword"
-                                action: "disconnect"
-                                Layout.topMargin: 8 * Appearance.factor
-                                onProven: function(file) {
-                                    VaultController.disconnectVault(file)
-                                    disconnectWindow.accept()
-                                }
+                        }
+                        AskWindow {
+                            id: disconnectAsk
+                            objectName: "disconnectAskWindow"
+                            transientParent: settingsWindow
+                            typedOnly: true
+                            action: "disconnect"
+                            function start(file) {
+                                if (settingsWindow.needsVaultPassword(file))
+                                    askVault(file)
+                                else
+                                    disconnectWindow.open()
+                            }
+                            onRight: {
+                                disconnectWindow.proofKept = true
+                                handOn()
+                                disconnectWindow.open()
                             }
                         }
                     }

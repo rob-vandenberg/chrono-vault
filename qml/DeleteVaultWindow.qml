@@ -21,16 +21,17 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DeleteVaultWindow.qml 0.8.123
+// DeleteVaultWindow.qml 0.8.129
 
 // --- Version history ----------------------------------------------------
+// v0.8.129: Two dialogs: the password in the standard dialog first, then this warning (the owner, D-083)
 // v0.8.123: As wide as the question on one line; whose password it asks; "Password" always; requires its keyfile (D-083)
 // v0.8.122: Initial release (D-083)
 
-// Delete… in Settings > Vaults (the owner, D-083): a locked vault is deleted
-// for good once its own password (and keyfile) is typed and proven. Delete
-// stands apart at the far left in red; Cancel is the default; Enter and Esc
-// never delete.
+// Delete… in Settings > Vaults (the owner, D-083): a locked vault's own
+// password (and keyfile) is first typed and proven in the standard dialog;
+// then this warning, as an extra confirmation. Delete stands apart at the far
+// left in red; Cancel is the default; Enter and Esc never delete.
 DialogWindow {
     id: deleteWindow
     objectName: "deleteVaultWindow"
@@ -49,30 +50,32 @@ DialogWindow {
         text: deleteWindow.question
     }
     fitWidth: Math.max(440, Math.ceil((questionWidth.advanceWidth + 1) / Appearance.factor) + 32)
-    readonly property int waitSeconds: VaultController.askWaitSeconds
-    readonly property bool busy: deleting || VaultController.askBusy
-    readonly property string said: problem !== "" ? problem : VaultController.askMessage
+    readonly property bool busy: deleting
 
+    // The password, proven in the standard dialog, is kept until this
+    // warning closes.
+    AskWindow {
+        id: askWindow
+        objectName: "deleteAskWindow"
+        transientParent: deleteWindow.transientParent
+        typedOnly: true
+        action: "delete"
+        onRight: {
+            handOn()
+            deleteWindow.open()
+        }
+    }
     function askVault(file) {
         problem = ""
         deleting = false
         vaultFile = file
-        field.clear()
-        VaultController.askFor(file)
-        if (!visible)
-            open()
-        field.forceActiveFocus()
+        askWindow.askVault(file)
     }
-    // The password first proven against the vault's copy on this computer,
-    // off the window's thread (OR-5); only then deleted.
     function go() {
-        if (field.text === "" || busy || waitSeconds > 0)
+        if (busy || problem !== "")
             return
-        const words = field.text
-        field.clear()
-        problem = ""
         deleting = true
-        VaultController.proveWithPassword(words)
+        VaultController.deleteVault(vaultFile)
     }
 
     standardButtons: Dialog.Cancel
@@ -83,38 +86,26 @@ DialogWindow {
         palette.buttonText: "#ff6b6b" // every button with red text (the owner, D-082)
         // Enter never deletes (the owner, D-083).
         property bool enterNeverPresses: true
-        enabled: field.text !== "" && !deleteWindow.busy && deleteWindow.waitSeconds === 0
+        // After a failure the proof is gone: the vault's password again, from its menu.
+        enabled: !deleteWindow.busy && deleteWindow.problem === ""
         onClicked: deleteWindow.go()
     }
+    // Nothing proven is left behind.
     onVisibleChanged: {
-        if (!visible) {
-            field.clear()
+        if (!visible)
             VaultController.stopAsking()
-        }
     }
     Connections {
         target: VaultController
         enabled: deleteWindow.visible
-        function onProven(file) {
-            if (file === deleteWindow.vaultFile && deleteWindow.deleting)
-                VaultController.deleteVault(file)
-        }
-        function onAskChanged() {
-            // A wrong password: the dialog stays and says so.
-            if (deleteWindow.deleting && !VaultController.askBusy && VaultController.askTrouble)
-                deleteWindow.deleting = false
-        }
         function onDeleteDone(ok, problem) {
             if (!deleteWindow.deleting)
                 return
             deleteWindow.deleting = false
-            if (ok) {
+            if (ok)
                 deleteWindow.accept()
-            } else {
+            else
                 deleteWindow.problem = problem
-                VaultController.askFor(deleteWindow.vaultFile) // asked again, as new
-                field.forceActiveFocus()
-            }
         }
     }
 
@@ -142,69 +133,14 @@ DialogWindow {
                 Layout.fillWidth: true
             }
         }
-        ExactColumn {
-            gap: 8 * Appearance.factor
+        Label {
+            objectName: "deleteVaultProblem"
+            visible: text !== ""
+            text: deleteWindow.problem
+            textFormat: Text.PlainText
+            color: "#e53e3e"
+            wrapMode: Text.Wrap
             Layout.fillWidth: true
-            // Whose password it asks (the owner, D-083).
-            Label {
-                objectName: "deleteVaultAsks"
-                text: qsTr("Enter the password of the vault you are about to delete.")
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-            PasswordField {
-                id: field
-                objectName: "deleteVaultField"
-                placeholderText: qsTr("Password")
-                enabled: deleteWindow.waitSeconds === 0 && !deleteWindow.deleting
-                Layout.fillWidth: true
-                // Enter in the field never deletes (the owner, D-083).
-                onEnabledChanged: if (enabled && deleteWindow.visible) forceActiveFocus()
-            }
-            Label {
-                objectName: "deleteVaultWait"
-                visible: deleteWindow.waitSeconds > 0
-                text: qsTr("Try again in %1").arg(Math.floor(deleteWindow.waitSeconds / 60) + ":"
-                                                  + String(deleteWindow.waitSeconds % 60).padStart(2, "0"))
-                Layout.fillWidth: true
-            }
-            // The keyfile, when this vault has one, as unlocking asks it (Q7).
-            ExactRow {
-                visible: VaultController.askKeyfileNeeded
-                Layout.fillWidth: true
-                Label {
-                    objectName: "deleteVaultKeyfile"
-                    text: VaultController.askKeyfile === "" ? qsTr("This vault requires its keyfile.")
-                          : qsTr("Keyfile: %1").arg(VaultController.askKeyfile)
-                    elide: Text.ElideMiddle
-                    Layout.fillWidth: true
-                }
-                Button {
-                    text: qsTr("Choose keyfile…")
-                    onClicked: keyfileDialog.open()
-                }
-            }
-            Label {
-                objectName: "deleteVaultProblem"
-                visible: text !== ""
-                text: deleteWindow.said
-                textFormat: Text.PlainText
-                color: deleteWindow.problem !== "" || VaultController.askTrouble ? "#e53e3e" : deleteWindow.palette.windowText
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-            }
-        }
-    }
-
-    FilePicker {
-        id: keyfileDialog
-        memoryName: "UnlockPage.unlockKeyfileDialog"
-        parentWindow: deleteWindow
-        title: qsTr("Choose the vault's keyfile")
-        fileMode: FileDialog.OpenFile
-        onAccepted: {
-            VaultController.setAskKeyfile(selectedFile)
-            field.forceActiveFocus()
         }
     }
 }

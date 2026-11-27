@@ -18,9 +18,10 @@
 #include "intuitive_fixture.h"
 
 // --- Version ------------------------------------------------------------
-// test_delete_vault_windows.cpp 0.8.123
+// test_delete_vault_windows.cpp 0.8.129
 
 // --- Version history ----------------------------------------------------
+// v0.8.129: Two dialogs: the password dialog first, then the warning (the owner, D-083)
 // v0.8.123: The question on one line; whose password it asks; "Password" always; requires its keyfile (D-083)
 // v0.8.122: Initial release: Delete… in Settings > Vaults, its three dialogs (D-083)
 
@@ -110,68 +111,87 @@ private slots:
         closeIt(refused);
         QVERIFY(QFileInfo::exists(secondFile));
 
-        // 3. Locked: the question, the first line bold.
+        // 3. Locked: first the vault's password in the standard dialog
+        // (the owner, D-083), "Password" always; the warning only after it.
+        QQuickWindow* asked = dialog("deleteAskWindow");
+        QVERIFY(asked);
+        QObject* field = asked->findChild<QObject*>(QStringLiteral("askField"));
+        QObject* ok = asked->findChild<QObject*>(QStringLiteral("askOk"));
+        QVERIFY(field && ok);
         controller->lockVault(secondFile);
         QTRY_COMPARE(controller->vaultStateOf(secondFile), 0);
         QVERIFY(askDelete(second));
+        QTRY_VERIFY(comesUp(asked));
+        QVERIFY(!question->isVisible() && !refused->isVisible());
+        QCOMPARE(asked->title(), QStringLiteral("Delete the vault"));
+        QCOMPARE(asked->property("heading").toString(), QStringLiteral("Enter the password of the vault you are about to delete."));
+        QCOMPARE(asked->property("okText").toString(), QStringLiteral("Delete"));
+        QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Password"));
+        QVERIFY(!asked->property("fingerWanted").toBool());
+        // A wrong password: the password dialog stays and says so; no warning.
+        field->setProperty("text", QStringLiteral("wrong"));
+        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+        QTRY_VERIFY(controller->askTrouble());
+        QVERIFY(asked->isVisible() && !question->isVisible());
+        // The right one: the warning, nothing deleted yet.
+        field->setProperty("text", QStringLiteral("two"));
+        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
         QTRY_VERIFY(comesUp(question));
-        QVERIFY(!refused->isVisible());
+        QTRY_VERIFY(!asked->isVisible());
+        QVERIFY(QFileInfo::exists(secondFile));
+
+        // The warning: the first line bold, the question on one line.
         QQuickItem* warning = seen(question->contentItem(), QStringLiteral("deleteWarning"));
         QCOMPARE(warning->property("text").toString(), QStringLiteral("WARNING: You are about to delete the vault “second”."));
         QVERIFY(warning->property("font").value<QFont>().bold());
         const QString said = textOf(question, "dialogText");
         QVERIFY(said.contains(QStringLiteral("The vault and all information it contains will be permanently lost!")));
         QVERIFY(said.contains(QStringLiteral("This action cannot be undone. Are you sure you want to delete the vault?")));
-        QCOMPARE(seen(question->contentItem(), QStringLiteral("deleteVaultField"))->property("placeholderText").toString(),
-                 QStringLiteral("Password"));
-        // Whose password it asks, and the question on one line (the owner, D-083).
-        QCOMPARE(textOf(question, "deleteVaultAsks"), QStringLiteral("Enter the password of the vault you are about to delete."));
         QQuickItem* paragraphs = seen(question->contentItem(), QStringLiteral("dialogText"));
         QVERIFY2(paragraphs->implicitWidth() <= paragraphs->width() + 0.5,
                  qPrintable(QStringLiteral("%1 > %2").arg(paragraphs->implicitWidth()).arg(paragraphs->width())));
         QVERIFY(question->width() > 440); // wider than before, for the question
-        QCOMPARE(question->findChild<QObject*>(QStringLiteral("deleteVaultKeyfile"))->property("text").toString(),
-                 QStringLiteral("This vault requires its keyfile."));
 
-        // Delete in red at the far left, used once a password is typed;
-        // Cancel the default at the right.
+        // Delete in red at the far left; Cancel the default at the right.
         auto* remove = qobject_cast<QQuickItem*>(question->findChild<QObject*>(QStringLiteral("deleteVaultButton")));
         QVERIFY(remove);
         QCOMPARE(remove->property("palette").value<QObject*>()->property("buttonText").value<QColor>(), QColor("#ff6b6b"));
         QVERIFY(std::abs(remove->mapToScene(QPointF(0, 0)).x() - 16) <= 1);
-        QVERIFY(!remove->isEnabled());
+        QVERIFY(remove->isEnabled());
         auto* cancel = qvariant_cast<QQuickItem*>(question->property("enterTarget"));
         QVERIFY(cancel && cancel->property("text").toString() == QStringLiteral("Cancel"));
         QVERIFY(cancel->mapToScene(QPointF(0, 0)).x() > question->width() / 2);
 
-        // Enter never deletes: in the field, nor on Delete itself.
-        QQuickItem* field = seen(question->contentItem(), QStringLiteral("deleteVaultField"));
-        field->forceActiveFocus();
-        for (const char letter : {'t', 'w', 'o'}) {
-            QTest::keyClick(question, letter);
-        }
-        QTRY_VERIFY(remove->isEnabled());
-        QTest::keyClick(question, Qt::Key_Return);
+        // Enter never deletes, not on Delete itself.
         remove->forceActiveFocus();
         QTest::keyClick(question, Qt::Key_Return);
         QTest::qWait(200);
         QVERIFY(question->isVisible());
         QVERIFY(QFileInfo::exists(secondFile));
-        // Esc is Cancel: nothing deleted.
+        // Esc is Cancel: nothing deleted, nothing proven left behind.
         QTest::keyClick(question, Qt::Key_Escape);
         QTRY_VERIFY(!question->isVisible());
         QVERIFY(QFileInfo::exists(secondFile));
-
-        // A wrong password: the dialog stays and says so.
-        QVERIFY(askDelete(second));
-        QTRY_VERIFY(comesUp(question));
-        field->setProperty("text", QStringLiteral("wrong"));
-        QVERIFY(QMetaObject::invokeMethod(remove, "clicked"));
-        QTRY_VERIFY(!textOf(question, "deleteVaultProblem").isEmpty());
-        QVERIFY(question->isVisible());
+        controller->deleteVault(secondFile);
+        QTest::qWait(200);
         QVERIFY(QFileInfo::exists(secondFile));
-        // The right one: deleted, the dialog closes, the row goes.
+
+        // Enter is Cancel, the default: nothing deleted.
+        QVERIFY(askDelete(second));
+        QTRY_VERIFY(comesUp(asked));
         field->setProperty("text", QStringLiteral("two"));
+        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+        QTRY_VERIFY(comesUp(question));
+        QTest::keyClick(question, Qt::Key_Return);
+        QTRY_VERIFY(!question->isVisible());
+        QVERIFY(QFileInfo::exists(secondFile));
+
+        // Again, and Delete: deleted, the warning closes, the row goes.
+        QVERIFY(askDelete(second));
+        QTRY_VERIFY(comesUp(asked));
+        field->setProperty("text", QStringLiteral("two"));
+        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+        QTRY_VERIFY(comesUp(question));
         QVERIFY(QMetaObject::invokeMethod(remove, "clicked"));
         QTRY_VERIFY(!question->isVisible());
         QVERIFY(!QFileInfo::exists(secondFile));
@@ -192,12 +212,15 @@ private slots:
         settings()->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
         QTRY_VERIFY(there(QStringLiteral("vaultMenuButton_") + only));
         QQuickWindow* question = dialog("deleteVaultWindow");
+        QQuickWindow* asked = dialog("deleteAskWindow");
         QVERIFY(askDelete(only));
-        QTRY_VERIFY(comesUp(question));
+        QTRY_VERIFY(comesUp(asked));
         // "Password" for the primary too (the owner, D-083).
-        QQuickItem* field = seen(question->contentItem(), QStringLiteral("deleteVaultField"));
+        QObject* field = asked->findChild<QObject*>(QStringLiteral("askField"));
         QCOMPARE(field->property("placeholderText").toString(), QStringLiteral("Password"));
         field->setProperty("text", QStringLiteral("pass"));
+        QVERIFY(QMetaObject::invokeMethod(asked->findChild<QObject*>(QStringLiteral("askOk")), "clicked"));
+        QTRY_VERIFY(comesUp(question));
         QVERIFY(QMetaObject::invokeMethod(question->findChild<QObject*>(QStringLiteral("deleteVaultButton")), "clicked"));
         QTRY_VERIFY(!question->isVisible());
         QVERIFY(!QFileInfo::exists(file));

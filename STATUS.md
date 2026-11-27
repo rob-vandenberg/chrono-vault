@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.129**: Forget, Disconnect and Delete on a closed or locked vault are two dialogs: first the standard
+password dialog, then the warning with its question (the owner, D-060, D-083).
+
 **Version 0.8.128**: the password dialog says what the password is for: each action its own title, heading and button
 (D-073). The fingerprint is the administrator's: only the primary vault's key lies behind it, it is turned on with the
 primary open or with the master password (no open vault needed), and Make primary turns it off (D-043). Forget and

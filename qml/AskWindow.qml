@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.8.128
+// AskWindow.qml 0.8.129
 
 // --- Version history ----------------------------------------------------
+// v0.8.129: Forget, Disconnect and Delete: their words; the proof handed on to the warning that follows (D-060)
 // v0.8.128: The action as one word, its title, heading and button in whole sentences (D-073)
 // v0.8.125: typedOnly: the password typed, never a finger (D-043)
 // v0.8.121: The new PIN 16 apart (D-082)
@@ -58,7 +59,7 @@ DialogWindow {
     readonly property bool primaryAsked: vaultFile !== "" && vaultFile === VaultController.primaryVault
     // What the password is for, one word; the dialog says it in whole
     // sentences, for translators (the owner, D-073): unlock, export, import,
-    // pin, fingerprint, primary, retry, webdav.
+    // pin, fingerprint, primary, retry, webdav, forget, disconnect, delete.
     property string action: "unlock"
     // Set PIN or Change PIN.
     property bool changesPin: false
@@ -86,6 +87,12 @@ DialogWindow {
         case "retry":
             return [qsTr("Retry sync"), m ? qsTr("Enter the Master Password of the vault the items come from")
                                           : qsTr("Enter the password of the vault the items come from"), qsTr("Retry")]
+        case "forget":
+            return [qsTr("Forget the vault"), m ? qsTr("Enter the Master Password to forget the vault") : qsTr("Enter the password to forget the vault"), qsTr("Forget")]
+        case "disconnect":
+            return [qsTr("Disconnect the vault"), m ? qsTr("Enter the Master Password to disconnect the vault") : qsTr("Enter the password to disconnect the vault"), qsTr("Disconnect")]
+        case "delete":
+            return [qsTr("Delete the vault"), qsTr("Enter the password of the vault you are about to delete."), qsTr("Delete")]
         case "webdav":
             return [qsTr("WebDAV password"), qsTr("Enter the password of the WebDAV server"), qsTr("OK")]
         default:
@@ -95,7 +102,8 @@ DialogWindow {
     // Make primary: the vault that is to be crowned.
     property string newPrimaryName: ""
     readonly property string heading: words[1]
-    readonly property string hint: action === "webdav" ? qsTr("Password") : master ? qsTr("Master Password") : qsTr("Password")
+    // Delete says "Password", for the primary too (the owner, D-083).
+    readonly property string hint: action === "webdav" || action === "delete" ? qsTr("Password") : master ? qsTr("Master Password") : qsTr("Password")
     readonly property string okText: words[2]
     readonly property bool proving: vaultFile !== ""
     readonly property int waitSeconds: proving ? VaultController.askWaitSeconds : 0
@@ -112,7 +120,15 @@ DialogWindow {
     // Another vault picked in the list.
     signal picked(string vaultFile)
 
+    // The proof kept when this dialog closes, for the warning that follows
+    // (Forget, Disconnect); that warning wipes it when it closes (D-060).
+    property bool proofHandedOn: false
+    function handOn() {
+        proofHandedOn = true
+        accept()
+    }
     function askVault(file) {
+        proofHandedOn = false
         problem = ""
         name = ""
         vaultFile = file
@@ -180,7 +196,7 @@ DialogWindow {
             field.clear()
             newPin.clear()
             vaultBox.popup.close()
-            if (proving)
+            if (proving && !proofHandedOn)
                 VaultController.stopAsking()
         }
     }

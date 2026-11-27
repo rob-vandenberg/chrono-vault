@@ -27,7 +27,7 @@
 <context>
     <name>AskWindow</name>
     <message>
-        <location filename="../qml/AskWindow.qml" line="+92"/>
+        <location filename="../qml/AskWindow.qml" line="+99"/>
         <source>Enter the Master Password to unlock</source>
         <translation type="unfinished"></translation>
     </message>
@@ -37,7 +37,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>Master Password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -47,7 +47,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-6"/>
+        <location line="-7"/>
         <source>Unlock</source>
         <translation type="unfinished"></translation>
     </message>
@@ -57,7 +57,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+168"/>
+        <location line="+177"/>
         <source>New PIN (at least %1 characters)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -67,7 +67,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-173"/>
+        <location line="-188"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -190,6 +190,61 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>Forget the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Enter the Master Password to forget the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Enter the password to forget the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Forget</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Disconnect the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Enter the Master Password to disconnect the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Enter the password to disconnect the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Disconnect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Delete the vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Enter the password of the vault you are about to delete.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>WebDAV password</source>
         <translation type="unfinished"></translation>
     </message>
@@ -204,7 +259,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+162"/>
+        <location line="+171"/>
         <source>Remember my credentials</source>
         <translation type="unfinished"></translation>
     </message>
@@ -500,17 +555,17 @@
 <context>
     <name>DeleteVaultWindow</name>
     <message>
-        <location filename="../qml/DeleteVaultWindow.qml" line="+37"/>
+        <location filename="../qml/DeleteVaultWindow.qml" line="+38"/>
         <source>Delete the vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location line="+47"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+35"/>
         <source>WARNING: You are about to delete the vault “%1”.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -520,43 +575,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
-        <source>Enter the password of the vault you are about to delete.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+26"/>
-        <source>This vault requires its keyfile.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="-132"/>
+        <location line="-84"/>
         <source>This action cannot be undone. Are you sure you want to delete the vault?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+113"/>
-        <source>Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+9"/>
-        <source>Try again in %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>Keyfile: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Choose keyfile…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+20"/>
-        <source>Choose the vault&apos;s keyfile</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -674,7 +694,7 @@
 <context>
     <name>ExportWindow</name>
     <message>
-        <location filename="../qml/ExportWindow.qml" line="+44"/>
+        <location filename="../qml/ExportWindow.qml" line="+45"/>
         <source>Export the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1634,7 +1654,7 @@
 <context>
     <name>ImportWindow</name>
     <message>
-        <location filename="../qml/ImportWindow.qml" line="+66"/>
+        <location filename="../qml/ImportWindow.qml" line="+67"/>
         <location line="+66"/>
         <source>Import</source>
         <translation type="unfinished"></translation>
@@ -2110,7 +2130,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="+91"/>
+        <location filename="../qml/Main.qml" line="+92"/>
         <source>Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2594,7 +2614,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+364"/>
+        <location filename="../qml/SettingsWindow.qml" line="+371"/>
         <location line="+373"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2653,12 +2673,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1220"/>
+        <location line="+1255"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1221"/>
+        <location line="-1256"/>
         <location line="+450"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2804,12 +2824,12 @@
     </message>
     <message>
         <location line="+9"/>
-        <location line="+138"/>
+        <location line="+136"/>
         <source>Make primary vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-106"/>
+        <location line="-105"/>
         <source>Import…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2824,7 +2844,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+12"/>
         <source>Delete…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2879,7 +2899,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+41"/>
         <source>Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2899,12 +2919,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+39"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+122"/>
+        <location line="+137"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2919,7 +2939,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-956"/>
+        <location line="-991"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3005,7 +3025,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+898"/>
+        <location line="+933"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3020,7 +3040,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-550"/>
+        <location line="-585"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3050,7 +3070,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+227"/>
         <source>Where should the vault be moved to?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3070,7 +3090,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+62"/>
         <source>Forget the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3080,12 +3100,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+58"/>
         <source>Disconnect from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+23"/>
         <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3100,7 +3120,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+185"/>
+        <location line="+193"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3125,14 +3145,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1464"/>
-        <location line="+1477"/>
+        <location line="-1499"/>
+        <location line="+1512"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1477"/>
-        <location line="+1490"/>
+        <location line="-1512"/>
+        <location line="+1525"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3200,7 +3220,7 @@
 <context>
     <name>SyncConflictsWindow</name>
     <message>
-        <location filename="../qml/SyncConflictsWindow.qml" line="+199"/>
+        <location filename="../qml/SyncConflictsWindow.qml" line="+200"/>
         <source>Sync conflicts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4199,64 +4219,6 @@
     </message>
 </context>
 <context>
-    <name>VaultPasswordPart</name>
-    <message>
-        <location filename="../qml/VaultPasswordPart.qml" line="+100"/>
-        <source>Enter the Master Password to disconnect the vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Enter the password to disconnect the vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Enter the Master Password to forget the vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Enter the password to forget the vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>Master Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+0"/>
-        <source>Password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>Try again in %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
-        <source>This vault requires its keyfile.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Keyfile: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Choose keyfile…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+17"/>
-        <source>Choose the vault&apos;s keyfile</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>WebDavFileDialog</name>
     <message>
         <location filename="../qml/WebDavFileDialog.qml" line="+67"/>
@@ -4930,7 +4892,7 @@
         <location line="+2158"/>
         <location line="+467"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="+338"/>
-        <location filename="../src/ui/vault_controller_vaults.cpp" line="+98"/>
+        <location filename="../src/ui/vault_controller_vaults.cpp" line="+99"/>
         <location line="+12"/>
         <location line="+40"/>
         <location line="+398"/>
@@ -5542,7 +5504,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+56"/>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+57"/>
         <source>Google Drive cannot be reached. Check the network.</source>
         <translation type="unfinished"></translation>
     </message>

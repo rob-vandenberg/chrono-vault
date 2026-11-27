@@ -1048,3 +1048,12 @@ turns the finger off. `forgetVault` and `disconnectVault` need `typedProofOf` fo
 fingerprint dialog's words, every action's words, Forget's password part), `test_pin_unlock`, `test_vault_menu`; the
 related tests pass, each under 20 seconds.
 Review: a finger was asked for the open vault's PIN, and Forget left the proof in memory; both fixed, round 3 clean.
+
+## 27 November 2026: version 0.8.129, Forget, Disconnect and Delete: the password first, then the warning
+
+0.8.128 put the password inside the warning, one dialog; the owner had asked for two. Now `forgetAsk`,
+`disconnectAsk` (Settings) and the `deleteAskWindow` inside `DeleteVaultWindow` are `AskWindow`s with the actions
+forget, disconnect and delete; a right password hands its proof on (`handOn`) and opens the warning, which wipes it when
+it closes. `VaultPasswordPart.qml` is removed. Tests: `test_reader` (the words, Forget and Disconnect: password first,
+a wrong one stays, Cancel on the warning forgets nothing and leaves no proof), `test_delete_vault_windows` (the same for
+Delete; Enter on the warning is Cancel); the related tests pass, each under 20 seconds.
