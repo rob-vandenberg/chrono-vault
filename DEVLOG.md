@@ -1006,3 +1006,9 @@ each under 20 seconds alone.
 one line in every language; the line "Enter the password of the vault you are about to delete." in the field's group;
 the hint "Password" always; "This vault requires its keyfile.". `test_delete_vault_windows` checks them;
 `test_delete_vault_windows`, `test_dialog_design` and `test_every_string_translatable` pass.
+
+## 27 November 2026: version 0.8.124, the tray icon follows its setting
+
+`SystemTray` shows its icon only while `keepInTray` is on and follows `keepInTrayChanged`; `main.cpp` starts
+minimized to the taskbar when the icon is off. `test_tray` passes; its new case is skipped on the offscreen test
+platform (no tray) and passed once on the real desktop.

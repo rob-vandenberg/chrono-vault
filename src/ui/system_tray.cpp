@@ -26,9 +26,10 @@
 #include <QWindow>
 
 // --- Version ------------------------------------------------------------
-// system_tray.cpp 0.6.106
+// system_tray.cpp 0.8.124
 
 // --- Version history ----------------------------------------------------
+// v0.8.124: The icon only while Keep Chrono Vault running in the system tray is on (D-019)
 // v0.6.106: Lock while the key store is open (D-075)
 // v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
@@ -66,9 +67,20 @@ SystemTray::SystemTray(VaultController* vaultController, QWindow* mainWindow, QO
     if (icon) {
         icon->setIcon(QIcon(iconFile()));
     }
+    // Only while "Keep Chrono Vault running in the system tray" is on (the
+    // owner, D-019), following it at once.
     if (icon) {
-        icon->show();
+        icon->setVisible(!controller || controller->keepInTray());
+        if (controller) {
+            connect(controller, &VaultController::keepInTrayChanged, icon,
+                    [this]() { icon->setVisible(controller && controller->keepInTray()); });
+        }
     }
+}
+
+bool SystemTray::iconShown() const
+{
+    return icon && icon->isVisible();
 }
 
 SystemTray::~SystemTray()

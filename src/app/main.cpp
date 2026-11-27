@@ -39,9 +39,10 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 // --- Version ------------------------------------------------------------
-// main.cpp 0.0.40
+// main.cpp 0.8.124
 
 // --- Version history ----------------------------------------------------
+// v0.8.124: A minimized start goes to the taskbar while the tray icon is off (D-019)
 // v0.0.40: The shipped icons copied into the person's folder at start (D-050)
 // v0.0.38: --reset deletes chrono-vault.ini; no carry-over (D-026)
 // v0.0.30: The identifier chrono-vault for the settings, carried over; --debug writes the fingerprint log (D-044)
@@ -127,7 +128,8 @@ int main(int argc, char* argv[])
     chrono_vault::SystemTray tray(controller, window);
     QObject::connect(&instance, &chrono_vault::SingleInstance::showRequested, &tray,
                      &chrono_vault::SystemTray::showWindow);
-    chrono_vault::showMainWindow(window, controller->startMinimized(), trayAvailable);
+    // Without the tray icon a minimized start goes to the taskbar (D-019).
+    chrono_vault::showMainWindow(window, controller->startMinimized(), trayAvailable && controller->keepInTray());
     engine.singletonInstance<chrono_vault::Updater*>("ChronoVault", "Updater")->startAutomaticChecks();
 
     return QGuiApplication::exec();

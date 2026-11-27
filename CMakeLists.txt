@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.123 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.124 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.123
+# CMakeLists.txt 0.8.124
 
 # --- Version history ----------------------------------------------------
+# v0.8.124: Version 0.8.124; the tray icon only while its setting is on (D-019)
 # v0.8.123: Version 0.8.123; the Delete dialog as its mockup (D-083)
 # v0.8.122: Version 0.8.122; Delete a vault (D-083)
 # v0.8.121: Version 0.8.121; every dialog as its mockup (D-082)

@@ -36,9 +36,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_tray.cpp 0.6.96
+// test_tray.cpp 0.8.124
 
 // --- Version history ----------------------------------------------------
+// v0.8.124: The icon only while the setting is on (D-019)
 // v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.85: The tray icon for a dark and a light tray (D-064)
@@ -70,6 +71,7 @@ private slots:
     void closing_the_window_hides_it_when_there_is_a_tray();
     void the_tray_menu_shows_locks_and_quits();
     void the_icon_is_the_owners();
+    void the_icon_is_there_only_while_the_setting_is_on();
     void start_at_startup_writes_and_removes_its_entry();
     void start_minimized_waits_in_the_tray_or_starts_minimized();
     void the_general_settings_are_remembered();
@@ -176,6 +178,22 @@ void TestTray::the_tray_menu_shows_locks_and_quits()
 void TestTray::the_icon_is_the_owners()
 {
     QVERIFY(!QIcon(SystemTray::iconFile()).pixmap(16, 16).toImage().isNull());
+}
+
+void TestTray::the_icon_is_there_only_while_the_setting_is_on()
+{
+    if (!SystemTray::isAvailable()) {
+        QSKIP("This desktop has no system tray.");
+    }
+    Loaded loaded = load();
+    QVERIFY(loaded.window && loaded.controller);
+    loaded.controller->setKeepInTray(false);
+    SystemTray tray(loaded.controller, loaded.window);
+    QVERIFY(!tray.iconShown());
+    loaded.controller->setKeepInTray(true);
+    QVERIFY(tray.iconShown());
+    loaded.controller->setKeepInTray(false);
+    QVERIFY(!tray.iconShown());
 }
 
 void TestTray::start_at_startup_writes_and_removes_its_entry()

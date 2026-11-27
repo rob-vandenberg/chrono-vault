@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.124**: the tray icon is there only while "Keep Chrono Vault running in the system tray" is on, and
+follows the setting at once; a minimized start without it goes to the taskbar (D-019).
+
 **Version 0.8.123**: the Delete dialog as the owner's mockup (D-083): just wide enough that its question stands on one
 line; "Enter the password of the vault you are about to delete." above the field; the hint "Password" for every
 vault; "This vault requires its keyfile.".

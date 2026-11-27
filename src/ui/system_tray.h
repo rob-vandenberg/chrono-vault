@@ -26,9 +26,10 @@ class QSystemTrayIcon;
 class QWindow;
 
 // --- Version ------------------------------------------------------------
-// system_tray.h 0.6.96
+// system_tray.h 0.8.124
 
 // --- Version history ----------------------------------------------------
+// v0.8.124: The icon only while Keep Chrono Vault running in the system tray is on (D-019)
 // v0.6.96: One tray icon, the owner's, on every tray (D-064)
 // v0.5.85: The vault as its icon, for a dark or a light tray (D-064)
 // v0.0.4: Initial release
@@ -56,6 +57,7 @@ public:
 
     [[nodiscard]] static QString iconFile() { return QStringLiteral(":/icons/chrono-vault-tray.svg"); }
     [[nodiscard]] QAction* lockAction() const { return lock; }
+    [[nodiscard]] bool iconShown() const;
 
 private:
     void updateLockAction();
