@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.8.121
+// ImportWindow.qml 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The password dialog's action: import (D-073)
 // v0.8.121: Fixed, 440 wide; the vault list under the words Another vault (D-082)
 // v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -103,7 +104,7 @@ DialogWindow {
         id: askWindow
         objectName: "importAskWindow"
         transientParent: importWindow
-        title: importWindow.title
+        action: "import"
         onRight: {
             importWindow.reading = true
             VaultController.importProven()

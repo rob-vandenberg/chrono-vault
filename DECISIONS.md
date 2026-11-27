@@ -51,7 +51,7 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-040](decisions/D-040.md) | Settings > Security: Change the Master Password, and Autolock when the window closes, the system sleeps, Chrono Vault or the system is idle |
 | [D-041](decisions/D-041.md) | Waits after wrong master passwords: 3 at once, then 10 seconds, a minute, 10 minutes, an hour after every 25; kept through a restart |
 | [D-042](decisions/D-042.md) | The sidebar collapses to its icons and its groups fold; wider splitters; the fingerprint reader held only while a finger is asked, a switch with a one-time touch |
-| [D-043](decisions/D-043.md) | The fingerprint one check box for all vaults, its touch in a popup; the Autolock switches no longer mirrored; centered triangles; the master password before the fingerprint |
+| [D-043](decisions/D-043.md) | The fingerprint one check box for all vaults, its touch in a popup; the Autolock switches no longer mirrored; centered triangles; the master password before the fingerprint; the fingerprint for the administrator only |
 | [D-044](decisions/D-044.md) | `--debug` writes the fingerprint log; the settings under the identifier chrono-vault |
 | [D-045](decisions/D-045.md) | Keyboard shortcuts set by the person, after Chrono Viewer; Ctrl+B the sidebar, Shift+Ctrl+B Clear Clipboard |
 | [D-046](decisions/D-046.md) | No bounce anywhere; the About box's text with a clear scroll bar, scrolled by the arrow, page and Home/End keys |
@@ -68,7 +68,7 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-057](decisions/D-057.md) | WebDAV storage: a working copy here, synced and merged; the password in the system's store; a certificate trusted by its fingerprint |
 | [D-058](decisions/D-058.md) | The unlock page with a vault selector; a lock keeps the vault used last; new local vaults in Documents/chrono-vault |
 | [D-059](decisions/D-059.md) | PIN unlock: only while Chrono Vault runs, the PIN's key on disk only sealed with each vault's own key |
-| [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed |
+| [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed; Forget and Disconnect ask a closed or locked vault's password |
 | [D-061](decisions/D-061.md) | The person decides every difference an import or a sync meets; the sides Vault/Import and This device/Other device |
 | [D-062](decisions/D-062.md) | What a person guesses is what happens: keys, mouse, several items, Delete asked, dialogs; Settings > Vaults; 5 pixels in every button |
 | [D-063](decisions/D-063.md) | Selected and focused; the Item menu on the selected items; Change Category; the empty list; the vault's counts |
@@ -81,10 +81,10 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-070](decisions/D-070.md) | The main window keeps its size at another scaling; the others scale along |
 | [D-071](decisions/D-071.md) | Padlocks and Open in Settings > Vaults; round picture buttons, vertical dots |
 | [D-072](decisions/D-072.md) | Menus as wide as their longest entry, 120 at least; they close with their window |
-| [D-073](decisions/D-073.md) | One standard dialog for a master password, a PIN or a finger |
+| [D-073](decisions/D-073.md) | One standard dialog for a master password, a PIN or a finger; its words per action; when a password is asked |
 | [D-074](decisions/D-074.md) | Another primary vault; Remember my credentials; Open, Closed, Locked |
 | [D-075](decisions/D-075.md) | Close and Lock per vault; the start-up page begins with the primary; the way back after a lock |
-| [D-076](decisions/D-076.md) | A PIN per vault; the lock as a screen lock |
+| [D-076](decisions/D-076.md) | A PIN per vault; the lock as a screen lock; the open vault's PIN without its password |
 | [D-077](decisions/D-077.md) | Open a vault: your vaults and the storage locations; the crown in the start-up list |
 | [D-078](decisions/D-078.md) | Another vault opens without anything in between; never a page that needs nothing |
 | [D-079](decisions/D-079.md) | Question dialogs fit their text; Enter on the selected button, Esc on Cancel, Y and N; where a vault is kept |

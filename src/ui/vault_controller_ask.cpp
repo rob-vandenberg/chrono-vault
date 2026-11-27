@@ -31,9 +31,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_ask.cpp 0.7.107
+// vault_controller_ask.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: typedProofOf and ownerOf: who may forget, disconnect or set a PIN (D-060, D-076)
 // v0.7.107: The PIN is no longer asked here (D-076)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
 // v0.6.103: Initial release (D-073)
@@ -289,6 +290,16 @@ void VaultController::checkProven(const VaultKey& candidate, const QByteArray& k
             },
             Qt::QueuedConnection);
     });
+}
+
+bool VaultController::typedProofOf(const QString& vaultFile) const
+{
+    return !vaultFile.isEmpty() && askedFor == vaultFile && proofKey.isValid() && proofTyped;
+}
+
+bool VaultController::ownerOf(const QString& vaultFile) const
+{
+    return currentState == State::Unlocked && vaultFile == path;
 }
 
 void VaultController::provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed, const QByteArray& words)

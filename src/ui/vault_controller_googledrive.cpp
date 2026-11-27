@@ -24,9 +24,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_googledrive.cpp 0.8.119
+// vault_controller_googledrive.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Disconnect a closed or locked vault only with its own password (D-060)
 // v0.8.119: Disconnect deletes nothing on Google Drive either (D-060)
 // v0.8.117: The window's account read at sign-in and kept with the places made there; read again after a renewed sign-in (D-080 point 20)
 // v0.8.116: Every sign-in in the Google Drive window opens the browser; a vault's own sign-in is not reused there (D-080 point 13)
@@ -276,7 +277,11 @@ void VaultController::moveVaultToGoogleDrive(const QString& vaultFile)
 void VaultController::disconnectVault(const QString& vaultFile)
 {
     // Disconnect deletes nothing, on any storage (D-060): the copy in the
-    // remote place and this device's copy both stay, as two vaults.
+    // remote place and this device's copy both stay, as two vaults. A closed
+    // or locked vault only with its own password typed just now (the owner).
+    if (!ownerOf(vaultFile) && foundList.contains(vaultFile) && !typedProofOf(vaultFile)) {
+        return;
+    }
     disconnectWebDav(vaultFile);
 }
 

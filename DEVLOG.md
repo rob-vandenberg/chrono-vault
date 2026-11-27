@@ -1037,3 +1037,14 @@ now; "Make primary" in the question opens `primaryPasswordWindow`, the standard 
 `test_vault_rows` checks a wrong password, the new vault's own, Cancel and a call without the password (nothing moves)
 and the right one (the crown moves); it passes in 16.3 seconds, `test_vault_row_accounts` in 10.0.
 
+## 27 November 2026: version 0.8.128, the password dialog per action, the fingerprint for the administrator
+
+`AskWindow` takes `action` and shows that action's words; every caller passes it (`unlockFirst`'s own word became
+`afterwards`). `VaultController::setQuickUnlock` keeps only the primary's key (the open primary's, or from the master
+password just proven), `keepForThisVault` only for the primary, `forgetQuickKeysButPrimary` at the start, `makePrimary`
+turns the finger off. `forgetVault` and `disconnectVault` need `typedProofOf` for a vault not open (`ownerOf`); the new
+`VaultPasswordPart.qml` asks it inside their dialogs. `setPinFor` takes the open vault's own key. Tests:
+`test_quick_unlock` (the primary's key only, no open vault, Make primary, earlier keys removed), `test_reader` (the
+fingerprint dialog's words, every action's words, Forget's password part), `test_pin_unlock`, `test_vault_menu`; the
+related tests pass, each under 20 seconds.
+Review: a finger was asked for the open vault's PIN, and Forget left the proof in memory; both fixed, round 3 clean.

@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.8.127
+// vault_controller.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Only the primary's key behind the finger, turned on with the primary open or the master password; Make primary turns it off (D-043)
 // v0.8.127: Make primary only with the current primary's master password typed just now (D-074)
 // v0.8.126: The fingerprint is turned on only with the master password, the primary vault's, typed just now (D-043)
 // v0.8.125: The fingerprint is turned on only with the open vault's master password typed just now (D-043)
@@ -466,6 +467,9 @@ VaultController::VaultController(QObject* parent) : QObject(parent)
         vaults.setValue(vaultListKey, vaultList);
     }
     lastUsed = last;
+    // Only the primary's key lies behind the finger (the owner, D-043): a key
+    // of another vault kept by an earlier version is removed.
+    forgetQuickKeysButPrimary();
     // The primary first; when it is not found, the vault used last (D-075).
     const QString primary = primaryVault();
     if (!primary.isEmpty() && QFileInfo::exists(primary)) {
@@ -2072,13 +2076,14 @@ void VaultController::setQuickUnlockForTests(std::unique_ptr<QuickUnlock> standI
 {
     quick = std::move(standIn);
     connectQuickUnlock();
+    forgetQuickKeysButPrimary(); // as at a start
     quickAvailable = quick->available();
     emit quickUnlockChanged();
 }
 
 void VaultController::setQuickUnlock(bool on)
 {
-    if (!quick || path.isEmpty()) {
+    if (!quick) {
         return;
     }
     if (!on) {
@@ -2090,13 +2095,38 @@ void VaultController::setQuickUnlock(bool on)
         emit quickUnlockChanged();
         return;
     }
-    // One finger asked at a time: the switch waits for it (D-042). Only with the
-    // master password, the primary vault's, typed just now (the owner, D-043).
-    if (currentState == State::Unlocked && quickAvailable && !settingUp && !askedFor.isEmpty() &&
-        askedFor == primaryVault() && proofKey.isValid() && proofTyped) {
+    // One finger asked at a time: the switch waits for it (D-042). The finger
+    // stands for the administrator, so only the primary's key lies behind it:
+    // the primary open, or the master password typed just now (the owner, D-043).
+    const QString primary = primaryVault();
+    if (primary.isEmpty() || !quickAvailable || settingUp) {
+        return;
+    }
+    if (ownerOf(primary)) {
         settingUp = true;
         tellSetup(QString(), false);
-        quick->store(path, quickSecretOf(key, keyfileSecret));
+        quick->store(primary, quickSecretOf(key, keyfileSecret));
+    } else if (typedProofOf(primary)) {
+        settingUp = true;
+        tellSetup(QString(), false);
+        VaultsFile settings; // the master password was just typed: the reminder waits
+        QVariantMap times = settings.value(lastPasswordKey).toMap();
+        times.insert(primary, QDateTime::currentDateTimeUtc());
+        settings.setValue(lastPasswordKey, times);
+        quick->store(primary, quickSecretOf(proofKey, proofKeyfile));
+    }
+}
+
+void VaultController::forgetQuickKeysButPrimary()
+{
+    if (!quick) {
+        return;
+    }
+    const QString primary = primaryVault();
+    for (const QString& vault : VaultsFile().value(QStringLiteral("quickUnlock/vaults")).toStringList()) {
+        if (vault != primary) {
+            quick->remove(vault);
+        }
     }
 }
 
@@ -2108,8 +2138,9 @@ bool VaultController::quickUnlockEnabled() const
 
 void VaultController::keepForThisVault()
 {
-    if (quick && quickAvailable && quickUnlockEnabled() && !quick->has(path) && !settingUp && !replacingQuickKey &&
-        currentState == State::Unlocked) {
+    // Only the primary's key, the administrator's (the owner, D-043).
+    if (quick && quickAvailable && quickUnlockEnabled() && path == primaryVault() && !quick->has(path) && !settingUp &&
+        !replacingQuickKey && currentState == State::Unlocked) {
         keepingQuietly = true;
         quick->replace(path, quickSecretOf(key, keyfileSecret));
     }
@@ -3366,6 +3397,9 @@ void VaultController::makePrimary(const QString& vaultFile)
         return;
     }
     VaultsFile().setValue(primaryKeyName, vaultFile);
+    // The finger's key was the old primary's: it no longer fits, and the
+    // finger is turned on again with the new master password (the owner, D-043).
+    setQuickUnlock(false);
     // What was kept was the other primary's; the new one's own is read when it
     // is the one that is open, else when it is opened.
     forgetPrimary();

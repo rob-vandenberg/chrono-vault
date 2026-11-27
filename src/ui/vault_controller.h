@@ -52,9 +52,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.8.122
+// vault_controller.h 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: typedProofOf, ownerOf, forgetQuickKeysButPrimary (D-043, D-060, D-076)
 // v0.8.122: Delete a vault: deleteRefusal, deleteVault, deleteDone (D-083)
 // v0.8.119: Disconnect deletes nothing on any storage (D-060); Sort By per vault and each item's use (D-081)
 // v0.8.117: googleAccount: the Google Drive window's account, kept with new places (D-080 point 20)
@@ -1107,6 +1108,11 @@ private:
     void tellAsked(const QString& text, bool isTrouble);
     void checkProven(const VaultKey& candidate, const QByteArray& keyfile, int by);
     void provenNow(const VaultKey& right, const QByteArray& keyfile, bool typed, const QByteArray& words = {});
+    // The vault's own password typed and proven just now in the standard
+    // question; the open vault's owner needs none (the owner, D-060).
+    [[nodiscard]] bool typedProofOf(const QString& vaultFile) const;
+    [[nodiscard]] bool ownerOf(const QString& vaultFile) const;
+    void forgetQuickKeysButPrimary();
     void askedFingerAnswered(int result, const QByteArray& secret);
     void wipeProof();
     void updateAskWait();

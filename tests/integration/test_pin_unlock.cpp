@@ -16,9 +16,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 // --- Version ------------------------------------------------------------
-// test_pin_unlock.cpp 0.7.107
+// test_pin_unlock.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The open vault's PIN set without its password (D-076)
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.71: The PIN page shows only the logo, its line, the field and the link
@@ -206,7 +207,14 @@ void TestPinUnlock::a_pin_needs_the_typed_master_password_and_can_be_removed()
 {
     VaultController controller;
     const QString file = unlockedVault(controller, QStringLiteral("short"));
-    // Nothing proven: no PIN (P79's first way).
+    // The open vault's owner sets its PIN without its password (the owner, D-076).
+    controller.setPinFor(file, QStringLiteral("0000"));
+    QTRY_VERIFY(!controller.pinBusy() && controller.hasPin(file));
+    controller.removePinFor(file);
+    QVERIFY(!controller.hasPin(file));
+    controller.lock();
+    QTRY_VERIFY(controller.state() != VaultController::State::Unlocked);
+    // A locked vault, nothing proven: no PIN (P79's first way).
     controller.askFor(file);
     controller.setPinFor(file, QStringLiteral("0000"));
     controller.stopAsking();
@@ -224,7 +232,6 @@ void TestPinUnlock::a_pin_needs_the_typed_master_password_and_can_be_removed()
     settings.beginGroup(QStringLiteral("pins"));
     QVERIFY(settings.allKeys().isEmpty());
     settings.endGroup();
-    controller.lock();
     QVERIFY(!controller.pinUnlockReady());
 }
 

@@ -27,9 +27,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_vaults.cpp 0.8.122
+// vault_controller_vaults.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Forget a closed or locked vault only with its own password (D-060)
 // v0.8.122: Delete a vault (D-083)
 // v0.8.115: Move to any cloud storage, Google Drive too (D-080)
 // v0.8.114: A vault in any cloud storage, not only WebDAV (D-080)
@@ -537,6 +538,11 @@ void VaultController::forgetVault(const QString& vaultFile)
 {
     if (vaultFile.isEmpty() || vaultFile == primaryVault() || !vaultList.contains(vaultFile) ||
         (moveRunning && movingVault == vaultFile)) {
+        return;
+    }
+    // A closed or locked vault only with its own password typed just now; a
+    // vault not on this computer cannot be proven (the owner, D-060).
+    if (!ownerOf(vaultFile) && foundList.contains(vaultFile) && !typedProofOf(vaultFile)) {
         return;
     }
     if (vaultFile == path && currentState == State::Unlocked && (dirty || savesRunning > 0)) {

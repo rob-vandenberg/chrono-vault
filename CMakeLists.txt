@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.127 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.128 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.127
+# CMakeLists.txt 0.8.128
 
 # --- Version history ----------------------------------------------------
+# v0.8.128: Version 0.8.128; the password dialog per action, the fingerprint for the administrator only (D-043, D-060, D-073)
 # v0.8.127: Version 0.8.127; Make primary asks the master password (D-074)
 # v0.8.126: Version 0.8.126; the master password, the primary vault's, before the finger (D-043)
 # v0.8.125: Version 0.8.125; the master password before the fingerprint (D-043)

@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_vault_menu.cpp 0.6.106
+// test_vault_menu.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Forget a locked vault only with its own password (D-060)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.5.81: An item deleted here is simply imported again (D-061)
 // v0.5.78: An import's every difference waits for the person, an item deleted here too (D-061)
@@ -592,7 +593,16 @@ private slots:
         const QString workingCopy = controller->vaultPath();
         QTRY_VERIFY_WITH_TIMEOUT(controller->syncForTests() && !controller->syncForTests()->running(), 10000);
         controller->lock();
+        // A locked vault only with its own password (the owner, D-060).
+        controller->disconnectVault(workingCopy);
+        QVERIFY(webDavPlaceOf(workingCopy)); // still connected
         controller->forgetVault(workingCopy);
+        QCOMPARE(controller->vaults().size(), 2);
+        controller->askFor(workingCopy);
+        controller->proveWithPassword(QStringLiteral("pass"));
+        QTRY_VERIFY(!controller->askBusy());
+        controller->forgetVault(workingCopy);
+        controller->stopAsking();
         QCOMPARE(controller->vaults(), QStringList{primary});
         QVERIFY(!QFileInfo::exists(workingCopy));
         QVERIFY(!webDavPlaceOf(workingCopy));

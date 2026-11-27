@@ -2,6 +2,12 @@
 
 ## Now
 
+**Version 0.8.128**: the password dialog says what the password is for: each action its own title, heading and button
+(D-073). The fingerprint is the administrator's: only the primary vault's key lies behind it, it is turned on with the
+primary open or with the master password (no open vault needed), and Make primary turns it off (D-043). Forget and
+Disconnect ask the password of a closed or locked vault in their own dialog (D-060); Set PIN on the open vault asks no
+password (D-076).
+
 **Version 0.8.127**: Make primary vault asks the master password of the current primary vault, in the standard dialog,
 before the crown moves (D-074).
 

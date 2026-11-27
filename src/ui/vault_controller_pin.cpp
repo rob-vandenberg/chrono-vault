@@ -35,9 +35,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_pin.cpp 0.7.107
+// vault_controller_pin.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The open vault's PIN set without its password (D-076)
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
 // v0.6.106: The primary opened for its key store only (D-075)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -147,14 +148,15 @@ bool VaultController::sessionPinReady() const
 
 void VaultController::setPinFor(const QString& vaultFile, const QString& pin)
 {
-    // Only with the vault's own master password typed just now (D-076).
-    if (settingPin || vaultFile.isEmpty() || vaultFile != askedFor || !proofKey.isValid() || !proofTyped ||
-        pin.size() < pinMinimumLength) {
+    // The open vault's owner needs no password; any other vault only with its
+    // own password typed just now (the owner, D-076).
+    const bool owner = ownerOf(vaultFile);
+    if (settingPin || vaultFile.isEmpty() || (!owner && !typedProofOf(vaultFile)) || pin.size() < pinMinimumLength) {
         return;
     }
     settingPin = true;
     emit pinChanged();
-    VaultKey own = proofKey;
+    VaultKey own = owner ? key : proofKey;
     own.key.detach();
     const QByteArray salt = crypto::randomBytes(16);
     const crypto::KdfParameters parameters = kdfParameters;

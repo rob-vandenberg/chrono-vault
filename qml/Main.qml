@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.8.120
+// Main.qml 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The password dialog's action: webdav (D-073)
 // v0.8.120: The questions in the one width (D-082)
 // v0.8.119: The title is Chrono Vault and its version only (D-017); the top bar's two spaces alike (D-074); a copy or the website opened is a use (D-081)
 // v0.8.115: Sync Now for any storage; the Google sign-in renewed (D-080)
@@ -1235,10 +1236,7 @@ ApplicationWindow {
         id: webDavPasswordWindow
         objectName: "webDavPasswordWindow"
         transientParent: mainWindow
-        title: qsTr("WebDAV password")
-        heading: qsTr("Enter the password of the WebDAV server")
-        hint: qsTr("Password")
-        okText: qsTr("OK")
+        action: "webdav"
         onEntered: function(text) {
             accept()
             VaultController.giveWebDavPassword(text)

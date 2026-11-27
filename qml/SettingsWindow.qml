@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.127
+// SettingsWindow.qml 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The password dialog per action; Forget and Disconnect ask a closed or locked vault's password; the fingerprint for the primary only (D-043, D-060, D-073)
 // v0.8.127: Make primary asks the master password, the current primary's, before the crown moves (D-074)
 // v0.8.126: The standard master password dialog, the primary vault's, before the finger (D-043)
 // v0.8.125: Ticking the fingerprint box first asks the open vault's master password (D-043)
@@ -988,11 +989,15 @@ ApplicationWindow {
                             text: Qt.platform.os === "windows" ? qsTr("Use Windows Hello to unlock vault")
                                                                : qsTr("Use fingerprint to unlock vault")
                             checked: VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
+                            // No vault needs to be open: the master password is asked (the owner, D-043).
                             enabled: VaultController.quickUnlockAvailable && !VaultController.quickUnlockBusy
-                                     && (checked || VaultController.state === VaultController.Unlocked)
                             Layout.topMargin: 8 * Appearance.factor
                             onToggled: {
-                                if (checked)
+                                // The primary open: its owner is the administrator, nothing asked.
+                                if (checked && VaultController.vaultPath === VaultController.primaryVault
+                                        && VaultController.state === VaultController.Unlocked)
+                                    VaultController.setQuickUnlock(true)
+                                else if (checked)
                                     fingerPasswordWindow.askVault(VaultController.primaryVault)
                                 else
                                     VaultController.setQuickUnlock(false)
@@ -1213,7 +1218,7 @@ ApplicationWindow {
                                                 height: visible ? implicitHeight : 0
                                                 onTriggered: {
                                                     settingsWindow.problem = ""
-                                                    pinWindow.title = has ? qsTr("Change PIN") : qsTr("Set PIN")
+                                                    pinWindow.changesPin = has
                                                     pinWindow.askVault(vaultRow.modelData)
                                                 }
                                             }
@@ -1257,6 +1262,7 @@ ApplicationWindow {
                                                     forgetWindow.vaultFile = vaultRow.modelData
                                                     forgetWindow.onWebDav = vaultRow.place.inCloud === true
                                                     forgetWindow.open()
+                                                    forgetPassword.start(vaultRow.modelData)
                                                 }
                                             }
                                             MenuItem {
@@ -1282,6 +1288,7 @@ ApplicationWindow {
                                                     disconnectWindow.vaultFile = vaultRow.modelData
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
                                                     disconnectWindow.open()
+                                                    disconnectPassword.start(vaultRow.modelData)
                                                 }
                                             }
                                             // Every vault, every state (the owner, D-083).
@@ -1303,13 +1310,13 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             withList: true
                             mayRemember: true
-                            property string action: ""
+                            property string afterwards: ""
                             function ready(file) {
                                 return VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked
                             }
                             // A vault that needs no password: done at once, without asking.
                             function ask(file, what) {
-                                action = what
+                                afterwards = what
                                 if (ready(file)) {
                                     goOn()
                                 } else if (VaultController.opensAtOnce(file)) {
@@ -1323,12 +1330,12 @@ ApplicationWindow {
                             function goOn() {
                                 if (visible)
                                     accept()
-                                if (action === "import")
+                                if (afterwards === "import")
                                     settingsWindow.importRequested()
-                                else if (action === "export")
+                                else if (afterwards === "export")
                                     settingsWindow.exportRequested()
                             }
-                            onPicked: function(file) { ask(file, action) }
+                            onPicked: function(file) { ask(file, afterwards) }
                             // Right: the vault is opened with it, and only now the other one closes.
                             property string opened: ""
                             onRight: function(file) {
@@ -1392,7 +1399,7 @@ ApplicationWindow {
                             objectName: "pinWindow"
                             transientParent: settingsWindow
                             withNewPin: true
-                            okText: qsTr("OK")
+                            action: "pin"
                             onRight: function(file) {
                                 VaultController.setPinFor(file, newPinText)
                                 accept()
@@ -1405,6 +1412,8 @@ ApplicationWindow {
                             objectName: "primaryPasswordWindow"
                             transientParent: settingsWindow
                             typedOnly: true
+                            action: "primary"
+                            newPrimaryName: VaultController.vaultNameOf(newPrimary)
                             property string newPrimary: ""
                             onRight: function(file) {
                                 VaultController.makePrimary(newPrimary)
@@ -1418,6 +1427,7 @@ ApplicationWindow {
                             objectName: "fingerPasswordWindow"
                             transientParent: settingsWindow
                             typedOnly: true
+                            action: "fingerprint"
                             onRight: function(file) {
                                 VaultController.setQuickUnlock(true)
                                 accept()
@@ -1579,11 +1589,11 @@ ApplicationWindow {
                             rightButtons: Button {
                                 objectName: "forgetButton"
                                 text: qsTr("Forget")
-                                onClicked: {
-                                    VaultController.forgetVault(forgetWindow.vaultFile)
-                                    forgetWindow.accept()
-                                }
+                                enabled: forgetPassword.ready
+                                // A closed or locked vault: its password first, in this dialog (the owner, D-060).
+                                onClicked: forgetPassword.go()
                             }
+                            onVisibleChanged: if (!visible) forgetPassword.stop()
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
@@ -1596,6 +1606,16 @@ ApplicationWindow {
                                          : qsTr("Nothing is deleted, only the name of the vault is removed from the list of vaults.")),
                                     qsTr("Are you sure you want Chrono Vault to forget “%1”?").arg(VaultController.vaultNameOf(forgetWindow.vaultFile))])
                                 wrapMode: Text.Wrap
+                            }
+                            VaultPasswordPart {
+                                id: forgetPassword
+                                objectName: "forgetPassword"
+                                action: "forget"
+                                Layout.topMargin: 8 * Appearance.factor
+                                onProven: function(file) {
+                                    VaultController.forgetVault(file)
+                                    forgetWindow.accept()
+                                }
                             }
                         }
                         DialogWindow {
@@ -1611,11 +1631,11 @@ ApplicationWindow {
                             rightButtons: Button {
                                 objectName: "disconnectButton"
                                 text: qsTr("Disconnect")
-                                onClicked: {
-                                    VaultController.disconnectVault(disconnectWindow.vaultFile)
-                                    disconnectWindow.accept()
-                                }
+                                enabled: disconnectPassword.ready
+                                // A closed or locked vault: its password first, in this dialog (the owner, D-060).
+                                onClicked: disconnectPassword.go()
                             }
+                            onVisibleChanged: if (!visible) disconnectPassword.stop()
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
@@ -1626,6 +1646,16 @@ ApplicationWindow {
                                     qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault."),
                                     qsTr("This action cannot be undone. Are you sure you want to disconnect from “%1”?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))])
                                 wrapMode: Text.Wrap
+                            }
+                            VaultPasswordPart {
+                                id: disconnectPassword
+                                objectName: "disconnectPassword"
+                                action: "disconnect"
+                                Layout.topMargin: 8 * Appearance.factor
+                                onProven: function(file) {
+                                    VaultController.disconnectVault(file)
+                                    disconnectWindow.accept()
+                                }
                             }
                         }
                     }

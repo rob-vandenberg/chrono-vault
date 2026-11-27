@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.8.126
+// test_quick_unlock.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Only the primary's key behind the finger; without an open vault; Make primary turns it off (D-043)
 // v0.8.126: The master password, the primary vault's, with a second vault open (D-043)
 // v0.8.125: Turned on only with the open vault's master password typed (D-043)
 // v0.7.107: After a lock the page shows the vault logged in with (D-076)
@@ -109,7 +110,8 @@ private slots:
     void init();
     void cleanup();
     void a_finger_unlocks_once_turned_on();
-    void turning_it_on_needs_the_open_vaults_password_typed();
+    void the_finger_holds_only_the_primarys_key();
+    void an_earlier_key_of_another_vault_is_removed();
     void a_cancelled_or_unknown_finger_leaves_it_locked();
     void a_lost_key_turns_it_off_and_says_so();
     void a_new_master_password_is_kept_for_the_finger();
@@ -193,55 +195,93 @@ void TestQuickUnlock::a_finger_unlocks_once_turned_on()
     QVERIFY(standIn->kept.isEmpty());
 }
 
-// Nothing is kept without the open vault's own master password typed just now:
-// not without it, not with a wrong one (the owner, D-043).
-void TestQuickUnlock::turning_it_on_needs_the_open_vaults_password_typed()
+// The finger stands for the administrator (the owner, D-043): with the primary
+// open nothing is asked; otherwise only the master password typed just now
+// turns it on; only the primary's key lies behind it; Make primary turns it off.
+void TestQuickUnlock::the_finger_holds_only_the_primarys_key()
 {
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
+    const QString primary = controller->vaultPath();
+    QCOMPARE(controller->primaryVault(), primary);
     controller->setQuickUnlock(true);
-    QCOMPARE(standIn->stores, 0);
-    QVERIFY(!controller->quickUnlockEnabled());
+    QCOMPARE(standIn->stores, 1);
+    QVERIFY(standIn->kept.contains(primary));
+    controller->setQuickUnlock(false);
 
-    controller->askFor(controller->primaryVault());
+    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+    controller->setQuickUnlock(true);
+    QCOMPARE(standIn->stores, 1);
+    controller->askFor(primary);
     controller->proveWithPassword(QStringLiteral("no"));
     QTRY_VERIFY(!controller->askBusy());
     QVERIFY(controller->askTrouble());
     controller->setQuickUnlock(true);
-    QCOMPARE(standIn->stores, 0);
-    QVERIFY(!controller->quickUnlockOn());
-
-    // Cancelled: what was proven is gone with the dialog.
-    QSignalSpy proven(controller.get(), &VaultController::proven);
-    controller->proveWithPassword(QStringLiteral("pass"));
-    QTRY_COMPARE(proven.size(), 1);
-    controller->stopAsking();
-    controller->setQuickUnlock(true);
-    QCOMPARE(standIn->stores, 0);
-
-    QVERIFY(turnOn(*controller));
     QCOMPARE(standIn->stores, 1);
-    QVERIFY(controller->quickUnlockOn());
-
-    // A second vault open: its own password is not the master password; the
-    // primary's is, and the open vault's key is kept.
-    controller->setQuickUnlock(false);
-    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
-    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
-    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
-    QVERIFY(controller->primaryVault() != second);
+    // The open vault's own password is not the master password.
     controller->askFor(second);
     controller->proveWithPassword(QStringLiteral("two"));
     QTRY_VERIFY(!controller->askBusy());
     controller->setQuickUnlock(true);
     controller->stopAsking();
     QCOMPARE(standIn->stores, 1);
-    QVERIFY(!controller->quickUnlockOn());
+    // Cancelled: what was proven is gone with the dialog.
+    QSignalSpy proven(controller.get(), &VaultController::proven);
+    controller->askFor(primary);
+    controller->proveWithPassword(QStringLiteral("pass"));
+    QTRY_COMPARE(proven.size(), 1);
+    controller->stopAsking();
+    controller->setQuickUnlock(true);
+    QCOMPARE(standIn->stores, 1);
+    // The master password: the primary's key, never the open vault's.
     QVERIFY(turnOn(*controller));
     QCOMPARE(standIn->stores, 2);
-    QVERIFY(standIn->kept.contains(second));
-    QVERIFY(controller->quickUnlockOn());
+    QVERIFY(standIn->kept.contains(primary) && !standIn->kept.contains(second));
+    QVERIFY(controller->quickUnlockEnabled());
+    QVERIFY(!controller->quickUnlockOn()); // the vault shown is not the primary
+
+    // No vault open: the master password turns it on too.
+    controller->setQuickUnlock(false);
+    controller->lock();
+    QVERIFY(controller->state() != State::Unlocked);
+    QVERIFY(turnOn(*controller));
+    QCOMPARE(standIn->stores, 3);
+    QVERIFY(standIn->kept.contains(primary));
+
+    // Make primary: the key was the old primary's, so it is turned off.
+    controller->askFor(primary);
+    controller->proveWithPassword(QStringLiteral("pass"));
+    QTRY_VERIFY(!controller->askBusy());
+    controller->makePrimary(second);
+    controller->stopAsking();
+    QCOMPARE(controller->primaryVault(), second);
+    QVERIFY(!controller->quickUnlockEnabled());
+    QVERIFY(standIn->kept.isEmpty());
+}
+
+// A key of another vault, kept by an earlier version, is removed.
+void TestQuickUnlock::an_earlier_key_of_another_vault_is_removed()
+{
+    StandIn* standIn = nullptr;
+    auto controller = unlocked(standIn);
+    QVERIFY(controller);
+    const QString primary = controller->vaultPath();
+    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+    controller.reset();
+
+    VaultController again; // its own reader is asked nothing: no key is listed yet
+    auto earlier = std::make_unique<StandIn>();
+    StandIn* kept = earlier.get();
+    earlier->store(primary, QByteArrayLiteral("one"));
+    earlier->store(second, QByteArrayLiteral("two"));
+    again.setQuickUnlockForTests(std::move(earlier));
+    QVERIFY(kept->kept.contains(primary));
+    QVERIFY(!kept->kept.contains(second));
 }
 
 void TestQuickUnlock::a_cancelled_or_unknown_finger_leaves_it_locked()
@@ -326,7 +366,7 @@ void TestQuickUnlock::the_standard_dialog_asks_the_finger_for_any_vault()
     controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
     QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
     QVERIFY(turnOn(*controller));
-    QVERIFY(standIn->kept.contains(first) && standIn->kept.contains(second));
+    QVERIFY(standIn->kept.contains(first) && !standIn->kept.contains(second)); // only the primary's (D-043)
     // Logged in with the primary: its password gives the second back (D-076).
     controller->lock();
     QCOMPARE(controller->vaultPath(), first);

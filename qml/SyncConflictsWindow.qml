@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.8.121
+// SyncConflictsWindow.qml 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The password dialog's action: retry (D-073)
 // v0.8.121: Three groups of buttons, alike only inside a group (D-082)
 // v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.8.115: The places picture of the vault's own storage (D-080)
@@ -573,7 +574,7 @@ DialogWindow {
         id: retryPassword
         objectName: "retryPasswordWindow"
         transientParent: conflictsWindow
-        title: qsTr("Retry sync")
+        action: "retry"
         // Those still to be asked; the first is the one shown.
         property var waiting: []
         function askNext(source, vaultName, itemIds, problem) {
@@ -587,6 +588,7 @@ DialogWindow {
             picture = String(waiting[0].source).indexOf("vault:") === 0
                       ? "qrc:/icons/places-device.svg"
                       : VaultController.vaultPlace(VaultController.vaultPath).placePicture
+            masterNamed = String(waiting[0].source) === "vault:" + VaultController.primaryVault
             ask(waiting[0].name, waiting[0].problem)
         }
         Connections {

@@ -31,9 +31,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_reader.cpp 0.8.126
+// test_reader.cpp 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: Only the primary's key at an unlock; the fingerprint dialog's own words (D-043, D-073)
 // v0.8.126: The standard master password dialog, a second vault open (D-043)
 // v0.8.125: Ticking the box asks the open vault's master password before the touch (D-043)
 // v0.4.73: The finger asked only once the window is active
@@ -157,6 +158,7 @@ private slots:
     void the_unlock_page_asks_whenever_it_is_on_screen();
     void one_setting_for_all_vaults_keeps_each_key_at_its_unlock();
     void ticking_the_box_asks_the_master_password_before_the_touch();
+    void every_action_has_its_own_words_and_forget_asks_only_for_another_vault();
 
 private:
     std::unique_ptr<VaultController> unlocked(Reader*& reader, const QString& name);
@@ -421,8 +423,10 @@ void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
     controller->chooseVault(QUrl::fromLocalFile(second));
     controller->unlock(QStringLiteral("two"));
     QTRY_COMPARE(controller->state(), State::Unlocked);
-    QTRY_VERIFY(reader->kept.contains(second));
-    QVERIFY(controller->quickUnlockOn());
+    QTRY_VERIFY(controller->isIdle());
+    // Only the primary's key lies behind the finger (the owner, D-043).
+    QVERIFY(!reader->kept.contains(second));
+    QVERIFY(!controller->quickUnlockOn());
 
     // Unticked: every kept key removed.
     controller->setQuickUnlock(false);
@@ -469,11 +473,11 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     // Ticked: the standard master password dialog, no finger, the box still unticked.
     QVERIFY(QMetaObject::invokeMethod(box, "click"));
     QTRY_VERIFY(asked->isVisible());
-    QCOMPARE(asked->title(), QStringLiteral("Unlock the vault"));
+    QCOMPARE(asked->title(), QStringLiteral("Use fingerprint to unlock vault"));
     QCOMPARE(asked->property("vaultFile").toString(), controller->primaryVault());
     QCOMPARE(asked->findChild<QObject*>(QStringLiteral("askHeading"))->property("text").toString(),
-             QStringLiteral("Enter the Master Password to unlock"));
-    QCOMPARE(asked->findChild<QObject*>(QStringLiteral("askOk"))->property("text").toString(), QStringLiteral("Unlock"));
+             QStringLiteral("Enter the Master Password to turn on the fingerprint"));
+    QCOMPARE(asked->findChild<QObject*>(QStringLiteral("askOk"))->property("text").toString(), QStringLiteral("Turn on"));
     QCOMPARE(reader->asked, 0);
     QVERIFY(!box->property("checked").toBool());
     QVERIFY(!asked->findChild<QQuickItem*>(QStringLiteral("askFinger"))->isVisible());
@@ -512,8 +516,9 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     QVERIFY(controller->quickUnlockBusy());
     QVERIFY(box->property("checked").toBool());
     reader->finger(true);
-    QVERIFY(controller->quickUnlockOn());
     QVERIFY(controller->quickUnlockEnabled());
+    // The primary's key, not the open vault's (the owner, D-043).
+    QVERIFY(reader->kept.contains(controller->primaryVault()) && !reader->kept.contains(second));
 
     // Unticked: every kept key gone, nothing asked.
     QVERIFY(QMetaObject::invokeMethod(box, "click"));
@@ -522,6 +527,96 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     QVERIFY(reader->kept.isEmpty());
     QCOMPARE(reader->asked, 1);
     settings->setProperty("visible", false);
+}
+
+// The password dialog says what the password is for (the owner, D-073); Forget
+// asks a password only for a vault that is not the open one (D-060).
+void TestReader::every_action_has_its_own_words_and_forget_asks_only_for_another_vault()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("words.chronovault"))),
+                            QStringLiteral("pass"), QStringLiteral("pass"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+    const QString primary = controller->vaultPath();
+    const QString second = folder->filePath(QStringLiteral("other.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    auto* asked = settings->findChild<QQuickWindow*>(QStringLiteral("pinWindow"));
+    QVERIFY(asked);
+    const auto says = [asked](const QString& action, const QString& vault) {
+        asked->setProperty("action", action);
+        asked->setProperty("vaultFile", vault);
+        return QStringList{asked->title(), asked->property("heading").toString(), asked->property("okText").toString()};
+    };
+    using L = QStringList;
+    QCOMPARE(says("unlock", primary), (L{"Unlock the vault", "Enter the Master Password to unlock", "Unlock"}));
+    QCOMPARE(says("unlock", second), (L{"Unlock the vault", "Enter the password to unlock", "Unlock"}));
+    QCOMPARE(says("export", primary), (L{"Export", "Enter the Master Password to export", "Export"}));
+    QCOMPARE(says("export", second), (L{"Export", "Enter the password to export", "Export"}));
+    QCOMPARE(says("import", second), (L{"Import", "Enter the password of the vault to import from", "Import"}));
+    QCOMPARE(says("import", primary), (L{"Import", "Enter the Master Password of the vault to import from", "Import"}));
+    QCOMPARE(says("pin", second), (L{"Set PIN", "Enter the password to set the PIN", "Set PIN"}));
+    asked->setProperty("changesPin", true);
+    QCOMPARE(says("pin", primary), (L{"Change PIN", "Enter the Master Password to change the PIN", "Change PIN"}));
+    asked->setProperty("changesPin", false);
+    QCOMPARE(says("fingerprint", primary),
+             (L{"Use fingerprint to unlock vault", "Enter the Master Password to turn on the fingerprint", "Turn on"}));
+    asked->setProperty("newPrimaryName", QStringLiteral("other"));
+    QCOMPARE(says("primary", primary),
+             (L{"Make primary vault", "Enter the Master Password to make “other” your primary vault", "Make primary"}));
+    QCOMPARE(says("retry", second), (L{"Retry sync", "Enter the password of the vault the items come from", "Retry"}));
+    QCOMPARE(says("webdav", QString()), (L{"WebDAV password", "Enter the password of the WebDAV server", "OK"}));
+    asked->setProperty("action", QStringLiteral("pin"));
+    asked->setProperty("vaultFile", QString());
+    // The open vault's PIN: no password, and no finger asked or offered.
+    QVERIFY(QMetaObject::invokeMethod(asked, "askVault", Q_ARG(QVariant, second)));
+    QTRY_VERIFY(asked->isVisible());
+    QVERIFY(asked->property("ownerSetsPin").toBool());
+    QVERIFY(!asked->property("fingerWanted").toBool());
+    QVERIFY(!asked->findChild<QQuickItem*>(QStringLiteral("askField"))->isVisible());
+    QVERIFY(!asked->findChild<QQuickItem*>(QStringLiteral("askFinger"))->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(asked, "reject"));
+    QTRY_VERIFY(!asked->isVisible());
+
+    // Forget the open vault: no password; another vault: its own password first.
+    auto* forget = settings->findChild<QQuickWindow*>(QStringLiteral("forgetWindow"));
+    QObject* part = settings->findChild<QObject*>(QStringLiteral("forgetPassword"));
+    QObject* button = settings->findChild<QObject*>(QStringLiteral("forgetButton"));
+    QVERIFY(forget && part && button);
+    forget->setProperty("vaultFile", second);
+    QMetaObject::invokeMethod(forget, "open");
+    QVERIFY(QMetaObject::invokeMethod(part, "start", Q_ARG(QVariant, second)));
+    QVERIFY(!part->property("visible").toBool());
+    QVERIFY(button->property("enabled").toBool());
+    QVERIFY(QMetaObject::invokeMethod(forget, "reject"));
+    QTRY_VERIFY(!forget->isVisible());
+    controller->lock();
+    QTRY_VERIFY(controller->state() != State::Unlocked);
+    forget->setProperty("vaultFile", second);
+    QMetaObject::invokeMethod(forget, "open");
+    QVERIFY(QMetaObject::invokeMethod(part, "start", Q_ARG(QVariant, second)));
+    QTRY_VERIFY(part->property("visible").toBool());
+    QVERIFY(!button->property("enabled").toBool());
+    QObject* field = part->findChild<QObject*>(QStringLiteral("vaultPasswordField"));
+    field->setProperty("text", QStringLiteral("no"));
+    QVERIFY(button->property("enabled").toBool());
+    QVERIFY(QMetaObject::invokeMethod(button, "clicked"));
+    QTRY_VERIFY(controller->askTrouble());
+    QVERIFY(forget->isVisible());
+    QVERIFY(controller->vaults().contains(second));
+    field->setProperty("text", QStringLiteral("two"));
+    QVERIFY(QMetaObject::invokeMethod(button, "clicked"));
+    QTRY_VERIFY(!controller->vaults().contains(second));
+    QTRY_VERIFY(!forget->isVisible());
+    QVERIFY(!part->property("asking").toBool()); // nothing proven left behind
 }
 
 QTEST_MAIN(TestReader)

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ExportWindow.qml 0.8.120
+// ExportWindow.qml 0.8.128
 
 // --- Version history ----------------------------------------------------
+// v0.8.128: The password dialog's action: export (D-073)
 // v0.8.120: Its text in normal weight, the one width (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -89,7 +90,7 @@ DialogWindow {
         id: askWindow
         objectName: "exportAskWindow"
         transientParent: exportWindow
-        title: exportWindow.title
+        action: "export"
         onRight: {
             saveDialog.selectedFile = saveDialog.currentFolder + "/" + encodeURIComponent(VaultController.vaultName + ".json")
             saveDialog.open()
