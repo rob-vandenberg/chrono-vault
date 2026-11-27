@@ -31,9 +31,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_reader.cpp 0.8.129
+// test_reader.cpp 0.8.130
 
 // --- Version history ----------------------------------------------------
+// v0.8.130: Forget and Disconnect: the warning first, then the password dialog (D-060)
 // v0.8.129: Forget and Disconnect: the password dialog first, then the warning; the words of forget, disconnect and delete (D-060)
 // v0.8.128: Only the primary's key at an unlock; the fingerprint dialog's own words (D-043, D-073)
 // v0.8.126: The standard master password dialog, a second vault open (D-043)
@@ -595,16 +596,16 @@ void TestReader::every_action_has_its_own_words_and_forget_asks_only_for_another
              (L{"Delete the vault", "Enter the password of the vault you are about to delete.", "Delete"}));
     asked->setProperty("vaultFile", QString());
 
-    // Forget the open vault: only the warning; another vault: first its own
-    // password in the standard dialog, then the warning (the owner, D-060).
+    // Forget the open vault: only the warning; another vault: first the
+    // warning, then its own password in the standard dialog (the owner, D-060).
     auto* forget = settings->findChild<QQuickWindow*>(QStringLiteral("forgetWindow"));
     auto* forgetAsk = settings->findChild<QQuickWindow*>(QStringLiteral("forgetAskWindow"));
     QObject* button = settings->findChild<QObject*>(QStringLiteral("forgetButton"));
     QVERIFY(forget && forgetAsk && button);
+    // The open vault: Forget on the warning asks nothing more.
     forget->setProperty("vaultFile", second);
-    QVERIFY(QMetaObject::invokeMethod(forgetAsk, "start", Q_ARG(QVariant, second)));
+    QMetaObject::invokeMethod(forget, "open");
     QTRY_VERIFY(forget->isVisible());
-    QVERIFY(!forgetAsk->isVisible());
     QVERIFY(QMetaObject::invokeMethod(forget, "reject"));
     QTRY_VERIFY(!forget->isVisible());
     controller->lock();
@@ -612,41 +613,47 @@ void TestReader::every_action_has_its_own_words_and_forget_asks_only_for_another
     QObject* field = forgetAsk->findChild<QObject*>(QStringLiteral("askField"));
     QObject* ok = forgetAsk->findChild<QObject*>(QStringLiteral("askOk"));
     QVERIFY(field && ok);
-    const auto passwordFirst = [&]() {
-        QVERIFY(QMetaObject::invokeMethod(forgetAsk, "start", Q_ARG(QVariant, second)));
-        QTRY_VERIFY(forgetAsk->isVisible());
-        QVERIFY(!forget->isVisible());
-        field->setProperty("text", QStringLiteral("no"));
-        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
-        QTRY_VERIFY(controller->askTrouble());
-        QVERIFY(forgetAsk->isVisible());
-        QVERIFY(!forget->isVisible());
-        field->setProperty("text", QStringLiteral("two"));
-        QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    // A locked vault: the warning, then its Forget opens the password dialog.
+    const auto warningFirst = [&]() {
+        forget->setProperty("vaultFile", second);
+        QMetaObject::invokeMethod(forget, "open");
         QTRY_VERIFY(forget->isVisible());
-        QTRY_VERIFY(!forgetAsk->isVisible());
-        QVERIFY(controller->vaults().contains(second)); // not yet: the warning asks first
+        QVERIFY(!forgetAsk->isVisible());
+        QVERIFY(QMetaObject::invokeMethod(button, "clicked"));
+        QTRY_VERIFY(forgetAsk->isVisible());
+        QTRY_VERIFY(!forget->isVisible());
+        QVERIFY(controller->vaults().contains(second)); // not yet: the password first
     };
-    // Disconnect the same: the password dialog first, not the warning.
+    warningFirst();
+    // Cancel on the password dialog: nothing forgotten, nothing proven left behind.
+    QVERIFY(QMetaObject::invokeMethod(forgetAsk, "reject"));
+    QTRY_VERIFY(!forgetAsk->isVisible());
+    controller->forgetVault(second);
+    QVERIFY(controller->vaults().contains(second));
+    // Disconnect the same: the warning first, then the password dialog.
     auto* disconnectAsk = settings->findChild<QQuickWindow*>(QStringLiteral("disconnectAskWindow"));
     auto* disconnect = settings->findChild<QQuickWindow*>(QStringLiteral("disconnectWindow"));
     QVERIFY(disconnectAsk && disconnect);
-    QVERIFY(QMetaObject::invokeMethod(disconnectAsk, "start", Q_ARG(QVariant, second)));
+    disconnect->setProperty("vaultFile", second);
+    QMetaObject::invokeMethod(disconnect, "open");
+    QTRY_VERIFY(disconnect->isVisible());
+    QVERIFY(!disconnectAsk->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(settings->findChild<QObject*>(QStringLiteral("disconnectButton")), "clicked"));
     QTRY_VERIFY(disconnectAsk->isVisible());
-    QVERIFY(!disconnect->isVisible());
     QCOMPARE(disconnectAsk->title(), QStringLiteral("Disconnect the vault"));
     QVERIFY(QMetaObject::invokeMethod(disconnectAsk, "reject"));
     QTRY_VERIFY(!disconnectAsk->isVisible());
-    passwordFirst();
-    // Cancel on the warning: nothing forgotten, nothing proven left behind.
-    QVERIFY(QMetaObject::invokeMethod(forget, "reject"));
-    QTRY_VERIFY(!forget->isVisible());
-    controller->forgetVault(second);
+    // A wrong password: the dialog stays and says so; the right one forgets.
+    warningFirst();
+    field->setProperty("text", QStringLiteral("no"));
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
+    QTRY_VERIFY(controller->askTrouble());
+    QVERIFY(forgetAsk->isVisible());
     QVERIFY(controller->vaults().contains(second));
-    passwordFirst();
-    QVERIFY(QMetaObject::invokeMethod(button, "clicked"));
+    field->setProperty("text", QStringLiteral("two"));
+    QVERIFY(QMetaObject::invokeMethod(ok, "clicked"));
     QTRY_VERIFY(!controller->vaults().contains(second));
-    QTRY_VERIFY(!forget->isVisible());
+    QTRY_VERIFY(!forgetAsk->isVisible());
 }
 
 QTEST_MAIN(TestReader)

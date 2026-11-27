@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.130**: Forget, Disconnect and Delete on a closed or locked vault: first the warning, then the standard
+password dialog; only a right password there acts (the owner, D-060, D-083).
+
 **Version 0.8.129**: Forget, Disconnect and Delete on a closed or locked vault are two dialogs: first the standard
 password dialog, then the warning with its question (the owner, D-060, D-083).
 

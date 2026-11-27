@@ -68,7 +68,7 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-057](decisions/D-057.md) | WebDAV storage: a working copy here, synced and merged; the password in the system's store; a certificate trusted by its fingerprint |
 | [D-058](decisions/D-058.md) | The unlock page with a vault selector; a lock keeps the vault used last; new local vaults in Documents/chrono-vault |
 | [D-059](decisions/D-059.md) | PIN unlock: only while Chrono Vault runs, the PIN's key on disk only sealed with each vault's own key |
-| [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed; Forget and Disconnect ask a closed or locked vault's password first, in its own dialog, then the warning |
+| [D-060](decisions/D-060.md) | The vault menu in Settings > Vaults: Lock, Move…, Forget…, Disconnect…, Import…, Export…; vaults not found listed; Forget and Disconnect on a closed or locked vault: the warning, then its password in its own dialog |
 | [D-061](decisions/D-061.md) | The person decides every difference an import or a sync meets; the sides Vault/Import and This device/Other device |
 | [D-062](decisions/D-062.md) | What a person guesses is what happens: keys, mouse, several items, Delete asked, dialogs; Settings > Vaults; 5 pixels in every button |
 | [D-063](decisions/D-063.md) | Selected and focused; the Item menu on the selected items; Change Category; the empty list; the vault's counts |
@@ -91,4 +91,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-080](decisions/D-080.md) | One cloud storage base class with a class per storage, one sync for all; Google Drive with `drive.file` |
 | [D-081](decisions/D-081.md) | Sort By: six orders either way, kept per vault; headings by title only; a key brings its heading to the top |
 | [D-082](decisions/D-082.md) | One design for every dialog, as the owner's mockups: 16 all round, 8 inside a group, buttons alike only inside a group, buttons and fields 28 high; fixed or resizable by its content; Google Drive shows only its file dialog once signed in |
-| [D-083](decisions/D-083.md) | Delete a vault: every vault's menu; the primary, open or closed say why not; a locked vault: first its own password in its own dialog, then the warning; on its server first, then everything of it on this computer |
+| [D-083](decisions/D-083.md) | Delete a vault: every vault's menu; the primary, open or closed say why not; a locked vault: the warning, then its own password in its own dialog; on its server first, then everything of it on this computer |

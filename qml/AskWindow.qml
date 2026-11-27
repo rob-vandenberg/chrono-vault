@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.8.129
+// AskWindow.qml 0.8.130
 
 // --- Version history ----------------------------------------------------
+// v0.8.130: The password after the warning: no proof handed on (D-060)
 // v0.8.129: Forget, Disconnect and Delete: their words; the proof handed on to the warning that follows (D-060)
 // v0.8.128: The action as one word, its title, heading and button in whole sentences (D-073)
 // v0.8.125: typedOnly: the password typed, never a finger (D-043)
@@ -120,15 +121,7 @@ DialogWindow {
     // Another vault picked in the list.
     signal picked(string vaultFile)
 
-    // The proof kept when this dialog closes, for the warning that follows
-    // (Forget, Disconnect); that warning wipes it when it closes (D-060).
-    property bool proofHandedOn: false
-    function handOn() {
-        proofHandedOn = true
-        accept()
-    }
     function askVault(file) {
-        proofHandedOn = false
         problem = ""
         name = ""
         vaultFile = file
@@ -196,7 +189,7 @@ DialogWindow {
             field.clear()
             newPin.clear()
             vaultBox.popup.close()
-            if (proving && !proofHandedOn)
+            if (proving)
                 VaultController.stopAsking()
         }
     }
@@ -292,7 +285,7 @@ DialogWindow {
             Layout.fillWidth: true
             Label {
                 objectName: "askKeyfileLabel"
-                text: VaultController.askKeyfile === "" ? qsTr("This vault needs its keyfile.")
+                text: VaultController.askKeyfile === "" ? qsTr("This vault requires its keyfile.")
                       : qsTr("Keyfile: %1").arg(VaultController.askKeyfile)
                 elide: Text.ElideMiddle
                 Layout.fillWidth: true

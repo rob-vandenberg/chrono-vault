@@ -27,7 +27,7 @@
 <context>
     <name>AskWindow</name>
     <message>
-        <location filename="../qml/AskWindow.qml" line="+99"/>
+        <location filename="../qml/AskWindow.qml" line="+100"/>
         <source>Enter the Master Password to unlock</source>
         <translation type="unfinished"></translation>
     </message>
@@ -57,7 +57,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+177"/>
+        <location line="+169"/>
         <source>New PIN (at least %1 characters)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -67,7 +67,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-188"/>
+        <location line="-180"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -259,7 +259,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+171"/>
+        <location line="+163"/>
         <source>Remember my credentials</source>
         <translation type="unfinished"></translation>
     </message>
@@ -555,17 +555,17 @@
 <context>
     <name>DeleteVaultWindow</name>
     <message>
-        <location filename="../qml/DeleteVaultWindow.qml" line="+38"/>
+        <location filename="../qml/DeleteVaultWindow.qml" line="+40"/>
         <source>Delete the vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+43"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="+28"/>
         <source>WARNING: You are about to delete the vault “%1”.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -575,7 +575,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-84"/>
+        <location line="-74"/>
         <source>This action cannot be undone. Are you sure you want to delete the vault?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2614,7 +2614,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+371"/>
+        <location filename="../qml/SettingsWindow.qml" line="+372"/>
         <location line="+373"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2673,12 +2673,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1255"/>
+        <location line="+1235"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1256"/>
+        <location line="-1236"/>
         <location line="+450"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2899,7 +2899,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location line="+38"/>
         <source>Chrono Vault remembers every vault you have opened. If you no longer use a vault, you can tell Chrono Vault to forget it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2919,12 +2919,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+30"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+137"/>
+        <location line="+129"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2939,7 +2939,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-991"/>
+        <location line="-971"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3025,7 +3025,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+933"/>
+        <location line="+913"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3040,7 +3040,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-585"/>
+        <location line="-565"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3090,7 +3090,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+62"/>
+        <location line="+60"/>
         <source>Forget the vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3100,12 +3100,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location line="+48"/>
         <source>Disconnect from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+22"/>
         <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3120,7 +3120,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+193"/>
+        <location line="+186"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3145,14 +3145,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1499"/>
-        <location line="+1512"/>
+        <location line="-1479"/>
+        <location line="+1492"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1512"/>
-        <location line="+1525"/>
+        <location line="-1492"/>
+        <location line="+1505"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>

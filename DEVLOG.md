@@ -1057,3 +1057,10 @@ forget, disconnect and delete; a right password hands its proof on (`handOn`) an
 it closes. `VaultPasswordPart.qml` is removed. Tests: `test_reader` (the words, Forget and Disconnect: password first,
 a wrong one stays, Cancel on the warning forgets nothing and leaves no proof), `test_delete_vault_windows` (the same for
 Delete; Enter on the warning is Cancel); the related tests pass, each under 20 seconds.
+
+## 27 November 2026: version 0.8.130, the warning first, then the password
+
+The owner changed his mind after 0.8.129. The warnings open from the menus again; their buttons open `forgetAsk`,
+`disconnectAsk` or `deleteAskWindow` for a closed or locked vault, whose `right` acts. `AskWindow` hands no proof on
+any more (`handOn` removed). A failed delete says why in the password dialog and asks again. Tests: `test_reader` and
+`test_delete_vault_windows` rewritten for the order; the related tests pass, each under 20 seconds.
