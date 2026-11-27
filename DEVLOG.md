@@ -1030,3 +1030,10 @@ standard dialog for the primary vault, unchanged (its own title and OK of 0.8.12
 `test_reader` check it with a second vault open (the open vault's own password asks no finger); both pass, with
 `test_pin_unlock`, each under 20 seconds.
 
+## 27 November 2026: version 0.8.127, Make primary asks the master password
+
+`VaultController::makePrimary` moves the crown only with the current primary's master password typed and proven just
+now; "Make primary" in the question opens `primaryPasswordWindow`, the standard `AskWindow`, for the current primary.
+`test_vault_rows` checks a wrong password, the new vault's own, Cancel and a call without the password (nothing moves)
+and the right one (the crown moves); it passes in 16.3 seconds, `test_vault_row_accounts` in 10.0.
+

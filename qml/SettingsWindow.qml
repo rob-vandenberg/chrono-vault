@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.126
+// SettingsWindow.qml 0.8.127
 
 // --- Version history ----------------------------------------------------
+// v0.8.127: Make primary asks the master password, the current primary's, before the crown moves (D-074)
 // v0.8.126: The standard master password dialog, the primary vault's, before the finger (D-043)
 // v0.8.125: Ticking the fingerprint box first asks the open vault's master password (D-043)
 // v0.8.122: Delete… in every vault's menu: the primary, open or closed say why not; a locked vault asks its password (D-083)
@@ -1371,8 +1372,9 @@ ApplicationWindow {
                                 objectName: "makePrimaryButton"
                                 text: qsTr("Make primary")
                                 onClicked: {
-                                    VaultController.makePrimary(primaryWindow.vaultFile)
+                                    primaryPasswordWindow.newPrimary = primaryWindow.vaultFile
                                     primaryWindow.accept()
+                                    primaryPasswordWindow.askVault(VaultController.primaryVault)
                                 }
                             }
                             Label {
@@ -1393,6 +1395,19 @@ ApplicationWindow {
                             okText: qsTr("OK")
                             onRight: function(file) {
                                 VaultController.setPinFor(file, newPinText)
+                                accept()
+                            }
+                        }
+                        // Make primary: the standard dialog that asks the master password,
+                        // the current primary's, before the crown moves (the owner, D-074).
+                        AskWindow {
+                            id: primaryPasswordWindow
+                            objectName: "primaryPasswordWindow"
+                            transientParent: settingsWindow
+                            typedOnly: true
+                            property string newPrimary: ""
+                            onRight: function(file) {
+                                VaultController.makePrimary(newPrimary)
                                 accept()
                             }
                         }

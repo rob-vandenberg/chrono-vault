@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.127**: Make primary vault asks the master password of the current primary vault, in the standard dialog,
+before the crown moves (D-074).
+
 **Version 0.8.126**: ticking "Use fingerprint to unlock vault" first shows the standard dialog that asks the master
 password (the primary vault's), whichever vault is open; once accepted, the dialog asking for the finger follows
 (D-043 point 6). 0.8.125 asked the open vault's own password: wrong.

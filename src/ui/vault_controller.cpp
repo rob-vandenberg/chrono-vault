@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.8.126
+// vault_controller.cpp 0.8.127
 
 // --- Version history ----------------------------------------------------
+// v0.8.127: Make primary only with the current primary's master password typed just now (D-074)
 // v0.8.126: The fingerprint is turned on only with the master password, the primary vault's, typed just now (D-043)
 // v0.8.125: The fingerprint is turned on only with the open vault's master password typed just now (D-043)
 // v0.8.122: Delete a vault: everything of it on this computer, its password in the primary (D-083)
@@ -3358,7 +3359,10 @@ void VaultController::dropSavedPassword(const QString& vaultFile)
 
 void VaultController::makePrimary(const QString& vaultFile)
 {
-    if (!vaultList.contains(vaultFile) || vaultFile == primaryVault()) {
+    // Only with the master password, the current primary's, typed just now:
+    // else anyone could crown a vault of their own (the owner, D-074).
+    if (!vaultList.contains(vaultFile) || vaultFile == primaryVault() || askedFor != primaryVault() ||
+        !proofKey.isValid() || !proofTyped) {
         return;
     }
     VaultsFile().setValue(primaryKeyName, vaultFile);

@@ -22,9 +22,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.8.120
+// test_vault_rows.cpp 0.8.127
 
 // --- Version history ----------------------------------------------------
+// v0.8.127: Make primary asks the master password, the current primary's (D-074)
 // v0.8.120: The unlock question 440 wide; opened and locked in its row in the second binary (D-082, OR-11)
 // v0.8.118: A double click on a row opens the vault
 // v0.8.117: A cloud vault's row shows its account, in Settings and Open a vault
@@ -446,11 +447,37 @@ private slots:
         QTRY_VERIFY(is(first));
         QCOMPARE(controller->vaultStateOf(second), 1); // out of the primary's own file
 
-        // The crown moves; nothing else. The old primary's keeping is its own.
+        // The crown moves only after the master password, the current primary's,
+        // in the standard dialog (D-074); nothing else moves.
         QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("primaryWindow")), "open");
         settings()->findChild<QObject*>(QStringLiteral("primaryWindow"))->setProperty("vaultFile", second);
         QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("makePrimaryButton")), "clicked");
-        QCOMPARE(controller->primaryVault(), second);
+        auto* asked = settings()->findChild<QQuickWindow*>(QStringLiteral("primaryPasswordWindow"));
+        QVERIFY(asked);
+        QTRY_VERIFY(asked->isVisible());
+        QCOMPARE(asked->property("vaultFile").toString(), first);
+        QObject* typed = asked->findChild<QObject*>(QStringLiteral("askField"));
+        // A wrong password, and the new vault's own: the crown stays, the dialog stays.
+        for (const QString& wrong : {QStringLiteral("no"), QStringLiteral("two")}) {
+            typed->setProperty("text", wrong);
+            QVERIFY(QMetaObject::invokeMethod(asked, "go"));
+            QTRY_VERIFY(controller->askTrouble());
+            QVERIFY(asked->isVisible());
+            QCOMPARE(controller->primaryVault(), first);
+        }
+        // Cancel: the crown stays.
+        QVERIFY(QMetaObject::invokeMethod(asked, "reject"));
+        QTRY_VERIFY(!asked->isVisible());
+        QCOMPARE(controller->primaryVault(), first);
+        controller->makePrimary(second); // without the password: refused
+        QCOMPARE(controller->primaryVault(), first);
+        QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("primaryWindow")), "open");
+        QMetaObject::invokeMethod(settings()->findChild<QObject*>(QStringLiteral("makePrimaryButton")), "clicked");
+        QTRY_VERIFY(asked->isVisible());
+        typed->setProperty("text", QStringLiteral("pass"));
+        QVERIFY(QMetaObject::invokeMethod(asked, "go"));
+        QTRY_COMPARE(controller->primaryVault(), second);
+        QTRY_VERIFY(!asked->isVisible());
         QCOMPARE(controller->vaultStateOf(second), 0);
         controller->lock();
         opens(second, QStringLiteral("two"));
@@ -463,7 +490,12 @@ private slots:
         controller->switchToVault(second);
         QTRY_VERIFY(is(second) && controller->vaultStateOf(first) == 1);
         // Back: what the first kept before is used again, without asking.
+        controller->askFor(second);
+        controller->proveWithPassword(QStringLiteral("two"));
+        QTRY_VERIFY(!controller->askBusy());
         controller->makePrimary(first);
+        controller->stopAsking();
+        QCOMPARE(controller->primaryVault(), first);
         controller->lock();
         controller->switchToVault(first);
         controller->unlock(QStringLiteral("pass"));
