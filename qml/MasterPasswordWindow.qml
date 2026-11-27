@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// MasterPasswordWindow.qml 0.8.120
+// MasterPasswordWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The current password apart from the new pair (D-082)
 // v0.8.120: The one width of every dialog; no text bold as a whole (D-082)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.92: Exact sizes (D-069)
@@ -89,6 +90,8 @@ DialogWindow {
             objectName: "newPasswordField"
             placeholderText: qsTr("New master password")
             Layout.fillWidth: true
+            // The current password apart from the new pair (the owner, D-082).
+            Layout.topMargin: 8 * Appearance.factor
         }
         PasswordField {
             id: repeatedPassword
@@ -104,10 +107,16 @@ DialogWindow {
         CheckBox {
             id: useKeyfile
             objectName: "changeUseKeyfileBox"
+            // 22 high, at the left edge, as in the mockup (D-082).
+            topPadding: 2 * Appearance.factor
+            bottomPadding: 2 * Appearance.factor
+            leftPadding: 0
+            Layout.topMargin: 8 * Appearance.factor
             text: qsTr("Also lock the vault with a keyfile")
         }
         ExactColumn {
             visible: useKeyfile.checked
+            gap: 8 * Appearance.factor
             Label {
                 text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
                 wrapMode: Text.Wrap

@@ -20,20 +20,24 @@
 
 #include <QQuickItem>
 #include <QScreen>
+#include <QSet>
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// test_dialog_design.cpp 0.8.120
+// test_dialog_design.cpp 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: 16 edge, 8 in a group, 28 high, groups, Discard left, Yes and No words, growth at the top (D-082)
 // v0.8.120: Initial release: every dialog in the one design, at 100% and 200% (D-082)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
 
 // Every dialog the program has, opened from a clean start: a dialog that fits
-// its content is 440 wide and exactly as tall as its content; in every one the
-// buttons of the bottom row are alike, and the last one is as far from the
-// right edge as from the bottom (the owner, D-082). Built twice: at 100%, and
+// its content is 440 wide (WebDAV 580, wider by hand) and exactly as tall as its
+// content; the edge 16 all round; buttons and fields 28 high, buttons at least
+// 88 wide, 8 apart and alike inside a group; Discard at the far left; Yes and No
+// show their words; a resizable one made taller keeps its content at the top
+// and its buttons at the bottom (the owner, D-082). Built twice: at 100%, and
 // with CHRONO_VAULT_DESIGN_200 at 200%, so each stays under 20 seconds (OR-11).
 
 namespace {
@@ -75,22 +79,51 @@ class TestDialogDesign : public IntuitiveFixture
 {
     Q_OBJECT
 
-    // What is wrong with one window, or nothing.
-    QString faultsOf(QQuickWindow* one)
+    // What is wrong with one window, or nothing. The settings window keeps
+    // its own edge; its bottom row is checked as every dialog's.
+    QString faultsOf(QQuickWindow* one, bool withEdge = true)
     {
         QStringList faults;
         const double factor = scale / 100.0;
-        const double edge = 12 * factor;
+        const double edge = 16 * factor;
+        const double gap = 8 * factor;
+        const double high = std::round(28 * factor);
         const bool fits = one->property("fitsContent").toBool();
+        const bool wider = one->property("widthResizable").toBool();
         if (fits) {
-            if (one->width() != qRound(440 * factor)) {
-                faults << QStringLiteral("width %1").arg(one->width());
+            const double fitWidth = one->property("fitWidth").toDouble();
+            if (one->minimumWidth() != qRound(fitWidth * factor)) {
+                faults << QStringLiteral("width %1").arg(one->minimumWidth());
             }
-            if (one->minimumSize() != one->maximumSize() || one->size() != one->minimumSize()) {
-                faults << QStringLiteral("not fixed to its content");
+            if (one->minimumHeight() != one->maximumHeight() || one->height() != one->minimumHeight()) {
+                faults << QStringLiteral("not as tall as its content");
+            }
+            if (!wider && one->minimumWidth() != one->maximumWidth()) {
+                faults << QStringLiteral("not fixed in width");
+            }
+            if (wider && one->maximumWidth() <= one->minimumWidth()) {
+                faults << QStringLiteral("not wider by hand");
             }
         }
-        // The bottom row: the buttons whose bottom is the lowest.
+        // Fields and choices as high as the buttons.
+        QList<QQuickItem*> all{one->contentItem()};
+        for (int at = 0; at < all.size(); ++at) {
+            for (QQuickItem* child : all[at]->childItems()) {
+                if (child->isVisible()) {
+                    all << child;
+                }
+            }
+        }
+        for (QQuickItem* item : std::as_const(all)) {
+            // A field drawn as one: one inside another, without a
+            // background of its own, takes the size of the one around it.
+            if ((item->inherits("QQuickTextField") || item->inherits("QQuickComboBox")) && withEdge
+                && item->property("background").value<QQuickItem*>() && std::abs(item->height() - high) > 0.5) {
+                faults << QStringLiteral("a field %1 high").arg(item->height());
+                break;
+            }
+        }
+        // The bottom row: the buttons whose bottom is the lowest, left to right.
         QList<QQuickItem*> buttons;
         buttonsIn(one->contentItem(), buttons);
         double lowest = 0;
@@ -103,17 +136,39 @@ class TestDialogDesign : public IntuitiveFixture
                 row << button;
             }
         }
+        std::sort(row.begin(), row.end(), [](QQuickItem* a, QQuickItem* b) { return placeOf(a).left() < placeOf(b).left(); });
         if (row.isEmpty()) {
             return faults.join(QStringLiteral(", "));
         }
         double right = 0;
-        for (QQuickItem* button : std::as_const(row)) {
+        for (int i = 0; i < row.size(); ++i) {
+            QQuickItem* button = row[i];
             right = std::max(right, placeOf(button).right());
-            if (std::abs(button->width() - row.constFirst()->width()) > 0.5
-                || std::abs(button->height() - row.constFirst()->height()) > 0.5) {
-                faults << QStringLiteral("buttons not alike");
-                break;
+            if (std::abs(button->height() - high) > 0.5 || button->width() < std::round(88 * factor) - 0.5) {
+                faults << QStringLiteral("a button %1 by %2").arg(button->width()).arg(button->height());
             }
+            if (button->property("text").toString().contains(QLatin1Char('&'))) {
+                faults << QStringLiteral("an & shown");
+            }
+            // 8 between the buttons of a group, alike in width; more between
+            // groups.
+            if (i > 0) {
+                const double apart = placeOf(button).left() - placeOf(row[i - 1]).right();
+                if (apart < gap - 0.5) {
+                    faults << QStringLiteral("buttons %1 apart").arg(apart);
+                } else if (apart < gap + 0.5 && std::abs(button->width() - row[i - 1]->width()) > 0.5) {
+                    faults << QStringLiteral("a group not alike");
+                }
+            }
+        }
+        // Discard apart at the far left (the owner, D-082).
+        for (QQuickItem* button : std::as_const(row)) {
+            if (button->objectName() == QLatin1String("discardButton") && std::abs(placeOf(button).left() - edge) > 1) {
+                faults << QStringLiteral("Discard not at the left");
+            }
+        }
+        if (!withEdge) {
+            return faults.join(QStringLiteral(", "));
         }
         // A window the screen keeps smaller than its content is left aside.
         if (one->height() >= one->minimumHeight() && std::abs(one->height() - lowest - edge) > 1) {
@@ -126,6 +181,47 @@ class TestDialogDesign : public IntuitiveFixture
         return faults.join(QStringLiteral(", "));
     }
 
+    // The top of what a window shows: the highest visible part inside it.
+    static double topOf(QQuickWindow* one)
+    {
+        double top = 0;
+        bool found = false;
+        QList<QQuickItem*> all{seen(one->contentItem(), QStringLiteral("dialogContent"))};
+        if (!all.constFirst()) {
+            return 0;
+        }
+        for (int at = 0; at < all.size(); ++at) {
+            for (QQuickItem* child : all[at]->childItems()) {
+                if (child->isVisible() && child->width() > 0 && child->height() > 0) {
+                    all << child;
+                    if (child->childItems().isEmpty()) {
+                        top = found ? std::min(top, placeOf(child).top()) : placeOf(child).top();
+                        found = true;
+                    }
+                }
+            }
+        }
+        return top;
+    }
+
+    // A resizable window made taller: its content stays at the top, the
+    // buttons at the bottom; the room goes to the part that grows (D-082).
+    QString growthFaultsOf(QQuickWindow* one)
+    {
+        if (one->property("fitsContent").toBool() || one->height() + 100 > one->screen()->availableGeometry().height()) {
+            return {};
+        }
+        const double top = topOf(one);
+        one->resize(one->width(), one->height() + 100);
+        QString faults;
+        (void)QTest::qWaitFor([&]() {
+            faults = std::abs(topOf(one) - top) > 1 ? QStringLiteral("content not at the top") : faultsOf(one);
+            return faults.isEmpty();
+        }, 2000);
+        one->resize(one->width(), one->height() - 100);
+        return faults;
+    }
+
 private slots:
     void every_dialog_has_the_one_design()
     {
@@ -136,7 +232,7 @@ private slots:
         // The settings window itself, in the same edge and buttons.
         auto* settingsWindow = qobject_cast<QQuickWindow*>(settings);
         QTRY_VERIFY(settingsWindow->isExposed());
-        const QString settingsFaults = faultsOf(settingsWindow);
+        const QString settingsFaults = faultsOf(settingsWindow, false);
         QVERIFY2(settingsFaults.isEmpty(), qPrintable(settingsFaults));
         QMetaObject::invokeMethod(settings, "close");
         QTRY_VERIFY(!settingsWindow->isVisible());
@@ -156,6 +252,33 @@ private slots:
             // Laid out once shown: what is still wrong then is a fault.
             QString faults;
             (void)QTest::qWaitFor([&]() { faults = faultsOf(one); return faults.isEmpty(); }, 2000);
+            if (faults.isEmpty()) {
+                faults = growthFaultsOf(one);
+            }
+            // Yes and No show their words (0.8.121: a "&" given while made
+            // left them empty).
+            if (faults.isEmpty() && one->property("asksYesNo").toBool()) {
+                const QImage picture = one->grabWindow();
+                for (const char* name : {"buttonBox_yes", "buttonBox_no"}) {
+                    QVariant answer;
+                    QMetaObject::invokeMethod(one, name, Q_RETURN_ARG(QVariant, answer));
+                    QQuickItem* button = answer.value<QQuickItem*>();
+                    if (!button) {
+                        faults = QStringLiteral("no Yes or No");
+                        break;
+                    }
+                    const QRect inside = placeOf(button).toRect().adjusted(4, 4, -4, -4);
+                    QSet<QRgb> colours;
+                    for (int y = inside.top(); y <= inside.bottom(); ++y) {
+                        for (int x = inside.left(); x <= inside.right(); ++x) {
+                            colours.insert(picture.pixel(x * picture.width() / one->width(), y * picture.height() / one->height()));
+                        }
+                    }
+                    if (colours.size() < 4) {
+                        faults = QStringLiteral("a Yes or No without words");
+                    }
+                }
+            }
             if (!faults.isEmpty()) {
                 wrong << one->objectName() + QStringLiteral(": ") + faults;
             }

@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.120
+// SettingsWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Buttons alike only inside a group, 28 high; the key question's first line bold (D-082)
 // v0.8.120: The edge of every dialog, its buttons alike; the key dialogs and the paragraphs in the one design (D-082)
 // v0.8.119: Disconnect deletes nothing, its new text (D-060); no minimize button (D-079); Check for updates above the clipboard
 // v0.8.118: A double click on a vault's row opens it, as Open in its menu (D-071)
@@ -1721,6 +1722,8 @@ ApplicationWindow {
             onRejected: keyCatcher.pendingKey = ""
             Label {
                 text: qsTr("This key has already been assigned")
+                // In bold, as first line, no "?" picture (the owner, Q22, D-082).
+                font.bold: true
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -1736,13 +1739,16 @@ ApplicationWindow {
         ExactRow {
             id: bottomRow
             Layout.fillWidth: true
-            gap: 6 * Appearance.factor
-            // Every button of the row as wide as the widest shown (D-082).
-            readonly property real buttonWidth: Math.ceil(Math.max(
-                createVaultButton.visible ? createVaultButton.implicitWidth : 0,
-                openVaultButton.visible ? openVaultButton.implicitWidth : 0,
-                restoreDefaultsButton.visible ? restoreDefaultsButton.implicitWidth : 0,
+            gap: 8 * Appearance.factor
+            // Buttons alike only inside a group (the owner, D-082): Create
+            // vault and Open vault, Restore defaults on its own, OK and
+            // Cancel; 28 high, at least 88 wide, as in every dialog.
+            readonly property real leftWidth: Math.ceil(Math.max(88 * Appearance.factor,
+                createVaultButton.implicitWidth, openVaultButton.implicitWidth))
+            readonly property real restoreWidth: Math.ceil(Math.max(88 * Appearance.factor, restoreDefaultsButton.implicitWidth))
+            readonly property real rightWidth: Math.ceil(Math.max(88 * Appearance.factor,
                 okButton.implicitWidth, cancelButton.implicitWidth))
+            readonly property real buttonHigh: Math.round(28 * Appearance.factor)
             // The Vaults page's own buttons, at the section's left edge (D-062).
             Item {
                 visible: settingsWindow.onVaults
@@ -1751,7 +1757,8 @@ ApplicationWindow {
             Button {
                 id: createVaultButton
                 objectName: "createVaultButton"
-                Layout.preferredWidth: bottomRow.buttonWidth
+                Layout.preferredWidth: bottomRow.leftWidth
+                Layout.preferredHeight: bottomRow.buttonHigh
                 visible: settingsWindow.onVaults
                 text: qsTr("Create vault")
                 onClicked: settingsWindow.createVaultRequested()
@@ -1759,7 +1766,8 @@ ApplicationWindow {
             Button {
                 id: openVaultButton
                 objectName: "openVaultButton"
-                Layout.preferredWidth: bottomRow.buttonWidth
+                Layout.preferredWidth: bottomRow.leftWidth
+                Layout.preferredHeight: bottomRow.buttonHigh
                 visible: settingsWindow.onVaults
                 text: qsTr("Open vault")
                 onClicked: settingsWindow.openVaultRequested()
@@ -1788,16 +1796,23 @@ ApplicationWindow {
             Button {
                 id: restoreDefaultsButton
                 objectName: "restoreDefaultsButton"
-                Layout.preferredWidth: bottomRow.buttonWidth
+                Layout.preferredWidth: bottomRow.restoreWidth
+                Layout.preferredHeight: bottomRow.buttonHigh
                 // Nothing to put back on the Vaults page (D-062).
                 visible: settingsWindow.restorable
                 text: qsTr("Restore defaults")
                 onClicked: settingsWindow.restoreDefaults()
             }
+            // Restore defaults its own group, apart from OK and Cancel (D-082).
+            Item {
+                visible: restoreDefaultsButton.visible
+                Layout.preferredWidth: 16 * Appearance.factor
+            }
             Button {
                 id: okButton
                 objectName: "okButton"
-                Layout.preferredWidth: bottomRow.buttonWidth
+                Layout.preferredWidth: bottomRow.rightWidth
+                Layout.preferredHeight: bottomRow.buttonHigh
                 text: qsTr("OK")
                 highlighted: true
                 icon.source: "qrc:/icons/ok.svg"
@@ -1809,7 +1824,8 @@ ApplicationWindow {
             Button {
                 id: cancelButton
                 objectName: "cancelButton"
-                Layout.preferredWidth: bottomRow.buttonWidth
+                Layout.preferredWidth: bottomRow.rightWidth
+                Layout.preferredHeight: bottomRow.buttonHigh
                 text: qsTr("Cancel")
                 icon.source: "qrc:/icons/cancel.svg"
                 icon.width: Math.round(16 * Appearance.factor)

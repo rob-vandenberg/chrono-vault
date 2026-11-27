@@ -23,9 +23,10 @@
 #include <QScopeGuard>
 
 // --- Version ------------------------------------------------------------
-// test_intuitive.cpp 0.8.119
+// test_intuitive.cpp 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Yes without &, its letter Y; letter keys quickly one after another, no typed word (D-079, D-081)
 // v0.8.119: No minimize button, the title, the top bar, General's order (test_intuitive_bars); Sort By and the letter keys (test_intuitive_sorting) (D-079, D-074, D-017, D-081)
 // v0.7.111: A question fits its text; Enter, Esc, Y and N as the owner set them (D-079)
 // v0.6.88: The settings' topics in their new order (D-066)
@@ -231,6 +232,9 @@ private slots:
             QVERIFY2(text == QLatin1String("Cancel") || text == QLatin1String("No"), qPrintable(QLatin1String(name) + text));
         }
     }
+#elif defined(CHRONO_VAULT_INTUITIVE_BARS)
+    // The questions' keys, the title bars, the top bar and Settings' order,
+    // apart so each binary stays under 20 seconds (OR-11).
 
     // A question is as tall as its text; its selected button shows its edge;
     // Enter presses only that one; Y and N answer; Esc presses Cancel, or
@@ -251,7 +255,9 @@ private slots:
         QCOMPARE(question->height(), question->minimumHeight());
         auto* yesButton = question->property("enterTarget").value<QQuickItem*>();
         QVERIFY(yesButton);
-        QCOMPARE(yesButton->property("text").toString(), QStringLiteral("&Yes"));
+        // The words without "&", the translator's letter still pressing it (0.8.121).
+        QCOMPARE(yesButton->property("text").toString(), QStringLiteral("Yes"));
+        QCOMPARE(question->property("yesLetter").toString(), QStringLiteral("Y"));
         QTRY_VERIFY(yesButton->property("visualFocus").toBool());
         QTest::keyClick(question, Qt::Key_Escape); // no Cancel: nothing
         QTest::qWait(50);
@@ -301,9 +307,6 @@ private slots:
         QTest::keyClick(outer, Qt::Key_Escape);
         QTRY_VERIFY(!outer->isVisible());
     }
-#elif defined(CHRONO_VAULT_INTUITIVE_BARS)
-    // The title bars, the top bar and Settings' order, apart so each binary
-    // stays under 20 seconds (OR-11).
     // In Settings > General "Check for updates" stands above "Clear the
     // clipboard after", on the screen and for Tab (the owner, 0.8.119).
     void check_for_updates_comes_before_the_clipboard()
@@ -602,8 +605,10 @@ private:
         });
         click(row(2));
         QTRY_VERIFY(list->hasActiveFocus());
+        // Every key a first letter of its own: no word is typed, nothing
+        // waits a second (the owner, D-081).
+        QVERIFY(!list->property("typed").isValid());
         const auto press = [this](Qt::Key letter) {
-            list->setProperty("typed", QString()); // a key of its own, not more of a word
             key(letter);
             QCoreApplication::processEvents();
         };
@@ -623,6 +628,16 @@ private:
         QTRY_VERIFY(headingAtTop(QStringLiteral("A")));
         press(Qt::Key_N); // after the last heading but Z: Z, at the bottom
         QTRY_VERIFY(atTheBottom());
+        // Keys quickly one after another: each its own first letter at once.
+        key(Qt::Key_Z);
+        key(Qt::Key_A);
+        QCoreApplication::processEvents();
+        QTRY_VERIFY(headingAtTop(QStringLiteral("A")));
+        key(Qt::Key_A);
+        key(Qt::Key_I);
+        key(Qt::Key_5);
+        QCoreApplication::processEvents();
+        QTRY_VERIFY(headingAtTop(QStringLiteral("#")));
     }
 
 private:

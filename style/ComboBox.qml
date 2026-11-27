@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// ComboBox.qml 0.7.112
+// ComboBox.qml 0.8.121
 //
 // --- Version history ----------------------------------------------------
+// v0.8.121: In a dialog 28 high (D-082)
 // v0.7.112: Its list stops at its ends, no bounce (D-046)
 // v0.6.101: A menu fits its entries and closes with its window (D-072)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
@@ -79,9 +80,10 @@ F.ComboBox {
             radius: 1.7
         }
     }
+    // In a dialog a choice is 28 pixels high, as its fields (the owner, D-082).
     background: ButtonPanel {
         implicitWidth: 120 * UiScale.factor
-        implicitHeight: 24 * UiScale.factor
+        implicitHeight: (control.Window.window !== null && control.Window.window.dialogDesign === true ? 28 : 24) * UiScale.factor
         control: control
         visible: !control.flat || control.down
         highlighted: control.visualFocus || control.contentItem.activeFocus

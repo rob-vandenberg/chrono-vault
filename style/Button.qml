@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// Button.qml 0.6.92
+// Button.qml 0.8.121
 //
 // --- Version history ----------------------------------------------------
+// v0.8.121: In a dialog 28 high and at least 88 wide (D-082)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.5.82: 5 pixels free between the edge and the text, left and right (the owner)
 // v0.0.10: Initial release (D-023)
@@ -38,9 +39,13 @@ F.Button {
         font: control.font
         color: control.palette.buttonText
     }
+    // In a dialog a button with words is 28 pixels high and at least 88
+    // wide (the owner, D-082).
+    readonly property bool dialogLook: !flat && text !== "" && Window.window !== null
+                                       && Window.window.dialogDesign === true
     background: ButtonPanel {
-        implicitWidth: 80 * UiScale.factor
-        implicitHeight: 24 * UiScale.factor
+        implicitWidth: (control.dialogLook ? 88 : 80) * UiScale.factor
+        implicitHeight: (control.dialogLook ? 28 : 24) * UiScale.factor
         control: control
         visible: !control.flat || control.down || control.checked || control.highlighted || control.visualFocus
                  || (enabled && control.hovered)

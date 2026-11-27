@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SyncConflictsWindow.qml 0.8.120
+// SyncConflictsWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Three groups of buttons, alike only inside a group (D-082)
 // v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.8.115: The places picture of the vault's own storage (D-080)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
@@ -478,21 +479,35 @@ DialogWindow {
         }
 
         // The ticked rows, settled whole. Greyed, never hidden.
+        // Three groups of buttons, alike only inside a group (the owner,
+        // D-082): which side to use; how to settle; Invert selection at the
+        // right.
         ExactRow {
-            gap: 6 * Appearance.factor
+            id: settleRow
+            gap: 8 * Appearance.factor
+            Layout.fillWidth: true
+            readonly property real useWidth: Math.ceil(Math.max(useLeft.implicitWidth, useRight.implicitWidth))
+            readonly property real settleWidth: Math.ceil(Math.max(retry.implicitWidth, keepHere.implicitWidth, keepBoth.implicitWidth))
             Button {
+                id: useLeft
+                Layout.preferredWidth: settleRow.useWidth
                 objectName: "useLeftButton"
                 text: qsTr("Use %1").arg(conflictsWindow.sides.left)
                 enabled: conflictsWindow.tickedCount > 0
                 onClicked: conflictsWindow.settle("left")
             }
             Button {
+                id: useRight
+                Layout.preferredWidth: settleRow.useWidth
                 objectName: "useRightButton"
                 text: qsTr("Use %1").arg(conflictsWindow.sides.right)
                 enabled: conflictsWindow.tickedCount > 0
                 onClicked: conflictsWindow.settle("right")
             }
+            Item { Layout.preferredWidth: 16 * Appearance.factor }
             Button {
+                id: retry
+                Layout.preferredWidth: settleRow.settleWidth
                 objectName: "retryButton"
                 text: qsTr("Retry sync")
                 enabled: conflictsWindow.everyTicked("canRetry")
@@ -502,17 +517,22 @@ DialogWindow {
                 }
             }
             Button {
+                id: keepHere
+                Layout.preferredWidth: settleRow.settleWidth
                 objectName: "keepHereButton"
                 text: qsTr("Keep here only")
                 enabled: conflictsWindow.everyTicked("canKeepHere")
                 onClicked: conflictsWindow.settle("keep")
             }
             Button {
+                id: keepBoth
+                Layout.preferredWidth: settleRow.settleWidth
                 objectName: "keepBothButton"
                 text: qsTr("Keep both")
                 enabled: conflictsWindow.everyTicked("canKeepBoth")
                 onClicked: conflictsWindow.settle("both")
             }
+            Item { Layout.fillWidth: true }
             Button {
                 objectName: "invertSelectionButton"
                 text: qsTr("Invert selection")

@@ -966,3 +966,22 @@ Tests: `test_dialog_design` and `test_dialog_design_200` (new), `test_webdav_win
 direct file dialog for WebDAV and Google Drive), `test_appearance`, `test_dialog_keys`, `test_vault_rows` (its slowest
 case moved into `test_vault_row_accounts`, OR-11); the related tests pass, each under 20 seconds alone.
 `test_sync_conflicts` and `test_audit_windows` fail as they did in 0.8.119.
+
+## 27 November 2026: version 0.8.121, every dialog as its mockup
+
+`qml/DialogWindow.qml`: the edge 16, 16 between content and buttons, 8 between the buttons of a group; buttons alike
+only inside a group (the right group: its own buttons and the standard ones; at the left a `ButtonGap` starts a new
+one); a filler between the left and right buttons (a row of buttons cannot grow past them itself, so the right ones
+stood short of the edge without a filler of the dialog's own); Discard as a red button of its own at the far left; a
+resizable window without a growing part keeps its content at the top; `fitWidth` and `widthResizable` for the WebDAV
+window; `enterWithoutButton` for Sync conflict. The style makes buttons, fields and choices 28 high (buttons at least
+88 wide) in a window with `dialogDesign`. Each dialog spaced as its mockup (password, PIN, keyfile, Import, WebDAV,
+Field Options, updates, Sync conflicts, template editor, file dialog, generator, Settings' bottom row, the key in use).
+Google Drive: the sign-in window hides once signed in, the file dialog over the main window stays open while a choice
+is carried out and shows a failure itself. Yes and No: a "&" given to a button while it is made draws no text at all
+(found with the dialog pictures, on the offscreen and the real display alike); the words are now set without it and the
+translator's letter kept for the key. Letter keys: no typed word, no one-second wait. `test_audit_windows`: the window
+asked for was larger than the 800 by 800 test screen, which cut it down later; a click before that landed at the cut
+edge of the sidebar; the tests now ask a size that fits and wait until the content has it. Tests: `test_dialog_design`
+and `test_dialog_design_200` (rewritten to the design), `test_intuitive` split again (two cases to `test_intuitive_bars`,
+OR-11), `test_webdav_windows`, `test_audit_windows`; the related tests pass, each under 20 seconds alone.

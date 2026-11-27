@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavFileDialog.qml 0.8.120
+// WebDavFileDialog.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Open while a Google Drive choice is carried out; 8 between its parts (D-082)
 // v0.8.120: Resized by the person; Google Drive's size apart from WebDAV's (D-082)
 // v0.8.115: Any storage's folders: WebDAV or Google Drive (D-080)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
@@ -56,6 +57,9 @@ DialogWindow {
     property string leaving: ""
     property bool waiting: false
     property string problem: ""
+    // Open while the choice is carried out, so a failure shows in its own
+    // error line (Google Drive, the only window on screen; the owner, D-082).
+    property bool actsBeforeClosing: false
 
     // The choice: the file's name ("" for a folder) in the folder shown.
     signal chosen(string fileName, string folder)
@@ -111,7 +115,12 @@ DialogWindow {
         if (!ready)
             return
         const name = mode === "folder" ? "" : mode === "save" ? typedName.slice(0, -".chronovault".length) : nameField.text
-        accept()
+        if (actsBeforeClosing) {
+            problem = ""
+            waiting = true
+        } else {
+            accept()
+        }
         chosen(name, folderShown)
     }
 
@@ -150,11 +159,25 @@ DialogWindow {
         }
     }
 
+    // The list of files takes all extra room; the rest keeps its size (the
+    // owner, D-082).
     ExactColumn {
-        gap: 6 * Appearance.factor
+        gap: 8 * Appearance.factor
+        Layout.fillWidth: true
+        Layout.fillHeight: true
 
+        // Only the file dialog is seen once signed in to Google Drive, so
+        // what it shows is said here (the owner, Q15 and D-082).
+        Label {
+            objectName: "googleDriveOnlyOurs"
+            visible: fileDialog.storage === "googledrive" && fileDialog.mode === "open"
+            text: qsTr("Only vaults created or moved here by Chrono Vault are shown. To bring in another vault, open it from this computer and use Move to Google Drive…")
+            wrapMode: Text.Wrap
+            opacity: 0.7
+            Layout.fillWidth: true
+        }
         ExactRow {
-            gap: 6 * Appearance.factor
+            gap: 8 * Appearance.factor
             Layout.fillWidth: true
             Button {
                 objectName: "fileDialogBackButton"
@@ -190,7 +213,7 @@ DialogWindow {
         ExactRow {
             id: newFolderRow
             visible: false
-            gap: 6 * Appearance.factor
+            gap: 8 * Appearance.factor
             Layout.fillWidth: true
             TextField {
                 id: folderNameField
@@ -225,6 +248,7 @@ DialogWindow {
             Layout.fillWidth: true
             Layout.preferredWidth: 600 * Appearance.factor
             Layout.preferredHeight: 300 * Appearance.factor
+            Layout.fillHeight: true
             ExactColumn {
                 anchors.fill: parent
                 gap: 0

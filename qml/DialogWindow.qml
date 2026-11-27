@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.8.120
+// DialogWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The edge 16, 8 between buttons, buttons alike only inside a group, 28 high (D-082)
 // v0.8.120: One design for every dialog: 440 wide, as tall as its content, one edge all round, the buttons of a row alike (D-082)
 // v0.8.119: A title and × only, never minimize (D-079)
 // v0.7.111: A question as tall as its text; Enter only on the selected button, shown; Esc on Cancel or Close; Y and N (D-079)
@@ -84,6 +85,10 @@ ApplicationWindow {
         }
         return null
     }
+    // Enter presses the selected button, the default one too while the
+    // keyboard is on no button (Sync conflict: Apply once it can be used, the
+    // owner, D-082).
+    property bool enterWithoutButton: false
     // A button, not a tick box or a choice.
     function isButton(item) {
         return item && typeof item.click === "function" && !item.indicator
@@ -128,14 +133,22 @@ ApplicationWindow {
         return at >= 0 && at + 1 < text.length ? text.charAt(at + 1).toUpperCase() : ""
     }
     function markLetters() {
+        const discard = buttonBox.standardButton(Dialog.Discard)
+        if (discard)
+            discard.visible = false
         const yes = buttonBox.standardButton(Dialog.Yes)
         const no = buttonBox.standardButton(Dialog.No)
+        // The translator's letters press the buttons; the words are shown
+        // without the "&": a "&" given to a button while it is made leaves it
+        // without any text at all (0.8.121, the dialog pictures).
+        const yesWords = qsTr("&Yes")
+        const noWords = qsTr("&No")
         if (yes)
-            yes.text = qsTr("&Yes")
+            yes.text = yesWords.replace("&", "")
         if (no)
-            no.text = qsTr("&No")
-        yesLetter = yes ? letterOf(yes.text) : ""
-        noLetter = no ? letterOf(no.text) : ""
+            no.text = noWords.replace("&", "")
+        yesLetter = yes ? letterOf(yesWords) : ""
+        noLetter = no ? letterOf(noWords) : ""
     }
     onStandardButtonsChanged: markLetters()
     // A dialog of text, a few fields and buttons: one width for all of them,
@@ -181,14 +194,13 @@ ApplicationWindow {
         show()
         shown()
     }
-    // Paragraphs for one label with textFormat Text.RichText, half a line
-    // apart, as every dialog's (the owner, D-082); never read as markup.
+    // Paragraphs for one label with textFormat Text.RichText, 8 pixels
+    // apart, as within a group (the owner, D-082); never read as markup.
     function paragraphs(list) {
         const escape = function(text) {
             return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
         }
-        // Half a line, in pixels: a point is 4/3 pixel at 96 dpi.
-        const apart = Math.round(Appearance.fontPointSize * 4 / 3 * 0.5)
+        const apart = Math.round(8 * Appearance.factor)
         let joined = ""
         for (let i = 0; i < list.length; ++i)
             joined += "<p style=\"margin-top:0; margin-bottom:" + (i + 1 < list.length ? apart : 0) + "px\">" + escape(list[i]) + "</p>"
@@ -256,22 +268,32 @@ ApplicationWindow {
     flags: Appearance.questionFlags
     modality: Qt.ApplicationModal
     visible: false
-    // The edge around everything, the same as the settings window's.
-    // The same on all four sides, the bottom too (the owner, D-082).
-    readonly property real edge: 12 * Appearance.factor
-    // The width of every dialog that fits its content (D-082).
-    readonly property real simpleWidth: Math.round(440 * Appearance.factor)
+    // The edge around everything: 16 pixels on all four sides, the bottom
+    // too (the owner, D-082).
+    readonly property real edge: 16 * Appearance.factor
+    // 8 pixels between the buttons of one group (the owner, D-082).
+    readonly property real buttonGap: 8 * Appearance.factor
+    // Buttons, fields and choices in a dialog are 28 pixels high, buttons
+    // at least 88 wide (the owner, D-082): the style reads this.
+    readonly property bool dialogDesign: true
+    // The width of every dialog that fits its content: 440, a window of
+    // fields with long values (WebDAV) wider (the owner, D-082).
+    property real fitWidth: 440
+    readonly property real simpleWidth: Math.round(fitWidth * Appearance.factor)
+    // A dialog that fits its content in height, but may be made wider, so a
+    // long address shows whole (WebDAV, the owner, D-082).
+    property bool widthResizable: false
     // The room the screen gives a window, its frame taken off.
     readonly property real roomHigh: Appearance.screenRoom(dialogWindow).height - Appearance.frameOf(dialogWindow).height
-    // Every button in the bottom row as wide as the widest there (D-082).
+    // Buttons are alike in width only inside a group that belongs together
+    // (the owner, D-082): the decision at the right (its own buttons and the
+    // standard ones) is one group; at the left, a ButtonGap starts a new one.
     readonly property real buttonWidth: {
         let widest = 0
-        for (const area of [leftArea, rightArea]) {
-            for (let i = 0; i < area.children.length; ++i) {
-                const one = area.children[i]
-                if (isButton(one) && one.visible)
-                    widest = Math.max(widest, one.implicitWidth)
-            }
+        for (let i = 0; i < rightArea.children.length; ++i) {
+            const one = rightArea.children[i]
+            if (isButton(one) && one.visible)
+                widest = Math.max(widest, one.implicitWidth)
         }
         const boxed = buttonBox.contentChildren
         for (let i = 0; i < boxed.length; ++i) {
@@ -280,13 +302,38 @@ ApplicationWindow {
         }
         return Math.ceil(widest)
     }
+    // The widest button of the left group the button is in.
+    function leftGroupWidth(button) {
+        const all = leftArea.children
+        let at = 0
+        while (at < all.length && all[at] !== button)
+            ++at
+        let first = at
+        while (first > 0 && isButton(all[first - 1]))
+            --first
+        let widest = 0
+        for (let i = first; i < all.length && isButton(all[i]); ++i) {
+            if (all[i].visible)
+                widest = Math.max(widest, all[i].implicitWidth)
+        }
+        return Math.ceil(widest)
+    }
+    // Between two groups of buttons at the left: 16 pixels more than
+    // between the buttons of one group (the mockups, D-082).
+    component ButtonGap: Item {
+        implicitWidth: 16 * Appearance.factor
+        implicitHeight: 1
+    }
     function sizeOwnButtons() {
-        for (const area of [leftArea, rightArea]) {
-            for (let i = 0; i < area.children.length; ++i) {
-                const one = area.children[i]
-                if (isButton(one))
-                    one.Layout.preferredWidth = Qt.binding(function() { return dialogWindow.buttonWidth })
-            }
+        for (let i = 0; i < rightArea.children.length; ++i) {
+            const one = rightArea.children[i]
+            if (isButton(one))
+                one.Layout.preferredWidth = Qt.binding(function() { return dialogWindow.buttonWidth })
+        }
+        for (let i = 0; i < leftArea.children.length; ++i) {
+            const one = leftArea.children[i]
+            if (isButton(one))
+                one.Layout.preferredWidth = Qt.binding(function() { return dialogWindow.leftGroupWidth(one) })
         }
     }
     // The size it first opens at; then the person's own, which scales along
@@ -304,7 +351,7 @@ ApplicationWindow {
     minimumWidth: fitsContent ? simpleWidth : layout.implicitWidth + 2 * edge
     // A text taller than the screen scrolls inside the window (D-082).
     minimumHeight: fitsContent ? fittedHeight : Math.min(layout.implicitHeight + 2 * edge, roomHigh)
-    maximumWidth: fitsContent ? minimumWidth : 16777215
+    maximumWidth: fitsContent && !widthResizable ? minimumWidth : 16777215
     maximumHeight: fitsContent ? fittedHeight : 16777215
     color: palette.window
 
@@ -363,6 +410,12 @@ ApplicationWindow {
                 if (dialogWindow.isButton(on) && on.enabled && on.visible) {
                     event.accepted = true
                     on.click()
+                } else if (dialogWindow.enterWithoutButton && !dialogWindow.isButton(on) && !dialogWindow.isTyping(on)) {
+                    const target = dialogWindow.enterTarget
+                    if (target && target.enabled && target.visible) {
+                        event.accepted = true
+                        target.click()
+                    }
                 }
             } else if ((event.key === Qt.Key_Left || event.key === Qt.Key_Right) && event.modifiers === Qt.NoModifier
                        && dialogWindow.isButton(dialogWindow.activeFocusItem)) {
@@ -371,7 +424,9 @@ ApplicationWindow {
                 dialogWindow.selectNext(event.key === Qt.Key_Right)
             }
         }
-        gap: 10 * Appearance.factor
+        // 16 pixels between the content and the buttons, as between groups
+        // (the owner, D-082).
+        gap: 16 * Appearance.factor
 
         // The content scrolls only when the screen is too small for it.
         Flickable {
@@ -390,27 +445,57 @@ ApplicationWindow {
             interactive: clip
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar { policy: scroller.interactive ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff }
+            // A resizable window gives its extra room to the part that grows;
+            // without one its content stays at the top, never spread out
+            // (the owner, D-082).
             ExactColumn {
                 id: contentArea
+                objectName: "dialogContent"
                 width: scroller.width
-                height: dialogWindow.fitsContent ? Math.max(implicitHeight, scroller.height) : scroller.height
+                readonly property bool grows: {
+                    for (let i = 0; i < children.length; ++i) {
+                        if (children[i].visible && children[i].Layout.fillHeight)
+                            return true
+                    }
+                    return false
+                }
+                height: dialogWindow.fitsContent || !grows ? Math.max(implicitHeight, dialogWindow.fitsContent ? scroller.height : 0)
+                                                          : scroller.height
             }
         }
 
         ExactRow {
             Layout.fillWidth: true
-            gap: 6 * Appearance.factor
-            // The left buttons' area takes the free room, so the right ones
-            // stand at the right.
+            gap: dialogWindow.buttonGap
+            // Discard apart at the far left, in the red of every button with
+            // red text (the owner, D-082); the box's own stays hidden, so
+            // Enter and Esc never reach it.
+            Button {
+                id: discardButton
+                objectName: "discardButton"
+                visible: (dialogWindow.standardButtons & Dialog.Discard) !== 0
+                text: qsTr("Discard")
+                palette.buttonText: "#ff6b6b"
+                onClicked: {
+                    const boxed = buttonBox.standardButton(Dialog.Discard)
+                    if (boxed)
+                        boxed.clicked()
+                }
+            }
             ExactRow {
                 id: leftArea
-                gap: 6 * Appearance.factor
-                Layout.fillWidth: true
+                gap: dialogWindow.buttonGap
                 onChildrenChanged: dialogWindow.sizeOwnButtons()
+            }
+            // The free room between the left buttons and the right ones, so
+            // the right ones stand against the right edge (a row of buttons
+            // cannot grow past them itself).
+            Item {
+                Layout.fillWidth: true
             }
             ExactRow {
                 id: rightArea
-                gap: 6 * Appearance.factor
+                gap: dialogWindow.buttonGap
                 onChildrenChanged: dialogWindow.sizeOwnButtons()
             }
             DialogButtonBox {
@@ -418,6 +503,7 @@ ApplicationWindow {
                 // No edge, frame or room of its own: the window's edge is the
                 // only one, and the box is exactly as large as its buttons.
                 padding: 0
+                spacing: dialogWindow.buttonGap
                 background: null
                 alignment: Qt.AlignRight
                 // A row as wide as its buttons now, not as they were made.

@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// UpdateAvailableWindow.qml 0.8.120
+// UpdateAvailableWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Skip this update apart at the left (D-082)
 // v0.8.120: The one width of every dialog (D-082)
 // v0.6.97: A long text breaks in a window of normal width (D-061)
 // v0.6.92: Exact sizes (D-069)
@@ -72,24 +73,24 @@ DialogWindow {
         Layout.fillWidth: true
     }
 
-    rightButtons: [
-        Button {
-            objectName: "downloadButton"
-            text: qsTr("Download")
-            highlighted: true
-            enabled: availableWindow.state === Updater.Available
-            onClicked: Updater.download()
-        },
-        Button {
-            objectName: "skipButton"
-            text: qsTr("Skip this update")
-            enabled: availableWindow.state === Updater.Available
-            onClicked: {
-                Updater.skipThisVersion()
-                availableWindow.accept()
-            }
+    // Skip this update apart at the left; Download and Cancel at the right
+    // (the owner, Q20, D-082).
+    leftButtons: Button {
+        objectName: "skipButton"
+        text: qsTr("Skip this update")
+        enabled: availableWindow.state === Updater.Available
+        onClicked: {
+            Updater.skipThisVersion()
+            availableWindow.accept()
         }
-    ]
+    }
+    rightButtons: Button {
+        objectName: "downloadButton"
+        text: qsTr("Download")
+        highlighted: true
+        enabled: availableWindow.state === Updater.Available
+        onClicked: Updater.download()
+    }
     standardButtons: Dialog.Cancel
     // Cancel, Esc or the close button: nothing until the next check; a
     // download under way stops.

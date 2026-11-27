@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// TemplateEditor.qml 0.8.120
+// TemplateEditor.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The list of fields grows, Add a field right under it (D-082)
 // v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
@@ -99,14 +100,18 @@ DialogWindow {
 
     ListModel { id: fieldsModel }
 
+    // Name and Category at the top; the list of fields takes all extra room,
+    // "Add a field" right under it (the owner, D-082).
     ExactColumn {
-        gap: 8 * Appearance.factor
+        gap: 16 * Appearance.factor
         Layout.preferredWidth: 520 * Appearance.factor
         Layout.fillWidth: true
+        Layout.fillHeight: true
 
         GridLayout {
             columns: 2
-            columnSpacing: 8 * Appearance.factor
+            columnSpacing: 12 * Appearance.factor
+            rowSpacing: 8 * Appearance.factor
             Layout.fillWidth: true
             Label { text: qsTr("Name:") }
             TextField {
@@ -124,6 +129,10 @@ DialogWindow {
             }
         }
 
+        ExactColumn {
+        gap: 8 * Appearance.factor
+        Layout.fillWidth: true
+        Layout.fillHeight: true
         Label {
             text: qsTr("Fields")
             font.bold: true
@@ -131,10 +140,19 @@ DialogWindow {
         ScrollView {
             id: fieldScroll
             Layout.fillWidth: true
-            Layout.preferredHeight: 260 * Appearance.factor
+            Layout.fillHeight: true
+            // Opens as tall as its fields, within reason (D-082).
+            Layout.preferredHeight: Math.min(Math.max(fieldColumn.implicitHeight + topPadding + bottomPadding, 80 * Appearance.factor),
+                                             360 * Appearance.factor)
             contentWidth: availableWidth
             clip: true
+            padding: 4 * Appearance.factor
+            background: Rectangle {
+                color: templateEditor.palette.base
+                border.color: templateEditor.palette.mid
+            }
             ExactColumn {
+                id: fieldColumn
                 width: fieldScroll.availableWidth
                 Repeater {
                     model: fieldsModel
@@ -189,7 +207,9 @@ DialogWindow {
             objectName: "templateAddFieldButton"
             text: qsTr("Add a field")
             flat: true
+            palette.buttonText: templateEditor.palette.link
             onClicked: fieldsModel.append({ role: "", label: qsTr("New field"), name: qsTr("New field"), kind: "text" })
+        }
         }
     }
 }

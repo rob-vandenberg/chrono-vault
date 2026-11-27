@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WebDavWindow.qml 0.8.120
+// WebDavWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Labels at the left of the fields, 580 wide, wider when the person makes it so (D-082)
 // v0.8.120: Connected: the file dialog opens by itself, a choice goes on at once, its Cancel ends it all; no Vault field (D-082)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.75: Move is the vault menu's: the vault leaves its old place once its copy is checked (D-060)
@@ -63,8 +64,10 @@ DialogWindow {
     property string certificate: ""
     property string trusted: ""
     property string problem: ""
-    // The width inside the window, as every dialog (D-082).
-    readonly property real columnWidth: simpleWidth - 2 * edge
+    // 580 wide, so a normal address fits without scrolling, and wider when
+    // the person makes it so; its fields grow (the owner, Q21, D-082).
+    fitWidth: 580
+    widthResizable: true
     // As tall as its content, whatever height was remembered (the owner).
     maximumHeight: minimumHeight
     // Connected or signed in: the file dialog opens by itself, once (D-082).
@@ -223,8 +226,15 @@ DialogWindow {
             visible: webDavWindow.mode === "move"
             text: qsTr("“%1” moves to the WebDAV folder you choose. Where it is now, it is deleted once its copy there is checked.").arg(VaultController.vaultNameOf(webDavWindow.moveVault))
             wrapMode: Text.Wrap
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
         }
+        // The labels at the left of their fields, in one column (the owner,
+        // Q21, D-082).
+        GridLayout {
+            columns: 2
+            columnSpacing: 12 * Appearance.factor
+            rowSpacing: 8 * Appearance.factor
+            Layout.fillWidth: true
         Label { text: qsTr("Server") }
         // pCloud's addresses are filled in only when chosen, and may be
         // changed: they may change one day (the owner).
@@ -235,7 +245,7 @@ DialogWindow {
             currentIndex: -1
             displayText: currentIndex < 0 ? qsTr("Choose the server…") : currentText
             enabled: !webDavWindow.busy
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
             onActivated: function(index) {
                 addressField.text = index === 0 ? "https://ewebdav.pcloud.com"
                                   : index === 1 ? "https://webdav.pcloud.com" : ""
@@ -251,7 +261,7 @@ DialogWindow {
             objectName: "webDavAddressField"
             placeholderText: qsTr("https://example.org/remote.php/webdav")
             enabled: !webDavWindow.busy
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
             onTextChanged: { webDavWindow.connected = false; webDavWindow.certificate = ""; webDavWindow.trusted = "" }
         }
         Label {
@@ -260,14 +270,15 @@ DialogWindow {
             text: qsTr("This address is not encrypted (http). The vault itself stays encrypted, but your WebDAV user name and password cross the network readable by anyone on it.")
             color: "#e53e3e"
             wrapMode: Text.Wrap
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
+            Layout.columnSpan: 2
         }
         Label { text: qsTr("User name") }
         TextField {
             id: userField
             objectName: "webDavUserField"
             enabled: !webDavWindow.busy
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
             onTextChanged: webDavWindow.connected = false
         }
         Label { text: qsTr("Password") }
@@ -275,9 +286,10 @@ DialogWindow {
             id: passwordField
             objectName: "webDavPasswordField"
             enabled: !webDavWindow.busy
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
             onTextChanged: webDavWindow.connected = false
             onAccepted: webDavWindow.go()
+        }
         }
         Label {
             objectName: "webDavProblem"
@@ -285,7 +297,7 @@ DialogWindow {
             text: webDavWindow.problem
             color: "#e53e3e"
             wrapMode: Text.Wrap
-            Layout.preferredWidth: webDavWindow.columnWidth
+            Layout.fillWidth: true
         }
 
         // A certificate the system does not trust (D-057).
@@ -295,14 +307,14 @@ DialogWindow {
             Label {
                 text: qsTr("Trust this certificate only when it is your server's. Its SHA-256 fingerprint:")
                 wrapMode: Text.Wrap
-                Layout.preferredWidth: webDavWindow.columnWidth
+                Layout.fillWidth: true
             }
             Label {
                 objectName: "webDavFingerprint"
                 text: webDavWindow.certificate
                 font.family: "Noto Sans Mono"
                 wrapMode: Text.WrapAnywhere
-                Layout.preferredWidth: webDavWindow.columnWidth
+                Layout.fillWidth: true
             }
             Button {
                 objectName: "trustCertificateButton"

@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.8.120
+// AskWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The new PIN 16 apart (D-082)
 // v0.8.120: The design of every dialog: its text and normal fields, 440 wide, no size remembered (the owner, D-082)
 // v0.7.107: No PIN face; Set or Change PIN; the password of any vault but the primary (D-076)
 // v0.6.105: Another primary vault; Remember my credentials; Open, Closed, Locked (D-074)
@@ -203,6 +204,8 @@ DialogWindow {
             visible: askWindow.withNewPin
             placeholderText: qsTr("New PIN (at least %1 characters)").arg(VaultController.pinShortest)
             Layout.fillWidth: true
+            // The new PIN apart from the password (the owner, D-082).
+            Layout.topMargin: 8 * Appearance.factor
             onAccepted: askWindow.go()
         }
         Label {

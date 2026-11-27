@@ -4,9 +4,10 @@
 // Copyright (C) 2026 Rob Vandenberg
 //
 // --- Version ------------------------------------------------------------
-// TextField.qml 0.6.92
+// TextField.qml 0.8.121
 //
 // --- Version history ----------------------------------------------------
+// v0.8.121: In a dialog 28 high (D-082)
 // v0.6.92: Enlarged by exactly the UI scaling (D-069)
 // v0.6.91: The right-click menu (D-068)
 // v0.0.10: Initial release (D-023)
@@ -110,9 +111,10 @@ T.Pane {
         }
     }
 
+    // In a dialog a field is 28 pixels high, as its buttons (the owner, D-082).
     background: TextFieldBackground {
         implicitWidth: 120 * UiScale.factor
-        implicitHeight: 24 * UiScale.factor
+        implicitHeight: (control.Window.window !== null && control.Window.window.dialogDesign === true ? 28 : 24) * UiScale.factor
         control: control
     }
 }

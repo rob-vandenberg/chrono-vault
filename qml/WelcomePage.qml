@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// WelcomePage.qml 0.8.120
+// WelcomePage.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The two tick boxes close together (D-082)
 // v0.8.120: Choose the master password in the one width; no text bold as a whole (D-082)
 // v0.8.115: The Google Drive window; a new vault created on Google Drive (D-080)
 // v0.7.108: Open a vault lists the known vaults (D-077)
@@ -282,10 +283,19 @@ Item {
                 visible: secondPassword.text !== "" && !newVaultDialog.passwordsAgree
                 text: qsTr("The two passwords are not the same yet.")
             }
+            // The two tick boxes close together, 16 below the fields (the
+            // owner, D-082).
+            ExactColumn {
+                gap: 4 * Appearance.factor
+                Layout.topMargin: 8 * Appearance.factor
             // First the saved password, then the keyfile (the owner).
             CheckBox {
                 id: saveInPrimary
                 objectName: "saveInPrimaryBox"
+                // 22 high, at the left edge, as in the mockup (D-082).
+                topPadding: 2 * Appearance.factor
+                bottomPadding: 2 * Appearance.factor
+                leftPadding: 0
                 visible: newVaultDialog.offerSave
                 // What the primary vault is for, said where it matters (the owner, D-058).
                 // Its text wraps with the window, as every text does (the owner).
@@ -302,11 +312,16 @@ Item {
             CheckBox {
                 id: useKeyfile
                 objectName: "useKeyfileBox"
+                // 22 high, at the left edge, as in the mockup (D-082).
+                topPadding: 2 * Appearance.factor
+                bottomPadding: 2 * Appearance.factor
+                leftPadding: 0
                 text: qsTr("Also lock the vault with a keyfile")
+            }
             }
             ExactColumn {
                 visible: useKeyfile.checked
-                gap: 6 * Appearance.factor
+                gap: 8 * Appearance.factor
                 Label {
                     text: qsTr("Without its keyfile the vault cannot be opened, not even with the right password. Keep a copy of the keyfile somewhere safe, apart from the vault.")
                     wrapMode: Text.Wrap

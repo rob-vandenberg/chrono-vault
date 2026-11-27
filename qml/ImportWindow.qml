@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ImportWindow.qml 0.8.120
+// ImportWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Fixed, 440 wide; the vault list under the words Another vault (D-082)
 // v0.8.120: Resized by the person, its own size kept (D-082)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.6.92: Exact sizes (D-069)
@@ -49,8 +50,8 @@ DialogWindow {
     id: importWindow
     objectName: "importWindow"
     memoryName: "import"
-    // Resized by the person, who finds it at that size again (D-082).
-    fitsContent: false
+    // Fixed, 440 wide and as tall as its content (the owner, D-082).
+    fitsContent: true
     readonly property string program: VaultController.referenceName()
     // "choose" first, then "summary".
     property string step: "choose"
@@ -171,13 +172,12 @@ DialogWindow {
     onRejected: VaultController.cancelImport()
 
     ExactColumn {
-        gap: 10 * Appearance.factor
-        Layout.preferredWidth: 460 * Appearance.factor
+        gap: 8 * Appearance.factor
         Layout.fillWidth: true
 
         ExactColumn {
             visible: importWindow.step === "choose"
-            gap: 6 * Appearance.factor
+            gap: 8 * Appearance.factor
             Layout.fillWidth: true
             Label {
                 text: qsTr("Import into “%1” from:").arg(VaultController.vaultName)
@@ -185,6 +185,7 @@ DialogWindow {
                 Layout.fillWidth: true
             }
             RadioButton {
+                id: fromVault
                 objectName: "importFromVault"
                 text: qsTr("Another vault")
                 checked: importWindow.source === "vault"
@@ -192,9 +193,11 @@ DialogWindow {
             }
             ExactRow {
                 enabled: importWindow.source === "vault"
-                gap: 6 * Appearance.factor
+                gap: 8 * Appearance.factor
                 Layout.fillWidth: true
-                Layout.leftMargin: 28 * Appearance.factor
+                // The vault list starts under the words "Another vault" (the
+                // owner, D-082).
+                Layout.leftMargin: fromVault.leftPadding + fromVault.indicator.width + fromVault.spacing
                 ComboBox {
                     id: vaultBox
                     objectName: "importVaultBox"

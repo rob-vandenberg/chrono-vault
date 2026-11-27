@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.120 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.121 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.120
+# CMakeLists.txt 0.8.121
 
 # --- Version history ----------------------------------------------------
+# v0.8.121: Version 0.8.121; every dialog as its mockup (D-082)
 # v0.8.120: Version 0.8.120; one design for every dialog, WebDAV and Google Drive straight to the file dialog (D-082)
 # v0.8.119: Version 0.8.119; Disconnect deletes nothing, no minimize button, the title, the top bar, Sort By (D-060, D-079, D-074, D-017, D-081)
 # v0.8.118: Version 0.8.118; a double click on a vault's row opens it (D-071)

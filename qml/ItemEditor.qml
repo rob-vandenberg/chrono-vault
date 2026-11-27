@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemEditor.qml 0.8.120
+// ItemEditor.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Field Options as its mockup: the switch at the start of its column; Delete Field in the new red (D-082)
 // v0.8.120: Field options and the questions in the one width (D-082)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -684,7 +685,7 @@ Item {
         leftButtons: Button {
             objectName: "deleteFieldButton"
             text: qsTr("Delete Field")
-            palette.buttonText: "#e53e3e"
+            palette.buttonText: "#ff6b6b" // every button with red text (the owner, D-082)
             onClicked: {
                 fieldsModel.remove(fieldOptions.fieldIndex)
                 editor.changed = true
@@ -718,10 +719,12 @@ Item {
             }
             isNewField = false
         }
+        // 8 between rows, 12 between a label and its field, as every dialog
+        // with labels at the left (the owner, D-082).
         GridLayout {
             columns: 2
-            columnSpacing: 24 * Appearance.factor
-            rowSpacing: 12 * Appearance.factor
+            columnSpacing: 12 * Appearance.factor
+            rowSpacing: 8 * Appearance.factor
             Layout.fillWidth: true
             Label { text: fieldOptions.isSection ? qsTr("Section Name") : qsTr("Field Name") }
             TextField {
@@ -755,7 +758,8 @@ Item {
                 id: sensitiveSwitch
                 objectName: "sensitiveSwitch"
                 visible: !fieldOptions.isSection
-                Layout.alignment: Qt.AlignRight
+                // At the start of its column (the owner, D-082).
+                Layout.alignment: Qt.AlignLeft
             }
         }
     }

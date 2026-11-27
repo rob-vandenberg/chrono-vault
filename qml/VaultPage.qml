@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.8.120
+// VaultPage.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Every key is a first letter, at once: no typed word, no wait (D-081)
 // v0.8.120: The questions in the one width (D-082)
 // v0.8.119: Sort By: six orders, either way, per vault; headings by title only; a key brings its heading to the top (D-081)
 // v0.8.115: The storage's name under the vault's name (D-080)
@@ -1140,7 +1141,6 @@ Item {
                 activeFocusOnTab: true
                 keyNavigationEnabled: false
                 highlightMoveDuration: 0 // the view is there at once, however far
-                property string typed: ""
                 function headingToTop(key) {
                     const row = VaultController.items.headingRowOf(key)
                     // The list knows where its end is only once the rows there
@@ -1149,11 +1149,6 @@ Item {
                     positionViewAtEnd()
                     if (row >= 0)
                         positionViewAtIndex(row, ListView.Beginning)
-                }
-                Timer {
-                    id: typedEnds
-                    interval: 1000
-                    onTriggered: itemList.typed = ""
                 }
                 // Up, Down, Page Up, Page Down, Home and End show the item they
                 // move to, as a click does, an edit not saved yet asked about
@@ -1190,19 +1185,19 @@ Item {
                         }
                         return
                     default:
-                        if (event.text.length === 1 && event.text > " " || (event.text === " " && typed !== "")) {
+                        // Every key is a first letter, at once, however fast
+                        // the keys follow: no word typed, no wait (the owner,
+                        // D-081).
+                        if (event.text.length === 1 && event.text > " ") {
                             event.accepted = true
-                            typed += event.text
-                            typedEnds.restart()
-                            const found = VaultController.items.rowStartingWith(typed, currentIndex, typed.length > 1)
+                            const found = VaultController.items.rowStartingWith(event.text, currentIndex, false)
                             if (found >= 0)
                                 vaultPage.showItem(VaultController.items.idAt(found))
-                            // By title, a first key also brings its heading to the
-                            // top: 0 to 9 the "#", a letter without one the next
-                            // heading, else the end; never empty room below
-                            // (the owner, D-081).
-                            if (typed.length === 1 && VaultController.sortBy === 0)
-                                itemList.headingToTop(typed)
+                            // By title, its heading to the top: 0 to 9 the "#",
+                            // a letter without one the next heading, else the
+                            // end; never empty room below (the owner, D-081).
+                            if (VaultController.sortBy === 0)
+                                itemList.headingToTop(event.text)
                         }
                         return
                     }

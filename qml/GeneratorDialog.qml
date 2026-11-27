@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GeneratorDialog.qml 0.8.120
+// GeneratorDialog.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: The design of every dialog: groups 16 apart, the tick boxes close together (D-082)
 // v0.8.120: The one width of every dialog (D-082)
 // v0.6.92: Exact sizes (D-069)
 // v0.5.78: Its content follows the window's width (D-061)
@@ -46,14 +47,17 @@ DialogWindow {
                                                     digits.checked, symbols.checked)
     }
 
+    objectName: "generatorDialog"
     title: qsTr("Generate a password")
     standardButtons: Dialog.Ok | Dialog.Cancel
 
     onShown: makeOne()
     onAccepted: usePassword(password)
 
+    // The design of every dialog (the owner, D-082): 16 between groups, the
+    // tick boxes close together.
     ExactColumn {
-        gap: 8 * Appearance.factor
+        gap: 16 * Appearance.factor
 
         TextField {
             text: generatorDialog.password
@@ -63,6 +67,8 @@ DialogWindow {
             Layout.fillWidth: true
         }
         ExactRow {
+            gap: 12 * Appearance.factor
+            Layout.fillWidth: true
             Label { text: qsTr("Length: %1").arg(lengthSlider.value) }
             Slider {
                 id: lengthSlider
@@ -74,8 +80,14 @@ DialogWindow {
                 onMoved: generatorDialog.makeOne()
             }
         }
+        ExactColumn {
+            gap: 4 * Appearance.factor
         CheckBox {
             id: uppercase
+            // 22 high, at the left edge (D-082).
+            topPadding: 2 * Appearance.factor
+            bottomPadding: 2 * Appearance.factor
+            leftPadding: 0
             text: qsTr("Capital letters (A-Z)")
             checked: true
             enabled: !checked || generatorDialog.kindsTicked > 1
@@ -83,6 +95,10 @@ DialogWindow {
         }
         CheckBox {
             id: lowercase
+            // 22 high, at the left edge (D-082).
+            topPadding: 2 * Appearance.factor
+            bottomPadding: 2 * Appearance.factor
+            leftPadding: 0
             text: qsTr("Small letters (a-z)")
             checked: true
             enabled: !checked || generatorDialog.kindsTicked > 1
@@ -90,6 +106,10 @@ DialogWindow {
         }
         CheckBox {
             id: digits
+            // 22 high, at the left edge (D-082).
+            topPadding: 2 * Appearance.factor
+            bottomPadding: 2 * Appearance.factor
+            leftPadding: 0
             text: qsTr("Digits (0-9)")
             checked: true
             enabled: !checked || generatorDialog.kindsTicked > 1
@@ -97,10 +117,15 @@ DialogWindow {
         }
         CheckBox {
             id: symbols
+            // 22 high, at the left edge (D-082).
+            topPadding: 2 * Appearance.factor
+            bottomPadding: 2 * Appearance.factor
+            leftPadding: 0
             text: qsTr("Symbols (!#$%…)")
             checked: true
             enabled: !checked || generatorDialog.kindsTicked > 1
             onToggled: generatorDialog.makeOne()
+        }
         }
         Button {
             text: qsTr("Another one")

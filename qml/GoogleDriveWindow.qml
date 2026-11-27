@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// GoogleDriveWindow.qml 0.8.120
+// GoogleDriveWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Once signed in only the file dialog is on screen; a failure shown in its error line (D-082)
 // v0.8.120: Signed in: the file dialog opens by itself, a choice goes on at once, its Cancel ends it all; no Vault field (D-082)
 // v0.8.115: Initial release: a vault on Google Drive, made, opened or moved there (D-080)
 
@@ -54,8 +55,6 @@ DialogWindow {
     property string chosenFolder: ""
     property bool chosen: false
     property string problem: ""
-    // The width inside the window, as every dialog (D-082).
-    readonly property real columnWidth: simpleWidth - 2 * edge
     // As tall as its content, whatever height was remembered (the owner).
     maximumHeight: minimumHeight
     // Connected or signed in: the file dialog opens by itself, once (D-082).
@@ -86,7 +85,13 @@ DialogWindow {
     }
 
     // Shown again with the reason a new vault was not kept.
+    // Signed in, it is the file dialog that shows it (the owner, D-082).
     function openWithProblem(reason) {
+        if (connected && driveRoot !== "") {
+            browse()
+            fileDialog.problem = reason
+            return
+        }
         open()
         problem = reason
     }
@@ -102,6 +107,7 @@ DialogWindow {
         if (!ready)
             return
         if (mode === "new") {
+            fileDialog.accept()
             accept()
             newVaultNamed(chosenFile)
         } else if (mode === "open") {
@@ -143,15 +149,15 @@ DialogWindow {
         connecting = false
     }
 
+    // Shown only while sign-in is needed: once signed in this window closes
+    // and only the file dialog is on screen (the owner, D-082).
     rightButtons: Button {
         id: goButton
         objectName: "googleDriveGoButton"
-        // Signed in: the file dialog again, after a choice that failed (D-082).
-        text: driveWindow.connecting ? qsTr("Waiting for Google…") : !driveWindow.connected ? qsTr("Sign in with Google")
-            : qsTr("Browse…")
+        text: driveWindow.connecting ? qsTr("Waiting for Google…") : qsTr("Sign in with Google")
         enabled: !driveWindow.busy
         highlighted: true
-        onClicked: driveWindow.connected ? driveWindow.browse() : driveWindow.go()
+        onClicked: driveWindow.go()
     }
 
     Connections {
@@ -164,7 +170,7 @@ DialogWindow {
             driveWindow.problem = problem
         }
         function onWebDavFolderShown(address, entries, files) {
-            if (!driveWindow.visible)
+            if (!driveWindow.visible && !fileDialog.visible)
                 return
             if (driveWindow.driveRoot === "")
                 driveWindow.driveRoot = address
@@ -174,7 +180,9 @@ DialogWindow {
             driveWindow.waitingFor = ""
             if (driveWindow.browseWhenListed) {
                 driveWindow.browseWhenListed = false
-                Qt.callLater(driveWindow.browse)
+                // Signed in: this window goes, the file dialog comes.
+                driveWindow.hide()
+                driveWindow.browse()
             }
         }
         // A move answers on its own (D-060).
@@ -182,20 +190,26 @@ DialogWindow {
             if (driveWindow.mode !== "move" || driveWindow.waitingFor !== "act")
                 return
             driveWindow.waitingFor = ""
-            if (ok)
+            if (ok) {
+                fileDialog.accept()
                 driveWindow.accept()
-            else
-                driveWindow.problem = problem
+            } else {
+                fileDialog.waiting = false
+                fileDialog.problem = problem
+            }
         }
+        // A failure is shown by the file dialog itself, which waits for it.
         function onWebDavDone(ok, problem) {
-            if (!driveWindow.visible || driveWindow.waitingFor === "")
+            if ((!driveWindow.visible && !fileDialog.visible) || driveWindow.waitingFor === "")
                 return
             const acting = driveWindow.waitingFor === "act"
             driveWindow.waitingFor = ""
-            if (ok && acting)
+            if (ok && acting) {
+                fileDialog.accept()
                 driveWindow.accept()
-            else if (!ok)
+            } else if (!ok) {
                 driveWindow.problem = problem
+            }
         }
     }
 
@@ -206,7 +220,7 @@ DialogWindow {
             visible: driveWindow.mode === "move"
             text: qsTr("“%1” moves to the Google Drive folder you choose. Where it is now, it is deleted once its copy there is checked.").arg(VaultController.vaultNameOf(driveWindow.moveVault))
             wrapMode: Text.Wrap
-            Layout.preferredWidth: driveWindow.columnWidth
+            Layout.fillWidth: true
         }
         Label {
             visible: !driveWindow.connected
@@ -214,15 +228,7 @@ DialogWindow {
                   ? qsTr("Sign in to Google in your web browser, then come back here.")
                   : qsTr("Sign in with Google opens your web browser. Chrono Vault keeps its vaults in the folder “Chrono Vault” in your Google Drive.")
             wrapMode: Text.Wrap
-            Layout.preferredWidth: driveWindow.columnWidth
-        }
-        Label {
-            objectName: "googleDriveOnlyOurs"
-            visible: driveWindow.connected && driveWindow.mode === "open"
-            text: qsTr("Only vaults created or moved here by Chrono Vault are shown. To bring in another vault, open it from this computer and use Move to Google Drive…")
-            wrapMode: Text.Wrap
-            opacity: 0.7
-            Layout.preferredWidth: driveWindow.columnWidth
+            Layout.fillWidth: true
         }
         Label {
             objectName: "googleDriveProblem"
@@ -230,7 +236,7 @@ DialogWindow {
             text: driveWindow.problem
             color: "#e53e3e"
             wrapMode: Text.Wrap
-            Layout.preferredWidth: driveWindow.columnWidth
+            Layout.fillWidth: true
         }
     }
 
@@ -238,7 +244,9 @@ DialogWindow {
         id: fileDialog
         objectName: "googleDriveFileDialog"
         storage: "googledrive"
-        transientParent: driveWindow
+        actsBeforeClosing: true
+        // Over the main window: the sign-in window is gone by then.
+        transientParent: driveWindow.transientParent
         // Chosen: on at once, a new vault to its password (D-082).
         onChosen: function(fileName, folder) {
             driveWindow.chosenFile = fileName

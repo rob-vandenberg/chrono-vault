@@ -192,6 +192,10 @@ void TestWebDavWindows::google_drive_opens_its_file_dialog_once_signed_in()
         click(inWindow(drive, QStringLiteral("googleDriveGoButton")));
         QTRY_VERIFY_WITH_TIMEOUT(files->property("visible").toBool(), 10000);
         QVERIFY(!inWindow(drive, QStringLiteral("googleDriveChosenField")));
+        // Signed in: the sign-in window is gone, only the file dialog is on
+        // screen, over the main window (the owner, D-082).
+        QVERIFY(!drive->property("visible").toBool());
+        QCOMPARE(qobject_cast<QQuickWindow*>(files)->transientParent(), window);
         if (cancelled) {
             QVERIFY(QMetaObject::invokeMethod(files, "reject"));
             QTRY_VERIFY(!files->property("visible").toBool());

@@ -2,6 +2,17 @@
 
 ## Now
 
+**Version 0.8.121**: every dialog as the owner's approved mockups (D-082): 16 pixels all round, 8 between the buttons
+of a group and alike only inside it, 16 between groups; buttons and fields 28 high, buttons at least 88 wide; Discard
+apart at the far left and every red button text #ff6b6b; Import fixed at 440 with its vault list under "Another vault";
+the WebDAV window 580 wide with its labels at the left, wider by hand; Skip this update, Show and Delete Field at the
+left; three button groups in Sync conflicts; the template editor's list of fields grows with "Add a field" under it; a
+resizable window without a growing part keeps its content at the top. Once signed in to Google Drive only its file
+dialog is on screen, and a failure shows in its own error line. Yes and No show their words again (a "&" set while the
+button was made left them empty). Every key in the item list is a first letter, at once (D-081). In Sync conflict
+Enter applies once Apply can be used and no button holds the keyboard. `test_audit_windows` fixed: it asked for a
+window larger than the test screen and clicked before the size arrived. `test_sync_conflicts` passes again.
+
 **Version 0.8.120**: one design for every dialog (D-082): a dialog of text, fields and buttons is 440 wide and exactly
 as tall as its content, never resized and with no size remembered; a window with a list or editor keeps the size the
 person gives it under its own name; one edge of 12 pixels all round; the buttons of a row alike; paragraphs half a line

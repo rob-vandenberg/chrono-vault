@@ -21,9 +21,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ConflictWindow.qml 0.8.120
+// ConflictWindow.qml 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: Enter applies once Apply can be used and the keyboard is on no button (D-082)
 // v0.8.120: Resized by the person; its buttons alike (D-082)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
@@ -236,6 +237,8 @@ DialogWindow {
     title: qsTr("Sync conflict: %1").arg(conflict.name || "")
     standardButtons: Dialog.NoButton
     defaultItem: applyButton
+    // Enter applies once Apply can be used, the keyboard on no button (P1, D-082).
+    enterWithoutButton: true
     minimumWidth: Math.max(Math.round(560 * Appearance.factor), contentLayout.implicitWidth + 2 * edge)
 
     onVisibleChanged: {
@@ -265,9 +268,7 @@ DialogWindow {
             icon.height: Math.round(16 * Appearance.factor)
             icon.color: enabled ? conflictWindow.palette.buttonText : conflictWindow.palette.disabled.buttonText
             onClicked: conflictWindow.chooseWay("both")
-        },
-        // Apply and Cancel at the right.
-        Item { Layout.fillWidth: true }
+        }
     ]
     rightButtons: [
         Button {

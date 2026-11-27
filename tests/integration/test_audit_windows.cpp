@@ -22,9 +22,10 @@
 #include <QTcpSocket>
 
 // --- Version ------------------------------------------------------------
-// test_audit_windows.cpp 0.6.86
+// test_audit_windows.cpp 0.8.121
 
 // --- Version history ----------------------------------------------------
+// v0.8.121: A window that fits the test screen, used once it has that size (P2)
 // v0.6.86: Initial release (D-065)
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
@@ -115,6 +116,14 @@ class TestAuditWindows : public IntuitiveFixture
         server.broken = false;
     }
     const QString strong = QStringLiteral("vK9#mQ2x!Lp7@zRt4&Wb");
+    // A window that fits the test screen (800 by 800), worked with only once
+    // it has that size: a larger one is cut down by the screen later, and a
+    // click meanwhile lands where the list was (P2, 0.8.121).
+    void roomy()
+    {
+        window->resize(780, 760);
+        QTRY_COMPARE(window->contentItem()->size(), QSizeF(780, 760));
+    }
 
 private slots:
     void the_cards_the_lists_and_the_remarks()
@@ -130,7 +139,7 @@ private slots:
         QCOMPARE(controller->audit().value(QStringLiteral("score")).toInt(), 25);
         QCOMPARE(server.asked.size(), 0); // off: nothing is asked
         QCOMPARE(state("leakState"), QStringLiteral("off"));
-        window->resize(1000, 900);
+        roomy();
         QTRY_VERIFY(part("auditBlock"));
         QCOMPARE(part("auditScore")->property("text").toString(), QStringLiteral("25%"));
         QCOMPARE(cardText("leaked"), QStringLiteral("Off"));
@@ -231,7 +240,7 @@ private slots:
         controller->setCheckLeaks(true);
         QTRY_COMPARE(state("leakState"), QStringLiteral("failed"));
         QTRY_COMPARE(state("breachState"), QStringLiteral("failed"));
-        window->resize(1000, 900);
+        roomy();
         QTRY_COMPARE(cardText("leaked"), QStringLiteral("Not checked"));
         QCOMPARE(cardText("breached"), QStringLiteral("Not checked"));
         click(part("audit_leaked"));
@@ -249,7 +258,7 @@ private slots:
     {
         useServer();
         QVERIFY(!controller->checkLeaks());
-        window->resize(1000, 900);
+        roomy();
         QTRY_VERIFY(part("auditCard_leaked"));
         add(QStringLiteral("One"), strong);
         QTRY_COMPARE(controller->audit().value(QStringLiteral("passwords")).toInt(), 1);
