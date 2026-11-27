@@ -910,3 +910,12 @@ client comes from the private folder through the build scripts; Qt Network Autho
 Tests: `test_google_drive`, `test_google_drive_interruptions`, against a Google of our own; the WebDAV tests,
 `test_cloud_sync`, `test_vault_menu`, `test_vault_rows`, `test_intuitive`, `test_dialog_keys`,
 `test_every_string_translatable` and `test_no_bounce` pass.
+
+## 27 November 2026: a Google account per vault (0.8.116)
+
+P86 (D-080 point 13, the owner's Q4 no, Q5 and Q6 yes): `connectGoogleDrive` no longer reuses the run's first Google
+sign-in; every Sign in with Google in the Google Drive window opens the browser, and `GoogleSignIn` asks Google for its
+account chooser (`prompt` "consent select_account"). A vault keeps the sign-in it was made, added or moved with, so two
+vaults on two Google accounts work in one run without a restart. Tests: `test_google_drive` (new: two accounts in one
+run, each vault syncing with its own; the account chooser asked at every sign-in) and
+`test_google_drive_interruptions` pass.

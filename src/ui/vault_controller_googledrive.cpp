@@ -24,9 +24,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_googledrive.cpp 0.8.115
+// vault_controller_googledrive.cpp 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: Every sign-in in the Google Drive window opens the browser; a vault's own sign-in is not reused there (D-080 point 13)
 // v0.8.115: Initial release: sign in to Google Drive, its folders, and a vault made, opened or moved there (D-080)
 
 // The controller's Google Drive part (D-080). The sync, the working copy and
@@ -87,10 +88,12 @@ void VaultController::connectGoogleDrive()
         emit googleDriveConnected(false, tr("This version of Chrono Vault has no Google Drive."));
         return;
     }
-    if (!googleToken.isEmpty()) {
-        showGoogleDrive(); // signed in already while Chrono Vault runs
-        return;
-    }
+    // Every sign-in here opens the browser, so each vault created, added or
+    // moved here keeps the Google account picked for it (D-080 point 13).
+    googleToken.clear();
+    drive.reset();
+    driveSigningIn.reset();
+    driveFiles.clear();
     // The browser opens, the person signs in at Google, and the answer
     // comes back to Chrono Vault on this computer (D-080).
     googleSignIn = std::make_unique<GoogleSignIn>();
@@ -321,7 +324,6 @@ void VaultController::signInToCloudAgain()
                     self->say(problem, true);
                     return;
                 }
-                self->googleToken = refreshToken;
                 if (session != self->vaultSession || self->currentState != State::Unlocked) {
                     return;
                 }

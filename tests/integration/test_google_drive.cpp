@@ -37,9 +37,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_google_drive.cpp 0.8.115
+// test_google_drive.cpp 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: Two Google accounts in one run, each vault with its own; Google's account chooser always (D-080 point 13)
 // v0.8.115: Initial release: a vault on Google Drive, against a Drive of our own (D-080); its interruptions built apart
 
 using namespace chrono_vault;
@@ -447,6 +448,66 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!QFile::exists(from), 10000);
         QCOMPARE(controller->vaults().size(), 1);
         QCOMPARE(cloudPlaceOf(controller->vaults().constFirst())->kind, QStringLiteral("googledrive"));
+    }
+
+    // A vault keeps the Google account it was made with; every sign-in in the
+    // Google Drive window opens the browser with Google's account chooser
+    // (the owner, P86; D-080 point 13).
+    void two_google_accounts_in_one_run_each_vault_with_its_own()
+    {
+        GoogleDriveTestServer server;
+        server.eachSignInItsOwn = true;
+        use(server);
+        auto controller = device();
+        QList<QUrl> addresses;
+        controller->setGoogleBrowserForTests([&addresses](const QUrl& address) {
+            addresses.append(address);
+            signInInBrowser(address);
+        });
+        QVERIFY(createdOnDrive(*controller));
+        const QString home = controller->vaultPath();
+        QVERIFY(signedIn(*controller));
+        controller->createGoogleDriveVault(QStringLiteral("Work"), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked && controller->vaultPath() != home, 10000);
+        QVERIFY(syncedNow(*controller));
+
+        QCOMPARE(addresses.size(), 2);
+        for (const QUrl& address : addresses) {
+            const QString prompt = QUrlQuery(address).queryItemValue(QStringLiteral("prompt"), QUrl::FullyDecoded);
+            QVERIFY2(prompt.split(QLatin1Char(' ')).contains(QStringLiteral("select_account")), qPrintable(prompt));
+        }
+        QCOMPARE(server.refreshTokensGiven,
+                 (QStringList{QStringLiteral("refresh-account-1"), QStringLiteral("refresh-account-2")}));
+
+        // "Work" syncs with the second account.
+        server.expireTokens();
+        server.refreshTokensUsed.clear();
+        QVERIFY(addHere(*controller, QStringLiteral("At work")));
+        QVERIFY(syncedNow(*controller));
+        QVERIFY(!server.refreshTokensUsed.isEmpty());
+        QCOMPARE(server.refreshTokensUsed.filter(QStringLiteral("refresh-account-2")).size(),
+                 server.refreshTokensUsed.size());
+        QCOMPARE(titlesOfData(server.vaultData(QStringLiteral("Work.chronovault"))), QStringList{QStringLiteral("At work")});
+
+        // "Home" syncs with the first, without asking again.
+        controller->switchToVault(home);
+        QTRY_VERIFY_WITH_TIMEOUT(controller->vaultPath() == home && (controller->state() == State::Unlocked ||
+                                                                     controller->state() == State::Locked),
+                                 10000);
+        if (controller->state() == State::Locked) {
+            controller->unlock(QStringLiteral("pass"));
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
+        server.expireTokens();
+        server.refreshTokensUsed.clear();
+        QVERIFY(addHere(*controller, QStringLiteral("At home")));
+        QVERIFY(syncedNow(*controller));
+        QVERIFY(!server.refreshTokensUsed.isEmpty());
+        QCOMPARE(server.refreshTokensUsed.filter(QStringLiteral("refresh-account-1")).size(),
+                 server.refreshTokensUsed.size());
+        QCOMPARE(titlesOfData(server.vaultData(vaultName)), QStringList{QStringLiteral("At home")});
+        QCOMPARE(addresses.size(), 2);
+        QVERIFY(controller->syncProblem().isEmpty());
     }
 #endif
 };

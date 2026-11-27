@@ -52,9 +52,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.8.115
+// vault_controller.h 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: googleToken holds only the Google Drive window's sign-in (D-080 point 13)
 // v0.8.115: Google Drive: sign in, its folders, create, open, move, disconnect; one create, open and move for all (D-080)
 // v0.8.114: Any cloud storage: inCloud, storageName, storages; the sync is CloudSync (D-080)
 // v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
@@ -1218,7 +1219,7 @@ private:
     std::unique_ptr<WebDavClient> browsing;   // a folder being listed, shown once its list came
     QStringList connectedFiles;
     bool signInNeeded = false;
-    QString googleToken; // the Google sign-in of this run, in memory only
+    QString googleToken; // the Google Drive window's own sign-in, in memory only
     std::unique_ptr<GoogleSignIn> googleSignIn;
     std::unique_ptr<GoogleDriveStorage> driveSigningIn;
     std::unique_ptr<GoogleDriveStorage> drive; // the folder shown in the Google Drive window

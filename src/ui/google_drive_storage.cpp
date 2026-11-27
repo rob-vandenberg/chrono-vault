@@ -38,9 +38,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// google_drive_storage.cpp 0.8.115
+// google_drive_storage.cpp 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: Google's account chooser at every sign-in (D-080 point 13)
 // v0.8.115: Initial release: Google Drive as a cloud storage, with the permission drive.file only (D-080)
 
 namespace chrono_vault {
@@ -886,9 +887,10 @@ void GoogleSignIn::start()
     flow->setReplyHandler(handler);
     flow->setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
         if (stage == QAbstractOAuth::Stage::RequestingAuthorization) {
-            // A refresh token too, so the sign-in lasts (D-080).
+            // A refresh token too, so the sign-in lasts, and Google's account
+            // chooser always, so the person picks the account (D-080).
             parameters->insert(QStringLiteral("access_type"), QStringLiteral("offline"));
-            parameters->insert(QStringLiteral("prompt"), QStringLiteral("consent"));
+            parameters->insert(QStringLiteral("prompt"), QStringLiteral("consent select_account"));
         }
     });
     connect(flow, &QAbstractOAuth::authorizeWithBrowser, this, [this](const QUrl& address) {

@@ -30,9 +30,10 @@
 #include <QUrlQuery>
 
 // --- Version ------------------------------------------------------------
-// google_drive_test_server.cpp 0.8.115
+// google_drive_test_server.cpp 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: Each sign-in its own account when asked, and the refresh tokens used (D-080 point 13)
 // v0.8.115: Initial release: Google's sign-in and the part of the Drive API Chrono Vault uses (D-080)
 
 namespace {
@@ -183,10 +184,19 @@ void GoogleDriveTestServer::answer(QTcpSocket* socket, const QByteArray& method,
                           {QStringLiteral("token_type"), QStringLiteral("Bearer")},
                           {QStringLiteral("scope"), QStringLiteral("https://www.googleapis.com/auth/drive.file")}};
         if (grant == QLatin1String("authorization_code")) {
-            token.insert(QStringLiteral("refresh_token"), refreshToken);
-        } else if (form.queryItemValue(QStringLiteral("refresh_token"), QUrl::FullyDecoded) != refreshToken) {
-            socket->write(reply(400, json({{QStringLiteral("error"), QStringLiteral("invalid_grant")}})));
-            return;
+            QString given = refreshToken;
+            if (eachSignInItsOwn) {
+                given = QStringLiteral("refresh-account-%1").arg(refreshTokensGiven.size() + 1);
+                refreshTokensGiven.append(given);
+            }
+            token.insert(QStringLiteral("refresh_token"), given);
+        } else {
+            const QString used = form.queryItemValue(QStringLiteral("refresh_token"), QUrl::FullyDecoded);
+            refreshTokensUsed.append(used);
+            if (used != refreshToken && !(eachSignInItsOwn && refreshTokensGiven.contains(used))) {
+                socket->write(reply(400, json({{QStringLiteral("error"), QStringLiteral("invalid_grant")}})));
+                return;
+            }
         }
         socket->write(reply(200, json(token)));
         return;

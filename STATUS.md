@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.116**: a Google account per vault without a restart (D-080 point 13): every Sign in with Google in the
+Google Drive window opens the browser with Google's account chooser; each vault keeps and opens with its own sign-in.
+
 **Version 0.8.115**: Google Drive (D-080, `ROADMAP.md` step 14): sign in with Google in the browser, the "Chrono Vault"
 folder in My Drive, the permission `drive.file` only, and nothing lost when two devices write at the same moment.
 Before it, 0.8.114: one cloud storage base class with a class per storage, one sync for all, WebDAV moved onto it.

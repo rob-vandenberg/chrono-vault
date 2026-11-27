@@ -23,14 +23,16 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// google_drive_test_server.h 0.8.115
+// google_drive_test_server.h 0.8.116
 
 // --- Version history ----------------------------------------------------
+// v0.8.116: Each sign-in its own account when asked, and the refresh tokens used (D-080 point 13)
 // v0.8.115: Initial release: Google's sign-in and the part of the Drive API Chrono Vault uses (D-080)
 
 class QTcpServer;
@@ -67,6 +69,12 @@ public:
     // The refresh token Google gives at sign-in; another one is refused, as
     // when the person took Chrono Vault's access away.
     QString refreshToken = QStringLiteral("refresh-good");
+    // Each sign-in as another Google account: its own refresh token, every
+    // one given so far still accepted.
+    bool eachSignInItsOwn = false;
+    QStringList refreshTokensGiven;
+    // Every refresh token a renewal came with, in order.
+    QStringList refreshTokensUsed;
     // Every access token given so far stops working (it ran out).
     void expireTokens() { ++tokenGeneration; }
     // Called when a new version of a file is about to be written: a test may
