@@ -2,6 +2,8 @@
 
 ## Now
 
+**Version 0.8.118**: a double click on a vault's row in Settings > Vaults opens it, as Open in its menu (D-071).
+
 **Version 0.8.117**: a cloud vault's row shows its account, "Google Drive: <email>" or "WebDAV: <user> on <server>",
 in Settings > Vaults and Open a vault, kept in the place record on this computer (D-080 point 20); the empty line fixed.
 

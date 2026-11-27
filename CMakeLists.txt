@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.117 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.118 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.117
+# CMakeLists.txt 0.8.118
 
 # --- Version history ----------------------------------------------------
+# v0.8.118: Version 0.8.118; a double click on a vault's row opens it (D-071)
 # v0.8.117: Version 0.8.117; a cloud vault's account on its row (D-080 point 20)
 # v0.8.116: Version 0.8.116; a Google account per vault without a restart (D-080 point 13)
 # v0.8.115: Version 0.8.115; Qt Network Authorization and the Google client (D-080)

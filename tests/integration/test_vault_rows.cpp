@@ -22,9 +22,10 @@
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.8.117
+// test_vault_rows.cpp 0.8.118
 
 // --- Version history ----------------------------------------------------
+// v0.8.118: A double click on a row opens the vault
 // v0.8.117: A cloud vault's row shows its account, in Settings and Open a vault
 // v0.7.110: An outdated kept password keeps the vault shown open (D-078)
 // v0.7.109: Create a vault in the look of Open a vault; no OK without the list
@@ -118,6 +119,37 @@ private slots:
                  qPrintable(line->property("text").toString()));
         storage->close();
         forgetCloudPlace(second);
+    }
+
+    // A double click on a row opens that vault, as Open in its menu; on the
+    // open vault it changes nothing (the owner, 27 November 2026).
+    void a_double_click_on_a_row_opens_the_vault()
+    {
+        const QString first = controller->vaultPath();
+        const QString second = folder.filePath(QStringLiteral("clicked.chronovault"));
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"), QUrl(), true);
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+        controller->switchToVault(first);
+        QTRY_VERIFY(controller->vaultPath() == first && controller->state() == State::Unlocked && controller->isIdle());
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QTRY_VERIFY(settings()->isExposed());
+        settings()->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
+        const auto doubleClick = [this](const QString& name) {
+            QQuickItem* line = there(QStringLiteral("placeLine_") + name);
+            QVERIFY(line);
+            const QPoint at = line->mapToScene(QPointF(line->width() / 4, line->height() / 2)).toPoint();
+            QTest::mouseDClick(settings(), Qt::LeftButton, Qt::NoModifier, at);
+        };
+        QTRY_VERIFY(there(QStringLiteral("placeLine_clicked")));
+
+        doubleClick(QFileInfo(first).completeBaseName());
+        QTest::qWait(300);
+        QCOMPARE(controller->vaultPath(), first);
+        QCOMPARE(controller->state(), State::Unlocked);
+
+        doubleClick(QStringLiteral("clicked"));
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+        settings()->close();
     }
 
 #else

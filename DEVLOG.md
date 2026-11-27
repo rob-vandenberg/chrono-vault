@@ -930,3 +930,8 @@ there; `CloudSync` asks once for a place without it and keeps it in the place re
 (new, apart from `test_vault_rows` for OR-11), `test_google_drive` (each vault its own account),
 `test_google_drive_interruptions` (an older vault gets its account at its next sync, not asked again), the WebDAV
 tests, `test_cloud_sync`, `test_vault_rows` and `test_every_string_translatable` pass.
+
+## 27 November 2026: a double click opens a vault in Settings > Vaults (0.8.118)
+
+D-071: a double click on a vault's row does what Open in its menu does, only where Open is offered, never on the
+three dots. Tests: `test_vault_row_accounts` (new case) and `test_vault_rows` pass.

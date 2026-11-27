@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.117
+// SettingsWindow.qml 0.8.118
 
 // --- Version history ----------------------------------------------------
+// v0.8.118: A double click on a vault's row opens it, as Open in its menu (D-071)
 // v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
 // v0.8.115: Any storage in the vault lines and Disconnect; Move to Google Drive; Also delete the vault on Google Drive (D-080)
 // v0.7.111: A vault row shows where it is kept; question dialogs fit their text (D-079)
@@ -1043,6 +1044,17 @@ ApplicationWindow {
                                     acceptedButtons: Qt.RightButton
                                     onTapped: vaultMenu.popup()
                                 }
+                                // A double click opens the vault, as Open in its menu (the owner,
+                                // 27 November 2026); never on the three dots.
+                                TapHandler {
+                                    objectName: "vaultRowOpener_" + vaultRow.name
+                                    acceptedButtons: Qt.LeftButton
+                                    onDoubleTapped: function(eventPoint) {
+                                        const onDots = vaultMenuButton.contains(vaultMenuButton.mapFromItem(vaultRow, eventPoint.position))
+                                        if (vaultRow.canOpen && !onDots)
+                                            settingsWindow.openKnownRequested(vaultRow.modelData)
+                                    }
+                                }
                                 Connections {
                                     target: VaultController
                                     function onSyncChanged() { vaultRow.place = VaultController.vaultPlace(vaultRow.modelData) }
@@ -1128,6 +1140,7 @@ ApplicationWindow {
                                         }
                                     }
                                     PictureButton {
+                                        id: vaultMenuButton
                                         objectName: "vaultMenuButton_" + vaultRow.name
                                         dots: true
                                         menuOpen: vaultMenu.visible
