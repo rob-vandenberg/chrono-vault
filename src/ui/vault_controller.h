@@ -52,9 +52,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.8.119
+// vault_controller.h 0.8.122
 
 // --- Version history ----------------------------------------------------
+// v0.8.122: Delete a vault: deleteRefusal, deleteVault, deleteDone (D-083)
 // v0.8.119: Disconnect deletes nothing on any storage (D-060); Sort By per vault and each item's use (D-081)
 // v0.8.117: googleAccount: the Google Drive window's account, kept with new places (D-080 point 20)
 // v0.8.116: googleToken holds only the Google Drive window's sign-in (D-080 point 13)
@@ -104,6 +105,9 @@ namespace chrono_vault {
 // The steps of a move, for tests that stop it at each to prove the original
 // is never lost (OR-15.4): the vault read, the copy written, the copy checked.
 enum class MoveStep { Read, Written, Verified };
+// The steps of a deletion, for tests that stop it at each (OR-15.4): the
+// password proven, the vault on the server deleted, its files deleted.
+enum class DeleteStep { Proven, ServerDeleted, FilesDeleted };
 
 // A vault's key and keyfile fingerprint packed into one value, for the finger
 // (D-038) and the PIN (D-059).
@@ -733,6 +737,17 @@ public:
     // the primary.
     Q_INVOKABLE void forgetVault(const QString& vaultFile);
     void setMoveStepCheckForTests(std::function<bool(MoveStep)> check) { moveStepCheck = std::move(check); }
+    // Delete… in Settings > Vaults (D-083). Why a vault cannot be deleted now:
+    // 0 it can (it is locked), 1 the primary while other vaults exist, 2 it is
+    // open, 3 it is closed.
+    [[nodiscard]] Q_INVOKABLE int deleteRefusal(const QString& vaultFile) const;
+    // Deletes the vault whose own password (and keyfile) was just proven with
+    // askFor and proveWithPassword: a cloud vault on its server first, then
+    // its files here, then everything of it on this computer; when the server
+    // fails, nothing is deleted. deleteDone answers. Backups stay.
+    Q_INVOKABLE void deleteVault(const QString& vaultFile);
+    [[nodiscard]] bool deleting() const { return deleteRunning; }
+    void setDeleteStepCheckForTests(std::function<bool(DeleteStep)> check) { deleteStepCheck = std::move(check); }
     // For Settings > Vaults: inCloud, kind, storageName, onWebDav, address,
     // user, lastSynced (as words).
     [[nodiscard]] Q_INVOKABLE QVariantMap vaultPlace(const QString& vaultFile) const;
@@ -838,6 +853,8 @@ signals:
     void webDavDone(bool ok, const QString& problem);
     // The answer to moveVaultTo and moveVaultToWebDav (D-060).
     void moveDone(bool ok, const QString& problem);
+    // The answer to deleteVault (D-083).
+    void deleteDone(bool ok, const QString& problem);
     // A new WebDAV vault that could not be made or put on the server; nothing was kept.
     void webDavCreateFailed(const QString& problem);
     void googleDriveCreateFailed(const QString& problem);
@@ -1036,6 +1053,15 @@ private:
     // A moved vault's password saved in the primary follows it at the
     // primary's next unlock (D-060).
     void followMovedVaults();
+    // Delete a vault (D-083): its files here off the window's thread, then
+    // everything of it on this computer.
+    void deleteFilesOf(const QString& vaultFile, const QStringList& files, bool serverDone);
+    void forgetDeletedVault(const QString& vaultFile);
+    void deleteFailed(const QString& problem);
+    [[nodiscard]] bool deleteGoesOn(DeleteStep step) const { return !deleteStepCheck || deleteStepCheck(step); }
+    // A deleted vault's password saved in the primary is emptied there, at
+    // once when the primary is shown unlocked, else at its next unlock (D-083).
+    void forgetDeletedVaultPasswords();
 
     State currentState = State::NoVault;
     QString path;
@@ -1249,6 +1275,8 @@ private:
     QString movingVault; // never unlocked while it is moved (OR-15)
     [[nodiscard]] bool refusedWhileMoving();
     std::function<bool(MoveStep)> moveStepCheck;
+    bool deleteRunning = false;
+    std::function<bool(DeleteStep)> deleteStepCheck;
 };
 
 } // namespace chrono_vault

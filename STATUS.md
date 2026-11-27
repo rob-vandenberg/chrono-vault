@@ -2,6 +2,13 @@
 
 ## Now
 
+**Version 0.8.122**: Delete… in every vault's menu in Settings > Vaults (D-083). The primary while other vaults exist,
+an open and a closed vault each say why they cannot be deleted, with Close only. A locked vault asks its own password
+(and keyfile) under a bold warning; Delete in red at the far left, Cancel the default; Enter and Esc never delete. A
+cloud vault goes from its server first (Google Drive: to Drive's trash); when the server fails nothing is deleted. Then
+its files and everything of it on this computer; its password in the primary is emptied at the primary's next unlock.
+The only vault deleted leaves the start page. Backups and the keyfile stay.
+
 **Version 0.8.121**: every dialog as the owner's approved mockups (D-082): 16 pixels all round, 8 between the buttons
 of a group and alike only inside it, 16 between groups; buttons and fields 28 high, buttons at least 88 wide; Discard
 apart at the far left and every red button text #ff6b6b; Import fixed at 440 with its vault list under "Another vault";

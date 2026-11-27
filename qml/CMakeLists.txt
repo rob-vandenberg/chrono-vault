@@ -103,6 +103,7 @@ qt_add_qml_module(chrono_vault_ui
         SyncConflictsWindow.qml
         PictureButton.qml
         AskWindow.qml
+        DeleteVaultWindow.qml
         BigPasswordField.qml
         Padlock.qml
         TickBox.qml

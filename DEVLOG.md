@@ -985,3 +985,17 @@ asked for was larger than the 800 by 800 test screen, which cut it down later; a
 edge of the sidebar; the tests now ask a size that fits and wait until the content has it. Tests: `test_dialog_design`
 and `test_dialog_design_200` (rewritten to the design), `test_intuitive` split again (two cases to `test_intuitive_bars`,
 OR-11), `test_webdav_windows`, `test_audit_windows`; the related tests pass, each under 20 seconds alone.
+
+## 27 November 2026: version 0.8.122, Delete a vault
+
+`VaultController::deleteRefusal` gives the owner's order of checks (primary with other vaults, open, closed);
+`deleteVault` deletes only after the vault's own password was proven with `askFor` and `proveWithPassword`: a cloud
+vault on its server first (a file already gone counts as deleted), then its files off the window's thread, then
+`forgetDeletedVault` takes everything of it off this computer. Its password in the primary is emptied by
+`forgetDeletedVaultPasswords` when the primary is shown unlocked; until then "vaults/deleted" keeps it out of the key
+store. `qml/DeleteVaultWindow.qml` is the question; `noDeleteWindow` in `qml/SettingsWindow.qml` says why not; the
+dots of a row always show, since Delete… is in every menu. `qml/DialogWindow.qml`: Enter never presses a button with
+`enterNeverPresses`. Tests: `test_delete_vault` (the checks, a local vault with everything of it here, a wrong password
+and a missing keyfile, the only vault, WebDAV, a server that fails, stopped at every step, Google Drive's trash) and
+`test_delete_vault_windows` (the three dialogs, their order, Enter and Esc, the start page); the related tests pass,
+each under 20 seconds alone.

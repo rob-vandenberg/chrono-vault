@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.8.121
+// DialogWindow.qml 0.8.122
 
 // --- Version history ----------------------------------------------------
+// v0.8.122: Enter never presses a button that says enterNeverPresses (Delete a vault, D-083)
 // v0.8.121: The edge 16, 8 between buttons, buttons alike only inside a group, 28 high (D-082)
 // v0.8.120: One design for every dialog: 440 wide, as tall as its content, one edge all round, the buttons of a row alike (D-082)
 // v0.8.119: A title and × only, never minimize (D-079)
@@ -409,7 +410,9 @@ ApplicationWindow {
                 const on = dialogWindow.activeFocusItem
                 if (dialogWindow.isButton(on) && on.enabled && on.visible) {
                     event.accepted = true
-                    on.click()
+                    // Never a button that deletes for good (D-083).
+                    if (on.enterNeverPresses !== true)
+                        on.click()
                 } else if (dialogWindow.enterWithoutButton && !dialogWindow.isButton(on) && !dialogWindow.isTyping(on)) {
                     const target = dialogWindow.enterTarget
                     if (target && target.enabled && target.visible) {

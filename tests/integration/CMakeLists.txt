@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.8.120
+# tests/integration/CMakeLists.txt 0.8.122
 
 # --- Version history ----------------------------------------------------
+# v0.8.122: test_delete_vault and test_delete_vault_windows (D-083)
 # v0.8.120: test_dialog_design and test_dialog_design_200; test_webdav_windows with the Google Drive test server (D-082)
 # v0.8.119: test_intuitive_bars (D-079), test_intuitive_sorting (D-081), test_pages_second, test_menus_second (OR-11)
 # v0.8.117: test_vault_row_accounts (D-080)
@@ -301,6 +302,19 @@ target_include_directories(test_google_drive_interruptions PRIVATE "${PROJECT_SO
 target_link_libraries(test_google_drive_interruptions PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::NetworkAuth Qt6::Test)
 chrono_vault_strict_warnings(test_google_drive_interruptions)
 chrono_vault_add_test(test_google_drive_interruptions)
+
+# Delete a vault, here, on WebDAV and on Google Drive (D-083).
+qt_add_executable(test_delete_vault test_delete_vault.cpp ../webdav_test_server.cpp ../webdav_test_server.h
+                  ../google_drive_test_server.cpp ../google_drive_test_server.h)
+target_include_directories(test_delete_vault PRIVATE "${PROJECT_SOURCE_DIR}/tests")
+target_link_libraries(test_delete_vault PRIVATE chrono_vault_ui Qt6::Gui Qt6::Network Qt6::NetworkAuth Qt6::Test)
+chrono_vault_strict_warnings(test_delete_vault)
+chrono_vault_add_test(test_delete_vault)
+
+qt_add_executable(test_delete_vault_windows test_delete_vault_windows.cpp intuitive_fixture.h)
+target_link_libraries(test_delete_vault_windows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_delete_vault_windows)
+chrono_vault_add_test(test_delete_vault_windows)
 
 # The vault menu: Lock, Move… and Forget… (D-060).
 qt_add_executable(test_vault_menu test_vault_menu.cpp ../webdav_test_server.cpp ../webdav_test_server.h)

@@ -91,3 +91,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-080](decisions/D-080.md) | One cloud storage base class with a class per storage, one sync for all; Google Drive with `drive.file` |
 | [D-081](decisions/D-081.md) | Sort By: six orders either way, kept per vault; headings by title only; a key brings its heading to the top |
 | [D-082](decisions/D-082.md) | One design for every dialog, as the owner's mockups: 16 all round, 8 inside a group, buttons alike only inside a group, buttons and fields 28 high; fixed or resizable by its content; Google Drive shows only its file dialog once signed in |
+| [D-083](decisions/D-083.md) | Delete a vault: every vault's menu; the primary, open or closed say why not; a locked vault with its own password, on its server first, then everything of it on this computer |

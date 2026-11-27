@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.8.119
+// vault_controller.cpp 0.8.122
 
 // --- Version history ----------------------------------------------------
+// v0.8.122: Delete a vault: everything of it on this computer, its password in the primary (D-083)
 // v0.8.119: Sort By per vault and each item's use, on this computer (D-081)
 // v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.109: A Closed vault picked in the file picker opens at once
@@ -116,6 +117,8 @@ const QString keyfilesKey = QStringLiteral("vaults/keyfiles");
 // Vaults moved (old place to new) whose password saved in the primary still
 // names the old place, until the primary is next unlocked (D-060).
 const QString movedVaultsKey = QStringLiteral("vaults/moved");
+// Vaults deleted whose password in the primary is still to be emptied (D-083).
+const QString deletedVaultsKey = QStringLiteral("vaults/deleted");
 const QString autoLockKey = QStringLiteral("security/autoLockMinutes");
 const QString idleLockKey = QStringLiteral("security/idleLockOn");
 const QString lockClosedKey = QStringLiteral("security/lockWhenClosed");
@@ -1241,6 +1244,7 @@ void VaultController::unlocked(const VaultKey& newKey, const VaultContents& read
     if (path == primaryVault()) {
         rememberPrimary();
         followMovedVaults(); // a moved vault's saved password follows it (D-060)
+        forgetDeletedVaultPasswords(); // a deleted vault's goes (D-083)
     }
 }
 
@@ -2971,6 +2975,7 @@ void VaultController::rememberPrimary()
     // A vault moved since the primary was last unlocked is found at its new
     // place (D-060).
     const QVariantMap moved = VaultsFile().value(movedVaultsKey).toMap();
+    const QStringList deleted = VaultsFile().value(deletedVaultsKey).toStringList();
     for (const Item& one : std::as_const(contents.items)) {
         QString vaultFile;
         QString password;
@@ -2982,7 +2987,7 @@ void VaultController::rememberPrimary()
             }
         }
         const QString at = moved.value(vaultFile, vaultFile).toString();
-        if (!vaultFile.isEmpty() && !password.isEmpty() && stalePasswords.value(at) != password) {
+        if (!vaultFile.isEmpty() && !password.isEmpty() && stalePasswords.value(at) != password && !deleted.contains(at)) {
             savedPasswords.insert(at, password);
         }
     }
@@ -4373,6 +4378,108 @@ void VaultController::followMovedVaults()
         contentsChanged();
         saveInBackground(QString());
     }
+}
+
+void VaultController::forgetDeletedVaultPasswords()
+{
+    VaultsFile settings;
+    const QStringList deleted = settings.value(deletedVaultsKey).toStringList();
+    if (deleted.isEmpty() || currentState != State::Unlocked || path != primaryVault()) {
+        return;
+    }
+    bool changed = false;
+    for (Item& one : contents.items) {
+        const bool names = std::any_of(one.fields.cbegin(), one.fields.cend(), [&deleted](const Field& f) {
+            return f.role == QLatin1String("vaultfile") && deleted.contains(f.value);
+        });
+        if (!names) {
+            continue;
+        }
+        for (Field& field : one.fields) {
+            if (field.role == QLatin1String("password") && !field.value.isEmpty()) {
+                field.value.clear();
+                one.modified = QDateTime::currentDateTimeUtc();
+                changed = true;
+            }
+        }
+    }
+    settings.remove(deletedVaultsKey);
+    if (changed) {
+        contentsChanged();
+        saveInBackground(QString());
+    }
+}
+
+void VaultController::forgetDeletedVault(const QString& vaultFile)
+{
+    // Everything of the vault on this computer (the owner, D-083); backups
+    // the person made stay.
+    const bool wasPrimary = vaultFile == primaryVault();
+    if (const auto place = cloudPlaceOf(vaultFile)) {
+        forgetCloudPlace(vaultFile);
+        webDavPasswords.remove(place->id);
+        if (const std::shared_ptr<SecretStore> store = secrets) {
+            const QString name = place->secretName();
+            (void)QtConcurrent::run([store, name]() { (void)store->remove(name); });
+        }
+    }
+    if (vaultFile == unsavedPath) {
+        discardKeptChanges();
+    }
+    carryVaultSettings(vaultFile, QString()); // keyfile, PIN, waits, finger
+    removePinFor(vaultFile);
+    forgetOrderOf(vaultFile);
+    VaultsFile settings;
+    QStringList notRemembered = settings.value(notRememberedKey).toStringList();
+    if (notRemembered.removeAll(vaultFile) > 0) {
+        settings.setValue(notRememberedKey, notRemembered);
+    }
+    QVariantMap moved = settings.value(movedVaultsKey).toMap();
+    for (auto entry = moved.begin(); entry != moved.end();) {
+        entry = entry.key() == vaultFile || entry.value().toString() == vaultFile ? moved.erase(entry) : std::next(entry);
+    }
+    settings.setValue(movedVaultsKey, moved);
+    savedPasswords.remove(vaultFile);
+    stalePasswords.remove(vaultFile);
+    vaultList.removeAll(vaultFile);
+    settings.setValue(vaultListKey, vaultList);
+    foundList.removeAll(vaultFile);
+    if (wasPrimary) {
+        // Only when it was the only vault (D-083): nothing is kept for it.
+        settings.remove(primaryKeyName);
+        settings.remove(deletedVaultsKey);
+        forgetPrimary();
+    } else {
+        QStringList deleted = settings.value(deletedVaultsKey).toStringList();
+        if (!deleted.contains(vaultFile)) {
+            deleted.append(vaultFile);
+        }
+        settings.setValue(deletedVaultsKey, deleted);
+        tellKept();
+    }
+    if (missingLast == vaultFile) {
+        missingLast.clear();
+    }
+    if (returnTo == vaultFile) {
+        returnTo.clear();
+        emit returnChanged();
+    }
+    if (lastUsed == vaultFile) {
+        lastUsed.clear();
+        settings.remove(lastVaultKey);
+    }
+    if (path == vaultFile) {
+        // The primary's unlock page, or the start page when it was the only
+        // vault (the owner, Q10).
+        setPath(primaryVault());
+        setState(path.isEmpty() ? State::NoVault : State::Locked);
+        say(QString(), false);
+    }
+    forgetDeletedVaultPasswords();
+    emit vaultsChanged();
+    emit vaultsFoundChanged();
+    emit syncChanged();
+    checkVaults();
 }
 
 } // namespace chrono_vault

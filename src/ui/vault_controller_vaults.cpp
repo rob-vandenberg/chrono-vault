@@ -27,9 +27,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_vaults.cpp 0.8.115
+// vault_controller_vaults.cpp 0.8.122
 
 // --- Version history ----------------------------------------------------
+// v0.8.122: Delete a vault (D-083)
 // v0.8.115: Move to any cloud storage, Google Drive too (D-080)
 // v0.8.114: A vault in any cloud storage, not only WebDAV (D-080)
 // v0.6.106: Close and Lock per vault (D-075)
@@ -51,6 +52,11 @@ constexpr qint64 largestVaultBytes = 1024LL * 1024 * 1024;
 QString stoppedText()
 {
     return VaultController::tr("The move was stopped. The vault stays where it was.");
+}
+
+QString deleteStoppedText()
+{
+    return VaultController::tr("The deletion was stopped.");
 }
 
 } // namespace
@@ -580,6 +586,132 @@ void VaultController::forgetVault(const QString& vaultFile)
     emit vaultsFoundChanged();
     emit syncChanged();
     checkVaults();
+}
+
+int VaultController::deleteRefusal(const QString& vaultFile) const
+{
+    // The order the owner set (D-083): the primary first, then open or closed.
+    if (vaultFile == primaryVault() && vaultList.size() > 1) {
+        return 1;
+    }
+    const int state = vaultStateOf(vaultFile);
+    return state == 2 ? 2 : state == 1 ? 3 : 0;
+}
+
+void VaultController::deleteVault(const QString& vaultFile)
+{
+    if (deleteRunning) {
+        return;
+    }
+    if (!vaultList.contains(vaultFile) || deleteRefusal(vaultFile) != 0 || currentState == State::Busy) {
+        emit deleteDone(false, tr("The vault cannot be deleted now. Close the window and try again."));
+        return;
+    }
+    if (moveRunning) {
+        emit deleteDone(false, tr("Another vault is being moved. Wait until that is done."));
+        return;
+    }
+    // Only with that vault's own password (and keyfile) just proven.
+    if (askedFor != vaultFile || !proofKey.isValid()) {
+        emit deleteDone(false, tr("Type the password of the vault first."));
+        return;
+    }
+    wipeProof();
+    deleteRunning = true;
+    if (!deleteGoesOn(DeleteStep::Proven)) {
+        deleteFailed(deleteStoppedText());
+        return;
+    }
+    const auto place = cloudPlaceOf(vaultFile);
+    if (!place) {
+        deleteFilesOf(vaultFile, {vaultFile}, false);
+        return;
+    }
+    if (vaultFile == path) {
+        stopWebDav();
+    }
+    // The vault on the server first; when that fails, nothing at all is
+    // deleted (the owner, Q2). Google Drive puts it in its trash (D-080).
+    QPointer<VaultController> self(this);
+    withCloudSecret(*place, [self, vaultFile, place = *place](std::optional<QString> password) {
+        if (!self) {
+            return;
+        }
+        if (!password) {
+            self->deleteFailed(tr("The server's password is not known on this device. Unlock the vault once so it is "
+                                  "asked, then delete it. Nothing was deleted."));
+            return;
+        }
+        CloudStorage* client = makeCloudStorage(place, *password).release();
+        if (!client) {
+            self->deleteFailed(tr("That storage is not in this version of Chrono Vault. Nothing was deleted."));
+            return;
+        }
+        client->setParent(self);
+        client->remove(place.fileName, [self, client, vaultFile, place](const CloudReply& answer) {
+            client->deleteLater();
+            if (!self) {
+                return;
+            }
+            // Already gone from the server counts as deleted there.
+            if (!answer.ok() && answer.error != CloudError::NotFound) {
+                self->deleteFailed(tr("The vault could not be deleted on the server: %1 Nothing was deleted.")
+                                       .arg(cloudProblem(place.kind, answer)));
+                return;
+            }
+            if (!self->deleteGoesOn(DeleteStep::ServerDeleted)) {
+                self->deleteFailed(deleteStoppedText());
+                return;
+            }
+            self->deleteFilesOf(vaultFile, {vaultFile, cloudBasePath(place)}, true);
+        });
+    });
+}
+
+void VaultController::deleteFilesOf(const QString& vaultFile, const QStringList& files, bool serverDone)
+{
+    // Deleted off the window's thread (OR-5); the first that cannot be
+    // deleted stops it.
+    QPointer<VaultController> self(this);
+    (void)QtConcurrent::run(&filePool, [self, vaultFile, files, serverDone]() {
+        QString failed;
+        for (const QString& one : files) {
+            if (QFileInfo::exists(one) && !QFile::remove(one)) {
+                failed = one;
+                break;
+            }
+        }
+        QMetaObject::invokeMethod(
+            qApp,
+            [self, vaultFile, failed, serverDone]() {
+                if (!self) {
+                    return;
+                }
+                if (!failed.isEmpty()) {
+                    const QString shown = QDir::toNativeSeparators(failed);
+                    self->deleteFailed(serverDone ? tr("The vault was deleted on the server, but its copy on this "
+                                                       "computer could not be deleted: %1")
+                                                        .arg(shown)
+                                                  : tr("The vault could not be deleted: %1. Nothing was deleted.")
+                                                        .arg(shown));
+                    return;
+                }
+                if (!self->deleteGoesOn(DeleteStep::FilesDeleted)) {
+                    self->deleteFailed(deleteStoppedText());
+                    return;
+                }
+                self->forgetDeletedVault(vaultFile);
+                self->deleteRunning = false;
+                emit self->deleteDone(true, QString());
+            },
+            Qt::QueuedConnection);
+    });
+}
+
+void VaultController::deleteFailed(const QString& problem)
+{
+    deleteRunning = false;
+    emit deleteDone(false, problem);
 }
 
 } // namespace chrono_vault

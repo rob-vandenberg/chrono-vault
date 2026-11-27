@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.121
+// SettingsWindow.qml 0.8.122
 
 // --- Version history ----------------------------------------------------
+// v0.8.122: Delete… in every vault's menu: the primary, open or closed say why not; a locked vault asks its password (D-083)
 // v0.8.121: Buttons alike only inside a group, 28 high; the key question's first line bold (D-082)
 // v0.8.120: The edge of every dialog, its buttons alike; the key dialogs and the paragraphs in the one design (D-082)
 // v0.8.119: Disconnect deletes nothing, its new text (D-060); no minimize button (D-079); Check for updates above the clipboard
@@ -240,6 +241,18 @@ ApplicationWindow {
     Connections {
         target: VaultController
         function onVaultMenuProblem(text) { settingsWindow.problem = text }
+    }
+    // Delete… (D-083): the checks in the owner's order, then the question.
+    function askDelete(vaultFile) {
+        settingsWindow.problem = ""
+        const refusal = VaultController.deleteRefusal(vaultFile)
+        if (refusal !== 0) {
+            noDeleteWindow.vaultFile = vaultFile
+            noDeleteWindow.refusal = refusal
+            noDeleteWindow.open()
+        } else {
+            deleteVaultWindow.askVault(vaultFile)
+        }
     }
     function openKnown(vaultFile) {
         problem = ""
@@ -1149,9 +1162,7 @@ ApplicationWindow {
                                         objectName: "vaultMenuButton_" + vaultRow.name
                                         dots: true
                                         menuOpen: vaultMenu.visible
-                                        visible: vaultRow.canClose || vaultRow.canLock || vaultRow.canOpen || vaultRow.canMove || vaultRow.canForget
-                                                 || vaultRow.canDisconnect || vaultRow.canImport
-                                                 || vaultRow.canExport
+                                        // Always: Delete… is in every vault's menu (D-083).
                                         Accessible.name: qsTr("Vault menu")
                                         onClicked: vaultMenu.popup(this, 0, height)
                                         Menu {
@@ -1265,6 +1276,12 @@ ApplicationWindow {
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
                                                     disconnectWindow.open()
                                                 }
+                                            }
+                                            // Every vault, every state (the owner, D-083).
+                                            MenuItem {
+                                                objectName: "deleteVault_" + vaultRow.name
+                                                text: qsTr("Delete…")
+                                                onTriggered: settingsWindow.askDelete(vaultRow.modelData)
                                             }
                                         }
                                     }
@@ -1486,6 +1503,34 @@ ApplicationWindow {
                         GoogleDriveWindow {
                             id: moveToDriveWindow
                             objectName: "moveToGoogleDriveWindow"
+                            transientParent: settingsWindow
+                        }
+                        // Delete…: first why it cannot be deleted now, in the owner's
+                        // order; a locked vault asks its own password (D-083).
+                        DialogWindow {
+                            id: noDeleteWindow
+                            fitsContent: true // only says: as tall as its text (D-079)
+                            objectName: "noDeleteWindow"
+                            transientParent: settingsWindow
+                            property string vaultFile: ""
+                            property int refusal: 0
+                            title: qsTr("Delete the vault")
+                            standardButtons: Dialog.Close
+                            Label {
+                                objectName: "dialogText"
+                                Layout.fillWidth: true
+                                textFormat: Text.PlainText
+                                readonly property string name: VaultController.vaultNameOf(noDeleteWindow.vaultFile)
+                                text: noDeleteWindow.refusal === 1
+                                      ? qsTr("“%1” is your primary vault and cannot be deleted while you have other vaults. To delete it, first make another vault primary with Make primary.").arg(name)
+                                      : (noDeleteWindow.refusal === 2 ? qsTr("The vault “%1” is currently open.").arg(name)
+                                                                      : qsTr("The vault “%1” is currently closed.").arg(name))
+                                        + " " + qsTr("The vault must be locked before it can be deleted.")
+                                wrapMode: Text.Wrap
+                            }
+                        }
+                        DeleteVaultWindow {
+                            id: deleteVaultWindow
                             transientParent: settingsWindow
                         }
                         DialogWindow {
