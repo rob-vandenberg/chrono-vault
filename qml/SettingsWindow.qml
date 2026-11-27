@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.122
+// SettingsWindow.qml 0.8.125
 
 // --- Version history ----------------------------------------------------
+// v0.8.125: Ticking the fingerprint box first asks the open vault's master password (D-043)
 // v0.8.122: Delete… in every vault's menu: the primary, open or closed say why not; a locked vault asks its password (D-083)
 // v0.8.121: Buttons alike only inside a group, 28 high; the key question's first line bold (D-082)
 // v0.8.120: The edge of every dialog, its buttons alike; the key dialogs and the paragraphs in the one design (D-082)
@@ -977,7 +978,8 @@ ApplicationWindow {
                             }
                         }
                         // One line, for all vaults (the owner, D-043): ticked, it
-                        // asks for one touch in a popup, at once, not with OK.
+                        // first asks the open vault's master password, typed, and only
+                        // then one touch in a popup, at once, not with OK.
                         CheckBox {
                             id: quickUnlockBox
                             objectName: "quickUnlockToggle"
@@ -988,7 +990,10 @@ ApplicationWindow {
                                      && (checked || VaultController.state === VaultController.Unlocked)
                             Layout.topMargin: 8 * Appearance.factor
                             onToggled: {
-                                VaultController.setQuickUnlock(checked)
+                                if (checked)
+                                    fingerPasswordWindow.askVault(VaultController.vaultPath)
+                                else
+                                    VaultController.setQuickUnlock(false)
                                 checked = Qt.binding(function() {
                                     return VaultController.quickUnlockEnabled || VaultController.quickUnlockBusy
                                 })
@@ -1387,6 +1392,20 @@ ApplicationWindow {
                             okText: qsTr("OK")
                             onRight: function(file) {
                                 VaultController.setPinFor(file, newPinText)
+                                accept()
+                            }
+                        }
+                        // The fingerprint turned on: the open vault's own master password,
+                        // typed now, never a finger (the owner, D-043).
+                        AskWindow {
+                            id: fingerPasswordWindow
+                            objectName: "fingerPasswordWindow"
+                            transientParent: settingsWindow
+                            typedOnly: true
+                            title: quickUnlockBox.text
+                            okText: qsTr("OK")
+                            onRight: function(file) {
+                                VaultController.setQuickUnlock(true)
                                 accept()
                             }
                         }

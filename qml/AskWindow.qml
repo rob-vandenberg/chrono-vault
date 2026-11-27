@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.8.121
+// AskWindow.qml 0.8.125
 
 // --- Version history ----------------------------------------------------
+// v0.8.125: typedOnly: the password typed, never a finger (D-043)
 // v0.8.121: The new PIN 16 apart (D-082)
 // v0.8.120: The design of every dialog: its text and normal fields, 440 wide, no size remembered (the owner, D-082)
 // v0.7.107: No PIN face; Set or Change PIN; the password of any vault but the primary (D-076)
@@ -47,6 +48,8 @@ DialogWindow {
     property bool withList: false
     // Set or Change PIN: a new PIN typed with the master password (D-076).
     property bool withNewPin: false
+    // Only the password typed, never a finger: a finger never sets a PIN nor turns itself on (D-043).
+    property bool typedOnly: withNewPin
     // "Remember my credentials" (the owner, D-074).
     property bool mayRemember: false
     readonly property bool remembers: rememberBox.wanted && rememberBox.enabled && rememberBox.checked
@@ -78,7 +81,7 @@ DialogWindow {
         if (!visible)
             open()
         field.forceActiveFocus()
-        fingerWanted = !withNewPin // a finger never sets a PIN
+        fingerWanted = !typedOnly
         askFinger()
     }
     // Once, and only when this window is active, so Windows lets Windows Hello
@@ -233,7 +236,7 @@ DialogWindow {
         }
         Button {
             objectName: "askFinger"
-            visible: askWindow.proving && VaultController.askFingerOn && !askWindow.withNewPin
+            visible: askWindow.proving && VaultController.askFingerOn && !askWindow.typedOnly
             text: qsTr("Unlock with %1").arg(VaultController.quickUnlockName)
             flat: true
             onClicked: VaultController.proveWithFinger()

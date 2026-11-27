@@ -27,9 +27,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_quick_unlock.cpp 0.7.107
+// test_quick_unlock.cpp 0.8.125
 
 // --- Version history ----------------------------------------------------
+// v0.8.125: Turned on only with the open vault's master password typed (D-043)
 // v0.7.107: After a lock the page shows the vault logged in with (D-076)
 // v0.6.103: One standard dialog for a master password, a PIN or a finger (D-073)
 // v0.4.74: A lost key turns the setting off
@@ -80,6 +81,21 @@ public:
     }
 };
 
+// Turned on as the settings window does: the open vault's own master password
+// typed and proven first (D-043).
+bool turnOn(VaultController& controller, const QString& password = QStringLiteral("pass"))
+{
+    QSignalSpy proven(&controller, &VaultController::proven);
+    controller.askFor(controller.vaultPath());
+    controller.proveWithPassword(password);
+    if (!proven.wait(10000) && proven.isEmpty()) {
+        return false;
+    }
+    controller.setQuickUnlock(true);
+    controller.stopAsking();
+    return true;
+}
+
 } // namespace
 
 class TestQuickUnlock : public QObject
@@ -92,6 +108,7 @@ private slots:
     void init();
     void cleanup();
     void a_finger_unlocks_once_turned_on();
+    void turning_it_on_needs_the_open_vaults_password_typed();
     void a_cancelled_or_unknown_finger_leaves_it_locked();
     void a_lost_key_turns_it_off_and_says_so();
     void a_new_master_password_is_kept_for_the_finger();
@@ -160,7 +177,7 @@ void TestQuickUnlock::a_finger_unlocks_once_turned_on()
     QVERIFY(controller);
     QVERIFY(controller->quickUnlockAvailable());
     QVERIFY(!controller->quickUnlockOn());
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     QVERIFY(controller->quickUnlockOn());
     QVERIFY(controller->saveItem(controller->newLogin()));
     QTRY_VERIFY(controller->isIdle());
@@ -175,12 +192,44 @@ void TestQuickUnlock::a_finger_unlocks_once_turned_on()
     QVERIFY(standIn->kept.isEmpty());
 }
 
-void TestQuickUnlock::a_cancelled_or_unknown_finger_leaves_it_locked()
+// Nothing is kept without the open vault's own master password typed just now:
+// not without it, not with a wrong one (the owner, D-043).
+void TestQuickUnlock::turning_it_on_needs_the_open_vaults_password_typed()
 {
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
     controller->setQuickUnlock(true);
+    QCOMPARE(standIn->stores, 0);
+    QVERIFY(!controller->quickUnlockEnabled());
+
+    controller->askFor(controller->vaultPath());
+    controller->proveWithPassword(QStringLiteral("no"));
+    QTRY_VERIFY(!controller->askBusy());
+    QVERIFY(controller->askTrouble());
+    controller->setQuickUnlock(true);
+    QCOMPARE(standIn->stores, 0);
+    QVERIFY(!controller->quickUnlockOn());
+
+    // Cancelled: what was proven is gone with the dialog.
+    QSignalSpy proven(controller.get(), &VaultController::proven);
+    controller->proveWithPassword(QStringLiteral("pass"));
+    QTRY_COMPARE(proven.size(), 1);
+    controller->stopAsking();
+    controller->setQuickUnlock(true);
+    QCOMPARE(standIn->stores, 0);
+
+    QVERIFY(turnOn(*controller));
+    QCOMPARE(standIn->stores, 1);
+    QVERIFY(controller->quickUnlockOn());
+}
+
+void TestQuickUnlock::a_cancelled_or_unknown_finger_leaves_it_locked()
+{
+    StandIn* standIn = nullptr;
+    auto controller = unlocked(standIn);
+    QVERIFY(controller);
+    QVERIFY(turnOn(*controller));
     controller->lock();
     standIn->next = QuickUnlock::Result::Cancelled;
     controller->unlockWithQuickUnlock();
@@ -200,7 +249,7 @@ void TestQuickUnlock::a_lost_key_turns_it_off_and_says_so()
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     controller->lock();
     standIn->next = QuickUnlock::Result::NoKey;
     controller->unlockWithQuickUnlock();
@@ -217,7 +266,7 @@ void TestQuickUnlock::a_new_master_password_is_kept_for_the_finger()
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     QSignalSpy changed(controller.get(), &VaultController::masterPasswordChanged);
     controller->changeMasterPassword(QStringLiteral("pass"), QStringLiteral("new"), QStringLiteral("new"), {});
     QTRY_COMPARE(changed.size(), 1);
@@ -234,7 +283,7 @@ void TestQuickUnlock::a_new_key_not_kept_says_so_and_turns_it_off()
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     standIn->failStore = true;
     QSignalSpy changed(controller.get(), &VaultController::masterPasswordChanged);
     controller->changeMasterPassword(QStringLiteral("pass"), QStringLiteral("new"), QStringLiteral("new"), {});
@@ -252,11 +301,11 @@ void TestQuickUnlock::the_standard_dialog_asks_the_finger_for_any_vault()
     auto controller = unlocked(standIn);
     QVERIFY(controller);
     const QString first = controller->vaultPath();
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     const QString second = folder->filePath(QStringLiteral("second.chronovault"));
     controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
     QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller, QStringLiteral("two")));
     QVERIFY(standIn->kept.contains(first) && standIn->kept.contains(second));
     // Logged in with the primary: its password gives the second back (D-076).
     controller->lock();
@@ -352,7 +401,7 @@ void TestQuickUnlock::the_master_password_is_asked_once_a_year()
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     controller->lock();
     QVERIFY(!controller->reminderDue());
     // A year and more since the master password was last typed.
@@ -397,7 +446,7 @@ void TestQuickUnlock::a_master_password_changed_elsewhere_turns_it_off_and_says_
     StandIn* standIn = nullptr;
     auto controller = unlocked(standIn);
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     QTRY_VERIFY(controller->isIdle());
     const QString vaultFile = controller->vaultPath();
     controller->lock();

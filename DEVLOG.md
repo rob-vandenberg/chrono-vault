@@ -1012,3 +1012,13 @@ the hint "Password" always; "This vault requires its keyfile.". `test_delete_vau
 `SystemTray` shows its icon only while `keepInTray` is on and follows `keepInTrayChanged`; `main.cpp` starts
 minimized to the taskbar when the icon is off. `test_tray` passes; its new case is skipped on the offscreen test
 platform (no tray) and passed once on the real desktop.
+
+## 27 November 2026: version 0.8.125, the master password before the fingerprint
+
+`VaultController::setQuickUnlock(true)` keeps a key only when the open vault's own master password was typed and
+proven just now (`askFor`, `proveWithPassword`), and keeps the key proven. In Settings > Security the box opens
+`fingerPasswordWindow`, an `AskWindow` with the new `typedOnly` (no finger asked or offered). `test_quick_unlock`
+(new case: without, wrong and cancelled keep nothing) and `test_reader` (new window case: ticking asks the password,
+wrong and Cancel keep nothing, the right one goes on to the touch, unticking asks nothing) pass, with
+`test_pin_unlock`; each under 20 seconds.
+

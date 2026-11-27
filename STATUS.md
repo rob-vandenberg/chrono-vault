@@ -2,6 +2,10 @@
 
 ## Now
 
+**Version 0.8.125**: ticking "Use fingerprint to unlock vault" in Settings > Security first asks the open vault's
+master password, typed; only then the touch (D-043 point 6). Cancel or a wrong password keep nothing and leave it
+unticked.
+
 **Version 0.8.124**: the tray icon is there only while "Keep Chrono Vault running in the system tray" is on, and
 follows the setting at once; a minimized start without it goes to the taskbar (D-019).
 

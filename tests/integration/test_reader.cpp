@@ -22,6 +22,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlError>
 #include <QQuickItem>
+#include <QQuickWindow>
 #include "settings_files.h"
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -30,9 +31,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_reader.cpp 0.0.38
+// test_reader.cpp 0.8.125
 
 // --- Version history ----------------------------------------------------
+// v0.8.125: Ticking the box asks the open vault's master password before the touch (D-043)
 // v0.4.73: The finger asked only once the window is active
 // v0.4.73: The width compared to within a pixel, as the layout rounds
 // v0.4.72: Unlock with Windows Hello as wide as its text, centred
@@ -120,6 +122,21 @@ private:
     }
 };
 
+// Turned on as the settings window does: the open vault's own master password
+// typed and proven first (D-043).
+bool turnOn(VaultController& controller, const QString& password = QStringLiteral("pass"))
+{
+    QSignalSpy proven(&controller, &VaultController::proven);
+    controller.askFor(controller.vaultPath());
+    controller.proveWithPassword(password);
+    if (!proven.wait(10000) && proven.isEmpty()) {
+        return false;
+    }
+    controller.setQuickUnlock(true);
+    controller.stopAsking();
+    return true;
+}
+
 } // namespace
 
 // The fingerprint reader is held only while a finger is asked, and given
@@ -138,6 +155,7 @@ private slots:
     void unlocking_holds_the_reader_until_it_is_settled();
     void the_unlock_page_asks_whenever_it_is_on_screen();
     void one_setting_for_all_vaults_keeps_each_key_at_its_unlock();
+    void ticking_the_box_asks_the_master_password_before_the_touch();
 
 private:
     std::unique_ptr<VaultController> unlocked(Reader*& reader, const QString& name);
@@ -196,7 +214,7 @@ void TestReader::turning_it_on_asks_one_touch_and_tells_what_came_of_it()
     Reader* reader = nullptr;
     auto controller = unlocked(reader, QStringLiteral("on"));
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     QVERIFY(controller->quickUnlockBusy());
     QVERIFY(reader->holding);
     QCOMPARE(controller->quickUnlockMessage(), QStringLiteral("Touch the fingerprint reader…"));
@@ -223,7 +241,7 @@ void TestReader::a_cancel_is_no_failure_and_a_key_not_kept_is_told()
     Reader* reader = nullptr;
     auto controller = unlocked(reader, QStringLiteral("cancel"));
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     controller->cancelQuickUnlockSetup();
     QVERIFY(!reader->holding);
     QVERIFY(!controller->quickUnlockBusy());
@@ -231,7 +249,7 @@ void TestReader::a_cancel_is_no_failure_and_a_key_not_kept_is_told()
     QVERIFY(controller->quickUnlockMessage().isEmpty());
     QVERIFY(!controller->messageIsTrouble());
     // Recognized, but the keyring would not keep the key.
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     reader->answer(QuickUnlock::Result::NotKept);
     QVERIFY(!controller->quickUnlockOn());
     QVERIFY(controller->quickUnlockTrouble());
@@ -243,7 +261,7 @@ void TestReader::unlocking_holds_the_reader_until_it_is_settled()
     Reader* reader = nullptr;
     auto controller = unlocked(reader, QStringLiteral("held"));
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     reader->finger(true);
     QVERIFY(controller->quickUnlockOn());
     controller->lock();
@@ -302,7 +320,7 @@ void TestReader::the_unlock_page_asks_whenever_it_is_on_screen()
     controller->createVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("page.chronovault"))),
                             QStringLiteral("pass"), QStringLiteral("pass"));
     QTRY_COMPARE(controller->state(), State::Unlocked);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     reader->finger(true);
     QVERIFY(controller->quickUnlockOn());
 
@@ -386,7 +404,7 @@ void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
     Reader* reader = nullptr;
     auto controller = unlocked(reader, QStringLiteral("first"));
     QVERIFY(controller);
-    controller->setQuickUnlock(true);
+    QVERIFY(turnOn(*controller));
     reader->finger(true);
     QVERIFY(controller->quickUnlockEnabled());
     const QString first = controller->vaultPath();
@@ -410,6 +428,81 @@ void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
     QVERIFY(!controller->quickUnlockEnabled());
     QVERIFY(reader->kept.isEmpty());
     QVERIFY(!controller->quickUnlockOn());
+}
+
+// Settings > Security: ticking the box asks the open vault's own master
+// password first; Cancel and a wrong password keep nothing and leave it
+// unticked; the right one goes on to the touch (the owner, D-043).
+void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
+{
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ChronoVault", "Main");
+    QVERIFY(!engine.rootObjects().isEmpty());
+    QObject* window = engine.rootObjects().constFirst();
+    showMainWindow(qobject_cast<QWindow*>(window), false, false);
+    auto* controller = engine.singletonInstance<VaultController*>("ChronoVault", "VaultController");
+    auto owned = std::make_unique<Reader>();
+    Reader* reader = owned.get();
+    controller->setQuickUnlockForTests(std::move(owned));
+    controller->setKdfParameters(crypto::KdfParameters{1024, 1, 1});
+    controller->createVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("box.chronovault"))),
+                            QStringLiteral("pass"), QStringLiteral("pass"));
+    QTRY_COMPARE(controller->state(), State::Unlocked);
+
+    QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
+    QVERIFY(settings);
+    QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+    settings->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 1);
+    QObject* box = nullptr;
+    QTRY_VERIFY((box = settings->findChild<QObject*>(QStringLiteral("quickUnlockToggle"))));
+    auto* asked = settings->findChild<QQuickWindow*>(QStringLiteral("fingerPasswordWindow"));
+    QVERIFY(asked);
+    QObject* field = asked->findChild<QObject*>(QStringLiteral("askField"));
+    QVERIFY(field);
+
+    // Ticked: the password is asked, no finger, the box still unticked.
+    QVERIFY(QMetaObject::invokeMethod(box, "click"));
+    QTRY_VERIFY(asked->isVisible());
+    QCOMPARE(reader->asked, 0);
+    QVERIFY(!box->property("checked").toBool());
+    QVERIFY(!asked->findChild<QQuickItem*>(QStringLiteral("askFinger"))->isVisible());
+
+    // Wrong: said in the dialog, which stays open; nothing kept.
+    field->setProperty("text", QStringLiteral("no"));
+    QVERIFY(QMetaObject::invokeMethod(asked, "go"));
+    QTRY_VERIFY(controller->askTrouble());
+    QVERIFY(asked->isVisible());
+    QVERIFY(asked->findChild<QQuickItem*>(QStringLiteral("askProblem"))->isVisible());
+    QCOMPARE(reader->asked, 0);
+    QVERIFY(!box->property("checked").toBool());
+
+    // Cancel: nothing kept, still unticked.
+    QVERIFY(QMetaObject::invokeMethod(asked, "reject"));
+    QTRY_VERIFY(!asked->isVisible());
+    QCOMPARE(reader->asked, 0);
+    QVERIFY(!box->property("checked").toBool());
+    QVERIFY(!controller->quickUnlockEnabled());
+
+    // Right: the dialog closes and the touch is asked, as before.
+    QVERIFY(QMetaObject::invokeMethod(box, "click"));
+    QTRY_VERIFY(asked->isVisible());
+    field->setProperty("text", QStringLiteral("pass"));
+    QVERIFY(QMetaObject::invokeMethod(asked, "go"));
+    QTRY_COMPARE(reader->asked, 1);
+    QTRY_VERIFY(!asked->isVisible());
+    QVERIFY(controller->quickUnlockBusy());
+    QVERIFY(box->property("checked").toBool());
+    reader->finger(true);
+    QVERIFY(controller->quickUnlockOn());
+    QVERIFY(controller->quickUnlockEnabled());
+
+    // Unticked: every kept key gone, nothing asked.
+    QVERIFY(QMetaObject::invokeMethod(box, "click"));
+    QVERIFY(!asked->isVisible());
+    QVERIFY(!controller->quickUnlockEnabled());
+    QVERIFY(reader->kept.isEmpty());
+    QCOMPARE(reader->asked, 1);
+    settings->setProperty("visible", false);
 }
 
 QTEST_MAIN(TestReader)
