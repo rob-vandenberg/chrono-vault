@@ -16,11 +16,17 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "intuitive_fixture.h"
+#include "item_order.h"
+#include "program_scale.h"
+
+#include <QDesktopServices>
+#include <QScopeGuard>
 
 // --- Version ------------------------------------------------------------
-// test_intuitive.cpp 0.7.111
+// test_intuitive.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: No minimize button, the title, the top bar, General's order (test_intuitive_bars); Sort By and the letter keys (test_intuitive_sorting) (D-079, D-074, D-017, D-081)
 // v0.7.111: A question fits its text; Enter, Esc, Y and N as the owner set them (D-079)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.83: The fixture, and the tests of several items, in files of their own (D-063)
@@ -28,12 +34,28 @@
 
 Q_IMPORT_QML_PLUGIN(ChronoVaultPlugin)
 
+#if defined(CHRONO_VAULT_INTUITIVE_SORTING)
+// Catches a website being opened, so no browser starts.
+class Opener : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit Opener(QStringList* into) : seen(into) {}
+    Q_INVOKABLE void open(const QUrl& address) { seen->append(address.toString()); }
+
+private:
+    QStringList* seen;
+};
+#endif
+
 // What a person guesses is what happens (D-062): mouse and keys only.
 class TestIntuitive : public IntuitiveFixture
 {
     Q_OBJECT
 
 private slots:
+#if !defined(CHRONO_VAULT_INTUITIVE_BARS) && !defined(CHRONO_VAULT_INTUITIVE_SORTING)
     void a_click_gives_the_list_the_keyboard_and_every_key_scrolls_to_its_item()
     {
         click(part("searchField")); // the keyboard elsewhere first
@@ -279,6 +301,386 @@ private slots:
         QTest::keyClick(outer, Qt::Key_Escape);
         QTRY_VERIFY(!outer->isVisible());
     }
+#elif defined(CHRONO_VAULT_INTUITIVE_BARS)
+    // The title bars, the top bar and Settings' order, apart so each binary
+    // stays under 20 seconds (OR-11).
+    // In Settings > General "Check for updates" stands above "Clear the
+    // clipboard after", on the screen and for Tab (the owner, 0.8.119).
+    void check_for_updates_comes_before_the_clipboard()
+    {
+        auto* settings = dialog("settingsWindow");
+        QVERIFY(QMetaObject::invokeMethod(settings, "showWindow"));
+        QVERIFY(comesUp(settings));
+        const auto here = [settings](const char* name) { return seen(settings->contentItem(), QString::fromLatin1(name)); };
+        QQuickItem* updates = here("checkFrequencyBox");
+        QQuickItem* clipboard = here("clipboardBox");
+        QVERIFY(updates && clipboard);
+        QVERIFY(updates->mapToScene(QPointF()).y() + updates->height() <= clipboard->mapToScene(QPointF()).y());
+        updates->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(updates->hasActiveFocus());
+        QTest::keyClick(settings, Qt::Key_Tab);
+        QTRY_VERIFY(clipboard->hasActiveFocus() || clipboard->isAncestorOf(settings->activeFocusItem()));
+        QTest::keyClick(settings, Qt::Key_Backtab);
+        QTRY_VERIFY(updates->hasActiveFocus());
+        settings->close();
+    }
+
+    // No window that asks an answer can be minimized or maximized: its title
+    // bar holds its title and × only (the owner, D-079).
+    void no_question_window_has_a_minimize_button()
+    {
+        int questions = 0;
+        for (QQuickWindow* one : window->findChildren<QQuickWindow*>()) {
+            if (one->objectName() == QLatin1String("settingsWindow")) {
+                continue; // the main window and Settings keep theirs
+            }
+            const QString name = one->objectName() + QLatin1Char(' ') + one->title();
+            const Qt::WindowFlags flags = one->flags();
+            QVERIFY2(flags.testFlag(Qt::CustomizeWindowHint), qPrintable(name));
+            QVERIFY2(flags.testFlag(Qt::WindowCloseButtonHint), qPrintable(name));
+            QVERIFY2(!flags.testFlag(Qt::WindowMinimizeButtonHint), qPrintable(name));
+            QVERIFY2(!flags.testFlag(Qt::WindowMaximizeButtonHint), qPrintable(name));
+#if defined(Q_OS_LINUX)
+            QVERIFY2(one->type() == Qt::Tool, qPrintable(name)); // KDE minimizes no utility window
+#else
+            QVERIFY2(one->type() == Qt::Dialog, qPrintable(name));
+#endif
+            ++questions;
+        }
+        QVERIFY(dialog("keyCatcher") && dialog("keyTaken") && dialog("disconnectWindow"));
+        QVERIFY(questions > 20);
+    }
+
+    // The main window's title is the program and its version, also with a
+    // vault open (the owner, D-017).
+    void the_title_is_the_program_and_its_version()
+    {
+        QCOMPARE(controller->state(), State::Unlocked);
+        QCOMPARE(window->title(), QStringLiteral("Chrono Vault ") + controller->version());
+    }
+
+    // In the top bar, the space from Generate Password to the padlock equals
+    // the space from the padlock to the gear, both as seen on the screen (the
+    // owner, D-074).
+    void the_top_bar_spaces_are_equal()
+    {
+        const auto back = qScopeGuard([]() { applyProgramScale(100); });
+        spacesAreEqualAt(100);
+        spacesAreEqualAt(200);
+    }
+
+private:
+    void spacesAreEqualAt(int scale)
+    {
+        applyProgramScale(scale);
+        window->resize(16 * scale, 9 * scale);
+        QCoreApplication::processEvents();
+        (void)window->grabWindow();
+        QCoreApplication::processEvents();
+        QQuickItem* generate = part("generateButton");
+        QQuickItem* lock = part("lockButton");
+        QQuickItem* gear = part("preferencesButton");
+        QVERIFY(generate && lock && gear);
+        const QImage shot = window->grabWindow();
+        const qreal ratio = shot.devicePixelRatio();
+        const QPointF lockAt = lock->mapToScene(QPointF(0, 0));
+        const int lockX = qCeil(lockAt.x() * ratio);
+        const int gearX = qCeil(gear->mapToScene(QPointF(0, 0)).x() * ratio);
+        const int fromX = qFloor(generate->mapToScene(QPointF(generate->width() / 2, 0)).x() * ratio);
+        const int top = qRound((lockAt.y() + lock->height() / 4) * ratio);
+        const int bottom = qRound((lockAt.y() + lock->height() * 3 / 4) * ratio);
+        const int empty = lockX + 1; // inside the padlock's circle, before the picture
+        // A column holds something seen where a pixel differs from the bar's
+        // own colour in its row.
+        const auto seenAt = [&](int x) {
+            for (int y = top; y <= bottom; ++y) {
+                const QColor one = shot.pixelColor(x, y);
+                const QColor bar = shot.pixelColor(empty, y);
+                if (qAbs(one.red() - bar.red()) + qAbs(one.green() - bar.green()) + qAbs(one.blue() - bar.blue()) > 60) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        const auto firstSeen = [&](int from, int to, int step) {
+            for (int x = from; x != to; x += step) {
+                if (seenAt(x)) {
+                    return x;
+                }
+            }
+            return -1;
+        };
+        const int generateRight = firstSeen(lockX - 1, fromX, -1);
+        const int lockLeft = firstSeen(lockX, gearX, 1);
+        const int lockRight = firstSeen(gearX - 1, lockX, -1);
+        const int gearLeft = firstSeen(gearX, gearX + qRound(gear->width() * ratio), 1);
+        QVERIFY(generateRight > 0 && lockLeft > 0 && lockRight > lockLeft && gearLeft > lockRight);
+        const int before = lockLeft - generateRight - 1;
+        const int after = gearLeft - lockRight - 1;
+        QVERIFY2(qAbs(before - after) <= 1, qPrintable(QStringLiteral("%1%: %2 and %3").arg(scale).arg(before).arg(after)));
+    }
+#else
+    // Sort By, its headings and the letter keys, apart so each binary stays
+    // under 20 seconds (OR-11; the owner, D-081).
+    void each_order_and_direction()
+    {
+        rewrite([](VaultContents& contents) {
+            const QDateTime base = QDateTime::currentDateTimeUtc().addDays(-1);
+            for (Item& item : contents.items) {
+                const int number = item.title == QLatin1String("Mill") ? 30 : item.title.mid(5).toInt();
+                item.fields.append(webAddress(QStringLiteral("site%1.example").arg((number * 7) % 31, 2, 10, QLatin1Char('0'))));
+                item.created = base.addSecs(60 * ((number * 11) % 31));
+                item.modified = base.addSecs(60 * ((number * 13) % 31));
+            }
+        });
+        // By use: Item 05 three times, Item 03 twice, Item 07 once; the last
+        // use of each in the order 07, 03, 05.
+        for (const char* title : {"Item 05", "Item 05", "Item 07", "Item 03", "Item 03", "Item 05"}) {
+            controller->usedItem(idOf(QString::fromLatin1(title)));
+            QTest::qWait(3);
+        }
+        const auto titles = [this]() {
+            QStringList all;
+            for (int row = 0; row < controller->items()->rowCount(); ++row) {
+                all << controller->items()->index(row).data(ItemListModel::TitleRole).toString();
+            }
+            return all;
+        };
+        const auto valuesBy = [this](const char* role) {
+            QStringList all;
+            const VaultContents& contents = kept;
+            for (int row = 0; row < controller->items()->rowCount(); ++row) {
+                const QString id = controller->items()->idAt(row);
+                for (const Item& item : contents.items) {
+                    if (item.id.toString(QUuid::WithoutBraces) != id) {
+                        continue;
+                    }
+                    all << (qstrcmp(role, "url") == 0       ? item.fields.constFirst().value
+                            : qstrcmp(role, "created") == 0 ? item.created.toString(Qt::ISODate)
+                                                            : item.modified.toString(Qt::ISODate));
+                }
+            }
+            return all;
+        };
+        const auto sorted = [](QStringList values, bool descending) {
+            std::sort(values.begin(), values.end());
+            if (descending) {
+                std::reverse(values.begin(), values.end());
+            }
+            return values;
+        };
+        for (const bool descending : {false, true}) {
+            controller->setSortDescending(descending);
+            controller->setSortBy(0);
+            QCOMPARE(titles().constFirst(), descending ? QStringLiteral("Mill") : QStringLiteral("Item 00"));
+            QCOMPARE(titles().constLast(), descending ? QStringLiteral("Item 00") : QStringLiteral("Mill"));
+            int by = 1;
+            for (const char* role : {"url", "created", "modified"}) {
+                controller->setSortBy(by++);
+                const QStringList seen = valuesBy(role);
+                QCOMPARE(seen.size(), 31);
+                QCOMPARE(seen, sorted(seen, descending));
+            }
+            // Never used first going up, by title A to Z among themselves.
+            controller->setSortBy(4);
+            QStringList used = titles();
+            QCOMPARE(descending ? used.mid(0, 3) : used.mid(28),
+                     descending ? QStringList({"Item 05", "Item 03", "Item 07"}) : QStringList({"Item 07", "Item 03", "Item 05"}));
+            QCOMPARE(descending ? used.at(3) : used.at(0), QStringLiteral("Item 00"));
+            controller->setSortBy(5);
+            used = titles();
+            QCOMPARE(descending ? used.mid(0, 3) : used.mid(28),
+                     descending ? QStringList({"Item 05", "Item 03", "Item 07"}) : QStringList({"Item 07", "Item 03", "Item 05"}));
+        }
+    }
+
+    // Headings by title only; the menu shows one tick in each part.
+    void headings_only_by_title()
+    {
+        auto* section = list->property("section").value<QObject*>();
+        QVERIFY(section);
+        QCOMPARE(section->property("property").toString(), QStringLiteral("initial"));
+        QTRY_VERIFY(headingSeen(QStringLiteral("I")));
+        auto* button = part("sortButton");
+        QVERIFY(button);
+        QCOMPARE(button->property("text").toString(), QStringLiteral("Title ▾"));
+        click(button);
+        auto* menu = window->findChild<QObject*>(QStringLiteral("sortMenu"));
+        QTRY_VERIFY(menu && menu->property("opened").toBool());
+        QCOMPARE(menu->property("count").toInt(), 9); // six, a line, two
+        auto* url = window->findChild<QObject*>(QStringLiteral("sortBy_1"));
+        QVERIFY(url && QMetaObject::invokeMethod(url, "triggered"));
+        QTRY_COMPARE(section->property("property").toString(), QString());
+        QTRY_VERIFY(!headingSeen(QStringLiteral("I")));
+        QCOMPARE(button->property("text").toString(), QStringLiteral("URL ▾"));
+        int ticked = 0;
+        for (int by = 0; by < 6; ++by) {
+            ticked += window->findChild<QObject*>(QStringLiteral("sortBy_%1").arg(by))->property("checked").toBool() ? 1 : 0;
+        }
+        QCOMPARE(ticked, 1);
+        auto* down = window->findChild<QObject*>(QStringLiteral("sortDescending"));
+        auto* up = window->findChild<QObject*>(QStringLiteral("sortAscending"));
+        QVERIFY(up->property("checked").toBool() && !down->property("checked").toBool());
+        QVERIFY(QMetaObject::invokeMethod(down, "triggered"));
+        QTRY_VERIFY(controller->sortDescending());
+        QVERIFY(!up->property("checked").toBool() && down->property("checked").toBool());
+        QVERIFY(QMetaObject::invokeMethod(window->findChild<QObject*>(QStringLiteral("sortBy_0")), "triggered"));
+        QTRY_COMPARE(section->property("property").toString(), QStringLiteral("initial"));
+        QVERIFY(QMetaObject::invokeMethod(menu, "close"));
+    }
+
+    // A use is a field copied or the website opened; kept on this computer,
+    // not in the vault (D-081).
+    void a_use_is_counted()
+    {
+        rewrite([](VaultContents& contents) {
+            Field name;
+            name.role = QStringLiteral("username");
+            name.kind = FieldKind::Username;
+            name.value = QStringLiteral("rob");
+            contents.items[4].fields << name << webAddress(QStringLiteral("example.com"));
+        });
+        QStringList opened;
+        Opener opener(&opened);
+        QDesktopServices::setUrlHandler(QStringLiteral("https"), &opener, "open");
+        const auto noHandler = qScopeGuard([]() { QDesktopServices::unsetUrlHandler(QStringLiteral("https")); });
+        const QString id = idOf(QStringLiteral("Item 04"));
+        const QString file = controller->vaultPath();
+        QMetaObject::invokeMethod(page, "showItem", Q_ARG(QVariant, id));
+        QTRY_COMPARE(page->property("chosenItemId").toString(), id);
+        QObject* copyName = window->findChild<QObject*>(QStringLiteral("copyUsernameAction"));
+        QTRY_VERIFY(copyName && copyName->property("enabled").toBool());
+        QVERIFY(QMetaObject::invokeMethod(copyName, "trigger"));
+        QCOMPARE(keptUsesOf(file).value(QUuid::fromString(id)).count, 1);
+        QObject* launch = window->findChild<QObject*>(QStringLiteral("launchUrlAction"));
+        QVERIFY(launch && QMetaObject::invokeMethod(launch, "trigger"));
+        QTRY_COMPARE(opened, QStringList{QStringLiteral("https://example.com")});
+        QCOMPARE(keptUsesOf(file).value(QUuid::fromString(id)).count, 2);
+        QVERIFY(keptUsesOf(file).value(QUuid::fromString(id)).last.isValid());
+        controller->setSortBy(4);
+        QCOMPARE(controller->items()->idAt(30), id); // the most recent last, going up
+        forgetOrderOf(file);
+    }
+
+    // Sort By is kept per vault, on this computer.
+    void kept_per_vault()
+    {
+        const QString first = controller->vaultPath();
+        controller->setSortBy(2);
+        controller->setSortDescending(true);
+        QCOMPARE(keptOrderOf(first).by, SortBy::Created);
+        controller->lock();
+        QTRY_COMPARE(controller->state(), State::Locked);
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        QCOMPARE(controller->sortBy(), 2);
+        QVERIFY(controller->sortDescending());
+        // Another vault starts on Title, Ascending.
+        const QString second = folder.filePath(QStringLiteral("second.chronovault"));
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("pass"), QStringLiteral("pass"));
+        QTRY_COMPARE(controller->vaultPath(), second);
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        QCOMPARE(controller->sortBy(), 0);
+        QVERIFY(!controller->sortDescending());
+        QCOMPARE(keptOrderOf(first).by, SortBy::Created);
+        forgetOrderOf(first);
+        forgetOrderOf(second);
+    }
+
+    // By title, a key brings its heading to the top of the list (the owner,
+    // D-081).
+    void a_key_brings_its_heading_to_the_top()
+    {
+        rewrite([](VaultContents& contents) {
+            for (const char* title : {"1Password", "Alpha 1", "Alpha 2", "Alpha 3", "Zeta"}) {
+                Item item;
+                item.id = QUuid::createUuid();
+                item.title = QString::fromLatin1(title);
+                item.created = item.modified = QDateTime::currentDateTimeUtc();
+                contents.items.append(item);
+            }
+        });
+        click(row(2));
+        QTRY_VERIFY(list->hasActiveFocus());
+        const auto press = [this](Qt::Key letter) {
+            list->setProperty("typed", QString()); // a key of its own, not more of a word
+            key(letter);
+            QCoreApplication::processEvents();
+        };
+        press(Qt::Key_A);
+        QTRY_VERIFY(headingAtTop(QStringLiteral("A")));
+        press(Qt::Key_I);
+        QTRY_VERIFY(headingAtTop(QStringLiteral("I")));
+        press(Qt::Key_B); // no B: the next heading
+        QTRY_VERIFY(headingAtTop(QStringLiteral("I")));
+        press(Qt::Key_5); // a digit: "#"
+        QTRY_VERIFY(headingAtTop(QStringLiteral("#")));
+        press(Qt::Key_Z); // near the end: only to the bottom, no empty room
+        QTRY_VERIFY(atTheBottom());
+        QVERIFY(headingSeen(QStringLiteral("Z")));
+        QVERIFY(!headingAtTop(QStringLiteral("Z")));
+        press(Qt::Key_A);
+        QTRY_VERIFY(headingAtTop(QStringLiteral("A")));
+        press(Qt::Key_N); // after the last heading but Z: Z, at the bottom
+        QTRY_VERIFY(atTheBottom());
+    }
+
+private:
+    VaultContents kept; // the vault as rewrite last wrote it
+    static Field webAddress(const QString& address)
+    {
+        Field field;
+        field.role = QStringLiteral("url");
+        field.kind = FieldKind::WebAddress;
+        field.value = address;
+        return field;
+    }
+    QString idOf(const QString& title) const
+    {
+        for (const Item& item : kept.items) {
+            if (item.title == title) {
+                return item.id.toString(QUuid::WithoutBraces);
+            }
+        }
+        return {};
+    }
+    // The vault written again with a change, as the fixture writes it.
+    void rewrite(const std::function<void(VaultContents&)>& change)
+    {
+        const QString file = controller->vaultPath();
+        controller->lock();
+        QTRY_COMPARE(controller->state(), State::Locked);
+        const OpenResult opened = openVaultFile(file, "pass");
+        VaultContents contents = contentsFromJson(opened.contents).contents;
+        change(contents);
+        kept = contents;
+        QCOMPARE(saveVaultFile(file, contentsToJson(contents), opened.key), SaveStatus::Saved);
+        controller->unlock(QStringLiteral("pass"));
+        QTRY_COMPARE(controller->state(), State::Unlocked);
+        QTRY_VERIFY(row(0));
+    }
+    QQuickItem* heading(const QString& text) const
+    {
+        for (QQuickItem* one : list->property("contentItem").value<QQuickItem*>()->childItems()) {
+            if (one->isVisible() && one->property("section").isValid() && one->property("text").toString() == text) {
+                return one;
+            }
+        }
+        return nullptr;
+    }
+    bool headingSeen(const QString& text) const { return heading(text) != nullptr; }
+    // The last row's bottom is the list's: nothing cut off, no room below.
+    bool atTheBottom()
+    {
+        QQuickItem* last = row(list->property("count").toInt() - 1);
+        return last && qAbs(last->mapToItem(list, QPointF(0, last->height())).y() - list->height()) <= 1;
+    }
+    bool headingAtTop(const QString& text) const
+    {
+        QQuickItem* one = heading(text);
+        return one && qAbs(one->mapToItem(list, QPointF(0, 0)).y()) <= 1;
+    }
+#endif
 };
 
 QTEST_MAIN(TestIntuitive)

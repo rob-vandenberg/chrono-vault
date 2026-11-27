@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// VaultPage.qml 0.8.115
+// VaultPage.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Sort By: six orders, either way, per vault; headings by title only; a key brings its heading to the top (D-081)
 // v0.8.115: The storage's name under the vault's name (D-080)
 // v0.7.111: Question dialogs fit their text (D-079)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
@@ -1042,15 +1043,53 @@ Item {
                 }
                 ToolButton {
                     objectName: "sortButton"
-                    text: qsTr("Title") + " ▾"
+                    // In the order of VaultController.sortBy (D-081).
+                    readonly property var names: [qsTr("Title"), qsTr("URL"), qsTr("Created Time"), qsTr("Modified Time"),
+                                                  qsTr("Recently Used"), qsTr("Frequently Used")]
+                    text: names[VaultController.sortBy] + " ▾"
                     font.bold: true
                     onClicked: sortMenu.popup(this, 0, height)
+                    // What to sort by, a line, then which way; one tick in each
+                    // part (the owner, D-081).
                     Menu {
                         id: sortMenu
+                        objectName: "sortMenu"
+                        Instantiator {
+                            model: 6
+                            delegate: MenuItem {
+                                required property int index
+                                objectName: "sortBy_" + index
+                                text: sortMenu.parent.names[index]
+                                checkable: true
+                                checked: VaultController.sortBy === index
+                                onTriggered: {
+                                    VaultController.sortBy = index
+                                    checked = Qt.binding(function() { return VaultController.sortBy === index })
+                                }
+                            }
+                            onObjectAdded: function(index, object) { sortMenu.insertItem(index, object) }
+                            onObjectRemoved: function(index, object) { sortMenu.removeItem(object) }
+                        }
+                        MenuSeparator {}
                         MenuItem {
-                            text: qsTr("Title")
+                            objectName: "sortAscending"
+                            text: qsTr("Ascending")
                             checkable: true
-                            checked: true
+                            checked: !VaultController.sortDescending
+                            onTriggered: {
+                                VaultController.sortDescending = false
+                                checked = Qt.binding(function() { return !VaultController.sortDescending })
+                            }
+                        }
+                        MenuItem {
+                            objectName: "sortDescending"
+                            text: qsTr("Descending")
+                            checkable: true
+                            checked: VaultController.sortDescending
+                            onTriggered: {
+                                VaultController.sortDescending = true
+                                checked = Qt.binding(function() { return VaultController.sortDescending })
+                            }
                         }
                     }
                 }
@@ -1101,6 +1140,15 @@ Item {
                 keyNavigationEnabled: false
                 highlightMoveDuration: 0 // the view is there at once, however far
                 property string typed: ""
+                function headingToTop(key) {
+                    const row = VaultController.items.headingRowOf(key)
+                    // The list knows where its end is only once the rows there
+                    // are laid out; before that it holds a heading near the end
+                    // short of the bottom, the last row cut off.
+                    positionViewAtEnd()
+                    if (row >= 0)
+                        positionViewAtIndex(row, ListView.Beginning)
+                }
                 Timer {
                     id: typedEnds
                     interval: 1000
@@ -1148,6 +1196,12 @@ Item {
                             const found = VaultController.items.rowStartingWith(typed, currentIndex, typed.length > 1)
                             if (found >= 0)
                                 vaultPage.showItem(VaultController.items.idAt(found))
+                            // By title, a first key also brings its heading to the
+                            // top: 0 to 9 the "#", a letter without one the next
+                            // heading, else the end; never empty room below
+                            // (the owner, D-081).
+                            if (typed.length === 1 && VaultController.sortBy === 0)
+                                itemList.headingToTop(typed)
                         }
                         return
                     }
@@ -1159,7 +1213,8 @@ Item {
                         vaultPage.showItem(VaultController.items.idAt(row))
                 }
 
-                section.property: "initial"
+                // Headings only by title (the owner, D-081).
+                section.property: VaultController.items.headings ? "initial" : ""
                 section.criteria: ViewSection.FullString
                 section.delegate: Label {
                     required property string section

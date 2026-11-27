@@ -24,9 +24,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_googledrive.cpp 0.8.117
+// vault_controller_googledrive.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Disconnect deletes nothing on Google Drive either (D-060)
 // v0.8.117: The window's account read at sign-in and kept with the places made there; read again after a renewed sign-in (D-080 point 20)
 // v0.8.116: Every sign-in in the Google Drive window opens the browser; a vault's own sign-in is not reused there (D-080 point 13)
 // v0.8.115: Initial release: sign in to Google Drive, its folders, and a vault made, opened or moved there (D-080)
@@ -272,46 +273,11 @@ void VaultController::moveVaultToGoogleDrive(const QString& vaultFile)
     moveVaultToCloud(vaultFile, driveTarget(), googleToken, driveFiles, tr("Sign in to Google Drive first."));
 }
 
-void VaultController::disconnectVault(const QString& vaultFile, bool alsoDelete)
+void VaultController::disconnectVault(const QString& vaultFile)
 {
-    const auto place = cloudPlaceOf(vaultFile);
-    if (!place) {
-        return;
-    }
-    if (!alsoDelete || place->kind != googleDriveKind) {
-        disconnectWebDav(vaultFile); // nothing deleted (D-060)
-        return;
-    }
-    // The copy on Google Drive goes to its trash, where the person can still
-    // get it back; this device's copy stays a vault of its own (item 12).
-    // The sign-in is read before Disconnect removes it from the system's store.
-    QPointer<VaultController> self(this);
-    const CloudPlace where = *place;
-    withCloudSecret(where, [self, where, vaultFile](std::optional<QString> secret) {
-        if (!self) {
-            return;
-        }
-        self->disconnectWebDav(vaultFile);
-        if (!secret) {
-            self->say(tr("The vault on Google Drive could not be deleted: sign in to Google Drive first. It was "
-                         "disconnected; delete it there yourself."),
-                      true);
-            return;
-        }
-        CloudStorage* storage = makeCloudStorage(where, *secret).release();
-        if (!storage) {
-            return;
-        }
-        storage->setParent(self);
-        storage->remove(where.fileName, [self, storage, where](const CloudReply& answer) {
-            storage->deleteLater();
-            if (self && !answer.ok() && answer.error != CloudError::NotFound) {
-                self->say(tr("The vault on Google Drive could not be deleted (%1): %2. Delete it there yourself.")
-                              .arg(cloudProblem(googleDriveKind, answer), shownCloudAddress(where)),
-                          true);
-            }
-        });
-    });
+    // Disconnect deletes nothing, on any storage (D-060): the copy in the
+    // remote place and this device's copy both stay, as two vaults.
+    disconnectWebDav(vaultFile);
 }
 
 void VaultController::signInToCloudAgain()

@@ -935,3 +935,17 @@ tests, `test_cloud_sync`, `test_vault_rows` and `test_every_string_translatable`
 
 D-071: a double click on a vault's row does what Open in its menu does, only where Open is offered, never on the
 three dots. Tests: `test_vault_row_accounts` (new case) and `test_vault_rows` pass.
+
+## 27 November 2026: Disconnect deletes nothing, no minimize button, the title, the top bar, Sort By (0.8.119)
+
+Disconnect deletes nothing on any storage: the Google Drive tick box and its delete code are gone, `disconnectVault`
+takes only the vault, the dialog has the owner's three paragraphs with the storage and the vault (D-060, D-080 point
+16). No minimize button: KDE offers minimize on every dialog-type window whatever its flags (checked on X11 with the
+window's allowed actions), never on a utility window; question windows are utility windows on Linux and dialogs
+elsewhere, with only the title and close hints (`Appearance.questionFlags`, D-079 point 7). The main window's title is
+"Chrono Vault <version>" only (D-017). The padlock's left margin makes the two top bar spaces alike as seen (D-074).
+Check for updates above Clear the clipboard. Sort By (D-081): six orders, Ascending and Descending, kept per vault
+with each item's use in the vaults file (`src/ui/item_order.*`), headings by title only, a first key bringing its
+heading to the top with the list's end laid out first so the last row is never cut off. Tests: `test_intuitive_bars`
+and `test_intuitive_sorting` (new, from `test_intuitive.cpp`), `test_pages_second` and `test_menus_second` (new
+halves, OR-11), `test_google_drive`, `test_webdav_windows` and the related tests pass, each under 20 seconds.

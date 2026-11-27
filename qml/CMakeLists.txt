@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# qml/CMakeLists.txt 0.8.115
+# qml/CMakeLists.txt 0.8.119
 
 # --- Version history ----------------------------------------------------
+# v0.8.119: The item list's order and each item's use (D-081)
 # v0.8.115: Google Drive: its storage, the Google client from the build, Qt Network Authorization (D-080)
 # v0.8.114: The cloud storage base, its WebDAV storage and CloudSync (D-080)
 # v0.7.113: The padlock pictures renamed; lock.svg removed
@@ -125,7 +126,10 @@ qt_add_qml_module(chrono_vault_ui
         ../src/ui/item_icons.cpp
         ../src/ui/item_icons.h
         ../src/ui/item_list_model.cpp
+    ../src/ui/item_order.cpp
         ../src/ui/item_list_model.h
+        ../src/ui/item_order.cpp
+        ../src/ui/item_order.h
         ../src/ui/licences.cpp
         ../src/ui/licences.h
         ../src/ui/program_scale.cpp

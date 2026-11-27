@@ -34,9 +34,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_menus.cpp 0.7.111
+// test_menus.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Four tests in test_menus_second, so each binary stays under 20 seconds (OR-11)
 // v0.7.111: The arrows move the selection in the key-in-use window (D-079)
 // v0.6.95: UI scaling to 200%, Options in Tools, Lock vault in File, first sizes and headings (the owner)
 // v0.6.88: The settings' topics in their new order (D-066)
@@ -97,16 +98,19 @@ private slots:
     void cleanupTestCase();
     void init();
     void cleanup();
+#if !defined(CHRONO_VAULT_MENUS_SECOND)
     void the_menus_hold_their_entries_in_order_with_their_shortcuts();
     void the_item_menu_copies_the_chosen_items_fields_and_greys_what_it_lacks();
     void shortcuts_stand_aside_while_a_text_field_is_typed_in();
     void the_view_menu_hides_the_sidebar_and_its_groups_and_shows_counts();
     void clear_clipboard_empties_it_and_the_code_has_a_copy_button();
     void the_sidebar_collapses_to_icons_and_its_groups_fold();
+#else
     void the_sidebar_snaps_shut_and_open_when_its_splitter_is_dragged();
     void every_category_has_edit_and_reset_or_delete_and_a_right_click_menu();
     void after_a_menu_the_content_holds_the_keyboard();
     void keyboard_shortcuts_are_set_on_their_page_and_kept();
+#endif
 
 private:
     // The main window with a vault unlocked, and one item shown.
@@ -225,6 +229,7 @@ QStringList TestMenus::menuEntries(int menu) const
     return entries;
 }
 
+#if !defined(CHRONO_VAULT_MENUS_SECOND)
 void TestMenus::the_menus_hold_their_entries_in_order_with_their_shortcuts()
 {
     QVERIFY(open(QStringLiteral("order")));
@@ -588,6 +593,7 @@ void TestMenus::the_sidebar_collapses_to_icons_and_its_groups_fold()
     QCOMPARE(handles, 2);
 }
 
+#else
 void TestMenus::keyboard_shortcuts_are_set_on_their_page_and_kept()
 {
     QVERIFY(open(QStringLiteral("keys")));
@@ -849,5 +855,6 @@ void TestMenus::every_category_has_edit_and_reset_or_delete_and_a_right_click_me
                 ->findChild<QObject*>(QStringLiteral("categoryMenu_login")));
 }
 
+#endif
 QTEST_MAIN(TestMenus)
 #include "test_menus.moc"

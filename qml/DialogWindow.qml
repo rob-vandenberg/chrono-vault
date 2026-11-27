@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DialogWindow.qml 0.7.111
+// DialogWindow.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: A title and × only, never minimize (D-079)
 // v0.7.111: A question as tall as its text; Enter only on the selected button, shown; Esc on Cancel or Close; Y and N (D-079)
 // v0.6.94: The main window keeps its size, the others scale along (D-070)
 // v0.6.92: Exact sizes (D-069)
@@ -235,7 +236,8 @@ ApplicationWindow {
         return buttonBox.standardButton(button)
     }
 
-    flags: fitsContent ? Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint : Qt.Dialog
+    // A title and ×, never minimize or maximize (D-079).
+    flags: Appearance.questionFlags
     modality: Qt.ApplicationModal
     visible: false
     // The edge around everything, the same as the settings window's.

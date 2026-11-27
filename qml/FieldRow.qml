@@ -19,9 +19,10 @@ import QtQuick
 import QtQuick.Controls
 
 // --- Version ------------------------------------------------------------
-// FieldRow.qml 0.6.100
+// FieldRow.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: A copy or the website opened is a use of the item (D-081)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.86: What the audit says under a password (D-065)
@@ -54,11 +55,16 @@ Item {
 
     HoverHandler { id: hover }
     readonly property string toCopy: kind === "totp" ? code : modelData.value
+    // A field copied is a use of its item (D-081).
+    function copy(text) {
+        VaultController.copyToClipboard(text)
+        VaultController.usedItem(details.itemId)
+    }
     // A double click copies the value, a right click opens the "…" menu
     // (D-062); a link opens with its own click.
     TapHandler {
         acceptedButtons: Qt.LeftButton
-        onDoubleTapped: if (valueText.hoveredLink === "") VaultController.copyToClipboard(row.toCopy)
+        onDoubleTapped: if (valueText.hoveredLink === "") row.copy(row.toCopy)
     }
     TapHandler {
         acceptedButtons: Qt.RightButton
@@ -103,7 +109,11 @@ Item {
         linkColor: details.palette.link
         font.family: row.modelData.sensitive && row.shownPlain ? "Noto Sans Mono" : Appearance.font.family
         wrapMode: Text.Wrap
-        onLinkActivated: function(address) { Qt.openUrlExternally(address) }
+        onLinkActivated: function(address) {
+            Qt.openUrlExternally(address)
+            if (row.kind === "url")
+                VaultController.usedItem(details.itemId) // its website opened (D-081)
+        }
         HoverHandler {
             enabled: valueText.textFormat === Text.RichText
             cursorShape: Qt.PointingHandCursor
@@ -165,7 +175,7 @@ Item {
         anchors.right: ring.left
         anchors.rightMargin: 6 * Appearance.factor
         anchors.verticalCenter: parent.verticalCenter
-        onClicked: VaultController.copyToClipboard(row.code)
+        onClicked: row.copy(row.code)
         ToolTip.visible: hovered
         ToolTip.text: qsTr("Copy")
     }
@@ -215,7 +225,7 @@ Item {
             id: rowMenu
             Action {
                 text: qsTr("Copy")
-                onTriggered: VaultController.copyToClipboard(row.toCopy)
+                onTriggered: row.copy(row.toCopy)
             }
             MenuItem {
                 text: row.revealed ? qsTr("Hide") : qsTr("Show")

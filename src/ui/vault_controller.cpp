@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.7.110
+// vault_controller.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Sort By per vault and each item's use, on this computer (D-081)
 // v0.7.110: A vault that opens without typing is opened before the one shown closes (D-078)
 // v0.7.109: A Closed vault picked in the file picker opens at once
 // v0.7.107: A PIN per vault; the lock as a screen lock (D-076)
@@ -2748,6 +2749,12 @@ QString VaultController::sizeText(qint64 bytes) const
 
 void VaultController::contentsChanged()
 {
+    // Another vault: its own Sort By and uses, kept on this computer (D-081).
+    if (orderVault != path) {
+        orderVault = path;
+        listModel.setOrder(keptOrderOf(path), keptUsesOf(path));
+        emit sortChanged();
+    }
     listModel.setContents(contents);
     ++contentsRevision;
     emit revisionChanged();
@@ -3706,6 +3713,45 @@ void VaultController::retrySave()
     }
 }
 
+void VaultController::setSortBy(int by)
+{
+    if (by < 0 || by >= sortByCount || by == sortBy()) {
+        return;
+    }
+    ItemOrder order = listModel.order();
+    order.by = static_cast<SortBy>(by);
+    keepOrder(order);
+}
+
+void VaultController::setSortDescending(bool descending)
+{
+    if (descending == sortDescending()) {
+        return;
+    }
+    ItemOrder order = listModel.order();
+    order.descending = descending;
+    keepOrder(order);
+}
+
+void VaultController::keepOrder(ItemOrder order)
+{
+    if (orderVault.isEmpty()) {
+        return; // no vault open: nothing to sort
+    }
+    keepOrderOf(orderVault, order);
+    listModel.setOrder(order, keptUsesOf(orderVault));
+    emit sortChanged();
+}
+
+void VaultController::usedItem(const QString& itemId)
+{
+    const QUuid id = QUuid::fromString(itemId);
+    if (orderVault.isEmpty() || id.isNull() || currentState != State::Unlocked) {
+        return;
+    }
+    listModel.setUse(id, keepUseOf(orderVault, id, QDateTime::currentDateTimeUtc()));
+}
+
 void VaultController::copyToClipboard(const QString& text)
 {
     QClipboard* clipboard = QGuiApplication::clipboard();
@@ -4236,6 +4282,7 @@ void VaultController::forgetUnlockedVault()
     ++vaultSession;
     forgetAudit();
     listModel.clear();
+    orderVault.clear();
     if (!search.isEmpty()) {
         search.clear();
         emit searchTextChanged();

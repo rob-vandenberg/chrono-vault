@@ -52,9 +52,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.h 0.8.117
+// vault_controller.h 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Disconnect deletes nothing on any storage (D-060); Sort By per vault and each item's use (D-081)
 // v0.8.117: googleAccount: the Google Drive window's account, kept with new places (D-080 point 20)
 // v0.8.116: googleToken holds only the Google Drive window's sign-in (D-080 point 13)
 // v0.8.115: Google Drive: sign in, its folders, create, open, move, disconnect; one create, open and move for all (D-080)
@@ -136,6 +137,11 @@ class VaultController : public QObject
     Q_PROPERTY(bool usesKeyfile READ usesKeyfile NOTIFY stateChanged)
     Q_PROPERTY(ItemListModel* items READ items CONSTANT)
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
+    // Sort By (D-081): what the list is sorted by, in the menu's order from
+    // Title (0) to Frequently Used (5), and which way; kept per vault on this
+    // computer.
+    Q_PROPERTY(int sortBy READ sortBy WRITE setSortBy NOTIFY sortChanged)
+    Q_PROPERTY(bool sortDescending READ sortDescending WRITE setSortDescending NOTIFY sortChanged)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockMinutesChanged)
@@ -267,6 +273,10 @@ public:
     [[nodiscard]] ItemListModel* items() { return &listModel; }
     [[nodiscard]] QString searchText() const { return search; }
     void setSearchText(const QString& text);
+    [[nodiscard]] int sortBy() const { return static_cast<int>(listModel.order().by); }
+    void setSortBy(int by);
+    [[nodiscard]] bool sortDescending() const { return listModel.order().descending; }
+    void setSortDescending(bool descending);
     // What the list is narrowed to: "" (Home), "favourites", "category:<id>"
     // or "tag:<tag>" (D-027, D-028).
     [[nodiscard]] QString filter() const { return chosenFilter; }
@@ -649,9 +659,9 @@ public:
                                             const QUrl& keyfile = QUrl(), bool savePassword = false);
     Q_INVOKABLE void openGoogleDriveVault(const QString& fileName);
     Q_INVOKABLE void moveVaultToGoogleDrive(const QString& vaultFile);
-    // Disconnect…, and with alsoDelete the vault on Google Drive goes to its
-    // trash; this device's copy stays a vault of its own.
-    Q_INVOKABLE void disconnectVault(const QString& vaultFile, bool alsoDelete);
+    // Disconnect… deletes nothing: the remote copy and this device's copy stay
+    // two vaults of their own (D-060).
+    Q_INVOKABLE void disconnectVault(const QString& vaultFile);
     Q_INVOKABLE void signInToCloudAgain();
     // Tests: the address the browser would open goes here.
     void setGoogleBrowserForTests(std::function<void(const QUrl&)> open) { googleBrowserForTests = std::move(open); }
@@ -734,6 +744,9 @@ public:
     // Copies text, marked as secret for clipboard history tools, and clears
     // it again after the chosen number of seconds (D-007).
     Q_INVOKABLE void copyToClipboard(const QString& text);
+    // An item used: a field of it copied, its website opened, auto-type; kept
+    // on this computer only, for Recently Used and Frequently Used (D-081).
+    Q_INVOKABLE void usedItem(const QString& itemId);
     // Tools > Clear Clipboard: empties it at once, whatever is on it (D-039).
     Q_INVOKABLE void clearClipboard();
     // The keyboard shortcuts, each action's keys as the person set them, or
@@ -770,6 +783,7 @@ signals:
     void vaultPathChanged();
     void messageChanged();
     void searchTextChanged();
+    void sortChanged();
     void filterChanged();
     void revisionChanged();
     // A file the person added is read (ok) or not; the id is readAttachment's.
@@ -1142,6 +1156,9 @@ private:
     VaultKey key;
     crypto::KdfParameters kdfParameters;
     ItemListModel listModel;
+    // The vault whose Sort By and uses the list has (D-081).
+    QString orderVault;
+    void keepOrder(ItemOrder order);
 
     QThreadPool savePool;    // one thread, so saves happen in order
     QThreadPool unlockPool;  // deriving keys

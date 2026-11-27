@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// ItemDetails.qml 0.6.100
+// ItemDetails.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: A copy from a field's history is a use of the item (D-081)
 // v0.6.100: Padlocks and Open in Settings > Vaults; round picture buttons (D-071)
 // v0.6.92: Exact sizes (D-069)
 // v0.6.86: What the audit says under a password (D-065)
@@ -468,7 +469,10 @@ Item {
                     }
                     Button {
                         text: qsTr("Copy")
-                        onClicked: VaultController.copyToClipboard(modelData.value)
+                        onClicked: {
+                            VaultController.copyToClipboard(modelData.value)
+                            VaultController.usedItem(itemDetails.itemId) // a use (D-081)
+                        }
                     }
                 }
             }

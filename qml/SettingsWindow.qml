@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.118
+// SettingsWindow.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Disconnect deletes nothing, its new text (D-060); no minimize button (D-079); Check for updates above the clipboard
 // v0.8.118: A double click on a vault's row opens it, as Open in its menu (D-071)
 // v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
 // v0.8.115: Any storage in the vault lines and Disconnect; Move to Google Drive; Also delete the vault on Google Drive (D-080)
@@ -764,10 +765,22 @@ ApplicationWindow {
                             leftPadding: 28 * Appearance.factor
                             Layout.fillWidth: true
                         }
-                        // One line; 0 shows as "Never" (D-049).
+                        // Above the clipboard's line (the owner, 0.8.119).
                         ExactRow {
                             // As far apart as the tick boxes, this line and the next (the owner).
                             Layout.topMargin: 9 * Appearance.factor
+                            Label { text: qsTr("Check for updates") }
+                            ComboBox {
+                                id: frequencyBox
+                                objectName: "checkFrequencyBox"
+                                model: [qsTr("Daily"), qsTr("Weekly"), qsTr("Monthly"), qsTr("Never")]
+                                currentIndex: settingsWindow.checkFrequency
+                                onActivated: function(index) { settingsWindow.checkFrequency = index }
+                            }
+                        }
+                        // One line; 0 shows as "Never" (D-049).
+                        ExactRow {
+                            Layout.topMargin: 5 * Appearance.factor
                             Label { text: qsTr("Clear the clipboard after") }
                             SpinBox {
                                 objectName: "clipboardBox"
@@ -791,17 +804,6 @@ ApplicationWindow {
                                 onValueModified: settingsWindow.clipboardClearSeconds = value
                             }
                             Label { text: qsTr("seconds") }
-                        }
-                        ExactRow {
-                            Layout.topMargin: 5 * Appearance.factor
-                            Label { text: qsTr("Check for updates") }
-                            ComboBox {
-                                id: frequencyBox
-                                objectName: "checkFrequencyBox"
-                                model: [qsTr("Daily"), qsTr("Weekly"), qsTr("Monthly"), qsTr("Never")]
-                                currentIndex: settingsWindow.checkFrequency
-                                onActivated: function(index) { settingsWindow.checkFrequency = index }
-                            }
                         }
                         Label {
                             visible: !VaultController.trayAvailable
@@ -1258,9 +1260,6 @@ ApplicationWindow {
                                                 onTriggered: {
                                                     disconnectWindow.vaultFile = vaultRow.modelData
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
-                                                    disconnectWindow.kind = vaultRow.place.kind || ""
-                                                    if (alsoDelete.item)
-                                                        alsoDelete.item.checked = false
                                                     disconnectWindow.open()
                                                 }
                                             }
@@ -1523,37 +1522,24 @@ ApplicationWindow {
                             transientParent: settingsWindow
                             property string vaultFile: ""
                             property string storageName: ""
-                            property string kind: ""
                             title: qsTr("Disconnect from %1").arg(storageName)
                             standardButtons: Dialog.Cancel
                             rightButtons: Button {
                                 objectName: "disconnectButton"
                                 text: qsTr("Disconnect")
                                 onClicked: {
-                                    VaultController.disconnectVault(disconnectWindow.vaultFile,
-                                                                    disconnectWindow.kind === "googledrive" && alsoDelete.item !== null
-                                                                    && alsoDelete.item.checked)
+                                    VaultController.disconnectVault(disconnectWindow.vaultFile)
                                     disconnectWindow.accept()
                                 }
                             }
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
-                                text: qsTr("Chrono Vault keeps a local copy of every vault that is stored in a remote location, so you can keep working when you are offline. Changes are synced automatically once your connection is restored.") + "\n"
-                                      + qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault. This action cannot be undone.") + "\n"
-                                      + qsTr("Are you sure you want to disconnect “%1” from the remote vault?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
+                                // Three paragraphs; Disconnect deletes nothing, on any storage (D-060).
+                                text: qsTr("Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.").arg(disconnectWindow.storageName) + "\n"
+                                      + qsTr("Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault.") + "\n"
+                                      + qsTr("This action cannot be undone. Are you sure you want to disconnect from “%1”?").arg(VaultController.vaultNameOf(disconnectWindow.vaultFile))
                                 wrapMode: Text.Wrap
-                            }
-                            // Google Drive only, off unless ticked (D-080): the copy there goes to
-                            // Drive's trash. A WebDAV vault's Disconnect deletes nothing (D-060), so
-                            // there the box is not there at all.
-                            Loader {
-                                id: alsoDelete
-                                active: disconnectWindow.kind === "googledrive"
-                                sourceComponent: CheckBox {
-                                    objectName: "alsoDeleteBox"
-                                    text: qsTr("Also delete the vault on Google Drive")
-                                }
                             }
                         }
                     }
@@ -1652,7 +1638,7 @@ ApplicationWindow {
             font: Appearance.font
             Component.onCompleted: Appearance.dress(this)
             transientParent: settingsWindow
-            flags: Qt.Dialog
+            flags: Appearance.questionFlags // a title and ×, nothing else (D-079)
             modality: Qt.ApplicationModal
             visible: false
             title: qsTr("Press the new key")
@@ -1730,7 +1716,7 @@ ApplicationWindow {
             font: Appearance.font
             Component.onCompleted: Appearance.dress(this)
             transientParent: settingsWindow
-            flags: Qt.Dialog
+            flags: Appearance.questionFlags // a title and ×, nothing else (D-079)
             modality: Qt.ApplicationModal
             visible: false
             title: qsTr("Keyboard shortcuts")

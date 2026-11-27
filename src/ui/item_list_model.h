@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "item_order.h"
 #include "vault_contents.h"
 
 #include <QAbstractListModel>
@@ -25,9 +26,10 @@
 #include <QtQml/qqmlregistration.h>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.h 0.6.86
+// item_list_model.h 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Sorted by what Sort By says; headings only by title (D-081)
 // v0.6.86: The lists of the audit (D-065)
 // v0.5.82: rowStartingWith (D-062)
 // v0.2.45: The mark of an item a merge left a note on (D-054)
@@ -41,13 +43,15 @@
 namespace chrono_vault {
 
 // The items of the unlocked vault as the list in the middle shows them:
-// sorted by title, narrowed by what is chosen on the left (everything, the
+// sorted as Sort By says (D-081), narrowed by what is chosen on the left (everything, the
 // favourites, a category or a tag) and by the search text.
 class ItemListModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("The controller owns the list")
+    // Group headings: by title only, and the groups of the "reused" audit (D-081, D-065).
+    Q_PROPERTY(bool headings READ headings NOTIFY headingsChanged)
 
 public:
     enum Role { IdRole = Qt::UserRole + 1, TitleRole, SubtitleRole, IsNoteRole, IconRole, InitialRole, FavouriteRole, MergedRole };
@@ -69,6 +73,11 @@ public:
     // each item (D-065); only a list of the audit shown now is made again.
     void setAudit(const QHash<QString, QSet<QUuid>>& lists, const QHash<QUuid, int>& groups);
     void setWebsiteIcons(const QHash<QString, QString>& icons);
+    // The order, and each item's use for the two orders by use (D-081).
+    void setOrder(ItemOrder order, const QHash<QUuid, ItemUse>& uses);
+    void setUse(const QUuid& item, const ItemUse& use);
+    [[nodiscard]] ItemOrder order() const { return sorting; }
+    [[nodiscard]] bool headings() const;
     void clear();
 
     // The row of the item with this id, or -1.
@@ -82,6 +91,12 @@ public:
     // "favourites", "category:<id>", "tag:<tag>", "archive", "trash"),
     // whatever the search (D-039).
     [[nodiscard]] Q_INVOKABLE int countOf(const QString& filter) const;
+    // The first row under the heading of this letter, or under the next
+    // heading after it; "#" for a digit (D-081). -1 when none comes after.
+    [[nodiscard]] Q_INVOKABLE int headingRowOf(const QString& letter) const;
+
+signals:
+    void headingsChanged();
 
 private:
     void rebuild();
@@ -95,6 +110,8 @@ private:
     QHash<QString, QString> websiteIcons;
     QHash<QString, QSet<QUuid>> auditLists;
     QHash<QUuid, int> auditGroups;
+    ItemOrder sorting;
+    QHash<QUuid, ItemUse> itemUses;
 };
 
 } // namespace chrono_vault

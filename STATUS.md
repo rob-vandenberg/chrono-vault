@@ -2,6 +2,12 @@
 
 ## Now
 
+**Version 0.8.119**: Disconnect deletes nothing on any storage, with the owner's new text (D-060, D-080 point 16); no
+minimize button on any window that asks an answer (D-079 point 7); the main window's title is "Chrono Vault" and the
+version only (D-017); the top bar's two spaces alike (D-074); Check for updates above Clear the clipboard in Settings >
+General; Sort By with six orders either way, kept per vault, headings by title only, and a key bringing its heading to
+the top (D-081). Auto-type, which would count as a use, does not exist yet.
+
 **Version 0.8.118**: a double click on a vault's row in Settings > Vaults opens it, as Open in its menu (D-071).
 
 **Version 0.8.117**: a cloud vault's row shows its account, "Google Drive: <email>" or "WebDAV: <user> on <server>",

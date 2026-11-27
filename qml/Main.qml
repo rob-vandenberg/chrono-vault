@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// Main.qml 0.8.115
+// Main.qml 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: The title is Chrono Vault and its version only (D-017); the top bar's two spaces alike (D-074); a copy or the website opened is a use (D-081)
 // v0.8.115: Sync Now for any storage; the Google sign-in renewed (D-080)
 // v0.7.113: The lock button shows the solid padlock; lock and gear pictures 24 by 24
 // v0.7.111: Question dialogs fit their text (D-079)
@@ -85,9 +86,8 @@ ApplicationWindow {
     // Shown by the program as it starts: normally, minimized, or not at all
     // when "Start Chrono Vault minimized" keeps it in the tray (D-019).
     visible: false
-    title: VaultController.state === VaultController.Unlocked
-           ? qsTr("%1 – Chrono Vault %2").arg(VaultController.vaultName).arg(VaultController.version)
-           : qsTr("Chrono Vault %1").arg(VaultController.version)
+    // The program and its version, nothing else, also with a vault open (the owner, D-017).
+    title: qsTr("Chrono Vault %1").arg(VaultController.version)
 
     readonly property bool busy: VaultController.state === VaultController.Busy
 
@@ -259,6 +259,11 @@ ApplicationWindow {
         const address = given.trim()
         return /^[a-z][a-z0-9+.-]*:\/\//i.test(address) || /^(mailto|tel):/i.test(address)
                ? address : "https://" + address
+    }
+    // A field of the chosen item copied: a use of it (D-081).
+    function copyOfItem(text) {
+        VaultController.copyToClipboard(text)
+        VaultController.usedItem(vaultPage.chosenItemId)
     }
     function launch(address) {
         Qt.openUrlExternally(addressToOpen(address))
@@ -548,7 +553,7 @@ ApplicationWindow {
                         objectName: "copyUsernameAction"
                         text: qsTr("Copy Username")
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("username") !== ""
-                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("username"))
+                        onTriggered: mainWindow.copyOfItem(mainWindow.fieldValue("username"))
                     }
                     Action {
                         id: action_copyEmail
@@ -557,7 +562,7 @@ ApplicationWindow {
                         objectName: "copyEmailAction"
                         text: qsTr("Copy E-mail")
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("email") !== ""
-                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("email"))
+                        onTriggered: mainWindow.copyOfItem(mainWindow.fieldValue("email"))
                     }
                     Action {
                         id: action_copyPassword
@@ -566,7 +571,7 @@ ApplicationWindow {
                         objectName: "copyPasswordAction"
                         text: qsTr("Copy Password")
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("password") !== ""
-                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("password"))
+                        onTriggered: mainWindow.copyOfItem(mainWindow.fieldValue("password"))
                     }
                     Action {
                         id: action_showPasswords
@@ -585,7 +590,7 @@ ApplicationWindow {
                         objectName: "copyUrlAction"
                         text: qsTr("Copy URL")
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
-                        onTriggered: VaultController.copyToClipboard(mainWindow.fieldValue("url"))
+                        onTriggered: mainWindow.copyOfItem(mainWindow.fieldValue("url"))
                     }
                     Action {
                         id: action_copyOtp
@@ -596,7 +601,7 @@ ApplicationWindow {
                         // Greyed too when the secret makes no code (a damaged import).
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("totp") !== ""
                                  && VaultController.oneTimeCode(mainWindow.fieldValue("totp")) !== ""
-                        onTriggered: VaultController.copyToClipboard(VaultController.oneTimeCode(mainWindow.fieldValue("totp")))
+                        onTriggered: mainWindow.copyOfItem(VaultController.oneTimeCode(mainWindow.fieldValue("totp")))
                     }
                     Action {
                         id: action_launchUrl
@@ -605,7 +610,10 @@ ApplicationWindow {
                         objectName: "launchUrlAction"
                         text: qsTr("Launch URL")
                         enabled: mainWindow.itemFree && mainWindow.fieldValue("url") !== ""
-                        onTriggered: mainWindow.launch(mainWindow.fieldValue("url"))
+                        onTriggered: {
+                            mainWindow.launch(mainWindow.fieldValue("url"))
+                            VaultController.usedItem(vaultPage.chosenItemId) // its website opened (D-081)
+                        }
                     }
                 }
                 MainMenu {
@@ -750,6 +758,13 @@ ApplicationWindow {
             }
             PictureButton {
                 objectName: "lockButton"
+                // The space from Generate Password to the padlock as seen equals
+                // the space from the padlock to the gear as seen (the owner,
+                // D-074): the padlock fills 4 to 20 of its 24 on both sides, so
+                // what differs is the gear's empty edge in its circle: the
+                // circle's room around the picture and the gear's own edge,
+                // 3.3 of 24 less half its 1.8 line.
+                Layout.leftMargin: (32 * Appearance.factor - icon.width) / 2 + 2.4 * icon.width / 24
                 icon.width: Math.round(24 * UiScale.factor) // the top bar's two pictures (the owner)
                 icon.height: Math.round(24 * UiScale.factor)
                 icon.source: "qrc:/icons/padlock-locked.svg"

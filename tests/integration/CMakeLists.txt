@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.8.117
+# tests/integration/CMakeLists.txt 0.8.119
 
 # --- Version history ----------------------------------------------------
+# v0.8.119: test_intuitive_bars (D-079), test_intuitive_sorting (D-081), test_pages_second, test_menus_second (OR-11)
 # v0.8.117: test_vault_row_accounts (D-080)
 # v0.8.115: test_google_drive and its interruptions (D-080)
 # v0.6.100: test_vault_rows (D-071)
@@ -74,6 +75,20 @@ target_link_libraries(test_intuitive PRIVATE chrono_vault_ui chrono_vault_uiplug
 chrono_vault_strict_warnings(test_intuitive)
 chrono_vault_add_test(test_intuitive)
 
+# The title bars, the top bar and Settings' order, apart so each stays under 20 seconds (OR-11).
+qt_add_executable(test_intuitive_bars test_intuitive.cpp intuitive_fixture.h)
+target_compile_definitions(test_intuitive_bars PRIVATE CHRONO_VAULT_INTUITIVE_BARS)
+target_link_libraries(test_intuitive_bars PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_intuitive_bars)
+chrono_vault_add_test(test_intuitive_bars)
+
+# Sort By and the letter keys, apart so each stays under 20 seconds (OR-11).
+qt_add_executable(test_intuitive_sorting test_intuitive.cpp intuitive_fixture.h)
+target_compile_definitions(test_intuitive_sorting PRIVATE CHRONO_VAULT_INTUITIVE_SORTING)
+target_link_libraries(test_intuitive_sorting PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_intuitive_sorting)
+chrono_vault_add_test(test_intuitive_sorting)
+
 qt_add_executable(test_selecting test_selecting.cpp intuitive_fixture.h)
 target_link_libraries(test_selecting PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_selecting)
@@ -110,6 +125,13 @@ qt_add_executable(test_pages test_pages.cpp)
 target_link_libraries(test_pages PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_pages)
 chrono_vault_add_test(test_pages)
+
+# Its second half, apart so each stays under 20 seconds (OR-11).
+qt_add_executable(test_pages_second test_pages.cpp)
+target_compile_definitions(test_pages_second PRIVATE CHRONO_VAULT_PAGES_SECOND)
+target_link_libraries(test_pages_second PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_pages_second)
+chrono_vault_add_test(test_pages_second)
 
 qt_add_executable(test_tray test_tray.cpp)
 target_link_libraries(test_tray PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::Test)
@@ -180,6 +202,13 @@ qt_add_executable(test_menus test_menus.cpp)
 target_link_libraries(test_menus PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_menus)
 chrono_vault_add_test(test_menus)
+
+# Its second half, apart so each stays under 20 seconds (OR-11).
+qt_add_executable(test_menus_second test_menus.cpp)
+target_compile_definitions(test_menus_second PRIVATE CHRONO_VAULT_MENUS_SECOND)
+target_link_libraries(test_menus_second PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_menus_second)
+chrono_vault_add_test(test_menus_second)
 
 qt_add_executable(test_autolock test_autolock.cpp)
 target_link_libraries(test_autolock PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)

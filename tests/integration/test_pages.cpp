@@ -35,9 +35,10 @@
 #include <QSignalSpy>
 
 // --- Version ------------------------------------------------------------
-// test_pages.cpp 0.6.88
+// test_pages.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Four tests in test_pages_second, so each binary stays under 20 seconds (OR-11)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.5.82: Move to Trash asked first (D-062)
 // v0.3.67: A change kept through a lock is asked about before another vault
@@ -110,15 +111,18 @@ class TestPages : public QObject
 private slots:
     void initTestCase();
     void cleanupTestCase();
+#if !defined(CHRONO_VAULT_PAGES_SECOND)
     void a_login_made_in_the_editor_is_saved_without_qml_errors();
     void the_main_window_has_one_bar_and_three_columns();
     void a_quit_for_an_update_waits_for_the_editor_and_goes_on();
     void unsaved_changes_are_asked_about_and_kept_through_a_lock();
     void categories_tags_favourites_and_templates_work_from_the_windows();
+#else
     void a_file_still_being_read_is_never_lost_by_leaving_the_editor();
     void vaults_are_chosen_and_the_master_password_changed_from_the_windows();
     void new_item_shows_when_it_has_the_keyboard_focus();
     void a_change_kept_through_a_lock_is_asked_about_before_another_vault();
+#endif
 };
 
 void TestPages::initTestCase()
@@ -140,6 +144,7 @@ void TestPages::cleanupTestCase()
     QFile::remove(VaultsFile().fileName());
 }
 
+#if !defined(CHRONO_VAULT_PAGES_SECOND)
 void TestPages::a_login_made_in_the_editor_is_saved_without_qml_errors()
 {
     QTemporaryDir folder;
@@ -492,6 +497,7 @@ void TestPages::categories_tags_favourites_and_templates_work_from_the_windows()
     QVERIFY2(qmlWarnings.isEmpty(), qPrintable(warningText));
 }
 
+#else
 void TestPages::a_file_still_being_read_is_never_lost_by_leaving_the_editor()
 {
     QTemporaryDir folder;
@@ -745,5 +751,6 @@ void TestPages::a_change_kept_through_a_lock_is_asked_about_before_another_vault
 #endif
 }
 
+#endif
 QTEST_MAIN(TestPages)
 #include "test_pages.moc"

@@ -33,9 +33,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_webdav_windows.cpp 0.6.106
+// test_webdav_windows.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: The Disconnect dialog names the storage and the vault (D-060)
 // v0.6.106: Close and Lock per vault (D-075)
 // v0.6.88: The settings' topics in their new order (D-066)
 // v0.3.67: A refused New folder and a cancelled Browse… keep Back and the choice right
@@ -317,6 +318,12 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(disconnectWindow);
     QTRY_VERIFY(disconnectWindow->property("visible").toBool());
     QVERIFY(!settings->findChild<QObject*>(QStringLiteral("alsoDeleteBox")));
+    // The storage and the vault are named; nothing is deleted (D-060).
+    const QString said = inWindow(disconnectWindow, QStringLiteral("dialogText"))->property("text").toString();
+    QVERIFY2(said.contains(QStringLiteral("stored in a remote location, like WebDAV, so you")), qPrintable(said));
+    QVERIFY2(said.contains(QStringLiteral("nothing is deleted")), qPrintable(said));
+    QVERIFY2(said.endsWith(QStringLiteral("This action cannot be undone. Are you sure you want to disconnect from “Home”?")),
+             qPrintable(said));
     click(inWindow(disconnectWindow, QStringLiteral("disconnectButton")));
     QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);
     QTRY_VERIFY(!disconnectWindow->property("visible").toBool());

@@ -33,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// appearance.cpp 0.6.92
+// appearance.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: questionFlags: a utility window on Linux, where KDE minimizes every dialog (D-079)
 // v0.6.92: The font at 100% for the windows (D-069)
 // v0.5.82: focusWindow (D-062)
 // v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
@@ -70,6 +71,18 @@ int keptScale()
 }
 
 } // namespace
+
+int Appearance::questionFlags()
+{
+    const Qt::WindowFlags titleAndClose = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint;
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    // KDE's window manager offers minimize on every dialog window, whatever
+    // the flags ask; a utility window it never minimizes (D-079).
+    return static_cast<int>(Qt::Tool | titleAndClose);
+#else
+    return static_cast<int>(Qt::Dialog | titleAndClose);
+#endif
+}
 
 Appearance::Appearance(QObject* parent) : QObject(parent)
 {

@@ -89,3 +89,4 @@ a password is used, translations, the order of the platforms, how releases are b
 | [D-078](decisions/D-078.md) | Another vault opens without anything in between; never a page that needs nothing |
 | [D-079](decisions/D-079.md) | Question dialogs fit their text; Enter on the selected button, Esc on Cancel, Y and N; where a vault is kept |
 | [D-080](decisions/D-080.md) | One cloud storage base class with a class per storage, one sync for all; Google Drive with `drive.file` |
+| [D-081](decisions/D-081.md) | Sort By: six orders either way, kept per vault; headings by title only; a key brings its heading to the top |

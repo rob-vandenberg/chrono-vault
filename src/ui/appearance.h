@@ -26,9 +26,10 @@
 class QEvent;
 
 // --- Version ------------------------------------------------------------
-// appearance.h 0.5.82
+// appearance.h 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: questionFlags: a title and close only on every window that asks (D-079)
 // v0.5.82: focusWindow (D-062)
 // v0.2.47: pointerIn: where the pointer is, for the sidebar snap (the owner)
 // v0.0.13: The size of a window's title bar and frame
@@ -68,6 +69,9 @@ class Appearance : public QObject
     // The one window that has the keyboard. A window's own "active" is also
     // true while a dialog of its has the keyboard (D-062).
     Q_PROPERTY(QObject* focusWindow READ focusWindow NOTIFY focusWindowChanged)
+    // The window flags of every window that asks an answer: a title and a
+    // close button, never minimize or maximize (D-079).
+    Q_PROPERTY(int questionFlags READ questionFlags CONSTANT)
 
 public:
     explicit Appearance(QObject* parent = nullptr);
@@ -84,6 +88,7 @@ public:
     [[nodiscard]] static double factor();
     [[nodiscard]] static QFont font();
     [[nodiscard]] static QObject* focusWindow();
+    [[nodiscard]] static int questionFlags();
 
     // Shows a theme and a scale at once, without keeping them.
     Q_INVOKABLE void show(int theme, int scale);

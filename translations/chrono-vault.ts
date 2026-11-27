@@ -255,7 +255,7 @@
 <context>
     <name>CloudStorage</name>
     <message>
-        <location filename="../src/ui/cloud_storage.cpp" line="+211"/>
+        <location filename="../src/ui/cloud_storage.cpp" line="+212"/>
         <source>%1 on %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -665,7 +665,7 @@
 <context>
     <name>FieldRow</name>
     <message>
-        <location filename="../qml/FieldRow.qml" line="+170"/>
+        <location filename="../qml/FieldRow.qml" line="+179"/>
         <location line="+47"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
@@ -1656,7 +1656,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+257"/>
+        <location line="+260"/>
         <source>Save the attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1956,16 +1956,11 @@
     <name>Main</name>
     <message>
         <location filename="../qml/Main.qml" line="+89"/>
-        <source>%1 – Chrono Vault %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
         <source>Chrono Vault %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+224"/>
+        <location line="+229"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1990,7 +1985,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+88"/>
+        <location line="+91"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2011,17 +2006,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+21"/>
         <source>Lock the vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-622"/>
+        <location line="-637"/>
         <source>Collapse or expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+181"/>
+        <location line="+186"/>
         <source>New vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2162,7 +2157,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+618"/>
+        <location line="+628"/>
         <source>Enter the password of the WebDAV server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2192,12 +2187,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-909"/>
+        <location line="-919"/>
         <source>Lock vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+283"/>
+        <location line="+286"/>
         <source>Sync Now</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2213,12 +2208,12 @@
     </message>
     <message>
         <location line="+16"/>
-        <location line="+120"/>
+        <location line="+127"/>
         <source>Options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-109"/>
+        <location line="-116"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2238,7 +2233,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+185"/>
+        <location line="+192"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2464,7 +2459,7 @@
 <context>
     <name>SettingsWindow</name>
     <message>
-        <location filename="../qml/SettingsWindow.qml" line="+342"/>
+        <location filename="../qml/SettingsWindow.qml" line="+344"/>
         <location line="+372"/>
         <source>%1%</source>
         <translation type="unfinished"></translation>
@@ -2476,12 +2471,12 @@
     </message>
     <message>
         <location line="+178"/>
-        <location line="+247"/>
+        <location line="+248"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-247"/>
+        <location line="-248"/>
         <location line="+64"/>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -2523,18 +2518,18 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1151"/>
+        <location line="+1148"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1152"/>
-        <location line="+441"/>
+        <location line="-1149"/>
+        <location line="+442"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-284"/>
+        <location line="-285"/>
         <source>Start Chrono Vault minimized</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2544,7 +2539,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+29"/>
         <source>Check for updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2564,16 +2559,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-21"/>
+        <location line="+0"/>
+        <location line="+17"/>
         <location line="+3"/>
         <location line="+6"/>
-        <location line="+12"/>
-        <location line="+44"/>
+        <location line="+45"/>
         <source>Never</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-356"/>
+        <location line="-357"/>
         <source>Chrono Vault - Settings</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2593,7 +2588,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+235"/>
+        <location line="+236"/>
         <source>This desktop has no system tray, so closing the window ends Chrono Vault.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2633,17 +2628,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+97"/>
+        <location line="+108"/>
         <source>Primary vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+56"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-37"/>
+        <location line="-38"/>
         <source>This computer: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2653,7 +2648,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+35"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2684,12 +2679,12 @@
     </message>
     <message>
         <location line="+9"/>
-        <location line="+133"/>
+        <location line="+130"/>
         <source>Make primary vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-102"/>
+        <location line="-99"/>
         <source>Import…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2704,7 +2699,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+92"/>
+        <location line="+89"/>
         <source>Make primary</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2749,32 +2744,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+16"/>
         <source>Disconnect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
-        <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, so you can keep working when you are offline. Changes are synced automatically once your connection is restored.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault. This action cannot be undone.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Are you sure you want to disconnect “%1” from the remote vault?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>Also delete the vault on Google Drive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+103"/>
+        <location line="+115"/>
         <source>Press the new key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2789,7 +2764,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-885"/>
+        <location line="-881"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2809,7 +2784,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-74"/>
+        <location line="-63"/>
         <source>Clear the clipboard after</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2819,7 +2794,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+110"/>
+        <location line="+99"/>
         <source>System sleeps</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2860,7 +2835,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-219"/>
+        <location line="-220"/>
         <source>Show subtitles in the item list</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2875,7 +2850,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+805"/>
+        <location line="+802"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2890,7 +2865,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-477"/>
+        <location line="-462"/>
         <source>Not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2900,7 +2875,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+29"/>
         <source>Vault menu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2920,7 +2895,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+192"/>
         <source>Where should the vault be moved to?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2950,12 +2925,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+25"/>
         <source>Disconnect from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+285"/>
+        <location line="+14"/>
+        <source>Chrono Vault keeps a local copy of every vault that is stored in a remote location, like %1, so you can keep working while you are offline. Changes are synced automatically once your connection is restored.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Disconnecting from the remote vault makes the local copy a separate individual vault. Both vaults continue to exist and nothing is deleted, but changes in one vault are no longer synced with the other vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This action cannot be undone. Are you sure you want to disconnect from “%1”?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+257"/>
         <source>This key has already been assigned</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2980,16 +2970,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1450"/>
-        <location line="+929"/>
-        <location line="+460"/>
+        <location line="-1447"/>
+        <location line="+939"/>
+        <location line="+447"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1456"/>
-        <location line="+1277"/>
+        <location line="-1453"/>
+        <location line="+1274"/>
         <location line="+118"/>
         <location line="+71"/>
         <source>Cancel</source>
@@ -2999,7 +2989,7 @@
 <context>
     <name>StorageWindow</name>
     <message>
-        <location filename="../qml/StorageWindow.qml" line="+62"/>
+        <location filename="../qml/StorageWindow.qml" line="+63"/>
         <source>Open a vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3635,7 +3625,7 @@
 <context>
     <name>VaultController</name>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+253"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+254"/>
         <source>Field</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3813,7 +3803,7 @@
     </message>
     <message numerus="yes">
         <location line="-391"/>
-        <location line="+661"/>
+        <location line="+699"/>
         <location line="+12"/>
         <source>%n item(s)</source>
         <translation type="unfinished">
@@ -3821,18 +3811,18 @@
         </translation>
     </message>
     <message>
-        <location line="-672"/>
+        <location line="-710"/>
         <source>“%1”</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+48"/>
-        <location line="+612"/>
+        <location line="+650"/>
         <source>Restore %1?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-597"/>
+        <location line="-635"/>
         <source>Archive %1?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3918,12 +3908,12 @@
     </message>
     <message>
         <location line="+8"/>
-        <location line="+366"/>
+        <location line="+420"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-355"/>
+        <location line="-409"/>
         <source>Trash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3938,13 +3928,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+5"/>
         <location line="+6"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+0"/>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Created Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Modified Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Recently Used</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Frequently Used</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>Ascending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Descending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
         <source>Restore all</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3954,7 +3978,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+263"/>
+        <location line="+279"/>
         <source>Remove from Favorites</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4014,7 +4038,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-730"/>
+        <location line="-784"/>
         <source>Expand the sidebar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4120,7 +4144,7 @@
 <context>
     <name>WebDavSync</name>
     <message>
-        <location filename="../src/ui/cloud_sync.cpp" line="+114"/>
+        <location filename="../src/ui/cloud_sync.cpp" line="+115"/>
         <source>Google Drive cannot be reached</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4466,7 +4490,7 @@
 <context>
     <name>chrono_vault::GoogleSignIn</name>
     <message>
-        <location filename="../src/ui/google_drive_storage.cpp" line="+901"/>
+        <location filename="../src/ui/google_drive_storage.cpp" line="+902"/>
         <source>Chrono Vault cannot wait for Google&apos;s answer on this computer.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4504,7 +4528,7 @@
 <context>
     <name>chrono_vault::ItemListModel</name>
     <message numerus="yes">
-        <location filename="../src/ui/item_list_model.cpp" line="+101"/>
+        <location filename="../src/ui/item_list_model.cpp" line="+120"/>
         <source>%1. The same password in %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4699,26 +4723,26 @@
     </message>
     <message>
         <location line="+4"/>
-        <location line="+2692"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+544"/>
+        <location line="+2698"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+545"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2688"/>
-        <location line="+2693"/>
+        <location line="-2694"/>
+        <location line="+2699"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+4"/>
         <source>The two passwords are not the same.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2596"/>
-        <location line="+2560"/>
+        <location line="-2602"/>
+        <location line="+2566"/>
         <source>A file with that name already exists. Choose another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2649"/>
+        <location line="-2655"/>
         <source>Creating the vault…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4730,7 +4754,7 @@
     <message>
         <location line="+37"/>
         <location line="+130"/>
-        <location line="+2121"/>
+        <location line="+2127"/>
         <location line="+461"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="+327"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+92"/>
@@ -4743,7 +4767,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2657"/>
+        <location line="-2663"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="-65"/>
         <source>The keyfile could not be read. The vault was not created.</source>
         <translation type="unfinished"></translation>
@@ -4755,17 +4779,17 @@
     </message>
     <message>
         <location line="+25"/>
-        <location line="+2528"/>
+        <location line="+2534"/>
         <source>%1 vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1341"/>
+        <location line="-1347"/>
         <source>%1 can no longer open this vault, so it was turned off. Unlock with the master password, then turn it on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+798"/>
+        <location line="+804"/>
         <source>The vault was changed elsewhere and now has another master password. Unlock it with that one.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4780,7 +4804,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1965"/>
+        <location line="-1971"/>
         <location line="+91"/>
         <location filename="../src/ui/vault_controller_pin.cpp" line="+338"/>
         <source>Unlocking…</source>
@@ -4799,12 +4823,12 @@
     </message>
     <message>
         <location line="+21"/>
-        <location line="+2091"/>
+        <location line="+2097"/>
         <source>The vault opened, but what it holds is damaged. It was not changed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2025"/>
+        <location line="-2031"/>
         <source>The master password of this vault was changed on another computer. Type it, then turn %1 on again in Settings &gt; Security.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5178,7 +5202,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+69"/>
+        <location line="+75"/>
         <source>The vault was changed elsewhere and was read again.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5228,7 +5252,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-2302"/>
+        <location line="-2308"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="+63"/>
         <source>The master password of this vault was changed on another computer. Type it.</source>
         <translation type="unfinished"></translation>
@@ -5249,7 +5273,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="+2344"/>
+        <location filename="../src/ui/vault_controller.cpp" line="+2350"/>
         <source>Changing the master password…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5279,7 +5303,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+133"/>
+        <location line="+172"/>
         <source>Copied. The clipboard is cleared in %n second(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -5345,7 +5369,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+54"/>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+55"/>
         <source>Google Drive cannot be reached. Check the network.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5389,16 +5413,6 @@
         <location line="+17"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+437"/>
         <source>Sign in to Google Drive first.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+24"/>
-        <source>The vault on Google Drive could not be deleted: sign in to Google Drive first. It was disconnected; delete it there yourself.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+13"/>
-        <source>The vault on Google Drive could not be deleted (%1): %2. Delete it there yourself.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5448,7 +5462,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_googledrive.cpp" line="-72"/>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="-35"/>
         <location filename="../src/ui/vault_controller_webdav.cpp" line="+116"/>
         <source>A folder or file with that name is already there.</source>
         <translation type="unfinished"></translation>
@@ -5464,7 +5478,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller.cpp" line="-1026"/>
+        <location filename="../src/ui/vault_controller.cpp" line="-1065"/>
         <location filename="../src/ui/vault_controller_ask.cpp" line="-66"/>
         <location filename="../src/ui/vault_controller_vaults.cpp" line="+11"/>
         <source>This vault is being moved. Unlock it once the move is done.</source>

@@ -37,9 +37,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_google_drive.cpp 0.8.117
+// test_google_drive.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Disconnect leaves the vault on Drive (D-060)
 // v0.8.117: Each vault keeps its Google account's email; an older vault gets it at its next sync
 // v0.8.116: Two Google accounts in one run, each vault with its own; Google's account chooser always (D-080 point 13)
 // v0.8.115: Initial release: a vault on Google Drive, against a Drive of our own (D-080); its interruptions built apart
@@ -438,7 +439,7 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(server.keptVersions(vaultId(server)) <= GoogleDriveStorage::keptVersions + 1, 10000);
     }
 
-    void disconnect_deletes_on_drive_only_when_ticked()
+    void disconnect_leaves_the_vault_on_drive()
     {
         GoogleDriveTestServer server;
         use(server);
@@ -446,10 +447,12 @@ private slots:
         QVERIFY(createdOnDrive(*first));
         const QString workingCopy = first->vaultPath();
         const QString id = vaultId(server);
-        first->disconnectVault(workingCopy, true);
-        QTRY_VERIFY_WITH_TIMEOUT(server.byId(id) && server.byId(id)->trashed, 10000); // in Drive's trash
-        QVERIFY(QFile::exists(workingCopy));                                          // this device's copy stays
+        QSignalSpy done(first.get(), &VaultController::webDavDone);
+        first->disconnectVault(workingCopy);
+        QCOMPARE(done.count(), 1); // done at once: nothing is sent to Drive
         QVERIFY(!cloudPlaceOf(workingCopy));
+        QVERIFY(QFile::exists(workingCopy));                    // this device's copy stays
+        QVERIFY(server.byId(id) && !server.byId(id)->trashed); // and the one on Drive (D-060)
     }
 
     void a_vault_of_this_device_moves_to_drive()

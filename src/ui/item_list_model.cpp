@@ -22,11 +22,14 @@
 #include <QCollator>
 
 #include <algorithm>
+#include <limits>
 
 // --- Version ------------------------------------------------------------
-// item_list_model.cpp 0.6.87
+// item_list_model.cpp 0.8.119
 
 // --- Version history ----------------------------------------------------
+// v0.8.119: Sorted by title, web address, created, modified, recently or frequently used, either way; headings only
+//           by title; headingRowOf (D-081)
 // v0.6.87: A parameter no longer named as a member, for Microsoft's compiler
 // v0.6.86: The lists of the audit (D-065)
 // v0.5.82: rowStartingWith (D-062)
@@ -52,6 +55,22 @@ QString fieldValue(const Item& item, const QString& role)
         }
     }
     return {};
+}
+
+// The heading an item stands under by title: its first letter, or # for a
+// title that starts with anything else (D-025).
+QString initialOf(const Item& item)
+{
+    const QString title = item.title.trimmed();
+    if (title.isEmpty() || !title.at(0).isLetter()) {
+        return QStringLiteral("#");
+    }
+    return QString(title.at(0)).toUpper();
+}
+
+int compared(qint64 left, qint64 right)
+{
+    return left < right ? -1 : (left > right ? 1 : 0);
 }
 
 } // namespace
@@ -100,11 +119,8 @@ QVariant ItemListModel::data(const QModelIndex& index, int role) const
             });
             return tr("%1. The same password in %n item(s)", nullptr, static_cast<int>(count)).arg(group);
         }
-        const QString title = item.title.trimmed();
-        if (title.isEmpty() || !title.at(0).isLetter()) {
-            return QStringLiteral("#");
-        }
-        return QString(title.at(0)).toUpper();
+        // Only by title (the owner, D-081): every other order is one list.
+        return sorting.by == SortBy::Title ? initialOf(item) : QString();
     }
     case IsNoteRole: return item.categoryId == QLatin1String("note");
     case FavouriteRole: return item.favourite;
@@ -156,9 +172,70 @@ void ItemListModel::setAudit(const QHash<QString, QSet<QUuid>>& lists, const QHa
 void ItemListModel::setFilter(const QString& filter)
 {
     if (chosen != filter) {
+        const bool before = headings();
         chosen = filter;
         rebuild();
+        if (headings() != before) {
+            emit headingsChanged();
+        }
     }
+}
+
+void ItemListModel::setOrder(ItemOrder order, const QHash<QUuid, ItemUse>& uses)
+{
+    const bool before = headings();
+    sorting = order;
+    itemUses = uses;
+    rebuild();
+    if (headings() != before) {
+        emit headingsChanged();
+    }
+}
+
+void ItemListModel::setUse(const QUuid& item, const ItemUse& use)
+{
+    itemUses.insert(item, use);
+    // The list moves only where the order is by use.
+    if (sorting.by == SortBy::RecentlyUsed || sorting.by == SortBy::FrequentlyUsed) {
+        rebuild();
+    }
+}
+
+bool ItemListModel::headings() const
+{
+    return sorting.by == SortBy::Title || chosen == QLatin1String("audit:reused");
+}
+
+int ItemListModel::headingRowOf(const QString& letter) const
+{
+    if (sorting.by != SortBy::Title || letter.size() != 1 || chosen == QLatin1String("audit:reused")) {
+        return -1;
+    }
+    const QChar typed = letter.at(0);
+    const QString wanted = typed.isLetter() ? QString(typed).toUpper() : QStringLiteral("#");
+    // A heading comes after the wanted one where it comes later in the
+    // list's own direction; "#" stands first going up, last going down.
+    QCollator collator;
+    collator.setCaseSensitivity(Qt::CaseInsensitive);
+    const auto rank = [&collator, &wanted](const QString& heading) {
+        if (heading == wanted) {
+            return 0;
+        }
+        if (wanted == QLatin1String("#")) {
+            return 1;
+        }
+        if (heading == QLatin1String("#")) {
+            return -1;
+        }
+        return collator.compare(heading, wanted);
+    };
+    for (int row = 0; row < shownItems.size(); ++row) {
+        const int where = rank(initialOf(shownItems.at(row)));
+        if (where == 0 || (sorting.descending ? where < 0 : where > 0)) {
+            return row;
+        }
+    }
+    return -1;
 }
 
 void ItemListModel::setSearchText(const QString& text)
@@ -272,10 +349,35 @@ void ItemListModel::rebuild()
     QCollator collator;
     collator.setCaseSensitivity(Qt::CaseInsensitive);
     collator.setNumericMode(true);
+    const auto lastUse = [this](const Item& item) {
+        const ItemUse use = itemUses.value(item.id);
+        return use.last.isValid() ? use.last.toMSecsSinceEpoch() : std::numeric_limits<qint64>::min();
+    };
+    // Ascending: A to Z, oldest first, least used first; Descending the
+    // other way (the owner, D-081). Two alike stand by title, A to Z.
+    const auto order = [&](const Item& left, const Item& right) {
+        switch (sorting.by) {
+        case SortBy::Title: return collator.compare(left.title, right.title);
+        case SortBy::Url:
+            return collator.compare(fieldValue(left, QStringLiteral("url")), fieldValue(right, QStringLiteral("url")));
+        case SortBy::Created: return compared(left.created.toMSecsSinceEpoch(), right.created.toMSecsSinceEpoch());
+        case SortBy::Modified: return compared(left.modified.toMSecsSinceEpoch(), right.modified.toMSecsSinceEpoch());
+        case SortBy::RecentlyUsed: return compared(lastUse(left), lastUse(right));
+        case SortBy::FrequentlyUsed: return compared(itemUses.value(left.id).count, itemUses.value(right.id).count);
+        }
+        return 0;
+    };
     std::stable_sort(shownItems.begin(), shownItems.end(),
-                     [this, &collator](const Item& left, const Item& right) {
+                     [this, &collator, &order](const Item& left, const Item& right) {
                          if (chosen == QLatin1String("audit:reused") && auditGroups.value(left.id) != auditGroups.value(right.id)) {
                              return auditGroups.value(left.id) < auditGroups.value(right.id);
+                         }
+                         const int first = order(left, right);
+                         if (first != 0) {
+                             return sorting.descending ? first > 0 : first < 0;
+                         }
+                         if (sorting.by == SortBy::Title) {
+                             return false;
                          }
                          return collator.compare(left.title, right.title) < 0;
                      });
