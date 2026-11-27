@@ -22,9 +22,10 @@ import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// StorageWindow.qml 0.8.115
+// StorageWindow.qml 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
 // v0.8.115: One tile per storage of the build; any storage named in the vault lines (D-080)
 // v0.7.111: Your vaults show where each is kept (D-079)
 // v0.7.109: Create a vault and Move a vault in the look of Open a vault
@@ -236,8 +237,10 @@ DialogWindow {
                             }
                         }
                         Label {
+                            objectName: "knownPlace_" + knownRow.name
                             text: knownRow.place.inCloud
-                                  ? qsTr("%1: %2").arg(knownRow.place.storageName, knownRow.place.address)
+                                  ? (knownRow.place.account ? qsTr("%1: %2").arg(knownRow.place.storageName).arg(knownRow.place.account)
+                                                            : knownRow.place.storageName)
                                     + (knownRow.place.lastSynced ? "   " + qsTr("Last synchronized: %1").arg(knownRow.place.lastSynced) : "")
                                   : qsTr("This computer: %1").arg(knownRow.place.address)
                             textFormat: Text.PlainText

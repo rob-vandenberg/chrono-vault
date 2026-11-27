@@ -33,9 +33,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// cloud_sync.h 0.8.115
+// cloud_sync.h 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: accountFound; removeLeftover (D-080 point 20)
 // v0.8.115: syncOutcomeText names Google Drive (D-080)
 // v0.8.114: Initial release: the WebDAV sync of D-057, for any cloud storage (D-080)
 
@@ -88,9 +89,12 @@ signals:
     void finished(chrono_vault::SyncOutcome outcome, const QByteArray& certificate, const QString& conflictCopy);
     // The sync wrote the working copy: the vault shown is read again or merged.
     void workingCopyChanged();
+    // The account was found and kept in the place record: the rows show it.
+    void accountFound();
 
 private:
     struct Prepared;
+    void removeLeftover();
     void round();
     void downloaded(const CloudReply& answer);
     void prepared(const Prepared& ready);

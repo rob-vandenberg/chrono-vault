@@ -33,9 +33,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// cloud_sync.cpp 0.8.115
+// cloud_sync.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: A place without its account asks the storage once at the start of a sync and keeps it (D-080 point 20)
 // v0.8.115: A version that came in at the same moment is merged in a new round (D-080)
 // v0.8.114: Initial release: WebDavSync of webdav_sync.cpp 0.5.78, for any cloud storage (D-080)
 
@@ -198,6 +199,30 @@ void CloudSync::start()
     }
     busy = true;
     rounds = 0;
+    QPointer<CloudSync> self(this);
+    if (shownCloudAccount(where).isEmpty()) {
+        // The account for the vault's row, asked once and kept in the place
+        // record (the owner, 27 November 2026); a failure is asked again next
+        // time and never stops the sync.
+        client->signedInAs([self](const CloudReply& answer) {
+            if (!self) {
+                return;
+            }
+            const QString account = QString::fromUtf8(answer.body);
+            if (answer.ok() && !account.isEmpty()) {
+                self->where.details.insert(cloudAccountKey, account);
+                rememberCloudPlace(self->copy, self->where);
+                emit self->accountFound();
+            }
+            self->removeLeftover();
+        });
+        return;
+    }
+    removeLeftover();
+}
+
+void CloudSync::removeLeftover()
+{
     // An upload of this vault left by an earlier sync that was stopped goes
     // first (the owner: clean up after yourself); one of another device's
     // is never touched, it may still be uploading.

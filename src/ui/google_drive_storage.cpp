@@ -38,9 +38,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// google_drive_storage.cpp 0.8.116
+// google_drive_storage.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: signedInAs: the email from Drive's about (D-080 point 20)
 // v0.8.116: Google's account chooser at every sign-in (D-080 point 13)
 // v0.8.115: Initial release: Google Drive as a cloud storage, with the permission drive.file only (D-080)
 
@@ -637,6 +638,30 @@ void GoogleDriveStorage::makeFolder(const QString& name, Done done)
                 done(made);
             });
     });
+}
+
+void GoogleDriveStorage::signedInAs(Done done)
+{
+    const QUrl address = apiUrl(QStringLiteral("about"), {{QStringLiteral("fields"), QStringLiteral("user(emailAddress)")}});
+    QPointer<GoogleDriveStorage> self(this);
+    send([self, address](const QString& token) { return self->network.get(self->request(address, token)); },
+         [done = std::move(done)](QNetworkReply*, CloudReply answer) {
+             if (answer.ok()) {
+                 const QString email = jsonOf(answer.body)
+                                           .value(QStringLiteral("user"))
+                                           .toObject()
+                                           .value(QStringLiteral("emailAddress"))
+                                           .toString()
+                                           .trimmed();
+                 answer.body = email.left(320).toUtf8(); // never more than an address can be
+                 if (email.isEmpty()) {
+                     answer.error = CloudError::Server;
+                 }
+             } else {
+                 answer.body.clear();
+             }
+             done(answer);
+         });
 }
 
 void GoogleDriveStorage::tagOf(const QString& name, Done done)

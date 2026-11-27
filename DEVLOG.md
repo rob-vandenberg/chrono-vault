@@ -919,3 +919,14 @@ account chooser (`prompt` "consent select_account"). A vault keeps the sign-in i
 vaults on two Google accounts work in one run without a restart. Tests: `test_google_drive` (new: two accounts in one
 run, each vault syncing with its own; the account chooser asked at every sign-in) and
 `test_google_drive_interruptions` pass.
+
+## 27 November 2026: the account on a cloud vault's row (0.8.117)
+
+D-080 point 20. The cloud line in Settings > Vaults and Open a vault was empty: `qsTr("%1: %2").arg(a, b)` fails in
+QML (arg takes one value), so the binding left no text. It now reads "<storage>: <account>". `CloudStorage::signedInAs`
+asks the account; `GoogleDriveStorage` answers from Drive's "about"; `shownCloudAccount` shows the kept one, or
+WebDAV's user and server. The Google Drive window reads the account at sign-in and keeps it with the places made
+there; `CloudSync` asks once for a place without it and keeps it in the place record. Tests: `test_vault_row_accounts`
+(new, apart from `test_vault_rows` for OR-11), `test_google_drive` (each vault its own account),
+`test_google_drive_interruptions` (an older vault gets its account at its next sync, not asked again), the WebDAV
+tests, `test_cloud_sync`, `test_vault_rows` and `test_every_string_translatable` pass.

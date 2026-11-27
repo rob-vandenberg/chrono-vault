@@ -241,12 +241,18 @@ msgctxt "CategoryMenu|"
 msgid "Change Category"
 msgstr ""
 
-#: ../src/ui/cloud_storage.cpp:193
+#: ../src/ui/cloud_storage.cpp:211
+#, qt-format
+msgctxt "CloudStorage|"
+msgid "%1 on %2"
+msgstr ""
+
+#: ../src/ui/cloud_storage.cpp:219
 msgctxt "CloudStorage|"
 msgid "WebDAV"
 msgstr ""
 
-#: ../src/ui/cloud_storage.cpp:199
+#: ../src/ui/cloud_storage.cpp:225
 msgctxt "CloudStorage|"
 msgid "Google Drive"
 msgstr ""
@@ -2467,7 +2473,7 @@ msgctxt "SettingsWindow|"
 msgid "Start Chrono Vault at startup"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:571 ../qml/SettingsWindow.qml:1718
+#: ../qml/SettingsWindow.qml:571 ../qml/SettingsWindow.qml:1722
 msgctxt "SettingsWindow|"
 msgid "Keyboard shortcuts"
 msgstr ""
@@ -2583,79 +2589,79 @@ msgctxt "SettingsWindow|"
 msgid "Primary vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1140
+#: ../qml/SettingsWindow.qml:1144
 msgctxt "SettingsWindow|"
 msgid "Open"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1105
+#: ../qml/SettingsWindow.qml:1107
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "This computer: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1113
+#: ../qml/SettingsWindow.qml:1117
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Last synchronized: %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1147
+#: ../qml/SettingsWindow.qml:1151
 msgctxt "SettingsWindow|"
 msgid "Close"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1170
+#: ../qml/SettingsWindow.qml:1174
 msgctxt "SettingsWindow|"
 msgid "Change PIN…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1170
+#: ../qml/SettingsWindow.qml:1174
 msgctxt "SettingsWindow|"
 msgid "Set PIN…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1175
+#: ../qml/SettingsWindow.qml:1179
 msgctxt "SettingsWindow|"
 msgid "Change PIN"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1175
+#: ../qml/SettingsWindow.qml:1179
 msgctxt "SettingsWindow|"
 msgid "Set PIN"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1183
+#: ../qml/SettingsWindow.qml:1187
 msgctxt "SettingsWindow|"
 msgid "Remove PIN…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1192 ../qml/SettingsWindow.qml:1325
+#: ../qml/SettingsWindow.qml:1196 ../qml/SettingsWindow.qml:1329
 msgctxt "SettingsWindow|"
 msgid "Make primary vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1223
+#: ../qml/SettingsWindow.qml:1227
 msgctxt "SettingsWindow|"
 msgid "Import…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1230
+#: ../qml/SettingsWindow.qml:1234
 msgctxt "SettingsWindow|"
 msgid "Export…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1237
+#: ../qml/SettingsWindow.qml:1241
 msgctxt "SettingsWindow|"
 msgid "Disconnect…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1329
+#: ../qml/SettingsWindow.qml:1333
 msgctxt "SettingsWindow|"
 msgid "Make primary"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1337
+#: ../qml/SettingsWindow.qml:1341
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid ""
@@ -2663,17 +2669,17 @@ msgid ""
 "moved: what is remembered in “%2” stays there."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1363
+#: ../qml/SettingsWindow.qml:1367
 msgctxt "SettingsWindow|"
 msgid "Remove PIN"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1367
+#: ../qml/SettingsWindow.qml:1371
 msgctxt "SettingsWindow|"
 msgid "Remove"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1375
+#: ../qml/SettingsWindow.qml:1379
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid ""
@@ -2681,39 +2687,39 @@ msgid ""
 "is asked instead."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1492
+#: ../qml/SettingsWindow.qml:1496
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault remembers every vault you have opened. If you no longer use a "
 "vault, you can tell Chrono Vault to forget it."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1494
+#: ../qml/SettingsWindow.qml:1498
 msgctxt "SettingsWindow|"
 msgid ""
 "The vault in the remote location is not deleted, but the local copy on this "
 "computer is, together with any changes that are not synced yet."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1495
+#: ../qml/SettingsWindow.qml:1499
 msgctxt "SettingsWindow|"
 msgid ""
 "Nothing is deleted, only the name of the vault is removed from the list of "
 "vaults."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1496
+#: ../qml/SettingsWindow.qml:1500
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Are you sure you want Chrono Vault to forget “%1”?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1513
+#: ../qml/SettingsWindow.qml:1517
 msgctxt "SettingsWindow|"
 msgid "Disconnect"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1524
+#: ../qml/SettingsWindow.qml:1528
 msgctxt "SettingsWindow|"
 msgid ""
 "Chrono Vault keeps a local copy of every vault that is stored in a remote "
@@ -2721,7 +2727,7 @@ msgid ""
 "automatically once your connection is restored."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1525
+#: ../qml/SettingsWindow.qml:1529
 msgctxt "SettingsWindow|"
 msgid ""
 "Disconnecting from the remote vault makes the local copy a separate "
@@ -2730,29 +2736,29 @@ msgid ""
 "cannot be undone."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1526
+#: ../qml/SettingsWindow.qml:1530
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Are you sure you want to disconnect “%1” from the remote vault?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1537
+#: ../qml/SettingsWindow.qml:1541
 msgctxt "SettingsWindow|"
 msgid "Also delete the vault on Google Drive"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1640
+#: ../qml/SettingsWindow.qml:1644
 msgctxt "SettingsWindow|"
 msgid "Press the new key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1679
+#: ../qml/SettingsWindow.qml:1683
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Press a key for “%1”"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1724
+#: ../qml/SettingsWindow.qml:1728
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1 is assigned to “%2”. Reassign it to “%3”?"
@@ -2846,122 +2852,122 @@ msgid ""
 "disk."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1559
+#: ../qml/SettingsWindow.qml:1563
 msgctxt "SettingsWindow|"
 msgid "Cancel, close a window"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1563
+#: ../qml/SettingsWindow.qml:1567
 msgctxt "SettingsWindow|"
 msgid "Esc"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1597
+#: ../qml/SettingsWindow.qml:1601
 msgctxt "SettingsWindow|"
 msgid "no key"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1120
+#: ../qml/SettingsWindow.qml:1124
 msgctxt "SettingsWindow|"
 msgid "Not found"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1104
+#: ../qml/SettingsWindow.qml:1108
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "%1: %2"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1132
+#: ../qml/SettingsWindow.qml:1136
 msgctxt "SettingsWindow|"
 msgid "Vault menu"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1157
+#: ../qml/SettingsWindow.qml:1161
 msgctxt "SettingsWindow|"
 msgid "Lock"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1202
+#: ../qml/SettingsWindow.qml:1206
 msgctxt "SettingsWindow|"
 msgid "Move…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1212
+#: ../qml/SettingsWindow.qml:1216
 msgctxt "SettingsWindow|"
 msgid "Forget…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1407
+#: ../qml/SettingsWindow.qml:1411
 msgctxt "SettingsWindow|"
 msgid "Where should the vault be moved to?"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1410
+#: ../qml/SettingsWindow.qml:1414
 msgctxt "SettingsWindow|"
 msgid "Chrono Vault vaults (*.chronovault)"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1428
+#: ../qml/SettingsWindow.qml:1432
 msgctxt "SettingsWindow|"
 msgid "Move the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1447
+#: ../qml/SettingsWindow.qml:1451
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Moving “%1”…"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1479
+#: ../qml/SettingsWindow.qml:1483
 msgctxt "SettingsWindow|"
 msgid "Forget the vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1483
+#: ../qml/SettingsWindow.qml:1487
 msgctxt "SettingsWindow|"
 msgid "Forget"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1509
+#: ../qml/SettingsWindow.qml:1513
 #, qt-format
 msgctxt "SettingsWindow|"
 msgid "Disconnect from %1"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1794
+#: ../qml/SettingsWindow.qml:1798
 msgctxt "SettingsWindow|"
 msgid "This key has already been assigned"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1837
+#: ../qml/SettingsWindow.qml:1841
 msgctxt "SettingsWindow|"
 msgid "Create vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1843
+#: ../qml/SettingsWindow.qml:1847
 msgctxt "SettingsWindow|"
 msgid "Open vault"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1856
+#: ../qml/SettingsWindow.qml:1860
 msgctxt "SettingsWindow|"
 msgid "Waiting for Windows Hello fingerprint..."
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:1871
+#: ../qml/SettingsWindow.qml:1875
 msgctxt "SettingsWindow|"
 msgid "Restore defaults"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:425 ../qml/SettingsWindow.qml:1350
-#: ../qml/SettingsWindow.qml:1810 ../qml/SettingsWindow.qml:1877
+#: ../qml/SettingsWindow.qml:425 ../qml/SettingsWindow.qml:1354
+#: ../qml/SettingsWindow.qml:1814 ../qml/SettingsWindow.qml:1881
 msgctxt "SettingsWindow|"
 msgid "OK"
 msgstr ""
 
-#: ../qml/SettingsWindow.qml:425 ../qml/SettingsWindow.qml:1698
-#: ../qml/SettingsWindow.qml:1816 ../qml/SettingsWindow.qml:1887
+#: ../qml/SettingsWindow.qml:425 ../qml/SettingsWindow.qml:1702
+#: ../qml/SettingsWindow.qml:1820 ../qml/SettingsWindow.qml:1891
 msgctxt "SettingsWindow|"
 msgid "Cancel"
 msgstr ""
@@ -2996,30 +3002,30 @@ msgctxt "StorageWindow|"
 msgid "Not found"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:240
+#: ../qml/StorageWindow.qml:241
 #, qt-format
 msgctxt "StorageWindow|"
 msgid "%1: %2"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:241
+#: ../qml/StorageWindow.qml:243
 #, qt-format
 msgctxt "StorageWindow|"
 msgid "Last synchronized: %1"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:242
+#: ../qml/StorageWindow.qml:244
 #, qt-format
 msgctxt "StorageWindow|"
 msgid "This computer: %1"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:253 ../qml/StorageWindow.qml:286
+#: ../qml/StorageWindow.qml:255 ../qml/StorageWindow.qml:288
 msgctxt "StorageWindow|"
 msgid "Storage locations"
 msgstr ""
 
-#: ../qml/StorageWindow.qml:261 ../qml/StorageWindow.qml:293
+#: ../qml/StorageWindow.qml:263 ../qml/StorageWindow.qml:295
 msgctxt "StorageWindow|"
 msgid "This Device"
 msgstr ""
@@ -4413,38 +4419,38 @@ msgctxt "WelcomePage|"
 msgid "Chrono Vault keyfiles (*.chronovaultkey)"
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:876
+#: ../src/ui/google_drive_storage.cpp:901
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "Chrono Vault cannot wait for Google's answer on this computer."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:879
+#: ../src/ui/google_drive_storage.cpp:904
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "Chrono Vault is signed in to Google Drive. You can close this page."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:898
+#: ../src/ui/google_drive_storage.cpp:924
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "No web browser could be opened for the Google sign-in."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:904
+#: ../src/ui/google_drive_storage.cpp:930
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "Google did not give Chrono Vault a lasting sign-in. Try again."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:912
+#: ../src/ui/google_drive_storage.cpp:938
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "The sign-in to Google was cancelled."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:913
+#: ../src/ui/google_drive_storage.cpp:939
 #, qt-format
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "Google refused the sign-in (%1)."
 msgstr ""
 
-#: ../src/ui/google_drive_storage.cpp:916
+#: ../src/ui/google_drive_storage.cpp:942
 msgctxt "chrono_vault::GoogleSignIn|"
 msgid "The sign-in to Google failed. Check the network and try again."
 msgstr ""
@@ -4674,13 +4680,13 @@ msgid "Choose where to keep the new vault."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:789 ../src/ui/vault_controller.cpp:3481
-#: ../src/ui/vault_controller_webdav.cpp:543
+#: ../src/ui/vault_controller_webdav.cpp:544
 msgctxt "chrono_vault::VaultController|"
 msgid "Choose a master password."
 msgstr ""
 
 #: ../src/ui/vault_controller.cpp:793 ../src/ui/vault_controller.cpp:3486
-#: ../src/ui/vault_controller_webdav.cpp:547
+#: ../src/ui/vault_controller_webdav.cpp:548
 msgctxt "chrono_vault::VaultController|"
 msgid "The two passwords are not the same."
 msgstr ""
@@ -4707,13 +4713,13 @@ msgstr ""
 #: ../src/ui/vault_controller_vaults.cpp:104
 #: ../src/ui/vault_controller_vaults.cpp:144
 #: ../src/ui/vault_controller_vaults.cpp:537
-#: ../src/ui/vault_controller_webdav.cpp:551
-#: ../src/ui/vault_controller_webdav.cpp:672
+#: ../src/ui/vault_controller_webdav.cpp:552
+#: ../src/ui/vault_controller_webdav.cpp:673
 msgctxt "chrono_vault::VaultController|"
 msgid "Wait until your last change is saved, then try again."
 msgstr ""
 
-#: ../src/ui/vault_controller.cpp:834 ../src/ui/vault_controller_webdav.cpp:607
+#: ../src/ui/vault_controller.cpp:834 ../src/ui/vault_controller_webdav.cpp:608
 msgctxt "chrono_vault::VaultController|"
 msgid "The keyfile could not be read. The vault was not created."
 msgstr ""
@@ -5399,19 +5405,19 @@ msgctxt "chrono_vault::VaultController|"
 msgid "The server's certificate is not trusted by this system."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:53
+#: ../src/ui/vault_controller_googledrive.cpp:54
 msgctxt "chrono_vault::VaultController|"
 msgid "Google Drive cannot be reached. Check the network."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:55
+#: ../src/ui/vault_controller_googledrive.cpp:56
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "Google no longer accepts Chrono Vault's sign-in. Sign in to Google Drive "
 "again."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:57
+#: ../src/ui/vault_controller_googledrive.cpp:58
 msgctxt "chrono_vault::VaultController|"
 msgid "That folder or vault is no longer on Google Drive."
 msgstr ""
@@ -5421,42 +5427,42 @@ msgctxt "chrono_vault::VaultController|"
 msgid "The file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:59
+#: ../src/ui/vault_controller_googledrive.cpp:60
 msgctxt "chrono_vault::VaultController|"
 msgid "Google Drive is full, or the file is too large to be a vault."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:69
+#: ../src/ui/vault_controller_googledrive.cpp:70
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Google Drive refused it (%1)."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:87
+#: ../src/ui/vault_controller_googledrive.cpp:91
 msgctxt "chrono_vault::VaultController|"
 msgid "This version of Chrono Vault has no Google Drive."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:197
+#: ../src/ui/vault_controller_googledrive.cpp:212
 msgctxt "chrono_vault::VaultController|"
 msgid "That folder is not on Google Drive."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:239
-#: ../src/ui/vault_controller_googledrive.cpp:256
-#: ../src/ui/vault_controller_webdav.cpp:526
+#: ../src/ui/vault_controller_googledrive.cpp:254
+#: ../src/ui/vault_controller_googledrive.cpp:271
+#: ../src/ui/vault_controller_webdav.cpp:527
 msgctxt "chrono_vault::VaultController|"
 msgid "Sign in to Google Drive first."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:280
+#: ../src/ui/vault_controller_googledrive.cpp:295
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The vault on Google Drive could not be deleted: sign in to Google Drive "
 "first. It was disconnected; delete it there yourself."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:293
+#: ../src/ui/vault_controller_googledrive.cpp:308
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5488,14 +5494,14 @@ msgctxt "chrono_vault::VaultController|"
 msgid "The server refused it (%1)."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:263
-#: ../src/ui/vault_controller_webdav.cpp:300
+#: ../src/ui/vault_controller_webdav.cpp:264
+#: ../src/ui/vault_controller_webdav.cpp:301
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid "Not synchronized: %1"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:288
+#: ../src/ui/vault_controller_webdav.cpp:289
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
 msgid ""
@@ -5503,28 +5509,28 @@ msgid ""
 "with that one. Your version is kept as “%1”."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:299
+#: ../src/ui/vault_controller_webdav.cpp:300
 msgctxt "chrono_vault::VaultController|"
 msgid "The vault was synchronized. A conflict still listed is the same there."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:301
+#: ../src/ui/vault_controller_webdav.cpp:302
 msgctxt "chrono_vault::VaultController|"
 msgid "The conflict stays."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:348
+#: ../src/ui/vault_controller_webdav.cpp:349
 msgctxt "chrono_vault::VaultController|"
 msgid "That is not a web address."
 msgstr ""
 
-#: ../src/ui/vault_controller_googledrive.cpp:221
-#: ../src/ui/vault_controller_webdav.cpp:464
+#: ../src/ui/vault_controller_googledrive.cpp:236
+#: ../src/ui/vault_controller_webdav.cpp:465
 msgctxt "chrono_vault::VaultController|"
 msgid "A folder or file with that name is already there."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:482
+#: ../src/ui/vault_controller_webdav.cpp:483
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "Choose a name without / \\ : * ? \" < > |, not starting or ending with a dot."
@@ -5601,8 +5607,8 @@ msgid "The copy did not read back the same. The vault stays where it was."
 msgstr ""
 
 #: ../src/ui/vault_controller_vaults.cpp:297
-#: ../src/ui/vault_controller_webdav.cpp:526
-#: ../src/ui/vault_controller_webdav.cpp:648
+#: ../src/ui/vault_controller_webdav.cpp:527
+#: ../src/ui/vault_controller_webdav.cpp:649
 msgctxt "chrono_vault::VaultController|"
 msgid "Connect to the WebDAV folder first."
 msgstr ""
@@ -5648,46 +5654,46 @@ msgctxt "chrono_vault::VaultController|"
 msgid "the server's password is not known"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:536
+#: ../src/ui/vault_controller_webdav.cpp:537
 msgctxt "chrono_vault::VaultController|"
 msgid "A vault with that name is already in that folder. Choose another name."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:562
+#: ../src/ui/vault_controller_webdav.cpp:563
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault on the WebDAV server…"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:562
+#: ../src/ui/vault_controller_webdav.cpp:563
 msgctxt "chrono_vault::VaultController|"
 msgid "Creating the vault on Google Drive…"
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:608
+#: ../src/ui/vault_controller_webdav.cpp:609
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "The new vault could not be created: this computer cannot write its copy, or "
 "the disk is full."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:615
+#: ../src/ui/vault_controller_webdav.cpp:616
 msgctxt "chrono_vault::VaultController|"
 msgid "That storage is not in this version of Chrono Vault. Nothing was kept."
-msgstr ""
-
-#: ../src/ui/vault_controller_webdav.cpp:627
-#, qt-format
-msgctxt "chrono_vault::VaultController|"
-msgid "The vault could not be put on the WebDAV server: %1. Nothing was kept."
 msgstr ""
 
 #: ../src/ui/vault_controller_webdav.cpp:628
 #, qt-format
 msgctxt "chrono_vault::VaultController|"
+msgid "The vault could not be put on the WebDAV server: %1. Nothing was kept."
+msgstr ""
+
+#: ../src/ui/vault_controller_webdav.cpp:629
+#, qt-format
+msgctxt "chrono_vault::VaultController|"
 msgid "The vault could not be put on Google Drive: %1. Nothing was kept."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:708
+#: ../src/ui/vault_controller_webdav.cpp:709
 msgctxt "chrono_vault::VaultController|"
 msgid ""
 "That file is not a Chrono Vault vault, or this device cannot write its copy."
@@ -5700,7 +5706,7 @@ msgctxt "chrono_vault::VaultController|"
 msgid "A vault with the name “%1” is already in that folder."
 msgstr ""
 
-#: ../src/ui/vault_controller_webdav.cpp:771
+#: ../src/ui/vault_controller_webdav.cpp:772
 msgctxt "chrono_vault::VaultController|"
 msgid "Not yet"
 msgstr ""

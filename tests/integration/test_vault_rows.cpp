@@ -16,13 +16,16 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "intuitive_fixture.h"
+#include "cloud_storage.h"
+#include "webdav_sync.h"
 
 #include <QQmlComponent>
 
 // --- Version ------------------------------------------------------------
-// test_vault_rows.cpp 0.7.110
+// test_vault_rows.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: A cloud vault's row shows its account, in Settings and Open a vault
 // v0.7.110: An outdated kept password keeps the vault shown open (D-078)
 // v0.7.109: Create a vault in the look of Open a vault; no OK without the list
 // v0.7.108: Open a vault and its list; the crown in the start-up page's list (D-077)
@@ -67,6 +70,57 @@ class TestVaultRows : public IntuitiveFixture
     }
 
 private slots:
+#if defined(CHRONO_VAULT_ROW_ACCOUNTS)
+    // Built as test_vault_row_accounts, so test_vault_rows stays under 20 seconds (OR-11).
+    // The second line of a row: where a vault on this computer is, and the
+    // account a cloud vault is reached with (the owner, 27 November 2026), in
+    // Settings > Vaults and in Open a vault.
+    void a_cloud_vaults_row_shows_its_account()
+    {
+        const QString first = controller->vaultPath();
+        const QString second = folder.filePath(QStringLiteral("cloudy.chronovault"));
+        controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"), QUrl(), true);
+        QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked && controller->isIdle());
+        controller->switchToVault(first);
+        QTRY_VERIFY(controller->vaultPath() == first && controller->state() == State::Unlocked);
+        WebDavPlace place;
+        place.id = QStringLiteral("a1b2");
+        place.folder = QUrl(QStringLiteral("https://cloud.example.com/dav/"));
+        place.fileName = QStringLiteral("cloudy.chronovault");
+        place.user = QStringLiteral("anne");
+        rememberCloudPlace(second, place.toCloud());
+        emit controller->syncChanged();
+
+        QMetaObject::invokeMethod(settings(), "showWindow");
+        QTRY_VERIFY(settings()->isExposed());
+        settings()->findChild<QObject*>(QStringLiteral("topics"))->setProperty("currentIndex", 2);
+        const QString name = QFileInfo(first).completeBaseName();
+        QTRY_COMPARE(there(QStringLiteral("placeLine_") + name)->property("text").toString(),
+                     QStringLiteral("This computer: %1").arg(QDir::toNativeSeparators(first)));
+        QTRY_COMPARE(there(QStringLiteral("placeLine_cloudy"))->property("text").toString(),
+                     QStringLiteral("WebDAV: anne on cloud.example.com"));
+
+        // An account kept in the place record is shown as it was kept.
+        CloudPlace kept = place.toCloud();
+        kept.details.insert(cloudAccountKey, QStringLiteral("someone@example.com"));
+        rememberCloudPlace(second, kept);
+        emit controller->syncChanged();
+        QTRY_COMPARE(there(QStringLiteral("placeLine_cloudy"))->property("text").toString(),
+                     QStringLiteral("WebDAV: someone@example.com"));
+        settings()->close();
+
+        auto* storage = window->findChild<QQuickWindow*>(QStringLiteral("storageWindow"));
+        QVERIFY(QMetaObject::invokeMethod(window, "openVault"));
+        QTRY_VERIFY(storage->isVisible());
+        QQuickItem* line = nullptr;
+        QTRY_VERIFY((line = seen(storage->contentItem(), QStringLiteral("knownPlace_cloudy"))));
+        QVERIFY2(line->property("text").toString().startsWith(QStringLiteral("WebDAV: someone@example.com   ")),
+                 qPrintable(line->property("text").toString()));
+        storage->close();
+        forgetCloudPlace(second);
+    }
+
+#else
     // Open a vault: your vaults on top, the storage locations below; the crown in
     // the start-up page's list (D-077).
     void open_a_vault_lists_the_known_vaults()
@@ -134,7 +188,7 @@ private slots:
         opens();
         storage->setProperty("selected", first);
         QVERIFY(!ok->isEnabled());
-        QMetaObject::invokeMethod(storage, "reject");
+        storage->close();
         QTRY_VERIFY(!storage->isVisible());
         QVERIFY(QFile::rename(first + QStringLiteral(".away"), first));
         controller->checkVaults();
@@ -152,7 +206,7 @@ private slots:
         QTRY_VERIFY(storage->isVisible());
         QVERIFY(!list->isVisible());
         QVERIFY(!ok->isVisible()); // no list: no OK, only Cancel
-        QMetaObject::invokeMethod(storage, "reject");
+        storage->close();
         QTRY_VERIFY(!storage->isVisible());
         // Creating: the same look, its own title (0.7.109).
         QVERIFY(QMetaObject::invokeMethod(window, "newVault"));
@@ -160,7 +214,7 @@ private slots:
         QCOMPARE(storage->title(), QStringLiteral("Create a vault"));
         QVERIFY(seen(storage->contentItem(), QStringLiteral("deviceTile"))->isVisible());
         QVERIFY(!ok->isVisible());
-        QMetaObject::invokeMethod(storage, "reject");
+        storage->close();
         QTRY_VERIFY(!storage->isVisible());
     }
 
@@ -436,6 +490,7 @@ private slots:
         QVERIFY(!opened(first));
         QMetaObject::invokeMethod(settings(), "close");
     }
+#endif
 };
 
 QTEST_MAIN(TestVaultRows)

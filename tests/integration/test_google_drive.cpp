@@ -37,9 +37,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_google_drive.cpp 0.8.116
+// test_google_drive.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: Each vault keeps its Google account's email; an older vault gets it at its next sync
 // v0.8.116: Two Google accounts in one run, each vault with its own; Google's account chooser always (D-080 point 13)
 // v0.8.115: Initial release: a vault on Google Drive, against a Drive of our own (D-080); its interruptions built apart
 
@@ -269,6 +270,28 @@ private slots:
         }
     }
 
+    // A vault without its account in the place record (made before 0.8.117,
+    // or Google did not answer) gets it quietly at its next sync, and once
+    // known it is not asked again.
+    void an_older_vault_gets_its_account_at_its_next_sync()
+    {
+        GoogleDriveTestServer server;
+        server.aboutRefused = true;
+        use(server);
+        auto first = device();
+        QVERIFY(createdOnDrive(*first));
+        const QString home = first->vaultPath();
+        QCOMPARE(first->vaultPlace(home).value(QStringLiteral("account")).toString(), QString());
+        QVERIFY(first->syncProblem().isEmpty()); // the sync itself went on
+        server.aboutRefused = false;
+        QVERIFY(syncedNow(*first));
+        QCOMPARE(first->vaultPlace(home).value(QStringLiteral("account")).toString(),
+                 GoogleDriveTestServer::emailOf(QStringLiteral("refresh-good")));
+        const int asked = server.aboutAsked;
+        QVERIFY(syncedNow(*first));
+        QCOMPARE(server.aboutAsked, asked);
+    }
+
 #else
     void the_tile_is_there_only_with_the_programs_google_client()
     {
@@ -470,6 +493,7 @@ private slots:
         controller->createGoogleDriveVault(QStringLiteral("Work"), QStringLiteral("pass"), QStringLiteral("pass"));
         QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked && controller->vaultPath() != home, 10000);
         QVERIFY(syncedNow(*controller));
+        const QString work = controller->vaultPath();
 
         QCOMPARE(addresses.size(), 2);
         for (const QUrl& address : addresses) {
@@ -508,6 +532,12 @@ private slots:
         QCOMPARE(titlesOfData(server.vaultData(vaultName)), QStringList{QStringLiteral("At home")});
         QCOMPARE(addresses.size(), 2);
         QVERIFY(controller->syncProblem().isEmpty());
+
+        // Each row shows its own account (the owner, 27 November 2026).
+        QTRY_COMPARE_WITH_TIMEOUT(controller->vaultPlace(home).value(QStringLiteral("account")).toString(),
+                                  GoogleDriveTestServer::emailOf(QStringLiteral("refresh-account-1")), 10000);
+        QCOMPARE(controller->vaultPlace(work).value(QStringLiteral("account")).toString(),
+                 GoogleDriveTestServer::emailOf(QStringLiteral("refresh-account-2")));
     }
 #endif
 };

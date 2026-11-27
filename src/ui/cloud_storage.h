@@ -32,9 +32,10 @@
 #include <optional>
 
 // --- Version ------------------------------------------------------------
-// cloud_storage.h 0.8.115
+// cloud_storage.h 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: signedInAs, shownCloudAccount and cloudAccountKey: the account in the place record (D-080 point 20)
 // v0.8.115: Superseded; Google Drive in the list of storages (D-080)
 // v0.8.114: Initial release: the base of every cloud storage, and where a vault is kept (D-080)
 
@@ -118,6 +119,10 @@ public:
     // move all the same.
     virtual void lock(const QString& name, Done done);
     virtual void unlock(const QString& name, const QByteArray& lockToken, Done done);
+    // The account signed in, as the person reads it, in body (UTF-8), for the
+    // second line of a vault's row (the owner, 27 November 2026). A storage
+    // whose account is already in its place record answers NotSupported.
+    virtual void signedInAs(Done done);
 
     // The largest answer read: a vault at most, a little more for a folder's list.
     static constexpr qint64 largestAnswerBytes = 256LL * 1024 * 1024 + 1024 * 1024;
@@ -157,6 +162,11 @@ void forgetCloudPlace(const QString& workingCopy);
 [[nodiscard]] QString newCloudId();
 // Where the vault is, as the person reads it, never with a password.
 [[nodiscard]] QString shownCloudAddress(const CloudPlace& place);
+// The account the vault is reached with, as the person reads it; "" when not
+// known yet. Kept in the place record on this computer, never in the vault.
+[[nodiscard]] QString shownCloudAccount(const CloudPlace& place);
+// The key of the account in a place's details.
+inline const QString cloudAccountKey = QStringLiteral("account");
 
 // One kind of cloud storage, for every window that names one: the Storage
 // tiles, "Move to …", the line under the vault's name (D-080). A kind not

@@ -30,9 +30,10 @@
 #include <QUrl>
 
 // --- Version ------------------------------------------------------------
-// cloud_storage.cpp 0.8.115
+// cloud_storage.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: signedInAs answers NotSupported by default; shownCloudAccount (D-080 point 20)
 // v0.8.115: Google Drive in the list of storages, when the build has its client (D-080)
 // v0.8.114: Initial release: the base of every cloud storage, and where a vault is kept (D-080)
 
@@ -68,6 +69,13 @@ bool usable(const CloudPlace& place)
 void CloudStorage::lock(const QString& name, Done done)
 {
     Q_UNUSED(name)
+    CloudReply reply;
+    reply.error = CloudError::NotSupported;
+    answerLater(std::move(done), reply);
+}
+
+void CloudStorage::signedInAs(Done done)
+{
     CloudReply reply;
     reply.error = CloudError::NotSupported;
     answerLater(std::move(done), reply);
@@ -185,6 +193,25 @@ QString shownCloudAddress(const CloudPlace& place)
         return place.details.value(QStringLiteral("folderPath")).toString() + QLatin1Char('/') + place.fileName;
     }
     return place.fileName;
+}
+
+QString shownCloudAccount(const CloudPlace& place)
+{
+    const QString kept = place.details.value(cloudAccountKey).toString();
+    if (!kept.isEmpty()) {
+        return kept;
+    }
+    if (place.kind == webDavKind) {
+        // The user and the server are in the place record already.
+        const WebDavPlace webDav = WebDavPlace::fromCloud(place);
+        const QString server = webDav.folder.host();
+        if (webDav.user.isEmpty()) {
+            return server;
+        }
+        return server.isEmpty() ? webDav.user
+                                : QCoreApplication::translate("CloudStorage", "%1 on %2").arg(webDav.user, server);
+    }
+    return {};
 }
 
 QList<CloudKind> cloudKinds()

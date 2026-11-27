@@ -2,6 +2,9 @@
 
 ## Now
 
+**Version 0.8.117**: a cloud vault's row shows its account, "Google Drive: <email>" or "WebDAV: <user> on <server>",
+in Settings > Vaults and Open a vault, kept in the place record on this computer (D-080 point 20); the empty line fixed.
+
 **Version 0.8.116**: a Google account per vault without a restart (D-080 point 13): every Sign in with Google in the
 Google Drive window opens the browser with Google's account chooser; each vault keeps and opens with its own sign-in.
 

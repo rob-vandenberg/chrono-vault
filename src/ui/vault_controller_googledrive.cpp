@@ -24,9 +24,10 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_googledrive.cpp 0.8.116
+// vault_controller_googledrive.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: The window's account read at sign-in and kept with the places made there; read again after a renewed sign-in (D-080 point 20)
 // v0.8.116: Every sign-in in the Google Drive window opens the browser; a vault's own sign-in is not reused there (D-080 point 13)
 // v0.8.115: Initial release: sign in to Google Drive, its folders, and a vault made, opened or moved there (D-080)
 
@@ -79,6 +80,9 @@ std::optional<CloudPlace> VaultController::driveTarget() const
     place.kind = googleDriveKind;
     place.details.insert(QStringLiteral("folderId"), drive->account().folderId);
     place.details.insert(QStringLiteral("folderPath"), drive->account().folderPath);
+    if (!googleAccount.isEmpty()) {
+        place.details.insert(cloudAccountKey, googleAccount);
+    }
     return place;
 }
 
@@ -91,6 +95,7 @@ void VaultController::connectGoogleDrive()
     // Every sign-in here opens the browser, so each vault created, added or
     // moved here keeps the Google account picked for it (D-080 point 13).
     googleToken.clear();
+    googleAccount.clear();
     drive.reset();
     driveSigningIn.reset();
     driveFiles.clear();
@@ -145,6 +150,14 @@ void VaultController::showGoogleDrive()
         }
         self->drive = std::move(self->driveSigningIn);
         self->driveFiles.clear();
+        // The account for the vaults' rows; without it a vault gets it at
+        // its first sync (the owner, 27 November 2026).
+        GoogleDriveStorage* signedIn = self->drive.get();
+        signedIn->signedInAs([self, signedIn](const CloudReply& who) {
+            if (self && self->drive.get() == signedIn && who.ok()) {
+                self->googleAccount = QString::fromUtf8(who.body);
+            }
+        });
         self->listGoogleDrive(true);
     });
 }
@@ -315,7 +328,7 @@ void VaultController::signInToCloudAgain()
     const quint64 session = vaultSession;
     QPointer<VaultController> self(this);
     connect(asking, &GoogleSignIn::finished, this,
-            [self, asking, session, where = *place](bool ok, const QString& refreshToken, const QString& problem) {
+            [self, asking, session, where = *place](bool ok, const QString& refreshToken, const QString& problem) mutable {
                 if (!self || self->googleSignIn.get() != asking) {
                     return;
                 }
@@ -327,6 +340,8 @@ void VaultController::signInToCloudAgain()
                 if (session != self->vaultSession || self->currentState != State::Unlocked) {
                     return;
                 }
+                // Read again from this sign-in at the sync it starts.
+                where.details.remove(cloudAccountKey);
                 self->keepCloudSecret(where, refreshToken);
                 self->stopWebDav();
                 self->makeSyncer(where, refreshToken);

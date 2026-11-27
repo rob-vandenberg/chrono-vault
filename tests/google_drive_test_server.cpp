@@ -30,9 +30,10 @@
 #include <QUrlQuery>
 
 // --- Version ------------------------------------------------------------
-// google_drive_test_server.cpp 0.8.116
+// google_drive_test_server.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: Drive's "about": the email of the account the access token belongs to
 // v0.8.116: Each sign-in its own account when asked, and the refresh tokens used (D-080 point 13)
 // v0.8.115: Initial release: Google's sign-in and the part of the Drive API Chrono Vault uses (D-080)
 
@@ -178,8 +179,8 @@ void GoogleDriveTestServer::answer(QTcpSocket* socket, const QByteArray& method,
     if (path == QLatin1String("/token")) {
         const QUrlQuery form(QString::fromLatin1(body));
         const QString grant = form.queryItemValue(QStringLiteral("grant_type"));
-        QJsonObject token{{QStringLiteral("access_token"),
-                           QStringLiteral("access-%1-%2").arg(tokenGeneration).arg(++tokensGiven)},
+        const QString access = QStringLiteral("access-%1-%2").arg(tokenGeneration).arg(++tokensGiven);
+        QJsonObject token{{QStringLiteral("access_token"), access},
                           {QStringLiteral("expires_in"), 3600},
                           {QStringLiteral("token_type"), QStringLiteral("Bearer")},
                           {QStringLiteral("scope"), QStringLiteral("https://www.googleapis.com/auth/drive.file")}};
@@ -190,6 +191,7 @@ void GoogleDriveTestServer::answer(QTcpSocket* socket, const QByteArray& method,
                 refreshTokensGiven.append(given);
             }
             token.insert(QStringLiteral("refresh_token"), given);
+            accountOfAccess.insert(access, given);
         } else {
             const QString used = form.queryItemValue(QStringLiteral("refresh_token"), QUrl::FullyDecoded);
             refreshTokensUsed.append(used);
@@ -197,6 +199,7 @@ void GoogleDriveTestServer::answer(QTcpSocket* socket, const QByteArray& method,
                 socket->write(reply(400, json({{QStringLiteral("error"), QStringLiteral("invalid_grant")}})));
                 return;
             }
+            accountOfAccess.insert(access, used);
         }
         socket->write(reply(200, json(token)));
         return;
@@ -206,6 +209,18 @@ void GoogleDriveTestServer::answer(QTcpSocket* socket, const QByteArray& method,
     const QByteArray authorization = headers.value("authorization");
     if (!authorization.startsWith("Bearer access-" + QByteArray::number(tokenGeneration) + "-")) {
         socket->write(reply(401, json({{QStringLiteral("error"), QStringLiteral("unauthorized")}})));
+        return;
+    }
+    if (path == QLatin1String("/drive/v3/about")) {
+        ++aboutAsked;
+        if (aboutRefused) {
+            socket->write(reply(500, json({{QStringLiteral("error"), QStringLiteral("backend")}})));
+            return;
+        }
+        const QString access = QString::fromLatin1(authorization.mid(int(qstrlen("Bearer "))));
+        socket->write(reply(200, json({{QStringLiteral("user"),
+                                        QJsonObject{{QStringLiteral("emailAddress"),
+                                                     emailOf(accountOfAccess.value(access))}}}})));
         return;
     }
     const auto described = [](const File& file) {

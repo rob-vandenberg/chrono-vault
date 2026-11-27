@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.115
+// SettingsWindow.qml 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: A cloud vault's line shows its account; the line was empty (arg takes one value in QML) (D-080 point 20)
 // v0.8.115: Any storage in the vault lines and Disconnect; Move to Google Drive; Also delete the vault on Google Drive (D-080)
 // v0.7.111: A vault row shows where it is kept; question dialogs fit their text (D-079)
 // v0.7.110: Open with what is kept: the vault shown stays until the other one is open (D-078)
@@ -1101,8 +1102,12 @@ ApplicationWindow {
                                             Item { Layout.fillWidth: true }
                                         }
                                         Label {
-                                            text: vaultRow.place.inCloud ? qsTr("%1: %2").arg(vaultRow.place.storageName, vaultRow.place.address)
-                                                                         : qsTr("This computer: %1").arg(vaultRow.place.address)
+                                            objectName: "placeLine_" + vaultRow.name
+                                            // A cloud vault's account (the owner, 27 November 2026); arg()
+                                            // takes one value in QML, two make the line empty.
+                                            text: !vaultRow.place.inCloud ? qsTr("This computer: %1").arg(vaultRow.place.address)
+                                                  : vaultRow.place.account ? qsTr("%1: %2").arg(vaultRow.place.storageName).arg(vaultRow.place.account)
+                                                  : vaultRow.place.storageName
                                             textFormat: Text.PlainText
                                             opacity: 0.7
                                             elide: Text.ElideMiddle

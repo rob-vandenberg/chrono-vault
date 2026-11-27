@@ -255,7 +255,12 @@
 <context>
     <name>CloudStorage</name>
     <message>
-        <location filename="../src/ui/cloud_storage.cpp" line="+193"/>
+        <location filename="../src/ui/cloud_storage.cpp" line="+211"/>
+        <source>%1 on %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>WebDAV</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2518,12 +2523,12 @@
     </message>
     <message>
         <location line="-150"/>
-        <location line="+1147"/>
+        <location line="+1151"/>
         <source>Keyboard shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1148"/>
+        <location line="-1152"/>
         <location line="+441"/>
         <source>Vaults</source>
         <translation type="unfinished"></translation>
@@ -2633,17 +2638,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+51"/>
+        <location line="+55"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-35"/>
+        <location line="-37"/>
         <source>This computer: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+10"/>
         <source>Last synchronized: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2784,7 +2789,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-881"/>
+        <location line="-885"/>
         <source>Day</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2870,7 +2875,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+801"/>
+        <location line="+805"/>
         <source>Cancel, close a window</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2975,16 +2980,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1446"/>
-        <location line="+925"/>
+        <location line="-1450"/>
+        <location line="+929"/>
         <location line="+460"/>
         <location line="+67"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-1452"/>
-        <location line="+1273"/>
+        <location line="-1456"/>
+        <location line="+1277"/>
         <location line="+118"/>
         <location line="+71"/>
         <source>Cancel</source>
@@ -3024,12 +3029,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>%1: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Last synchronized: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4461,7 +4466,7 @@
 <context>
     <name>chrono_vault::GoogleSignIn</name>
     <message>
-        <location filename="../src/ui/google_drive_storage.cpp" line="+876"/>
+        <location filename="../src/ui/google_drive_storage.cpp" line="+901"/>
         <source>Chrono Vault cannot wait for Google&apos;s answer on this computer.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4471,7 +4476,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+20"/>
         <source>No web browser could be opened for the Google sign-in.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4695,7 +4700,7 @@
     <message>
         <location line="+4"/>
         <location line="+2692"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+543"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+544"/>
         <source>Choose a master password.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4980,7 +4985,7 @@
     </message>
     <message>
         <location line="+68"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-464"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-465"/>
         <source>Not synchronized: the server&apos;s password is needed. The conflict stays.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5340,7 +5345,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+53"/>
+        <location filename="../src/ui/vault_controller_googledrive.cpp" line="+54"/>
         <source>Google Drive cannot be reached. Check the network.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5370,19 +5375,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+21"/>
         <source>This version of Chrono Vault has no Google Drive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+110"/>
+        <location line="+121"/>
         <source>That folder is not on Google Drive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+42"/>
         <location line="+17"/>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="+436"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="+437"/>
         <source>Sign in to Google Drive first.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5397,7 +5402,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/vault_controller_webdav.cpp" line="-434"/>
+        <location filename="../src/ui/vault_controller_webdav.cpp" line="-435"/>
         <source>The address does not answer as a WebDAV folder.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5417,7 +5422,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+157"/>
+        <location line="+158"/>
         <location line="+37"/>
         <source>Not synchronized: %1</source>
         <translation type="unfinished"></translation>

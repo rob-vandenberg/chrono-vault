@@ -16,9 +16,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # --- Version ------------------------------------------------------------
-# tests/integration/CMakeLists.txt 0.8.115
+# tests/integration/CMakeLists.txt 0.8.117
 
 # --- Version history ----------------------------------------------------
+# v0.8.117: test_vault_row_accounts (D-080)
 # v0.8.115: test_google_drive and its interruptions (D-080)
 # v0.6.100: test_vault_rows (D-071)
 # v0.6.92: test_exact_scaling (D-069)
@@ -92,6 +93,13 @@ qt_add_executable(test_vault_rows test_vault_rows.cpp intuitive_fixture.h)
 target_link_libraries(test_vault_rows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
 chrono_vault_strict_warnings(test_vault_rows)
 chrono_vault_add_test(test_vault_rows)
+
+# A cloud vault's account in its row, apart so each stays under 20 seconds (OR-11).
+qt_add_executable(test_vault_row_accounts test_vault_rows.cpp intuitive_fixture.h)
+target_compile_definitions(test_vault_row_accounts PRIVATE CHRONO_VAULT_ROW_ACCOUNTS)
+target_link_libraries(test_vault_row_accounts PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Test)
+chrono_vault_strict_warnings(test_vault_row_accounts)
+chrono_vault_add_test(test_vault_row_accounts)
 
 qt_add_executable(test_audit_windows test_audit_windows.cpp intuitive_fixture.h)
 target_link_libraries(test_audit_windows PRIVATE chrono_vault_ui chrono_vault_uiplugin Qt6::Gui Qt6::Network Qt6::Qml Qt6::Quick Qt6::Test)

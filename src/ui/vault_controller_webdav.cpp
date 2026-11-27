@@ -30,9 +30,10 @@
 #include <algorithm>
 
 // --- Version ------------------------------------------------------------
-// vault_controller_webdav.cpp 0.8.115
+// vault_controller_webdav.cpp 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: vaultPlace gives the account; a found account refreshes the rows (D-080 point 20)
 // v0.8.115: Create and open shared by every storage; a Google sign-in renewed in the browser (D-080)
 // v0.8.114: The sync of a vault in any cloud storage, CloudSync; vaultPlace names the storage (D-080)
 // v0.5.81: Retry sync answered by the sync it asked for (D-061)
@@ -213,6 +214,7 @@ void VaultController::makeSyncer(const CloudPlace& place, const QString& secret)
         // (D-032, D-054).
         checkForChangeElsewhere();
     });
+    connect(syncer.get(), &CloudSync::accountFound, this, &VaultController::syncChanged);
     syncTimer.start(syncEveryMs);
     syncer->start(); // every unlock syncs (ref)
     emit syncChanged();
@@ -778,6 +780,7 @@ QVariantMap VaultController::vaultPlace(const QString& vaultFile) const
         {QStringLiteral("onWebDav"), webDav},
         {QStringLiteral("address"), shownCloudAddress(*place)},
         {QStringLiteral("user"), webDav ? WebDavPlace::fromCloud(*place).user : QString()},
+        {QStringLiteral("account"), shownCloudAccount(*place)},
         {QStringLiteral("lastSynced"), synced},
     };
 }

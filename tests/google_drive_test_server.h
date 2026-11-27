@@ -29,9 +29,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// google_drive_test_server.h 0.8.116
+// google_drive_test_server.h 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: Drive's "about": the email of the account the access token belongs to
 // v0.8.116: Each sign-in its own account when asked, and the refresh tokens used (D-080 point 13)
 // v0.8.115: Initial release: Google's sign-in and the part of the Drive API Chrono Vault uses (D-080)
 
@@ -75,6 +76,10 @@ public:
     QStringList refreshTokensGiven;
     // Every refresh token a renewal came with, in order.
     QStringList refreshTokensUsed;
+    // Drive's "about" answers the email of the sign-in: "<refresh token>@example.com".
+    [[nodiscard]] static QString emailOf(const QString& refreshToken) { return refreshToken + QStringLiteral("@example.com"); }
+    bool aboutRefused = false;
+    int aboutAsked = 0;
     // Every access token given so far stops working (it ran out).
     void expireTokens() { ++tokenGeneration; }
     // Called when a new version of a file is about to be written: a test may
@@ -103,4 +108,5 @@ private:
     QTcpServer* server;
     int counter = 0;
     int tokenGeneration = 0;
+    QHash<QString, QString> accountOfAccess; // access token to the refresh token it came from
 };

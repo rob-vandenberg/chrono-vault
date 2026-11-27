@@ -30,9 +30,10 @@
 #include <functional>
 
 // --- Version ------------------------------------------------------------
-// google_drive_storage.h 0.8.115
+// google_drive_storage.h 0.8.117
 
 // --- Version history ----------------------------------------------------
+// v0.8.117: signedInAs (D-080 point 20)
 // v0.8.115: Initial release: Google Drive as a cloud storage, with the permission drive.file only (D-080)
 
 class QNetworkReply;
@@ -94,6 +95,8 @@ public:
     void tagOf(const QString& name, Done done) override;
     void move(const QString& from, const QString& to, const QByteArray& lockToken, Done done,
               bool overwrite = true) override;
+    // The Google account's email, from Drive's "about" (drive.file is enough).
+    void signedInAs(Done done) override;
 
     // For the file dialog: a subfolder of the folder shown (as the last list
     // named it), ".." for its parent, never above the "Chrono Vault" folder.
