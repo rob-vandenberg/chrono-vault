@@ -31,9 +31,10 @@
 #include <QtTest>
 
 // --- Version ------------------------------------------------------------
-// test_reader.cpp 0.8.125
+// test_reader.cpp 0.8.126
 
 // --- Version history ----------------------------------------------------
+// v0.8.126: The standard master password dialog, a second vault open (D-043)
 // v0.8.125: Ticking the box asks the open vault's master password before the touch (D-043)
 // v0.4.73: The finger asked only once the window is active
 // v0.4.73: The width compared to within a pixel, as the layout rounds
@@ -122,12 +123,12 @@ private:
     }
 };
 
-// Turned on as the settings window does: the open vault's own master password
-// typed and proven first (D-043).
+// Turned on as the settings window does: the master password, the primary
+// vault's, typed and proven first (D-043).
 bool turnOn(VaultController& controller, const QString& password = QStringLiteral("pass"))
 {
     QSignalSpy proven(&controller, &VaultController::proven);
-    controller.askFor(controller.vaultPath());
+    controller.askFor(controller.primaryVault());
     controller.proveWithPassword(password);
     if (!proven.wait(10000) && proven.isEmpty()) {
         return false;
@@ -430,9 +431,10 @@ void TestReader::one_setting_for_all_vaults_keeps_each_key_at_its_unlock()
     QVERIFY(!controller->quickUnlockOn());
 }
 
-// Settings > Security: ticking the box asks the open vault's own master
-// password first; Cancel and a wrong password keep nothing and leave it
-// unticked; the right one goes on to the touch (the owner, D-043).
+// Settings > Security, a second vault open: ticking the box first shows the
+// standard dialog asking the master password; Cancel, a wrong password and the
+// open vault's own password ask no finger and leave it unticked; the master
+// password goes on to the finger (the owner, D-043).
 void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
 {
     QQmlApplicationEngine engine;
@@ -448,6 +450,10 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     controller->createVault(QUrl::fromLocalFile(folder->filePath(QStringLiteral("box.chronovault"))),
                             QStringLiteral("pass"), QStringLiteral("pass"));
     QTRY_COMPARE(controller->state(), State::Unlocked);
+    const QString second = folder->filePath(QStringLiteral("second.chronovault"));
+    controller->createVault(QUrl::fromLocalFile(second), QStringLiteral("two"), QStringLiteral("two"));
+    QTRY_VERIFY(controller->vaultPath() == second && controller->state() == State::Unlocked);
+    QVERIFY(controller->primaryVault() != second);
 
     QObject* settings = window->findChild<QObject*>(QStringLiteral("settingsWindow"));
     QVERIFY(settings);
@@ -460,9 +466,14 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     QObject* field = asked->findChild<QObject*>(QStringLiteral("askField"));
     QVERIFY(field);
 
-    // Ticked: the password is asked, no finger, the box still unticked.
+    // Ticked: the standard master password dialog, no finger, the box still unticked.
     QVERIFY(QMetaObject::invokeMethod(box, "click"));
     QTRY_VERIFY(asked->isVisible());
+    QCOMPARE(asked->title(), QStringLiteral("Unlock the vault"));
+    QCOMPARE(asked->property("vaultFile").toString(), controller->primaryVault());
+    QCOMPARE(asked->findChild<QObject*>(QStringLiteral("askHeading"))->property("text").toString(),
+             QStringLiteral("Enter the Master Password to unlock"));
+    QCOMPARE(asked->findChild<QObject*>(QStringLiteral("askOk"))->property("text").toString(), QStringLiteral("Unlock"));
     QCOMPARE(reader->asked, 0);
     QVERIFY(!box->property("checked").toBool());
     QVERIFY(!asked->findChild<QQuickItem*>(QStringLiteral("askFinger"))->isVisible());
@@ -473,6 +484,14 @@ void TestReader::ticking_the_box_asks_the_master_password_before_the_touch()
     QTRY_VERIFY(controller->askTrouble());
     QVERIFY(asked->isVisible());
     QVERIFY(asked->findChild<QQuickItem*>(QStringLiteral("askProblem"))->isVisible());
+    QCOMPARE(reader->asked, 0);
+    QVERIFY(!box->property("checked").toBool());
+
+    // The open vault's own password is not the master password.
+    field->setProperty("text", QStringLiteral("two"));
+    QVERIFY(QMetaObject::invokeMethod(asked, "go"));
+    QTRY_VERIFY(controller->askTrouble());
+    QVERIFY(asked->isVisible());
     QCOMPARE(reader->asked, 0);
     QVERIFY(!box->property("checked").toBool());
 

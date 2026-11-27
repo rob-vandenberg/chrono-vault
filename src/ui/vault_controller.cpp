@@ -55,9 +55,10 @@
 #include <utility>
 
 // --- Version ------------------------------------------------------------
-// vault_controller.cpp 0.8.125
+// vault_controller.cpp 0.8.126
 
 // --- Version history ----------------------------------------------------
+// v0.8.126: The fingerprint is turned on only with the master password, the primary vault's, typed just now (D-043)
 // v0.8.125: The fingerprint is turned on only with the open vault's master password typed just now (D-043)
 // v0.8.122: Delete a vault: everything of it on this computer, its password in the primary (D-083)
 // v0.8.119: Sort By per vault and each item's use, on this computer (D-081)
@@ -2089,13 +2090,12 @@ void VaultController::setQuickUnlock(bool on)
         return;
     }
     // One finger asked at a time: the switch waits for it (D-042). Only with the
-    // open vault's own master password typed just now; the key kept is the one
-    // proven (the owner, D-043).
-    if (currentState == State::Unlocked && quickAvailable && !settingUp && askedFor == path && proofKey.isValid() &&
-        proofTyped) {
+    // master password, the primary vault's, typed just now (the owner, D-043).
+    if (currentState == State::Unlocked && quickAvailable && !settingUp && !askedFor.isEmpty() &&
+        askedFor == primaryVault() && proofKey.isValid() && proofTyped) {
         settingUp = true;
         tellSetup(QString(), false);
-        quick->store(path, quickSecretOf(proofKey, proofKeyfile));
+        quick->store(path, quickSecretOf(key, keyfileSecret));
     }
 }
 

@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.125 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.126 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.125
+# CMakeLists.txt 0.8.126
 
 # --- Version history ----------------------------------------------------
+# v0.8.126: Version 0.8.126; the master password, the primary vault's, before the finger (D-043)
 # v0.8.125: Version 0.8.125; the master password before the fingerprint (D-043)
 # v0.8.124: Version 0.8.124; the tray icon only while its setting is on (D-019)
 # v0.8.123: Version 0.8.123; the Delete dialog as its mockup (D-083)

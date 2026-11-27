@@ -1022,3 +1022,11 @@ proven just now (`askFor`, `proveWithPassword`), and keeps the key proven. In Se
 wrong and Cancel keep nothing, the right one goes on to the touch, unticking asks nothing) pass, with
 `test_pin_unlock`; each under 20 seconds.
 
+## 27 November 2026: version 0.8.126, the master password, not the open vault's
+
+The owner: the master password is always the primary vault's. `setQuickUnlock(true)` now needs the primary vault's
+master password typed and proven just now, and keeps the open vault's key as before 0.8.125; the box opens the
+standard dialog for the primary vault, unchanged (its own title and OK of 0.8.125 removed). `test_quick_unlock` and
+`test_reader` check it with a second vault open (the open vault's own password asks no finger); both pass, with
+`test_pin_unlock`, each under 20 seconds.
+
