@@ -21,9 +21,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// AskWindow.qml 0.8.130
+// AskWindow.qml 0.8.131
 
 // --- Version history ----------------------------------------------------
+// v0.8.131: Forget, Disconnect and Delete: the action red at the left, Cancel the default, Enter cancels (the owner, D-060)
 // v0.8.130: The password after the warning: no proof handed on (D-060)
 // v0.8.129: Forget, Disconnect and Delete: their words; the proof handed on to the warning that follows (D-060)
 // v0.8.128: The action as one word, its title, heading and button in whole sentences (D-073)
@@ -174,10 +175,35 @@ DialogWindow {
             VaultController.proveWithPassword(words)
     }
 
+    // Forget, Disconnect and Delete (the owner, D-060, D-083): the action red,
+    // apart at the left; Cancel the default, so Enter cancels, also in the field.
+    readonly property bool destroys: action === "forget" || action === "disconnect" || action === "delete"
+    function pressEnter() {
+        if (!destroys) {
+            go()
+            return
+        }
+        const target = enterTarget
+        if (target && target.enabled && target.visible)
+            target.click()
+    }
+
     title: words[0]
     standardButtons: Dialog.Cancel
+    defaultButton: destroys ? Dialog.Cancel : Dialog.NoButton
+    leftButtons: Button {
+        objectName: "askAction"
+        visible: askWindow.destroys
+        text: askWindow.okText
+        palette.buttonText: "#ff6b6b" // every button with red text (the owner, D-082)
+        enabled: field.text !== "" && !askWindow.busy && askWindow.waitSeconds === 0
+        // Enter never acts here (the owner, D-083).
+        property bool enterNeverPresses: true
+        onClicked: askWindow.go()
+    }
     rightButtons: Button {
         objectName: "askOk"
+        visible: !askWindow.destroys
         text: askWindow.okText
         enabled: (field.text !== "" || askWindow.ownerSetsPin) && !askWindow.busy && askWindow.waitSeconds === 0 && askWindow.pinReady
         highlighted: true
@@ -240,7 +266,7 @@ DialogWindow {
             placeholderText: askWindow.hint
             enabled: askWindow.waitSeconds === 0
             Layout.fillWidth: true
-            onAccepted: askWindow.go()
+            onAccepted: askWindow.pressEnter()
             onEnabledChanged: if (enabled && askWindow.visible) forceActiveFocus()
         }
         Item {

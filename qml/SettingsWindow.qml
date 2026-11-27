@@ -22,9 +22,10 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// SettingsWindow.qml 0.8.130
+// SettingsWindow.qml 0.8.131
 
 // --- Version history ----------------------------------------------------
+// v0.8.131: Forget and Disconnect on a locked vault only, else refused as Delete; Continue next to Cancel (the owner, D-060)
 // v0.8.130: Forget and Disconnect on a closed or locked vault: first the warning, then the password dialog (the owner, D-060)
 // v0.8.129: Forget and Disconnect on a closed or locked vault: first the password dialog, then the warning (the owner, D-060)
 // v0.8.128: The password dialog per action; Forget and Disconnect ask a closed or locked vault's password; the fingerprint for the primary only (D-043, D-060, D-073)
@@ -97,11 +98,10 @@ import QtQuick.Layouts
 // topic being shown, to be kept with OK (D-022).
 ApplicationWindow {
     id: settingsWindow
-    // Forget and Disconnect ask the password of a closed or locked vault whose
-    // file is on this computer; the open vault's owner needs none (the owner, D-060).
+    // Forget and Disconnect, on a locked vault only, ask its password when its
+    // file is on this computer; one that is not here cannot be proven (the owner, D-060).
     function needsVaultPassword(file) {
         return VaultController.foundVaults.indexOf(file) >= 0
-               && !(VaultController.vaultPath === file && VaultController.state === VaultController.Unlocked)
     }
     // The program's font, so the UI scaling reaches every control (D-023).
     font: Appearance.font
@@ -254,17 +254,29 @@ ApplicationWindow {
         target: VaultController
         function onVaultMenuProblem(text) { settingsWindow.problem = text }
     }
-    // Delete… (D-083): the checks in the owner's order, then the question.
-    function askDelete(vaultFile) {
+    // Forget…, Disconnect… and Delete… only on a locked vault (the owner, D-060,
+    // D-083): the checks first, in the owner's order; true when one refuses.
+    function refuses(action, vaultFile, storageName) {
         settingsWindow.problem = ""
-        const refusal = VaultController.deleteRefusal(vaultFile)
-        if (refusal !== 0) {
-            noDeleteWindow.vaultFile = vaultFile
-            noDeleteWindow.refusal = refusal
-            noDeleteWindow.open()
+        let refusal = 0
+        if (action === "delete") {
+            refusal = VaultController.deleteRefusal(vaultFile)
         } else {
-            deleteVaultWindow.askVault(vaultFile)
+            const state = VaultController.vaultStateOf(vaultFile)
+            refusal = state === 2 ? 2 : state === 1 ? 3 : 0
         }
+        if (refusal === 0)
+            return false
+        refusalWindow.action = action
+        refusalWindow.storageName = storageName
+        refusalWindow.vaultFile = vaultFile
+        refusalWindow.refusal = refusal
+        refusalWindow.open()
+        return true
+    }
+    function askDelete(vaultFile) {
+        if (!refuses("delete", vaultFile, ""))
+            deleteVaultWindow.askVault(vaultFile)
     }
     function openKnown(vaultFile) {
         problem = ""
@@ -1267,6 +1279,8 @@ ApplicationWindow {
                                                 visible: vaultRow.canForget
                                                 height: visible ? implicitHeight : 0
                                                 onTriggered: {
+                                                    if (settingsWindow.refuses("forget", vaultRow.modelData, ""))
+                                                        return
                                                     forgetWindow.vaultFile = vaultRow.modelData
                                                     forgetWindow.onWebDav = vaultRow.place.inCloud === true
                                                     forgetWindow.open()
@@ -1292,6 +1306,9 @@ ApplicationWindow {
                                                 visible: vaultRow.canDisconnect
                                                 height: visible ? implicitHeight : 0
                                                 onTriggered: {
+                                                    if (settingsWindow.refuses("disconnect", vaultRow.modelData,
+                                                                               vaultRow.place.storageName || ""))
+                                                        return
                                                     disconnectWindow.vaultFile = vaultRow.modelData
                                                     disconnectWindow.storageName = vaultRow.place.storageName || ""
                                                     disconnectWindow.open()
@@ -1554,27 +1571,33 @@ ApplicationWindow {
                             objectName: "moveToGoogleDriveWindow"
                             transientParent: settingsWindow
                         }
-                        // Delete…: first why it cannot be deleted now, in the owner's
-                        // order; a locked vault asks its own password (D-083).
+                        // Forget…, Disconnect… and Delete…: first why it cannot be done
+                        // now, in the owner's order; only a locked vault goes on (D-060, D-083).
                         DialogWindow {
-                            id: noDeleteWindow
+                            id: refusalWindow
                             fitsContent: true // only says: as tall as its text (D-079)
-                            objectName: "noDeleteWindow"
+                            objectName: "refusalWindow"
                             transientParent: settingsWindow
+                            property string action: "delete"
+                            property string storageName: ""
                             property string vaultFile: ""
                             property int refusal: 0
-                            title: qsTr("Delete the vault")
+                            title: action === "forget" ? qsTr("Forget the vault")
+                                   : action === "disconnect" ? qsTr("Disconnect from %1").arg(storageName)
+                                   : qsTr("Delete the vault")
                             standardButtons: Dialog.Close
                             Label {
                                 objectName: "dialogText"
                                 Layout.fillWidth: true
                                 textFormat: Text.PlainText
-                                readonly property string name: VaultController.vaultNameOf(noDeleteWindow.vaultFile)
-                                text: noDeleteWindow.refusal === 1
+                                readonly property string name: VaultController.vaultNameOf(refusalWindow.vaultFile)
+                                text: refusalWindow.refusal === 1
                                       ? qsTr("“%1” is your primary vault and cannot be deleted while you have other vaults. To delete it, first make another vault primary with Make primary.").arg(name)
-                                      : (noDeleteWindow.refusal === 2 ? qsTr("The vault “%1” is currently open.").arg(name)
-                                                                      : qsTr("The vault “%1” is currently closed.").arg(name))
-                                        + " " + qsTr("The vault must be locked before it can be deleted.")
+                                      : (refusalWindow.refusal === 2 ? qsTr("The vault “%1” is currently open.").arg(name)
+                                                                     : qsTr("The vault “%1” is currently closed.").arg(name))
+                                        + " " + (refusalWindow.action === "forget" ? qsTr("The vault must be locked before it can be forgotten.")
+                                                 : refusalWindow.action === "disconnect" ? qsTr("The vault must be locked before it can be disconnected.")
+                                                 : qsTr("The vault must be locked before it can be deleted."))
                                 wrapMode: Text.Wrap
                             }
                         }
@@ -1592,11 +1615,13 @@ ApplicationWindow {
                             property bool onWebDav: false
                             title: qsTr("Forget the vault")
                             standardButtons: Dialog.Cancel
+                            // Continue next to Cancel, the default: Enter cancels (the owner, D-060).
+                            defaultButton: Dialog.Cancel
                             rightButtons: Button {
-                                objectName: "forgetButton"
-                                text: qsTr("Forget")
-                                // A closed or locked vault: then its password, in the
-                                // standard dialog (the owner, D-060).
+                                objectName: "forgetContinue"
+                                text: qsTr("Continue")
+                                // Then the locked vault's password, in the standard
+                                // dialog, where Forget acts (the owner, D-060).
                                 onClicked: {
                                     const file = forgetWindow.vaultFile
                                     forgetWindow.accept()
@@ -1620,9 +1645,9 @@ ApplicationWindow {
                                 wrapMode: Text.Wrap
                             }
                         }
-                        // A closed or locked vault: first the warning, then its password in
-                        // the standard dialog (the owner, D-060). The open vault's owner, and
-                        // a vault whose file is not here, only the warning.
+                        // A locked vault: first the warning, then its password in the
+                        // standard dialog (the owner, D-060). A vault whose file is not
+                        // here: only the warning.
                         AskWindow {
                             id: forgetAsk
                             objectName: "forgetAskWindow"
@@ -1644,11 +1669,13 @@ ApplicationWindow {
                             property string storageName: ""
                             title: qsTr("Disconnect from %1").arg(storageName)
                             standardButtons: Dialog.Cancel
+                            // Continue next to Cancel, the default: Enter cancels (the owner, D-060).
+                            defaultButton: Dialog.Cancel
                             rightButtons: Button {
-                                objectName: "disconnectButton"
-                                text: qsTr("Disconnect")
-                                // A closed or locked vault: then its password, in the
-                                // standard dialog (the owner, D-060).
+                                objectName: "disconnectContinue"
+                                text: qsTr("Continue")
+                                // Then the locked vault's password, in the standard
+                                // dialog, where Disconnect acts (the owner, D-060).
                                 onClicked: {
                                     const file = disconnectWindow.vaultFile
                                     disconnectWindow.accept()

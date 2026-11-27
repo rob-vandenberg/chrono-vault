@@ -442,10 +442,25 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QVERIFY(shown(QStringLiteral("disconnect_Home")));
     QVERIFY(shown(QStringLiteral("importVault_Home")));
     QVERIFY(shown(QStringLiteral("exportVault_Home")));
+    // The open vault: refused, it must be locked first (the owner, D-060).
     QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("disconnect_Home")), "triggered"));
+    QObject* refusal = settings->findChild<QObject*>(QStringLiteral("refusalWindow"));
     QObject* disconnectWindow = settings->findChild<QObject*>(QStringLiteral("disconnectWindow"));
-    QVERIFY(disconnectWindow);
+    QVERIFY(refusal && disconnectWindow);
+    QTRY_VERIFY(refusal->property("visible").toBool());
+    QCOMPARE(refusal->property("title").toString(), QStringLiteral("Disconnect from WebDAV"));
+    QCOMPARE(inWindow(refusal, QStringLiteral("dialogText"))->property("text").toString(),
+             QStringLiteral("The vault “Home” is currently open. The vault must be locked before it can be disconnected."));
+    QVERIFY(!disconnectWindow->property("visible").toBool());
+    QVERIFY(QMetaObject::invokeMethod(refusal, "reject"));
+    QTRY_VERIFY(!refusal->property("visible").toBool());
+    // Locked: the warning, its Continue, then the password dialog where Disconnect acts.
+    controller->lock();
+    QTRY_COMPARE(controller->state(), State::Locked);
+    QTRY_COMPARE(controller->vaultStateOf(controller->vaultPath()), 0);
+    QVERIFY(QMetaObject::invokeMethod(entryOf(QStringLiteral("disconnect_Home")), "triggered"));
     QTRY_VERIFY(disconnectWindow->property("visible").toBool());
+    QVERIFY(!refusal->property("visible").toBool());
     QVERIFY(!settings->findChild<QObject*>(QStringLiteral("alsoDeleteBox")));
     // The storage and the vault are named; nothing is deleted (D-060).
     const QString said = inWindow(disconnectWindow, QStringLiteral("dialogText"))->property("text").toString();
@@ -455,9 +470,18 @@ void TestWebDavWindows::a_new_vault_on_a_webdav_server_through_the_windows()
     QCOMPARE(said.count(QStringLiteral("<p ")), 3);
     QVERIFY2(said.endsWith(QStringLiteral("This action cannot be undone. Are you sure you want to disconnect from “Home”?</p>")),
              qPrintable(said));
-    click(inWindow(disconnectWindow, QStringLiteral("disconnectButton")));
-    QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);
+    click(inWindow(disconnectWindow, QStringLiteral("disconnectContinue")));
     QTRY_VERIFY(!disconnectWindow->property("visible").toBool());
+    QObject* disconnectAsk = settings->findChild<QObject*>(QStringLiteral("disconnectAskWindow"));
+    QVERIFY(disconnectAsk);
+    QTRY_VERIFY(disconnectAsk->property("visible").toBool());
+    QTRY_VERIFY(shown(QStringLiteral("disconnect_Home"))); // not yet: the password first
+    inWindow(disconnectAsk, QStringLiteral("askField"))->setProperty("text", QStringLiteral("pass"));
+    click(inWindow(disconnectAsk, QStringLiteral("askAction")));
+    QTRY_VERIFY(!disconnectAsk->property("visible").toBool());
+    controller->unlock(QStringLiteral("pass"));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->state() == State::Unlocked, 10000);
+    QTRY_VERIFY_WITH_TIMEOUT(!controller->onWebDav(), 10000);
     QVERIFY(server.files.contains(QStringLiteral("Work vaults/Home.chronovault")));
     QTRY_VERIFY(!shown(QStringLiteral("disconnect_Home")));
     QVERIFY(shown(QStringLiteral("moveVault_Home")));

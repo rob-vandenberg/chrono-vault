@@ -21,19 +21,19 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 // --- Version ------------------------------------------------------------
-// DeleteVaultWindow.qml 0.8.130
+// DeleteVaultWindow.qml 0.8.131
 
 // --- Version history ----------------------------------------------------
+// v0.8.131: Continue next to Cancel; Delete, red at the left, is in the password dialog (the owner, D-083)
 // v0.8.130: First this warning, then the password in the standard dialog (the owner, D-083)
 // v0.8.129: Two dialogs: the password in the standard dialog first, then this warning (the owner, D-083)
 // v0.8.123: As wide as the question on one line; whose password it asks; "Password" always; requires its keyfile (D-083)
 // v0.8.122: Initial release (D-083)
 
 // Delete… in Settings > Vaults (the owner, D-083): first this warning; its
-// Delete opens the standard dialog, where the locked vault's own password
-// (and keyfile) is typed and proven; only then it is deleted. Delete stands
-// apart at the far left in red; Cancel is the default; Enter and Esc never
-// delete.
+// Continue, next to Cancel, opens the standard dialog, where the locked
+// vault's own password (and keyfile) is typed and proven and its red Delete
+// deletes. Cancel is the default; Enter and Esc never delete.
 DialogWindow {
     id: deleteWindow
     objectName: "deleteVaultWindow"
@@ -78,12 +78,9 @@ DialogWindow {
 
     standardButtons: Dialog.Cancel
     defaultButton: Dialog.Cancel
-    leftButtons: Button {
-        objectName: "deleteVaultButton"
-        text: qsTr("Delete")
-        palette.buttonText: "#ff6b6b" // every button with red text (the owner, D-082)
-        // Enter never deletes (the owner, D-083).
-        property bool enterNeverPresses: true
+    rightButtons: Button {
+        objectName: "deleteContinue"
+        text: qsTr("Continue")
         onClicked: deleteWindow.go()
     }
     Connections {

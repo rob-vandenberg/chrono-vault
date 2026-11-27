@@ -2,6 +2,11 @@
 
 ## Now
 
+**Version 0.8.131**: Forget, Disconnect and Delete require a locked vault; on an open or closed vault Forget and
+Disconnect are refused as Delete. A locked vault: the warning with Continue next to Cancel, then the standard password
+dialog with Forget, Disconnect or Delete in red at the far left; Cancel the default, Enter cancels (the owner, D-060,
+D-083).
+
 **Version 0.8.130**: Forget, Disconnect and Delete on a closed or locked vault: first the warning, then the standard
 password dialog; only a right password there acts (the owner, D-060, D-083).
 

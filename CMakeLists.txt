@@ -17,12 +17,13 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(chrono-vault VERSION 0.8.130 LANGUAGES CXX)
+project(chrono-vault VERSION 0.8.131 LANGUAGES CXX)
 
 # --- Version ------------------------------------------------------------
-# CMakeLists.txt 0.8.130
+# CMakeLists.txt 0.8.131
 
 # --- Version history ----------------------------------------------------
+# v0.8.131: Version 0.8.131; Forget, Disconnect and Delete on a locked vault only; Continue, then the red action at the left (D-060, D-083)
 # v0.8.130: Version 0.8.130; Forget, Disconnect and Delete: first the warning, then the password dialog (D-060, D-083)
 # v0.8.129: Version 0.8.129; Forget, Disconnect and Delete: first the password dialog, then the warning (D-060, D-083)
 # v0.8.128: Version 0.8.128; the password dialog per action, the fingerprint for the administrator only (D-043, D-060, D-073)

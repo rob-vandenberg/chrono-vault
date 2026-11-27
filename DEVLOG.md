@@ -1064,3 +1064,14 @@ The owner changed his mind after 0.8.129. The warnings open from the menus again
 `disconnectAsk` or `deleteAskWindow` for a closed or locked vault, whose `right` acts. `AskWindow` hands no proof on
 any more (`handOn` removed). A failed delete says why in the password dialog and asks again. Tests: `test_reader` and
 `test_delete_vault_windows` rewritten for the order; the related tests pass, each under 20 seconds.
+
+## 28 November 2026: version 0.8.131, a locked vault only; Continue, then the red action
+
+The owner: the warning's Delete no longer deletes, so it says Continue, the same for Forget and Disconnect; all three
+require a locked vault. Settings > Vaults: Forget and Disconnect on an open or a closed vault show the refusal of
+Delete ("…must be locked before it can be forgotten." / "…disconnected."). The warnings' one button is Continue, plain,
+next to Cancel; the password dialog (`qml/AskWindow.qml`) shows Forget, Disconnect or Delete apart at the far left in
+#ff6b6b, Cancel the default, and Enter in its field presses Cancel. The open vault's one-step Forget and Disconnect are
+gone. Tests: test_delete_vault_windows (the refusals of all three, Continue beside Cancel, the red action at the left,
+Enter cancels), test_reader, test_webdav_windows (Disconnect refused while open, then locked through both dialogs);
+the related tests pass. No reviewers (the owner).
